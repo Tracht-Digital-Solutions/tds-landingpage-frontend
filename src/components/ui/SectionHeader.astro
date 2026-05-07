@@ -1,0 +1,37 @@
+---
+interface Props {
+  label: string;
+  headline: string;
+  headlineAccent: string;
+  id: string;
+  dark?: boolean;
+  labelClass?: string;
+  headingClass?: string;
+}
+
+const {
+  label,
+  headline,
+  headlineAccent,
+  id,
+  dark = false,
+  labelClass = "mb-4",
+  headingClass = "mb-16",
+} = Astro.props;
+
+const labelColor = dark ? "text-white/40" : "text-[var(--color-muted)]";
+const headingColor = dark ? "text-white" : "text-[var(--color-black)]";
+const accentColor = dark ? "var(--color-accent-pink)" : "var(--color-accent)";
+---
+
+<p class:list={["text-xs font-medium tracking-widest uppercase", labelClass, labelColor]}>
+  {label}
+</p>
+<h2
+  id={id}
+  class:list={["text-4xl md:text-5xl lg:text-6xl font-[var(--font-display)] font-medium leading-tight tracking-tight", headingColor, headingClass]}
+  style={`font-variation-settings: "opsz" 144`}
+>
+  {headline}{" "}
+  <em class="not-italic italic" style={`color: ${accentColor}`}>{headlineAccent}</em>
+</h2>

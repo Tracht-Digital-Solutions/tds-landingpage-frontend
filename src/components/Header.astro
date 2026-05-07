@@ -1,0 +1,45 @@
+---
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+
+const t = translations.de;
+
+const items = [
+  { id: "about", label: t.nav.about },
+  { id: "services", label: t.nav.services },
+  { id: "tech", label: t.nav.tech },
+  { id: "portfolio", label: t.nav.portfolio },
+  { id: "process", label: t.nav.process },
+  { id: "blog", label: t.nav.blog },
+];
+---
+
+<header class="fixed top-4 left-1/2 -translate-x-1/2 z-40 px-3 py-2 rounded-full bg-white/70 backdrop-blur border border-[var(--color-line)] shadow-[0_8px_24px_-12px_rgba(5,15,104,0.15)]">
+  <nav class="flex items-center gap-1 text-sm">
+    <a
+      href="/"
+      class="px-3 py-1.5 font-[var(--font-display)] font-medium text-[var(--color-primary)]"
+    >
+      TDS
+    </a>
+    {items.map((item) => (
+      <a
+        href={`#${item.id}`}
+        class="hidden md:inline-block px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+      >
+        {item.label}
+      </a>
+    ))}
+    <a
+      href="/preise"
+      class="hidden md:inline-block px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+    >
+      {t.nav.pricing}
+    </a>
+    <a
+      href="#contact"
+      class="ml-2 px-4 py-1.5 text-white rounded-full bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-accent)_100%)] hover:-translate-y-0.5 transition-transform"
+    >
+      {t.nav.cta}
+    </a>
+  </nav>
+</header>

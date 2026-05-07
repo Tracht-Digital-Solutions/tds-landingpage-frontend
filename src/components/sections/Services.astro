@@ -1,0 +1,29 @@
+---
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import ServiceCard from "~/components/ui/ServiceCard.astro";
+
+const t = translations.de;
+---
+
+<section id="services" class="section-spacing" aria-labelledby="services-heading">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <SectionHeader
+      label={t.services.label}
+      headline={t.services.headline}
+      headlineAccent={t.services.headlineAccent}
+      id="services-heading"
+    />
+
+    <div class="grid sm:grid-cols-2 gap-px border border-[var(--color-line)] rounded-[2px] overflow-hidden">
+      {t.services.items.map((item) => (
+        <ServiceCard
+          number={item.number}
+          title={item.title}
+          description={item.description}
+          tags={item.tags}
+        />
+      ))}
+    </div>
+  </div>
+</section>

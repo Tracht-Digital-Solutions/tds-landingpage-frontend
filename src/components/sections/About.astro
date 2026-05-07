@@ -1,0 +1,54 @@
+---
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import ImagePlaceholder from "~/components/ui/ImagePlaceholder.astro";
+
+const t = translations.de;
+
+const stats = [
+  { value: t.about.stat1Value, label: t.about.stat1Label },
+  { value: t.about.stat2Value, label: t.about.stat2Label },
+  { value: t.about.stat3Value, label: t.about.stat3Label },
+];
+---
+
+<section id="about" class="section-spacing" aria-labelledby="about-heading">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <p class="text-xs font-medium tracking-widest text-[var(--color-muted)] uppercase mb-12">
+      {t.about.label}
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-16 lg:gap-24 items-start">
+      <div class="md:sticky md:top-28 max-w-sm">
+        <ImagePlaceholder aspect="aspect-[3/4]" label="Portrait" description={t.about.portraitPlaceholder} />
+      </div>
+
+      <div>
+        <h2
+          id="about-heading"
+          class="text-4xl md:text-5xl lg:text-6xl font-[var(--font-display)] font-medium leading-tight tracking-tight text-[var(--color-black)] mb-8"
+          style={`font-variation-settings: "opsz" 144`}
+        >
+          {t.about.headline}{" "}
+          <em class="not-italic italic text-[var(--color-accent)]">{t.about.headlineAccent}</em>
+        </h2>
+
+        <p class="text-lg font-medium text-[var(--color-black)] mb-6 leading-relaxed">
+          {t.about.lead}
+        </p>
+        <p class="text-[var(--color-muted)] mb-4 leading-relaxed">{t.about.p1}</p>
+        <p class="text-[var(--color-muted)] mb-12 leading-relaxed">{t.about.p2}</p>
+
+        <div class="grid grid-cols-3 gap-4 pt-8 border-t border-[var(--color-line)]">
+          {stats.map(({ value, label }) => (
+            <div class="text-center">
+              <div class="text-3xl md:text-4xl font-[var(--font-display)] font-medium text-[var(--color-primary)] mb-1">
+                {value}
+              </div>
+              <div class="text-xs text-[var(--color-muted)] leading-tight">{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,41 @@
+---
+import ImagePlaceholder from "./ImagePlaceholder.astro";
+
+interface Props {
+  category: string;
+  title: string;
+  excerpt: string;
+  slug: string;
+  formattedDate: string;
+  readMore: string;
+  placeholderLabel: string;
+  imagePlaceholder: string;
+}
+
+const { category, title, excerpt, slug, formattedDate, readMore, placeholderLabel, imagePlaceholder } = Astro.props;
+
+const blogBase = (import.meta.env.PUBLIC_BLOG_BASE_URL as string | undefined) ?? "https://blog.tracht-digital.de";
+---
+
+<article class="group">
+  <a href={`${blogBase}/${slug}`} class="block">
+    <ImagePlaceholder aspect="aspect-[4/3]" label={placeholderLabel} description={imagePlaceholder} />
+    <div class="pt-5">
+      <p class="text-xs font-medium tracking-widest text-[var(--color-accent)] uppercase mb-3">
+        {category}
+      </p>
+      <h3 class="text-lg font-[var(--font-display)] font-medium mb-2 group-hover:text-[var(--color-accent)] transition-colors">
+        {title}
+      </h3>
+      <p class="text-sm text-[var(--color-muted)] leading-relaxed mb-3 line-clamp-3">
+        {excerpt}
+      </p>
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-[var(--color-muted)]">{formattedDate}</span>
+        <span class="text-xs font-medium text-[var(--color-muted)] group-hover:text-[var(--color-accent)] transition-colors">
+          {readMore} →
+        </span>
+      </div>
+    </div>
+  </a>
+</article>

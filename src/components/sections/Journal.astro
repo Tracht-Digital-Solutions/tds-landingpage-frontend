@@ -1,0 +1,114 @@
+---
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import BlogPostCard from "~/components/ui/BlogPostCard.astro";
+
+const t = translations.de;
+
+/**
+ * Build-time fetch of the 3 most recent published posts from
+ * tds-content-api. Falls back to the local i18n placeholders if the
+ * content API is unreachable at build time (e.g., first-deploy
+ * chicken-and-egg or transient downtime).
+ */
+const CONTENT_API_URL = (import.meta.env.PUBLIC_CONTENT_API_URL as string | undefined)
+  ?? "https://api.tracht-digital.de/content";
+
+interface ApiPost {
+  slug: string;
+  category: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  coverHint: string | null;
+}
+
+let livePosts: ApiPost[] = [];
+try {
+  const url = new URL(`${CONTENT_API_URL}/blog`);
+  url.searchParams.set("limit", "3");
+  url.searchParams.set("lang", "de");
+  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+  if (res.ok) {
+    const data = (await res.json()) as { posts: ApiPost[] };
+    livePosts = data.posts ?? [];
+  }
+} catch (err) {
+  console.warn("[tds-landingpage] journal teaser fetch failed, falling back to i18n:", err);
+}
+
+const formatter = new Intl.DateTimeFormat("de-DE", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+
+const posts =
+  livePosts.length > 0
+    ? livePosts.map((p) => ({
+        slug: p.slug,
+        category: p.category,
+        title: p.title,
+        excerpt: p.excerpt,
+        formattedDate: p.publishedAt ? formatter.format(new Date(p.publishedAt)) : "",
+        imagePlaceholder: p.coverHint ?? "",
+      }))
+    : t.blog.posts.map((p) => ({
+        slug: p.slug,
+        category: p.category,
+        title: p.title,
+        excerpt: p.excerpt,
+        formattedDate: formatter.format(new Date(p.date)),
+        imagePlaceholder: p.imagePlaceholder,
+      }));
+---
+
+<section id="blog" class="section-spacing" aria-labelledby="journal-heading">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <p class="text-xs font-medium tracking-widest text-[var(--color-muted)] uppercase mb-4">
+      {t.blog.label}
+    </p>
+
+    <div class="flex items-end justify-between mb-16">
+      <h2
+        id="journal-heading"
+        class="text-4xl md:text-5xl lg:text-6xl font-[var(--font-display)] font-medium leading-tight tracking-tight text-[var(--color-black)]"
+        style={`font-variation-settings: "opsz" 144`}
+      >
+        {t.blog.headline}{" "}
+        <em class="not-italic italic text-[var(--color-accent)]">{t.blog.headlineAccent}</em>
+      </h2>
+      <a
+        href="https://blog.tracht-digital.de"
+        class="hidden sm:flex items-center gap-2 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors group"
+      >
+        {t.blog.allPosts}
+        <span aria-hidden="true" class="group-hover:translate-x-1 transition-transform duration-200">→</span>
+      </a>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-6">
+      {posts.map((post) => (
+        <BlogPostCard
+          slug={post.slug}
+          category={post.category}
+          title={post.title}
+          excerpt={post.excerpt}
+          formattedDate={post.formattedDate}
+          readMore={t.blog.readMore}
+          placeholderLabel={t.blog.placeholderLabel}
+          imagePlaceholder={post.imagePlaceholder}
+        />
+      ))}
+    </div>
+
+    <div class="mt-10 sm:hidden">
+      <a
+        href="https://blog.tracht-digital.de"
+        class="flex items-center gap-2 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors group"
+      >
+        {t.blog.allPosts}
+        <span aria-hidden="true" class="group-hover:translate-x-1 transition-transform duration-200">→</span>
+      </a>
+    </div>
+  </div>
+</section>

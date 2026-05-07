@@ -1,0 +1,59 @@
+---
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+
+const t = translations.de;
+---
+
+<section id="pricing-teaser" class="py-12 md:py-20" aria-labelledby="pricing-teaser-heading">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <a
+      href="/preise"
+      class="group relative block rounded-[6px] overflow-hidden text-white p-8 md:p-12 bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-accent)_100%)] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.45)] hover:shadow-[0_30px_70px_-20px_rgba(5,15,104,0.55)] transition-shadow"
+    >
+      <span
+        aria-hidden="true"
+        class="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-60"
+        style="background: radial-gradient(circle, rgba(255,122,156,0.55) 0%, transparent 70%);"
+      ></span>
+
+      <div class="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
+        <div>
+          <p class="text-xs font-medium tracking-widest uppercase text-white/60 mb-4">
+            {t.pricing.teaserLabel}
+          </p>
+          <h2
+            id="pricing-teaser-heading"
+            class="text-3xl md:text-4xl lg:text-5xl font-[var(--font-display)] font-medium leading-tight tracking-tight mb-4"
+            style={`font-variation-settings: "opsz" 144`}
+          >
+            {t.pricing.teaserHeadline}{" "}
+            <em class="not-italic italic text-[var(--color-accent-pink)]">
+              {t.pricing.teaserHeadlineAccent}
+            </em>
+          </h2>
+          <p class="text-white/75 leading-relaxed max-w-xl">{t.pricing.teaserSub}</p>
+        </div>
+
+        <div class="flex flex-col items-start md:items-end gap-6 md:text-right">
+          <div class="flex items-baseline gap-2">
+            <span class="font-[var(--font-display)] italic text-sm text-white/60 leading-none">
+              {t.pricing.teaserFromLabel}
+            </span>
+            <span
+              class="font-[var(--font-display)] text-5xl md:text-6xl font-medium leading-none tabular-nums"
+              style={`font-variation-settings: "opsz" 144`}
+            >
+              95&nbsp;€
+            </span>
+            <span class="text-sm text-white/60 leading-none">{t.pricing.hourSuffix}</span>
+          </div>
+
+          <span class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-[var(--color-primary)] text-sm font-medium group-hover:gap-3 transition-all">
+            {t.pricing.teaserCta}
+            <span aria-hidden="true" class="group-hover:rotate-45 transition-transform duration-300">↗</span>
+          </span>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>

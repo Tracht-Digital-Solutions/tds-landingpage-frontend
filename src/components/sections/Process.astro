@@ -1,0 +1,29 @@
+---
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import ProcessStep from "~/components/ui/ProcessStep.astro";
+
+const t = translations.de;
+---
+
+<section id="process" class="section-spacing" aria-labelledby="process-heading">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <SectionHeader
+      label={t.process.label}
+      headline={t.process.headline}
+      headlineAccent={t.process.headlineAccent}
+      id="process-heading"
+    />
+
+    <div class="max-w-2xl">
+      {t.process.steps.map((step) => (
+        <ProcessStep
+          number={step.number}
+          title={step.title}
+          duration={step.duration}
+          description={step.description}
+        />
+      ))}
+    </div>
+  </div>
+</section>
