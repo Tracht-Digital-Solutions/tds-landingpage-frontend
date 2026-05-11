@@ -3,6 +3,21 @@ import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 
 const t = translations.de;
+
+/**
+ * Example values — replace before go-live. The shared lib still carries
+ * `XXX` for the phone, and social URLs aren't modelled there at all yet.
+ * These are visibly placeholder ("1234567", `/example`) so a quick
+ * find-replace pass during launch surfaces them. See README's
+ * "Replace examples before go-live" section.
+ */
+const phoneDisplay = "+49 4151 1234567";
+const phoneHref = phoneDisplay.replace(/\s/g, "");
+const socials = {
+  linkedin: "https://www.linkedin.com/in/example",
+  github: "https://github.com/example",
+  xing: "https://www.xing.com/profile/example",
+};
 ---
 
 <section
@@ -46,11 +61,11 @@ const t = translations.de;
             {t.contact.info.phoneLabel}
           </p>
           <a
-            href={`tel:${t.contact.info.phone.replace(/\s/g, "")}`}
+            href={`tel:${phoneHref}`}
             class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors"
           >
             <span aria-hidden="true">☎</span>
-            {t.contact.info.phone}
+            {phoneDisplay}
           </a>
         </div>
 
@@ -70,22 +85,28 @@ const t = translations.de;
           </p>
           <div class="flex gap-4">
             <a
-              href="#"
+              href={socials.linkedin}
               aria-label="LinkedIn"
+              rel="noopener noreferrer"
+              target="_blank"
               class="p-2 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-bold"
             >
               in
             </a>
             <a
-              href="#"
+              href={socials.github}
               aria-label="GitHub"
+              rel="noopener noreferrer"
+              target="_blank"
               class="p-2 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-bold"
             >
               gh
             </a>
             <a
-              href="#"
+              href={socials.xing}
               aria-label="Xing"
+              rel="noopener noreferrer"
+              target="_blank"
               class="p-2 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-bold"
             >
               Xi
