@@ -1,0 +1,171 @@
+---
+/**
+ * TEMPLATE — Julian must review and verify with a German lawyer
+ * before going live. Placeholders marked with XXX remain.
+ */
+import Layout from "~/layouts/Layout.astro";
+---
+
+<Layout
+  title="Datenschutzerklärung — Tracht Digital Solutions"
+  description="Datenschutzerklärung von Tracht Digital Solutions gemäß DSGVO."
+>
+  <meta slot="head" name="robots" content="noindex" />
+  <main id="main" class="min-h-screen bg-[var(--color-paper)]">
+    <div class="max-w-3xl mx-auto px-6 md:px-8 py-24">
+      <a
+        href="/"
+        class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors mb-12 block"
+      >
+        ← Zurück
+      </a>
+
+      <h1
+        class="text-4xl md:text-5xl font-[var(--font-display)] font-medium text-[var(--color-black)] mb-4"
+      >
+        Datenschutzerklärung
+      </h1>
+      <p class="text-sm text-[var(--color-muted)] mb-12">Stand: Mai 2026</p>
+
+      <div class="space-y-10 text-[var(--color-black)]">
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            1. Verantwortlicher
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Julian Tracht – Tracht Digital Solutions<br />
+            XXX Straße XXX, XXX PLZ Schwarzenbek<br />
+            E-Mail:{" "}
+            <a href="mailto:hallo@tracht-digital.de" class="text-[var(--color-accent)]">
+              hallo@tracht-digital.de
+            </a><br />
+            Telefon: +49 (0) XXX XXXXXXX
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            2. Erhebung allgemeiner Daten beim Websitebesuch (Server-Logs)
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Beim Aufruf dieser Website werden automatisch Informationen in sogenannten Server-Log-Dateien
+            gespeichert, die Ihr Browser übermittelt. Dies sind: Browsertyp und -version, verwendetes
+            Betriebssystem, Referrer-URL, Hostname des zugreifenden Rechners, Uhrzeit der Serveranfrage und
+            IP-Adresse. Diese Daten werden ausschließlich zur technischen Bereitstellung der Website genutzt und
+            nicht mit anderen Datenquellen zusammengeführt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
+            (berechtigtes Interesse an der sicheren Bereitstellung des Angebots).
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            3. Cookies
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Diese Website verwendet keine Cookies, die der Trackingeinwilligung bedürfen. Es werden lediglich
+            technisch notwendige, sessionbasierte Informationen im lokalen Speicher des Browsers abgelegt
+            (Spracheinstellung), die keine personenbezogenen Daten enthalten.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            4. Kontaktformular
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Wenn Sie das Kontaktformular nutzen, werden die von Ihnen eingegebenen Daten (Name, E-Mail-Adresse,
+            optional Unternehmen, Nachricht) zur Bearbeitung Ihrer Anfrage verarbeitet. Rechtsgrundlagen sind
+            Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) und Art. 6 Abs. 1 lit. b DSGVO (Vertragsanbahnung).
+          </p>
+          <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+            Die Daten werden nicht an Dritte weitergegeben, außer an den E-Mail-Dienst Resend (siehe unten), und
+            nach Abschluss der Kommunikation gelöscht, sofern keine gesetzliche Aufbewahrungspflicht besteht.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            5. Externe Dienste
+          </h2>
+          <div class="space-y-4 text-[var(--color-muted)] leading-relaxed">
+            <div>
+              <strong class="text-[var(--color-black)]">netcup (Hosting)</strong>
+              <p class="mt-1">
+                Diese Website wird über netcup GmbH, Daimlerstraße 25, 76185 Karlsruhe, Deutschland gehostet.
+                netcup verarbeitet technische Zugriffsdaten (IP-Adresse, Anfragedaten) zur Bereitstellung des
+                Dienstes. Es besteht ein Auftragsverarbeitungsvertrag (DPA). Weitere Informationen:{" "}
+                <a
+                  href="https://www.netcup.de/kontakt/datenschutzerklaerung.php"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-[var(--color-accent)]"
+                >
+                  netcup.de/kontakt/datenschutzerklaerung
+                </a>
+              </p>
+            </div>
+            <div>
+              <strong class="text-[var(--color-black)]">Resend (E-Mail-Versand)</strong>
+              <p class="mt-1">
+                Zur Verarbeitung von Kontaktformular-Anfragen nutzen wir Resend (Resend Inc., USA). Ihre beim
+                Kontaktformular angegebenen Daten werden zur Zustellung der E-Mail übermittelt. Mit Resend
+                besteht ein Auftragsverarbeitungsvertrag.
+              </p>
+            </div>
+            <div>
+              <strong class="text-[var(--color-black)]">Schriftarten</strong>
+              <p class="mt-1">
+                Schriftarten werden lokal von unserem Server ausgeliefert. Es werden{" "}
+                <strong>keine</strong> Anfragen an Drittanbieter wie Google Fonts oder Adobe Fonts gesendet.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            6. Ihre Rechte (Art. 15–21 DSGVO)
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Sie haben das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17),
+            Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21)
+            gegen die Verarbeitung Ihrer personenbezogenen Daten. Zur Ausübung dieser Rechte wenden Sie sich an:{" "}
+            <a href="mailto:hallo@tracht-digital.de" class="text-[var(--color-accent)]">
+              hallo@tracht-digital.de
+            </a>
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            7. Beschwerderecht bei der Aufsichtsbehörde
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Die zuständige
+            Behörde in Schleswig-Holstein ist das Unabhängige Landeszentrum für Datenschutz Schleswig-Holstein
+            (ULD), Holstenstraße 98, 24103 Kiel,{" "}
+            <a
+              href="https://www.datenschutzzentrum.de"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-[var(--color-accent)]"
+            >
+              www.datenschutzzentrum.de
+            </a>
+          </p>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+            8. SSL-Verschlüsselung
+          </h2>
+          <p class="text-[var(--color-muted)] leading-relaxed">
+            Diese Website nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine
+            SSL-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des
+            Browsers von „http://“ auf „https://“ wechselt.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>
