@@ -30,6 +30,15 @@ For a manual production build + deploy, see [Manual deploy](#manual-deploy).
 | Git | any | Repo hosting |
 | (optional) `gh` CLI | latest | Easiest way to mint a packages-scoped token |
 
+### First install generates the lockfile
+
+The repo intentionally doesn't ship a committed `package-lock.json` —
+the lockfile is created the first time you run `npm install` against
+your authenticated GitHub Packages registry. Once you commit that
+lockfile, CI's `npm ci` step (in `.github/workflows/deploy.yml`)
+becomes deterministic. For one-off manual deploys, `npm install`
+without a committed lockfile is fine.
+
 ### GitHub Packages authentication
 
 `@tracht-digital-solutions/tds-shared` lives on GitHub Packages, not
