@@ -1,0 +1,208 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+
+const t = translations.de;
+const formatRate = (rate: number) =>
+  new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(rate);
+---
+
+<Layout
+  title={`${t.pricing.label} — Tracht Digital Solutions`}
+  description="Transparente Stundensätze für Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und Schulungen. Preise zzgl. MwSt."
+>
+  <Header />
+  <main id="main" class="min-h-screen bg-[var(--color-paper)] relative overflow-hidden">
+    <div
+      aria-hidden="true"
+      class="absolute top-0 left-0 right-0 h-[480px] pointer-events-none opacity-70"
+      style="background: radial-gradient(ellipse 80% 60% at 70% 0%, rgba(255,122,156,0.12), transparent 70%), radial-gradient(ellipse 60% 50% at 20% 0%, rgba(5,15,104,0.10), transparent 70%);"
+    ></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-24">
+      <div class="flex items-center justify-between mb-12">
+        <a
+          href="/"
+          class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors inline-flex items-center gap-2 group"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          {t.pricing.back}
+        </a>
+      </div>
+
+      <p class="text-xs font-medium tracking-widest text-[var(--color-muted)] uppercase mb-6">
+        {t.pricing.label}
+      </p>
+
+      <h1
+        class="text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-tight tracking-tight text-[var(--color-black)] mb-6 max-w-4xl"
+        style='font-variation-settings: "opsz" 144;'
+      >
+        {t.pricing.headline}{" "}
+        <em class="not-italic italic text-[var(--color-accent)]">
+          {t.pricing.headlineAccent}
+        </em>
+      </h1>
+
+      <p class="text-lg text-[var(--color-muted)] max-w-2xl mb-16 leading-relaxed">
+        {t.pricing.sub}
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+        {t.pricing.items.map((item) => {
+          const isHighlight = item.highlight;
+          return (
+            <div
+              class:list={[
+                "relative rounded-[6px] p-7 flex flex-col",
+                isHighlight
+                  ? "bg-[var(--color-primary)] text-white border border-[var(--color-primary)] shadow-[0_20px_50px_rgba(5,15,104,0.18)]"
+                  : "bg-[var(--color-paper)] border border-[var(--color-line)]",
+              ]}
+            >
+              {isHighlight && (
+                <span
+                  aria-hidden="true"
+                  class="absolute -top-px left-6 right-6 h-px bg-[var(--color-accent)]"
+                ></span>
+              )}
+
+              <h2
+                class:list={[
+                  "font-[var(--font-display)] font-medium text-xl mb-3",
+                  isHighlight ? "text-white" : "text-[var(--color-black)]",
+                ]}
+              >
+                {item.title}
+              </h2>
+
+              <div class="flex items-baseline gap-2 mb-5">
+                <span
+                  class:list={[
+                    "font-[var(--font-display)] text-4xl font-medium tabular-nums",
+                    isHighlight ? "text-white" : "text-[var(--color-primary)]",
+                  ]}
+                  style='font-variation-settings: "opsz" 144;'
+                >
+                  {formatRate(item.rate)}
+                </span>
+                <span
+                  class:list={[
+                    "text-sm",
+                    isHighlight ? "text-white/70" : "text-[var(--color-muted)]",
+                  ]}
+                >
+                  {t.pricing.hourSuffix}
+                </span>
+              </div>
+
+              <p
+                class:list={[
+                  "text-sm leading-relaxed mb-6",
+                  isHighlight ? "text-white/80" : "text-[var(--color-muted)]",
+                ]}
+              >
+                {item.description}
+              </p>
+
+              <div
+                class:list={[
+                  "pt-5 mt-auto border-t",
+                  isHighlight ? "border-white/15" : "border-[var(--color-line)]",
+                ]}
+              >
+                <p
+                  class:list={[
+                    "text-xs font-medium tracking-wider uppercase mb-3",
+                    isHighlight ? "text-white/60" : "text-[var(--color-muted)]",
+                  ]}
+                >
+                  {t.pricing.includesLabel}
+                </p>
+                <ul class="space-y-2">
+                  {item.includes.map((inc) => (
+                    <li
+                      class:list={[
+                        "text-sm leading-snug flex gap-2",
+                        isHighlight ? "text-white/90" : "text-[var(--color-black)]",
+                      ]}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class:list={[
+                          "mt-0.5 shrink-0",
+                          isHighlight ? "text-[var(--color-accent-pink)]" : "text-[var(--color-accent)]",
+                        ]}
+                        aria-hidden="true"
+                      >
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      <span>{inc}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <section
+        class="rounded-[6px] border border-[var(--color-line)] p-8 mb-16 bg-white/40 backdrop-blur-sm"
+        aria-labelledby="pricing-notes-heading"
+      >
+        <h2
+          id="pricing-notes-heading"
+          class="font-[var(--font-display)] italic text-base text-[var(--color-muted)] mb-4"
+        >
+          {t.pricing.notesTitle}
+        </h2>
+        <ul class="grid sm:grid-cols-2 gap-3">
+          {t.pricing.notes.map((note) => (
+            <li class="text-sm text-[var(--color-black)] leading-snug flex gap-2">
+              <span class="text-[var(--color-accent)] select-none" aria-hidden="true">·</span>
+              {note}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section
+        class="rounded-[6px] p-10 md:p-14 text-center text-white"
+        style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);"
+      >
+        <h2
+          class="font-[var(--font-display)] font-medium text-3xl md:text-4xl mb-4"
+          style='font-variation-settings: "opsz" 144;'
+        >
+          {t.pricing.ctaTitle}
+        </h2>
+        <p class="text-white/80 max-w-xl mx-auto mb-8 leading-relaxed">
+          {t.pricing.ctaSub}
+        </p>
+        <a
+          href="/#contact"
+          class="inline-flex items-center gap-2 bg-white text-[var(--color-primary)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-[var(--color-paper)] transition-colors group"
+        >
+          {t.pricing.ctaButton}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</Layout>
