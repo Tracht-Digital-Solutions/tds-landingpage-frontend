@@ -5,35 +5,10 @@ Deploys to **netcup Webhosting 8000** at `tracht-digital.de`.
 
 ## Status
 
-Scaffolded with one placeholder hero section that proves the
-shared-package + i18n + Tailwind setup wires up. **Sections still
-need to be ported from `tds-lp/app/components/sections/`.**
-
-## Port checklist (Phase 5)
-
-Static sections → `.astro` files in `src/components/sections/`:
-- [ ] Hero
-- [ ] About
-- [ ] Services
-- [ ] PricingTeaser
-- [ ] TechMarquee
-- [ ] Portfolio
-- [ ] Process
-- [ ] Journal (with build-time fetch from `tds-content-api`)
-
-Interactive bits → React islands in `src/components/islands/`
-(use `client:load` or `client:visible`):
-- [ ] ContactForm (POST to `tds-contact-api`)
-- [ ] SmoothScroll (Lenis)
-- [ ] SectionSnap (existing snap controller)
-- [ ] LanguageToggle (uses `LanguageProvider` from
-      `@tracht-digital-solutions/tds-shared/i18n/react`)
-- [ ] Header / Footer / MagneticButton
-
-Pages still to create:
-- [ ] `src/pages/preise.astro`
-- [ ] `src/pages/legal/impressum.astro`
-- [ ] `src/pages/legal/datenschutz.astro`
+Phase 5 ported. Homepage sections, `/preise`, and `/legal/{impressum,datenschutz}`
+all shipped. Outstanding work is content (real phone, portrait,
+portfolio screenshots, social URLs) — tracked as repo issues, not
+ports. See README's "Replace examples before go-live" section.
 
 ## Mental model
 
