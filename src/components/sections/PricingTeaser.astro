@@ -18,16 +18,13 @@ const t = translations.de;
 
       <div class="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
         <div>
-          <p class="text-xs font-medium tracking-widest uppercase text-white/60 mb-4">
-            {t.pricing.teaserLabel}
-          </p>
+          <p class="eyebrow text-white/70 mb-4">{t.pricing.teaserLabel}</p>
           <h2
             id="pricing-teaser-heading"
-            class="text-3xl md:text-4xl lg:text-5xl font-[var(--font-display)] font-medium leading-tight tracking-tight mb-4"
-            style={`font-variation-settings: "opsz" 144`}
+            class="display-tight text-3xl md:text-4xl lg:text-5xl mb-4"
           >
             {t.pricing.teaserHeadline}{" "}
-            <em class="not-italic italic text-[var(--color-accent-pink)]">
+            <em class="not-italic italic text-[var(--color-accent-pink)]" style="font-variation-settings: 'opsz' 144">
               {t.pricing.teaserHeadlineAccent}
             </em>
           </h2>

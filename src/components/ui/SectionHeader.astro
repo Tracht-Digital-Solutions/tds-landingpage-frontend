@@ -1,4 +1,14 @@
 ---
+/**
+ * Shared section masthead — eyebrow + display headline with italic
+ * accent word. Used by About / Services / Tech / Portfolio / Process /
+ * Journal / Contact so each section reads as a numbered chapter in
+ * one publication.
+ *
+ * Dark-mode flips the eyebrow rule + headline to white and switches
+ * the italic accent to --color-accent-pink for legibility against the
+ * dark backgrounds (Tech, Contact, PricingTeaser callout).
+ */
 interface Props {
   label: string;
   headline: string;
@@ -15,23 +25,36 @@ const {
   headlineAccent,
   id,
   dark = false,
-  labelClass = "mb-4",
+  labelClass = "mb-6",
   headingClass = "mb-16",
 } = Astro.props;
-
-const labelColor = dark ? "text-white/40" : "text-[var(--color-muted)]";
-const headingColor = dark ? "text-white" : "text-[var(--color-black)]";
-const accentColor = dark ? "var(--color-accent-pink)" : "var(--color-accent)";
 ---
 
-<p class:list={["text-xs font-medium tracking-widest uppercase", labelClass, labelColor]}>
+<p
+  class:list={[
+    "section-num",
+    dark ? "text-white/60" : null,
+    labelClass,
+  ]}
+>
   {label}
 </p>
 <h2
   id={id}
-  class:list={["text-4xl md:text-5xl lg:text-6xl font-[var(--font-display)] font-medium leading-tight tracking-tight", headingColor, headingClass]}
-  style={`font-variation-settings: "opsz" 144`}
+  class:list={[
+    "display text-4xl md:text-5xl lg:text-6xl",
+    dark ? "text-white" : "text-[var(--color-black)]",
+    headingClass,
+  ]}
 >
   {headline}{" "}
-  <em class="not-italic italic" style={`color: ${accentColor}`}>{headlineAccent}</em>
+  <em
+    class:list={[
+      "not-italic italic",
+      dark ? "text-[var(--color-accent-pink)]" : "text-[var(--color-accent)]",
+    ]}
+    style="font-variation-settings: 'opsz' 144"
+  >
+    {headlineAccent}
+  </em>
 </h2>
