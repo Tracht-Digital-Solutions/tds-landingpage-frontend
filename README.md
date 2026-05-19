@@ -1,8 +1,11 @@
 # tds-landingpage
 
 Marketing landing page for Tracht Digital Solutions. **Astro 5** +
-**React** islands + **Tailwind v4**. Builds to fully static HTML;
-deploys to **netcup Webhosting 8000** at `tracht-digital.de`.
+**React** islands + **Tailwind v4** with self-hosted **Fraunces +
+Geist** (the brand fonts now actually load — `global.css` previously
+fell back to `ui-serif` / `system-ui` despite the brief specifying
+Fraunces). Builds to fully static HTML; deploys to **netcup
+Webhosting 8000** at `tracht-digital.de`.
 
 ---
 
@@ -35,7 +38,7 @@ For a manual production build + deploy, see [Manual deploy](#manual-deploy).
 The repo intentionally doesn't ship a committed `package-lock.json` —
 the lockfile is created the first time you run `npm install` against
 your authenticated GitHub Packages registry. Once you commit that
-lockfile, CI's `npm ci` step (in `.github/workflows/deploy.yml`)
+lockfile, CI's `npm ci` step (in `.github/workflows/build.yml`)
 becomes deterministic. For one-off manual deploys, `npm install`
 without a committed lockfile is fine.
 
@@ -82,9 +85,10 @@ npm run type-check   # astro check — catches .astro + .tsx errors
 
 ## Manual deploy
 
-The repo also ships an automated `.github/workflows/deploy.yml` (push
-to `main` → SFTP to netcup → `install.php` finalise). If you'd rather
-deploy by hand:
+Auto-deploy via GitHub Actions was removed. The repo now ships
+`.github/workflows/build.yml` which only builds + force-pushes
+`dist/` to an orphan `build` branch (one commit per run, no
+history). Deploy from there by hand:
 
 ```bash
 # 1. Build static output
@@ -102,9 +106,10 @@ npm run build
 #    (or use netcup's CCP to repoint the DocumentRoot symlink directly)
 ```
 
-The CI workflow does exactly these steps in sequence — manual deploy
-is the same flow, just with you in the driver's seat. If you never
-want the workflow to fire, delete `.github/workflows/deploy.yml`.
+If you want to pull straight from the `build` branch instead of
+building locally, swap step 1 for `git fetch origin build &&
+git worktree add ../tds-landingpage-build origin/build` and SFTP
+that worktree.
 
 ---
 
@@ -121,16 +126,22 @@ Set them in `.env` (or `.env.production` for prod-only) before
 `npm run build`. Astro inlines them as constants — anything starting
 with `PUBLIC_` is safe to expose in the client bundle.
 
-### GitHub Actions secrets / vars (for the auto-deploy workflow)
+### GitHub Actions secrets
 
-Only needed if you keep `deploy.yml` enabled.
+`build.yml` uses only the auto-provided `GITHUB_TOKEN`. It needs
+two permissions, both granted in the workflow itself:
 
-- `secrets.NETCUP_FTP_HOST` / `NETCUP_FTP_USER` / `NETCUP_FTP_PASSWORD`
-- `secrets.INSTALL_TOKEN` — matches the value baked into netcup's
-  `install.htaccess`
-- `vars.INSTALLER_URL` — e.g. `https://tracht-digital.de/install.php`
-- CI uses `secrets.GITHUB_TOKEN` (auto-provided, no separate PAT)
-  to read the `@tracht-digital-solutions/tds-shared` package
+- `contents: write` — for force-pushing to the `build` branch
+- `packages: read` — to install `@tracht-digital-solutions/tds-shared`
+  from the org's GitHub Packages registry
+
+The package must explicitly grant **Actions access** to this repo
+(Package settings → "Manage Actions access" → Add repository),
+otherwise `npm ci` returns 403 even with the right permissions.
+
+The five netcup-related Repository Secrets (`NETCUP_FTP_*`,
+`INSTALL_TOKEN`) and the `INSTALLER_URL` variable are now unused
+and can be cleaned up.
 
 ---
 

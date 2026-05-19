@@ -21,7 +21,15 @@ ports. See README's "Replace examples before go-live" section.
   `@tracht-digital-solutions/tds-shared/i18n/react`.
 - **Brand tokens**: imported via Tailwind's `@theme inline` block in
   `src/styles/global.css`. Same brand colors as the legacy app
-  (#050f68 navy, #820933 burgundy).
+  (#050f68 navy, #820933 burgundy). Fonts are self-hosted
+  `@fontsource-variable/fraunces` (opsz axis) + `@fontsource-variable/geist`
+  — the brief's Fraunces+Geist combo finally renders for real (was
+  silently falling back to `ui-serif`/`system-ui` until 2026-05).
+- **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
+  `.section-num`, `.eyebrow`, `.lead` — the same primitives the portals
+  and journal use. `SectionHeader.astro` is the shared masthead component
+  for the homepage sections; each section's eyebrow goes through
+  `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
@@ -35,3 +43,11 @@ ports. See README's "Replace examples before go-live" section.
   and bump the version.
 - Don't fetch the journal teaser at runtime. Build-time fetch in
   `index.astro` frontmatter so the rendered HTML ships static.
+- Don't reintroduce the navy→burgundy `linear-gradient` pill buttons.
+  Hero + Header CTAs are flat `bg-[var(--color-primary)]` with
+  `hover:bg-[var(--color-accent)]`. The PricingTeaser dark callout
+  *block* keeps its gradient on purpose — that's a deliberate
+  editorial card, not a button.
+- Don't inline `text-xs font-medium tracking-widest uppercase` for
+  section eyebrows. Use `.section-num` (with leading rule) for
+  numbered chapter labels and `.eyebrow` for field labels.
