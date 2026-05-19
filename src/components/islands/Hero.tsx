@@ -174,7 +174,7 @@ export default function Hero() {
           <button
             type="button"
             onClick={() => scrollTo("contact")}
-            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-accent)_100%)] cursor-pointer"
+            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-primary)] hover:bg-[var(--color-accent)] cursor-pointer"
           >
             {t.hero.cta1}
           </button>

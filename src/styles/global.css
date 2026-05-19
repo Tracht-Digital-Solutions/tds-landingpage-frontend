@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@import "@fontsource-variable/fraunces/opsz.css";
+@import "@fontsource-variable/fraunces/opsz-italic.css";
+@import "@fontsource-variable/geist/index.css";
+
 @theme inline {
   --color-primary: #050f68;
   --color-accent: #820933;
@@ -9,8 +13,11 @@
   --color-soft: #f1efe8;
   --color-accent-pink: #ff7a9c;
   --color-black: #0b0a07;
-  --font-display: ui-serif, Georgia, serif;
-  --font-body: ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1a1a17;
+
+  --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
 html {
@@ -32,6 +39,40 @@ body {
   outline-offset: 4px;
   border-radius: 2px;
 }
+
+/* Editorial typography primitives */
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 144;
+  line-height: 0.96;
+}
+.display-tight {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 96;
+  line-height: 1.02;
+}
+.accent-italic {
+  font-style: italic;
+  color: var(--color-accent);
+  font-variation-settings: "opsz" 144;
+}
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.lead {
+  font-size: clamp(1.0625rem, 1.5vw, 1.1875rem);
+  line-height: 1.55;
+}
+.tabular, .tabular * { font-variant-numeric: tabular-nums; }
 
 /* Section spacing — used by every numbered section */
 .section-spacing {
