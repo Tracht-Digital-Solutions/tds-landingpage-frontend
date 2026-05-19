@@ -1,5 +1,13 @@
 # tds-landingpage
 
+> **Setting this up from scratch?** See [`INSTALL.md`](INSTALL.md) for
+> the step-by-step bring-up (Packages auth → npm install → env →
+> dev → build → manual deploy). This README documents pages,
+> structure and brand notes.
+
+---
+
+
 Marketing landing page for Tracht Digital Solutions. **Astro 5** +
 **React** islands + **Tailwind v4** with self-hosted **Fraunces +
 Geist** (the brand fonts now actually load — `global.css` previously
