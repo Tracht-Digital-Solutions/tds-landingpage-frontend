@@ -1,0 +1,187 @@
+/**
+ * Build-time OG image renderer for the marketing site's default
+ * card. Satori turns a JSX-ish object tree into SVG; resvg-js
+ * rasterises that SVG to PNG. Output lives at /og/default.png and
+ * is referenced from every Layout.astro that doesn't override
+ * `ogImage`.
+ *
+ * 1200×630 — the LinkedIn / Twitter Card size:
+ *
+ *   ┌────────────────────────────────────────────────────────────┐
+ *   │  TRACHT DIGITAL SOLUTIONS                                  │
+ *   │                                                            │
+ *   │  Persönlich entwickelte                                    │
+ *   │  digitale Lösungen.                                        │
+ *   │                                                            │
+ *   │  ─── tracht-digital.de             Schwarzenbek · Hamburg  │
+ *   └────────────────────────────────────────────────────────────┘
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import satori from "satori";
+import { Resvg } from "@resvg/resvg-js";
+
+const FONT_DIR = fileURLToPath(new URL("./fonts/", import.meta.url));
+let frauncesRegular: Buffer | null = null;
+let frauncesItalic: Buffer | null = null;
+let geistMedium: Buffer | null = null;
+
+function loadFonts() {
+  if (frauncesRegular === null) {
+    frauncesRegular = fs.readFileSync(path.join(FONT_DIR, "Fraunces-Regular.ttf"));
+    frauncesItalic = fs.readFileSync(path.join(FONT_DIR, "Fraunces-Italic.ttf"));
+    geistMedium = fs.readFileSync(path.join(FONT_DIR, "Geist-Medium.ttf"));
+  }
+  return {
+    fraunces: frauncesRegular!,
+    frauncesItalic: frauncesItalic!,
+    geist: geistMedium!,
+  };
+}
+
+const PAPER = "#fafaf7";
+const INK = "#1a1a17";
+const PRIMARY = "#050f68";
+const ACCENT = "#820933";
+const MUTED = "#6b6b66";
+const LINE = "#e8e6df";
+
+export async function renderDefaultOgPng(): Promise<Buffer> {
+  const { fraunces, frauncesItalic, geist } = loadFonts();
+
+  const svg = await satori(
+    {
+      type: "div",
+      props: {
+        style: {
+          width: "1200px",
+          height: "630px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          backgroundColor: PAPER,
+          padding: "72px 80px",
+          fontFamily: "Geist",
+          color: INK,
+        },
+        children: [
+          // Wordmark eyebrow
+          {
+            type: "div",
+            props: {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+              },
+              children: [
+                {
+                  type: "div",
+                  props: {
+                    style: { width: "56px", height: "1px", backgroundColor: MUTED },
+                  },
+                },
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      fontFamily: "Geist",
+                      fontSize: "20px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: MUTED,
+                    },
+                    children: "Tracht Digital Solutions",
+                  },
+                },
+              ],
+            },
+          },
+          // Headline — head primary navy, accent burgundy italic
+          {
+            type: "div",
+            props: {
+              style: {
+                fontFamily: "Fraunces",
+                fontSize: "84px",
+                lineHeight: 1.02,
+                letterSpacing: "-0.025em",
+                color: PRIMARY,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+                marginTop: "36px",
+              },
+              children: [
+                {
+                  type: "span",
+                  props: { children: "Persönlich entwickelte" },
+                },
+                {
+                  type: "span",
+                  props: {
+                    style: {
+                      fontFamily: "Fraunces",
+                      fontStyle: "italic",
+                      color: ACCENT,
+                    },
+                    children: "digitale Lösungen.",
+                  },
+                },
+              ],
+            },
+          },
+          // Footer: domain · location
+          {
+            type: "div",
+            props: {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderTop: `1px solid ${LINE}`,
+                paddingTop: "32px",
+                fontFamily: "Geist",
+                fontSize: "22px",
+                color: MUTED,
+              },
+              children: [
+                {
+                  type: "span",
+                  props: {
+                    style: { color: INK },
+                    children: "tracht-digital.de",
+                  },
+                },
+                {
+                  type: "span",
+                  props: {
+                    style: {
+                      fontFamily: "Fraunces",
+                      fontSize: "22px",
+                    },
+                    children: "Schwarzenbek · Hamburg",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as Parameters<typeof satori>[0],
+    {
+      width: 1200,
+      height: 630,
+      fonts: [
+        { name: "Fraunces", data: fraunces, weight: 400, style: "normal" },
+        { name: "Fraunces", data: frauncesItalic, weight: 400, style: "italic" },
+        { name: "Geist", data: geist, weight: 500, style: "normal" },
+      ],
+    },
+  );
+
+  return new Resvg(svg, { fitTo: { mode: "width", value: 1200 } })
+    .render()
+    .asPng();
+}

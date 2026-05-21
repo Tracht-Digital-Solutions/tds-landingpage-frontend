@@ -1,0 +1,35 @@
+User-agent: *
+Allow: /
+
+# AI search crawlers are welcome — content is meant to be cited.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Legal pages stay out of indexes via per-page meta robots; no
+# need to disallow here.
+
+Sitemap: https://tracht-digital.de/sitemap-index.xml

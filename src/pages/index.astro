@@ -11,9 +11,29 @@ import Portfolio from "~/components/sections/Portfolio.astro";
 import Process from "~/components/sections/Process.astro";
 import Journal from "~/components/sections/Journal.astro";
 import Contact from "~/components/sections/Contact.astro";
+import {
+  asGraph,
+  organizationSchema,
+  personSchema,
+  websiteSchema,
+} from "~/lib/jsonld";
+import { siteConfig } from "~/lib/seo";
+
+// Home gets the canonical entity graph — Organization, Person (founder),
+// and WebSite all live here. Subpages reference them by @id rather than
+// redefining them.
+const jsonLd = asGraph(
+  organizationSchema(),
+  personSchema(),
+  websiteSchema(),
+);
 ---
 
-<Layout title="Tracht Digital Solutions — Persönliche digitale Lösungen für den Mittelstand">
+<Layout
+  title="Tracht Digital Solutions — Persönliche digitale Lösungen für den Mittelstand"
+  description={siteConfig.description.de}
+  jsonLd={jsonLd}
+>
   <Header />
   <main id="main">
     <Hero client:load />

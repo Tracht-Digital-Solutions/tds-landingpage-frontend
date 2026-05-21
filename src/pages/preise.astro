@@ -3,6 +3,8 @@ import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { breadcrumbSchema, pricingSchema } from "~/lib/jsonld";
+import { siteConfig } from "~/lib/seo";
 
 const t = translations.de;
 const formatRate = (rate: number) =>
@@ -11,11 +13,26 @@ const formatRate = (rate: number) =>
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(rate);
+
+const jsonLd = [
+  pricingSchema(
+    t.pricing.items.map((item) => ({
+      name: item.title,
+      description: item.description,
+      rate: item.rate,
+    })),
+  ),
+  breadcrumbSchema([
+    { name: "Home", url: `${siteConfig.url}/` },
+    { name: t.pricing.label.replace(/^—\s*/, ""), url: `${siteConfig.url}/preise` },
+  ]),
+];
 ---
 
 <Layout
-  title={`${t.pricing.label} — Tracht Digital Solutions`}
+  title={`${t.pricing.label.replace(/^—\s*/, "")} — Tracht Digital Solutions`}
   description="Transparente Stundensätze für Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und Schulungen. Preise zzgl. MwSt."
+  jsonLd={jsonLd}
 >
   <Header />
   <main id="main" class="min-h-screen bg-[var(--color-paper)] relative overflow-hidden">

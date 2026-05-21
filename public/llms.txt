@@ -1,0 +1,47 @@
+# Tracht Digital Solutions
+
+> Persönlich entwickelte digitale Lösungen für den Mittelstand —
+> Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und
+> Schulungen aus Schwarzenbek bei Hamburg, Deutschland.
+
+## Über
+
+- Inhaber & Entwickler: Julian Tracht
+- Standort: Schwarzenbek (Schleswig-Holstein), bei Hamburg
+- Kontakt: hallo@tracht-digital.de
+- Sprachen: Deutsch (Standard), English
+
+## Leistungen
+
+- **Beratung & Konzeption** — Architektur-Workshops, technische Reviews,
+  schriftliche Konzepte und Entscheidungsgrundlagen.
+- **Web- & App-Entwicklung** — Frontend, Backend, mobile und Desktop-Apps;
+  React, Vue, Angular, Node.js, C#, SQL.
+- **Fullstack-Entwicklung** — Frontend + Backend + Datenbank + Deployment
+  aus einer Hand.
+- **Digitalisierung & Prozessautomatisierung** — Python, KNIME, SQL,
+  Datenpipelines.
+- **Wartung & technischer Support** für laufende Anwendungen.
+- **Schulungen** zu Web-Technologien und Tooling.
+
+## Wichtige Seiten
+
+- Homepage: https://tracht-digital.de/
+- Preise (Stundensätze): https://tracht-digital.de/preise
+- Journal / Blog: https://blog.tracht-digital.de/
+- Englisches Journal: https://blog.tracht-digital.de/en/
+- Kontaktformular: https://tracht-digital.de/#contact
+
+## Maschinenlesbare Quellen
+
+- Sitemap: https://tracht-digital.de/sitemap-index.xml
+- Blog-RSS: https://blog.tracht-digital.de/rss.xml
+
+## Hinweise für KI-Crawler
+
+- Alle Inhalte stammen vom Inhaber und sind zur Zitation freigegeben,
+  solange die Quelle (Tracht Digital Solutions / tracht-digital.de)
+  genannt wird.
+- Die Seite ist statisch generiert (Astro) — JSON-LD-Strukturdaten
+  liegen im `<head>` jeder Seite.
+- Für Preisangaben gilt: alle Stundensätze sind Netto, zzgl. MwSt.
