@@ -35,6 +35,35 @@ ports. See README's "Replace examples before go-live" section.
   from `https://api.tracht-digital.de/content/blog?limit=3` at
   build time (Astro frontmatter, not at runtime).
 
+## SEO + structured data
+
+- **`src/lib/seo.ts`** is the single source of truth for org/person
+  identity (name, email, founder, areaServed, address city,
+  socials). The Impressum placeholders (street, phone, USt-IdNr,
+  social URLs from #5/#6/#7) are deliberately **kept off** the
+  config so Google + AI engines don't cache wrong data. When real
+  data lands, flip the `streetAddress`/`telephone`/`vatID`/
+  `socials` fields on in `seo.ts` and the JSON-LD layer below
+  picks it up everywhere.
+- **`src/lib/jsonld.ts`** renders Schema.org graphs
+  (Organization+ProfessionalService, Person, WebSite,
+  Service+OfferCatalog for `/preise`, BreadcrumbList). All entities
+  share stable `@id`s (`tracht-digital.de/#organization`,
+  `/#person`) so tds-blog can reference them by id instead of
+  duplicating.
+- **`src/components/JsonLd.astro`** is the head-injected
+  `<script type="application/ld+json">` utility — `<Layout
+  jsonLd={...} />` passes through.
+- **`src/og/render.ts` + `src/pages/og/default.png.ts`** — Satori
+  pipeline mirroring tds-blog. Builds a static 1200×630 brand
+  card at `/og/default.png` used as the fallback OG image. Fonts
+  live under `src/og/fonts/` (TTFs, copied from tds-blog).
+- **`public/robots.txt`** explicitly allows GPTBot, OAI-SearchBot,
+  PerplexityBot, ClaudeBot, Google-Extended (etc.) and points
+  at the sitemap.
+- **`public/llms.txt`** is the llmstxt.org-convention markdown
+  directory of services + pages for AI crawlers.
+
 ## Don't
 
 - Don't add `output: "server"` — Webhosting 8000 has no Node runtime.
@@ -51,3 +80,9 @@ ports. See README's "Replace examples before go-live" section.
 - Don't inline `text-xs font-medium tracking-widest uppercase` for
   section eyebrows. Use `.section-num` (with leading rule) for
   numbered chapter labels and `.eyebrow` for field labels.
+- Don't bake Impressum placeholder data (street, phone, USt-IdNr,
+  social URLs) into the JSON-LD layer — once Google + AI engines
+  cache it, the wrong data sticks until they re-crawl. The
+  `src/lib/seo.ts` TODO block is the only place to flip it on.
+- Don't import `~/og/render` from a React island — Satori + Resvg
+  pull native deps and are build-time only.

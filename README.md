@@ -15,6 +15,13 @@ fell back to `ui-serif` / `system-ui` despite the brief specifying
 Fraunces). Builds to fully static HTML; deploys to **netcup
 Webhosting 8000** at `tracht-digital.de`.
 
+SEO surface includes Schema.org JSON-LD (Organization,
+ProfessionalService, Person, WebSite, Service+OfferCatalog,
+BreadcrumbList), per-page OG/Twitter meta, `robots.txt` with explicit
+allow-list for AI crawlers (GPTBot, OAI-SearchBot, PerplexityBot,
+ClaudeBot, Google-Extended, etc.) and an `llms.txt` directory file.
+See `AGENTS.md` § *SEO + structured data* for the layout.
+
 ---
 
 ## Quick start (TL;DR)
@@ -204,6 +211,7 @@ src/
 ├── components/
 │   ├── Header.astro            # Floating capsule nav + LanguageToggle
 │   ├── Footer.astro            # Dark footer, social-less; links to /preise + /legal/*
+│   ├── JsonLd.astro            # Inline <script type="application/ld+json"> utility
 │   ├── islands/                # React, hydrated via client:load|visible
 │   │   ├── ContactForm.tsx     # POSTs to PUBLIC_CONTACT_API_URL
 │   │   ├── Hero.tsx            # Hero with motion entrance
@@ -215,12 +223,20 @@ src/
 │   │   │ TechMarquee.astro, Portfolio.astro, Process.astro,
 │   │   │ Journal.astro, Contact.astro
 │   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, …)
-├── layouts/Layout.astro        # Wraps every page; mounts SmoothScroll + SectionSnap
-├── lib/sections.ts             # Section-id source of truth (for SectionSnap)
+├── layouts/Layout.astro        # Wraps every page; mounts SmoothScroll + SectionSnap; renders meta + JSON-LD
+├── lib/
+│   ├── sections.ts             # Section-id source of truth (for SectionSnap)
+│   ├── seo.ts                  # Single source of truth for org/person identity
+│   └── jsonld.ts               # Schema.org graph generators
+├── og/                         # Satori OG-card pipeline (build-time)
+│   ├── render.ts               # 1200×630 default card
+│   └── fonts/                  # Fraunces + Geist TTFs
 ├── pages/                      # Astro file-routing
 │   ├── index.astro
 │   ├── preise.astro
+│   ├── og/default.png.ts       # Endpoint emitting the default OG card
 │   └── legal/{impressum,datenschutz}.astro
+├── public/                     # Static assets (robots.txt, llms.txt, favicon)
 └── styles/global.css           # Brand tokens via @theme, Tailwind v4
 ```
 
