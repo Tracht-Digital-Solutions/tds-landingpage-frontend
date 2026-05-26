@@ -13,7 +13,8 @@
  */
 import { siteConfig } from "./seo";
 
-type WithContext<T> = T & { "@context": "https://schema.org" };
+type WithContext<T extends Record<string, unknown> = Record<string, unknown>> =
+  T & { "@context": "https://schema.org" };
 
 /**
  * Person schema for the founder. Reused as `author` (Article),
@@ -87,7 +88,7 @@ export function websiteSchema() {
  */
 export function breadcrumbSchema(
   items: { name: string; url: string }[],
-): WithContext<object> {
+): WithContext {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -112,7 +113,7 @@ interface ServiceOffering {
  * PriceSpecification (UnitPriceSpecification, hourly) inside an
  * OfferCatalog — that's how Schema.org expresses tiered hourly rates.
  */
-export function pricingSchema(items: ServiceOffering[]): WithContext<object> {
+export function pricingSchema(items: ServiceOffering[]): WithContext {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -148,7 +149,7 @@ export function pricingSchema(items: ServiceOffering[]): WithContext<object> {
  * way to emit several typed entities in one <script> block without
  * duplicating the @context.
  */
-export function asGraph(...nodes: object[]): WithContext<object> {
+export function asGraph(...nodes: object[]): WithContext {
   return {
     "@context": "https://schema.org",
     "@graph": nodes,
