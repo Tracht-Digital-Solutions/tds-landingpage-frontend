@@ -86,3 +86,9 @@ ports. See README's "Replace examples before go-live" section.
   `src/lib/seo.ts` TODO block is the only place to flip it on.
 - Don't import `~/og/render` from a React island — Satori + Resvg
   pull native deps and are build-time only.
+- Don't anchor the OG font dir to `import.meta.url` (or any path
+  derived from it). Astro bundles `src/og/render.ts` into
+  `dist/pages/og/`, so `new URL("./fonts/", import.meta.url)` ends
+  up pointing at `dist/pages/og/fonts/` and the build crashes with
+  ENOENT. Keep the cwd-anchored `path.join(process.cwd(), "src/og/fonts")`.
+  `npm run og:smoke` is the cheapest way to catch this regression.
