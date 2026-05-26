@@ -18,11 +18,12 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 
-const FONT_DIR = fileURLToPath(new URL("./fonts/", import.meta.url));
+// Resolved from the project root because Astro bundles this file into dist/,
+// where `import.meta.url`-based relative paths no longer reach src/og/fonts.
+const FONT_DIR = path.join(process.cwd(), "src/og/fonts");
 let frauncesRegular: Buffer | null = null;
 let frauncesItalic: Buffer | null = null;
 let geistMedium: Buffer | null = null;
