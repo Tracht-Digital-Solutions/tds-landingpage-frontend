@@ -78,9 +78,16 @@ contact-api locally, leave the form alone or POST to production.
 
 ```bash
 npm run type-check     # astro check — must be 0 errors
+npm run og:smoke       # render the default OG card to scripts/og-smoke.png
 npm run build          # → dist/
 npm run preview        # serve dist/ for visual inspection
 ```
+
+`og:smoke` is the cheapest catch for the font-loading regression
+called out in `AGENTS.md` (it renders `renderDefaultOgPng` via
+tsx, bypassing the Astro bundler that breaks `import.meta.url`-
+based font paths). Open `scripts/og-smoke.png` and check it looks
+right.
 
 The build does NOT need a reachable content-api — if the teaser
 fetch fails, the Journal section gracefully shows zero posts and

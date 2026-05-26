@@ -92,3 +92,10 @@ ports. See README's "Replace examples before go-live" section.
   up pointing at `dist/pages/og/fonts/` and the build crashes with
   ENOENT. Keep the cwd-anchored `path.join(process.cwd(), "src/og/fonts")`.
   `npm run og:smoke` is the cheapest way to catch this regression.
+- Don't write `WithContext<object>` on Schema.org node builders.
+  TypeScript treats `object` as too narrow to accept additional
+  named property literals (`@type`, `@graph`), and the type-check
+  fails with "Object literal may only specify known properties".
+  The alias now defaults the generic to `Record<string, unknown>`
+  — just write `WithContext` (no explicit type argument). Same
+  pattern lives in tds-blog/src/lib/jsonld.ts.

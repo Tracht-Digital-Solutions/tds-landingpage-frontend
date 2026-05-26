@@ -238,6 +238,10 @@ src/
 │   └── legal/{impressum,datenschutz}.astro
 ├── public/                     # Static assets (robots.txt, llms.txt, favicon)
 └── styles/global.css           # Brand tokens via @theme, Tailwind v4
+
+scripts/og-smoke.ts             # `npm run og:smoke` — renders default OG card
+                                # to disk; regression guard for the bundling
+                                # gotcha called out in AGENTS.md
 ```
 
 See `AGENTS.md` for the porting rationale and "don't reach for an
