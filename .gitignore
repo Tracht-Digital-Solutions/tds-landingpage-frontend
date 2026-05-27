@@ -8,3 +8,18 @@ dist/
 .idea/
 .vscode/
 scripts/og-smoke.png
+
+# Windows OS files
+Thumbs.db
+Desktop.ini
+
+# Editor backups
+*.swp
+*~
+
+# Test coverage
+coverage/
+
+# Cache & incremental build info
+.eslintcache
+*.tsbuildinfo
