@@ -21,7 +21,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
 
 <header
   id="site-header"
-  class="site-header fixed top-4 left-1/2 -translate-x-1/2 z-40 px-3 py-2"
+  class="site-header fixed top-0 lg:top-4 left-1/2 -translate-x-1/2 z-40 px-3 py-2"
   data-scrolled="false"
 >
   <nav class="flex items-center gap-1 text-sm">
@@ -88,7 +88,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
 
 <div
   id="mobile-menu"
-  class="mobile-menu md:hidden fixed inset-x-4 top-20 z-30 origin-top rounded-2xl bg-white/95 backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.35)] p-4"
+  class="mobile-menu md:hidden fixed inset-x-4 top-16 z-30 origin-top rounded-2xl bg-white/95 backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.35)] p-4"
   aria-hidden="true"
 >
   <ul class="space-y-1">
@@ -134,34 +134,61 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
 </div>
 
 <style>
-  /* Default — floating pill shape but with no chrome: nav reads as
-     part of the page header. The pill materialises in once the user
-     starts scrolling. */
+  /* Mobile + tablet default — pill is docked flush against the top
+     edge (top: 0 in Tailwind) and the top corners are squared so
+     the chrome looks like it grew out of the viewport edge rather
+     than floating in front of it. Always rendered filled — the
+     scroll-morph only makes sense when there's air around the pill. */
   .site-header {
-    border-radius: 9999px;
-    border: 1px solid transparent;
-    background-color: transparent;
-    box-shadow: none;
-    backdrop-filter: blur(0);
-    -webkit-backdrop-filter: blur(0);
-    transition:
-      background-color 250ms ease,
-      border-color 250ms ease,
-      box-shadow 250ms ease,
-      backdrop-filter 250ms ease,
-      -webkit-backdrop-filter 250ms ease;
-  }
-
-  .site-header[data-scrolled="true"] {
-    background-color: rgb(255 255 255 / 0.85);
+    border-radius: 0 0 9999px 9999px;
+    border-top-width: 0;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-style: solid;
     border-color: color-mix(
       in srgb,
       var(--color-primary) 18%,
       var(--color-line)
     );
-    box-shadow: 0 10px 30px -10px rgba(5, 15, 104, 0.28);
+    background-color: rgb(255 255 255 / 0.9);
+    box-shadow: 0 8px 24px -12px rgba(5, 15, 104, 0.22);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Desktop ( >=lg / 1024px ) — back to the floating full pill with
+     the scroll-morph behaviour. At rest the pill is transparent so
+     the nav reads as part of the hero; once the page scrolls past
+     8px the data-scrolled attribute switches the chrome on. */
+  @media (min-width: 1024px) {
+    .site-header {
+      border-radius: 9999px;
+      border-top-width: 1px;
+      border-color: transparent;
+      background-color: transparent;
+      box-shadow: none;
+      backdrop-filter: blur(0);
+      -webkit-backdrop-filter: blur(0);
+      transition:
+        background-color 250ms ease,
+        border-color 250ms ease,
+        box-shadow 250ms ease,
+        backdrop-filter 250ms ease,
+        -webkit-backdrop-filter 250ms ease;
+    }
+
+    .site-header[data-scrolled="true"] {
+      background-color: rgb(255 255 255 / 0.85);
+      border-color: color-mix(
+        in srgb,
+        var(--color-primary) 18%,
+        var(--color-line)
+      );
+      box-shadow: 0 10px 30px -10px rgba(5, 15, 104, 0.28);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
   }
 
   /* Menu pill always shows the open icon by default; the close icon

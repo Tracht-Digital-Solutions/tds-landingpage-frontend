@@ -61,11 +61,12 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   };
 
   const fieldClass = (hasError: boolean) =>
-    `w-full bg-transparent border-b pb-2 text-white placeholder-white/40 text-sm transition-colors duration-200 outline-none focus:placeholder-white/20 ${
-      hasError ? "border-[var(--color-accent-pink)]" : "border-white/20"
+    `contact-field w-full bg-transparent border-b py-3 text-base text-white placeholder-white/40 leading-snug transition-colors duration-200 outline-none focus:placeholder-white/25 focus:border-[var(--color-accent-pink)] ${
+      hasError ? "border-[var(--color-accent-pink)]" : "border-white/25"
     }`;
 
-  const labelClass = "block text-xs font-medium text-white/60 mb-2 uppercase tracking-wide";
+  const labelClass =
+    "block text-xs font-medium text-white/60 mb-1.5 uppercase tracking-widest";
 
   return (
     <div className={shake ? "shake" : ""}>
