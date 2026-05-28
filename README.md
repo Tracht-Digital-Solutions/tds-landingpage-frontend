@@ -8,11 +8,11 @@
 ---
 
 
-Marketing landing page for Tracht Digital Solutions. **Astro 5** +
-**React** islands + **Tailwind v4** with self-hosted **Fraunces +
-Geist** (the brand fonts now actually load — `global.css` previously
-fell back to `ui-serif` / `system-ui` despite the brief specifying
-Fraunces). Builds to fully static HTML; deploys to **netcup
+Marketing landing page for Tracht Digital Solutions. **Astro 6** +
+**React** islands + **Tailwind v4** (via the `@tailwindcss/postcss`
+plugin — see the *Tailwind note* below) with self-hosted
+**Instrument Serif + Geist**. Builds to fully static HTML and ships
+in two locale trees (DE at `/`, EN at `/en/`); deploys to **netcup
 Webhosting 8000** at `tracht-digital.de`.
 
 SEO surface includes Schema.org JSON-LD (Organization,
@@ -43,19 +43,34 @@ For a manual production build + deploy, see [Manual deploy](#manual-deploy).
 
 | Tool | Version | Why |
 |---|---|---|
-| Node.js | 20 LTS or 22 LTS | Astro 5 requires ≥18.20, 20 LTS is what CI runs |
-| npm | 10+ | Bundled with Node 20 |
+| Node.js | 22 LTS | Astro 6 requires ≥22.12 — Node 18/20 are no longer supported |
+| npm | 10+ | Bundled with Node 22 |
 | Git | any | Repo hosting |
 | (optional) `gh` CLI | latest | Easiest way to mint a packages-scoped token |
 
-### First install generates the lockfile
+### Tailwind note (why PostCSS, not Vite plugin)
 
-The repo intentionally doesn't ship a committed `package-lock.json` —
-the lockfile is created the first time you run `npm install` against
-your authenticated GitHub Packages registry. Once you commit that
-lockfile, CI's `npm ci` step (in `.github/workflows/build.yml`)
-becomes deterministic. For one-off manual deploys, `npm install`
-without a committed lockfile is fine.
+Tailwind is wired through **`@tailwindcss/postcss`** via
+`postcss.config.mjs`, not the `@tailwindcss/vite` plugin. Astro 6
+ships Vite 7 with the rolldown bundler under the hood, and the
+Tailwind Vite plugin's build hook calls into rolldown's
+`BindingViteResolvePluginConfig` with a shape missing the
+`tsconfigPaths` field — builds crash with `Missing field
+'tsconfigPaths'` (withastro/astro#16542). The PostCSS variant runs
+the same Tailwind 4 compiler outside the rolldown contract and is
+unaffected.
+
+### Lockfile note
+
+A `package-lock.json` is committed. Locally, `npm install` uses it
+for reproducible installs. **CI installs with `npm install
+--no-package-lock`** — the lockfile is generated on Windows and
+only registers win32 platform binaries for native deps (rollup,
+lightningcss, esbuild, sharp, tailwindcss-oxide), so `npm ci` /
+`npm install` on the Linux runner would honor the lockfile and
+skip the Linux binaries, crashing at type-check
+(npm/cli#4828). `--no-package-lock` bypasses the lockfile on the
+runner and lets npm resolve from `package.json` directly.
 
 ### GitHub Packages authentication
 
@@ -143,16 +158,20 @@ with `PUBLIC_` is safe to expose in the client bundle.
 
 ### GitHub Actions secrets
 
-`build.yml` uses only the auto-provided `GITHUB_TOKEN`. It needs
-two permissions, both granted in the workflow itself:
+`build.yml` needs **one** repo secret: `NPM_TOKEN`, a classic PAT
+with `read:packages` on the `Tracht-Digital-Solutions` org. Both
+the install (cross-repo read of `tds-shared` from GitHub Packages)
+and the `peaceiris/actions-gh-pages` push to the `build` branch
+authenticate via this PAT. The auto-provided `GITHUB_TOKEN` can't
+read `tds-shared` because that package lives in a different repo.
 
-- `contents: write` — for force-pushing to the `build` branch
-- `packages: read` — to install `@tracht-digital-solutions/tds-shared`
-  from the org's GitHub Packages registry
+Workflow `permissions:` declared inline:
 
-The package must explicitly grant **Actions access** to this repo
-(Package settings → "Manage Actions access" → Add repository),
-otherwise `npm ci` returns 403 even with the right permissions.
+- `contents: write` — required so the implicit `GITHUB_TOKEN` is
+  still scoped correctly for the workflow itself, even though the
+  actual push to `build` uses the PAT
+- `packages: read` — sanity default; the PAT is what actually
+  authenticates
 
 The five netcup-related Repository Secrets (`NETCUP_FTP_*`,
 `INSTALL_TOKEN`) and the `INSTALLER_URL` variable are now unused
@@ -197,10 +216,16 @@ git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
 
 | Path | Source | Purpose |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Single-page scroll layout (9 sections) |
-| `/preise` | `src/pages/preise.astro` | Hourly-rate pricing |
+| `/` | `src/pages/index.astro` | Single-page scroll layout (9 sections, DE) |
+| `/en/` | `src/pages/en/index.astro` | Same layout, EN copy |
+| `/preise` | `src/pages/preise.astro` | Hourly-rate pricing (DE) |
+| `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
 | `/legal/impressum` | `src/pages/legal/impressum.astro` | Legal notice (DE) |
 | `/legal/datenschutz` | `src/pages/legal/datenschutz.astro` | Privacy policy (DSGVO) |
+
+Legal pages are German-only by regulation. The language dropdown in
+the header navigates between the DE and EN trees via Astro's i18n
+routing (`defaultLocale: de`, `prefixDefaultLocale: false`).
 
 ---
 
@@ -209,36 +234,40 @@ git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
 ```
 src/
 ├── components/
-│   ├── Header.astro            # Floating capsule nav + LanguageToggle
-│   ├── Footer.astro            # Dark footer, social-less; links to /preise + /legal/*
+│   ├── Header.astro            # Floating pill nav; data-scrolled morph + LanguageToggle
+│   ├── Footer.astro            # Dark footer; links to /preise + /legal/* via localizePath
 │   ├── JsonLd.astro            # Inline <script type="application/ld+json"> utility
 │   ├── islands/                # React, hydrated via client:load|visible
-│   │   ├── ContactForm.tsx     # POSTs to PUBLIC_CONTACT_API_URL
-│   │   ├── Hero.tsx            # Hero with motion entrance
-│   │   ├── LanguageToggle.tsx  # DE | EN pill, persists in localStorage
-│   │   ├── SectionSnap.tsx     # wheel/touch/keyboard snap controller
-│   │   └── SmoothScroll.tsx    # Lenis singleton + getLenis() helper
+│   │   ├── ContactForm.tsx     # POSTs to PUBLIC_CONTACT_API_URL; takes lang prop
+│   │   ├── Hero.tsx            # Hero with motion entrance; takes lang prop
+│   │   ├── LanguageToggle.tsx  # Flag dropdown; navigates between /  ↔ /en/
+│   │   ├── ScrollProgress.tsx  # Thin gradient reading-progress bar (top of viewport)
+│   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only)
 │   ├── sections/               # Static .astro sections (no JS by default)
 │   │   ├── About.astro, Services.astro, PricingTeaser.astro,
 │   │   │ TechMarquee.astro, Portfolio.astro, Process.astro,
 │   │   │ Journal.astro, Contact.astro
 │   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, …)
-├── layouts/Layout.astro        # Wraps every page; mounts SmoothScroll + SectionSnap; renders meta + JSON-LD
+├── layouts/Layout.astro        # Mounts SmoothScroll + ScrollProgress; renders meta + JSON-LD
 ├── lib/
-│   ├── sections.ts             # Section-id source of truth (for SectionSnap)
+│   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   └── jsonld.ts               # Schema.org graph generators
 ├── og/                         # Satori OG-card pipeline (build-time)
 │   ├── render.ts               # 1200×630 default card
-│   └── fonts/                  # Fraunces + Geist TTFs
+│   └── fonts/                  # Fraunces + Geist TTFs (legacy; OG card not yet repointed)
 ├── pages/                      # Astro file-routing
-│   ├── index.astro
-│   ├── preise.astro
+│   ├── index.astro             # DE home
+│   ├── preise.astro            # DE pricing
+│   ├── en/
+│   │   ├── index.astro         # EN home (thin shell; sections read Astro.currentLocale)
+│   │   └── preise.astro        # EN pricing
 │   ├── og/default.png.ts       # Endpoint emitting the default OG card
 │   └── legal/{impressum,datenschutz}.astro
 ├── public/                     # Static assets (robots.txt, llms.txt, favicon)
 └── styles/global.css           # Brand tokens via @theme, Tailwind v4
 
+postcss.config.mjs              # @tailwindcss/postcss wiring — see Tailwind note above
 scripts/og-smoke.ts             # `npm run og:smoke` — renders default OG card
                                 # to disk; regression guard for the bundling
                                 # gotcha called out in AGENTS.md

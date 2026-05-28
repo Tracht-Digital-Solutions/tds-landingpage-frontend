@@ -1,12 +1,18 @@
 # Agent notes — tds-landingpage
 
-Astro 5 + React islands + Tailwind v4. Static-rendered marketing site.
+Astro 6 + React islands + Tailwind v4. Static-rendered marketing site.
 Deploys to **netcup Webhosting 8000** at `tracht-digital.de`.
 
 ## Status
 
-Phase 5 ported. Homepage sections, `/preise`, and `/legal/{impressum,datenschutz}`
-all shipped. Outstanding work is content (real phone, portrait,
+Phase 5 ported. Homepage sections, `/preise`, `/legal/{impressum,datenschutz}`
+all shipped. As of 2026-05-28: upgraded to Astro 6, swapped Tailwind from
+the `@tailwindcss/vite` plugin to `@tailwindcss/postcss` (rolldown
+incompatibility with Vite 7 — withastro/astro#16542), wired real Astro
+i18n routing (DE at `/`, EN at `/en/`), swapped the heading family to
+Instrument Serif, dropped SectionSnap in favour of native scroll +
+a thin ScrollProgress bar, and replaced the DE/EN pill toggle with a
+flag dropdown. Outstanding work is content (real phone, portrait,
 portfolio screenshots, social URLs) — tracked as repo issues, not
 ports. See README's "Replace examples before go-live" section.
 
@@ -15,21 +21,36 @@ ports. See README's "Replace examples before go-live" section.
 - **Astro components** for non-interactive markup. Cheap, no JS.
 - **React islands** only when state or DOM events are needed.
   Don't reach for an island when an `.astro` will do.
-- **i18n strings**: `import { translations } from "@tracht-digital-solutions/tds-shared/i18n"`.
-  In server-side Astro, use `translations.de` directly. In React
-  islands, wrap with `<LanguageProvider>` from
-  `@tracht-digital-solutions/tds-shared/i18n/react`.
+- **i18n strings**: `import { tFor, resolveLang, localizePath } from "~/lib/i18n"`.
+  In server-side Astro, call `const t = tFor(Astro.currentLocale)` — the
+  helper maps the route-resolved locale onto the shared translations
+  bundle. React islands receive `lang` as a prop from the .astro
+  mount, so server-rendered text and client hydration agree without
+  a flash. Never re-introduce `translations.de` direct access — that
+  was the bug that made the language toggle a no-op.
+- **i18n routing**: `astro.config.mjs` declares `defaultLocale: "de"`,
+  `locales: ["de", "en"]`, `prefixDefaultLocale: false`. EN entry
+  pages live under `src/pages/en/` and are intentionally identical
+  to their DE counterparts because Astro injects the right
+  `currentLocale` from the URL. Internal links go through
+  `localizePath()` so /preise stays in the active locale tree.
 - **Brand tokens**: imported via Tailwind's `@theme inline` block in
   `src/styles/global.css`. Same brand colors as the legacy app
-  (#050f68 navy, #820933 burgundy). Fonts are self-hosted
-  `@fontsource-variable/fraunces` (opsz axis) + `@fontsource-variable/geist`
-  — the brief's Fraunces+Geist combo finally renders for real (was
-  silently falling back to `ui-serif`/`system-ui` until 2026-05).
+  (#050f68 navy, #820933 burgundy). Heading family is self-hosted
+  `@fontsource/instrument-serif` (regular + italic, non-variable);
+  body is `@fontsource-variable/geist`. The previous Fraunces
+  display family was replaced 2026-05-28 — Instrument Serif's
+  higher contrast reads better in the editorial layout.
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
   `.section-num`, `.eyebrow`, `.lead` — the same primitives the portals
   and journal use. `SectionHeader.astro` is the shared masthead component
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
+- **Section rhythm**: paper-backed narrative sections (About,
+  Portfolio, Journal) alternate with `--color-soft` callout
+  sections (Services, Process) and dark blue chrome sections
+  (PricingTeaser gradient, Tech, Contact) so adjacent sections
+  read as visually distinct chapters.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
@@ -84,6 +105,15 @@ ports. See README's "Replace examples before go-live" section.
   social URLs) into the JSON-LD layer — once Google + AI engines
   cache it, the wrong data sticks until they re-crawl. The
   `src/lib/seo.ts` TODO block is the only place to flip it on.
+- Don't reintroduce `@tailwindcss/vite`. Astro 6 ships Vite 7 with
+  the rolldown bundler, and the Vite plugin's build hook hits
+  `oxcResolvePlugin` with an incomplete `BindingViteResolvePluginConfig`
+  (withastro/astro#16542). Use `@tailwindcss/postcss` via
+  `postcss.config.mjs` — same compiler, no rolldown contract.
+- Don't read `translations.de` (or `.en`) directly from an .astro
+  file. The `tFor(Astro.currentLocale)` helper is what makes the
+  EN route actually render EN; bypassing it puts the file back
+  into the "language toggle does nothing" pre-i18n era.
 - Don't import `~/og/render` from a React island — Satori + Resvg
   pull native deps and are build-time only.
 - Don't anchor the OG font dir to `import.meta.url` (or any path
