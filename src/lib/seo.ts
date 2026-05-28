@@ -25,7 +25,7 @@ export const siteConfig = {
   defaultLocale: "de" as const,
   description: {
     de: "Persönlich entwickelte digitale Lösungen für den Mittelstand — Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und Schulungen aus Schwarzenbek bei Hamburg.",
-    en: "Personally crafted digital solutions for SMEs — consulting, web and app development, digitalisation, maintenance and training from Schwarzenbek near Hamburg, Germany.",
+    en: "Personally crafted digital solutions for the mid-market — consulting, web and app development, digitalization, maintenance and training from Schwarzenbek near Hamburg, Germany.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "hallo@tracht-digital.de",
