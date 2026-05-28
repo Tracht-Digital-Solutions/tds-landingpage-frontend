@@ -4,9 +4,53 @@ type Lang = "de" | "en";
 
 const STORAGE_KEY = "tdsLang";
 
-const options: { code: Lang; flag: string; label: string }[] = [
-  { code: "de", flag: "🇩🇪", label: "Deutsch" },
-  { code: "en", flag: "🇬🇧", label: "English" },
+// Inline SVG flags — flag emoji ( 🇩🇪 / 🇬🇧 ) renders as bare regional
+// indicator letters ("DE" / "GB") on Windows because Win32 doesn't
+// bundle colour flag glyphs. Cross-platform-consistent SVG marks
+// keep the brand polish on every OS.
+function FlagDE({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 5 3"
+      className={className}
+      aria-hidden="true"
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <rect width="5" height="1" y="0" fill="#000000" />
+      <rect width="5" height="1" y="1" fill="#DD0000" />
+      <rect width="5" height="1" y="2" fill="#FFCE00" />
+    </svg>
+  );
+}
+
+function FlagGB({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 60 30"
+      className={className}
+      aria-hidden="true"
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <clipPath id="tds-flag-gb-clip">
+        <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
+      </clipPath>
+      <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#ffffff" strokeWidth="6" />
+      <path
+        d="M0,0 L60,30 M60,0 L0,30"
+        clipPath="url(#tds-flag-gb-clip)"
+        stroke="#C8102E"
+        strokeWidth="4"
+      />
+      <path d="M30,0 v30 M0,15 h60" stroke="#ffffff" strokeWidth="10" />
+      <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6" />
+    </svg>
+  );
+}
+
+const options: { code: Lang; Flag: typeof FlagDE; label: string }[] = [
+  { code: "de", Flag: FlagDE, label: "Deutsch" },
+  { code: "en", Flag: FlagGB, label: "English" },
 ];
 
 function swapLocaleInPath(pathname: string, target: Lang): string {
@@ -23,10 +67,10 @@ function swapLocaleInPath(pathname: string, target: Lang): string {
 }
 
 /**
- * Compact language dropdown. Trigger shows the active flag + code;
- * the menu offers both locales with flag and full label. Selecting
- * an option persists the choice in localStorage and navigates to
- * the sibling URL in the other locale tree.
+ * Compact language dropdown. Trigger shows the active flag; the
+ * menu offers both locales with flag + full label. Selecting an
+ * option persists the choice in localStorage and navigates to the
+ * sibling URL in the other locale tree.
  *
  * Active locale is fed in by the server-rendered Header so the
  * trigger paints correctly on first frame without a hydration flash.
@@ -68,21 +112,21 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
   };
 
   const current = options.find((o) => o.code === lang) ?? options[0];
+  const CurrentFlag = current.Flag;
 
   return (
-    <div ref={rootRef} className="relative ml-2">
+    <div ref={rootRef} className="relative">
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={lang === "de" ? "Sprache wählen" : "Select language"}
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium uppercase tracking-wider text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-black/5 transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
       >
-        <span aria-hidden="true" className="text-base leading-none">
-          {current.flag}
+        <span className="block w-5 h-3.5 overflow-hidden rounded-[2px] ring-1 ring-black/10">
+          <CurrentFlag className="block w-full h-full" />
         </span>
-        <span>{current.code}</span>
         <svg
           aria-hidden="true"
           width="10"
@@ -103,10 +147,11 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
         <ul
           role="listbox"
           aria-label={lang === "de" ? "Sprachen" : "Languages"}
-          className="absolute right-0 top-full mt-2 min-w-[140px] py-1 rounded-xl bg-white shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] border border-[var(--color-line)] z-50"
+          className="absolute right-0 top-full mt-2 min-w-[160px] py-1 rounded-xl bg-white shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] border border-[var(--color-line)] z-50"
         >
           {options.map((opt) => {
             const active = opt.code === lang;
+            const OptionFlag = opt.Flag;
             return (
               <li key={opt.code} role="option" aria-selected={active}>
                 <button
@@ -118,8 +163,8 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
                       : "text-[var(--color-black)] hover:bg-black/5"
                   }`}
                 >
-                  <span aria-hidden="true" className="text-lg leading-none">
-                    {opt.flag}
+                  <span className="block w-6 h-4 overflow-hidden rounded-[2px] ring-1 ring-black/10 shrink-0">
+                    <OptionFlag className="block w-full h-full" />
                   </span>
                   <span className="flex-1">{opt.label}</span>
                   {active && (
