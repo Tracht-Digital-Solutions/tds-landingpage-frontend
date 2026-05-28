@@ -16,7 +16,7 @@ const items = [
 
 <header
   id="site-header"
-  class="site-header fixed top-0 left-1/2 -translate-x-1/2 z-40 px-3 py-2"
+  class="site-header fixed top-4 left-1/2 -translate-x-1/2 z-40 px-3 py-2"
   data-scrolled="false"
 >
   <nav class="flex items-center gap-1 text-sm">
@@ -51,13 +51,12 @@ const items = [
 </header>
 
 <style>
-  /* Default — sitting at the top of the page, no chrome: nav appears
-     to belong to the page header itself. The pill materialises once
-     the user starts scrolling. */
+  /* Default — floating pill shape but with no chrome: nav reads as
+     part of the page header. The pill materialises in once the user
+     starts scrolling. */
   .site-header {
-    border-radius: 0 0 9999px 9999px;
+    border-radius: 9999px;
     border: 1px solid transparent;
-    border-top: 0;
     background-color: transparent;
     box-shadow: none;
     backdrop-filter: blur(0);
