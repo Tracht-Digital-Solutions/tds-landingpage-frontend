@@ -69,20 +69,14 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
       <button
         id="menu-toggle"
         type="button"
-        class="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
+        class="menu-toggle md:hidden relative inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
         aria-controls="mobile-menu"
         aria-expanded="false"
         aria-label={menuLabel}
       >
-        <svg class="menu-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
-          <line x1="4" y1="7" x2="20" y2="7" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="17" x2="20" y2="17" />
-        </svg>
-        <svg class="menu-icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
-          <line x1="6" y1="6" x2="18" y2="18" />
-          <line x1="18" y1="6" x2="6" y2="18" />
-        </svg>
+        <span class="menu-bar menu-bar-top" aria-hidden="true"></span>
+        <span class="menu-bar menu-bar-mid" aria-hidden="true"></span>
+        <span class="menu-bar menu-bar-bot" aria-hidden="true"></span>
       </button>
     </div>
   </nav>
@@ -143,12 +137,12 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
 
 <style>
   /* Mobile + tablet default — pill is docked flush against the top
-     edge (top: 0 in Tailwind) and the top corners are squared so
-     the chrome looks like it grew out of the viewport edge rather
-     than floating in front of it. Always rendered filled — the
-     scroll-morph only makes sense when there's air around the pill. */
+     edge, top corners squared, glassmorphic. Heavier blur + slight
+     saturation pulls the colour out of whatever's behind it (the
+     hero blob aurora especially), and the inset top highlight reads
+     like light catching the rim of a piece of glass. */
   .site-header {
-    border-radius: 0 0 9999px 9999px;
+    border-radius: 0 0 24px 24px;
     border-top-width: 0;
     border-right-width: 1px;
     border-bottom-width: 1px;
@@ -156,13 +150,16 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
     border-style: solid;
     border-color: color-mix(
       in srgb,
-      var(--color-primary) 18%,
-      var(--color-line)
+      var(--color-primary) 14%,
+      rgb(255 255 255 / 0.6)
     );
-    background-color: rgb(255 255 255 / 0.9);
-    box-shadow: 0 8px 24px -12px rgba(5, 15, 104, 0.22);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: rgb(255 255 255 / 0.65);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.55),
+      0 10px 30px -10px rgba(5, 15, 104, 0.22),
+      0 2px 6px -2px rgba(5, 15, 104, 0.12);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
   }
 
   /* Desktop ( >=lg / 1024px ) — back to the floating full pill with
@@ -187,28 +184,53 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
     }
 
     .site-header[data-scrolled="true"] {
-      background-color: rgb(255 255 255 / 0.85);
+      background-color: rgb(255 255 255 / 0.7);
       border-color: color-mix(
         in srgb,
-        var(--color-primary) 18%,
-        var(--color-line)
+        var(--color-primary) 14%,
+        rgb(255 255 255 / 0.6)
       );
-      box-shadow: 0 10px 30px -10px rgba(5, 15, 104, 0.28);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.55),
+        0 10px 30px -10px rgba(5, 15, 104, 0.28);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
     }
   }
 
-  /* Menu pill always shows the open icon by default; the close icon
-     swaps in when the toggle has aria-expanded="true". */
-  .menu-icon-close {
-    display: none;
+  /* Animated hamburger ↔ × — three absolutely-positioned bars
+     transform on aria-expanded. The top and bottom bars rotate
+     into an × at the centre while the middle bar fades. */
+  .menu-bar {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 18px;
+    height: 1.75px;
+    background-color: currentColor;
+    border-radius: 2px;
+    transform-origin: center;
+    transform: translate(-50%, -50%);
+    transition:
+      transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 180ms ease;
   }
-  #menu-toggle[aria-expanded="true"] .menu-icon-open {
-    display: none;
+  .menu-bar-top {
+    transform: translate(-50%, calc(-50% - 6px));
   }
-  #menu-toggle[aria-expanded="true"] .menu-icon-close {
-    display: block;
+  .menu-bar-bot {
+    transform: translate(-50%, calc(-50% + 6px));
+  }
+
+  .menu-toggle[aria-expanded="true"] .menu-bar-top {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .menu-toggle[aria-expanded="true"] .menu-bar-mid {
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(0.6);
+  }
+  .menu-toggle[aria-expanded="true"] .menu-bar-bot {
+    transform: translate(-50%, -50%) rotate(-45deg);
   }
 
   /* Mobile menu panel — closed: scaled, transparent, untouchable.
