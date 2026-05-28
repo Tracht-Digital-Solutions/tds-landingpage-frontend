@@ -124,7 +124,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-16 md:py-24 w-full">
         <motion.div
           {...fadeUp(0)}
-          className="inline-flex items-center gap-3 mb-8 text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)]"
+          className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)] max-w-full"
         >
           <span className="flex items-center gap-2">
             <span
@@ -133,7 +133,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
             />
             {t.hero.availability}
           </span>
-          <span className="text-[var(--color-line)]" aria-hidden>
+          <span className="hidden sm:inline text-[var(--color-line)]" aria-hidden>
             ·
           </span>
           <span>{t.hero.location}</span>
