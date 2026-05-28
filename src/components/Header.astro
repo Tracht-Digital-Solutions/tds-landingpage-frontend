@@ -14,7 +14,11 @@ const items = [
 ];
 ---
 
-<header class="fixed top-0 left-1/2 -translate-x-1/2 z-40 px-3 py-2 rounded-b-full bg-white/85 backdrop-blur-md border border-t-0 border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_10px_30px_-10px_rgba(5,15,104,0.28)]">
+<header
+  id="site-header"
+  class="site-header fixed top-0 left-1/2 -translate-x-1/2 z-40 px-3 py-2"
+  data-scrolled="false"
+>
   <nav class="flex items-center gap-1 text-sm">
     <a
       href="/"
@@ -45,3 +49,49 @@ const items = [
     <LanguageToggle client:load />
   </nav>
 </header>
+
+<style>
+  /* Default — sitting at the top of the page, no chrome: nav appears
+     to belong to the page header itself. The pill materialises once
+     the user starts scrolling. */
+  .site-header {
+    border-radius: 0 0 9999px 9999px;
+    border: 1px solid transparent;
+    border-top: 0;
+    background-color: transparent;
+    box-shadow: none;
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+    transition:
+      background-color 250ms ease,
+      border-color 250ms ease,
+      box-shadow 250ms ease,
+      backdrop-filter 250ms ease,
+      -webkit-backdrop-filter 250ms ease;
+  }
+
+  .site-header[data-scrolled="true"] {
+    background-color: rgb(255 255 255 / 0.85);
+    border-color: color-mix(
+      in srgb,
+      var(--color-primary) 18%,
+      var(--color-line)
+    );
+    box-shadow: 0 10px 30px -10px rgba(5, 15, 104, 0.28);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+</style>
+
+<script>
+  const header = document.getElementById("site-header");
+  if (header) {
+    const THRESHOLD = 8;
+    const update = () => {
+      header.dataset.scrolled =
+        window.scrollY > THRESHOLD ? "true" : "false";
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+  }
+</script>
