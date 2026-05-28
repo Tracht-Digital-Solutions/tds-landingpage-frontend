@@ -123,11 +123,24 @@ const socials = {
 </section>
 
 <style is:global>
-  /* Underline-style inputs on the dark Contact section. Browser
-     autofill on Chrome/Safari paints its own background and text
-     color, which clashes with the bg-[--color-primary] section.
-     Neutralise both via the WebKit autofill pseudo (the 9999s
-     transition trick stops Chrome from re-applying the bg on focus). */
+  /* Underline-style inputs on the dark Contact section. */
+  .contact-field {
+    /* Force a transparent background and a white text cursor so the
+       fields read consistently against the navy --color-primary bg.
+       Some browsers (Safari, Firefox on macOS) otherwise paint a
+       light input background that looks broken on the dark section. */
+    background-color: transparent !important;
+    caret-color: #ffffff;
+    color-scheme: dark;
+  }
+  .contact-field::placeholder {
+    opacity: 1;
+  }
+
+  /* Browser autofill paints its own background + text color, which
+     clashes with the dark section. Neutralise both via the WebKit
+     autofill pseudo (the 9999s transition trick stops Chrome from
+     re-applying the background on focus). */
   .contact-field:-webkit-autofill,
   .contact-field:-webkit-autofill:hover,
   .contact-field:-webkit-autofill:focus,
@@ -137,5 +150,16 @@ const socials = {
     box-shadow: 0 0 0 1000px transparent inset;
     transition: background-color 9999s ease-in-out 0s;
     caret-color: #ffffff;
+  }
+
+  /* The custom page scrollbar is brand-primary over paper; inside
+     the textarea (which sits on the dark Contact section) that
+     same primary thumb is invisible against the section bg. Reskin
+     the local scrollbar in white so it reads. */
+  .contact-field::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.35);
+  }
+  .contact-field::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 0.55);
   }
 </style>

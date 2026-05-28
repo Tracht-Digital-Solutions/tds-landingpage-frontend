@@ -61,9 +61,16 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   };
 
   const fieldClass = (hasError: boolean) =>
-    `contact-field w-full bg-transparent border-b py-3 text-base text-white placeholder-white/40 leading-snug transition-colors duration-200 outline-none focus:placeholder-white/25 focus:border-[var(--color-accent-pink)] ${
-      hasError ? "border-[var(--color-accent-pink)]" : "border-white/25"
-    }`;
+    [
+      "contact-field block w-full appearance-none bg-transparent",
+      "border-0 border-b border-solid",
+      hasError ? "border-[var(--color-accent-pink)]" : "border-white/30",
+      "px-0 py-3 text-base text-white leading-snug",
+      "placeholder:text-white/40 focus:placeholder:text-white/25",
+      "transition-colors duration-200",
+      "outline-none focus:outline-none focus:ring-0",
+      "focus:border-[var(--color-accent-pink)]",
+    ].join(" ");
 
   const labelClass =
     "block text-xs font-medium text-white/60 mb-1.5 uppercase tracking-widest";
