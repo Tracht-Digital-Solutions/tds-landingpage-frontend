@@ -45,13 +45,17 @@ const titles = {
 >
   <Header />
   <main id="main">
+    {/* Narrative arc: hook → who → what → capability → proof → method →
+        cost → thinking → convert. PricingTeaser moved after Process
+        because pricing reads better once the visitor knows how the work
+        actually happens. */}
     <Hero client:load lang={lang} />
     <About />
     <Services />
-    <PricingTeaser />
     <TechMarquee />
     <Portfolio />
     <Process />
+    <PricingTeaser />
     <Journal />
     <Contact />
   </main>
