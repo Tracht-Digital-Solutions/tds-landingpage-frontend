@@ -50,6 +50,15 @@ const ogLocale = lang === "de" ? "de_DE" : "en_GB";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={url} />
 
+    <!-- Cross-property: sibling blog at blog.tracht-digital.de -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={lang === "en" ? "Tracht Digital — Journal" : "Tracht Digital — Journal (Feed)"}
+      href={`${siteConfig.blogUrl}/rss.xml`}
+    />
+    <link rel="me" href={siteConfig.blogUrl} />
+
     <title>{title}</title>
 
     <!-- Open Graph -->

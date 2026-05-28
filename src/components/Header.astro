@@ -1,6 +1,7 @@
 ---
 import LanguageToggle from "~/components/islands/LanguageToggle.tsx";
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { siteConfig } from "~/lib/seo";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -11,7 +12,6 @@ const items = [
   { id: "tech", label: t.nav.tech },
   { id: "portfolio", label: t.nav.portfolio },
   { id: "process", label: t.nav.process },
-  { id: "blog", label: t.nav.blog },
 ];
 
 const homeHref = localizePath("/", lang);
@@ -43,6 +43,14 @@ const pricingHref = localizePath("/preise", lang);
       class="hidden md:inline-block px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
     >
       {t.nav.pricing}
+    </a>
+    <a
+      href={siteConfig.blogUrl}
+      rel="me noopener"
+      class="hidden md:inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+    >
+      {t.nav.blog}
+      <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
     </a>
     <a
       href="#contact"
