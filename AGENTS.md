@@ -12,9 +12,13 @@ incompatibility with Vite 7 — withastro/astro#16542), wired real Astro
 i18n routing (DE at `/`, EN at `/en/`), swapped the heading family to
 Instrument Serif, dropped SectionSnap in favour of native scroll +
 a thin ScrollProgress bar, and replaced the DE/EN pill toggle with a
-flag dropdown. Outstanding work is content (real phone, portrait,
-portfolio screenshots, social URLs) — tracked as repo issues, not
-ports. See README's "Replace examples before go-live" section.
+flag dropdown (inline-SVG flags — Win32 doesn't ship colour flag
+glyphs). Closing pill below `lg` docks flush against the top edge
+with full mobile menu (animated hamburger ↔ ×) and the section
+order has been reshuffled so PricingTeaser sits after Process.
+Outstanding work is content (real phone, portrait, portfolio
+screenshots, social URLs) — tracked as repo issues, not ports.
+See README's "Replace examples before go-live" section.
 
 ## Mental model
 
@@ -46,11 +50,27 @@ ports. See README's "Replace examples before go-live" section.
   and journal use. `SectionHeader.astro` is the shared masthead component
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
-- **Section rhythm**: paper-backed narrative sections (About,
-  Portfolio, Journal) alternate with `--color-soft` callout
-  sections (Services, Process) and dark blue chrome sections
-  (PricingTeaser gradient, Tech, Contact) so adjacent sections
-  read as visually distinct chapters.
+- **Section order** (`src/pages/index.astro`): Hero → About →
+  Services → Tech → Portfolio → Process → PricingTeaser → Journal
+  → Contact. Narrative arc reads as hook → who → what → capability
+  → proof → method → cost → thinking → convert. PricingTeaser
+  sits after Process intentionally — visitors should see how the
+  work happens before seeing what it costs.
+- **Section rhythm**: paper → paper → soft → DARK → paper → soft →
+  paper → soft → DARK. Paper-backed narrative sections (About,
+  Portfolio, PricingTeaser inner card) alternate with
+  `--color-soft` callout sections (Services, Process, Journal)
+  and dark-blue chrome sections (Tech, Contact). Soft sections
+  flank PricingTeaser so its gradient card sits in a calm frame.
+- **Header / navigation**: floating pill on desktop (≥lg) with
+  `data-scrolled` morphing the chrome on scroll past 8px. Below
+  `lg` the pill docks against the top edge (`top: 0`, flat top
+  border, 24px-rounded bottom), is always rendered with chrome,
+  spans `left-3 right-3`, and ends in a 44px hamburger that
+  animates three CSS bars into an × via the `[aria-expanded]`
+  attribute. Mobile menu panel mounts as a separate fixed div
+  below the pill — Astro inline `<script>` toggles state and
+  body scroll-lock.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at

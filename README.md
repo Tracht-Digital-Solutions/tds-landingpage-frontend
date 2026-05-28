@@ -216,7 +216,7 @@ git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
 
 | Path | Source | Purpose |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Single-page scroll layout (9 sections, DE) |
+| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — 9 sections in narrative order: Hero → About → Services → Tech → Portfolio → Process → PricingTeaser → Journal → Contact |
 | `/en/` | `src/pages/en/index.astro` | Same layout, EN copy |
 | `/preise` | `src/pages/preise.astro` | Hourly-rate pricing (DE) |
 | `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
@@ -240,7 +240,7 @@ src/
 │   ├── islands/                # React, hydrated via client:load|visible
 │   │   ├── ContactForm.tsx     # POSTs to PUBLIC_CONTACT_API_URL; takes lang prop
 │   │   ├── Hero.tsx            # Hero with motion entrance; takes lang prop
-│   │   ├── LanguageToggle.tsx  # Flag dropdown; navigates between /  ↔ /en/
+│   │   ├── LanguageToggle.tsx  # SVG-flag dropdown; navigates between /  ↔ /en/
 │   │   ├── ScrollProgress.tsx  # Thin gradient reading-progress bar (top of viewport)
 │   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only)
 │   ├── sections/               # Static .astro sections (no JS by default)
