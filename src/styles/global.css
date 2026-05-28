@@ -23,6 +23,60 @@
 html {
   scroll-behavior: smooth;
   color-scheme: light;
+  /* Firefox + IE/Edge legacy — the thin pill is rendered by the
+     WebKit rules below for everyone else. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-primary) 65%, transparent)
+    transparent;
+}
+
+/* WebKit / Blink scrollbar — slender, brand-tinted, with a
+   transparent track. The 3px transparent border + padding-box
+   background-clip trick shrinks the thumb visually inside the
+   10px channel so the bar reads as a 4px pill instead of a heavy
+   slab. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 9999px;
+  transition: background-color 200ms ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--color-accent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Touch devices typically hide their own scrollbar already; nothing
+   to do beyond letting the OS handle it. */
+@media (pointer: coarse) {
+  html {
+    scrollbar-width: none;
+  }
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
 }
 
 body {
