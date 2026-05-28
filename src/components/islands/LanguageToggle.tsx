@@ -1,19 +1,14 @@
+import { useEffect, useRef, useState } from "react";
+
 type Lang = "de" | "en";
 
 const STORAGE_KEY = "tdsLang";
 
-/**
- * DE | EN pill toggle that drives navigation, not just preference.
- *
- * Astro's i18n routing produces two URL trees (`/` for DE,
- * `/en/...` for EN); this control maps the current pathname to its
- * sibling in the other locale and navigates there. The chosen
- * locale is also persisted in localStorage so future visits land
- * on the same language when the user hits "/".
- *
- * Receives the build-time `lang` from the page wrapper so the
- * active state renders correctly on first paint (no hydration flash).
- */
+const options: { code: Lang; flag: string; label: string }[] = [
+  { code: "de", flag: "🇩🇪", label: "Deutsch" },
+  { code: "en", flag: "🇬🇧", label: "English" },
+];
+
 function swapLocaleInPath(pathname: string, target: Lang): string {
   const trimmed = pathname.replace(/\/+$/, "") || "/";
   const inEn = trimmed === "/en" || trimmed.startsWith("/en/");
@@ -27,8 +22,39 @@ function swapLocaleInPath(pathname: string, target: Lang): string {
   return stripped;
 }
 
+/**
+ * Compact language dropdown. Trigger shows the active flag + code;
+ * the menu offers both locales with flag and full label. Selecting
+ * an option persists the choice in localStorage and navigates to
+ * the sibling URL in the other locale tree.
+ *
+ * Active locale is fed in by the server-rendered Header so the
+ * trigger paints correctly on first frame without a hydration flash.
+ */
 export default function LanguageToggle({ lang }: { lang: Lang }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onClickOutside = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
   const choose = (next: Lang) => {
+    setOpen(false);
     if (next === lang) return;
     try {
       localStorage.setItem(STORAGE_KEY, next);
@@ -41,33 +67,83 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
     }
   };
 
-  const base =
-    "px-2 py-0.5 text-xs font-medium uppercase tracking-wider rounded-full transition-colors cursor-pointer";
-  const active = "bg-[var(--color-primary)] text-white";
-  const idle = "text-[var(--color-muted)] hover:text-[var(--color-primary)]";
+  const current = options.find((o) => o.code === lang) ?? options[0];
 
   return (
-    <div
-      role="group"
-      aria-label="Sprache wählen"
-      className="flex items-center gap-1 ml-2"
-    >
+    <div ref={rootRef} className="relative ml-2">
       <button
         type="button"
-        aria-pressed={lang === "de"}
-        onClick={() => choose("de")}
-        className={`${base} ${lang === "de" ? active : idle}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={lang === "de" ? "Sprache wählen" : "Select language"}
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium uppercase tracking-wider text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-black/5 transition-colors cursor-pointer"
       >
-        DE
+        <span aria-hidden="true" className="text-base leading-none">
+          {current.flag}
+        </span>
+        <span>{current.code}</span>
+        <svg
+          aria-hidden="true"
+          width="10"
+          height="10"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
       </button>
-      <button
-        type="button"
-        aria-pressed={lang === "en"}
-        onClick={() => choose("en")}
-        className={`${base} ${lang === "en" ? active : idle}`}
-      >
-        EN
-      </button>
+
+      {open && (
+        <ul
+          role="listbox"
+          aria-label={lang === "de" ? "Sprachen" : "Languages"}
+          className="absolute right-0 top-full mt-2 min-w-[140px] py-1 rounded-xl bg-white shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] border border-[var(--color-line)] z-50"
+        >
+          {options.map((opt) => {
+            const active = opt.code === lang;
+            return (
+              <li key={opt.code} role="option" aria-selected={active}>
+                <button
+                  type="button"
+                  onClick={() => choose(opt.code)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors cursor-pointer ${
+                    active
+                      ? "text-[var(--color-primary)] font-medium bg-black/5"
+                      : "text-[var(--color-black)] hover:bg-black/5"
+                  }`}
+                >
+                  <span aria-hidden="true" className="text-lg leading-none">
+                    {opt.flag}
+                  </span>
+                  <span className="flex-1">{opt.label}</span>
+                  {active && (
+                    <svg
+                      aria-hidden="true"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-[var(--color-accent)]"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
