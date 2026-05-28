@@ -1,8 +1,8 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { tFor } from "~/lib/i18n";
 import BlogPostCard from "~/components/ui/BlogPostCard.astro";
 
-const t = translations.de;
+const t = tFor(Astro.currentLocale);
 
 /**
  * Build-time fetch of the 3 most recent published posts from

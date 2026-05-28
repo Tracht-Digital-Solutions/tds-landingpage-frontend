@@ -1,43 +1,48 @@
-import { useEffect, useState } from "react";
-
-const STORAGE_KEY = "tdsLang";
 type Lang = "de" | "en";
 
-function isLang(value: string | null): value is Lang {
-  return value === "de" || value === "en";
-}
+const STORAGE_KEY = "tdsLang";
 
 /**
- * Visible DE | EN pill toggle. Persists the chosen language in
- * localStorage under "tdsLang" (the same key the shared lib's
- * `LanguageProvider` reads on mount) and reloads the page so any
- * server-rendered text re-renders against the new preference.
+ * DE | EN pill toggle that drives navigation, not just preference.
  *
- * NOTE: Astro pre-renders all `.astro` text on the server, so a full
- * DE/EN site needs either separate `/en/` routes or an edge-rewrite
- * layer. v1 of this toggle just flips the stored preference + reloads;
- * sections that need to retranslate live (the Hero island, ContactForm,
- * etc.) will pick it up via the shared `LanguageProvider`.
+ * Astro's i18n routing produces two URL trees (`/` for DE,
+ * `/en/...` for EN); this control maps the current pathname to its
+ * sibling in the other locale and navigates there. The chosen
+ * locale is also persisted in localStorage so future visits land
+ * on the same language when the user hits "/".
+ *
+ * Receives the build-time `lang` from the page wrapper so the
+ * active state renders correctly on first paint (no hydration flash).
  */
-export default function LanguageToggle() {
-  const [lang, setLang] = useState<Lang>("de");
+function swapLocaleInPath(pathname: string, target: Lang): string {
+  const trimmed = pathname.replace(/\/+$/, "") || "/";
+  const inEn = trimmed === "/en" || trimmed.startsWith("/en/");
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (isLang(stored)) setLang(stored);
-  }, []);
+  if (target === "en") {
+    if (inEn) return pathname;
+    return trimmed === "/" ? "/en/" : `/en${trimmed}`;
+  }
+  if (!inEn) return pathname;
+  const stripped = trimmed.replace(/^\/en/, "") || "/";
+  return stripped;
+}
 
+export default function LanguageToggle({ lang }: { lang: Lang }) {
   const choose = (next: Lang) => {
     if (next === lang) return;
-    localStorage.setItem(STORAGE_KEY, next);
-    setLang(next);
-    // Hard reload so server-rendered Astro markup also re-renders. Once
-    // the whole site is i18n-aware (separate /en/ routes), drop this.
-    if (typeof window !== "undefined") window.location.reload();
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // ignore — Safari private mode etc.
+    }
+    if (typeof window !== "undefined") {
+      const target = swapLocaleInPath(window.location.pathname, next);
+      window.location.assign(target + window.location.hash);
+    }
   };
 
   const base =
-    "px-2 py-0.5 text-xs font-medium uppercase tracking-wider rounded-full transition-colors";
+    "px-2 py-0.5 text-xs font-medium uppercase tracking-wider rounded-full transition-colors cursor-pointer";
   const active = "bg-[var(--color-primary)] text-white";
   const idle = "text-[var(--color-muted)] hover:text-[var(--color-primary)]";
 

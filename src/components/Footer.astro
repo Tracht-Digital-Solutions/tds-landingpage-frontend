@@ -1,7 +1,9 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 
-const t = translations.de;
+const lang = resolveLang(Astro.currentLocale);
+const t = tFor(Astro.currentLocale);
+const pricingHref = localizePath("/preise", lang);
 ---
 
 <footer class="bg-[var(--color-black)] text-white pt-16 pb-10">
@@ -24,7 +26,7 @@ const t = translations.de;
           <li><a href="#about" class="text-white/70 hover:text-white">{t.nav.about}</a></li>
           <li><a href="#services" class="text-white/70 hover:text-white">{t.nav.services}</a></li>
           <li><a href="#portfolio" class="text-white/70 hover:text-white">{t.nav.portfolio}</a></li>
-          <li><a href="/preise" class="text-white/70 hover:text-white">{t.footer.pricing}</a></li>
+          <li><a href={pricingHref} class="text-white/70 hover:text-white">{t.footer.pricing}</a></li>
           <li><a href="https://blog.tracht-digital.de" class="text-white/70 hover:text-white">{t.nav.blog}</a></li>
         </ul>
       </div>

@@ -1,8 +1,8 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { tFor } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 
-const t = translations.de;
+const t = tFor(Astro.currentLocale);
 
 const techItems = [
   { label: "Node.js", italic: false },

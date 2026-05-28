@@ -1,8 +1,8 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { tFor } from "~/lib/i18n";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 
-const t = translations.de;
+const t = tFor(Astro.currentLocale);
 
 /**
  * Example values — replace before go-live. The shared lib still carries

@@ -12,17 +12,18 @@ function fadeUp(delay: number) {
   };
 }
 
+type Lang = "de" | "en";
+
 /**
  * Hero — full-viewport with a colourful three-blob aurora that drifts
  * behind the cursor. Ported from legacy tds-lp/app/components/sections/Hero.tsx.
  *
  * Renders as `client:load` so the parallax + entrance animations happen
- * immediately on page load. The translations are read at runtime from the
- * shared i18n module; for SSR-friendly translation, the page passes
- * `lang` via props (TODO when LanguageProvider is wired in Phase 5+).
+ * immediately on page load. The page passes `lang` via props so the EN
+ * route hydrates with EN copy without a client-side swap.
  */
-export default function Hero() {
-  const t = translations.de;
+export default function Hero({ lang = "de" }: { lang?: Lang }) {
+  const t = translations[lang];
   const containerRef = useRef<HTMLElement>(null);
 
   const mouseX = useMotionValue(0);

@@ -1,9 +1,9 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { tFor } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceCard from "~/components/ui/ServiceCard.astro";
 
-const t = translations.de;
+const t = tFor(Astro.currentLocale);
 ---
 
 <section id="services" class="section-spacing" aria-labelledby="services-heading">

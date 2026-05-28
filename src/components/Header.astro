@@ -1,8 +1,9 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import LanguageToggle from "~/components/islands/LanguageToggle.tsx";
+import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 
-const t = translations.de;
+const lang = resolveLang(Astro.currentLocale);
+const t = tFor(Astro.currentLocale);
 
 const items = [
   { id: "about", label: t.nav.about },
@@ -12,6 +13,9 @@ const items = [
   { id: "process", label: t.nav.process },
   { id: "blog", label: t.nav.blog },
 ];
+
+const homeHref = localizePath("/", lang);
+const pricingHref = localizePath("/preise", lang);
 ---
 
 <header
@@ -21,7 +25,7 @@ const items = [
 >
   <nav class="flex items-center gap-1 text-sm">
     <a
-      href="/"
+      href={homeHref}
       class="px-3 py-1.5 font-[var(--font-display)] font-medium text-[var(--color-primary)]"
     >
       TDS
@@ -35,7 +39,7 @@ const items = [
       </a>
     ))}
     <a
-      href="/preise"
+      href={pricingHref}
       class="hidden md:inline-block px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
     >
       {t.nav.pricing}
@@ -46,7 +50,7 @@ const items = [
     >
       {t.nav.cta}
     </a>
-    <LanguageToggle client:load />
+    <LanguageToggle client:load lang={lang} />
   </nav>
 </header>
 

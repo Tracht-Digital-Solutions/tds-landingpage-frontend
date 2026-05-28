@@ -16,9 +16,10 @@ type SubmitState = "idle" | "submitting" | "success" | "error";
  * Uses ContactSchema from @tds-shared so frontend + backend validation
  * stay in sync (the PHP backend mirrors the same schema by hand).
  */
-export default function ContactForm() {
-  const t = translations.de;
-  const lang: "de" | "en" = "de";
+type Lang = "de" | "en";
+
+export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
+  const t = translations[lang];
 
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [shake, setShake] = useState(false);

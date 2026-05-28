@@ -1,8 +1,8 @@
 ---
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { tFor } from "~/lib/i18n";
 import ImagePlaceholder from "~/components/ui/ImagePlaceholder.astro";
 
-const t = translations.de;
+const t = tFor(Astro.currentLocale);
 
 const stats = [
   { value: t.about.stat1Value, label: t.about.stat1Label },
