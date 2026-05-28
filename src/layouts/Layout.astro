@@ -1,7 +1,7 @@
 ---
 import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
-import SectionSnap from "~/components/islands/SectionSnap.tsx";
+import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import JsonLd from "~/components/JsonLd.astro";
 import { siteConfig } from "~/lib/seo";
 
@@ -82,7 +82,7 @@ const ogLocale = lang === "de" ? "de_DE" : "en_GB";
       Skip to content
     </a>
     <SmoothScroll client:load />
-    <SectionSnap client:load />
+    <ScrollProgress client:load />
     <slot />
   </body>
 </html>
