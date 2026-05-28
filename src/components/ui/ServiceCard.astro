@@ -9,11 +9,23 @@ interface Props {
 const { number, title, description, tags } = Astro.props;
 ---
 
-<div class="bg-[var(--color-paper)] p-8 md:p-10 cursor-pointer group transition-colors duration-200 hover:bg-[var(--color-soft)]">
-  <span class="text-xs font-medium text-[var(--color-muted)] tracking-widest block mb-6">
-    {number}
-  </span>
-  <h3 class="text-xl font-[var(--font-display)] font-medium text-[var(--color-black)] mb-4">
+<div class="relative bg-[var(--color-paper)] p-8 md:p-10 cursor-pointer group transition-colors duration-200 hover:bg-white">
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <span class="font-[var(--font-display)] text-3xl text-[var(--color-accent)] leading-none tabular-nums">
+      {number}
+    </span>
+    <span
+      aria-hidden="true"
+      class="text-[var(--color-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-200"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="7" y1="17" x2="17" y2="7" />
+        <polyline points="7 7 17 7 17 17" />
+      </svg>
+    </span>
+  </div>
+
+  <h3 class="text-2xl font-[var(--font-display)] text-[var(--color-black)] mb-3 leading-tight">
     {title}
   </h3>
   <p class="text-[var(--color-muted)] text-sm leading-relaxed mb-8">
@@ -21,7 +33,7 @@ const { number, title, description, tags } = Astro.props;
   </p>
   <div class="flex flex-wrap gap-2">
     {tags.map((tag) => (
-      <span class="px-3 py-1 text-xs rounded-[100px] border border-[var(--color-line)] text-[var(--color-muted)] group-hover:border-[var(--color-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-200">
+      <span class="px-3 py-1 text-xs rounded-full border border-[var(--color-line)] text-[var(--color-muted)] group-hover:border-[var(--color-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-200">
         {tag}
       </span>
     ))}

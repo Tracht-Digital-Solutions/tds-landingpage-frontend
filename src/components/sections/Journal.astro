@@ -101,14 +101,26 @@ const posts =
       ))}
     </div>
 
-    <div class="mt-10 sm:hidden">
-      <a
-        href="https://blog.tracht-digital.de"
-        class="flex items-center gap-2 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors group"
-      >
-        {t.blog.allPosts}
-        <span aria-hidden="true" class="group-hover:translate-x-1 transition-transform duration-200">→</span>
-      </a>
-    </div>
+    <a
+      href="https://blog.tracht-digital.de"
+      class="group mt-16 block rounded-[6px] border border-[var(--color-line)] bg-[var(--color-paper)] hover:bg-white hover:border-[var(--color-primary)] transition-all duration-200 p-8 md:p-10"
+    >
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="max-w-xl">
+          <p class="eyebrow mb-3 text-[var(--color-accent)]">blog.tracht-digital.de</p>
+          <h3 class="text-2xl md:text-3xl font-[var(--font-display)] text-[var(--color-black)] mb-2 leading-tight">
+            {t.blog.headline}{" "}
+            <em class="not-italic italic text-[var(--color-accent)]">{t.blog.headlineAccent}</em>
+          </h3>
+          <p class="text-sm text-[var(--color-muted)] leading-relaxed">
+            {t.blog.allPosts} — {Astro.currentLocale === "en" ? "deep dives, field notes, and the occasional rant." : "Tiefenrecherchen, Notizen aus der Praxis und gelegentliche Rants."}
+          </p>
+        </div>
+        <span class="inline-flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--color-primary)] text-white text-sm font-medium group-hover:bg-[var(--color-accent)] group-hover:gap-3 transition-all duration-200">
+          {t.blog.allPosts}
+          <span aria-hidden="true" class="group-hover:rotate-45 transition-transform duration-200">↗</span>
+        </span>
+      </div>
+    </a>
   </div>
 </section>
