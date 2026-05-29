@@ -40,14 +40,20 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
   const blob2X = useSpring(mouseX, { stiffness: 15, damping: 35 });
   const blob3X = useSpring(mouseX, { stiffness: 12, damping: 28 });
 
-  // Scroll-linked parallax. Each layer translates a different amount
-  // so the blobs drift up at slightly different rates as the user
-  // scrolls past the hero, creating a sense of depth without
-  // overpowering the cursor parallax.
+  // Scroll-linked parallax. Each layer translates and scales at a
+  // different rate so the aurora moves visibly while the user
+  // scrolls. The base conic gradient rotates and pans as well so
+  // the whole hero background reads as alive without overpowering
+  // the cursor parallax.
   const { scrollY } = useScroll();
-  const parallaxBack = useTransform(scrollY, [0, 800], [0, -60]);
-  const parallaxMid = useTransform(scrollY, [0, 800], [0, -120]);
-  const parallaxFront = useTransform(scrollY, [0, 800], [0, -180]);
+  const parallaxBack = useTransform(scrollY, [0, 800], [0, -160]);
+  const parallaxMid = useTransform(scrollY, [0, 800], [0, -260]);
+  const parallaxFront = useTransform(scrollY, [0, 800], [0, -360]);
+  const blob1Scale = useTransform(scrollY, [0, 800], [1, 1.15]);
+  const blob2Scale = useTransform(scrollY, [0, 800], [1, 0.9]);
+  const blob3Scale = useTransform(scrollY, [0, 800], [1, 1.25]);
+  const conicRotate = useTransform(scrollY, [0, 1200], [0, 60]);
+  const conicY = useTransform(scrollY, [0, 800], [0, -80]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -72,10 +78,12 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20"
       aria-label="Hero"
     >
-      <div
+      <motion.div
         aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-60"
+        className="absolute -inset-20 pointer-events-none opacity-60"
         style={{
+          rotate: conicRotate,
+          y: conicY,
           background:
             "conic-gradient(from 220deg at 70% 30%, rgba(5,15,104,0.08), rgba(255,122,156,0.06), rgba(130,9,51,0.07), rgba(5,15,104,0.08))",
           filter: "blur(60px)",
@@ -83,7 +91,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       />
 
       <motion.div
-        style={{ x: blob1X, y: parallaxBack }}
+        style={{ x: blob1X, y: parallaxBack, scale: blob1Scale }}
         className="absolute top-[15%] -left-40 w-[640px] h-[640px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
@@ -97,7 +105,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       </motion.div>
 
       <motion.div
-        style={{ x: blob2X, y: parallaxMid }}
+        style={{ x: blob2X, y: parallaxMid, scale: blob2Scale }}
         className="absolute bottom-[10%] -right-40 w-[560px] h-[560px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
@@ -111,7 +119,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       </motion.div>
 
       <motion.div
-        style={{ x: blob3X, y: parallaxFront }}
+        style={{ x: blob3X, y: parallaxFront, scale: blob3Scale }}
         className="absolute top-[40%] left-[35%] w-[440px] h-[440px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
