@@ -1,5 +1,11 @@
 import { useEffect, useRef } from "react";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import {
+  motion,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ease } from "@tracht-digital-solutions/tds-shared/motion";
 
@@ -26,27 +32,33 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
   const t = translations[lang];
   const containerRef = useRef<HTMLElement>(null);
 
+  // X axis tracks the cursor (spring-damped per layer for depth).
+  // Y axis is now scroll-driven — the blobs translate vertically with
+  // scroll and horizontally with the cursor, which reads as proper 3D drift.
   const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
   const blob1X = useSpring(mouseX, { stiffness: 20, damping: 30 });
-  const blob1Y = useSpring(mouseY, { stiffness: 20, damping: 30 });
   const blob2X = useSpring(mouseX, { stiffness: 15, damping: 35 });
-  const blob2Y = useSpring(mouseY, { stiffness: 15, damping: 35 });
   const blob3X = useSpring(mouseX, { stiffness: 12, damping: 28 });
-  const blob3Y = useSpring(mouseY, { stiffness: 12, damping: 28 });
+
+  // Scroll-linked parallax. Each layer translates a different amount
+  // so the blobs drift up at slightly different rates as the user
+  // scrolls past the hero, creating a sense of depth without
+  // overpowering the cursor parallax.
+  const { scrollY } = useScroll();
+  const parallaxBack = useTransform(scrollY, [0, 800], [0, -60]);
+  const parallaxMid = useTransform(scrollY, [0, 800], [0, -120]);
+  const parallaxFront = useTransform(scrollY, [0, 800], [0, -180]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
       const cx = rect.width / 2;
-      const cy = rect.height / 2;
       mouseX.set(((e.clientX - rect.left - cx) / cx) * 30);
-      mouseY.set(((e.clientY - rect.top - cy) / cy) * 30);
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
+  }, [mouseX]);
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -71,7 +83,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       />
 
       <motion.div
-        style={{ x: blob1X, y: blob1Y }}
+        style={{ x: blob1X, y: parallaxBack }}
         className="absolute top-[15%] -left-40 w-[640px] h-[640px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
@@ -85,7 +97,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       </motion.div>
 
       <motion.div
-        style={{ x: blob2X, y: blob2Y }}
+        style={{ x: blob2X, y: parallaxMid }}
         className="absolute bottom-[10%] -right-40 w-[560px] h-[560px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
@@ -99,7 +111,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       </motion.div>
 
       <motion.div
-        style={{ x: blob3X, y: blob3Y }}
+        style={{ x: blob3X, y: parallaxFront }}
         className="absolute top-[40%] left-[35%] w-[440px] h-[440px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >

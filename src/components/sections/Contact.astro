@@ -186,11 +186,15 @@ const socials = {
     color: var(--color-accent-pink);
     letter-spacing: 0.18em;
   }
+  /* No underline at all when the field is focused — the white wash
+     + pink-tinted glow on .contact-field:focus is the focus cue.
+     The static baseline rule fades, and the animated brand line
+     stays collapsed at scaleX(0). */
   .field:focus-within::after {
-    background-color: rgb(255 255 255 / 0.18);
+    background-color: transparent;
   }
   .field:focus-within .field-line {
-    transform: scaleX(1);
+    transform: scaleX(0);
   }
 
   /* Subtle white wash on the input area itself when focused —
