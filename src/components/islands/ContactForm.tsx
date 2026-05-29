@@ -60,20 +60,18 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
     }
   };
 
+  // Each field is wrapped in a `.field` <div> so the focus-within
+  // styles in the scoped <style> on Contact.astro can light up the
+  // label and underline together when the user lands on the input.
   const fieldClass = (hasError: boolean) =>
     [
       "contact-field block w-full appearance-none bg-transparent",
-      "border-0 border-b border-solid",
-      hasError ? "border-[var(--color-accent-pink)]" : "border-white/30",
       "px-0 py-3 text-base text-white leading-snug",
-      "placeholder:text-white/40 focus:placeholder:text-white/25",
-      "transition-colors duration-200",
-      "outline-none focus:outline-none focus:ring-0",
-      "focus:border-[var(--color-accent-pink)]",
+      "border-0 outline-none focus:outline-none focus:ring-0",
+      hasError ? "contact-field--error" : "",
     ].join(" ");
 
-  const labelClass =
-    "block text-xs font-medium text-white/60 mb-1.5 uppercase tracking-widest";
+  const labelClass = "field-label";
 
   return (
     <div className={shake ? "shake" : ""}>
@@ -118,7 +116,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               />
             </div>
 
-            <div>
+            <div className={`field ${errors.name ? "field--error" : ""}`}>
               <label htmlFor="name" className={labelClass}>{t.contact.form.name}</label>
               <input
                 id="name"
@@ -128,6 +126,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                 className={fieldClass(!!errors.name)}
                 {...register("name")}
               />
+              <span className="field-line" aria-hidden="true" />
               {errors.name && (
                 <p className="text-xs mt-2" style={{ color: "var(--color-accent-pink)" }}>
                   {t.errors.name}
@@ -135,7 +134,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               )}
             </div>
 
-            <div>
+            <div className={`field ${errors.email ? "field--error" : ""}`}>
               <label htmlFor="email" className={labelClass}>{t.contact.form.email}</label>
               <input
                 id="email"
@@ -145,6 +144,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                 className={fieldClass(!!errors.email)}
                 {...register("email")}
               />
+              <span className="field-line" aria-hidden="true" />
               {errors.email && (
                 <p className="text-xs mt-2" style={{ color: "var(--color-accent-pink)" }}>
                   {t.errors.email}
@@ -152,7 +152,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               )}
             </div>
 
-            <div>
+            <div className="field">
               <label htmlFor="company" className={labelClass}>{t.contact.form.company}</label>
               <input
                 id="company"
@@ -162,9 +162,10 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                 className={fieldClass(false)}
                 {...register("company")}
               />
+              <span className="field-line" aria-hidden="true" />
             </div>
 
-            <div>
+            <div className={`field ${errors.message ? "field--error" : ""}`}>
               <label htmlFor="message" className={labelClass}>{t.contact.form.message}</label>
               <textarea
                 id="message"
@@ -173,6 +174,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                 className={`${fieldClass(!!errors.message)} resize-none`}
                 {...register("message")}
               />
+              <span className="field-line" aria-hidden="true" />
               {errors.message && (
                 <p className="text-xs mt-2" style={{ color: "var(--color-accent-pink)" }}>
                   {t.errors.message}
@@ -215,12 +217,31 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             <motion.button
               type="submit"
               disabled={submitState === "submitting"}
-              whileHover={{ y: -2, boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }}
-              transition={{ duration: 0.15 }}
-              className="w-full py-4 text-sm font-medium rounded-[100px] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
-              style={{ backgroundColor: "var(--color-accent-pink)", color: "var(--color-primary)" }}
+              whileHover={{ y: -2 }}
+              whileTap={{ y: 0, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
+              className="submit-button group relative w-full py-4 text-sm font-medium rounded-full overflow-hidden flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
-              {submitState === "submitting" ? t.contact.form.submitting : t.contact.form.submit}
+              <span className="relative z-10 inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-0.5">
+                {submitState === "submitting"
+                  ? t.contact.form.submitting
+                  : t.contact.form.submit}
+                <svg
+                  aria-hidden="true"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </span>
             </motion.button>
           </motion.form>
         )}

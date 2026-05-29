@@ -87,7 +87,7 @@ const socials = {
               aria-label="LinkedIn"
               rel="noopener noreferrer"
               target="_blank"
-              class="p-2.5 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 hover:-translate-y-0.5 transition-all duration-200"
+              class="group p-2.5 rounded-full border border-white/20 text-white/60 bg-transparent hover:bg-white hover:border-white hover:text-[#0A66C2] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -98,7 +98,7 @@ const socials = {
               aria-label="GitHub"
               rel="noopener noreferrer"
               target="_blank"
-              class="p-2.5 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 hover:-translate-y-0.5 transition-all duration-200"
+              class="group p-2.5 rounded-full border border-white/20 text-white/60 bg-transparent hover:bg-white hover:border-white hover:text-[#181717] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
@@ -109,7 +109,7 @@ const socials = {
               aria-label="Xing"
               rel="noopener noreferrer"
               target="_blank"
-              class="p-2.5 rounded-full border border-white/20 text-white/60 hover:text-white hover:border-white/40 hover:-translate-y-0.5 transition-all duration-200"
+              class="group p-2.5 rounded-full border border-white/20 text-white/60 bg-transparent hover:bg-white hover:border-white hover:text-[#006567] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.539l-4.879-8.916c-.004-.006-.004-.016 0-.022L21.945.756c.099-.193.099-.387.01-.538C21.866.078 21.702 0 21.49 0h-3.302zM3.648 4.74c-.211 0-.385.074-.473.226-.09.151-.078.347.022.541l2.336 4.04c.007.01.007.016 0 .025L1.86 16.51c-.099.193-.093.39.004.541.092.146.265.219.476.219h3.293c.516 0 .768-.348.946-.667l3.74-6.62-2.387-4.155c-.171-.32-.43-.668-.961-.668H3.648z" />
@@ -123,21 +123,102 @@ const socials = {
 </section>
 
 <style is:global>
-  /* Underline-style inputs on the dark Contact section. */
+  /* === Contact form: field + focus state ============================ */
+
+  /* Each input/textarea sits inside a `.field` wrapper. The wrapper
+     paints the static baseline rule and an animated overlay rule
+     (`.field-line`) that grows from the centre on focus-within. The
+     label and rules share the focus-within trigger so the entire
+     row "lights up" at once. */
+  .field {
+    position: relative;
+    padding-bottom: 1px; /* leaves room for the .field-line absolute layer */
+  }
+
+  /* Static baseline rule along the bottom of every field — always
+     visible so a blank form still has visual structure. */
+  .field::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: rgb(255 255 255 / 0.22);
+    transition: background-color 200ms ease;
+  }
+
+  /* Animated brand-accent overlay rule. Scales from 0 → 1 on
+     focus-within and turns the baseline into a 2px accent strip. */
+  .field-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.5px;
+    height: 2px;
+    background-color: var(--color-accent-pink);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Label baseline. The focus-within rule lifts it to accent-pink
+     and tightens the tracking a hair so it reads as "active". */
+  .field-label {
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgb(255 255 255 / 0.6);
+    margin-bottom: 0.5rem;
+    transition:
+      color 200ms ease,
+      letter-spacing 200ms ease;
+  }
+
+  .field:focus-within .field-label {
+    color: var(--color-accent-pink);
+    letter-spacing: 0.18em;
+  }
+  .field:focus-within::after {
+    background-color: rgb(255 255 255 / 0.08);
+  }
+  .field:focus-within .field-line {
+    transform: scaleX(1);
+  }
+
+  /* Error variant — solid pink baseline so the broken field reads
+     immediately. The accent line still grows on focus, but it sits
+     on top of the same colour so the underline keeps depth. */
+  .field--error::after {
+    background-color: var(--color-accent-pink);
+  }
+  .field--error .field-label {
+    color: var(--color-accent-pink);
+  }
+
+  /* The input itself — just text + caret. All chrome lives on the
+     wrapper. Forced transparent against the navy section so Safari /
+     Firefox-on-macOS don't paint a light UA background. */
   .contact-field {
-    /* Force a transparent background and a white text cursor so the
-       fields read consistently against the navy --color-primary bg.
-       Some browsers (Safari, Firefox on macOS) otherwise paint a
-       light input background that looks broken on the dark section. */
     background-color: transparent !important;
-    caret-color: #ffffff;
+    caret-color: var(--color-accent-pink);
     color-scheme: dark;
   }
   .contact-field::placeholder {
     opacity: 1;
+    color: rgb(255 255 255 / 0.4);
+    transition: color 200ms ease;
+  }
+  .field:focus-within .contact-field::placeholder {
+    color: rgb(255 255 255 / 0.25);
   }
 
-  /* Browser autofill paints its own background + text color, which
+  /* Browser autofill paints its own background + text colour, which
      clashes with the dark section. Neutralise both via the WebKit
      autofill pseudo (the 9999s transition trick stops Chrome from
      re-applying the background on focus). */
@@ -149,7 +230,7 @@ const socials = {
     -webkit-box-shadow: 0 0 0 1000px transparent inset;
     box-shadow: 0 0 0 1000px transparent inset;
     transition: background-color 9999s ease-in-out 0s;
-    caret-color: #ffffff;
+    caret-color: var(--color-accent-pink);
   }
 
   /* The custom page scrollbar is brand-primary over paper; inside
@@ -161,5 +242,55 @@ const socials = {
   }
   .contact-field::-webkit-scrollbar-thumb:hover {
     background-color: rgb(255 255 255 / 0.55);
+  }
+
+  /* === Contact form: send button ==================================== */
+
+  /* Animated gradient pill. The gradient lives on a pseudo-element
+     so we can pan it on hover without re-rendering the button
+     background colour itself. The arrow icon is in the button
+     markup, animated via Tailwind on the inner span. */
+  .submit-button {
+    color: var(--color-primary);
+    background-color: var(--color-accent-pink);
+    isolation: isolate;
+    transition:
+      box-shadow 220ms ease,
+      color 220ms ease;
+    box-shadow:
+      0 6px 18px -8px rgba(255, 122, 156, 0.55),
+      0 2px 6px -2px rgba(5, 15, 104, 0.18);
+  }
+  .submit-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      120deg,
+      var(--color-accent-pink) 0%,
+      var(--color-accent-pink) 40%,
+      #ffffff 50%,
+      var(--color-accent-pink) 60%,
+      var(--color-accent-pink) 100%
+    );
+    background-size: 240% 100%;
+    background-position: 100% 0;
+    transition: background-position 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 0;
+    opacity: 0.85;
+  }
+  .submit-button:hover:not(:disabled)::before {
+    background-position: 0% 0;
+  }
+  .submit-button:hover:not(:disabled) {
+    box-shadow:
+      0 14px 36px -10px rgba(255, 122, 156, 0.65),
+      0 6px 14px -4px rgba(5, 15, 104, 0.25);
+  }
+  .submit-button:active:not(:disabled) {
+    box-shadow:
+      0 4px 12px -4px rgba(255, 122, 156, 0.5),
+      0 1px 3px -1px rgba(5, 15, 104, 0.15);
   }
 </style>
