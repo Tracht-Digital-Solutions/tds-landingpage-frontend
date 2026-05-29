@@ -168,15 +168,15 @@ body {
 
 .accent-letter:hover {
   color: var(--letter-hover, var(--color-primary));
-  transform: translateY(-8px) rotate(-6deg) scale(1.18);
-  text-shadow: 0 6px 18px rgba(130, 9, 51, 0.18);
+  transform: translateY(-3px) rotate(-2deg) scale(1.06);
+  text-shadow: 0 2px 8px rgba(130, 9, 51, 0.1);
 }
 
-/* Group reaction: idle siblings nudge the opposite way so the word
-   feels coupled — touch one, the rest acknowledge it. */
+/* Group reaction: idle siblings tilt almost imperceptibly so the word
+   feels coupled without distracting from the hovered letter. */
 .accent-letters:hover .accent-letter:not(:hover) {
-  transform: translateY(2px) rotate(2deg);
-  opacity: 0.78;
+  transform: translateY(0.5px) rotate(0.5deg);
+  opacity: 0.94;
 }
 
 @media (prefers-reduced-motion: reduce) {
