@@ -50,6 +50,18 @@ See README's "Replace examples before go-live" section.
   and journal use. `SectionHeader.astro` is the shared masthead component
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
+- **Interactive accent letters** (`src/components/ui/AccentLetters.astro`
+  + a React mirror in `Hero.tsx`): every italic `headlineAccent` word is
+  rendered as per-character spans so each letter can react to pointer
+  hover — colour cycles through the brand palette by `:nth-child(4n+x)`,
+  letter lifts -3 px / tilts -2° / scales 1.06, siblings tilt 0.5° / fade
+  to 0.94 on group hover. Pass `tone="dark"` on dark-blue sections
+  (Tech / Contact / PricingTeaser inner card) so the hover palette
+  switches to white + bright pink. Styles live in `global.css` under
+  `.accent-letters / .accent-letter` so the .astro and React paths
+  render identically. `aria-label` carries the whole word on the wrapper
+  so screen readers don't read letter-by-letter; transforms collapse on
+  `prefers-reduced-motion: reduce`.
 - **Section order** (`src/pages/index.astro`): Hero → About →
   Services → Tech → Portfolio → Process → **Currently** →
   PricingTeaser → Journal → Contact. Narrative arc reads as hook
@@ -98,10 +110,22 @@ See README's "Replace examples before go-live" section.
   and a `.field-line` overlay that scales from 0 → 1 on
   `focus-within`. Label color, letter-spacing, placeholder alpha
   and caret colour all share the same focus-within trigger so the
-  whole row "lights up" together. `.field--error` paints the
-  baseline pink immediately. Scoped via `<style is:global>` in
-  Contact.astro because the React island can't carry the styles
-  itself.
+  whole row "lights up" together. Final iteration removed both rules
+  on focus per user feedback — the soft white wash (`white/8`) +
+  pink-tinted box-shadow glow on `.contact-field:focus` is the full
+  focus indicator now. `.field--error` paints the baseline pink
+  immediately. Scoped via `<style is:global>` in Contact.astro
+  because the React island can't carry the styles itself.
+- **Hero background motion** (`src/components/islands/Hero.tsx`):
+  three concentric layers translate + scale at staggered rates as
+  the user scrolls (back -160 / mid -260 / front -360 over 800 px,
+  with scale 1.15 / 0.9 / 1.25 respectively); the base conic
+  gradient rotates 60° over 1200 px of scroll and pans -80 px so
+  even the field behind the blobs drifts. Cursor parallax owns the
+  X axis only, scroll owns Y + scale + rotate — separating axes
+  reads as 3D drift rather than uniform zoom. Bumped from a much
+  subtler 2026-05-29 starting point because the original was too
+  quiet to notice.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
