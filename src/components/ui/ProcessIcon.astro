@@ -1,0 +1,103 @@
+---
+/**
+ * Process-step visual cue, picked by the numbered slot. Same
+ * editorial mapping as ServiceIcon — title can change in the
+ * shared bundle without breaking the visual.
+ *
+ * 01 → speech bubble (discovery call)
+ * 02 → drafting / blueprint (concept)
+ * 03 → angle brackets (development)
+ * 04 → paper plane / send (launch)
+ */
+interface Props {
+  number: string;
+  class?: string;
+}
+
+const { number, class: className = "" } = Astro.props;
+---
+
+{
+  number === "01" && (
+    <svg
+      class={className}
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Speech bubble — discovery call */}
+      <path d="M21 11.5 C21 16 17 19 12 19 C10.6 19 9.3 18.8 8 18.4 L3 20 L4.5 15.5 C3.6 14.4 3 13 3 11.5 C3 7 7 4 12 4 C17 4 21 7 21 11.5 Z" />
+    </svg>
+  )
+}
+
+{
+  number === "02" && (
+    <svg
+      class={className}
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Drafting square + compass — concept */}
+      <path d="M3 4 L21 4 L17 20 L7 20 Z" />
+      <line x1="6" y1="10" x2="18" y2="10" />
+      <line x1="10" y1="4" x2="10" y2="20" />
+    </svg>
+  )
+}
+
+{
+  number === "03" && (
+    <svg
+      class={className}
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Code brackets — development */}
+      <polyline points="8,6 2,12 8,18" />
+      <polyline points="16,6 22,12 16,18" />
+      <line x1="14" y1="4" x2="10" y2="20" />
+    </svg>
+  )
+}
+
+{
+  number === "04" && (
+    <svg
+      class={className}
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Paper plane — launch */}
+      <path d="M22 2 L11 13" />
+      <path d="M22 2 L15 22 L11 13 L2 9 Z" />
+    </svg>
+  )
+}

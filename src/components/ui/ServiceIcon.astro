@@ -1,0 +1,132 @@
+---
+/**
+ * Service-card visual cue, picked by the numbered slot. Each icon is a
+ * small inline SVG so the cards stay zero-JS and the strokes pick up
+ * `currentColor` from the parent (the icon chip inherits the accent
+ * color when the card is hovered).
+ *
+ * Slot ↔ icon mapping is editorial, not derived from the title — the
+ * shared translations keep the title as the copywriter's lever while
+ * the visuals stay stable across DE / EN.
+ */
+interface Props {
+  number: string;
+  class?: string;
+}
+
+const { number, class: className = "" } = Astro.props;
+---
+
+{
+  number === "01" && (
+    <svg
+      class={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Browser window — web development */}
+      <rect x="2.5" y="3.5" width="19" height="16" rx="2" />
+      <line x1="2.5" y1="8.5" x2="21.5" y2="8.5" />
+      <circle cx="5.5" cy="6" r="0.6" fill="currentColor" stroke="none" />
+      <circle cx="7.5" cy="6" r="0.6" fill="currentColor" stroke="none" />
+      <circle cx="9.5" cy="6" r="0.6" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+{
+  number === "02" && (
+    <svg
+      class={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Smartphone — app development */}
+      <rect x="6" y="2" width="12" height="20" rx="2.5" />
+      <line x1="11" y1="18.5" x2="13" y2="18.5" />
+    </svg>
+  )
+}
+
+{
+  number === "03" && (
+    <svg
+      class={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Stacked layers — fullstack */}
+      <polygon points="12,2.5 21.5,7.5 12,12.5 2.5,7.5" />
+      <polyline points="2.5,12 12,17 21.5,12" />
+      <polyline points="2.5,16.5 12,21.5 21.5,16.5" />
+    </svg>
+  )
+}
+
+{
+  number === "04" && (
+    <svg
+      class={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Connected nodes — digitalization / process automation */}
+      <rect x="2.5" y="3" width="6" height="6" rx="1" />
+      <rect x="15.5" y="3" width="6" height="6" rx="1" />
+      <rect x="9" y="15" width="6" height="6" rx="1" />
+      <line x1="8.5" y1="6" x2="15.5" y2="6" />
+      <line x1="5.5" y1="9" x2="10.5" y2="15" />
+      <line x1="18.5" y1="9" x2="13.5" y2="15" />
+    </svg>
+  )
+}
+
+{
+  number === "05" && (
+    <svg
+      class={className}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {/* Sparkles — rapid prototyping (the "spark" of an idea) */}
+      <path d="M11 3 L12.4 8.6 L18 10 L12.4 11.4 L11 17 L9.6 11.4 L4 10 L9.6 8.6 Z" />
+      <path d="M19 3.5 L19.7 5.3 L21.5 6 L19.7 6.7 L19 8.5 L18.3 6.7 L16.5 6 L18.3 5.3 Z" />
+      <path d="M18 16 L18.5 17.5 L20 18 L18.5 18.5 L18 20 L17.5 18.5 L16 18 L17.5 17.5 Z" />
+    </svg>
+  )
+}

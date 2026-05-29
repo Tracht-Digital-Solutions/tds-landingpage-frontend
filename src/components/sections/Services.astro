@@ -1,31 +1,13 @@
 ---
-import { tFor, resolveLang } from "~/lib/i18n";
+import { tFor } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceCard from "~/components/ui/ServiceCard.astro";
 
-const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
 
-// Schnelles Prototyping joins the offering list. Inlined here until
-// the next tds-shared bump folds it back into translations.services.items.
-const extraItem =
-  lang === "de"
-    ? {
-        number: "05",
-        title: "Schnelles Prototyping",
-        description:
-          "Vom Whiteboard zum klickbaren Prototyp in wenigen Tagen. Validieren bevor entwickelt wird — spart Budget, Zeit und Frust am Ende des Projekts.",
-        tags: ["Figma", "React", "TypeScript", "Claude"],
-      }
-    : {
-        number: "05",
-        title: "Rapid Prototyping",
-        description:
-          "From whiteboard to a clickable prototype in days. Validate before you build — saves budget, time and frustration at the project's end.",
-        tags: ["Figma", "React", "TypeScript", "Claude"],
-      };
-
-const services = [...t.services.items, extraItem];
+// Five-item odd list: the last card spans both columns on sm+ so the
+// bordered grid stays balanced.
+const services = t.services.items;
 ---
 
 <section id="services" class="section-spacing bg-[var(--color-soft)]" aria-labelledby="services-heading">

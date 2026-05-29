@@ -11,7 +11,7 @@ const pricingHref = localizePath("/preise", lang);
     <div class="grid md:grid-cols-3 gap-12 mb-12">
       <div>
         <p class="brand-wordmark text-2xl mb-4">
-          Tracht <span class="italic text-[var(--color-accent-pink)]">Digital</span>
+          Tracht <span class="italic text-[var(--color-accent-pink)]">Digital</span> Solutions
         </p>
         <p class="text-white/60 text-sm leading-relaxed max-w-xs">
           {t.footer.tagline}
@@ -48,9 +48,17 @@ const pricingHref = localizePath("/preise", lang);
 
     <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-white/40">
       <p>{t.footer.copyright}</p>
-      <div class="flex gap-6">
+      <div class="flex flex-wrap gap-6">
         <a href="/legal/impressum" class="hover:text-white">{t.footer.impressum}</a>
         <a href="/legal/datenschutz" class="hover:text-white">{t.footer.datenschutz}</a>
+        <a
+          href="/legal/agb.pdf"
+          download
+          class="inline-flex items-center gap-1 hover:text-white"
+        >
+          AGB
+          <span aria-hidden="true" class="text-[10px]">↓</span>
+        </a>
       </div>
     </div>
   </div>

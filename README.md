@@ -247,7 +247,7 @@ src/
 │   │   ├── About.astro, Services.astro, PricingTeaser.astro,
 │   │   │ TechMarquee.astro, Portfolio.astro, Process.astro,
 │   │   │ Journal.astro, Contact.astro
-│   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, …)
+│   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, ServiceCard + ServiceIcon, PortfolioCard, ProcessStep, SectionHeader)
 ├── layouts/Layout.astro        # Mounts SmoothScroll + ScrollProgress; renders meta + JSON-LD
 ├── lib/
 │   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation

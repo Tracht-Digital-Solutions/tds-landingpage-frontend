@@ -29,10 +29,11 @@ not on npm. You need a token to install it.
 …or set `NPM_TOKEN` in your environment — the repo's `.npmrc`
 references it.
 
-If you get a 403 even with a valid token, the package needs to
-grant the consuming repo access — see
+If you get a 403 even with a valid token, the token may be missing
+SSO authorization for the `Tracht-Digital-Solutions` org, or the
+classic PAT lacks `read:packages`. See
 [tds-shared/INSTALL.md](https://github.com/Tracht-Digital-Solutions/tds-shared/blob/main/INSTALL.md)
-section 5.
+section 5 for the full setup.
 
 ## 2. Clone + install
 
@@ -42,7 +43,10 @@ cd tds-landingpage
 npm install
 ```
 
-First `npm install` creates the lockfile.
+A `package-lock.json` is committed and `npm install` honors it
+locally. CI installs with `--no-package-lock` to bypass the
+Windows-biased lockfile on the Linux runner — see the README's
+*Lockfile note* for context.
 
 ## 3. Configure
 
@@ -149,14 +153,18 @@ git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
 GitHub Packages auth missing/expired. See section 1.
 
 **`npm install` returns 403 `read_package` despite valid token.**
-The `tds-shared` package hasn't granted this repo access. See
+The token's classic-PAT scope is right but it isn't SSO-authorized
+for the org, or the workflow uses `secrets.GITHUB_TOKEN` instead
+of `secrets.NPM_TOKEN`. See
 [tds-shared INSTALL §5](https://github.com/Tracht-Digital-Solutions/tds-shared/blob/main/INSTALL.md).
 
 **Build succeeds but Journal section is empty.**
 `PUBLIC_CONTENT_API_URL` unreachable at build time, or no posts
 published yet. Graceful fallback — log shows the failed fetch.
 
-**Build branch update fails on push.**
-The `build.yml` workflow needs the package's "Manage Actions
-access" set up for this repo too. Same 403 as section 1, but in
-CI.
+**`Cannot find module @rollup/rollup-linux-x64-gnu` (or similar
+`*-linux-x64-gnu` failure) in CI.**
+The lockfile was generated on Windows and only registers win32
+platform binaries (npm/cli#4828). CI's install step uses `npm
+install --no-package-lock` to bypass this — confirm the workflow
+hasn't been reverted to `npm ci` / plain `npm install`.

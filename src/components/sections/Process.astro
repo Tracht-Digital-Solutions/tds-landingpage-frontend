@@ -16,12 +16,13 @@ const t = tFor(Astro.currentLocale);
     />
 
     <div class="max-w-2xl">
-      {t.process.steps.map((step) => (
+      {t.process.steps.map((step, i) => (
         <ProcessStep
           number={step.number}
           title={step.title}
           duration={step.duration}
           description={step.description}
+          isLast={i === t.process.steps.length - 1}
         />
       ))}
     </div>

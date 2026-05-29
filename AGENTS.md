@@ -70,7 +70,25 @@ See README's "Replace examples before go-live" section.
   animates three CSS bars into an × via the `[aria-expanded]`
   attribute. Mobile menu panel mounts as a separate fixed div
   below the pill — Astro inline `<script>` toggles state and
-  body scroll-lock.
+  body scroll-lock. The "TDS" wordmark is paired with a
+  placeholder logomark (gradient tile + Fraunces-italic "T") —
+  swap to a real SVG asset before launch.
+- **Service icons**: `ServiceIcon.astro` renders a small inline
+  SVG keyed off the service `number` ("01" → browser-window,
+  "02" → smartphone, "03" → stacked layers, "04" → connected
+  nodes, "05" → sparkles). The mapping is editorial and intentionally
+  not derived from the title — titles can change in tds-shared
+  without breaking the visuals. ServiceCard wraps the icon in an
+  accent-tinted chip that flips to the full accent fill on hover.
+- **Contact form focus**: each input/textarea is wrapped in a
+  `.field` div. The wrapper paints a static `::after` baseline rule
+  and a `.field-line` overlay that scales from 0 → 1 on
+  `focus-within`. Label color, letter-spacing, placeholder alpha
+  and caret colour all share the same focus-within trigger so the
+  whole row "lights up" together. `.field--error` paints the
+  baseline pink immediately. Scoped via `<style is:global>` in
+  Contact.astro because the React island can't carry the styles
+  itself.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
@@ -134,6 +152,12 @@ See README's "Replace examples before go-live" section.
   file. The `tFor(Astro.currentLocale)` helper is what makes the
   EN route actually render EN; bypassing it puts the file back
   into the "language toggle does nothing" pre-i18n era.
+- Don't inline service titles, descriptions, or form copy in the
+  `.astro` files. Editable copy lives in `tds-shared` so the same
+  string ships to every front-end. Short-lived inlining is fine
+  during prototyping — wrap it in a `TODO: promote to tds-shared`
+  comment and fold it into the next 0.2.x bump (see
+  `services.items` and `contact.form.*Placeholder` in 0.2.2).
 - Don't import `~/og/render` from a React island — Satori + Resvg
   pull native deps and are build-time only.
 - Don't anchor the OG font dir to `import.meta.url` (or any path
