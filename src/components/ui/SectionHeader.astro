@@ -9,6 +9,8 @@
  * the italic accent to --color-accent-pink for legibility against the
  * dark backgrounds (Tech, Contact, PricingTeaser callout).
  */
+import AccentLetters from "~/components/ui/AccentLetters.astro";
+
 interface Props {
   label: string;
   headline: string;
@@ -48,13 +50,5 @@ const {
   ]}
 >
   {headline}{" "}
-  <em
-    class:list={[
-      "not-italic italic",
-      dark ? "text-[var(--color-accent-pink)]" : "text-[var(--color-accent)]",
-    ]}
-    style="font-variation-settings: 'opsz' 144"
-  >
-    {headlineAccent}
-  </em>
+  <AccentLetters text={headlineAccent} tone={dark ? "dark" : "light"} />
 </h2>

@@ -9,6 +9,29 @@ import {
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ease } from "@tracht-digital-solutions/tds-shared/motion";
 
+/**
+ * Inline mirror of `src/components/ui/AccentLetters.astro` for use
+ * inside this React island. Styles live globally in global.css under
+ * `.accent-letters / .accent-letter` so both versions render identically.
+ */
+function AccentLetters({
+  text,
+  tone = "light",
+}: {
+  text: string;
+  tone?: "light" | "dark";
+}) {
+  return (
+    <span aria-label={text} className="accent-letters" data-tone={tone}>
+      {Array.from(text).map((char, i) => (
+        <span key={i} aria-hidden="true" className="accent-letter">
+          {char === " " ? " " : char}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /** Staggered fade-up factory for hero entrance animations. */
 function fadeUp(delay: number) {
   return {
@@ -174,9 +197,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
                   "radial-gradient(ellipse at center, rgba(255,122,156,0.55) 0%, rgba(130,9,51,0.25) 60%, transparent 80%)",
               }}
             />
-            <em className="not-italic italic text-[var(--color-accent)]">
-              {t.hero.headlineAccent}
-            </em>
+            <AccentLetters text={t.hero.headlineAccent} />
           </span>{" "}
           {t.hero.headlineSuffix}
         </motion.h1>

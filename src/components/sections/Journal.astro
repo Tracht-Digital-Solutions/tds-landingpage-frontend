@@ -1,6 +1,7 @@
 ---
 import { tFor } from "~/lib/i18n";
 import BlogPostCard from "~/components/ui/BlogPostCard.astro";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const t = tFor(Astro.currentLocale);
 
@@ -75,7 +76,7 @@ const posts =
         style={`font-variation-settings: "opsz" 144`}
       >
         {t.blog.headline}{" "}
-        <em class="not-italic italic text-[var(--color-accent)]">{t.blog.headlineAccent}</em>
+        <AccentLetters text={t.blog.headlineAccent} />
       </h2>
       <a
         href="https://blog.tracht-digital.de"
@@ -110,7 +111,7 @@ const posts =
           <p class="eyebrow mb-3 text-[var(--color-accent)]">blog.tracht-digital.de</p>
           <h3 class="text-2xl md:text-3xl font-[var(--font-display)] text-[var(--color-black)] mb-2 leading-tight">
             {t.blog.headline}{" "}
-            <em class="not-italic italic text-[var(--color-accent)]">{t.blog.headlineAccent}</em>
+            <AccentLetters text={t.blog.headlineAccent} />
           </h3>
           <p class="text-sm text-[var(--color-muted)] leading-relaxed">
             {t.blog.allPosts} — {Astro.currentLocale === "en" ? "deep dives, field notes, and the occasional rant." : "Tiefenrecherchen, Notizen aus der Praxis und gelegentliche Rants."}

@@ -1,6 +1,7 @@
 ---
 import { tFor, resolveLang } from "~/lib/i18n";
 import ContactForm from "~/components/islands/ContactForm.tsx";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -33,7 +34,7 @@ const socials = {
       class="display text-4xl md:text-5xl lg:text-6xl text-white mb-4"
     >
       {t.contact.headline}{" "}
-      <em class="not-italic italic text-[var(--color-accent-pink)]" style="font-variation-settings: 'opsz' 144">{t.contact.headlineAccent}</em>
+      <AccentLetters text={t.contact.headlineAccent} tone="dark" />
     </h2>
     <p class="text-white/60 max-w-lg mb-16 leading-relaxed">{t.contact.sub}</p>
 

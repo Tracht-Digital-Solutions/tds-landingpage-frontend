@@ -1,5 +1,6 @@
 ---
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -26,9 +27,7 @@ const pricingHref = localizePath("/preise", lang);
             class="display-tight text-3xl md:text-4xl lg:text-5xl mb-4"
           >
             {t.pricing.teaserHeadline}{" "}
-            <em class="not-italic italic text-[var(--color-accent-pink)]" style="font-variation-settings: 'opsz' 144">
-              {t.pricing.teaserHeadlineAccent}
-            </em>
+            <AccentLetters text={t.pricing.teaserHeadlineAccent} tone="dark" />
           </h2>
           <p class="text-white/75 leading-relaxed max-w-xl">{t.pricing.teaserSub}</p>
         </div>

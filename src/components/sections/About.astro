@@ -1,6 +1,7 @@
 ---
 import { tFor } from "~/lib/i18n";
 import ImagePlaceholder from "~/components/ui/ImagePlaceholder.astro";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const t = tFor(Astro.currentLocale);
 
@@ -26,7 +27,7 @@ const stats = [
           class="display text-4xl md:text-5xl lg:text-6xl text-[var(--color-black)] mb-8"
         >
           {t.about.headline}{" "}
-          <em class="not-italic italic text-[var(--color-accent)]" style="font-variation-settings: 'opsz' 144">{t.about.headlineAccent}</em>
+          <AccentLetters text={t.about.headlineAccent} />
         </h2>
 
         <p class="text-lg font-medium text-[var(--color-black)] mb-6 leading-relaxed">

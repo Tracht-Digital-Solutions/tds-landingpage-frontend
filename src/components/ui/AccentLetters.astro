@@ -1,0 +1,45 @@
+---
+/**
+ * Interactive italic accent. Splits `text` into per-character
+ * <span>s so each letter can react on hover (colour cycle through
+ * the brand palette + lift + tilt). Siblings nudge the opposite
+ * way on group-hover so the whole word reads as coupled.
+ *
+ * The visual styles live in `src/styles/global.css` under
+ * `.accent-letters / .accent-letter` so the React Hero island and
+ * the .astro sections share one source of truth.
+ *
+ * Accessibility:
+ * - The wrapper carries `aria-label={text}` so screen readers
+ *   announce the whole word, not letter-by-letter.
+ * - The per-character spans are `aria-hidden`.
+ * - Spaces render as non-breaking spaces so they keep the visual
+ *   layout but stay inside the same word for SR.
+ *
+ * Set `tone="dark"` when the surrounding background is the navy
+ * --color-primary section (Tech, Contact, PricingTeaser dark
+ * areas) so the hover palette switches to white + bright pink.
+ */
+interface Props {
+  text: string;
+  tone?: "light" | "dark";
+  class?: string;
+}
+
+const { text, tone = "light", class: className = "" } = Astro.props;
+const chars = Array.from(text);
+---
+
+<span
+  aria-label={text}
+  class:list={["accent-letters", className]}
+  data-tone={tone}
+>
+  {
+    chars.map((char) => (
+      <span aria-hidden="true" class="accent-letter">
+        {char === " " ? " " : char}
+      </span>
+    ))
+  }
+</span>
