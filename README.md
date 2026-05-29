@@ -222,7 +222,7 @@ git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
 
 | Path | Source | Purpose |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — 9 sections in narrative order: Hero → About → Services → Tech → Portfolio → Process → PricingTeaser → Journal → Contact |
+| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — 10 sections in narrative order: Hero → About → Services → Tech → Portfolio → Process → Currently → PricingTeaser → Journal → Contact |
 | `/en/` | `src/pages/en/index.astro` | Same layout, EN copy |
 | `/preise` | `src/pages/preise.astro` | Hourly-rate pricing (DE) |
 | `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
@@ -250,9 +250,9 @@ src/
 │   │   ├── ScrollProgress.tsx  # Thin gradient reading-progress bar (top of viewport)
 │   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only)
 │   ├── sections/               # Static .astro sections (no JS by default)
-│   │   ├── About.astro, Services.astro, PricingTeaser.astro,
-│   │   │ TechMarquee.astro, Portfolio.astro, Process.astro,
-│   │   │ Journal.astro, Contact.astro
+│   │   ├── About.astro, Services.astro, TechMarquee.astro,
+│   │   │ Portfolio.astro, Process.astro, Currently.astro,
+│   │   │ PricingTeaser.astro, Journal.astro, Contact.astro
 │   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, ServiceCard + ServiceIcon, PortfolioCard, ProcessStep, SectionHeader)
 ├── layouts/Layout.astro        # Mounts SmoothScroll + ScrollProgress; renders meta + JSON-LD
 ├── lib/

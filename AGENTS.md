@@ -51,17 +51,30 @@ See README's "Replace examples before go-live" section.
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
 - **Section order** (`src/pages/index.astro`): Hero → About →
-  Services → Tech → Portfolio → Process → PricingTeaser → Journal
-  → Contact. Narrative arc reads as hook → who → what → capability
-  → proof → method → cost → thinking → convert. PricingTeaser
-  sits after Process intentionally — visitors should see how the
-  work happens before seeing what it costs.
+  Services → Tech → Portfolio → Process → **Currently** →
+  PricingTeaser → Journal → Contact. Narrative arc reads as hook
+  → who → what → capability → proof → method → **now** → cost →
+  thinking → convert. PricingTeaser sits after Process and Currently
+  intentionally — visitors see how the work happens (Process) and
+  what's actually in the workshop right now (Currently) before they
+  see what it costs.
+- **Currently section** (`src/components/sections/Currently.astro`):
+  "Now page" convention — left column lists three active projects
+  with stack accent strings and a pulsing dot marker; right column
+  lists 4 intentions / principles with italic-arrow markers,
+  `md:sticky` so the principles stay visible while the project list
+  scrolls past. Copy is **inlined in the component** (DE + EN
+  variants gated on `Astro.currentLocale`) rather than living in
+  tds-shared, because this is the part of the site that drifts the
+  most. Promote individual fields upstream when they stabilise.
 - **Section rhythm**: paper → paper → soft → DARK → paper → soft →
-  paper → soft → DARK. Paper-backed narrative sections (About,
-  Portfolio, PricingTeaser inner card) alternate with
-  `--color-soft` callout sections (Services, Process, Journal)
-  and dark-blue chrome sections (Tech, Contact). Soft sections
-  flank PricingTeaser so its gradient card sits in a calm frame.
+  paper → paper → soft → DARK. Paper-backed narrative sections
+  (About, Portfolio, Currently, PricingTeaser inner card)
+  alternate with `--color-soft` callout sections (Services, Process,
+  Journal) and dark-blue chrome sections (Tech, Contact). The two
+  paper sections in a row (Currently + PricingTeaser) sit between
+  the soft Process and Journal "lists" so the gradient pricing
+  card lands in a calm frame.
 - **Header / navigation**: floating pill on desktop (≥lg) with
   `data-scrolled` morphing the chrome on scroll past 8px. Below
   `lg` the pill docks against the top edge (`top: 0`, flat top
