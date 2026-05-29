@@ -71,14 +71,29 @@ See README's "Replace examples before go-live" section.
   what's actually in the workshop right now (Currently) before they
   see what it costs.
 - **Currently section** (`src/components/sections/Currently.astro`):
-  "Now page" convention — left column lists three active projects
-  with stack accent strings and a pulsing dot marker; right column
-  lists 4 intentions / principles with italic-arrow markers,
-  `md:sticky` so the principles stay visible while the project list
-  scrolls past. Copy is **inlined in the component** (DE + EN
-  variants gated on `Astro.currentLocale`) rather than living in
-  tds-shared, because this is the part of the site that drifts the
-  most. Promote individual fields upstream when they stabilise.
+  "Now page" convention. Section masthead now reads "Aktuelle
+  *Themen*" / "Current *topics*" (was the more committal "Was ich
+  gerade *baue*" / "What I'm currently *building*" — renamed so
+  the framing covers projects, focus, and principles as a single
+  set of subjects rather than projects-only). Left column lists
+  three active project cards with stack accent strings and a
+  pulsing accent-dot marker. Right column lists 4 intentions /
+  principles with italic Fraunces "→" arrow markers, `md:sticky`
+  so the principles stay visible while the project list scrolls
+  past. Copy is **inlined in the component** (DE + EN variants
+  gated on `Astro.currentLocale`) rather than living in tds-shared,
+  because this is the part of the site that drifts the most.
+  Promote individual fields upstream when they stabilise.
+- **Process timeline** (`src/components/sections/Process.astro` +
+  `ProcessStep.astro`): vertical timeline with a continuous
+  `bg-gradient-to-b` spine (accent/40 → line → accent/20) sitting
+  absolute behind all step markers, plus an accent-coloured start
+  cap and a primary-coloured end cap. Each step's circular icon
+  marker carries a `ring-4 ring-[--color-soft]` so it punches
+  through the spine cleanly. Steps wrapped in an `<ol>` for
+  semantic order; the visual numbering already lives in each
+  step's title row. Replaces an earlier per-step gradient connector
+  design that read as four chained cards instead of one arc.
 - **Section rhythm**: paper → paper → soft → DARK → paper → soft →
   paper → paper → soft → DARK. Paper-backed narrative sections
   (About, Portfolio, Currently, PricingTeaser inner card)
