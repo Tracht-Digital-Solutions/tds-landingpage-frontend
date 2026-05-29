@@ -151,10 +151,16 @@ that worktree.
 |---|---|---|
 | `PUBLIC_CONTACT_API_URL` | `https://api.tracht-digital.de/contact` | Where `ContactForm` POSTs |
 | `PUBLIC_CONTENT_API_URL` | `https://api.tracht-digital.de/content` | Where `Journal.astro` build-time-fetches teaser posts |
+| `PUBLIC_BLOG_BASE_URL` | `https://blog.tracht-digital.de` | Base href for `BlogPostCard` links — each teaser navigates to `${base}/${slug}` |
 
-Set them in `.env` (or `.env.production` for prod-only) before
-`npm run build`. Astro inlines them as constants — anything starting
-with `PUBLIC_` is safe to expose in the client bundle.
+Copy [`.env.example`](.env.example) to `.env` (gitignored) and
+edit values to taste. Astro inlines anything prefixed `PUBLIC_` as
+a constant at build time — safe to expose in the client bundle.
+`.env.production` overrides `.env` for production builds.
+
+> `NPM_TOKEN` is **not** an Astro env var. npm doesn't auto-load
+> `.env`, so set it in your shell (`$env:NPM_TOKEN = "ghp_…"` on
+> PowerShell, `export NPM_TOKEN=ghp_…` on bash) before `npm install`.
 
 ### GitHub Actions secrets
 
