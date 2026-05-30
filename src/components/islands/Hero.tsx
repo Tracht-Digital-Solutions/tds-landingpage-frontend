@@ -253,10 +253,22 @@ export default function Hero({
           {t.hero.headlineSuffix}
         </motion.h1>
 
+        {/* Third title-tier strapline — picks up secondary SEO
+            (Beratung / Konzept / Code) the H1 doesn't carry. Sits
+            directly under the H1, sized small enough to read as a
+            supporting line. */}
+        <motion.p
+          {...fadeUp(0.07)}
+          className="text-base sm:text-lg md:text-xl text-[var(--color-muted)] mb-6 max-w-2xl"
+        >
+          {t.hero.tagline}
+        </motion.p>
+
         {/* Second main title — brand slogan picked up from
-            tds-shared. Sits between the h1 and the sub paragraph,
-            sized smaller than the h1 but still display-tier so it
-            reads as a secondary banner rather than an eyebrow. */}
+            tds-shared. Sits between the H1 strapline and the sub
+            paragraph, sized smaller than the h1 but still display-
+            tier so it reads as a secondary banner rather than an
+            eyebrow. */}
         <motion.p
           {...fadeUp(0.08)}
           className="text-2xl sm:text-3xl md:text-4xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-8 max-w-3xl leading-snug"

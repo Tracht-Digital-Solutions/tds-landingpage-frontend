@@ -183,16 +183,20 @@ const socials = {
       letter-spacing 200ms ease;
   }
 
+  /* Label brightens to near-white on focus (no accent-pink shift —
+     the previous pink looked like a "border lighting up", which is
+     exactly the cue the user asked us to remove). Letter-spacing
+     tightens a hair so the eye still picks up the focus state. */
   .field:focus-within .field-label {
-    color: var(--color-accent-pink);
+    color: rgb(255 255 255 / 0.85);
     letter-spacing: 0.18em;
   }
-  /* Focused state — the baseline rule turns into a clean white
-     underline and the animated brand line stays collapsed. Paired
-     with the brighter white wash on `.contact-field:focus` below,
-     so the field reads as "lit up" rather than "outlined". */
+  /* Focused state — the baseline rule becomes a clean, opaque
+     white underline and the animated brand line stays collapsed.
+     Paired with the brighter white wash on `.contact-field:focus`
+     below so the field reads as "lit up", not "outlined". */
   .field:focus-within::after {
-    background-color: rgb(255 255 255 / 0.75);
+    background-color: rgb(255 255 255 / 0.9);
   }
   .field:focus-within .field-line {
     transform: scaleX(0);
@@ -210,10 +214,10 @@ const socials = {
       box-shadow 220ms ease;
   }
   .contact-field:focus {
-    background-color: rgb(255 255 255 / 0.14) !important;
+    background-color: rgb(255 255 255 / 0.2) !important;
     box-shadow:
-      0 -1px 0 rgb(255 255 255 / 0.08) inset,
-      0 10px 28px -10px rgba(255, 255, 255, 0.18);
+      0 -1px 0 rgb(255 255 255 / 0.12) inset,
+      0 12px 32px -10px rgba(255, 255, 255, 0.22);
   }
 
   /* Error variant — solid pink baseline so the broken field reads
