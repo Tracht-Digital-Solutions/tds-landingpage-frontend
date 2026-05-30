@@ -44,15 +44,35 @@ function fadeUp(delay: number) {
 type Lang = "de" | "en";
 
 /**
+ * Shape of the optional "featured topic" the host page hands in.
+ * Used to power the headline pill at the top of the hero — links
+ * to the live blog article instead of the static availability blurb.
+ */
+type FeaturedTopic = {
+  slug: string;
+  title: string;
+  category: string;
+  href: string;
+};
+
+/**
  * Hero — full-viewport with a colourful three-blob aurora that drifts
  * behind the cursor. Ported from legacy tds-lp/app/components/sections/Hero.tsx.
  *
  * Renders as `client:load` so the parallax + entrance animations happen
  * immediately on page load. The page passes `lang` via props so the EN
- * route hydrates with EN copy without a client-side swap.
+ * route hydrates with EN copy without a client-side swap, and an optional
+ * `featuredTopic` for the pill (build-time fetched from tds-content-api).
  */
-export default function Hero({ lang = "de" }: { lang?: Lang }) {
+export default function Hero({
+  lang = "de",
+  featuredTopic,
+}: {
+  lang?: Lang;
+  featuredTopic?: FeaturedTopic;
+}) {
   const t = translations[lang];
+  const pillLabel = lang === "de" ? "Im Journal" : "In the journal";
   const containerRef = useRef<HTMLElement>(null);
 
   // X axis tracks the cursor (spring-damped per layer for depth).
@@ -165,22 +185,53 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       />
 
       <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-16 md:py-24 w-full">
-        <motion.div
-          {...fadeUp(0)}
-          className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)] max-w-full"
-        >
-          <span className="flex items-center gap-2">
+        {featuredTopic ? (
+          <motion.a
+            {...fadeUp(0)}
+            href={featuredTopic.href}
+            rel="noopener"
+            className="group inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 max-w-full text-xs sm:text-sm pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)] hover:bg-white/60 hover:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span
+                className="pulse-dot inline-block w-2 h-2 rounded-full bg-[var(--color-accent)]"
+                aria-hidden
+              />
+              <span className="font-medium text-[var(--color-primary)] uppercase tracking-widest text-[10px] sm:text-xs">
+                {pillLabel}
+              </span>
+            </span>
+            <span className="hidden sm:inline text-[var(--color-line)]" aria-hidden>
+              ·
+            </span>
+            <span className="text-[var(--color-black)] truncate max-w-[24ch] sm:max-w-[36ch] md:max-w-[44ch]">
+              {featuredTopic.title}
+            </span>
             <span
-              className="pulse-dot inline-block w-2 h-2 rounded-full bg-[var(--color-accent)]"
               aria-hidden
-            />
-            {t.hero.availability}
-          </span>
-          <span className="hidden sm:inline text-[var(--color-line)]" aria-hidden>
-            ·
-          </span>
-          <span>{t.hero.location}</span>
-        </motion.div>
+              className="text-[var(--color-muted)] group-hover:text-[var(--color-accent)] group-hover:translate-x-0.5 transition-all duration-200"
+            >
+              ↗
+            </span>
+          </motion.a>
+        ) : (
+          <motion.div
+            {...fadeUp(0)}
+            className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)] max-w-full"
+          >
+            <span className="flex items-center gap-2">
+              <span
+                className="pulse-dot inline-block w-2 h-2 rounded-full bg-[var(--color-accent)]"
+                aria-hidden
+              />
+              {t.hero.availability}
+            </span>
+            <span className="hidden sm:inline text-[var(--color-line)]" aria-hidden>
+              ·
+            </span>
+            <span>{t.hero.location}</span>
+          </motion.div>
+        )}
 
         <motion.h1
           {...fadeUp(0.05)}

@@ -18,7 +18,11 @@ const steps = t.process.steps;
       headline={t.process.headline}
       headlineAccent={t.process.headlineAccent}
       id="process-heading"
+      headingClass="mb-6"
     />
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
+      {t.process.body}
+    </p>
 
     {/* Vertical timeline. The continuous spine + start/end caps make
         the step sequence read as a single arc rather than four

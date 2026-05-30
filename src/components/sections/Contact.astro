@@ -187,12 +187,12 @@ const socials = {
     color: var(--color-accent-pink);
     letter-spacing: 0.18em;
   }
-  /* No underline at all when the field is focused — the white wash
-     + pink-tinted glow on .contact-field:focus is the focus cue.
-     The static baseline rule fades, and the animated brand line
-     stays collapsed at scaleX(0). */
+  /* Focused state — the baseline rule turns into a clean white
+     underline and the animated brand line stays collapsed. Paired
+     with the brighter white wash on `.contact-field:focus` below,
+     so the field reads as "lit up" rather than "outlined". */
   .field:focus-within::after {
-    background-color: transparent;
+    background-color: rgb(255 255 255 / 0.75);
   }
   .field:focus-within .field-line {
     transform: scaleX(0);
@@ -210,10 +210,10 @@ const socials = {
       box-shadow 220ms ease;
   }
   .contact-field:focus {
-    background-color: rgb(255 255 255 / 0.08) !important;
+    background-color: rgb(255 255 255 / 0.14) !important;
     box-shadow:
-      0 -1px 0 rgb(255 255 255 / 0.04) inset,
-      0 8px 24px -8px rgba(255, 122, 156, 0.18);
+      0 -1px 0 rgb(255 255 255 / 0.08) inset,
+      0 10px 28px -10px rgba(255, 255, 255, 0.18);
   }
 
   /* Error variant — solid pink baseline so the broken field reads

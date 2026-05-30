@@ -1,47 +1,64 @@
 ---
 /**
- * "Currently" / "Aktuell" — transparency about what's actively in the
- * workshop and what shapes which projects come next. Lives in the
- * landingpage rather than tds-shared because the content changes more
- * often than the rest of the i18n bundle — promote individual fields
- * upstream if they stabilise.
+ * "Currently" / "Aktuelle Themen" — left column lists the most
+ * recent published posts from tds-content-api so the page always
+ * surfaces the *actual* current themes, not a hand-curated list
+ * that drifts. Right column is hand-curated intentions / principles
+ * shaping which projects come next.
+ *
+ * Falls back to a hand-written project list when the content API
+ * is unreachable so the section still renders meaningfully on
+ * first-deploy or transient outage.
  *
  * Sits between Process and PricingTeaser in the narrative arc:
- *   …how I work in general → what I'm working on right now → what it
- *   costs.
+ *   …how I work in general → what topics are live right now → what
+ *   it costs.
  */
 import { resolveLang } from "~/lib/i18n";
+import { fetchTopics, topicHref, type ContentPost } from "~/lib/content";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 
-const content =
+const liveTopics = await fetchTopics(lang, 3);
+
+const copy =
   lang === "de"
     ? {
         label: "— Aktuell",
         headline: "Aktuelle",
         headlineAccent: "Themen.",
-        projectsLabel: "Im Bau",
-        projects: [
+        topicsLabel: "Aus dem Journal",
+        readMore: "Weiterlesen",
+        fallbackTopics: [
           {
+            slug: "tds-customer-portal",
+            category: "Build-Log",
             title: "TDS Customer Portal",
-            description:
+            excerpt:
               "Self-Service-Zugang für Mittelstandskunden — Projekte, Rechnungen, Dokumente. In aktiver Entwicklung.",
-            stack: "Astro · Slim · Stripe",
+            publishedAt: "",
+            coverHint: null,
           },
           {
+            slug: "ki-prozessanalyse",
+            category: "Case Study",
             title: "KI-Prozessanalyse",
-            description:
+            excerpt:
               "Datenpipelines mit Claude und n8n für eine Manufaktur — von der Bestellannahme bis zur Auslieferung.",
-            stack: "Python · Claude · n8n · KNIME",
+            publishedAt: "",
+            coverHint: null,
           },
           {
+            slug: "tracht-digital-journal",
+            category: "Meta",
             title: "Tracht Digital Journal",
-            description:
+            excerpt:
               "Längere Texte zu Architektur, Mittelstand und KI im täglichen Einsatz.",
-            stack: "Astro · Markdown · OG-Karten",
+            publishedAt: "",
+            coverHint: null,
           },
-        ],
+        ] satisfies ContentPost[],
         intentionsLabel: "Im Fokus",
         intentions: [
           "Lieber tief in zwei bis drei Projekte gleichzeitig — als oberflächlich in zehn.",
@@ -54,27 +71,37 @@ const content =
         label: "— Currently",
         headline: "Current",
         headlineAccent: "topics.",
-        projectsLabel: "In the workshop",
-        projects: [
+        topicsLabel: "From the journal",
+        readMore: "Read more",
+        fallbackTopics: [
           {
+            slug: "tds-customer-portal",
+            category: "Build log",
             title: "TDS Customer Portal",
-            description:
+            excerpt:
               "Self-service access for mid-market clients — projects, invoices, documents. In active development.",
-            stack: "Astro · Slim · Stripe",
+            publishedAt: "",
+            coverHint: null,
           },
           {
+            slug: "ai-process-analysis",
+            category: "Case study",
             title: "AI process analysis",
-            description:
+            excerpt:
               "Data pipelines with Claude and n8n for a manufactory — from order intake to delivery.",
-            stack: "Python · Claude · n8n · KNIME",
+            publishedAt: "",
+            coverHint: null,
           },
           {
+            slug: "tracht-digital-journal",
+            category: "Meta",
             title: "Tracht Digital Journal",
-            description:
+            excerpt:
               "Longer-form writing on architecture, mid-market work, and AI in daily use.",
-            stack: "Astro · Markdown · OG cards",
+            publishedAt: "",
+            coverHint: null,
           },
-        ],
+        ] satisfies ContentPost[],
         intentionsLabel: "Focused on",
         intentions: [
           "Going deep on two or three projects at a time — not shallow on ten.",
@@ -83,6 +110,12 @@ const content =
           "Taking AI seriously without overselling it. Claude as a partner, not a marketing trick.",
         ],
       };
+
+const topics = liveTopics.length > 0 ? liveTopics : copy.fallbackTopics;
+const dateFormatter = new Intl.DateTimeFormat(
+  lang === "de" ? "de-DE" : "en-IE",
+  { year: "numeric", month: "long", day: "numeric" },
+);
 ---
 
 <section
@@ -92,35 +125,52 @@ const content =
 >
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <SectionHeader
-      label={content.label}
-      headline={content.headline}
-      headlineAccent={content.headlineAccent}
+      label={copy.label}
+      headline={copy.headline}
+      headlineAccent={copy.headlineAccent}
       id="currently-heading"
     />
 
     <div class="grid md:grid-cols-2 gap-12 lg:gap-20">
-      {/* Active projects — what's actually in the workshop right now. */}
+      {/* Live topics — recent posts pulled from tds-content-api. */}
       <div>
         <div class="flex items-center gap-3 mb-8">
           <span
             aria-hidden="true"
             class="inline-block w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] animate-pulse"
           ></span>
-          <p class="eyebrow !mb-0">{content.projectsLabel}</p>
+          <p class="eyebrow !mb-0">{copy.topicsLabel}</p>
         </div>
         <ul class="space-y-6">
           {
-            content.projects.map((p) => (
+            topics.map((p) => (
               <li class="pb-6 border-b border-[var(--color-line)] last:border-b-0 last:pb-0">
-                <h3 class="font-[var(--font-display)] text-xl text-[var(--color-black)] mb-2 leading-tight">
-                  {p.title}
-                </h3>
-                <p class="text-sm text-[var(--color-muted)] leading-relaxed mb-3">
-                  {p.description}
-                </p>
-                <p class="text-xs font-mono text-[var(--color-accent)] tracking-wide">
-                  {p.stack}
-                </p>
+                <a
+                  href={topicHref(p.slug)}
+                  rel="noopener"
+                  class="group block"
+                >
+                  <p class="text-xs font-medium tracking-widest text-[var(--color-accent)] uppercase mb-2">
+                    {p.category}
+                  </p>
+                  <h3 class="font-[var(--font-display)] text-xl text-[var(--color-black)] mb-2 leading-tight group-hover:text-[var(--color-accent)] transition-colors">
+                    {p.title}
+                  </h3>
+                  <p class="text-sm text-[var(--color-muted)] leading-relaxed mb-3 line-clamp-3">
+                    {p.excerpt}
+                  </p>
+                  <div class="flex items-center justify-between text-xs text-[var(--color-muted)]">
+                    <span>
+                      {p.publishedAt
+                        ? dateFormatter.format(new Date(p.publishedAt))
+                        : ""}
+                    </span>
+                    <span class="font-medium group-hover:text-[var(--color-accent)] group-hover:gap-2 inline-flex items-center gap-1 transition-all">
+                      {copy.readMore}
+                      <span aria-hidden="true">↗</span>
+                    </span>
+                  </div>
+                </a>
               </li>
             ))
           }
@@ -143,11 +193,11 @@ const content =
               <polygon points="5,0 6.5,3.5 10,5 6.5,6.5 5,10 3.5,6.5 0,5 3.5,3.5" />
             </svg>
           </span>
-          <p class="eyebrow !mb-0">{content.intentionsLabel}</p>
+          <p class="eyebrow !mb-0">{copy.intentionsLabel}</p>
         </div>
         <ul class="space-y-5">
           {
-            content.intentions.map((i) => (
+            copy.intentions.map((i) => (
               <li class="relative pl-6 text-[var(--color-black)] leading-relaxed">
                 <span
                   aria-hidden="true"

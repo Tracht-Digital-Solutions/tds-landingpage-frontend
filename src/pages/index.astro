@@ -11,6 +11,7 @@ import Portfolio from "~/components/sections/Portfolio.astro";
 import Process from "~/components/sections/Process.astro";
 import Currently from "~/components/sections/Currently.astro";
 import Journal from "~/components/sections/Journal.astro";
+import Consulting from "~/components/sections/Consulting.astro";
 import Contact from "~/components/sections/Contact.astro";
 import {
   asGraph,
@@ -20,8 +21,23 @@ import {
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import { resolveLang } from "~/lib/i18n";
+import { fetchTopics, topicHref } from "~/lib/content";
 
 const lang = resolveLang(Astro.currentLocale);
+
+// Pull the top post once at build-time so the Hero pill links to
+// the actual most recent journal entry. Currently.astro does its
+// own fetch for the full 3-post list — kept independent so the
+// Hero pill renders even when the content API returns 0 posts.
+const heroTopics = await fetchTopics(lang, 1);
+const featuredTopic = heroTopics[0]
+  ? {
+      slug: heroTopics[0].slug,
+      title: heroTopics[0].title,
+      category: heroTopics[0].category,
+      href: topicHref(heroTopics[0].slug),
+    }
+  : undefined;
 
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than
@@ -50,7 +66,7 @@ const titles = {
         cost → thinking → convert. PricingTeaser moved after Process
         because pricing reads better once the visitor knows how the work
         actually happens. */}
-    <Hero client:load lang={lang} />
+    <Hero client:load lang={lang} featuredTopic={featuredTopic} />
     <About />
     <Services />
     <TechMarquee />
@@ -59,6 +75,7 @@ const titles = {
     <Currently />
     <PricingTeaser />
     <Journal />
+    <Consulting />
     <Contact />
   </main>
   <Footer />
