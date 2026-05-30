@@ -207,8 +207,13 @@ on this repo):
 - Real portrait photo in the About section
 - Real portfolio screenshots (× 4)
 - Real journal cover images (× 3)
+- Real header logomark (replace the gradient-tile + Fraunces-T placeholder)
 - Lawyer review of `/legal/impressum` + `/legal/datenschutz`
   (issue #5)
+
+See [`IMAGES.md`](IMAGES.md) for the per-image swap guide — file
+paths, aspect ratios, recommended sizes, and the exact pattern for
+replacing each `<ImagePlaceholder />` with an `<Image />` / `<img>`.
 
 Quick smoke search:
 
