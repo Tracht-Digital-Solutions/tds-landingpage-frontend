@@ -1,0 +1,172 @@
+---
+/**
+ * FAQ — the last sweep of common mid-market objections before a
+ * visitor hits the Contact section. Native `<details>`/`<summary>`
+ * accordions: zero JS, accessible by default, keyboard navigable.
+ *
+ * Sits between Consulting (the soft invitation) and Contact (the
+ * commit) in the narrative arc — answers the questions a typical
+ * mittelständisches Unternehmen has before booking a discovery
+ * call.
+ *
+ * Copy lives in the component (not tds-shared) — FAQ answers drift
+ * faster than the rest of the bundle. Promote to tds-shared if any
+ * question stabilises and a second consumer needs the same answer.
+ */
+import { resolveLang } from "~/lib/i18n";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+
+const lang = resolveLang(Astro.currentLocale);
+
+const content =
+  lang === "de"
+    ? {
+        label: "— FAQ",
+        headline: "Häufige",
+        headlineAccent: "Fragen.",
+        intro:
+          "Die Fragen, die in den meisten Erstgesprächen zuerst kommen — kurz vorab beantwortet, falls Sie sie sich auch stellen.",
+        items: [
+          {
+            q: "Wie lange dauert ein typisches Projekt?",
+            a: "Stark abhängig vom Umfang. Ein klickbarer Prototyp ist in wenigen Tagen fertig, eine MVP-Web-App meist in 6–10 Wochen, eine ausgewachsene Plattform in 3–6 Monaten. Ich gebe vor dem Start eine ehrliche Schätzung mit Obergrenze ab.",
+          },
+          {
+            q: "Arbeiten Sie remote oder vor Ort?",
+            a: "Beides. Standard ist remote mit regelmäßigen Video-Updates. Vor-Ort-Termine in Hamburg und Umgebung sind möglich, alles Weitere nach Absprache. Reisekosten sind nicht in den Sätzen enthalten.",
+          },
+          {
+            q: "Unterschreiben Sie eine NDA?",
+            a: "Ja, gerne. Senden Sie mir Ihre NDA vor dem Erstgespräch zu, dann ist sie zum Start unterzeichnet. Wenn Sie keine eigene Vorlage haben, stelle ich einen schlanken Standard-Vertrag bereit.",
+          },
+          {
+            q: "Was ist der erste Schritt?",
+            a: "Ein 30–60-minütiges Erstgespräch per Video — kostenfrei, unverbindlich, ohne Sales-Pitch. Ich höre zu, frage nach und sage offen, ob ich der Richtige für Ihr Vorhaben bin.",
+          },
+          {
+            q: "Welche Tech-Stacks bevorzugen Sie?",
+            o: "Werkzeuge",
+            a: "Keine Religionskriege. TypeScript / Node.js fürs Backend, Vue / Angular / React fürs Frontend, Python und KNIME für Datenpipelines, C# für Desktop-Apps. Bei jedem Projekt wähle ich das Werkzeug nach dem Problem, nicht umgekehrt.",
+          },
+          {
+            q: "Können wir auch nur einen Workshop oder ein Audit buchen?",
+            a: "Ja. Architektur-Reviews, Code-Audits und Inhouse-Workshops (TypeScript, Architektur, KI im Mittelstand) sind eigenständige Formate. Stundensätze siehe Preise.",
+          },
+        ],
+      }
+    : {
+        label: "— FAQ",
+        headline: "Common",
+        headlineAccent: "questions.",
+        intro:
+          "The questions that come up first in most discovery calls — answered briefly here in case you're wondering the same.",
+        items: [
+          {
+            q: "How long does a typical project take?",
+            a: "Heavily scope-dependent. A clickable prototype takes a few days, an MVP web app usually 6–10 weeks, a full platform 3–6 months. I give an honest estimate with a ceiling before the project starts.",
+          },
+          {
+            q: "Do you work remote or on-site?",
+            a: "Both. The default is remote with regular video updates. On-site meetings around Hamburg are possible, further travel on request. Travel costs are not included in the rates.",
+          },
+          {
+            q: "Will you sign an NDA?",
+            a: "Happily. Send me your NDA before the discovery call so it's signed by the time we start. If you don't have a template, I'll provide a lean standard contract.",
+          },
+          {
+            q: "What's the first step?",
+            a: "A 30–60-minute video discovery call — free, no obligation, no sales pitch. I listen, ask questions, and tell you honestly whether I'm the right fit for your project.",
+          },
+          {
+            q: "Which tech stacks do you prefer?",
+            a: "No religious wars. TypeScript / Node.js on the backend, Vue / Angular / React on the frontend, Python and KNIME for data pipelines, C# for desktop apps. I pick the tool to fit the problem, not the other way around.",
+          },
+          {
+            q: "Can I book just a workshop or an audit?",
+            a: "Yes. Architecture reviews, code audits, and in-house workshops (TypeScript, architecture, AI for mid-market) are standalone formats. See pricing for hourly rates.",
+          },
+        ],
+      };
+---
+
+<section
+  id="faq"
+  class="section-spacing bg-[var(--color-soft)]"
+  aria-labelledby="faq-heading"
+>
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <SectionHeader
+      label={content.label}
+      headline={content.headline}
+      headlineAccent={content.headlineAccent}
+      id="faq-heading"
+      headingClass="mb-6"
+    />
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
+      {content.intro}
+    </p>
+
+    <ul class="max-w-3xl divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+      {
+        content.items.map((item) => (
+          <li>
+            <details class="group faq-item">
+              <summary class="flex items-start justify-between gap-6 cursor-pointer py-5 md:py-6 list-none [&::-webkit-details-marker]:hidden">
+                <span class="font-[var(--font-display)] text-lg md:text-xl text-[var(--color-black)] leading-snug group-hover:text-[var(--color-accent)] transition-colors">
+                  {item.q}
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 mt-1 rounded-full border border-[var(--color-line)] text-[var(--color-accent)] bg-white group-hover:border-[var(--color-accent)] transition-colors"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="transition-transform duration-200 group-open:rotate-45"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </span>
+              </summary>
+              <p class="text-[var(--color-muted)] leading-relaxed pb-6 md:pb-7 pr-12 -mt-2">
+                {item.a}
+              </p>
+            </details>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Soften the open transition so the answer reveal feels less
+     mechanical than the default <details> snap. Browsers without
+     CSS interpolate-size still get the standard open/close;
+     supporting browsers get the smooth height animation. */
+  @supports (interpolate-size: allow-keywords) {
+    .faq-item {
+      interpolate-size: allow-keywords;
+    }
+    .faq-item::details-content {
+      height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition:
+        height 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 220ms ease,
+        content-visibility 280ms allow-discrete;
+    }
+    .faq-item[open]::details-content {
+      height: auto;
+      opacity: 1;
+    }
+  }
+</style>
