@@ -146,15 +146,18 @@ See README's "Replace examples before go-live" section.
   accent-tinted chip that flips to the full accent fill on hover.
 - **Contact form focus**: each input/textarea is wrapped in a
   `.field` div. The wrapper paints a static `::after` baseline rule
-  and a `.field-line` overlay that scales from 0 → 1 on
-  `focus-within`. Label color, letter-spacing, placeholder alpha
-  and caret colour all share the same focus-within trigger so the
-  whole row "lights up" together. Final iteration removed both rules
-  on focus per user feedback — the soft white wash (`white/8`) +
-  pink-tinted box-shadow glow on `.contact-field:focus` is the full
-  focus indicator now. `.field--error` paints the baseline pink
-  immediately. Scoped via `<style is:global>` in Contact.astro
-  because the React island can't carry the styles itself.
+  and a `.field-line` brand-pink overlay that's preserved in code
+  but kept collapsed (`scaleX(0)`) on focus per user feedback —
+  the pink line read as a "border lighting up" which is the cue
+  the user wants removed. Current focus indicator: the baseline
+  `::after` rule flips to a fully opaque white underline
+  (`white/0.9`); the input content area picks up a brighter wash
+  (`white/0.2`) plus a white-tinted inset highlight and drop-shadow
+  glow. The label brightens to near-white (no accent-pink shift)
+  and tightens its tracking. `.field--error` paints the baseline
+  pink immediately so a broken field still reads at a glance.
+  Scoped via `<style is:global>` in Contact.astro because the React
+  island can't carry the styles itself.
 - **Hero background motion** (`src/components/islands/Hero.tsx`):
   three concentric layers translate + scale at staggered rates as
   the user scrolls (back -160 / mid -260 / front -360 over 800 px,
@@ -165,16 +168,29 @@ See README's "Replace examples before go-live" section.
   reads as 3D drift rather than uniform zoom. Bumped from a much
   subtler 2026-05-29 starting point because the original was too
   quiet to notice.
-- **Hero composition**: the top pill is data-driven — when
-  `featuredTopic` is passed it renders as an `<a>` to the live blog
-  article (pulse-dot · "Im Journal" / "In the journal" · title ·
-  ↗); when absent it falls back to the static availability + location
-  pill. Below the h1 sits a **secondary display title** carrying
-  `t.footer.slogan` ("Digitales Handwerk für den Mittelstand." /
-  "Digital craft for the mid-market.") in italic accent — sized
-  text-2xl → md:text-4xl so it reads as a banner rather than an
-  eyebrow. Reusing the footer slogan keeps the brand-tier promise
-  consistent across both surfaces without a separate hero-only key.
+- **Hero composition**: three stacked title tiers in addition to
+  the data-driven pill.
+  - **Pill**: when `featuredTopic` is passed it renders as an `<a>`
+    to the live blog article (pulse-dot · "Im Journal" / "In the
+    journal" · title · ↗). When absent, falls back to the static
+    availability + location pill.
+  - **H1** (display): `t.hero.headline + headlineAccent +
+    headlineSuffix` — currently **"Software, die mit Ihrem
+    *Unternehmen* wächst." / "Software that grows with *your*
+    business."** (tds-shared 0.2.7). Italic accent on the personal
+    pronoun ("Unternehmen" / "your") so the brand-distinctive
+    emphasis lands on what the reader cares about.
+  - **Tagline strapline**: `t.hero.tagline` ("Beratung · Konzept ·
+    Code — alles aus einer Hand." / "Consulting · concept · code
+    — all from one source."). Sized text-base → md:text-xl in muted
+    body colour. Sits directly under the H1 and picks up secondary
+    SEO weight the H1 deliberately doesn't carry.
+  - **Brand slogan** (display-tier): `t.footer.slogan` ("Digitales
+    Handwerk für den Mittelstand." / "Digital craft for the
+    mid-market.") in italic accent — sized text-2xl → md:text-4xl
+    so it reads as a banner. Reusing the footer slogan keeps the
+    brand-tier promise consistent across both surfaces without a
+    separate hero-only key.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
