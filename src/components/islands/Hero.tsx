@@ -253,6 +253,17 @@ export default function Hero({
           {t.hero.headlineSuffix}
         </motion.h1>
 
+        {/* Second main title — brand slogan picked up from
+            tds-shared. Sits between the h1 and the sub paragraph,
+            sized smaller than the h1 but still display-tier so it
+            reads as a secondary banner rather than an eyebrow. */}
+        <motion.p
+          {...fadeUp(0.08)}
+          className="text-2xl sm:text-3xl md:text-4xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-8 max-w-3xl leading-snug"
+        >
+          {t.footer.slogan}
+        </motion.p>
+
         <motion.p
           {...fadeUp(0.1)}
           className="text-lg md:text-xl text-[var(--color-muted)] max-w-2xl mb-10 leading-relaxed"
