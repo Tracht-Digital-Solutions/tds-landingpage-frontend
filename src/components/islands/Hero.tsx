@@ -235,6 +235,7 @@ export default function Hero({
 
         <motion.h1
           {...fadeUp(0.05)}
+          id="hero-heading"
           className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-[var(--font-display)] font-medium leading-tight tracking-tight text-[var(--color-black)] mb-6 max-w-4xl"
           style={{ fontVariationSettings: '"opsz" 144' }}
         >

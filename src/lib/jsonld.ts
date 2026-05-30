@@ -144,6 +144,74 @@ export function pricingSchema(items: ServiceOffering[]): WithContext {
   };
 }
 
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
+/**
+ * FAQPage schema — Google's eligibility-checked rich snippet. Each
+ * item becomes a Question with an AnswerType. Renders inline in the
+ * page where the visible <details>/<summary> accordions live; the
+ * answer text must match the visible answer 1:1 or Google strips the
+ * rich result.
+ */
+export function faqPageSchema(items: readonly FaqItem[]): object {
+  return {
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
+  };
+}
+
+interface HowToStep {
+  number: string;
+  title: string;
+  duration: string;
+  description: string;
+}
+
+/**
+ * HowTo schema — describes the four-step Process section as a
+ * structured workflow. Each step becomes a HowToStep with a
+ * `position` (parsed from the visible "01" / "02" number) and the
+ * duration in ISO-8601 where possible. Helps both Google's "how to"
+ * rich snippet and AI agents that try to understand the service
+ * delivery flow.
+ */
+export function howToSchema(name: string, steps: readonly HowToStep[]): object {
+  return {
+    "@type": "HowTo",
+    name,
+    step: steps.map((step) => ({
+      "@type": "HowToStep",
+      position: Number(step.number) || undefined,
+      name: step.title,
+      text: step.description,
+      ...(step.duration ? { performTime: step.duration } : {}),
+    })),
+  };
+}
+
+/**
+ * Speakable schema — points voice assistants / AI summarisers at the
+ * key text on the page so they read the right thing aloud instead of
+ * guessing from the DOM. Apply CSS selectors at the wrapper that
+ * covers the hero headline + sub paragraph.
+ */
+export function speakableSchema(cssSelectors: readonly string[]): object {
+  return {
+    "@type": "SpeakableSpecification",
+    cssSelector: cssSelectors,
+  };
+}
+
 /**
  * Combine multiple schemas into a single @graph node — the canonical
  * way to emit several typed entities in one <script> block without

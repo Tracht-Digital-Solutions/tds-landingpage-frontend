@@ -16,13 +16,17 @@ import FAQ from "~/components/sections/FAQ.astro";
 import Contact from "~/components/sections/Contact.astro";
 import {
   asGraph,
+  faqPageSchema,
+  howToSchema,
   organizationSchema,
   personSchema,
+  speakableSchema,
   websiteSchema,
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
-import { resolveLang } from "~/lib/i18n";
+import { resolveLang, tFor } from "~/lib/i18n";
 import { fetchTopics, topicHref } from "~/lib/content";
+import { getFaqContent } from "~/lib/faq";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -39,10 +43,26 @@ const featuredTopic = heroTopics[0]
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than
 // redefining them.
+const t = tFor(Astro.currentLocale);
+const faq = getFaqContent(lang);
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
   websiteSchema(),
+  faqPageSchema(faq.items),
+  howToSchema(`${t.process.headline} ${t.process.headlineAccent}`, t.process.steps),
+  {
+    "@type": "WebPage",
+    "@id": `${siteConfig.url}/#webpage-${lang}`,
+    url: lang === "de" ? siteConfig.url : `${siteConfig.url}/en`,
+    inLanguage: lang === "de" ? "de-DE" : "en-GB",
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+    primaryImageOfPage: `${siteConfig.url}/og/default.png`,
+    speakable: speakableSchema([
+      "#hero-heading",
+      "[aria-labelledby='currently-heading']",
+    ]),
+  },
 );
 
 const titles = {

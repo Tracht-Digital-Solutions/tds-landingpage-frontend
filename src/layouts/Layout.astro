@@ -35,6 +35,18 @@ const ogImageAbs = ogImage.startsWith("http")
   ? ogImage
   : new URL(ogImage, site).toString();
 const ogLocale = lang === "de" ? "de_DE" : "en_GB";
+const altOgLocale = lang === "de" ? "en_GB" : "de_DE";
+
+// Compute hreflang alternates. The neutral path is the URL without
+// the /en prefix; the EN alternate is /en + the neutral path. Skip
+// alternates entirely when the page opts out of search via
+// `noindex` (legal pages are DE-only by regulation, no EN sibling).
+const neutralPath = Astro.url.pathname.replace(/^\/en\/?/, "/") || "/";
+const deAltUrl = new URL(neutralPath, site).toString();
+const enAltUrl = new URL(
+  neutralPath === "/" ? "/en/" : `/en${neutralPath}`,
+  site,
+).toString();
 ---
 
 <!DOCTYPE html>
@@ -49,6 +61,16 @@ const ogLocale = lang === "de" ? "de_DE" : "en_GB";
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={url} />
+
+    <!-- i18n alternates — only emitted when the page is indexable.
+         Legal pages opt out of both search and hreflang. -->
+    {!noindex && (
+      <>
+        <link rel="alternate" hreflang="de" href={deAltUrl} />
+        <link rel="alternate" hreflang="en" href={enAltUrl} />
+        <link rel="alternate" hreflang="x-default" href={deAltUrl} />
+      </>
+    )}
 
     <!-- Cross-property: sibling blog at blog.tracht-digital.de -->
     <link
@@ -71,6 +93,7 @@ const ogLocale = lang === "de" ? "de_DE" : "en_GB";
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={title} />
     <meta property="og:locale" content={ogLocale} />
+    {!noindex && <meta property="og:locale:alternate" content={altOgLocale} />}
     <meta property="og:site_name" content={siteConfig.name} />
 
     <!-- Twitter Card -->
