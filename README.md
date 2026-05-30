@@ -222,7 +222,7 @@ git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
 
 | Path | Source | Purpose |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — 10 sections in narrative order: Hero → About → Services → Tech → Portfolio → Process → Currently → PricingTeaser → Journal → Contact |
+| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — 12 sections in narrative order: Hero → About → Services → Tech → Portfolio → Process → Currently → PricingTeaser → Journal → Consulting → FAQ → Contact |
 | `/en/` | `src/pages/en/index.astro` | Same layout, EN copy |
 | `/preise` | `src/pages/preise.astro` | Hourly-rate pricing (DE) |
 | `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
@@ -252,11 +252,13 @@ src/
 │   ├── sections/               # Static .astro sections (no JS by default)
 │   │   ├── About.astro, Services.astro, TechMarquee.astro,
 │   │   │ Portfolio.astro, Process.astro, Currently.astro,
-│   │   │ PricingTeaser.astro, Journal.astro, Contact.astro
+│   │   │ PricingTeaser.astro, Journal.astro, Consulting.astro,
+│   │   │ FAQ.astro, Contact.astro
 │   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, ServiceCard + ServiceIcon, PortfolioCard, ProcessStep, SectionHeader)
 ├── layouts/Layout.astro        # Mounts SmoothScroll + ScrollProgress; renders meta + JSON-LD
 ├── lib/
 │   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
+│   ├── content.ts              # fetchTopics() — build-time pull of recent blog posts
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   └── jsonld.ts               # Schema.org graph generators
 ├── og/                         # Satori OG-card pipeline (build-time)

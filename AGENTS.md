@@ -63,27 +63,49 @@ See README's "Replace examples before go-live" section.
   so screen readers don't read letter-by-letter; transforms collapse on
   `prefers-reduced-motion: reduce`.
 - **Section order** (`src/pages/index.astro`): Hero → About →
-  Services → Tech → Portfolio → Process → **Currently** →
-  PricingTeaser → Journal → Contact. Narrative arc reads as hook
-  → who → what → capability → proof → method → **now** → cost →
-  thinking → convert. PricingTeaser sits after Process and Currently
-  intentionally — visitors see how the work happens (Process) and
-  what's actually in the workshop right now (Currently) before they
-  see what it costs.
+  Services → Tech → Portfolio → Process → Currently → PricingTeaser
+  → Journal → **Consulting** → **FAQ** → Contact. Narrative arc
+  reads as hook → who → what → capability → proof → method → now
+  → cost → thinking → invitation → objection-handling → convert.
+  Consulting + FAQ close the funnel before the contact form: the
+  consulting card invites a discovery call, FAQ clears the small
+  doubts a mid-market visitor usually has before clicking through.
 - **Currently section** (`src/components/sections/Currently.astro`):
-  "Now page" convention. Section masthead now reads "Aktuelle
-  *Themen*" / "Current *topics*" (was the more committal "Was ich
-  gerade *baue*" / "What I'm currently *building*" — renamed so
-  the framing covers projects, focus, and principles as a single
-  set of subjects rather than projects-only). Left column lists
-  three active project cards with stack accent strings and a
-  pulsing accent-dot marker. Right column lists 4 intentions /
-  principles with italic Fraunces "→" arrow markers, `md:sticky`
-  so the principles stay visible while the project list scrolls
-  past. Copy is **inlined in the component** (DE + EN variants
-  gated on `Astro.currentLocale`) rather than living in tds-shared,
-  because this is the part of the site that drifts the most.
-  Promote individual fields upstream when they stabilise.
+  "Now page" convention. Section masthead reads "Aktuelle *Themen*"
+  / "Current *topics*". Left column now pulls the 3 most recent
+  posts from `tds-content-api` via `src/lib/content.ts`'s
+  `fetchTopics(lang, limit)` — each card renders category eyebrow
+  · title · excerpt · date · "Weiterlesen ↗" and links to
+  `topicHref(slug)` on blog.tracht-digital.de. Hand-curated
+  fallback in the same file when the API returns `[]` so the
+  section still ships meaningfully on first-deploy or transient
+  outage. Right column ("Im Fokus" / "Focused on") still lists
+  4 intentions / principles with italic Fraunces "→" arrow
+  markers, `md:sticky` so they stay visible while the topics list
+  scrolls past. Intentions copy stays inlined; topics are live.
+- **Consulting section** (`src/components/sections/Consulting.astro`):
+  Gradient card matching `PricingTeaser`'s visual language so the
+  two callouts pair as a system. Two CTAs — primary
+  "Erstgespräch buchen" / "Book a discovery call" → `#contact`,
+  secondary "Leistungen ansehen" / "See services" → `/preise`. Copy
+  via `t.consulting.*` in tds-shared 0.2.5+.
+- **FAQ section** (`src/components/sections/FAQ.astro`): Native
+  `<details>`/`<summary>` accordions — zero JS, accessible,
+  keyboard-navigable. Six items (project timeline, remote/on-site,
+  NDA, first step, tech stacks, workshop/audit-only). Scoped
+  `<style>` uses `@supports (interpolate-size: allow-keywords)`
+  so modern browsers get a smooth height animation on open/close;
+  older browsers fall back to the default `<details>` snap. Copy
+  is inlined per the same rule as Currently — FAQ answers drift
+  faster than the rest of the bundle.
+- **Live topics via `src/lib/content.ts`**: `fetchTopics(lang, limit)`
+  is a build-time fetch from `PUBLIC_CONTENT_API_URL/blog?…` that
+  returns `[]` on any failure. Consumers fall back to their own
+  static content so the build never breaks on a content-API hiccup.
+  `index.astro` and `en/index.astro` use it twice — once for the
+  Hero `featuredTopic` (top 1 post), once independently inside
+  Currently for the full 3-post list — so the pill still renders
+  when Currently's fetch is empty.
 - **Process timeline** (`src/components/sections/Process.astro` +
   `ProcessStep.astro`): vertical timeline with a continuous
   `bg-gradient-to-b` spine (accent/40 → line → accent/20) sitting
@@ -95,13 +117,15 @@ See README's "Replace examples before go-live" section.
   step's title row. Replaces an earlier per-step gradient connector
   design that read as four chained cards instead of one arc.
 - **Section rhythm**: paper → paper → soft → DARK → paper → soft →
-  paper → paper → soft → DARK. Paper-backed narrative sections
-  (About, Portfolio, Currently, PricingTeaser inner card)
-  alternate with `--color-soft` callout sections (Services, Process,
-  Journal) and dark-blue chrome sections (Tech, Contact). The two
-  paper sections in a row (Currently + PricingTeaser) sit between
-  the soft Process and Journal "lists" so the gradient pricing
-  card lands in a calm frame.
+  paper → paper → soft → paper → soft → DARK. Paper-backed
+  narrative sections (About, Portfolio, Currently, PricingTeaser
+  inner card, Consulting) alternate with `--color-soft` callout
+  sections (Services, Process, Journal, FAQ) and dark-blue chrome
+  sections (Tech, Contact). The Currently + PricingTeaser paper
+  pair sits inside the soft Process / Journal frame so the
+  gradient pricing card lands in a calm space; Consulting's
+  gradient card and the soft FAQ both buffer the dark Contact
+  closing.
 - **Header / navigation**: floating pill on desktop (≥lg) with
   `data-scrolled` morphing the chrome on scroll past 8px. Below
   `lg` the pill docks against the top edge (`top: 0`, flat top
@@ -141,6 +165,16 @@ See README's "Replace examples before go-live" section.
   reads as 3D drift rather than uniform zoom. Bumped from a much
   subtler 2026-05-29 starting point because the original was too
   quiet to notice.
+- **Hero composition**: the top pill is data-driven — when
+  `featuredTopic` is passed it renders as an `<a>` to the live blog
+  article (pulse-dot · "Im Journal" / "In the journal" · title ·
+  ↗); when absent it falls back to the static availability + location
+  pill. Below the h1 sits a **secondary display title** carrying
+  `t.footer.slogan` ("Digitales Handwerk für den Mittelstand." /
+  "Digital craft for the mid-market.") in italic accent — sized
+  text-2xl → md:text-4xl so it reads as a banner rather than an
+  eyebrow. Reusing the footer slogan keeps the brand-tier promise
+  consistent across both surfaces without a separate hero-only key.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
