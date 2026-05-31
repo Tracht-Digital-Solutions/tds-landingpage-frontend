@@ -62,6 +62,17 @@ const enAltUrl = new URL(
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={url} />
 
+    <!-- Resource hints — connect to the API origins we know we'll
+         hit (the contact form on submit, the content API on every
+         page that has a Currently / Journal section). `preconnect`
+         opens the TLS handshake early; `dns-prefetch` is the cheap
+         fallback for browsers that ignore preconnect on a different
+         origin. -->
+    <link rel="preconnect" href="https://api.tracht-digital.de" crossorigin />
+    <link rel="dns-prefetch" href="https://api.tracht-digital.de" />
+    <link rel="preconnect" href="https://blog.tracht-digital.de" crossorigin />
+    <link rel="dns-prefetch" href="https://blog.tracht-digital.de" />
+
     <!-- i18n alternates — only emitted when the page is indexable.
          Legal pages opt out of both search and hreflang. -->
     {!noindex && (
