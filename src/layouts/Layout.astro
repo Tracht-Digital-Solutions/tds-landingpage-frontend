@@ -130,37 +130,67 @@ const enAltUrl = new URL(
 
     {/* Dynamic document.title — observes every <section id="…"> on
         the page and prefixes the tab title with the section name as
-        the user scrolls past it. The Hero section keeps the canonical
-        page title. Pages with no multi-section layout (legal pages,
-        /preise) naturally no-op because there's at most one section. */}
+        the user scrolls past it. Hero keeps the canonical page
+        title. Pages with no multi-section layout (legal pages,
+        /preise) naturally no-op because there's at most one section.
+
+        Labels come from a hand-curated id→title map so the tab
+        text reads consistently — no "— 02 / X" leftover prefixes,
+        no "Tech Stack" / "FAQ" / "Über mich" word-count mismatch.
+        Falls back through eyebrow text → aria-label → id for any
+        future section id that doesn't have a map entry yet. */}
     <script>
       const ORIGINAL_TITLE = document.title;
       const BRAND = ORIGINAL_TITLE.includes(" — ")
         ? ORIGINAL_TITLE.split(" — ")[0]
         : ORIGINAL_TITLE;
 
+      const lang = document.documentElement.lang.startsWith("en")
+        ? "en"
+        : "de";
+
+      const TITLES: Record<"de" | "en", Record<string, string>> = {
+        de: {
+          about: "Über mich",
+          services: "Leistungen",
+          tech: "Tech-Stack",
+          portfolio: "Portfolio",
+          process: "Vorgehen",
+          currently: "Aktuelle Themen",
+          "pricing-teaser": "Preise",
+          blog: "Journal",
+          consulting: "Beratung",
+          faq: "Häufige Fragen",
+          contact: "Kontakt",
+        },
+        en: {
+          about: "About",
+          services: "Services",
+          tech: "Tech stack",
+          portfolio: "Portfolio",
+          process: "Process",
+          currently: "Current topics",
+          "pricing-teaser": "Pricing",
+          blog: "Journal",
+          consulting: "Consulting",
+          faq: "FAQ",
+          contact: "Contact",
+        },
+      };
+      const map = TITLES[lang];
+
       const sections = document.querySelectorAll<HTMLElement>("section[id]");
       if (sections.length > 1) {
-        // Resolve a short, readable label for a section. Tries in
-        // order: an explicit `data-title`, the visible eyebrow /
-        // `.section-num` text (after stripping "— 02 / " style prefixes),
-        // the aria-labelledby target text, then aria-label, then the
-        // raw id.
         const labelFor = (el: HTMLElement): string => {
-          const explicit = el.dataset.title;
-          if (explicit) return explicit;
+          if (el.dataset.title) return el.dataset.title;
+          if (map[el.id]) return map[el.id];
+          // Defensive fallback if a new section id appears that's
+          // not yet mapped — keeps the title from going blank.
           const eyebrow = el.querySelector(".section-num, .eyebrow");
           if (eyebrow?.textContent) {
             return eyebrow.textContent
               .replace(/^[—–-]\s*(\d+\s*\/\s*)?/, "")
               .trim();
-          }
-          const labelledById = el.getAttribute("aria-labelledby");
-          if (labelledById) {
-            const target = document.getElementById(labelledById);
-            if (target?.textContent) {
-              return target.textContent.trim().split(".")[0].trim();
-            }
           }
           return el.getAttribute("aria-label") || el.id;
         };
