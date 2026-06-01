@@ -5,6 +5,11 @@
 @import "@fontsource-variable/geist/index.css";
 
 @theme inline {
+  /* Light theme — the default. Dark theme overrides below
+     (`:root[data-theme="dark"]`) flip the structural tokens
+     (paper / soft / line / muted / black / ink) but keep the
+     brand accents (primary navy, burgundy accent, pink accent)
+     since they read on both backgrounds. */
   --color-primary: #050f68;
   --color-accent: #820933;
   --color-paper: #fafaf7;
@@ -20,14 +25,38 @@
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
+/* Dark theme. Activated when html carries `data-theme="dark"`
+   (set by the inline no-flash script in Layout.astro from the
+   localStorage `tds-theme` preference or the OS `prefers-
+   color-scheme` fallback). Brand accents are nudged a little
+   brighter so they read well on the new dark backgrounds. */
+:root[data-theme="dark"] {
+  --color-primary: #8aa0ff;
+  --color-accent: #ff7a9c;
+  --color-paper: #0b0a07;
+  --color-soft: #18171a;
+  --color-line: rgb(255 255 255 / 0.12);
+  --color-muted: rgb(255 255 255 / 0.55);
+  --color-accent-pink: #ff9ab6;
+  --color-black: #fafaf7;
+  --color-ink: #f1efe8;
+}
+
 html {
   scroll-behavior: smooth;
-  color-scheme: light;
+  color-scheme: light dark;
   /* Firefox + IE/Edge legacy — the thin pill is rendered by the
      WebKit rules below for everyone else. */
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-primary) 65%, transparent)
     transparent;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* WebKit / Blink scrollbar — slender, brand-tinted, with a

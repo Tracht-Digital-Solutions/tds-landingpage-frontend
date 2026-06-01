@@ -1,5 +1,6 @@
 ---
 import LanguageToggle from "~/components/islands/LanguageToggle.tsx";
+import ThemeToggle from "~/components/islands/ThemeToggle.tsx";
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 
@@ -74,6 +75,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
     </div>
 
     <div class="flex items-center gap-1.5 lg:gap-0">
+      <ThemeToggle client:load />
       <LanguageToggle client:load lang={lang} />
 
       <button
