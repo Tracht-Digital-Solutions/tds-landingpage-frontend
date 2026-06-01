@@ -195,6 +195,23 @@ See README's "Replace examples before go-live" section.
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
   build time (Astro frontmatter, not at runtime).
+- **Dynamic document.title**: inline script at the bottom of
+  `Layout.astro` observes every `<section id="…">` and prefixes the
+  tab title with the section name as the user scrolls past it.
+  Hero keeps the canonical page title; below-hero sections render
+  as `<section name> · <brand>`. Label resolution falls back
+  through `data-title` → `.section-num`/`.eyebrow` text (strips
+  the "— 02 / " prefix) → aria-labelledby target → aria-label → id.
+  IntersectionObserver `rootMargin: "-30% 0px -60% 0px"` so the
+  "active section" band sits ~30 % from the top — matches where
+  the eye rests under smooth scroll. No-ops on pages with fewer
+  than two sections.
+- **Favicon**: `public/favicon.svg` ships a 32 × 32 rounded square
+  with the primary→accent gradient and a white italic "T" set in
+  Georgia. Shared verbatim with tds-blog / admin / customer so the
+  four properties read as one identity in browser tabs. Stand-in
+  for the future logomark — same composition as the header
+  placeholder tile, swap both together.
 
 ## SEO + structured data
 

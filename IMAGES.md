@@ -182,8 +182,8 @@ interface Props {
 | | |
 |---|---|
 | **File** | `public/favicon.svg` |
-| **Current** | Whatever ships in the file today — verify before launch. |
-| **Recommended set** | A small bundle covering modern + legacy + mobile + PWA: |
+| **Current** | **Shipping**: 32 × 32 rounded square with the brand primary→accent gradient and a white italic "T" set in Georgia. Same mark used by tds-blog / admin / customer. Stand-in for the future logomark — swap together. |
+| **Recommended bundle** | When the real mark lands, ship this set: |
 
 | File | Size | Purpose |
 |---|---|---|
