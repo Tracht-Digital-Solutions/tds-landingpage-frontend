@@ -28,7 +28,7 @@ export const siteConfig = {
     en: "Personally crafted digital solutions for the mid-market — consulting, web and app development, digitalization, maintenance and training from Schwarzenbek near Hamburg, Germany.",
   },
   /** Verified contact channel. Safe to publish in schema. */
-  email: "hallo@tracht-digital.de",
+  email: "kontakt@tracht-digital.de",
   /** Legal entity behind the brand. */
   legalName: "Julian Tracht",
   founder: {
