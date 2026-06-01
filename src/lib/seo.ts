@@ -49,11 +49,18 @@ export const siteConfig = {
   },
   /** Service-area for ProfessionalService schema. */
   areaServed: ["Hamburg", "Schwarzenbek", "Norddeutschland", "Deutschland"],
-  /** Public social URLs — empty until #7. */
-  socials: {} as {
+  /** Public social URLs — surface in JSON-LD `sameAs` and the
+   * Contact aside. WhatsApp is a `wa.me` deep link to the
+   * `contact.info.phone` number; it is intentionally not in
+   * JSON-LD `sameAs` (which expects social-profile URLs, not
+   * messenger links). */
+  socials: {
+    linkedin: "https://www.linkedin.com/in/julian-tracht/",
+    github: "https://github.com/Tracht-Digital-Solutions",
+  } as {
     linkedin?: string;
     github?: string;
-    xing?: string;
+    whatsapp?: string;
   },
   /** Default OG image (1200×630), generated at /og/default.png. */
   defaultOgImage: "/og/default.png",

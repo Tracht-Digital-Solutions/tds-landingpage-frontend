@@ -1,7 +1,8 @@
 ---
+import { Image } from "astro:assets";
 import { tFor } from "~/lib/i18n";
-import ImagePlaceholder from "~/components/ui/ImagePlaceholder.astro";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
+import portrait from "~/assets/portrait.jpg";
 
 const t = tFor(Astro.currentLocale);
 
@@ -18,7 +19,14 @@ const stats = [
 
     <div class="grid md:grid-cols-2 gap-16 lg:gap-24 items-start">
       <div class="md:sticky md:top-28 max-w-sm">
-        <ImagePlaceholder aspect="aspect-[3/4]" label="Portrait" description={t.about.portraitPlaceholder} />
+        <Image
+          src={portrait}
+          alt="Julian Tracht"
+          widths={[300, 450, 600, 900]}
+          sizes="(min-width: 768px) 24rem, 60vw"
+          loading="eager"
+          class="rounded-[2px] aspect-[3/4] object-cover w-full"
+        />
       </div>
 
       <div>
