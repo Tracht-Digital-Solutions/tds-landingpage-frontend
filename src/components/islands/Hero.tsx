@@ -184,13 +184,13 @@ export default function Hero({
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-12 md:py-16 w-full">
+      <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full">
         {featuredTopic ? (
           <motion.a
             {...fadeUp(0)}
             href={featuredTopic.href}
             rel="noopener"
-            className="group inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 max-w-full text-xs sm:text-sm pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] hover:bg-[color-mix(in_srgb,var(--color-card)_60%,transparent)] hover:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] transition-colors"
+            className="group inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 max-w-full text-xs sm:text-sm pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] hover:bg-[color-mix(in_srgb,var(--color-card)_60%,transparent)] hover:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] transition-colors"
           >
             <span className="flex items-center gap-2">
               <span
@@ -217,7 +217,7 @@ export default function Hero({
         ) : (
           <motion.div
             {...fadeUp(0)}
-            className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] max-w-full"
+            className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] max-w-full"
           >
             <span className="flex items-center gap-2">
               <span
@@ -236,7 +236,7 @@ export default function Hero({
         <motion.h1
           {...fadeUp(0.05)}
           id="hero-heading"
-          className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-[var(--font-display)] font-medium leading-tight tracking-tight text-[var(--color-black)] mb-6 max-w-4xl"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-[1.05] tracking-tight text-[var(--color-black)] mb-4 max-w-4xl"
           style={{ fontVariationSettings: '"opsz" 144' }}
         >
           {t.hero.headline}{" "}
@@ -260,7 +260,7 @@ export default function Hero({
             supporting line. */}
         <motion.p
           {...fadeUp(0.07)}
-          className="text-base sm:text-lg md:text-xl text-[var(--color-muted)] mb-6 max-w-2xl"
+          className="text-base sm:text-lg text-[var(--color-muted)] mb-4 max-w-2xl"
         >
           {t.hero.tagline}
         </motion.p>
@@ -272,14 +272,14 @@ export default function Hero({
             eyebrow. */}
         <motion.p
           {...fadeUp(0.08)}
-          className="text-2xl sm:text-3xl md:text-4xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-8 max-w-3xl leading-snug"
+          className="hero-slogan text-xl sm:text-2xl md:text-3xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-6 max-w-3xl leading-snug"
         >
           {t.footer.slogan}
         </motion.p>
 
         <motion.p
           {...fadeUp(0.1)}
-          className="text-lg md:text-xl text-[var(--color-muted)] max-w-2xl mb-10 leading-relaxed"
+          className="text-base md:text-lg text-[var(--color-muted)] max-w-2xl mb-8 leading-relaxed"
         >
           {t.hero.sub}
         </motion.p>

@@ -183,10 +183,10 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             </div>
 
             <div>
-              <label className="flex items-start gap-3 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="mt-0.5 w-4 h-4 rounded-[2px] accent-[var(--color-accent-pink)] flex-shrink-0"
+                  className="w-4 h-4 rounded-[2px] accent-[var(--color-accent-pink)] flex-shrink-0"
                   {...register("consent")}
                 />
                 <span className="text-xs text-white/60 leading-relaxed">

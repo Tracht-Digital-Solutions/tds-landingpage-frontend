@@ -152,6 +152,49 @@ body {
   border-radius: 2px;
 }
 
+/* About portrait — the headshot is an isolated cut-out on a near-white
+   background. Cropped into the 3:4 frame the figure ends on a hard
+   rectangular line at the bottom (torso) and right (shoulder). Fade
+   those two edges to transparent so the portrait dissolves into the
+   paper instead of stopping on a hard cut. */
+.portrait-fade {
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 70%, transparent 100%),
+    linear-gradient(to right, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, #000 70%, transparent 100%),
+    linear-gradient(to right, #000 86%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Hero — on short viewports (laptops, landscape phones) the stacked
+   headline + straplines + sub + CTAs can exceed the screen height and
+   spill past the scroll hint. Pull the type and rhythm in so the whole
+   hero stays within one screen. ID selectors out-specify the Tailwind
+   responsive size utilities, so these win without !important. */
+@media (max-height: 800px) {
+  #hero h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.04;
+    margin-bottom: 0.75rem;
+  }
+  #hero .hero-slogan {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    margin-bottom: 1rem;
+  }
+  #hero .hero-body {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+}
+
+@media (max-height: 640px) {
+  #hero {
+    min-height: auto;
+  }
+}
+
 /* Editorial typography primitives */
 .display {
   font-family: var(--font-display);
