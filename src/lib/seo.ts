@@ -5,13 +5,10 @@
  * `~/lib/jsonld` read from this config — changing values here
  * propagates through every page.
  *
- * TODO(real data): the Impressum + Contact section still carry
- * placeholders (street, phone, USt-IdNr, social URLs). They're
- * intentionally absent from the config below so Google + AI search
- * engines don't cache wrong data. Once issues #5, #6 and #7 land:
- *   - flip `address.streetAddress` + `postalCode` on
- *   - add `telephone` + `vatID`
- *   - populate `socials.linkedin` / `.github` / `.xing`
+ * Street address, postal code, phone and social URLs are now the real
+ * verified data (matches the Impressum). The only remaining placeholder
+ * is the USt-IdNr — kept off the config until a real VAT ID exists so
+ * Google + AI search engines don't cache a fake one (add `vatID` then).
  */
 export const siteConfig = {
   /** Brand name as it should appear in search results. */
@@ -29,6 +26,8 @@ export const siteConfig = {
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
+  /** Verified phone (WhatsApp). E.164-friendly formatting for schema. */
+  telephone: "+49 178 8224022",
   /** Legal entity behind the brand. */
   legalName: "Julian Tracht",
   founder: {
@@ -36,16 +35,13 @@ export const siteConfig = {
     jobTitle: "Inhaber & Entwickler",
     sameAs: [] as string[], // populated from socials below post-launch
   },
-  /**
-   * Verified location is the city only (Schwarzenbek bei Hamburg).
-   * Real street address pending Impressum cleanup (#5).
-   */
+  /** Verified business address (matches the Impressum). */
   address: {
+    streetAddress: "Elbinger Straße 19",
+    postalCode: "21493",
     addressLocality: "Schwarzenbek",
     addressRegion: "Schleswig-Holstein",
     addressCountry: "DE",
-    // streetAddress: "...",  // pending #5
-    // postalCode: "21493",   // matches Impressum but kept off until real street lands
   },
   /** Service-area for ProfessionalService schema. */
   areaServed: ["Hamburg", "Schwarzenbek", "Norddeutschland", "Deutschland"],

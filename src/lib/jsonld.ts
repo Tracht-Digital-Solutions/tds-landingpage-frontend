@@ -36,8 +36,8 @@ export function personSchema() {
 /**
  * Organization (+ ProfessionalService traits). Search engines treat
  * ProfessionalService as a LocalBusiness subtype, which is what we
- * actually are — but emit it without the street/phone until those
- * Impressum placeholders are replaced (see seo.ts TODO).
+ * actually are — now emitted with the verified street, postal code and
+ * phone (they match the Impressum).
  */
 export function organizationSchema() {
   const socials = Object.values(siteConfig.socials).filter(Boolean) as string[];
@@ -50,10 +50,13 @@ export function organizationSchema() {
     legalName: siteConfig.legalName,
     url: siteConfig.url,
     email: `mailto:${siteConfig.email}`,
+    telephone: siteConfig.telephone,
     founder: { "@id": `${siteConfig.url}/#person` },
     areaServed: siteConfig.areaServed.map((a) => ({ "@type": "Place", name: a })),
     address: {
       "@type": "PostalAddress",
+      streetAddress: siteConfig.address.streetAddress,
+      postalCode: siteConfig.address.postalCode,
       addressLocality: siteConfig.address.addressLocality,
       addressRegion: siteConfig.address.addressRegion,
       addressCountry: siteConfig.address.addressCountry,
