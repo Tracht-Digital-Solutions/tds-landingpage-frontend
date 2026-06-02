@@ -87,7 +87,7 @@ const jsonLd = [
               class:list={[
                 "relative rounded-[6px] p-7 flex flex-col",
                 isHighlight
-                  ? "bg-[var(--color-primary)] text-white border border-[var(--color-primary)] shadow-[0_20px_50px_rgba(5,15,104,0.18)]"
+                  ? "bg-[var(--color-surface-navy)] text-white border border-[var(--color-surface-navy)] shadow-[0_20px_50px_rgba(5,15,104,0.18)]"
                   : "bg-[var(--color-paper)] border border-[var(--color-line)]",
               ]}
             >
@@ -187,7 +187,7 @@ const jsonLd = [
       </div>
 
       <section
-        class="rounded-[6px] border border-[var(--color-line)] p-8 mb-16 bg-white/40 backdrop-blur-sm"
+        class="rounded-[6px] border border-[var(--color-line)] p-8 mb-16 bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm"
         aria-labelledby="pricing-notes-heading"
       >
         <h2
@@ -208,7 +208,7 @@ const jsonLd = [
 
       <section
         class="rounded-[6px] p-10 md:p-14 text-center text-white"
-        style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);"
+        style="background: linear-gradient(135deg, var(--color-surface-navy) 0%, var(--color-surface-accent) 100%);"
       >
         <h2
           class="font-[var(--font-display)] font-medium text-3xl md:text-4xl mb-4"
@@ -221,7 +221,7 @@ const jsonLd = [
         </p>
         <a
           href={`${homeHref === "/" ? "" : homeHref.replace(/\/$/, "")}/#contact`}
-          class="inline-flex items-center gap-2 bg-white text-[var(--color-primary)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-[var(--color-paper)] transition-colors group"
+          class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
         >
           {t.pricing.ctaButton}
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>

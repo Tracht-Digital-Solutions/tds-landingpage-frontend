@@ -68,7 +68,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
       </a>
       <a
         href="#contact"
-        class="ml-2 px-4 py-1.5 text-white rounded-full bg-[var(--color-primary)] hover:bg-[var(--color-accent)] hover:-translate-y-0.5 transition-all duration-200"
+        class="ml-2 px-4 py-1.5 text-white rounded-full bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] hover:-translate-y-0.5 transition-all duration-200"
       >
         {t.nav.cta}
       </a>
@@ -96,7 +96,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
 
 <div
   id="mobile-menu"
-  class="mobile-menu md:hidden fixed inset-x-3 top-16 z-30 origin-top rounded-2xl bg-white/95 backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.35)] p-3"
+  class="mobile-menu md:hidden fixed inset-x-3 top-16 z-30 origin-top rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.35)] p-3"
   aria-hidden="true"
 >
   <ul class="space-y-0.5">
@@ -141,7 +141,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
   <a
     href="#contact"
     data-menu-link
-    class="mt-3 flex items-center justify-center min-h-12 px-4 rounded-full text-base font-medium bg-[var(--color-primary)] text-white hover:bg-[var(--color-accent)] active:bg-[var(--color-accent)] transition-colors"
+    class="mt-3 flex items-center justify-center min-h-12 px-4 rounded-full text-base font-medium bg-[var(--color-surface-navy)] text-white hover:bg-[var(--color-surface-accent)] active:bg-[var(--color-surface-accent)] transition-colors"
   >
     {t.nav.cta}
   </a>
@@ -165,7 +165,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
       var(--color-primary) 14%,
       rgb(255 255 255 / 0.6)
     );
-    background-color: rgb(255 255 255 / 0.65);
+    background-color: color-mix(in srgb, var(--color-card) 65%, transparent);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 0.55),
       0 10px 30px -10px rgba(5, 15, 104, 0.22),
@@ -196,7 +196,7 @@ const menuLabel = lang === "en" ? "Menu" : "Menü";
     }
 
     .site-header[data-scrolled="true"] {
-      background-color: rgb(255 255 255 / 0.7);
+      background-color: color-mix(in srgb, var(--color-card) 70%, transparent);
       border-color: color-mix(
         in srgb,
         var(--color-primary) 14%,

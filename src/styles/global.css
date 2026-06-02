@@ -20,6 +20,20 @@
   --color-black: #0b0a07;
   --color-ink: #1a1a17;
 
+  /* Fixed brand surfaces — these stay dark in BOTH themes. The
+     structural tokens above flip in dark mode (so primary/black read
+     as foreground accents on a dark page), which would invert any
+     section that uses them as a *fixed dark backdrop*. These surface
+     tokens give those blocks (Contact, Tech, Footer, the gradient
+     cards and primary buttons) a backdrop that never inverts. */
+  --color-surface-navy: #050f68;
+  --color-surface-accent: #820933;
+  --color-surface-ink: #0b0a07;
+  /* Elevated card / glass surface — flips with the theme. Translucent
+     glass references it through color-mix() so the light appearance is
+     unchanged while dark mode gets a dark glass instead of white. */
+  --color-card: #ffffff;
+
   --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-body: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
@@ -40,6 +54,13 @@
   --color-accent-pink: #ff9ab6;
   --color-black: #fafaf7;
   --color-ink: #f1efe8;
+
+  /* Surface-navy / -accent stay on their brand values (navy + burgundy
+     read fine under white text in both themes). Only the ink surface
+     is nudged up off the near-black page so the footer reads as a
+     distinct panel, and the card surface flips white → elevated dark. */
+  --color-surface-ink: #18171a;
+  --color-card: #1c1b20;
 }
 
 html {

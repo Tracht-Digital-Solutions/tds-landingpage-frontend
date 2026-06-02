@@ -190,7 +190,7 @@ export default function Hero({
             {...fadeUp(0)}
             href={featuredTopic.href}
             rel="noopener"
-            className="group inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 max-w-full text-xs sm:text-sm pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)] hover:bg-white/60 hover:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] transition-colors"
+            className="group inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 max-w-full text-xs sm:text-sm pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] hover:bg-[color-mix(in_srgb,var(--color-card)_60%,transparent)] hover:border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] transition-colors"
           >
             <span className="flex items-center gap-2">
               <span
@@ -217,7 +217,7 @@ export default function Hero({
         ) : (
           <motion.div
             {...fadeUp(0)}
-            className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-[var(--color-line)] max-w-full"
+            className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-8 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] max-w-full"
           >
             <span className="flex items-center gap-2">
               <span
@@ -291,14 +291,14 @@ export default function Hero({
           <button
             type="button"
             onClick={() => scrollTo("contact")}
-            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-primary)] hover:bg-[var(--color-accent)] cursor-pointer"
+            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
           >
             {t.hero.cta1}
           </button>
           <button
             type="button"
             onClick={() => scrollTo("services")}
-            className="px-7 py-3.5 text-sm font-medium border border-[var(--color-line)] bg-white/40 backdrop-blur-sm text-[var(--color-black)] rounded-[100px] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
+            className="px-7 py-3.5 text-sm font-medium border border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm text-[var(--color-black)] rounded-[100px] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
           >
             {t.hero.cta2}
           </button>
