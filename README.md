@@ -197,7 +197,10 @@ favicon, the VAT ID (`DE450639725` — in `src/pages/legal/impressum.astro`
 
 - Real portfolio screenshots (× 4) — note the Portfolio section is
   currently hidden, see § [Portfolio (temporarily hidden)](#portfolio-temporarily-hidden)
-- Real journal cover images (× 3)
+- ~~Real journal cover images (× 3)~~ — **shipped**: hosted in
+  `tds-blog/public/covers/<slug>.webp`, wired via the content-api
+  seeder `cover_hint`; the Journal card renders the photo when the
+  cover URL is present (else the labelled placeholder).
 - Lawyer review of `/legal/impressum` + `/legal/datenschutz`
   (issue #5)
 

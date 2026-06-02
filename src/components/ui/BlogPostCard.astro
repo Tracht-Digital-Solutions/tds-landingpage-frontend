@@ -15,11 +15,28 @@ interface Props {
 const { category, title, excerpt, slug, formattedDate, readMore, placeholderLabel, imagePlaceholder } = Astro.props;
 
 const blogBase = (import.meta.env.PUBLIC_BLOG_BASE_URL as string | undefined) ?? "https://blog.tracht-digital.de";
+
+// When the post carries a real cover URL (coverHint set to an uploaded
+// image) render the photo; otherwise fall back to the labelled
+// placeholder box that describes the intended cover.
+const coverUrl = /^https?:\/\//.test(imagePlaceholder) ? imagePlaceholder : null;
 ---
 
 <article class="group">
   <a href={`${blogBase}/${slug}`} class="block">
-    <ImagePlaceholder aspect="aspect-[4/3]" label={placeholderLabel} description={imagePlaceholder} />
+    {coverUrl ? (
+      <img
+        src={coverUrl}
+        alt={title}
+        width="1200"
+        height="900"
+        loading="lazy"
+        decoding="async"
+        class="aspect-[4/3] w-full object-cover rounded-[2px] border border-[var(--color-line)] bg-[var(--color-soft)]"
+      />
+    ) : (
+      <ImagePlaceholder aspect="aspect-[4/3]" label={placeholderLabel} description={imagePlaceholder} />
+    )}
     <div class="pt-5">
       <p class="text-xs font-medium tracking-widest text-[var(--color-accent)] uppercase mb-3">
         {category}
