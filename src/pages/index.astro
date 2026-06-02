@@ -25,24 +25,24 @@ import {
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
-import { fetchTopics, topicHref } from "~/lib/content";
+import { fetchTopics, topicHref, topicFallback } from "~/lib/content";
 import { getFaqContent } from "~/lib/faq";
 
 const lang = resolveLang(Astro.currentLocale);
 
-// Pull the top post once at build-time so the Hero pill links to
-// the actual most recent journal entry. Currently.astro does its
-// own fetch for the full 3-post list — kept independent so the
-// Hero pill renders even when the content API returns 0 posts.
+// The Hero pill always surfaces the current most important topic.
+// Prefer the live top post from tds-content-api; fall back to the
+// same hand-written list the Currently section uses (first entry =
+// most important) so the pill never degrades to a static blurb and
+// stays in sync with the Currently section.
 const heroTopics = await fetchTopics(lang, 1);
-const featuredTopic = heroTopics[0]
-  ? {
-      slug: heroTopics[0].slug,
-      title: heroTopics[0].title,
-      category: heroTopics[0].category,
-      href: topicHref(heroTopics[0].slug),
-    }
-  : undefined;
+const topTopic = heroTopics[0] ?? topicFallback(lang)[0];
+const featuredTopic = {
+  slug: topTopic.slug,
+  title: topTopic.title,
+  category: topTopic.category,
+  href: topicHref(topTopic.slug),
+};
 
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than

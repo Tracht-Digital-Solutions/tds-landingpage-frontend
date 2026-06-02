@@ -15,7 +15,7 @@
  *   it costs.
  */
 import { resolveLang } from "~/lib/i18n";
-import { fetchTopics, topicHref, type ContentPost } from "~/lib/content";
+import { fetchTopics, topicHref, topicFallback } from "~/lib/content";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -30,35 +30,6 @@ const copy =
         headlineAccent: "Themen.",
         topicsLabel: "Aus dem Journal",
         readMore: "Weiterlesen",
-        fallbackTopics: [
-          {
-            slug: "tds-customer-portal",
-            category: "Build-Log",
-            title: "TDS Customer Portal",
-            excerpt:
-              "Self-Service-Zugang für Mittelstandskunden — Projekte, Rechnungen, Dokumente. In aktiver Entwicklung.",
-            publishedAt: "",
-            coverHint: null,
-          },
-          {
-            slug: "ki-prozessanalyse",
-            category: "Case Study",
-            title: "KI-Prozessanalyse",
-            excerpt:
-              "Datenpipelines mit Claude und n8n für eine Manufaktur — von der Bestellannahme bis zur Auslieferung.",
-            publishedAt: "",
-            coverHint: null,
-          },
-          {
-            slug: "tracht-digital-journal",
-            category: "Meta",
-            title: "Tracht Digital Journal",
-            excerpt:
-              "Längere Texte zu Architektur, Mittelstand und KI im täglichen Einsatz.",
-            publishedAt: "",
-            coverHint: null,
-          },
-        ] satisfies ContentPost[],
         intentionsLabel: "Im Fokus",
         intentions: [
           "Lieber tief in zwei bis drei Projekte gleichzeitig — als oberflächlich in zehn.",
@@ -73,35 +44,6 @@ const copy =
         headlineAccent: "topics.",
         topicsLabel: "From the journal",
         readMore: "Read more",
-        fallbackTopics: [
-          {
-            slug: "tds-customer-portal",
-            category: "Build log",
-            title: "TDS Customer Portal",
-            excerpt:
-              "Self-service access for mid-market clients — projects, invoices, documents. In active development.",
-            publishedAt: "",
-            coverHint: null,
-          },
-          {
-            slug: "ai-process-analysis",
-            category: "Case study",
-            title: "AI process analysis",
-            excerpt:
-              "Data pipelines with Claude and n8n for a manufactory — from order intake to delivery.",
-            publishedAt: "",
-            coverHint: null,
-          },
-          {
-            slug: "tracht-digital-journal",
-            category: "Meta",
-            title: "Tracht Digital Journal",
-            excerpt:
-              "Longer-form writing on architecture, mid-market work, and AI in daily use.",
-            publishedAt: "",
-            coverHint: null,
-          },
-        ] satisfies ContentPost[],
         intentionsLabel: "Focused on",
         intentions: [
           "Going deep on two or three projects at a time — not shallow on ten.",
@@ -111,7 +53,7 @@ const copy =
         ],
       };
 
-const topics = liveTopics.length > 0 ? liveTopics : copy.fallbackTopics;
+const topics = liveTopics.length > 0 ? liveTopics : topicFallback(lang);
 const dateFormatter = new Intl.DateTimeFormat(
   lang === "de" ? "de-DE" : "en-IE",
   { year: "numeric", month: "long", day: "numeric" },
