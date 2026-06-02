@@ -5,10 +5,8 @@
  * `~/lib/jsonld` read from this config — changing values here
  * propagates through every page.
  *
- * Street address, postal code, phone and social URLs are now the real
- * verified data (matches the Impressum). The only remaining placeholder
- * is the USt-IdNr — kept off the config until a real VAT ID exists so
- * Google + AI search engines don't cache a fake one (add `vatID` then).
+ * Street address, postal code, phone, VAT ID and social URLs are all
+ * the real verified data (matches the Impressum).
  */
 export const siteConfig = {
   /** Brand name as it should appear in search results. */
@@ -30,6 +28,8 @@ export const siteConfig = {
   telephone: "+49 178 8224022",
   /** Legal entity behind the brand. */
   legalName: "Julian Tracht",
+  /** USt-IdNr. gemäß § 27a UStG — verified, matches the Impressum. */
+  vatID: "DE450639725",
   founder: {
     name: "Julian Tracht",
     jobTitle: "Inhaber & Entwickler",

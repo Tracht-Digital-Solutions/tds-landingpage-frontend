@@ -48,6 +48,7 @@ export function organizationSchema() {
     name: siteConfig.name,
     alternateName: siteConfig.shortName,
     legalName: siteConfig.legalName,
+    vatID: siteConfig.vatID,
     url: siteConfig.url,
     email: `mailto:${siteConfig.email}`,
     telephone: siteConfig.telephone,
