@@ -98,7 +98,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           <motion.form
             key="form"
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-8"
+            className="space-y-6 sm:space-y-8"
             noValidate
             aria-live="polite"
           >
