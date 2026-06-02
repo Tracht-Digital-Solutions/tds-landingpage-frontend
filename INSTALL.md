@@ -125,19 +125,21 @@ git worktree add ../tds-landingpage-build origin/build
 
 ## 7. Before go-live: replace placeholder values
 
-The site ships with visibly-placeholder values you must replace:
+Address, phone, socials, portrait, logo and favicon are now real. The
+only contact placeholder left is the VAT ID:
 
 | Where | Value |
 |---|---|
-| `src/components/sections/Contact.astro` — `phoneDisplay` | `+49 4151 1234567` → real |
-| `src/components/sections/Contact.astro` — `socials.*` | `/example` URLs → real |
-| `src/pages/legal/impressum.astro` | address + phone + VAT ID |
-| `src/pages/legal/datenschutz.astro` | address + phone (mirrors impressum) |
+| `src/pages/legal/impressum.astro` — VAT ID | `DE 123 456 789` → real USt-IdNr |
+
+Plus, before launch: real portfolio (× 4) and journal (× 3) images
+(see [`IMAGES.md`](IMAGES.md)), a real `public/legal/agb.pdf`, and a
+lawyer review of the legal pages.
 
 Smoke search:
 
 ```bash
-git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
+git grep -nE 'DE 123 456 789'
 ```
 
 ## Related repos

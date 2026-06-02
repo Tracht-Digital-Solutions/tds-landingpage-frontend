@@ -187,38 +187,32 @@ and can be cleaned up.
 
 ## Replace examples before go-live
 
-The site ships with **visibly-placeholder values** in three places.
-A find-replace pass before launch catches them all:
+Most launch placeholders are now real: the business address, phone,
+LinkedIn/GitHub, the portrait photo, the header logo and the favicon.
+The only contact placeholder left is the VAT ID:
 
 | Where | What to replace | Current example value |
 |---|---|---|
-| `src/components/sections/Contact.astro` — `phoneDisplay` | Real phone | `+49 4151 1234567` |
-| `src/components/sections/Contact.astro` — `socials.linkedin` | Real URL | `https://www.linkedin.com/in/example` |
-| `src/components/sections/Contact.astro` — `socials.github` | Real URL | `https://github.com/example` |
-| `src/components/sections/Contact.astro` — `socials.xing` | Real URL | `https://www.xing.com/profile/example` |
-| `src/pages/legal/impressum.astro` — address (× 2 sections) | Real street + PLZ | `Musterstraße 1, 21493 Schwarzenbek` |
-| `src/pages/legal/impressum.astro` — phone | Real phone | `+49 4151 1234567` |
-| `src/pages/legal/impressum.astro` — VAT ID | Real `DE ...` | `DE 123 456 789` |
-| `src/pages/legal/datenschutz.astro` — address + phone | Same as above | (mirrors impressum) |
+| `src/pages/legal/impressum.astro` — VAT ID | Real `DE …` USt-IdNr | `DE 123 456 789` |
 
 **Also still TODO before launch** (tracked as open issues
 on this repo):
 
-- Real portrait photo in the About section
 - Real portfolio screenshots (× 4)
 - Real journal cover images (× 3)
-- Real header logomark (replace the gradient-tile + Fraunces-T placeholder)
+- `public/legal/agb.pdf` — real AGB document (placeholder file)
 - Lawyer review of `/legal/impressum` + `/legal/datenschutz`
   (issue #5)
 
 See [`IMAGES.md`](IMAGES.md) for the per-image swap guide — file
 paths, aspect ratios, recommended sizes, and the exact pattern for
-replacing each `<ImagePlaceholder />` with an `<Image />` / `<img>`.
+replacing each remaining `<ImagePlaceholder />` with an
+`<Image />` / `<img>`.
 
 Quick smoke search:
 
 ```bash
-git grep -nE '1234567|/example|Musterstraße|DE 123 456 789'
+git grep -nE 'DE 123 456 789'
 ```
 
 ---

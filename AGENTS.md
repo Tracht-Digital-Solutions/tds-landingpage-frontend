@@ -134,9 +134,9 @@ See README's "Replace examples before go-live" section.
   animates three CSS bars into an × via the `[aria-expanded]`
   attribute. Mobile menu panel mounts as a separate fixed div
   below the pill — Astro inline `<script>` toggles state and
-  body scroll-lock. The "TDS" wordmark is paired with a
-  placeholder logomark (gradient tile + Fraunces-italic "T") —
-  swap to a real SVG asset before launch.
+  body scroll-lock. The "TDS" wordmark is paired with the real
+  logomark at `public/images/logo.webp` (the with-text variant
+  `logo-with-text.webp` sits alongside it).
 - **Service icons**: `ServiceIcon.astro` renders a small inline
   SVG keyed off the service `number` ("01" → browser-window,
   "02" → smartphone, "03" → stacked layers, "04" → connected
@@ -206,23 +206,19 @@ See README's "Replace examples before go-live" section.
   "active section" band sits ~30 % from the top — matches where
   the eye rests under smooth scroll. No-ops on pages with fewer
   than two sections.
-- **Favicon**: `public/favicon.svg` ships a 32 × 32 rounded square
-  with the primary→accent gradient and a white italic "T" set in
-  Georgia. Shared verbatim with tds-blog / admin / customer so the
-  four properties read as one identity in browser tabs. Stand-in
-  for the future logomark — same composition as the header
-  placeholder tile, swap both together.
+- **Favicon**: `public/favicon.png` (901 × 901) is the real TDS
+  logomark, shared verbatim with tds-blog / admin / customer so the
+  four properties read as one identity in browser tabs. Matches the
+  header `public/images/logo.webp`.
 
 ## SEO + structured data
 
 - **`src/lib/seo.ts`** is the single source of truth for org/person
-  identity (name, email, founder, areaServed, address city,
-  socials). The Impressum placeholders (street, phone, USt-IdNr,
-  social URLs from #5/#6/#7) are deliberately **kept off** the
-  config so Google + AI engines don't cache wrong data. When real
-  data lands, flip the `streetAddress`/`telephone`/`vatID`/
-  `socials` fields on in `seo.ts` and the JSON-LD layer below
-  picks it up everywhere.
+  identity (name, email, founder, areaServed, full address, phone,
+  socials). These are now the real verified values and flow into the
+  JSON-LD layer below. The **only** field still deliberately kept off
+  is `vatID` (no real USt-IdNr yet) — add it to `seo.ts` once issued
+  so Google + AI engines don't cache a fake one.
 - **`src/lib/jsonld.ts`** renders Schema.org graphs
   (Organization+ProfessionalService, Person, WebSite,
   Service+OfferCatalog for `/preise`, BreadcrumbList). All entities
@@ -242,6 +238,25 @@ See README's "Replace examples before go-live" section.
 - **`public/llms.txt`** is the llmstxt.org-convention markdown
   directory of services + pages for AI crawlers.
 
+## Dark mode
+
+- All four frontends share a `data-theme="dark"` theme. A no-flash
+  inline script in `Layout.astro` sets `data-theme` on `<html>` from
+  the `tds-theme` localStorage key (or the OS `prefers-color-scheme`
+  fallback); the `ThemeToggle` island flips and persists it.
+- Tokens live in `src/styles/global.css`. The structural tokens
+  (`--color-primary`, `--color-black`, `--color-paper`, …) **flip**
+  in dark mode so they read as foreground accents on a dark ground.
+  Anything that must stay a fixed dark surface in both themes uses
+  `--color-surface-navy` (brand navy panels/buttons),
+  `--color-surface-accent` (burgundy, gradient end) or
+  `--color-surface-ink` (footer). Elevated cards/glass use
+  `--color-card` (white → dark), referenced via `color-mix()` for
+  translucent glass so the light look is unchanged.
+- The dark ground is a deliberate deep-navy family (not a warm black)
+  with warm-ivory text — keep new dark surfaces in that family so the
+  palette stays cohesive.
+
 ## Don't
 
 - Don't add `output: "server"` — Webhosting 8000 has no Node runtime.
@@ -251,17 +266,24 @@ See README's "Replace examples before go-live" section.
 - Don't fetch the journal teaser at runtime. Build-time fetch in
   `index.astro` frontmatter so the rendered HTML ships static.
 - Don't reintroduce the navy→burgundy `linear-gradient` pill buttons.
-  Hero + Header CTAs are flat `bg-[var(--color-primary)]` with
-  `hover:bg-[var(--color-accent)]`. The PricingTeaser dark callout
-  *block* keeps its gradient on purpose — that's a deliberate
-  editorial card, not a button.
+  Hero + Header CTAs are flat `bg-[var(--color-surface-navy)]` with
+  `hover:bg-[var(--color-surface-accent)]`. The Consulting /
+  PricingTeaser dark callout *blocks* keep their navy→burgundy
+  gradient on purpose — that's a deliberate editorial card, not a
+  button — and use the same `--color-surface-*` tokens.
+- Don't use the *flipping* structural tokens (`--color-primary`,
+  `--color-black`) as a fixed dark backdrop, or a `bg-white` surface
+  on the page ground — both invert/break in dark mode. Use the fixed
+  `--color-surface-navy/-accent/-ink` for brand-dark surfaces and
+  `--color-card` (via `color-mix()` for glass) for elevated/glass
+  surfaces. See "Dark mode" below and `src/styles/global.css`.
 - Don't inline `text-xs font-medium tracking-widest uppercase` for
   section eyebrows. Use `.section-num` (with leading rule) for
   numbered chapter labels and `.eyebrow` for field labels.
-- Don't bake Impressum placeholder data (street, phone, USt-IdNr,
-  social URLs) into the JSON-LD layer — once Google + AI engines
-  cache it, the wrong data sticks until they re-crawl. The
-  `src/lib/seo.ts` TODO block is the only place to flip it on.
+- Don't bake a *fake* USt-IdNr into the JSON-LD layer — once Google
+  + AI engines cache it, the wrong data sticks until they re-crawl.
+  Street, phone and socials are real and already in `src/lib/seo.ts`;
+  `vatID` is the one field to flip on there once a real one exists.
 - Don't reintroduce `@tailwindcss/vite`. Astro 6 ships Vite 7 with
   the rolldown bundler, and the Vite plugin's build hook hits
   `oxcResolvePlugin` with an incomplete `BindingViteResolvePluginConfig`

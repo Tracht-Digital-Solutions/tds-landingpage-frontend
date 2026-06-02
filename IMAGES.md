@@ -1,10 +1,10 @@
 # Image swap guide
 
-Every visible image on the site currently renders as an
-`<ImagePlaceholder />` box (description text on a soft-coloured tile)
-or — for the header logo — an inline gradient placeholder. This guide
-lists each spot, the aspect ratio the layout expects, and the exact
-swap pattern.
+**Status:** the header logo, the About portrait and the favicon are
+now **real assets** — see the ✅ entries below. What's still on
+`<ImagePlaceholder />` boxes: the **portfolio screenshots (× 4)** and
+the **journal cover images (× 3)**. This guide lists each spot, the
+aspect ratio the layout expects, and the exact swap pattern.
 
 When real assets land, drop them under `public/images/` (or import
 from `src/assets/` if you want Astro's `<Image />` optimisation
@@ -35,12 +35,17 @@ pipeline) and swap the placeholder component for an `<img>` or
 
 ## The list
 
-### 1. Header logomark — gradient placeholder
+### 1. Header logomark — ✅ DONE
+
+Shipped: `Header.astro` renders the real `<img src="/images/logo.webp">`
+(40 × 28, `h-6 lg:h-7`) next to the "TDS" wordmark. The with-text
+variant `public/images/logo-with-text.webp` is available for other
+placements. The swap details below are kept for reference.
 
 | | |
 |---|---|
 | **File** | `src/components/Header.astro` |
-| **Current** | Inline gradient tile (primary→accent) with a Fraunces-italic "T" |
+| **Current** | Real `public/images/logo.webp` (was: inline gradient tile) |
 | **Aspect** | Square (1:1) |
 | **Display size** | `28 × 28 px` (mobile) / `32 × 32 px` (desktop) |
 | **Source asset** | **SVG**, no nominal size (vector). If you must ship raster, export a **128 × 128 px** PNG (4× the desktop size to cover up to 3× DPR) |
@@ -67,12 +72,18 @@ pipeline) and swap the placeholder component for an `<img>` or
 (Keep `aria-label` on the anchor and `alt=""` on the mark — the
 wordmark next to it carries the accessible name.)
 
-### 2. Portrait photo — About section
+### 2. Portrait photo — About section — ✅ DONE
+
+Shipped: `About.astro` imports `~/assets/portrait.webp` and renders it
+through Astro's `<Image />`. The asset is a **transparent (alpha)
+cutout** of Julian, so the subject floats on the section background
+(paper in light, deep navy in dark). The swap details below are kept
+for reference.
 
 | | |
 |---|---|
-| **File** | `src/components/sections/About.astro` (line ~21) |
-| **Current** | `<ImagePlaceholder aspect="aspect-[3/4]" label="Portrait" description={t.about.portraitPlaceholder} />` |
+| **File** | `src/components/sections/About.astro` |
+| **Current** | Real `~/assets/portrait.webp` (alpha cutout) via `<Image />` |
 | **Aspect** | **3:4 portrait** (taller than wide) |
 | **Display size** | Roughly **384 × 512 px** on desktop (max-w-sm column at ≥md), `60vw × 80vw` on phones |
 | **Source asset** | **1200 × 1600 px** WebP — 3× the largest CSS render so retina + responsive widths have headroom. Astro `<Image />` generates 300 / 450 / 600 / 900 derivatives from this single source |
@@ -177,13 +188,13 @@ interface Props {
 | **Dimensions** | **1200 × 630 px** (Open Graph spec — also satisfies Twitter `summary_large_image`). LinkedIn / WhatsApp pull the same file. |
 | **Status** | Generated at build time — no manual swap needed for the default card. If you want a per-page OG card later, add a new endpoint under `src/pages/og/` mirroring the default pipeline. |
 
-### 6. Favicon
+### 6. Favicon — ✅ DONE
 
 | | |
 |---|---|
-| **File** | `public/favicon.svg` |
-| **Current** | **Shipping**: 32 × 32 rounded square with the brand primary→accent gradient and a white italic "T" set in Georgia. Same mark used by tds-blog / admin / customer. Stand-in for the future logomark — swap together. |
-| **Recommended bundle** | When the real mark lands, ship this set: |
+| **File** | `public/favicon.png` |
+| **Current** | **Shipping**: the real TDS logomark, `public/favicon.png` (901 × 901). Shared verbatim with tds-blog / admin / customer so the four properties read as one identity. Matches the header `logo.webp`. |
+| **Optional bundle** | If you later want a full home-screen / PWA set, ship these alongside it: |
 
 | File | Size | Purpose |
 |---|---|---|
@@ -213,10 +224,11 @@ PWA later. Reference them in `Layout.astro`'s `<head>`:
 
 ## Tracker
 
-| # | Asset |
-|---|---|
-| #8 | Portrait |
-| #9 | Portfolio screenshots (× 4) |
-| #10 | Journal cover images (× 3) |
-| — | Header logomark (no dedicated issue yet — open one when sourcing) |
-| — | `public/legal/agb.pdf` placeholder (PDF, not image — listed for completeness) |
+| # | Asset | Status |
+|---|---|---|
+| #8 | Portrait | ✅ done (transparent WebP) |
+| #9 | Portfolio screenshots (× 4) | ⬜ pending |
+| #10 | Journal cover images (× 3) | ⬜ pending |
+| — | Header logomark | ✅ done (`public/images/logo.webp`) |
+| — | Favicon | ✅ done (`public/favicon.png`) |
+| — | `public/legal/agb.pdf` placeholder (PDF, not image) | ⬜ pending |
