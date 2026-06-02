@@ -16,10 +16,13 @@ const { category, title, excerpt, slug, formattedDate, readMore, placeholderLabe
 
 const blogBase = (import.meta.env.PUBLIC_BLOG_BASE_URL as string | undefined) ?? "https://blog.tracht-digital.de";
 
-// When the post carries a real cover URL (coverHint set to an uploaded
-// image) render the photo; otherwise fall back to the labelled
-// placeholder box that describes the intended cover.
-const coverUrl = /^https?:\/\//.test(imagePlaceholder) ? imagePlaceholder : null;
+// When the post carries a real cover image — either a remote URL
+// (coverHint set to an uploaded image) or a local landingpage-hosted
+// placeholder (e.g. /journal/<slug>.webp) — render the photo; otherwise
+// fall back to the labelled placeholder box describing the cover.
+const coverUrl = /^(https?:\/\/|\/).+\.(webp|avif|png|jpe?g|svg)$/i.test(imagePlaceholder)
+  ? imagePlaceholder
+  : null;
 ---
 
 <article class="group">

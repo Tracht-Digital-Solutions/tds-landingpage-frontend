@@ -43,6 +43,17 @@ const formatter = new Intl.DateTimeFormat("de-DE", {
   day: "numeric",
 });
 
+// Local cover placeholders, hosted on the landingpage itself. Used
+// whenever a post has no live cover URL yet (e.g. the content API
+// hasn't been re-seeded with the uploaded cover_hint) so the Journal
+// teaser still shows the real artwork instead of an empty box. The
+// live coverHint always wins when present.
+const localCovers: Record<string, string> = {
+  "individuelle-software-kosten": "/journal/individuelle-software-kosten.webp",
+  "drei-prozesse-automatisierung": "/journal/drei-prozesse-automatisierung.webp",
+  "warum-ich-nicht-skaliere": "/journal/warum-ich-nicht-skaliere.webp",
+};
+
 const posts =
   livePosts.length > 0
     ? livePosts.map((p) => ({
@@ -51,7 +62,7 @@ const posts =
         title: p.title,
         excerpt: p.excerpt,
         formattedDate: p.publishedAt ? formatter.format(new Date(p.publishedAt)) : "",
-        imagePlaceholder: p.coverHint ?? "",
+        imagePlaceholder: p.coverHint ?? localCovers[p.slug] ?? "",
       }))
     : t.blog.posts.map((p) => ({
         slug: p.slug,
@@ -59,7 +70,7 @@ const posts =
         title: p.title,
         excerpt: p.excerpt,
         formattedDate: formatter.format(new Date(p.date)),
-        imagePlaceholder: p.imagePlaceholder,
+        imagePlaceholder: localCovers[p.slug] ?? p.imagePlaceholder,
       }));
 ---
 
