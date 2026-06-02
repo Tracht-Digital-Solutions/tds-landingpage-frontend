@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 type Theme = "light" | "dark";
 
@@ -18,6 +19,7 @@ const STORAGE_KEY = "tds-theme";
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const current = document.documentElement.getAttribute("data-theme");
@@ -27,13 +29,66 @@ export default function ThemeToggle() {
 
   const flip = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.setAttribute("data-theme", next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Safari private mode / disabled storage — soft fail.
+
+    // Commit the theme change. Kept as one closure so it can run either
+    // immediately or inside a View Transition snapshot callback.
+    const apply = () => {
+      setTheme(next);
+      document.documentElement.setAttribute("data-theme", next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // Safari private mode / disabled storage — soft fail.
+      }
+    };
+
+    const startViewTransition = (
+      document as Document & {
+        startViewTransition?: (cb: () => void) => { ready: Promise<void> };
+      }
+    ).startViewTransition;
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    // No View Transitions support (Firefox/Safari) or reduced-motion:
+    // flip instantly. The token transition in global.css still gives a
+    // soft colour crossfade.
+    if (!startViewTransition || prefersReduced) {
+      apply();
+      return;
     }
+
+    // Circular reveal: the incoming theme wipes in as a circle growing
+    // from the centre of the toggle button out to the farthest corner.
+    const rect = buttonRef.current?.getBoundingClientRect();
+    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y),
+    );
+
+    const transition = startViewTransition.call(document, () => {
+      // flushSync so React commits the icon swap before the snapshot.
+      flushSync(apply);
+    });
+
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 480,
+          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    });
   };
 
   // Render a stable label/icon during SSR + initial paint so the
@@ -44,6 +99,7 @@ export default function ThemeToggle() {
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={flip}
       aria-label={label}

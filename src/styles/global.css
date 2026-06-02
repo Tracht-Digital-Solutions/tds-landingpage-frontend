@@ -195,6 +195,34 @@ body {
   }
 }
 
+/* === Theme switch animation ======================================= */
+
+/* Circular-reveal theme switch (see ThemeToggle.tsx). The incoming
+   theme is captured as the `::view-transition-new(root)` snapshot and
+   clipped to an expanding circle in JS; here we only disable the
+   default cross-fade and stack the new snapshot above the old one so
+   the circle wipes the new theme in over the old. Browsers without the
+   View Transitions API ignore this block and the toggle falls back to
+   an instant flip. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
 /* Editorial typography primitives */
 .display {
   font-family: var(--font-display);
