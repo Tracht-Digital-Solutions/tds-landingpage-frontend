@@ -118,7 +118,7 @@ export default function Hero({
     <section
       ref={containerRef}
       id="hero"
-      className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20"
+      className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-20"
       aria-label="Hero"
     >
       <motion.div
@@ -184,7 +184,7 @@ export default function Hero({
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-16 md:py-24 w-full">
+      <div className="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-12 md:py-16 w-full">
         {featuredTopic ? (
           <motion.a
             {...fadeUp(0)}

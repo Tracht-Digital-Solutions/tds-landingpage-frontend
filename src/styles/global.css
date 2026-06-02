@@ -261,9 +261,11 @@ body {
 }
 .tabular, .tabular * { font-variant-numeric: tabular-nums; }
 
-/* Section spacing — used by every numbered section */
+/* Section spacing — the vertical rhythm for every numbered section.
+   Tuned to keep editorial air without oversized whitespace: ~52px on
+   phones up to ~104px on wide screens (was 80–144px). */
 .section-spacing {
-  padding: clamp(5rem, 10vw, 9rem) 0;
+  padding: clamp(3.25rem, 6.5vw, 6.5rem) 0;
 }
 
 /* Hero scroll-hint arrow */
