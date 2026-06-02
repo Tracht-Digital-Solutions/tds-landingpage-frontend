@@ -187,20 +187,17 @@ and can be cleaned up.
 
 ## Replace examples before go-live
 
-Most launch placeholders are now real: the business address, phone,
-LinkedIn/GitHub, the portrait photo, the header logo and the favicon.
-The only contact placeholder left is the VAT ID:
+All contact/legal placeholders are now real: the business address,
+phone, LinkedIn/GitHub, the portrait photo, the header logo, the
+favicon, the VAT ID (`DE450639725` — in `src/pages/legal/impressum.astro`
++ `src/lib/seo.ts`, surfaced as `Organization.vatID`) and the AGB PDF
+(`public/legal/agb.pdf`).
 
-| Where | What to replace | Current example value |
-|---|---|---|
-| `src/pages/legal/impressum.astro` — VAT ID | Real `DE …` USt-IdNr | `DE 123 456 789` |
+**Still TODO before launch** (tracked as open issues on this repo):
 
-**Also still TODO before launch** (tracked as open issues
-on this repo):
-
-- Real portfolio screenshots (× 4)
+- Real portfolio screenshots (× 4) — note the Portfolio section is
+  currently hidden, see § [Portfolio (temporarily hidden)](#portfolio-temporarily-hidden)
 - Real journal cover images (× 3)
-- `public/legal/agb.pdf` — real AGB document (placeholder file)
 - Lawyer review of `/legal/impressum` + `/legal/datenschutz`
   (issue #5)
 
@@ -209,11 +206,26 @@ paths, aspect ratios, recommended sizes, and the exact pattern for
 replacing each remaining `<ImagePlaceholder />` with an
 `<Image />` / `<img>`.
 
-Quick smoke search:
+---
 
-```bash
-git grep -nE 'DE 123 456 789'
-```
+## Portfolio (temporarily hidden)
+
+The **Portfolio** section is temporarily hidden from both homepages
+(`/` and `/en/`) until real project screenshots and case-study copy
+are ready. The `Portfolio.astro` component and its data are left in
+place — only the rendering and the navigation links are switched off:
+
+| File | What is commented out |
+|---|---|
+| `src/pages/index.astro` | `import Portfolio` + `<Portfolio />` |
+| `src/pages/en/index.astro` | `import Portfolio` + `<Portfolio />` |
+| `src/components/Header.astro` | `portfolio` entry in the `items` nav array |
+| `src/components/Footer.astro` | Portfolio `<li>` in the footer nav |
+
+**To restore:** uncomment those four spots (each is marked with a
+`Portfolio temporarily hidden` comment pointing back here). Nothing
+else changes — the section slots back in between **Tech** and
+**Process**.
 
 ---
 
@@ -221,7 +233,7 @@ git grep -nE 'DE 123 456 789'
 
 | Path | Source | Purpose |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — 12 sections in narrative order: Hero → About → Services → Tech → Portfolio → Process → Currently → PricingTeaser → Journal → Consulting → FAQ → Contact |
+| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — narrative order: Hero → About → Services → Tech → Process → Currently → PricingTeaser → Journal → Consulting → FAQ → Contact (Portfolio currently hidden, see § [Portfolio (temporarily hidden)](#portfolio-temporarily-hidden)) |
 | `/en/` | `src/pages/en/index.astro` | Same layout, EN copy |
 | `/preise` | `src/pages/preise.astro` | Hourly-rate pricing (DE) |
 | `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
