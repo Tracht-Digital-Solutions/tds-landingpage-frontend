@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
 
@@ -24,6 +24,30 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [shake, setShake] = useState(false);
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefersReduced = useReducedMotion();
+
+  // Staggered entrance — the island hydrates via `client:visible`, so
+  // mounting coincides with the section scrolling into view. The form
+  // is the variants parent; each field below carries `fieldItem` and
+  // rises in sequence. Reduced motion drops both the offset and stagger.
+  const formStagger = {
+    hidden: {},
+    show: {
+      transition: prefersReduced
+        ? {}
+        : { staggerChildren: 0.08, delayChildren: 0.05 },
+    },
+  };
+  const fieldItem = prefersReduced
+    ? { hidden: {}, show: {} }
+    : {
+        hidden: { opacity: 0, y: 16 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+        },
+      };
 
   const {
     register,
@@ -83,9 +107,15 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-start gap-4 py-12"
           >
-            <span style={{ color: "var(--color-accent-pink)", fontSize: 40 }} aria-hidden>
+            <motion.span
+              initial={prefersReduced ? false : { scale: 0, rotate: -25 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 320, damping: 16, delay: 0.1 }}
+              style={{ color: "var(--color-accent-pink)", fontSize: 40, lineHeight: 1 }}
+              aria-hidden
+            >
               ✓
-            </span>
+            </motion.span>
             <h3
               className="text-2xl font-[var(--font-display)] font-medium text-white"
               style={{ fontVariationSettings: '"opsz" 144' }}
@@ -101,6 +131,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             className="space-y-6 sm:space-y-8"
             noValidate
             aria-live="polite"
+            variants={formStagger}
+            initial="hidden"
+            animate="show"
           >
             <div
               style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}
@@ -116,7 +149,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               />
             </div>
 
-            <div className={`field ${errors.name ? "field--error" : ""}`}>
+            <motion.div variants={fieldItem} className={`field ${errors.name ? "field--error" : ""}`}>
               <label htmlFor="name" className={labelClass}>{t.contact.form.name}</label>
               <input
                 id="name"
@@ -132,9 +165,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                   {t.errors.name}
                 </p>
               )}
-            </div>
+            </motion.div>
 
-            <div className={`field ${errors.email ? "field--error" : ""}`}>
+            <motion.div variants={fieldItem} className={`field ${errors.email ? "field--error" : ""}`}>
               <label htmlFor="email" className={labelClass}>{t.contact.form.email}</label>
               <input
                 id="email"
@@ -150,9 +183,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                   {t.errors.email}
                 </p>
               )}
-            </div>
+            </motion.div>
 
-            <div className="field">
+            <motion.div variants={fieldItem} className="field">
               <label htmlFor="company" className={labelClass}>{t.contact.form.company}</label>
               <input
                 id="company"
@@ -163,9 +196,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                 {...register("company")}
               />
               <span className="field-line" aria-hidden="true" />
-            </div>
+            </motion.div>
 
-            <div className={`field ${errors.message ? "field--error" : ""}`}>
+            <motion.div variants={fieldItem} className={`field ${errors.message ? "field--error" : ""}`}>
               <label htmlFor="message" className={labelClass}>{t.contact.form.message}</label>
               <textarea
                 id="message"
@@ -180,9 +213,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                   {t.errors.message}
                 </p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div variants={fieldItem}>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -206,7 +239,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                   {t.errors.consent}
                 </p>
               )}
-            </div>
+            </motion.div>
 
             {submitState === "error" && (
               <p className="text-xs" style={{ color: "var(--color-accent-pink)" }} role="alert">
@@ -217,6 +250,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             <motion.button
               type="submit"
               disabled={submitState === "submitting"}
+              variants={fieldItem}
               whileHover={{ y: -2 }}
               whileTap={{ y: 0, scale: 0.98 }}
               transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
@@ -226,21 +260,38 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
                 {submitState === "submitting"
                   ? t.contact.form.submitting
                   : t.contact.form.submit}
-                <svg
-                  aria-hidden="true"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-transform duration-200 group-hover:translate-x-1"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
+                {submitState === "submitting" ? (
+                  <motion.svg
+                    aria-hidden="true"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </motion.svg>
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-transform duration-200 group-hover:translate-x-1"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                )}
               </span>
             </motion.button>
           </motion.form>
