@@ -12,6 +12,18 @@
    @tracht-digital-solutions/tds-shared/styles. */
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 
+/* The shared base sets `body { overflow-x: hidden }` to tame stray
+   horizontal overflow. But `overflow-x: hidden` turns the body into a
+   scroll container, which silently disables `backdrop-filter` on
+   position:fixed descendants in Chromium — i.e. it kills the frosted
+   blur on the fixed nav pill. `overflow-x: clip` clips the same way
+   without establishing that scroll container, so the nav blur renders
+   and horizontal overflow stays contained. (overflow-y stays visible:
+   clip + visible don't coerce each other, so vertical scroll is fine.) */
+body {
+  overflow-x: clip;
+}
+
 /* About portrait — the headshot is an isolated cut-out on a near-white
    background. Cropped into the 3:4 frame the figure ends on a hard
    rectangular line at the bottom (torso) and right (shoulder). Fade
