@@ -21,6 +21,14 @@ type Lang = "de" | "en";
 export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const t = translations[lang];
 
+  // Friendlier, on-brand failure copy than the shared default — and it
+  // asks the visitor to retry *later* (the API is likely briefly down),
+  // not to bash the button again right now.
+  const errorCopy =
+    lang === "de"
+      ? "Hoppla – diese Nachricht hat sich irgendwo im Datennirwana verlaufen. Probiere es später noch einmal, oder schreib mir direkt eine E-Mail."
+      : "Well, that message wandered off into the data void. Please try again later, or just drop me an email directly.";
+
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [shake, setShake] = useState(false);
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -243,7 +251,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
 
             {submitState === "error" && (
               <p className="text-xs" style={{ color: "var(--color-accent-pink)" }} role="alert">
-                {t.contact.form.errorMessage}
+                {errorCopy}
               </p>
             )}
 
