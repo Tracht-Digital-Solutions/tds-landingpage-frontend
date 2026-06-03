@@ -73,12 +73,6 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         {t.nav.blog}
         <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
       </a>
-      <a
-        href={sectionHref("contact")}
-        class="ml-2 px-4 py-1.5 text-white rounded-full bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] hover:-translate-y-0.5 transition-all duration-200"
-      >
-        {t.nav.cta}
-      </a>
     </div>
 
     <div class="flex items-center gap-1.5 lg:gap-0">
@@ -148,14 +142,6 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       </a>
     </li>
   </ul>
-
-  <a
-    href={sectionHref("contact")}
-    data-menu-link
-    class="mt-3 flex items-center justify-center min-h-12 px-4 rounded-full text-base font-medium bg-[var(--color-surface-navy)] text-white hover:bg-[var(--color-surface-accent)] active:bg-[var(--color-surface-accent)] transition-colors"
-  >
-    {t.nav.cta}
-  </a>
 </div>
 
 <style>
