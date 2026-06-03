@@ -98,4 +98,30 @@ const content = getFaqContent(lang);
       opacity: 1;
     }
   }
+
+  /* Wide screens have room to spare to the right of the max-w-3xl
+     list, so let each FAQ "drive out" rightward when you hover or
+     open it — a bit of horizontal play that reads as interactive.
+     Below lg the list is near the viewport edge, so we leave it put. */
+  @media (min-width: 1024px) {
+    .faq-item {
+      transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .faq-item:hover {
+      transform: translateX(1.25rem);
+    }
+    .faq-item[open] {
+      transform: translateX(2.5rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-item {
+      transition: none;
+    }
+    .faq-item:hover,
+    .faq-item[open] {
+      transform: none;
+    }
+  }
 </style>
