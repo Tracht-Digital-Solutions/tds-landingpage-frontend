@@ -12,8 +12,8 @@ Marketing landing page for Tracht Digital Solutions. **Astro 6** +
 **React** islands + **Tailwind v4** (via the `@tailwindcss/postcss`
 plugin — see the *Tailwind note* below) with self-hosted
 **Instrument Serif + Geist**. Builds to fully static HTML and ships
-in two locale trees (DE at `/`, EN at `/en/`); deploys to **netcup
-Webhosting 8000** at `tracht-digital.de`.
+in two locale trees (DE at `/`, EN at `/en/`); deploys to **the production host
+the production host** at `tracht-digital.de`.
 
 SEO surface includes Schema.org JSON-LD (Organization,
 ProfessionalService, Person, WebSite, Service+OfferCatalog,
@@ -124,16 +124,16 @@ history). Deploy from there by hand:
 # 1. Build static output
 npm run build
 
-# 2. SFTP the contents of dist/ to netcup
+# 2. SFTP the contents of dist/ to the production host
 #    Target: ~/sites/tracht-digital.de/releases/<TIMESTAMP>/
-#    (use FileZilla, lftp, or netcup's web file manager)
+#    (use FileZilla, lftp, or the production host's web file manager)
 
-# 3. Activate the new release on netcup
+# 3. Activate the new release on the production host
 #    Hit: https://tracht-digital.de/install.php?action=install-static
 #         &target=tracht-digital.de
 #         &release=<TIMESTAMP>
 #         &token=<INSTALL_TOKEN>
-#    (or use netcup's CCP to repoint the DocumentRoot symlink directly)
+#    (or use the hosting control panel to repoint the DocumentRoot symlink directly)
 ```
 
 If you want to pull straight from the `build` branch instead of
@@ -179,7 +179,7 @@ Workflow `permissions:` declared inline:
 - `packages: read` — sanity default; the PAT is what actually
   authenticates
 
-The five netcup-related Repository Secrets (`NETCUP_FTP_*`,
+The five deployment-related Repository Secrets (`FTP_*`,
 `INSTALL_TOKEN`) and the `INSTALLER_URL` variable are now unused
 and can be cleaned up.
 

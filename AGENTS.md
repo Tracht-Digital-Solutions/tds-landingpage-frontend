@@ -1,7 +1,7 @@
 # Agent notes — tds-landingpage
 
 Astro 6 + React islands + Tailwind v4. Static-rendered marketing site.
-Deploys to **netcup Webhosting 8000** at `tracht-digital.de`.
+Deploys to **the production host** at `tracht-digital.de`.
 
 ## Status
 
@@ -264,7 +264,7 @@ See README's "Replace examples before go-live" section.
 
 ## Don't
 
-- Don't add `output: "server"` — Webhosting 8000 has no Node runtime.
+- Don't add `output: "server"` — the production host has no Node runtime.
   This site MUST stay `output: "static"`.
 - Don't add per-frontend brand tokens or duplicate the shared design CSS.
   Always edit `tds-shared/styles/base.css` (tokens, base) or `app.css`

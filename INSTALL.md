@@ -108,7 +108,7 @@ from there by hand:
 # Option A — build locally then SFTP
 npm run build
 
-# SFTP contents of dist/ to netcup at
+# SFTP contents of dist/ to the production host at
 # ~/sites/tracht-digital.de/releases/<TIMESTAMP>/
 
 # Activate
@@ -120,7 +120,7 @@ curl --fail \
 # Option B — pull from the build branch
 git fetch origin build
 git worktree add ../tds-landingpage-build origin/build
-# SFTP ../tds-landingpage-build/ to netcup as above
+# SFTP ../tds-landingpage-build/ to the production host as above
 ```
 
 ## 7. Before go-live: replace placeholder values

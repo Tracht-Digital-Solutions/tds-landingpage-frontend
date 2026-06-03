@@ -1,4 +1,4 @@
-# Tracht Digital Solutions — static Astro build, served by Apache on netcup.
+# Tracht Digital Solutions — static Astro build, served by Apache on the production host.
 #
 # The domain has Phusion Passenger enabled. Without this file Passenger
 # intercepts sub-path requests such as /preise and answers with its
