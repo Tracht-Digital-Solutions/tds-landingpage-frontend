@@ -34,6 +34,17 @@ export default defineConfig({
       // Minify CSS aggressively (default is `esbuild`; `lightningcss`
       // shaves a few more bytes off the production bundle).
       cssMinify: "lightningcss",
+      // The lightningcss minify step derives its prefixing targets from
+      // `cssTarget` (it ignores `css.lightningcss.targets`). Vite's
+      // default baseline includes Firefox versions that predate any
+      // `backdrop-filter` support, so lightningcss concludes only the
+      // `-webkit-` prefix is needed and DROPS the unprefixed
+      // declaration — killing the frosted nav blur in Firefox, which
+      // only supports the standard property (since FF 103). Pinning a
+      // Firefox target that supports it forces lightningcss to keep BOTH
+      // the standard and `-webkit-` declarations; safari15 keeps the
+      // `-webkit-` prefix for Safari.
+      cssTarget: ["chrome90", "edge90", "firefox103", "safari15"],
     },
   },
 });
