@@ -24,19 +24,19 @@ import { Resvg } from "@resvg/resvg-js";
 // Resolved from the project root because Astro bundles this file into dist/,
 // where `import.meta.url`-based relative paths no longer reach src/og/fonts.
 const FONT_DIR = path.join(process.cwd(), "src/og/fonts");
-let frauncesRegular: Buffer | null = null;
-let frauncesItalic: Buffer | null = null;
+let serifRegular: Buffer | null = null;
+let serifItalic: Buffer | null = null;
 let geistMedium: Buffer | null = null;
 
 function loadFonts() {
-  if (frauncesRegular === null) {
-    frauncesRegular = fs.readFileSync(path.join(FONT_DIR, "Fraunces-Regular.ttf"));
-    frauncesItalic = fs.readFileSync(path.join(FONT_DIR, "Fraunces-Italic.ttf"));
+  if (serifRegular === null) {
+    serifRegular = fs.readFileSync(path.join(FONT_DIR, "InstrumentSerif-Regular.woff"));
+    serifItalic = fs.readFileSync(path.join(FONT_DIR, "InstrumentSerif-Italic.woff"));
     geistMedium = fs.readFileSync(path.join(FONT_DIR, "Geist-Medium.ttf"));
   }
   return {
-    fraunces: frauncesRegular!,
-    frauncesItalic: frauncesItalic!,
+    serif: serifRegular!,
+    serifItalic: serifItalic!,
     geist: geistMedium!,
   };
 }
@@ -49,7 +49,7 @@ const MUTED = "#6b6b66";
 const LINE = "#e8e6df";
 
 export async function renderDefaultOgPng(): Promise<Buffer> {
-  const { fraunces, frauncesItalic, geist } = loadFonts();
+  const { serif, serifItalic, geist } = loadFonts();
 
   const svg = await satori(
     {
@@ -104,7 +104,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
             type: "div",
             props: {
               style: {
-                fontFamily: "Fraunces",
+                fontFamily: "Instrument Serif",
                 fontSize: "84px",
                 lineHeight: 1.02,
                 letterSpacing: "-0.025em",
@@ -123,7 +123,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "span",
                   props: {
                     style: {
-                      fontFamily: "Fraunces",
+                      fontFamily: "Instrument Serif",
                       fontStyle: "italic",
                       color: ACCENT,
                     },
@@ -159,7 +159,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "span",
                   props: {
                     style: {
-                      fontFamily: "Fraunces",
+                      fontFamily: "Instrument Serif",
                       fontSize: "22px",
                     },
                     children: "Schwarzenbek · Hamburg",
@@ -175,8 +175,8 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Fraunces", data: fraunces, weight: 400, style: "normal" },
-        { name: "Fraunces", data: frauncesItalic, weight: 400, style: "italic" },
+        { name: "Instrument Serif", data: serif, weight: 400, style: "normal" },
+        { name: "Instrument Serif", data: serifItalic, weight: 400, style: "italic" },
         { name: "Geist", data: geist, weight: 500, style: "normal" },
       ],
     },
