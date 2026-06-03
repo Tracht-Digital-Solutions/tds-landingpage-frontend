@@ -99,28 +99,21 @@ the build still succeeds.
 
 ## 6. Production deployment
 
-Auto-SFTP was removed. The repo ships
-`.github/workflows/build.yml` which only builds and force-pushes
-`dist/` to an orphan `build` branch on every push to `main`. Deploy
-from there by hand:
+Deployment is automatic. On every push to `main`,
+`.github/workflows/build.yml` builds `dist/`, force-pushes it to an
+orphan `build` branch, then GET-pings the deploy webhook so the
+production host pulls that branch and goes live.
+
+One-time setup: add a `DEPLOY_WEBHOOK_URL` repository secret pointing at
+the host's deploy-hook URL (the deploy token is carried inside the URL).
+Until it's set, the build still publishes the `build` branch and the
+deploy ping is skipped.
 
 ```bash
-# Option A — build locally then SFTP
-npm run build
-
-# SFTP contents of dist/ to the production host at
-# ~/sites/tracht-digital.de/releases/<TIMESTAMP>/
-
-# Activate
-curl --fail \
-  "https://tracht-digital.de/install.php?action=install-static\
-&target=tracht-digital.de&release=<TIMESTAMP>&token=<INSTALL_TOKEN>"
-
-
-# Option B — pull from the build branch
+# Manual fallback: pull the latest built artifact from the build branch
 git fetch origin build
 git worktree add ../tds-landingpage-build origin/build
-# SFTP ../tds-landingpage-build/ to the production host as above
+# ../tds-landingpage-build/ now holds the built dist/
 ```
 
 ## 7. Before go-live: replace placeholder values

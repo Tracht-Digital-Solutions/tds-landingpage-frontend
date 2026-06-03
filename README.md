@@ -2,7 +2,7 @@
 
 > **Setting this up from scratch?** See [`INSTALL.md`](INSTALL.md) for
 > the step-by-step bring-up (Packages auth → npm install → env →
-> dev → build → manual deploy). This README documents pages,
+> dev → build → auto-deploy). This README documents pages,
 > structure and brand notes.
 
 ---
@@ -12,8 +12,8 @@ Marketing landing page for Tracht Digital Solutions. **Astro 6** +
 **React** islands + **Tailwind v4** (via the `@tailwindcss/postcss`
 plugin — see the *Tailwind note* below) with self-hosted
 **Instrument Serif + Geist**. Builds to fully static HTML and ships
-in two locale trees (DE at `/`, EN at `/en/`); deploys to **the production host
-the production host** at `tracht-digital.de`.
+in two locale trees (DE at `/`, EN at `/en/`); deploys automatically to
+the production host at `tracht-digital.de` on every push to `main`.
 
 SEO surface includes Schema.org JSON-LD (Organization,
 ProfessionalService, Person, WebSite, Service+OfferCatalog,
@@ -35,7 +35,7 @@ npm install
 npm run dev          # http://localhost:4321
 ```
 
-For a manual production build + deploy, see [Manual deploy](#manual-deploy).
+Deploys automatically on every push to `main`; see [Deploy](#deploy).
 
 ---
 
@@ -106,40 +106,36 @@ expired, or lacks the scope. Mint a new one at
 
 ```bash
 npm run dev          # Astro dev server (HMR, http://localhost:4321)
-npm run build        # → dist/ (static HTML/CSS/JS, ready to SFTP)
+npm run build        # → dist/ (static HTML/CSS/JS, what gets deployed)
 npm run preview      # serve dist/ to inspect the production build
 npm run type-check   # astro check — catches .astro + .tsx errors
 ```
 
 ---
 
-## Manual deploy
+## Deploy
 
-Auto-deploy via GitHub Actions was removed. The repo now ships
-`.github/workflows/build.yml` which only builds + force-pushes
-`dist/` to an orphan `build` branch (one commit per run, no
-history). Deploy from there by hand:
+Deployment is automatic. On every push to `main`,
+`.github/workflows/build.yml`:
+
+1. builds the static `dist/`,
+2. force-pushes it to an orphan `build` branch (one commit per run,
+   latest build only), and
+3. GET-pings the deploy webhook so the production host pulls the
+   `build` branch and goes live.
+
+**Required secret:** set the `DEPLOY_WEBHOOK_URL` repository secret to
+the host's deploy-hook URL (the deploy token is carried inside the URL).
+If it isn't set, the build still publishes the `build` branch and the
+deploy ping is skipped — so you can always fall back to pulling the
+artifact manually:
 
 ```bash
-# 1. Build static output
-npm run build
-
-# 2. SFTP the contents of dist/ to the production host
-#    Target: ~/sites/tracht-digital.de/releases/<TIMESTAMP>/
-#    (use FileZilla, lftp, or the production host's web file manager)
-
-# 3. Activate the new release on the production host
-#    Hit: https://tracht-digital.de/install.php?action=install-static
-#         &target=tracht-digital.de
-#         &release=<TIMESTAMP>
-#         &token=<INSTALL_TOKEN>
-#    (or use the hosting control panel to repoint the DocumentRoot symlink directly)
+# Inspect / roll back / deploy by hand from the latest build
+git fetch origin build
+git worktree add ../tds-landingpage-build origin/build
+# the worktree now holds the built dist/ for that commit
 ```
-
-If you want to pull straight from the `build` branch instead of
-building locally, swap step 1 for `git fetch origin build &&
-git worktree add ../tds-landingpage-build origin/build` and SFTP
-that worktree.
 
 ---
 
@@ -179,9 +175,10 @@ Workflow `permissions:` declared inline:
 - `packages: read` — sanity default; the PAT is what actually
   authenticates
 
-The five deployment-related Repository Secrets (`FTP_*`,
-`INSTALL_TOKEN`) and the `INSTALLER_URL` variable are now unused
-and can be cleaned up.
+Deploy secrets: `NPM_TOKEN` (used both to install from GitHub Packages
+and to push the `build` branch) and `DEPLOY_WEBHOOK_URL` (the host's
+deploy-hook URL). The old `FTP_*` / `INSTALL_TOKEN` Repository Secrets
+and the `INSTALLER_URL` variable are now unused and can be cleaned up.
 
 ---
 
