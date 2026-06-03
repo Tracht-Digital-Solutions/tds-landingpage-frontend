@@ -55,7 +55,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         controls apart from the section links while keeping them
         integrated into the same row rather than floating off the edge. */}
     <div class="flex items-center gap-1">
-      <div class="hidden md:flex items-center gap-1">
+      <div class="hidden lg:flex items-center gap-1">
         {items.map((item) => (
           <a
             href={sectionHref(item.id)}
@@ -81,7 +81,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       </div>
 
       <span
-        class="hidden md:block h-5 w-px mx-1 bg-[var(--color-line)]"
+        class="hidden lg:block h-5 w-px mx-1 bg-[var(--color-line)]"
         aria-hidden="true"
       ></span>
 
@@ -95,7 +95,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       <button
         id="menu-toggle"
         type="button"
-        class="menu-toggle md:hidden relative inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
+        class="menu-toggle lg:hidden relative inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
         aria-controls="mobile-menu"
         aria-expanded="false"
         aria-label={menuLabel}
@@ -110,7 +110,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 
 <div
   id="mobile-menu"
-  class="mobile-menu md:hidden fixed inset-x-3 top-16 z-30 origin-top rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.35)] p-3"
+  class="mobile-menu lg:hidden fixed inset-x-3 top-16 z-30 origin-top rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-line))] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.35)] p-3"
   aria-hidden="true"
 >
   <ul class="space-y-0.5">
@@ -346,9 +346,9 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       setOpen(false);
     });
 
-    // Close the panel automatically when crossing the md breakpoint
-    // (768px) so it never lingers after a viewport resize.
-    const mq = window.matchMedia("(min-width: 768px)");
+    // Close the panel automatically when crossing into the desktop
+    // (lg / 1024px) nav so it never lingers after a viewport resize.
+    const mq = window.matchMedia("(min-width: 1024px)");
     mq.addEventListener("change", (e) => {
       if (e.matches) setOpen(false);
     });
