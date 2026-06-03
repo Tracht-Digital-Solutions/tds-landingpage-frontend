@@ -1,0 +1,25 @@
+# Tracht Digital Solutions — static Astro build, served by Apache on netcup.
+#
+# The domain has Phusion Passenger enabled. Without this file Passenger
+# intercepts sub-path requests such as /preise and answers with its
+# generic "something went wrong" error instead of letting Apache serve
+# the built dist/preise/index.html. (The homepage works only because /
+# resolves straight to the root index.html.)
+#
+# Turning Passenger off makes Apache serve the static files directly.
+<IfModule mod_passenger.c>
+  PassengerEnabled off
+</IfModule>
+
+# Clean URLs: a request for /preise should serve dist/preise/index.html.
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # When the request maps to an existing directory that has an
+  # index.html, serve it internally — no visible trailing-slash redirect.
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
+  RewriteRule ^ %{REQUEST_URI}/index.html [L]
+</IfModule>
