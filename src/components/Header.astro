@@ -167,12 +167,8 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      like light catching the rim of a piece of glass. */
   .site-header {
     border-radius: 0 0 24px 24px;
+    border: 1px solid transparent;
     border-top-width: 0;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-style: solid;
-    border-color: transparent;
     background-color: color-mix(in srgb, var(--color-card) 60%, transparent);
     /* Docked pill carries no border and no drop shadow — only a faint
        glass rim highlight + the frosted blur. */
@@ -206,8 +202,6 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       top: 0;
       max-width: 100%;
       border-radius: 0 0 22px 22px;
-      border-top-width: 0;
-      border-color: transparent;
       background-color: transparent;
       box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
       backdrop-filter: blur(64px) saturate(190%);
@@ -308,9 +302,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 
   if (header) {
     const THRESHOLD = 8;
+    let scrolled: boolean | null = null;
     const updateScroll = () => {
-      header.dataset.scrolled =
-        window.scrollY > THRESHOLD ? "true" : "false";
+      const next = window.scrollY > THRESHOLD;
+      if (next === scrolled) return;
+      scrolled = next;
+      header.dataset.scrolled = next ? "true" : "false";
     };
     updateScroll();
     window.addEventListener("scroll", updateScroll, { passive: true });
