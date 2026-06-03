@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import {
   motion,
   useMotionValue,
+  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -98,6 +99,24 @@ export default function Hero({
   const conicRotate = useTransform(scrollY, [0, 1200], [0, 60]);
   const conicY = useTransform(scrollY, [0, 800], [0, -80]);
 
+  // Ambient drift — a slow, autonomous float on each blob so the
+  // aurora stays alive even with no cursor movement or scrolling
+  // (touch devices, or a visitor who's just reading). Applied to the
+  // inner gradient layer so it composes on top of the cursor (x) and
+  // scroll (y/scale) transforms on the wrapper rather than fighting
+  // them. Honour prefers-reduced-motion by dropping the loop entirely.
+  const prefersReduced = useReducedMotion();
+  const drift = (
+    keyframes: { x: number[]; y: number[]; scale: number[] },
+    duration: number,
+  ) =>
+    prefersReduced
+      ? undefined
+      : {
+          animate: keyframes,
+          transition: { duration, repeat: Infinity, ease: "easeInOut" as const },
+        };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -123,7 +142,7 @@ export default function Hero({
     >
       <motion.div
         aria-hidden
-        className="absolute -inset-20 pointer-events-none opacity-60"
+        className="absolute -inset-20 pointer-events-none"
         style={{
           rotate: conicRotate,
           y: conicY,
@@ -131,6 +150,13 @@ export default function Hero({
             "conic-gradient(from 220deg at 70% 30%, rgba(5,15,104,0.08), rgba(255,122,156,0.06), rgba(130,9,51,0.07), rgba(5,15,104,0.08))",
           filter: "blur(60px)",
         }}
+        animate={prefersReduced ? undefined : { opacity: [0.45, 0.68, 0.45] }}
+        transition={
+          prefersReduced
+            ? undefined
+            : { duration: 12, repeat: Infinity, ease: "easeInOut" }
+        }
+        initial={{ opacity: 0.6 }}
       />
 
       <motion.div
@@ -138,12 +164,13 @@ export default function Hero({
         className="absolute top-[15%] -left-40 w-[640px] h-[640px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
-        <div
+        <motion.div
           className="w-full h-full rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(5,15,104,0.22) 0%, rgba(5,15,104,0.05) 45%, transparent 70%)",
           }}
+          {...drift({ x: [0, 30, -20, 0], y: [0, 25, -15, 0], scale: [1, 1.06, 0.97, 1] }, 20)}
         />
       </motion.div>
 
@@ -152,12 +179,13 @@ export default function Hero({
         className="absolute bottom-[10%] -right-40 w-[560px] h-[560px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
-        <div
+        <motion.div
           className="w-full h-full rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(130,9,51,0.20) 0%, rgba(130,9,51,0.05) 45%, transparent 70%)",
           }}
+          {...drift({ x: [0, -35, 20, 0], y: [0, -20, 25, 0], scale: [1, 0.95, 1.05, 1] }, 24)}
         />
       </motion.div>
 
@@ -166,12 +194,13 @@ export default function Hero({
         className="absolute top-[40%] left-[35%] w-[440px] h-[440px] rounded-full pointer-events-none mix-blend-multiply"
         aria-hidden
       >
-        <div
+        <motion.div
           className="w-full h-full rounded-full"
           style={{
             background:
               "radial-gradient(circle, rgba(255,122,156,0.22) 0%, rgba(255,122,156,0.06) 45%, transparent 70%)",
           }}
+          {...drift({ x: [0, 25, -30, 0], y: [0, 30, -10, 0], scale: [1, 1.08, 0.94, 1] }, 17)}
         />
       </motion.div>
 
