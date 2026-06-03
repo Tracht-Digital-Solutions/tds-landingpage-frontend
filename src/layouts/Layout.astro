@@ -2,6 +2,7 @@
 import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
+import FloatingCta from "~/components/FloatingCta.astro";
 import JsonLd from "~/components/JsonLd.astro";
 import { siteConfig } from "~/lib/seo";
 
@@ -147,6 +148,7 @@ const enAltUrl = new URL(
     <SmoothScroll client:load />
     <ScrollProgress client:load />
     <slot />
+    <FloatingCta />
 
     {/* Dynamic document.title — observes every <section id="…"> on
         the page and prefixes the tab title with the section name as
