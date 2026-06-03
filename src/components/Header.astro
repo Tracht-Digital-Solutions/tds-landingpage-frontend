@@ -43,7 +43,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         alt=""
         width="40"
         height="28"
-        class="h-6 lg:h-7 w-auto"
+        class="site-logo h-6 lg:h-7 w-auto"
       />
       <span class="font-[var(--font-display)] text-lg lg:text-base font-medium leading-none">
         TDS
@@ -145,6 +145,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 </div>
 
 <style>
+  /* The brand mark ships in its dark navy colour; in dark mode flip it
+     to solid white so it stays legible against the dark surface. */
+  :global(:root[data-theme="dark"]) .site-logo {
+    filter: brightness(0) invert(1);
+  }
+
   /* Mobile + tablet default — pill is docked flush against the top
      edge, top corners squared, glassmorphic. Heavier blur + slight
      saturation pulls the colour out of whatever's behind it (the
