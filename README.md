@@ -277,7 +277,7 @@ src/
 │   └── jsonld.ts               # Schema.org graph generators
 ├── og/                         # Satori OG-card pipeline (build-time)
 │   ├── render.ts               # 1200×630 default card
-│   └── fonts/                  # Fraunces + Geist TTFs (legacy; OG card not yet repointed)
+│   └── fonts/                  # Instrument Serif (woff) + Geist (ttf) for the OG card
 ├── pages/                      # Astro file-routing
 │   ├── index.astro             # DE home
 │   ├── preise.astro            # DE pricing
@@ -287,7 +287,7 @@ src/
 │   ├── og/default.png.ts       # Endpoint emitting the default OG card
 │   └── legal/{impressum,datenschutz}.astro
 ├── public/                     # Static assets (robots.txt, llms.txt, favicon)
-└── styles/global.css           # Brand tokens via @theme, Tailwind v4
+└── styles/global.css           # imports tds-shared base.css (tokens/@theme) + local marketing CSS
 
 postcss.config.mjs              # @tailwindcss/postcss wiring — see Tailwind note above
 scripts/og-smoke.ts             # `npm run og:smoke` — renders default OG card

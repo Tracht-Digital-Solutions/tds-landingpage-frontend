@@ -184,7 +184,7 @@ interface Props {
 | | |
 |---|---|
 | **Generator** | `src/og/render.ts` → emitted at `dist/og/default.png` |
-| **Source** | Satori SVG with Fraunces + Geist TTFs in `src/og/fonts/` |
+| **Source** | Satori SVG with Instrument Serif (woff) + Geist (ttf) in `src/og/fonts/` |
 | **Dimensions** | **1200 × 630 px** (Open Graph spec — also satisfies Twitter `summary_large_image`). LinkedIn / WhatsApp pull the same file. |
 | **Status** | Generated at build time — no manual swap needed for the default card. If you want a per-page OG card later, add a new endpoint under `src/pages/og/` mirroring the default pipeline. |
 

@@ -144,7 +144,7 @@ git grep -nE 'DE 123 456 789'
 
 ## Related repos
 
-- [tds-shared](https://github.com/Tracht-Digital-Solutions/tds-shared) — i18n strings, brand tokens, Tailwind preset
+- [tds-shared](https://github.com/Tracht-Digital-Solutions/tds-shared) — design system (base.css), components, i18n strings, motion
 - [tds-contact-api](https://github.com/Tracht-Digital-Solutions/tds-contact-api) — Contact form POSTs here
 - [tds-content-api](https://github.com/Tracht-Digital-Solutions/tds-content-api) — Journal teaser fetches at build time
 - [tds-blog](https://github.com/Tracht-Digital-Solutions/tds-blog) — `Alle Artikel →` link points at `https://blog.tracht-digital.de`

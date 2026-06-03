@@ -38,16 +38,21 @@ See README's "Replace examples before go-live" section.
   to their DE counterparts because Astro injects the right
   `currentLocale` from the URL. Internal links go through
   `localizePath()` so /preise stays in the active locale tree.
-- **Brand tokens**: imported via Tailwind's `@theme inline` block in
-  `src/styles/global.css`. Same brand colors as the legacy app
-  (#050f68 navy, #820933 burgundy). Heading family is self-hosted
-  `@fontsource/instrument-serif` (regular + italic, non-variable);
-  body is `@fontsource-variable/geist`. The previous Fraunces
-  display family was replaced 2026-05-28 — Instrument Serif's
-  higher contrast reads better in the editorial layout.
+- **Brand tokens**: defined as the `@theme` block in
+  `@tracht-digital-solutions/tds-shared/styles/base.css`, which
+  `src/styles/global.css` imports (Tailwind v4 processes the imported
+  `@theme`). Same brand colors as the legacy app (#050f68 navy, #820933
+  burgundy). Heading family is self-hosted `@fontsource/instrument-serif`
+  (regular + italic, non-variable); body is `@fontsource-variable/geist`.
+  Instrument Serif is the single canonical display font across all
+  frontends (it replaced Fraunces — its higher contrast reads better in
+  the editorial layout).
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
-  `.section-num`, `.eyebrow`, `.lead` — the same primitives the portals
-  and journal use. `SectionHeader.astro` is the shared masthead component
+  `.section-num`, `.eyebrow`, `.lead` — shared primitives from
+  tds-shared's `base.css`, the same the portals and journal use. The
+  marketing site imports only `base.css` (not `app.css`) and keeps its
+  bespoke section styles (accent-letters, hero, marquee) local.
+  `SectionHeader.astro` is the shared masthead component
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
 - **Interactive accent letters** (`src/components/ui/AccentLetters.astro`
@@ -80,7 +85,7 @@ See README's "Replace examples before go-live" section.
   fallback in the same file when the API returns `[]` so the
   section still ships meaningfully on first-deploy or transient
   outage. Right column ("Im Fokus" / "Focused on") still lists
-  4 intentions / principles with italic Fraunces "→" arrow
+  4 intentions / principles with italic Instrument Serif "→" arrow
   markers, `md:sticky` so they stay visible while the topics list
   scrolls past. Intentions copy stays inlined; topics are live.
 - **Consulting section** (`src/components/sections/Consulting.astro`):
@@ -261,8 +266,9 @@ See README's "Replace examples before go-live" section.
 
 - Don't add `output: "server"` — Webhosting 8000 has no Node runtime.
   This site MUST stay `output: "static"`.
-- Don't add per-frontend brand tokens. Always edit `tds-shared/src/brand/`
-  and bump the version.
+- Don't add per-frontend brand tokens or duplicate the shared design CSS.
+  Always edit `tds-shared/styles/base.css` (tokens, base) or `app.css`
+  (shared chrome) and bump the version.
 - Don't fetch the journal teaser at runtime. Build-time fetch in
   `index.astro` frontmatter so the rendered HTML ships static.
 - Don't reintroduce the navy→burgundy `linear-gradient` pill buttons.
