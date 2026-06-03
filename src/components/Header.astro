@@ -32,7 +32,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
   class="site-header fixed top-0 left-3 right-3 z-40 px-2.5 py-2 lg:px-3"
   data-scrolled="false"
 >
-  <nav class="flex items-center justify-between gap-2 text-sm lg:gap-3">
+  <nav class="flex items-center justify-between gap-2 text-sm lg:justify-center lg:gap-2">
     <a
       href={homeHref}
       class="flex items-center gap-2 px-2 lg:px-2.5 py-1 lg:py-1 text-[var(--color-primary)] hover:opacity-90 transition-opacity"
@@ -50,32 +50,41 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       </span>
     </a>
 
-    <div class="hidden md:flex items-center gap-1">
-      {items.map((item) => (
+    {/* Links + controls live in one connected cluster so the nav reads
+        as a single unit. A hairline divider sets the theme/language
+        controls apart from the section links while keeping them
+        integrated into the same row rather than floating off the edge. */}
+    <div class="flex items-center gap-1">
+      <div class="hidden md:flex items-center gap-1">
+        {items.map((item) => (
+          <a
+            href={sectionHref(item.id)}
+            class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+          >
+            {item.label}
+          </a>
+        ))}
         <a
-          href={sectionHref(item.id)}
+          href={pricingHref}
           class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
         >
-          {item.label}
+          {t.nav.pricing}
         </a>
-      ))}
-      <a
-        href={pricingHref}
-        class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
-      >
-        {t.nav.pricing}
-      </a>
-      <a
-        href={siteConfig.blogUrl}
-        rel="me noopener"
-        class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
-      >
-        {t.nav.blog}
-        <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
-      </a>
-    </div>
+        <a
+          href={siteConfig.blogUrl}
+          rel="me noopener"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+        >
+          {t.nav.blog}
+          <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
+        </a>
+      </div>
 
-    <div class="flex items-center gap-1.5 lg:gap-0">
+      <span
+        class="hidden md:block h-5 w-px mx-1 bg-[var(--color-line)]"
+        aria-hidden="true"
+      ></span>
+
       <ThemeToggle
         client:load
         labelToDark={lang === "en" ? "Switch to dark mode" : "Auf Dunkel umschalten"}
