@@ -181,43 +181,42 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       inset 0 1px 0 rgb(255 255 255 / 0.55),
       0 10px 30px -10px rgba(5, 15, 104, 0.22),
       0 2px 6px -2px rgba(5, 15, 104, 0.12);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
   }
 
-  /* Desktop ( >=lg / 1024px ) — back to the floating full pill with
-     the scroll-morph behaviour. At rest the pill is transparent so
-     the nav reads as part of the hero; once the page scrolls past
-     8px the data-scrolled attribute switches the chrome on. */
+  /* Desktop ( >=lg / 1024px ) — floating full pill. The pill is
+     frosted milk-glass at all times: a translucent card-tinted fill
+     plus a heavy backdrop blur so whatever scrolls underneath (the
+     hero aurora especially) is softened, not just shown through. On
+     scroll past 8px the fill firms up a touch and the shadow deepens
+     so the pill detaches cleanly from the content behind it. */
   @media (min-width: 1024px) {
     .site-header {
       border-radius: 9999px;
       border-top-width: 1px;
-      border-color: transparent;
-      background-color: transparent;
-      box-shadow: none;
-      backdrop-filter: blur(0);
-      -webkit-backdrop-filter: blur(0);
-      transition:
-        background-color 250ms ease,
-        border-color 250ms ease,
-        box-shadow 250ms ease,
-        backdrop-filter 250ms ease,
-        -webkit-backdrop-filter 250ms ease;
-    }
-
-    .site-header[data-scrolled="true"] {
-      background-color: color-mix(in srgb, var(--color-card) 70%, transparent);
       border-color: color-mix(
         in srgb,
         var(--color-primary) 14%,
         rgb(255 255 255 / 0.6)
       );
+      background-color: color-mix(in srgb, var(--color-card) 60%, transparent);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.5),
+        0 10px 30px -12px rgba(5, 15, 104, 0.18);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      transition:
+        background-color 250ms ease,
+        border-color 250ms ease,
+        box-shadow 250ms ease;
+    }
+
+    .site-header[data-scrolled="true"] {
+      background-color: color-mix(in srgb, var(--color-card) 75%, transparent);
       box-shadow:
         inset 0 1px 0 rgb(255 255 255 / 0.55),
         0 10px 30px -10px rgba(5, 15, 104, 0.28);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
     }
   }
 
