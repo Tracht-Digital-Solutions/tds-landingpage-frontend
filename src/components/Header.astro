@@ -82,7 +82,11 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     </div>
 
     <div class="flex items-center gap-1.5 lg:gap-0">
-      <ThemeToggle client:load />
+      <ThemeToggle
+        client:load
+        labelToDark={lang === "en" ? "Switch to dark mode" : "Auf Dunkel umschalten"}
+        labelToLight={lang === "en" ? "Switch to light mode" : "Auf Hell umschalten"}
+      />
       <LanguageToggle client:load lang={lang} />
 
       <button

@@ -41,6 +41,7 @@ function loadFonts() {
   };
 }
 
+const SERIF = "Instrument Serif";
 const PAPER = "#fafaf7";
 const INK = "#1a1a17";
 const PRIMARY = "#050f68";
@@ -104,7 +105,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
             type: "div",
             props: {
               style: {
-                fontFamily: "Instrument Serif",
+                fontFamily: SERIF,
                 fontSize: "84px",
                 lineHeight: 1.02,
                 letterSpacing: "-0.025em",
@@ -123,7 +124,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "span",
                   props: {
                     style: {
-                      fontFamily: "Instrument Serif",
+                      fontFamily: SERIF,
                       fontStyle: "italic",
                       color: ACCENT,
                     },
@@ -159,7 +160,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "span",
                   props: {
                     style: {
-                      fontFamily: "Instrument Serif",
+                      fontFamily: SERIF,
                       fontSize: "22px",
                     },
                     children: "Schwarzenbek · Hamburg",
@@ -175,8 +176,8 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Instrument Serif", data: serif, weight: 400, style: "normal" },
-        { name: "Instrument Serif", data: serifItalic, weight: 400, style: "italic" },
+        { name: SERIF, data: serif, weight: 400, style: "normal" },
+        { name: SERIF, data: serifItalic, weight: 400, style: "italic" },
         { name: "Geist", data: geist, weight: 500, style: "normal" },
       ],
     },
