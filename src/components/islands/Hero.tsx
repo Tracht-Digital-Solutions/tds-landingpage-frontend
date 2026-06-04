@@ -137,7 +137,7 @@ export default function Hero({
     <section
       ref={containerRef}
       id="hero"
-      className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-20"
+      className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-20 pb-28"
       aria-label="Hero"
     >
       <motion.div
@@ -341,7 +341,7 @@ export default function Hero({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
         whileHover={{ y: -2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-xs text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer p-2 rounded-md"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-xs text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer p-2 rounded-md"
         aria-label={t.hero.scrollHint}
       >
         <span>{t.hero.scrollHint}</span>
