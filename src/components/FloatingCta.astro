@@ -46,7 +46,11 @@ const label = t.nav.cta;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.85rem 1.25rem;
+    /* Phones: collapse to a compact icon-only circle so the persistent
+       CTA doesn't eat half the viewport width or crowd the bottom edge.
+       The aria-label still announces the action. Equal padding around
+       the 18px icon keeps it a clean circle under border-radius. */
+    padding: 0.85rem;
     border-radius: 9999px;
     font-size: 0.875rem;
     font-weight: 500;
@@ -60,6 +64,20 @@ const label = t.nav.cta;
       background-color 220ms ease,
       box-shadow 220ms ease;
     animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+  }
+
+  .floating-cta__label {
+    display: none;
+  }
+
+  /* Small screens and up: expand into the full labelled pill. */
+  @media (min-width: 640px) {
+    .floating-cta {
+      padding: 0.85rem 1.25rem;
+    }
+    .floating-cta__label {
+      display: inline;
+    }
   }
 
   @media (min-width: 768px) {
