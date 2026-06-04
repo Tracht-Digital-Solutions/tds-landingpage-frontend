@@ -1,6 +1,9 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
+// Shared CSS minify settings (incl. the cssTarget that keeps lightningcss
+// from dropping the header backdrop-filter prefix). See tds-shared#10.
+import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 
 export default defineConfig({
   site: "https://tracht-digital.de",
@@ -30,21 +33,6 @@ export default defineConfig({
     service: { entrypoint: "astro/assets/services/sharp" },
   },
   vite: {
-    build: {
-      // Minify CSS aggressively (default is `esbuild`; `lightningcss`
-      // shaves a few more bytes off the production bundle).
-      cssMinify: "lightningcss",
-      // The lightningcss minify step derives its prefixing targets from
-      // `cssTarget` (it ignores `css.lightningcss.targets`). Vite's
-      // default baseline includes Firefox versions that predate any
-      // `backdrop-filter` support, so lightningcss concludes only the
-      // `-webkit-` prefix is needed and DROPS the unprefixed
-      // declaration — killing the frosted nav blur in Firefox, which
-      // only supports the standard property (since FF 103). Pinning a
-      // Firefox target that supports it forces lightningcss to keep BOTH
-      // the standard and `-webkit-` declarations; safari15 keeps the
-      // `-webkit-` prefix for Safari.
-      cssTarget: ["chrome90", "edge90", "firefox103", "safari15"],
-    },
+    build: { ...tdsViteBuild },
   },
 });
