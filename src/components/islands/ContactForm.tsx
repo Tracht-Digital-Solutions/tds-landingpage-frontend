@@ -98,7 +98,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const fieldClass = (hasError: boolean) =>
     [
       "contact-field block w-full appearance-none bg-transparent",
-      "px-0 py-3 text-base text-white leading-snug",
+      "px-3 py-3 text-base text-white leading-snug",
       "border-0 outline-none focus:outline-none focus:ring-0",
       hasError ? "contact-field--error" : "",
     ].join(" ");
