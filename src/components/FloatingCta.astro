@@ -2,11 +2,12 @@
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 
 /**
- * Persistent "book a call" CTA that hovers in the bottom-right corner
- * on every page. Links to the contact section on the homepage (the
- * sections only exist there, so from a subpage it navigates home then
- * scrolls). Idle bob + hover lift give it a bit of life; both are
- * dropped under prefers-reduced-motion.
+ * Persistent bottom-right control. Idle: just the "book a call" CTA
+ * (links to the contact section). Once the visitor scrolls ~one viewport
+ * down, a scroll-to-top button reveals itself attached on top of the CTA,
+ * separated by a divider line, so the two read as one connected pill.
+ * The whole group flips to white when it floats over a dark section so it
+ * never disappears into the background.
  */
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -14,64 +15,83 @@ const t = tFor(Astro.currentLocale);
 const home = localizePath("/", lang);
 const href = `${home === "/" ? "" : home.replace(/\/$/, "")}/#contact`;
 const label = t.nav.cta;
+const topLabel = lang === "en" ? "Back to top" : "Nach oben";
 ---
 
-<a href={href} class="floating-cta group" aria-label={label}>
-  <svg
-    aria-hidden="true"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    class="floating-cta__icon"
-  >
-    <rect x="3" y="4" width="18" height="18" rx="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-  <span class="floating-cta__label">{label}</span>
-</a>
+<div class="floating-cta-group" data-scrolled-down="false" data-on-dark="false">
+  <button type="button" class="floating-cta-top" aria-label={topLabel}>
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="floating-cta-top__icon"
+    >
+      <line x1="12" y1="19" x2="12" y2="5" />
+      <polyline points="5 12 12 5 19 12" />
+    </svg>
+  </button>
+
+  <a href={href} class="floating-cta" aria-label={label}>
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="floating-cta__icon"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+    <span class="floating-cta__label">{label}</span>
+  </a>
+</div>
 
 <style>
-  .floating-cta {
+  .floating-cta-group {
     position: fixed;
     right: 1rem;
     bottom: 1rem;
     z-index: 35;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    /* Phones: collapse to a compact icon-only circle so the persistent
-       CTA doesn't eat half the viewport width or crowd the bottom edge.
-       The aria-label still announces the action. Equal padding around
-       the 18px icon keeps it a clean circle under border-radius. */
-    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
     border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
     color: #fff;
     background-color: var(--color-surface-navy);
     box-shadow:
       0 14px 34px -12px rgba(5, 15, 104, 0.55),
       0 4px 10px -4px rgba(5, 15, 104, 0.3);
     transition:
-      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
       background-color 220ms ease,
       color 220ms ease,
-      box-shadow 220ms ease;
+      box-shadow 220ms ease,
+      border-radius 280ms cubic-bezier(0.22, 1, 0.36, 1);
     animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
   }
 
-  /* When the button floats over any dark-background section it would
-     disappear into it (the button is navy). Flip it to a white pill with
-     navy text so it stays legible. `data-on-dark` is toggled from the
-     luminance check in the script below as the user scrolls. */
-  .floating-cta[data-on-dark="true"] {
+  /* Expanded (scrolled down): the group grew a top button + divider, so
+     relax the pill radius into a rounded card. */
+  .floating-cta-group[data-scrolled-down="true"] {
+    border-radius: 1.6rem;
+  }
+
+  /* Over a dark section the whole group flips to a white pill (toggled
+     from the luminance check in the script). */
+  .floating-cta-group[data-on-dark="true"] {
     background-color: #fff;
     color: var(--color-surface-navy);
     box-shadow:
@@ -79,11 +99,38 @@ const label = t.nav.cta;
       0 4px 10px -4px rgba(0, 0, 0, 0.3);
   }
 
+  @media (min-width: 768px) {
+    .floating-cta-group {
+      right: 1.5rem;
+      bottom: 1.5rem;
+    }
+  }
+
+  /* --- CTA (bottom) -------------------------------------------------- */
+  .floating-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    /* Phones: a compact icon-only tap target. */
+    padding: 0.85rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 200ms ease;
+  }
+  /* currentColor-based wash so the hover reads on both the navy and the
+     inverted-white states. */
+  .floating-cta:hover {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
+  .floating-cta:active {
+    background-color: color-mix(in srgb, currentColor 18%, transparent);
+  }
   .floating-cta__label {
     display: none;
   }
-
-  /* Small screens and up: expand into the full labelled pill. */
   @media (min-width: 640px) {
     .floating-cta {
       padding: 0.85rem 1.25rem;
@@ -93,43 +140,54 @@ const label = t.nav.cta;
     }
   }
 
-  @media (min-width: 768px) {
-    .floating-cta {
-      right: 1.5rem;
-      bottom: 1.5rem;
-    }
-  }
-
-  /* Idle bob so the button reads as "hovering". Layered after the
-     entrance via a second animation on the inner icon keeps the
-     entrance and the loop from fighting over `transform`. */
+  /* Idle bob on the calendar icon so the control reads as "alive". */
   .floating-cta__icon {
     transition: transform 220ms ease;
     animation: floating-cta-bob 3s ease-in-out 1.2s infinite;
-  }
-
-  .floating-cta:hover {
-    transform: translateY(-3px);
-    background-color: var(--color-surface-accent);
-    box-shadow:
-      0 22px 48px -14px rgba(5, 15, 104, 0.6),
-      0 8px 18px -6px rgba(5, 15, 104, 0.35);
-  }
-  .floating-cta:active {
-    transform: translateY(-1px) scale(0.98);
   }
   .floating-cta:hover .floating-cta__icon {
     transform: scale(1.1) rotate(-6deg);
   }
 
-  /* Inverted hover: stay white, shift the text/icon to the burgundy
-     accent instead of the navy→burgundy fill that would blend back in. */
-  .floating-cta[data-on-dark="true"]:hover {
-    background-color: #fff;
-    color: var(--color-surface-accent);
-    box-shadow:
-      0 22px 48px -14px rgba(0, 0, 0, 0.5),
-      0 8px 18px -6px rgba(0, 0, 0, 0.35);
+  /* --- Scroll-to-top (top, revealed on scroll) ---------------------- */
+  .floating-cta-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    cursor: pointer;
+    /* Collapsed by default — zero height, faded, click-through, divider
+       hidden. */
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+    border-bottom: 1px solid transparent;
+    transition:
+      height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms ease,
+      background-color 200ms ease,
+      border-color 220ms ease;
+  }
+  .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
+    height: 2.6rem;
+    opacity: 1;
+    pointer-events: auto;
+    /* Trennlinie above the CTA. */
+    border-bottom-color: rgb(255 255 255 / 0.22);
+  }
+  /* Inverted group → dark divider on the white pill. */
+  .floating-cta-group[data-on-dark="true"][data-scrolled-down="true"]
+    .floating-cta-top {
+    border-bottom-color: rgb(5 15 104 / 0.16);
+  }
+  .floating-cta-top:hover {
+    background-color: color-mix(in srgb, currentColor 12%, transparent);
+  }
+  .floating-cta-top__icon {
+    transition: transform 220ms ease;
+  }
+  .floating-cta-top:hover .floating-cta-top__icon {
+    transform: translateY(-2px);
   }
 
   @keyframes floating-cta-in {
@@ -154,31 +212,31 @@ const label = t.nav.cta;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .floating-cta,
+    .floating-cta-group,
     .floating-cta__icon {
       animation: none;
     }
-    .floating-cta {
+    /* Reveal instantly, keep the colour/divider fades. */
+    .floating-cta-top {
       transition:
-        background-color 220ms ease,
-        color 220ms ease;
-    }
-    .floating-cta:hover {
-      transform: none;
+        height 0ms,
+        opacity 200ms ease,
+        background-color 200ms ease,
+        border-color 220ms ease;
     }
   }
 </style>
 
 <script>
-  // Invert the floating CTA to a white pill whenever it sits over a
-  // dark-background section, otherwise it disappears into it (the button
-  // is navy). Rather than match specific classes, we read the actual
-  // background colour under the button and test its luminance — so this
-  // covers navy (Tech/Contact), the ink footer, burgundy surfaces and
-  // dark mode alike. rAF-throttled on scroll/resize.
-  const cta = document.querySelector<HTMLElement>(".floating-cta");
+  type LenisLike = {
+    scrollTo: (target: number, options?: { immediate?: boolean }) => void;
+  };
 
-  if (cta) {
+  const group = document.querySelector<HTMLElement>(".floating-cta-group");
+  const topBtn = group?.querySelector<HTMLElement>(".floating-cta-top");
+
+  if (group) {
+    // Parse a computed `rgb(...)` / `rgba(...)` string into [r,g,b,a].
     const parseRgb = (
       value: string,
     ): [number, number, number, number] | null => {
@@ -190,9 +248,8 @@ const label = t.nav.cta;
       return [r, g, b, a];
     };
 
-    // Walk up from the element under the button until an opaque
-    // background is found, so we read the section's real colour rather
-    // than a transparent child. Falls back to the document background.
+    // Walk up from the element under the group until an opaque background
+    // is found; falls back to the document background.
     const backgroundUnder = (
       start: Element | null,
     ): [number, number, number] | null => {
@@ -206,22 +263,25 @@ const label = t.nav.cta;
       return doc ? [doc[0], doc[1], doc[2]] : null;
     };
 
-    // sRGB-weighted relative luminance on a 0–255 scale; below ~45% reads
-    // as a dark surface that the navy button would vanish into.
     const isDark = ([r, g, b]: [number, number, number]) =>
       0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
 
     let frame = 0;
     const update = () => {
       frame = 0;
-      const rect = cta.getBoundingClientRect();
+      // Reveal the scroll-to-top button after ~one viewport of scroll.
+      group.dataset.scrolledDown =
+        window.scrollY > window.innerHeight * 0.8 ? "true" : "false";
+
+      // Invert over dark sections — sample the background behind the group.
+      const rect = group.getBoundingClientRect();
       const x = rect.left + rect.width / 2;
       const y = rect.top + rect.height / 2;
       const behind = document
         .elementsFromPoint(x, y)
-        .find((el) => el !== cta && !cta.contains(el));
+        .find((el) => el !== group && !group.contains(el));
       const rgb = backgroundUnder(behind ?? null);
-      cta.dataset.onDark = rgb && isDark(rgb) ? "true" : "false";
+      group.dataset.onDark = rgb && isDark(rgb) ? "true" : "false";
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -230,5 +290,17 @@ const label = t.nav.cta;
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
+
+    topBtn?.addEventListener("click", () => {
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const lenis = (window as unknown as { lenis?: LenisLike }).lenis;
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: reduce });
+      } else {
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      }
+    });
   }
 </script>
