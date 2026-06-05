@@ -18,7 +18,12 @@ const label = t.nav.cta;
 const topLabel = lang === "en" ? "Back to top" : "Nach oben";
 ---
 
-<div class="floating-cta-group" data-scrolled-down="false" data-on-dark="false">
+<div
+  class="floating-cta-group"
+  data-scrolled-down="false"
+  data-near="false"
+  data-on-dark="false"
+>
   <button type="button" class="floating-cta-top" aria-label={topLabel}>
     <svg
       aria-hidden="true"
@@ -85,15 +90,16 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Arrow-sized: just enough to wrap the 18px glyph. */
-    width: 1.65rem;
-    height: 1.65rem;
+    /* Arrow-sized but a touch bigger so it reads clearly; fully round. */
+    width: 1.9rem;
+    height: 1.9rem;
     border-radius: 9999px;
     color: #fff;
     background-color: var(--color-surface-navy);
-    /* Sink the base behind the CTA (z-index below it) so the two navy
-       shapes fuse into one. */
-    margin-bottom: -0.8rem;
+    /* Sink the base deep behind the CTA (z-index below it) so the two
+       navy shapes stay fused into one rounded component across the whole
+       slide range. */
+    margin-bottom: -1rem;
     position: relative;
     z-index: 0;
     cursor: pointer;
@@ -108,10 +114,19 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       background-color 220ms ease,
       color 220ms ease;
   }
+  /* Revealed but resting — only peeks above the CTA. */
   .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
     opacity: 1;
-    transform: translateY(0) scale(1);
     pointer-events: auto;
+    transform: translateY(0.45rem) scale(1);
+  }
+  /* Cursor nearby — slides up so it reads more clearly. */
+  .floating-cta-group[data-scrolled-down="true"][data-near="true"] .floating-cta-top {
+    transform: translateY(0) scale(1);
+  }
+  /* Hovering the control — slides up the most. */
+  .floating-cta-group[data-scrolled-down="true"]:hover .floating-cta-top {
+    transform: translateY(-0.45rem) scale(1.05);
   }
   .floating-cta-top:hover {
     background-color: color-mix(in srgb, currentColor 16%, transparent);
@@ -304,6 +319,37 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
+
+    // Proximity: as the pointer nears the control, slide the scroll-to-top
+    // arrow up (the CSS slides it further again on hover). Hover-capable
+    // pointers only — touch has no "near" state.
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      const NEAR = 150;
+      let near = false;
+      let px = 0;
+      let py = 0;
+      let pframe = 0;
+      const evalNear = () => {
+        pframe = 0;
+        const r = group.getBoundingClientRect();
+        const dx = Math.max(r.left - px, 0, px - r.right);
+        const dy = Math.max(r.top - py, 0, py - r.bottom);
+        const next = Math.hypot(dx, dy) < NEAR;
+        if (next !== near) {
+          near = next;
+          group.dataset.near = next ? "true" : "false";
+        }
+      };
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          px = event.clientX;
+          py = event.clientY;
+          if (!pframe) pframe = requestAnimationFrame(evalNear);
+        },
+        { passive: true },
+      );
+    }
 
     topBtn?.addEventListener("click", () => {
       const reduce = window.matchMedia(
