@@ -96,10 +96,10 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     border-radius: 9999px;
     color: #fff;
     background-color: var(--color-surface-navy);
-    /* Sink the base deep behind the CTA (z-index below it) so the two
-       navy shapes stay fused into one rounded component across the whole
-       slide range. */
-    margin-bottom: -1rem;
+    /* Overlap the CTA so the two navy shapes fuse into one rounded
+       component; the ::after neck (below) keeps them connected as the
+       nub slides up. */
+    margin-bottom: -0.85rem;
     position: relative;
     z-index: 0;
     cursor: pointer;
@@ -114,27 +114,40 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       background-color 220ms ease,
       color 220ms ease;
   }
-  /* Revealed but resting — only peeks above the CTA. */
+  /* Fluid neck: a narrower navy stem dropping from the nub down behind the
+     CTA pill, so a droplet-like pinch connects them. Inherits the nub's
+     background-color, so it recolours with every state (navy / accent /
+     white-on-dark). Sits behind the pill (pill is z-index 1). */
+  .floating-cta-top::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: 1.15rem;
+    height: 1.7rem;
+    transform: translateX(-50%);
+    background-color: inherit;
+    border-radius: 0 0 0.7rem 0.7rem;
+    z-index: -1;
+  }
+  /* Revealed and resting — already peeks clearly above the CTA. */
   .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0.45rem) scale(1);
+    transform: translateY(0) scale(1);
   }
   /* Cursor nearby — slides up so it reads more clearly. */
   .floating-cta-group[data-scrolled-down="true"][data-near="true"] .floating-cta-top {
-    transform: translateY(0) scale(1);
+    transform: translateY(-0.4rem) scale(1.02);
   }
   /* Hovering the control — slides up the most. */
   .floating-cta-group[data-scrolled-down="true"]:hover .floating-cta-top {
-    transform: translateY(-0.45rem) scale(1.05);
-  }
-  .floating-cta-top:hover {
-    background-color: color-mix(in srgb, currentColor 16%, transparent);
+    transform: translateY(-0.8rem) scale(1.06);
   }
   .floating-cta-top__icon {
     transition: transform 220ms ease;
   }
-  .floating-cta-top:hover .floating-cta-top__icon {
+  .floating-cta-group:hover .floating-cta-top__icon {
     transform: translateY(-2px);
   }
 
@@ -184,19 +197,24 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     transform: scale(1.1) rotate(-6deg);
   }
 
-  /* Hover the CTA: the whole merged control lifts and warms to burgundy
-     with white text — applies in both the navy and inverted states (the
-     :has selector out-specifies the [data-on-dark] rules), and recolours
-     the nub too so the fused shape stays one colour. */
-  .floating-cta-group:has(.floating-cta:hover) {
+  /* Hover either piece: the whole merged control lifts and warms to
+     burgundy with white text — applies in both the navy and inverted
+     states (the :has selector out-specifies the [data-on-dark] rules),
+     and recolours both pieces so the fused shape stays one colour.
+     Hovering the arrow nub yields the identical look to hovering the CTA. */
+  .floating-cta-group:has(.floating-cta:hover),
+  .floating-cta-group:has(.floating-cta-top:hover) {
     transform: translateY(-2px);
   }
   .floating-cta-group:has(.floating-cta:hover) .floating-cta,
-  .floating-cta-group:has(.floating-cta:hover) .floating-cta-top {
+  .floating-cta-group:has(.floating-cta:hover) .floating-cta-top,
+  .floating-cta-group:has(.floating-cta-top:hover) .floating-cta,
+  .floating-cta-group:has(.floating-cta-top:hover) .floating-cta-top {
     background-color: var(--color-surface-accent);
     color: #fff;
   }
-  .floating-cta-group:has(.floating-cta:hover) .floating-cta {
+  .floating-cta-group:has(.floating-cta:hover) .floating-cta,
+  .floating-cta-group:has(.floating-cta-top:hover) .floating-cta {
     box-shadow:
       0 22px 48px -14px rgba(5, 15, 104, 0.55),
       0 8px 18px -6px rgba(5, 15, 104, 0.4);
