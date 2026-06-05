@@ -22,6 +22,11 @@ export default function SmoothScroll() {
       smoothWheel: true,
     });
 
+    // Expose the instance so non-Lenis callers (e.g. the BackToTop
+    // button) can drive programmatic scrolls through Lenis instead of
+    // native scrollTo, which Lenis would otherwise fight.
+    (window as unknown as { lenis?: Lenis }).lenis = lenis;
+
     let rafId: number;
     const raf = (time: number) => {
       lenis.raf(time);
@@ -32,6 +37,7 @@ export default function SmoothScroll() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      delete (window as unknown as { lenis?: Lenis }).lenis;
     };
   }, []);
 
