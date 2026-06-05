@@ -70,6 +70,8 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* Lifts as one unit when the CTA is hovered (see :has rule below). */
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   @media (min-width: 768px) {
     .floating-cta-group {
@@ -167,6 +169,24 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     transform: scale(1.1) rotate(-6deg);
   }
 
+  /* Hover the CTA: the whole merged control lifts and warms to burgundy
+     with white text — applies in both the navy and inverted states (the
+     :has selector out-specifies the [data-on-dark] rules), and recolours
+     the nub too so the fused shape stays one colour. */
+  .floating-cta-group:has(.floating-cta:hover) {
+    transform: translateY(-2px);
+  }
+  .floating-cta-group:has(.floating-cta:hover) .floating-cta,
+  .floating-cta-group:has(.floating-cta:hover) .floating-cta-top {
+    background-color: var(--color-surface-accent);
+    color: #fff;
+  }
+  .floating-cta-group:has(.floating-cta:hover) .floating-cta {
+    box-shadow:
+      0 22px 48px -14px rgba(5, 15, 104, 0.55),
+      0 8px 18px -6px rgba(5, 15, 104, 0.4);
+  }
+
   /* Over a dark section both pieces flip to white (toggled in script). */
   .floating-cta-group[data-on-dark="true"] .floating-cta,
   .floating-cta-group[data-on-dark="true"] .floating-cta-top {
@@ -213,6 +233,9 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       transform: none;
     }
     .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
+      transform: none;
+    }
+    .floating-cta-group:has(.floating-cta:hover) {
       transform: none;
     }
   }
