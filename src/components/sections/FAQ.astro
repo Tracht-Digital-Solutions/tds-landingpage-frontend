@@ -35,7 +35,7 @@ const content = getFaqContent(lang);
       {content.intro}
     </p>
 
-    <ul class="max-w-3xl divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+    <ul class="max-w-3xl lg:max-w-5xl divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
       {
         content.items.map((item) => (
           <li>
@@ -99,29 +99,41 @@ const content = getFaqContent(lang);
     }
   }
 
-  /* Wide screens have room to spare to the right of the max-w-3xl
-     list, so let each FAQ "drive out" rightward when you hover or
-     open it — a bit of horizontal play that reads as interactive.
-     Below lg the list is near the viewport edge, so we leave it put. */
-  @media (min-width: 1024px) {
-    .faq-item {
-      transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .faq-item:hover {
-      transform: translateX(1.25rem);
-    }
-    .faq-item[open] {
-      transform: translateX(2.5rem);
+  /* Wide screens have room to the right of the questions, so the answer
+     is shown beside the question in that space instead of pushing the
+     list down. Gated behind interpolate-size — the same browsers that
+     ship ::details-content (the grid item the answer lives in) — so
+     others gracefully fall back to the answer stacking below. Below lg
+     the answer always stacks under the question. */
+  @supports (interpolate-size: allow-keywords) {
+    @media (min-width: 1024px) {
+      .faq-item {
+        display: grid;
+        grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
+        column-gap: 3rem;
+        align-items: start;
+      }
+      .faq-item > summary {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .faq-item::details-content {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      /* Drop the stacked-layout spacing and top-align the answer with the
+         question (matches the summary's md:py-6 vertical padding). */
+      .faq-item p {
+        margin-top: 0;
+        padding-top: 1.5rem;
+        padding-right: 0;
+      }
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .faq-item {
+    .faq-item::details-content {
       transition: none;
-    }
-    .faq-item:hover,
-    .faq-item[open] {
-      transform: none;
     }
   }
 </style>
