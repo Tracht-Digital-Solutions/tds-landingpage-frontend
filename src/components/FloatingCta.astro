@@ -67,10 +67,10 @@ const label = t.nav.cta;
     animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
   }
 
-  /* When the button floats over a section whose background is the same
-     navy as the button itself (Tech, Contact), it disappears into the
-     section. Flip it to a white pill with navy text so it stays legible.
-     `data-on-dark` is toggled from the script below as the user scrolls. */
+  /* When the button floats over any dark-background section it would
+     disappear into it (the button is navy). Flip it to a white pill with
+     navy text so it stays legible. `data-on-dark` is toggled from the
+     luminance check in the script below as the user scrolls. */
   .floating-cta[data-on-dark="true"] {
     background-color: #fff;
     color: var(--color-surface-navy);
@@ -170,28 +170,58 @@ const label = t.nav.cta;
 </style>
 
 <script>
-  // Invert the floating CTA to a white pill whenever it overlaps a section
-  // whose background is the same navy as the button (Tech, Contact) —
-  // otherwise it disappears into the section. Those sections are tagged by
-  // their `bg-[var(--color-surface-navy)]` class, so we match on it rather
-  // than hard-coding ids. rAF-throttled on scroll/resize.
+  // Invert the floating CTA to a white pill whenever it sits over a
+  // dark-background section, otherwise it disappears into it (the button
+  // is navy). Rather than match specific classes, we read the actual
+  // background colour under the button and test its luminance — so this
+  // covers navy (Tech/Contact), the ink footer, burgundy surfaces and
+  // dark mode alike. rAF-throttled on scroll/resize.
   const cta = document.querySelector<HTMLElement>(".floating-cta");
-  const darkSections = Array.from(
-    document.querySelectorAll<HTMLElement>('section[class*="surface-navy"]'),
-  );
 
-  if (cta && darkSections.length) {
+  if (cta) {
+    const parseRgb = (
+      value: string,
+    ): [number, number, number, number] | null => {
+      const match = value.match(/rgba?\(([^)]+)\)/);
+      if (!match) return null;
+      const [r, g, b, a = 1] = match[1]
+        .split(",")
+        .map((part) => parseFloat(part.trim()));
+      return [r, g, b, a];
+    };
+
+    // Walk up from the element under the button until an opaque
+    // background is found, so we read the section's real colour rather
+    // than a transparent child. Falls back to the document background.
+    const backgroundUnder = (
+      start: Element | null,
+    ): [number, number, number] | null => {
+      let node: Element | null = start;
+      while (node) {
+        const rgb = parseRgb(getComputedStyle(node).backgroundColor);
+        if (rgb && rgb[3] > 0.5) return [rgb[0], rgb[1], rgb[2]];
+        node = node.parentElement;
+      }
+      const doc = parseRgb(getComputedStyle(document.body).backgroundColor);
+      return doc ? [doc[0], doc[1], doc[2]] : null;
+    };
+
+    // sRGB-weighted relative luminance on a 0–255 scale; below ~45% reads
+    // as a dark surface that the navy button would vanish into.
+    const isDark = ([r, g, b]: [number, number, number]) =>
+      0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
+
     let frame = 0;
     const update = () => {
       frame = 0;
       const rect = cta.getBoundingClientRect();
       const x = rect.left + rect.width / 2;
       const y = rect.top + rect.height / 2;
-      const onDark = darkSections.some((section) => {
-        const r = section.getBoundingClientRect();
-        return y >= r.top && y <= r.bottom && x >= r.left && x <= r.right;
-      });
-      cta.dataset.onDark = onDark ? "true" : "false";
+      const behind = document
+        .elementsFromPoint(x, y)
+        .find((el) => el !== cta && !cta.contains(el));
+      const rgb = backgroundUnder(behind ?? null);
+      cta.dataset.onDark = rgb && isDark(rgb) ? "true" : "false";
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
