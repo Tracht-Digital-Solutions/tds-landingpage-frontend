@@ -4,10 +4,10 @@ import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 /**
  * Persistent bottom-right control. Idle: just the "book a call" CTA
  * (links to the contact section). Once the visitor scrolls ~one viewport
- * down, a scroll-to-top button reveals itself attached on top of the CTA,
- * separated by a divider line, so the two read as one connected pill.
- * The whole group flips to white when it floats over a dark section so it
- * never disappears into the background.
+ * down, a small arrow-sized scroll-to-top button rises out of the CTA and
+ * fuses with it — same navy fill, its base tucked behind the CTA so the
+ * two read as one merged shape. The whole control flips to white when it
+ * floats over a dark section so it never disappears.
  */
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -60,6 +60,8 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
 </div>
 
 <style>
+  /* Positioning wrapper only — no background of its own. The arrow nub is
+     centred over the CTA pill below it. */
   .floating-cta-group {
     position: fixed;
     right: 1rem;
@@ -67,38 +69,8 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     z-index: 35;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    overflow: hidden;
-    border-radius: 9999px;
-    color: #fff;
-    background-color: var(--color-surface-navy);
-    box-shadow:
-      0 14px 34px -12px rgba(5, 15, 104, 0.55),
-      0 4px 10px -4px rgba(5, 15, 104, 0.3);
-    transition:
-      background-color 220ms ease,
-      color 220ms ease,
-      box-shadow 220ms ease,
-      border-radius 280ms cubic-bezier(0.22, 1, 0.36, 1);
-    animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+    align-items: center;
   }
-
-  /* Expanded (scrolled down): the group grew a top button + divider, so
-     relax the pill radius into a rounded card. */
-  .floating-cta-group[data-scrolled-down="true"] {
-    border-radius: 1.6rem;
-  }
-
-  /* Over a dark section the whole group flips to a white pill (toggled
-     from the luminance check in the script). */
-  .floating-cta-group[data-on-dark="true"] {
-    background-color: #fff;
-    color: var(--color-surface-navy);
-    box-shadow:
-      0 14px 34px -12px rgba(0, 0, 0, 0.45),
-      0 4px 10px -4px rgba(0, 0, 0, 0.3);
-  }
-
   @media (min-width: 768px) {
     .floating-cta-group {
       right: 1.5rem;
@@ -106,8 +78,53 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     }
   }
 
-  /* --- CTA (bottom) -------------------------------------------------- */
+  /* --- Scroll-to-top (small arrow nub, merges into the CTA) --------- */
+  .floating-cta-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Arrow-sized: just enough to wrap the 18px glyph. */
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 9999px;
+    color: #fff;
+    background-color: var(--color-surface-navy);
+    /* Sink the base behind the CTA (z-index below it) so the two navy
+       shapes fuse into one. */
+    margin-bottom: -0.8rem;
+    position: relative;
+    z-index: 0;
+    cursor: pointer;
+    /* Collapsed: tucked down inside the CTA, invisible + click-through. */
+    opacity: 0;
+    transform: translateY(1.1rem) scale(0.4);
+    transform-origin: center bottom;
+    pointer-events: none;
+    transition:
+      opacity 220ms ease,
+      transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 220ms ease,
+      color 220ms ease;
+  }
+  .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .floating-cta-top:hover {
+    background-color: color-mix(in srgb, currentColor 16%, transparent);
+  }
+  .floating-cta-top__icon {
+    transition: transform 220ms ease;
+  }
+  .floating-cta-top:hover .floating-cta-top__icon {
+    transform: translateY(-2px);
+  }
+
+  /* --- CTA pill ----------------------------------------------------- */
   .floating-cta {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -116,31 +133,32 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     padding: 0.85rem;
     font-size: 0.875rem;
     font-weight: 500;
-    color: inherit;
+    color: #fff;
+    background-color: var(--color-surface-navy);
+    border-radius: 9999px;
+    box-shadow:
+      0 14px 34px -12px rgba(5, 15, 104, 0.55),
+      0 4px 10px -4px rgba(5, 15, 104, 0.3);
     cursor: pointer;
-    transition: background-color 200ms ease;
-  }
-  /* currentColor-based wash so the hover reads on both the navy and the
-     inverted-white states. */
-  .floating-cta:hover {
-    background-color: color-mix(in srgb, currentColor 12%, transparent);
-  }
-  .floating-cta:active {
-    background-color: color-mix(in srgb, currentColor 18%, transparent);
-  }
-  .floating-cta__label {
-    display: none;
+    transition:
+      background-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease;
+    animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
   }
   @media (min-width: 640px) {
     .floating-cta {
       padding: 0.85rem 1.25rem;
     }
+  }
+  .floating-cta__label {
+    display: none;
+  }
+  @media (min-width: 640px) {
     .floating-cta__label {
       display: inline;
     }
   }
-
-  /* Idle bob on the calendar icon so the control reads as "alive". */
   .floating-cta__icon {
     transition: transform 220ms ease;
     animation: floating-cta-bob 3s ease-in-out 1.2s infinite;
@@ -149,45 +167,16 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     transform: scale(1.1) rotate(-6deg);
   }
 
-  /* --- Scroll-to-top (top, revealed on scroll) ---------------------- */
-  .floating-cta-top {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: inherit;
-    cursor: pointer;
-    /* Collapsed by default — zero height, faded, click-through, divider
-       hidden. */
-    height: 0;
-    opacity: 0;
-    pointer-events: none;
-    border-bottom: 1px solid transparent;
-    transition:
-      height 280ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 200ms ease,
-      background-color 200ms ease,
-      border-color 220ms ease;
+  /* Over a dark section both pieces flip to white (toggled in script). */
+  .floating-cta-group[data-on-dark="true"] .floating-cta,
+  .floating-cta-group[data-on-dark="true"] .floating-cta-top {
+    background-color: #fff;
+    color: var(--color-surface-navy);
   }
-  .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
-    height: 2.6rem;
-    opacity: 1;
-    pointer-events: auto;
-    /* Trennlinie above the CTA. */
-    border-bottom-color: rgb(255 255 255 / 0.22);
-  }
-  /* Inverted group → dark divider on the white pill. */
-  .floating-cta-group[data-on-dark="true"][data-scrolled-down="true"]
-    .floating-cta-top {
-    border-bottom-color: rgb(5 15 104 / 0.16);
-  }
-  .floating-cta-top:hover {
-    background-color: color-mix(in srgb, currentColor 12%, transparent);
-  }
-  .floating-cta-top__icon {
-    transition: transform 220ms ease;
-  }
-  .floating-cta-top:hover .floating-cta-top__icon {
-    transform: translateY(-2px);
+  .floating-cta-group[data-on-dark="true"] .floating-cta {
+    box-shadow:
+      0 14px 34px -12px rgba(0, 0, 0, 0.45),
+      0 4px 10px -4px rgba(0, 0, 0, 0.3);
   }
 
   @keyframes floating-cta-in {
@@ -212,17 +201,19 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .floating-cta-group,
+    .floating-cta,
     .floating-cta__icon {
       animation: none;
     }
-    /* Reveal instantly, keep the colour/divider fades. */
     .floating-cta-top {
       transition:
-        height 0ms,
         opacity 200ms ease,
-        background-color 200ms ease,
-        border-color 220ms ease;
+        background-color 220ms ease,
+        color 220ms ease;
+      transform: none;
+    }
+    .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
+      transform: none;
     }
   }
 </style>
@@ -269,7 +260,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     let frame = 0;
     const update = () => {
       frame = 0;
-      // Reveal the scroll-to-top button after ~one viewport of scroll.
+      // Reveal the scroll-to-top nub after ~one viewport of scroll.
       group.dataset.scrolledDown =
         window.scrollY > window.innerHeight * 0.8 ? "true" : "false";
 
