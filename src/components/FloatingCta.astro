@@ -62,8 +62,21 @@ const label = t.nav.cta;
     transition:
       transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
       background-color 220ms ease,
+      color 220ms ease,
       box-shadow 220ms ease;
     animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+  }
+
+  /* When the button floats over a section whose background is the same
+     navy as the button itself (Tech, Contact), it disappears into the
+     section. Flip it to a white pill with navy text so it stays legible.
+     `data-on-dark` is toggled from the script below as the user scrolls. */
+  .floating-cta[data-on-dark="true"] {
+    background-color: #fff;
+    color: var(--color-surface-navy);
+    box-shadow:
+      0 14px 34px -12px rgba(0, 0, 0, 0.45),
+      0 4px 10px -4px rgba(0, 0, 0, 0.3);
   }
 
   .floating-cta__label {
@@ -109,6 +122,16 @@ const label = t.nav.cta;
     transform: scale(1.1) rotate(-6deg);
   }
 
+  /* Inverted hover: stay white, shift the text/icon to the burgundy
+     accent instead of the navy→burgundy fill that would blend back in. */
+  .floating-cta[data-on-dark="true"]:hover {
+    background-color: #fff;
+    color: var(--color-surface-accent);
+    box-shadow:
+      0 22px 48px -14px rgba(0, 0, 0, 0.5),
+      0 8px 18px -6px rgba(0, 0, 0, 0.35);
+  }
+
   @keyframes floating-cta-in {
     from {
       opacity: 0;
@@ -136,10 +159,46 @@ const label = t.nav.cta;
       animation: none;
     }
     .floating-cta {
-      transition: background-color 220ms ease;
+      transition:
+        background-color 220ms ease,
+        color 220ms ease;
     }
     .floating-cta:hover {
       transform: none;
     }
   }
 </style>
+
+<script>
+  // Invert the floating CTA to a white pill whenever it overlaps a section
+  // whose background is the same navy as the button (Tech, Contact) —
+  // otherwise it disappears into the section. Those sections are tagged by
+  // their `bg-[var(--color-surface-navy)]` class, so we match on it rather
+  // than hard-coding ids. rAF-throttled on scroll/resize.
+  const cta = document.querySelector<HTMLElement>(".floating-cta");
+  const darkSections = Array.from(
+    document.querySelectorAll<HTMLElement>('section[class*="surface-navy"]'),
+  );
+
+  if (cta && darkSections.length) {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = cta.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const onDark = darkSections.some((section) => {
+        const r = section.getBoundingClientRect();
+        return y >= r.top && y <= r.bottom && x >= r.left && x <= r.right;
+      });
+      cta.dataset.onDark = onDark ? "true" : "false";
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+  }
+</script>
