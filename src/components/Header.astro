@@ -63,21 +63,21 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         {items.map((item) => (
           <a
             href={sectionHref(item.id)}
-            class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+            class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
           >
             {item.label}
           </a>
         ))}
         <a
           href={pricingHref}
-          class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+          class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
         >
           {t.nav.pricing}
         </a>
         <a
           href={siteConfig.blogUrl}
           rel="me noopener"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] rounded-full transition-colors"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
         >
           {t.nav.blog}
           <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
