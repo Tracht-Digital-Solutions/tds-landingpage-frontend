@@ -34,6 +34,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 >
   <nav class="flex items-center justify-between gap-2 text-sm lg:justify-center lg:gap-5">
     <a
+      id="logo-link"
       href={homeHref}
       class="flex items-center gap-2 px-2 lg:px-2.5 py-1 lg:py-1 text-[var(--color-primary)] hover:opacity-90 transition-opacity"
       aria-label="Tracht Digital Solutions"
@@ -357,6 +358,31 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     const mq = window.matchMedia("(min-width: 1024px)");
     mq.addEventListener("change", (e) => {
       if (e.matches) setOpen(false);
+    });
+  }
+
+  // Logo: when we're already on the page it links to (the homepage in
+  // either locale), don't reload — just smooth-scroll back up to the
+  // hero. On any other page it stays a normal link home. Compares the
+  // link's own pathname to the current one (trailing slash normalised)
+  // so it works for both `/` and `/en/`.
+  const logo = document.getElementById("logo-link") as HTMLAnchorElement | null;
+  if (logo) {
+    const normalize = (path: string) => path.replace(/\/+$/, "") || "/";
+    logo.addEventListener("click", (event) => {
+      if (normalize(new URL(logo.href).pathname) !== normalize(location.pathname)) {
+        return;
+      }
+      event.preventDefault();
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const lenis = (window as unknown as {
+        lenis?: { scrollTo: (target: number, options?: { immediate?: boolean }) => void };
+      }).lenis;
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: reduce });
+      } else {
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      }
     });
   }
 </script>
