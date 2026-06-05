@@ -32,23 +32,25 @@ const {
 } = Astro.props;
 ---
 
-<p
-  class:list={[
-    "section-num",
-    dark ? "text-white/60" : null,
-    labelClass,
-  ]}
->
-  {label}
-</p>
-<h2
-  id={id}
-  class:list={[
-    "display text-4xl md:text-5xl lg:text-6xl",
-    dark ? "text-white" : "text-[var(--color-black)]",
-    headingClass,
-  ]}
->
-  {headline}{" "}
-  <AccentLetters text={headlineAccent} tone={dark ? "dark" : "light"} />
-</h2>
+<div class="text-center md:text-left">
+  <p
+    class:list={[
+      "section-num",
+      dark ? "text-white/60" : null,
+      labelClass,
+    ]}
+  >
+    {label}
+  </p>
+  <h2
+    id={id}
+    class:list={[
+      "display text-4xl md:text-5xl lg:text-6xl",
+      dark ? "text-white" : "text-[var(--color-black)]",
+      headingClass,
+    ]}
+  >
+    {headline}{" "}
+    <AccentLetters text={headlineAccent} tone={dark ? "dark" : "light"} />
+  </h2>
+</div>

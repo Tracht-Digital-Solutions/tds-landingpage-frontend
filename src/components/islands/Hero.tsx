@@ -213,7 +213,7 @@ export default function Hero({
         }}
       />
 
-      <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full">
+      <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full text-center md:text-left">
         {featuredTopic ? (
           <motion.a
             {...fadeUp(0)}
@@ -265,7 +265,7 @@ export default function Hero({
         <motion.h1
           {...fadeUp(0.05)}
           id="hero-heading"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-[1.05] tracking-tight text-[var(--color-black)] mb-4 max-w-4xl"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-[1.05] tracking-tight text-[var(--color-black)] mb-4 max-w-4xl mx-auto md:mx-0"
           style={{ fontVariationSettings: '"opsz" 144' }}
         >
           {t.hero.headline}{" "}
@@ -289,7 +289,7 @@ export default function Hero({
             supporting line. */}
         <motion.p
           {...fadeUp(0.07)}
-          className="text-base sm:text-lg text-[var(--color-muted)] mb-4 max-w-2xl"
+          className="text-base sm:text-lg text-[var(--color-muted)] mb-4 max-w-2xl mx-auto md:mx-0"
         >
           {t.hero.tagline}
         </motion.p>
@@ -301,21 +301,21 @@ export default function Hero({
             eyebrow. */}
         <motion.p
           {...fadeUp(0.08)}
-          className="hero-slogan text-xl sm:text-2xl md:text-3xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-6 max-w-3xl leading-snug"
+          className="hero-slogan text-xl sm:text-2xl md:text-3xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-6 max-w-3xl leading-snug mx-auto md:mx-0"
         >
           {t.footer.slogan}
         </motion.p>
 
         <motion.p
           {...fadeUp(0.1)}
-          className="text-base md:text-lg text-[var(--color-muted)] max-w-2xl mb-8 leading-relaxed"
+          className="text-base md:text-lg text-[var(--color-muted)] max-w-2xl mb-8 leading-relaxed mx-auto md:mx-0"
         >
           {t.hero.sub}
         </motion.p>
 
         <motion.div
           {...fadeUp(0.15)}
-          className="flex flex-wrap items-center gap-4"
+          className="flex flex-wrap items-center justify-center md:justify-start gap-4"
         >
           <button
             type="button"
