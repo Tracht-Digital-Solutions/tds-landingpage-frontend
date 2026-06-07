@@ -236,7 +236,8 @@ See README's "Replace examples before go-live" section.
 - **`src/og/render.ts` + `src/pages/og/default.png.ts`** — Satori
   pipeline mirroring tds-blog. Builds a static 1200×630 brand
   card at `/og/default.png` used as the fallback OG image. Fonts
-  live under `src/og/fonts/` (TTFs, copied from tds-blog).
+  live under `src/og/fonts/` (Instrument Serif `.woff` + Geist `.ttf`,
+  copied from tds-blog).
 - **`public/robots.txt`** explicitly allows GPTBot, OAI-SearchBot,
   PerplexityBot, ClaudeBot, Google-Extended (etc.) and points
   at the sitemap.
@@ -282,7 +283,7 @@ See README's "Replace examples before go-live" section.
   on the page ground — both invert/break in dark mode. Use the fixed
   `--color-surface-navy/-accent/-ink` for brand-dark surfaces and
   `--color-card` (via `color-mix()` for glass) for elevated/glass
-  surfaces. See "Dark mode" below and `src/styles/global.css`.
+  surfaces. See "Dark mode" above and `src/styles/global.css`.
 - Don't inline `text-xs font-medium tracking-widest uppercase` for
   section eyebrows. Use `.section-num` (with leading rule) for
   numbered chapter labels and `.eyebrow` for field labels.
@@ -295,6 +296,13 @@ See README's "Replace examples before go-live" section.
   `oxcResolvePlugin` with an incomplete `BindingViteResolvePluginConfig`
   (withastro/astro#16542). Use `@tailwindcss/postcss` via
   `postcss.config.mjs` — same compiler, no rolldown contract.
+- Don't hand-author the lightningcss `cssTarget` in `astro.config.mjs`.
+  Spread the shared `tdsViteBuild` preset from
+  `@tracht-digital-solutions/tds-shared/astro` into `vite.build`
+  (as of the 2026-06-04 build refactor on tds-shared 0.4.0). It pins the
+  Safari floor so lightningcss keeps the `-webkit-backdrop-filter` prefix
+  on the frosted header; a hand-copied array drifts and the blur silently
+  dies in Safari ≤17. See tds-shared#10.
 - Don't read `translations.de` (or `.en`) directly from an .astro
   file. The `tFor(Astro.currentLocale)` helper is what makes the
   EN route actually render EN; bypassing it puts the file back
