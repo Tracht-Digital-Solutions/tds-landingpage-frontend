@@ -26,8 +26,8 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   // not to bash the button again right now.
   const errorCopy =
     lang === "de"
-      ? "Hoppla – diese Nachricht hat sich irgendwo im Datennirwana verlaufen. Probiere es später noch einmal, oder schreib mir direkt eine E-Mail."
-      : "Well, that message wandered off into the data void. Please try again later, or just drop me an email directly.";
+      ? "Hoppla – diese Nachricht hat sich irgendwo im Datennirwana verlaufen. Probiere es später noch einmal, oder schreib mir direkt: "
+      : "Well, that message wandered off into the data void. Please try again later, or just drop me an email directly: ";
 
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [shake, setShake] = useState(false);
@@ -252,6 +252,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             {submitState === "error" && (
               <p className="text-xs" style={{ color: "var(--color-accent-pink)" }} role="alert">
                 {errorCopy}
+                <a href={`mailto:${t.contact.info.email}`} className="underline">
+                  {t.contact.info.email}
+                </a>
               </p>
             )}
 
