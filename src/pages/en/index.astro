@@ -26,18 +26,21 @@ import {
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
-import { fetchTopics, topicHref } from "~/lib/content";
+import { fetchTopics, topicHref, topicFallback } from "~/lib/content";
 import { getFaqContent } from "~/lib/faq";
 
 const lang = resolveLang(Astro.currentLocale);
 
 const heroTopics = await fetchTopics(lang, 1);
-const featuredTopic = heroTopics[0]
+// Fall back to the in-sync demo topic when no content API is connected,
+// so the hero pill is never empty (matches the DE home + Currently).
+const topTopic = heroTopics[0] ?? topicFallback(lang)[0];
+const featuredTopic = topTopic
   ? {
-      slug: heroTopics[0].slug,
-      title: heroTopics[0].title,
-      category: heroTopics[0].category,
-      href: topicHref(heroTopics[0].slug),
+      slug: topTopic.slug,
+      title: topTopic.title,
+      category: topTopic.category,
+      href: topicHref(topTopic.slug),
     }
   : undefined;
 
