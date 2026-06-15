@@ -30,6 +30,10 @@ export async function fetchTopics(
   lang: "de" | "en",
   limit = 3,
 ): Promise<ContentPost[]> {
+  // Demo build: skip the API so consumers fall back to topicFallback()
+  // (the in-sync demo topics) — no backend required.
+  if (import.meta.env.PUBLIC_DEMO_MODE === "true") return [];
+
   try {
     const url = new URL(`${CONTENT_API_URL}/blog`);
     url.searchParams.set("limit", String(limit));
