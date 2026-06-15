@@ -1,14 +1,18 @@
 ---
 /**
  * FAQ — the last sweep of common mid-market objections before a
- * visitor hits the Contact section. Native `<details>`/`<summary>`
- * accordions: zero JS, accessible by default, keyboard navigable.
+ * visitor hits the Contact section.
  *
- * Sits between Consulting (the soft invitation) and Contact (the
- * commit) in the narrative arc. Content lives in `src/lib/faq.ts`
- * so the FAQPage JSON-LD on index.astro can render from the same
- * source — Google strips the rich snippet when the schema text
- * doesn't match the visible answer 1:1.
+ * Master–detail: the questions are a vertical tablist on the left; the
+ * answer of the selected question shows in a single shared panel on the
+ * right and is replaced when another question is picked. The question
+ * rows never change height (the answer lives only in the panel), and the
+ * active question is marked with an accent edge + colour. Enhanced by a
+ * small inline ARIA-tabs script; without JS the first answer is shown.
+ *
+ * Content lives in `src/lib/faq.ts` so the FAQPage JSON-LD on
+ * index.astro can render from the same source — Google strips the rich
+ * snippet when the schema text doesn't match the visible answer 1:1.
  */
 import { resolveLang } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
@@ -35,108 +39,117 @@ const content = getFaqContent(lang);
       {content.intro}
     </p>
 
-    <ul class="max-w-3xl lg:max-w-5xl divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-      {
-        content.items.map((item) => (
+    <div class="grid lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] lg:gap-x-12 lg:items-start">
+      {/* Questions — vertical tablist */}
+      <ul
+        role="tablist"
+        aria-orientation="vertical"
+        aria-label={content.label.replace(/^[—–-]\s*/, "")}
+        class="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]"
+      >
+        {content.items.map((item, i) => (
           <li>
-            <details class="group faq-item">
-              <summary class="flex items-start justify-between gap-6 cursor-pointer py-5 md:py-6 list-none [&::-webkit-details-marker]:hidden">
-                <span class="font-[var(--font-display)] text-lg md:text-xl text-[var(--color-black)] leading-snug group-hover:text-[var(--color-accent)] group-open:text-[var(--color-accent)] group-hover:translate-x-0.5 transition duration-200">
-                  {item.q}
-                </span>
-                <span
-                  aria-hidden="true"
-                  class="flex-shrink-0 inline-flex items-center justify-center w-7 h-7 mt-1 rounded-full border border-[var(--color-line)] text-[var(--color-accent)] bg-[var(--color-card)] group-hover:border-[var(--color-accent)] group-hover:scale-110 group-open:bg-[var(--color-accent)] group-open:border-[var(--color-accent)] group-open:text-white transition duration-200"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="transition-transform duration-200 group-open:rotate-45"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                </span>
-              </summary>
-              <p class="text-[var(--color-muted)] leading-relaxed pb-6 md:pb-7 pr-12 -mt-2">
-                {item.a}
-              </p>
-            </details>
+            <button
+              type="button"
+              role="tab"
+              id={`faq-tab-${i}`}
+              aria-controls={`faq-panel-${i}`}
+              aria-selected={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+              class="faq-tab w-full flex items-start justify-between gap-6 text-left py-5 md:py-6 pl-4 border-l-2 border-transparent cursor-pointer transition-colors duration-200"
+            >
+              <span class="faq-q font-[var(--font-display)] text-lg md:text-xl text-[var(--color-black)] leading-snug transition-colors duration-200">
+                {item.q}
+              </span>
+              <span aria-hidden="true" class="faq-arrow flex-shrink-0 mt-1 text-[var(--color-muted)] transition-all duration-200">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+              </span>
+            </button>
           </li>
-        ))
-      }
-    </ul>
+        ))}
+      </ul>
+
+      {/* Answer — single shared panel (one tabpanel per answer, only the
+          active one visible). Sticky beside the list on wide screens; on
+          small screens it stacks under the list. */}
+      <div class="mt-8 lg:mt-0 lg:sticky lg:top-28 self-start">
+        {content.items.map((item, i) => (
+          <div
+            role="tabpanel"
+            id={`faq-panel-${i}`}
+            aria-labelledby={`faq-tab-${i}`}
+            tabindex="0"
+            hidden={i !== 0}
+            class="faq-panel"
+          >
+            <p class="text-[var(--color-muted)] leading-relaxed text-base md:text-lg max-w-2xl">
+              {item.a}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  /* Soften the open transition so the answer reveal feels less
-     mechanical than the default <details> snap. Browsers without
-     CSS interpolate-size still get the standard open/close;
-     supporting browsers get the smooth height animation. */
-  @supports (interpolate-size: allow-keywords) {
-    .faq-item {
-      interpolate-size: allow-keywords;
-    }
-    .faq-item::details-content {
-      height: 0;
-      opacity: 0;
-      overflow: hidden;
-      transform: translateY(-0.35rem);
-      transition:
-        height 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        opacity 220ms ease,
-        transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
-        content-visibility 280ms allow-discrete;
-    }
-    .faq-item[open]::details-content {
-      height: auto;
-      opacity: 1;
-      transform: translateY(0);
-    }
+  /* Active question: accent edge + colour. The 2px border is always
+     present (transparent → accent) so selecting never shifts width or
+     height — the row stays exactly as tall as its question. */
+  .faq-tab[aria-selected="true"] {
+    border-left-color: var(--color-accent);
   }
-
-  /* Wide screens have room to the right of the questions, so the answer
-     is shown beside the question in that space instead of pushing the
-     list down. Gated behind interpolate-size — the same browsers that
-     ship ::details-content (the grid item the answer lives in) — so
-     others gracefully fall back to the answer stacking below. Below lg
-     the answer always stacks under the question. */
-  @supports (interpolate-size: allow-keywords) {
-    @media (min-width: 1024px) {
-      .faq-item {
-        display: grid;
-        grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
-        column-gap: 3rem;
-        align-items: start;
-      }
-      .faq-item > summary {
-        grid-column: 1;
-        grid-row: 1;
-      }
-      .faq-item::details-content {
-        grid-column: 2;
-        grid-row: 1;
-      }
-      /* Drop the stacked-layout spacing and top-align the answer with the
-         question (matches the summary's md:py-6 vertical padding). */
-      .faq-item p {
-        margin-top: 0;
-        padding-top: 1.5rem;
-        padding-right: 0;
-      }
-    }
+  .faq-tab[aria-selected="true"] .faq-q,
+  .faq-tab:hover .faq-q {
+    color: var(--color-accent);
   }
-
+  .faq-tab[aria-selected="true"] .faq-arrow {
+    color: var(--color-accent);
+    transform: translateX(2px);
+  }
+  .faq-panel { animation: faq-fade 220ms ease both; }
   @media (prefers-reduced-motion: reduce) {
-    .faq-item::details-content {
-      transition: none;
-    }
+    .faq-panel { animation: none; }
+  }
+  @keyframes faq-fade {
+    from { opacity: 0; transform: translateY(0.35rem); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
+
+<script>
+  // Progressive enhancement: turn the question list + panels into an
+  // ARIA tablist. Without this script the first answer stays visible.
+  const root = document.getElementById("faq");
+  if (root) {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+
+    const select = (tab: HTMLButtonElement) => {
+      for (const t of tabs) {
+        const active = t === tab;
+        t.setAttribute("aria-selected", String(active));
+        t.tabIndex = active ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute("aria-controls") ?? "");
+        if (panel) panel.hidden = !active;
+      }
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(tab));
+      tab.addEventListener("keydown", (e) => {
+        let next = -1;
+        if (e.key === "ArrowDown" || e.key === "ArrowRight") next = (i + 1) % tabs.length;
+        else if (e.key === "ArrowUp" || e.key === "ArrowLeft") next = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === "Home") next = 0;
+        else if (e.key === "End") next = tabs.length - 1;
+        if (next >= 0) {
+          e.preventDefault();
+          tabs[next].focus();
+          select(tabs[next]);
+        }
+      });
+    });
+  }
+</script>

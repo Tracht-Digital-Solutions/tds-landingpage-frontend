@@ -76,10 +76,13 @@ const { number, class: className = "" } = Astro.props;
       stroke-linejoin="round"
       aria-hidden="true"
     >
-      {/* Stacked layers — fullstack */}
-      <polygon points="12,2.5 21.5,7.5 12,12.5 2.5,7.5" />
-      <polyline points="2.5,12 12,17 21.5,12" />
-      <polyline points="2.5,16.5 12,21.5 21.5,16.5" />
+      {/* Connected nodes — digitalization / process automation */}
+      <rect x="2.5" y="3" width="6" height="6" rx="1" />
+      <rect x="15.5" y="3" width="6" height="6" rx="1" />
+      <rect x="9" y="15" width="6" height="6" rx="1" />
+      <line x1="8.5" y1="6" x2="15.5" y2="6" />
+      <line x1="5.5" y1="9" x2="10.5" y2="15" />
+      <line x1="18.5" y1="9" x2="13.5" y2="15" />
     </svg>
   )
 }
@@ -98,32 +101,7 @@ const { number, class: className = "" } = Astro.props;
       stroke-linejoin="round"
       aria-hidden="true"
     >
-      {/* Connected nodes — digitalization / process automation */}
-      <rect x="2.5" y="3" width="6" height="6" rx="1" />
-      <rect x="15.5" y="3" width="6" height="6" rx="1" />
-      <rect x="9" y="15" width="6" height="6" rx="1" />
-      <line x1="8.5" y1="6" x2="15.5" y2="6" />
-      <line x1="5.5" y1="9" x2="10.5" y2="15" />
-      <line x1="18.5" y1="9" x2="13.5" y2="15" />
-    </svg>
-  )
-}
-
-{
-  number === "05" && (
-    <svg
-      class={className}
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      {/* Sparkles — rapid prototyping (the "spark" of an idea) */}
+      {/* Sparkles — fast, tailored concepts (the "spark" of an idea) */}
       <path d="M11 3 L12.4 8.6 L18 10 L12.4 11.4 L11 17 L9.6 11.4 L4 10 L9.6 8.6 Z" />
       <path d="M19 3.5 L19.7 5.3 L21.5 6 L19.7 6.7 L19 8.5 L18.3 6.7 L16.5 6 L18.3 5.3 Z" />
       <path d="M18 16 L18.5 17.5 L20 18 L18.5 18.5 L18 20 L17.5 18.5 L16 18 L17.5 17.5 Z" />
