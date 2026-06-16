@@ -26,24 +26,9 @@ import {
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
-import { fetchTopics, topicHref, topicFallback } from "~/lib/content";
 import { getFaqContent } from "~/lib/faq";
 
 const lang = resolveLang(Astro.currentLocale);
-
-// The Hero pill always surfaces the current most important topic.
-// Prefer the live top post from tds-content-api; fall back to the
-// same hand-written list the Currently section uses (first entry =
-// most important) so the pill never degrades to a static blurb and
-// stays in sync with the Currently section.
-const heroTopics = await fetchTopics(lang, 1);
-const topTopic = heroTopics[0] ?? topicFallback(lang)[0];
-const featuredTopic = {
-  slug: topTopic.slug,
-  title: topTopic.title,
-  category: topTopic.category,
-  href: topicHref(topTopic.slug),
-};
 
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than
@@ -91,7 +76,7 @@ const titles = {
         cost → thinking → convert. PricingTeaser moved after Process
         because pricing reads better once the visitor knows how the work
         actually happens. */}
-    <Hero client:load lang={lang} featuredTopic={featuredTopic} />
+    <Hero client:load lang={lang} />
     <About />
     <Services />
     <TechMarquee />

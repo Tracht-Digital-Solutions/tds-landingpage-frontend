@@ -26,23 +26,9 @@ import {
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
-import { fetchTopics, topicHref, topicFallback } from "~/lib/content";
 import { getFaqContent } from "~/lib/faq";
 
 const lang = resolveLang(Astro.currentLocale);
-
-const heroTopics = await fetchTopics(lang, 1);
-// Fall back to the in-sync demo topic when no content API is connected,
-// so the hero pill is never empty (matches the DE home + Currently).
-const topTopic = heroTopics[0] ?? topicFallback(lang)[0];
-const featuredTopic = topTopic
-  ? {
-      slug: topTopic.slug,
-      title: topTopic.title,
-      category: topTopic.category,
-      href: topicHref(topTopic.slug),
-    }
-  : undefined;
 
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than
@@ -83,7 +69,7 @@ const titles = {
 >
   <Header />
   <main id="main">
-    <Hero client:load lang={lang} featuredTopic={featuredTopic} />
+    <Hero client:load lang={lang} />
     <About />
     <Services />
     <TechMarquee />
