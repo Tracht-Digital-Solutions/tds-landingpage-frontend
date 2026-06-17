@@ -209,11 +209,25 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     backdrop-filter: blur(28px) saturate(180%);
   }
 
-  /* Dark mode — drop every shadow/rim on the bar so it doesn't read as
-     a glowing or floating panel against the dark surface. */
-  :global(:root[data-theme="dark"]) .site-header,
-  :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
+  /* Dark mode — give the bar a faint tinted fill + hairline border so the
+     nav stays legible against the dark hero instead of dissolving into it.
+     (Previously every shadow/rim was dropped and the bar could vanish.) */
+  :global(:root[data-theme="dark"]) .site-header {
+    background-color: color-mix(in srgb, var(--color-card) 55%, transparent);
+    border-color: color-mix(in srgb, var(--color-line) 60%, transparent);
     box-shadow: none;
+  }
+  :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
+    background-color: color-mix(in srgb, var(--color-card) 82%, transparent);
+    box-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.6);
+  }
+  @media (min-width: 1024px) {
+    :global(:root[data-theme="dark"]) .site-header {
+      background-color: color-mix(in srgb, var(--color-card) 45%, transparent);
+    }
+    :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
+      background-color: color-mix(in srgb, var(--color-card) 82%, transparent);
+    }
   }
 
   /* Desktop ( >=lg / 1024px ) — the bar morphs between two states as
