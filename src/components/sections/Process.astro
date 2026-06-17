@@ -121,13 +121,11 @@ const pd = getProcessDetails(lang);
 </section>
 
 <style>
-  /* Hovered / focused step gets a subtle card tint so the link between
-     the left list and the right detail panel is obvious. */
+  /* No background change on hover/active — the marker scale, the text
+     nudge and the right-hand detail panel carry the feedback. The focus
+     ring stays for keyboard a11y. */
   .process-step-item {
     outline: none;
-  }
-  .process-step-item.is-active {
-    background-color: color-mix(in srgb, var(--color-accent) 7%, transparent);
   }
   .process-step-item:focus-visible {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 55%, transparent);
