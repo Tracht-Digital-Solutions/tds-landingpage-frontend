@@ -189,3 +189,59 @@ body {
     animation: none;
   }
 }
+
+/* Custom cursor — an additive dot + trailing ring layered over the native
+   pointer (see islands/CustomCursor.tsx). Both start hidden and fade in on
+   first pointer move. */
+.tds-cursor-ring,
+.tds-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  will-change: transform;
+}
+.tds-cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: var(--color-accent);
+  transition: opacity 200ms ease;
+}
+.tds-cursor-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: 1.5px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+  transition:
+    opacity 200ms ease,
+    width 200ms ease,
+    height 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+.tds-cursor-ring.is-hover {
+  width: 52px;
+  height: 52px;
+  background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 90%, transparent);
+}
+.tds-cursor-ring.is-down {
+  width: 26px;
+  height: 26px;
+}
+/* No custom cursor where there's no fine pointer or motion is reduced. */
+@media (pointer: coarse) {
+  .tds-cursor-ring,
+  .tds-cursor-dot {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tds-cursor-ring,
+  .tds-cursor-dot {
+    display: none;
+  }
+}

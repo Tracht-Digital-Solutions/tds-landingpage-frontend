@@ -2,6 +2,7 @@
 import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
+import CustomCursor from "~/components/islands/CustomCursor.tsx";
 import FloatingCta from "~/components/FloatingCta.astro";
 import JsonLd from "~/components/JsonLd.astro";
 import { siteConfig } from "~/lib/seo";
@@ -149,7 +150,9 @@ const enAltUrl = new URL(
       Skip to content
     </a>
     {!bare && <SmoothScroll client:load />}
-    {!bare && <ScrollProgress client:load />}
+    {/* Non-critical chrome — defer to idle so it never blocks first paint. */}
+    {!bare && <ScrollProgress client:idle />}
+    {!bare && <CustomCursor client:idle />}
     <slot />
     {!bare && <FloatingCta />}
 
