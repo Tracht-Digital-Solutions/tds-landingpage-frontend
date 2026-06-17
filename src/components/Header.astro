@@ -410,11 +410,11 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       }
       event.preventDefault();
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const lenis = (window as unknown as {
-        lenis?: { scrollTo: (target: number, options?: { immediate?: boolean }) => void };
-      }).lenis;
-      if (lenis) {
-        lenis.scrollTo(0, { immediate: reduce });
+      const bounceScroll = (window as unknown as {
+        tdsScrollTo?: (target: number, opts?: { immediate?: boolean }) => void;
+      }).tdsScrollTo;
+      if (bounceScroll) {
+        bounceScroll(0, { immediate: reduce });
       } else {
         window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
       }

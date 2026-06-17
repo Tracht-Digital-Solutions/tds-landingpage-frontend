@@ -110,7 +110,10 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    if (!el) return;
+    // Bounce-jump via Lenis when available; native smooth scroll otherwise.
+    if (window.tdsScrollTo) window.tdsScrollTo(el);
+    else el.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
