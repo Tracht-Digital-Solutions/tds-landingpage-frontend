@@ -5,7 +5,6 @@ type ScrollTarget = number | HTMLElement | string;
 
 declare global {
   interface Window {
-    lenis?: Lenis;
     /**
      * Bounce-eased scroll used for click-to-section jumps (nav links, CTAs,
      * logo, back-to-top). Plain mouse-wheel scrolling does NOT go through
