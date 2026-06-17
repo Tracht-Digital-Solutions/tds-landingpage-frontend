@@ -81,16 +81,27 @@ const pd = getProcessDetails(lang);
             return (
               <div class="process-detail" data-detail={i} hidden={i !== 0}>
                 <div class="rounded-2xl overflow-hidden border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_24px_60px_-32px_rgba(5,15,104,0.35)]">
-                  <div class="relative flex items-center justify-between p-8 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] text-white overflow-hidden">
+                  {/* Per-step photo over a brand-gradient fallback: if the
+                      image is missing it simply doesn't render and the
+                      gradient shows through, so the build never breaks. The
+                      scrim keeps the icon + number legible over any photo. */}
+                  <div class="relative flex items-end justify-between h-44 p-6 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] text-white overflow-hidden">
+                    <img
+                      src={`/images/process/step-${step.number}.webp`}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      decoding="async"
+                      class="absolute inset-0 w-full h-full object-cover"
+                    />
                     <span
                       aria-hidden="true"
-                      class="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none opacity-50"
-                      style="background: radial-gradient(circle, rgba(255,122,156,0.55) 0%, transparent 70%);"
+                      class="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,15,104,0.7)_0%,rgba(5,15,104,0.15)_55%,transparent_100%)]"
                     />
-                    <span class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/15 text-white">
-                      <ProcessIcon number={step.number} class="w-8 h-8" />
+                    <span class="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm text-white">
+                      <ProcessIcon number={step.number} class="w-7 h-7" />
                     </span>
-                    <span class="relative font-[var(--font-display)] text-6xl leading-none text-white/30 tabular-nums">
+                    <span class="relative font-[var(--font-display)] text-5xl leading-none text-white/80 tabular-nums">
                       {step.number}
                     </span>
                   </div>
