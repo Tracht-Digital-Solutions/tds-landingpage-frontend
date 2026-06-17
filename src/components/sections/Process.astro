@@ -1,10 +1,14 @@
 ---
-import { tFor } from "~/lib/i18n";
+import { tFor, resolveLang } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ProcessStep from "~/components/ui/ProcessStep.astro";
+import ProcessIcon from "~/components/ui/ProcessIcon.astro";
+import { getProcessDetails } from "~/lib/processDetails";
 
 const t = tFor(Astro.currentLocale);
+const lang = resolveLang(Astro.currentLocale);
 const steps = t.process.steps;
+const pd = getProcessDetails(lang);
 ---
 
 <section
@@ -24,43 +28,160 @@ const steps = t.process.steps;
       {t.process.body}
     </p>
 
-    {/* Vertical timeline. The continuous spine + start/end caps make
-        the step sequence read as a single arc rather than four
-        unrelated cards. The spine sits behind the markers via
-        z-index so each ProcessStep marker punches through it. */}
-    <div class="relative max-w-2xl">
-      <span
-        aria-hidden="true"
-        class="absolute left-[1.375rem] md:left-6 top-6 bottom-6 w-px bg-gradient-to-b from-[var(--color-accent)]/40 via-[var(--color-line)] to-[var(--color-accent)]/20"
-      ></span>
+    {/* Two columns on desktop: the vertical-timeline steps on the left,
+        a sticky detail panel on the right that reveals the hovered (or
+        keyboard-focused) step's longer narrative + a branded visual.
+        On smaller screens the right panel is dropped — each step already
+        carries its short description inline, so nothing is lost. */}
+    <div class="grid lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:gap-x-12 lg:items-start">
+      <div class="relative">
+        <span
+          aria-hidden="true"
+          class="absolute left-[1.375rem] md:left-6 top-6 bottom-6 w-px bg-gradient-to-b from-[var(--color-accent)]/40 via-[var(--color-line)] to-[var(--color-accent)]/20"
+        ></span>
 
-      {/* Start cap — small accent dot anchoring the top of the spine. */}
-      <span
-        aria-hidden="true"
-        class="absolute left-[1.375rem] md:left-6 -translate-x-1/2 top-5 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] ring-4 ring-[var(--color-soft)]"
-      ></span>
+        {/* Start cap — small accent dot anchoring the top of the spine. */}
+        <span
+          aria-hidden="true"
+          class="absolute left-[1.375rem] md:left-6 -translate-x-1/2 top-5 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] ring-4 ring-[var(--color-soft)]"
+        ></span>
 
-      <ol class="relative pt-6 pb-6">
+        <ol class="relative pt-6 pb-6">
+          {
+            steps.map((step, i) => (
+              <li
+                class="process-step-item rounded-xl transition-colors duration-200"
+                data-step={i}
+                tabindex="0"
+              >
+                <ProcessStep
+                  number={step.number}
+                  title={step.title}
+                  duration={step.duration}
+                  description={step.description}
+                  isLast={i === steps.length - 1}
+                />
+              </li>
+            ))
+          }
+        </ol>
+
+        {/* End cap — primary-filled dot signalling the arc terminates. */}
+        <span
+          aria-hidden="true"
+          class="absolute left-[1.375rem] md:left-6 -translate-x-1/2 bottom-5 w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-soft)]"
+        ></span>
+      </div>
+
+      {/* Detail panel — desktop only, sticky beside the list. */}
+      <aside class="hidden lg:block lg:sticky lg:top-28 self-start" aria-hidden="true">
         {
-          steps.map((step, i) => (
-            <li>
-              <ProcessStep
-                number={step.number}
-                title={step.title}
-                duration={step.duration}
-                description={step.description}
-                isLast={i === steps.length - 1}
-              />
-            </li>
-          ))
+          steps.map((step, i) => {
+            const detail = pd[step.number];
+            return (
+              <div class="process-detail" data-detail={i} hidden={i !== 0}>
+                <div class="rounded-2xl overflow-hidden border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_24px_60px_-32px_rgba(5,15,104,0.35)]">
+                  <div class="relative flex items-center justify-between p-8 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] text-white overflow-hidden">
+                    <span
+                      aria-hidden="true"
+                      class="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none opacity-50"
+                      style="background: radial-gradient(circle, rgba(255,122,156,0.55) 0%, transparent 70%);"
+                    />
+                    <span class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/15 text-white">
+                      <ProcessIcon number={step.number} class="w-8 h-8" />
+                    </span>
+                    <span class="relative font-[var(--font-display)] text-6xl leading-none text-white/30 tabular-nums">
+                      {step.number}
+                    </span>
+                  </div>
+                  <div class="p-6">
+                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3">
+                      <h3 class="text-xl font-[var(--font-display)] font-medium text-[var(--color-black)]">
+                        {step.title}
+                      </h3>
+                      <span class="text-xs text-[var(--color-muted)] bg-[var(--color-card)] px-2.5 py-1 rounded-[100px]">
+                        {step.duration}
+                      </span>
+                    </div>
+                    <p class="text-sm text-[var(--color-muted)] leading-relaxed mb-4">
+                      {detail.detail}
+                    </p>
+                    <p class="text-sm font-medium text-[var(--color-accent)]">
+                      {detail.outcome}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
         }
-      </ol>
-
-      {/* End cap — primary-filled dot signalling the arc terminates. */}
-      <span
-        aria-hidden="true"
-        class="absolute left-[1.375rem] md:left-6 -translate-x-1/2 bottom-5 w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-soft)]"
-      ></span>
+      </aside>
     </div>
   </div>
 </section>
+
+<style>
+  /* Hovered / focused step gets a subtle card tint so the link between
+     the left list and the right detail panel is obvious. */
+  .process-step-item {
+    outline: none;
+  }
+  .process-step-item.is-active {
+    background-color: color-mix(in srgb, var(--color-accent) 7%, transparent);
+  }
+  .process-step-item:focus-visible {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+
+  .process-detail {
+    animation: process-detail-fade 240ms ease both;
+  }
+  @keyframes process-detail-fade {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .process-detail {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Reveal the matching detail panel as the visitor hovers or
+  // keyboard-focuses a step. Default = first step (shown server-side).
+  const root = document.getElementById("process");
+  if (root) {
+    const items = Array.from(
+      root.querySelectorAll<HTMLElement>(".process-step-item"),
+    );
+    const details = Array.from(
+      root.querySelectorAll<HTMLElement>(".process-detail"),
+    );
+
+    const activate = (idx: number) => {
+      for (const item of items) {
+        item.classList.toggle("is-active", Number(item.dataset.step) === idx);
+      }
+      for (const detail of details) {
+        detail.hidden = Number(detail.dataset.detail) !== idx;
+      }
+    };
+
+    for (const item of items) {
+      const idx = Number(item.dataset.step);
+      item.addEventListener("mouseenter", () => activate(idx));
+      item.addEventListener("focusin", () => activate(idx));
+    }
+
+    // Mark the first step active on load so the list ↔ panel pairing is
+    // visible before any interaction.
+    if (items.length) activate(0);
+  }
+</script>
