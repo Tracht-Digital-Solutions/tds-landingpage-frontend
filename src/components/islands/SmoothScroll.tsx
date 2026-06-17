@@ -16,9 +16,18 @@ export default function SmoothScroll() {
       window.matchMedia?.("(pointer: coarse)").matches;
     if (isCoarsePointer) return;
 
+    // Gentle ease-out-back: the scroll settles a hair past its target and
+    // eases back, giving the page a subtle bounce as it comes to rest.
+    // `overshoot` is kept small so anchor jumps land softly, not nauseously.
+    const overshoot = 1.05;
+    const easeOutBack = (t: number) => {
+      const c3 = overshoot + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + overshoot * Math.pow(t - 1, 2);
+    };
+
     const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.2,
+      easing: easeOutBack,
       smoothWheel: true,
     });
 
