@@ -7,6 +7,8 @@ const pricingHref = localizePath("/preise", lang);
 // Section links resolve against the homepage so they work from subpages
 // like /preise, where these sections don't exist.
 const homeHref = localizePath("/", lang);
+// Strip spaces for the dialer href; keep the spaced version for display.
+const telHref = `tel:${t.contact.info.phone.replace(/\s+/g, "")}`;
 ---
 
 <footer class="bg-[var(--color-surface-ink)] text-white pt-16 pb-10">
@@ -45,6 +47,11 @@ const homeHref = localizePath("/", lang);
           <li>
             <a href={`mailto:${t.contact.info.email}`} class="text-white/70 hover:text-white">
               {t.contact.info.email}
+            </a>
+          </li>
+          <li>
+            <a href={telHref} class="text-white/70 hover:text-white">
+              {t.contact.info.phone}
             </a>
           </li>
           <li class="text-white/50">{t.contact.info.location}</li>
