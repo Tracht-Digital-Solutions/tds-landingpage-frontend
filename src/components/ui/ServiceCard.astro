@@ -11,7 +11,7 @@ interface Props {
 const { number, title, description, tags } = Astro.props;
 ---
 
-<div class="relative bg-[var(--color-paper)] p-6 sm:p-8 md:p-10 cursor-pointer group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left">
+<div class="relative flex flex-col h-full bg-[var(--color-paper)] p-6 sm:p-8 md:p-10 cursor-pointer group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left">
   <div class="flex items-start justify-center sm:justify-between gap-4 mb-6">
     <span
       aria-hidden="true"
@@ -39,7 +39,7 @@ const { number, title, description, tags } = Astro.props;
   <p class="text-[var(--color-muted)] text-sm leading-relaxed mb-8">
     {description}
   </p>
-  <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+  <div class="flex flex-wrap gap-2 justify-center sm:justify-start mt-auto">
     {tags.map((tag) => (
       <span class="px-3 py-1 text-xs rounded-full border border-[var(--color-line)] text-[var(--color-muted)] group-hover:border-[var(--color-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-200">
         {tag}

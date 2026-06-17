@@ -23,7 +23,7 @@ const services = t.services.items;
       {services.map((item, i) => {
         const orphan = i === services.length - 1 && services.length % 2 === 1;
         return (
-          <div class:list={[orphan && "sm:col-span-2"]}>
+          <div class:list={["h-full", orphan && "sm:col-span-2"]}>
             <ServiceCard
               number={item.number}
               title={item.title}
