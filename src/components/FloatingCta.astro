@@ -338,6 +338,14 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
 
+    // Re-sample when the colour theme flips. `update()` otherwise only runs
+    // on scroll/resize, so toggling dark mode while idle left the CTA's
+    // navy/white fill stale until the next scroll.
+    new MutationObserver(schedule).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
     // Proximity: as the pointer nears the control, slide the scroll-to-top
     // arrow up (the CSS slides it further again on hover). Hover-capable
     // pointers only — touch has no "near" state.
