@@ -151,6 +151,22 @@ body {
   50% { transform: translateY(6px); opacity: 0.4; }
 }
 
+/* Hero primary-CTA connector arrow — a gentle vertical bounce that nudges
+   the eye toward the "Gespräch vereinbaren" button. */
+.hero-cta-arrow {
+  animation: hero-cta-arrow-bounce 1.8s ease-in-out infinite;
+  transform-origin: top center;
+}
+@keyframes hero-cta-arrow-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-cta-arrow {
+    animation: none;
+  }
+}
+
 /* Hero availability dot */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
