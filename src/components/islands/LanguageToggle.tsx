@@ -147,7 +147,7 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
         <ul
           role="listbox"
           aria-label={lang === "de" ? "Sprachen" : "Languages"}
-          className="absolute right-0 top-full mt-2 min-w-[160px] py-1 rounded-xl bg-[var(--color-card)] shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] border border-[var(--color-line)] z-50"
+          className="absolute right-0 top-full mt-4 min-w-[160px] py-1 rounded-xl bg-[var(--color-card)] shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] border border-[var(--color-line)] z-50"
         >
           {options.map((opt) => {
             const active = opt.code === lang;
