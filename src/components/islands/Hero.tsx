@@ -194,23 +194,6 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
       />
 
       <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full text-center md:text-left">
-        <motion.div
-          {...fadeUp(0)}
-          className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 mb-6 text-xs sm:text-sm text-[var(--color-muted)] pl-1.5 pr-3.5 py-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm border border-[var(--color-line)] max-w-full"
-        >
-          <span className="flex items-center gap-2">
-            <span
-              className="pulse-dot inline-block w-2 h-2 rounded-full bg-[var(--color-accent)]"
-              aria-hidden
-            />
-            {t.hero.availability}
-          </span>
-          <span className="hidden sm:inline text-[var(--color-line)]" aria-hidden>
-            ·
-          </span>
-          <span>{t.hero.location}</span>
-        </motion.div>
-
         <motion.h1
           {...fadeUp(0.05)}
           id="hero-heading"
