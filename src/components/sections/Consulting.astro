@@ -51,17 +51,55 @@ const homePrefix = lang === "de" ? "" : "/en";
         </p>
 
         <div class="flex flex-wrap items-center gap-3">
-          <a
-            href={`${homePrefix}/#contact`}
-            class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium bg-white text-[var(--color-surface-navy)] hover:bg-white/85 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(0,0,0,0.25)] transition-all duration-200"
-          >
-            {t.consulting.primaryCta}
-            <span
+          <div class="relative">
+            {/* Hand-drawn curved arrow that loops down into the primary
+                CTA, drawing the eye to it. Bounces up gently; hidden on
+                small screens where there's no room and under reduced
+                motion. */}
+            <svg
               aria-hidden="true"
-              class="group-hover:translate-x-0.5 transition-transform"
-              >→</span
+              class="consulting-arrow pointer-events-none absolute -top-[3.25rem] left-2 w-24 h-16 text-[var(--color-accent-pink)] hidden sm:block"
+              viewBox="0 0 96 64"
+              fill="none"
             >
-          </a>
+              <path
+                d="M10 6 C 2 30, 14 50, 40 54 C 56 56, 68 52, 80 46"
+                stroke="currentColor"
+                stroke-width="2.75"
+                stroke-linecap="round"
+                fill="none"
+              />
+              <path
+                d="M70 39 L 82 46 L 70 53"
+                stroke="currentColor"
+                stroke-width="2.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                fill="none"
+              />
+            </svg>
+            <a
+              href={`${homePrefix}/#contact`}
+              class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium bg-white text-[var(--color-surface-navy)] hover:bg-white/85 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(0,0,0,0.25)] transition-all duration-200"
+            >
+              {t.consulting.primaryCta}
+              <svg
+                aria-hidden="true"
+                class="group-hover:translate-x-1 transition-transform duration-200"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 12c4.5 0 9-2.5 13 0" />
+                <polyline points="13 7 18 12 13 17" />
+              </svg>
+            </a>
+          </div>
           <a
             href={pricingHref}
             class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium border border-white/30 text-white hover:bg-white/10 hover:border-white/60 hover:-translate-y-0.5 transition-all duration-200"
@@ -78,3 +116,26 @@ const homePrefix = lang === "de" ? "" : "/en";
     </div>
   </div>
 </section>
+
+<style>
+  /* The decorative connector bounces up and settles, nudging the eye
+     toward the primary CTA. */
+  .consulting-arrow {
+    animation: consulting-arrow-bounce 1.8s ease-in-out infinite;
+    transform-origin: bottom right;
+  }
+  @keyframes consulting-arrow-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-7px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .consulting-arrow {
+      animation: none;
+    }
+  }
+</style>
