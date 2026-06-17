@@ -45,7 +45,7 @@ const content = getFaqContent(lang);
         role="tablist"
         aria-orientation="vertical"
         aria-label={content.label.replace(/^[—–-]\s*/, "")}
-        class="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]"
+        class="faq-tablist divide-y divide-[var(--color-line)] border-y border-[var(--color-line)] lg:max-h-[30rem] lg:overflow-y-auto lg:pr-3"
       >
         {content.items.map((item, i) => (
           <li>
@@ -109,6 +109,25 @@ const content = getFaqContent(lang);
     color: var(--color-accent);
     transform: translateX(2px);
   }
+  /* The question list scrolls on its own (desktop) while the answer
+     panel stays put — a thin, brand-tinted scrollbar keeps it discreet. */
+  .faq-tablist {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-accent) 45%, transparent)
+      transparent;
+    overscroll-behavior: contain;
+  }
+  .faq-tablist::-webkit-scrollbar {
+    width: 6px;
+  }
+  .faq-tablist::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    border-radius: 9999px;
+  }
+  .faq-tablist::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   .faq-panel { animation: faq-fade 220ms ease both; }
   @media (prefers-reduced-motion: reduce) {
     .faq-panel { animation: none; }

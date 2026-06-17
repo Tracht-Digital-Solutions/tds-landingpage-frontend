@@ -55,6 +55,26 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             q: "Können wir auch nur einen Workshop oder ein Audit buchen?",
             a: "Ja. Architektur-Reviews, Code-Audits und Inhouse-Workshops (TypeScript, Architektur, KI im Mittelstand) sind eigenständige Formate. Stundensätze siehe Preise.",
           },
+          {
+            q: "Was kostet ein Projekt ungefähr?",
+            a: "Pauschal oder nach Aufwand — je nach Projekt. Für klar umrissene Vorhaben gebe ich gern einen Festpreis ab, für offenere ein Tages- oder Stundenbudget mit Obergrenze. Konkrete Sätze finden Sie auf der Preise-Seite.",
+          },
+          {
+            q: "Übernehmen Sie auch Wartung und Support nach dem Launch?",
+            a: "Ja. Nach dem Launch biete ich Wartung, Updates und Weiterentwicklung — auf Abruf oder als monatliches Kontingent. So bleibt Ihre Anwendung sicher und aktuell, ohne dass Sie ein eigenes Team aufbauen müssen.",
+          },
+          {
+            q: "Wem gehört der Code am Ende?",
+            a: "Ihnen — vollständig. Nach Bezahlung gehen sämtliche Rechte am erstellten Code an Sie über, inklusive Repository-Zugriff. Kein Vendor-Lock-in, keine versteckten Lizenzen.",
+          },
+          {
+            q: "Können Sie ein bestehendes Projekt übernehmen?",
+            a: "Häufig ja. Ich starte mit einem kurzen Code- und Architektur-Audit, um Risiken und Aufwand einzuschätzen, und sage Ihnen ehrlich, ob eine Übernahme, ein Refactoring oder ein Neubau sinnvoller ist.",
+          },
+          {
+            q: "Wie läuft die Zusammenarbeit und Kommunikation ab?",
+            a: "Transparent und in Ihrem Takt. Sie bekommen regelmäßige Updates, Zugang zum Projektboard und einen festen Ansprechpartner — mich. Keine Ticket-Hotline, kein Account-Manager dazwischen.",
+          },
         ],
       }
     : {
@@ -87,6 +107,26 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           {
             q: "Can I book just a workshop or an audit?",
             a: "Yes. Architecture reviews, code audits, and in-house workshops (TypeScript, architecture, AI for mid-market) are standalone formats. See pricing for hourly rates.",
+          },
+          {
+            q: "Roughly what does a project cost?",
+            a: "Fixed price or time-and-materials — depending on the project. For clearly scoped work I'm happy to quote a fixed price; for open-ended work, a day or hour budget with a ceiling. Concrete rates are on the pricing page.",
+          },
+          {
+            q: "Do you handle maintenance and support after launch?",
+            a: "Yes. After launch I offer maintenance, updates, and further development — on demand or as a monthly retainer. Your app stays secure and current without you building an in-house team.",
+          },
+          {
+            q: "Who owns the code in the end?",
+            a: "You do — entirely. On payment, all rights to the code transfer to you, including repository access. No vendor lock-in, no hidden licences.",
+          },
+          {
+            q: "Can you take over an existing project?",
+            a: "Often, yes. I start with a short code and architecture audit to gauge risk and effort, and tell you honestly whether taking it over, refactoring, or rebuilding makes more sense.",
+          },
+          {
+            q: "How does collaboration and communication work?",
+            a: "Transparently, at your pace. You get regular updates, access to the project board, and one fixed point of contact — me. No ticket hotline, no account manager in between.",
           },
         ],
       };
