@@ -218,35 +218,46 @@ body {
   z-index: 9999;
   opacity: 0;
   will-change: transform;
+  /* Brand accent over light surfaces; the JS flips this to a light pink
+     over dark surfaces (see CustomCursor.tsx → .is-on-dark). */
+  --cursor-tint: var(--color-accent);
+}
+.tds-cursor-ring.is-on-dark,
+.tds-cursor-dot.is-on-dark {
+  --cursor-tint: #ff9ab6;
 }
 .tds-cursor-dot {
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background-color: var(--color-accent);
-  transition: opacity 200ms ease;
+  background-color: var(--cursor-tint);
+  transition:
+    opacity 200ms ease,
+    background-color 200ms ease;
 }
 .tds-cursor-ring {
   width: 34px;
   height: 34px;
   border-radius: 9999px;
-  border: 1.5px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--cursor-tint) 75%, transparent);
+  /* No transform transition — the rAF loop drives transform every frame. */
   transition:
     opacity 200ms ease,
-    width 200ms ease,
-    height 200ms ease,
+    width 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
     background-color 200ms ease,
     border-color 200ms ease;
 }
 .tds-cursor-ring.is-hover {
-  width: 52px;
-  height: 52px;
-  background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  border-color: color-mix(in srgb, var(--color-accent) 90%, transparent);
+  width: 54px;
+  height: 54px;
+  background-color: color-mix(in srgb, var(--cursor-tint) 14%, transparent);
+  border-color: color-mix(in srgb, var(--cursor-tint) 95%, transparent);
 }
 .tds-cursor-ring.is-down {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
+  background-color: color-mix(in srgb, var(--cursor-tint) 22%, transparent);
 }
 /* No custom cursor where there's no fine pointer or motion is reduced. */
 @media (pointer: coarse) {

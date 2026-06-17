@@ -1,14 +1,16 @@
 import { useEffect, useRef } from "react";
 
 /**
- * An additive custom cursor: a small dot pinned to the pointer plus a
- * larger ring that trails it with a smooth lerp, growing over interactive
- * elements. The native cursor stays visible — this rides on top of it.
+ * An additive custom cursor: a small dot pinned to the pointer plus a larger
+ * ring that trails it. The ring squashes/stretches along the movement vector
+ * (faster = more stretch), grows over interactive elements and pinches on
+ * click — so it reads as reactive to what the user is doing. Its colour flips
+ * between the brand accent (over light surfaces) and a light pink (over dark
+ * ones) by sampling the background luminance under the pointer, mirroring the
+ * approach in FloatingCta.astro. The native cursor stays visible underneath.
  *
- * Bails out entirely on coarse pointers (touch) and under
- * `prefers-reduced-motion`; the matching CSS also hides it in those cases
- * as a belt-and-braces guard. Mounted `client:idle` so it never competes
- * with first paint.
+ * Bails out on coarse pointers (touch) and under `prefers-reduced-motion`;
+ * matching CSS hides it there too. Mounted `client:idle`.
  */
 export default function CustomCursor() {
   const ringRef = useRef<HTMLDivElement>(null);
@@ -27,11 +29,35 @@ export default function CustomCursor() {
     let mouseY = window.innerHeight / 2;
     let ringX = mouseX;
     let ringY = mouseY;
+    let prevX = ringX;
+    let prevY = ringY;
     let visible = false;
     let hovering = false;
+    let onDark = false;
+    let frame = 0;
 
     const interactiveSelector =
       "a, button, [role='tab'], [role='button'], input, textarea, select, label, summary, .process-step-item";
+
+    // --- Background luminance sampling (flip cursor colour over dark UI) ---
+    const parseRgb = (value: string): [number, number, number, number] | null => {
+      const match = value.match(/rgba?\(([^)]+)\)/);
+      if (!match) return null;
+      const [r, g, b, a = 1] = match[1].split(",").map((p) => parseFloat(p.trim()));
+      return [r, g, b, a];
+    };
+    const isDark = (r: number, g: number, b: number) =>
+      0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
+    const sampleOnDark = (): boolean => {
+      const els = document.elementsFromPoint(mouseX, mouseY);
+      for (const el of els) {
+        if (el === ring || el === dot) continue;
+        const rgb = parseRgb(getComputedStyle(el).backgroundColor);
+        if (rgb && rgb[3] > 0.5) return isDark(rgb[0], rgb[1], rgb[2]);
+      }
+      const body = parseRgb(getComputedStyle(document.body).backgroundColor);
+      return body ? isDark(body[0], body[1], body[2]) : false;
+    };
 
     const onMove = (e: MouseEvent) => {
       mouseX = e.clientX;
@@ -60,10 +86,33 @@ export default function CustomCursor() {
 
     let raf = 0;
     const loop = () => {
-      // Lerp the ring toward the pointer for a smooth, weighty trail.
-      ringX += (mouseX - ringX) * 0.18;
-      ringY += (mouseY - ringY) * 0.18;
-      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+      // Snappy follow.
+      ringX += (mouseX - ringX) * 0.28;
+      ringY += (mouseY - ringY) * 0.28;
+
+      // Velocity → directional squash/stretch.
+      const vx = ringX - prevX;
+      const vy = ringY - prevY;
+      prevX = ringX;
+      prevY = ringY;
+      const speed = Math.hypot(vx, vy);
+      const stretch = Math.min(speed / 28, 0.45);
+      const angle = (Math.atan2(vy, vx) * 180) / Math.PI;
+      const sx = (1 + stretch).toFixed(3);
+      const sy = (1 - stretch * 0.6).toFixed(3);
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${sx}, ${sy})`;
+
+      // Re-sample the background colour a few times a second.
+      frame = (frame + 1) % 6;
+      if (frame === 0 && visible) {
+        const next = sampleOnDark();
+        if (next !== onDark) {
+          onDark = next;
+          ring.classList.toggle("is-on-dark", next);
+          dot.classList.toggle("is-on-dark", next);
+        }
+      }
+
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
