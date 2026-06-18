@@ -164,33 +164,23 @@ const pd = getProcessDetails(lang);
 
 <script>
   // Reveal the matching detail panel as the visitor hovers or
-  // keyboard-focuses a step. Default = first step (shown server-side).
+  // keyboard-focuses a step. The first panel is shown server-side.
   const root = document.getElementById("process");
   if (root) {
-    const items = Array.from(
-      root.querySelectorAll<HTMLElement>(".process-step-item"),
-    );
     const details = Array.from(
       root.querySelectorAll<HTMLElement>(".process-detail"),
     );
 
-    const activate = (idx: number) => {
-      for (const item of items) {
-        item.classList.toggle("is-active", Number(item.dataset.step) === idx);
-      }
+    const show = (idx: number) => {
       for (const detail of details) {
         detail.hidden = Number(detail.dataset.detail) !== idx;
       }
     };
 
-    for (const item of items) {
+    for (const item of root.querySelectorAll<HTMLElement>(".process-step-item")) {
       const idx = Number(item.dataset.step);
-      item.addEventListener("mouseenter", () => activate(idx));
-      item.addEventListener("focusin", () => activate(idx));
+      item.addEventListener("mouseenter", () => show(idx));
+      item.addEventListener("focusin", () => show(idx));
     }
-
-    // Mark the first step active on load so the list ↔ panel pairing is
-    // visible before any interaction.
-    if (items.length) activate(0);
   }
 </script>
