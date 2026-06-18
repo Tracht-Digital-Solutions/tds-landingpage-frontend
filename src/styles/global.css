@@ -24,36 +24,6 @@ body {
   overflow-x: clip;
 }
 
-/* About portrait — a heavily blurred, accent-coloured silhouette of the
-   cut-out sits behind the sharp portrait as a soft brand halo (the portrait
-   alpha is used as a mask, filled with --color-accent). Kept faint; on hover
-   the blur eases down so the silhouette firms up a touch. */
-.portrait-shadow {
-  position: absolute;
-  inset: 0;
-  z-index: -5;
-  width: 100%;
-  height: 100%;
-  background-color: var(--color-accent);
-  mask: var(--portrait-src) center top / cover no-repeat;
-  transform: scale(1.08) translateY(10px);
-  filter: blur(40px);
-  opacity: 0.2;
-  pointer-events: none;
-  transition:
-    filter 400ms ease,
-    opacity 400ms ease;
-}
-.portrait-frame:hover .portrait-shadow {
-  filter: blur(26px);
-  opacity: 0.3;
-}
-@media (prefers-reduced-motion: reduce) {
-  .portrait-shadow {
-    transition: none;
-  }
-}
-
 /* About portrait — the headshot is an isolated cut-out on a near-white
    background. Cropped into the 3:4 frame the figure ends on a hard
    rectangular line at the bottom (torso) and right (shoulder). Fade

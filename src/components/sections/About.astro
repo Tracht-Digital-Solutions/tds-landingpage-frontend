@@ -21,7 +21,7 @@ const stats = [
 
     <div class="grid md:grid-cols-2 gap-16 lg:gap-24 items-start">
       <div class="md:sticky md:top-28 max-w-sm mx-auto md:mx-0">
-        <div class="portrait-frame relative">
+        <div class="relative">
           {/* Soft brand glow behind the cut-out so it reads as framed
               rather than floating on the paper. */}
           <div
@@ -30,22 +30,13 @@ const stats = [
             style="background: radial-gradient(120% 120% at 50% 10%, color-mix(in srgb, var(--color-accent-pink) 20%, transparent), transparent 62%);"
           >
           </div>
-          {/* Heavily blurred accent-coloured silhouette of the portrait
-              behind it (the portrait alpha is used as a mask); the blur
-              eases down on hover. */}
-          <div
-            aria-hidden="true"
-            class="portrait-shadow"
-            style={`--portrait-src: url('${portrait.src}')`}
-          >
-          </div>
           <Image
             src={portrait}
             alt="Julian Tracht"
             widths={[300, 450, 600, 900]}
             sizes="(min-width: 768px) 24rem, 60vw"
             loading="eager"
-            class="portrait-fade relative rounded-[2px] aspect-[3/4] object-cover object-top w-full"
+            class="portrait-fade rounded-[2px] aspect-[3/4] object-cover object-top w-full"
           />
         </div>
       </div>
