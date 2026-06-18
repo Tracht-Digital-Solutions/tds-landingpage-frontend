@@ -85,7 +85,7 @@ const pd = getProcessDetails(lang);
                       image is missing it simply doesn't render and the
                       gradient shows through, so the build never breaks. The
                       scrim keeps the icon + number legible over any photo. */}
-                  <div class="relative flex items-end justify-between h-44 p-6 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] text-white overflow-hidden">
+                  <div class="relative flex items-end justify-between aspect-[4/3] p-6 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] text-white overflow-hidden">
                     <img
                       src={`/images/process/step-${step.number}.webp`}
                       alt=""
