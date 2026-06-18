@@ -30,14 +30,15 @@ const stats = [
             style="background: radial-gradient(120% 120% at 50% 10%, color-mix(in srgb, var(--color-accent-pink) 20%, transparent), transparent 62%);"
           >
           </div>
-          {/* Heavily blurred silhouette of the portrait as a soft shadow
-              behind it; the blur eases down on hover. */}
-          <img
-            src={portrait.src}
-            alt=""
+          {/* Heavily blurred accent-coloured silhouette of the portrait
+              behind it (the portrait alpha is used as a mask); the blur
+              eases down on hover. */}
+          <div
             aria-hidden="true"
             class="portrait-shadow"
-          />
+            style={`--portrait-src: url('${portrait.src}')`}
+          >
+          </div>
           <Image
             src={portrait}
             alt="Julian Tracht"

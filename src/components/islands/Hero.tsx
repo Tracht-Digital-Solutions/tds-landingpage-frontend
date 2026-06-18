@@ -252,40 +252,13 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
           {...fadeUp(0.15)}
           className="flex flex-wrap items-center justify-center md:justify-start gap-4"
         >
-          <div className="relative inline-flex">
-            {/* Hand-drawn curved arrow that loops up into the primary CTA
-                to draw the eye to it; gentle bounce, hidden where there's
-                no room (small screens) and under reduced motion. */}
-            <svg
-              aria-hidden="true"
-              className="hero-cta-arrow pointer-events-none absolute left-8 top-full mt-1 w-24 h-16 text-[var(--color-accent)] hidden md:block"
-              viewBox="0 0 96 64"
-              fill="none"
-            >
-              <path
-                d="M16 58 C 6 34, 30 16, 62 12"
-                stroke="currentColor"
-                strokeWidth="2.75"
-                strokeLinecap="round"
-                fill="none"
-              />
-              <path
-                d="M52 16 L 63 9 L 71 20"
-                stroke="currentColor"
-                strokeWidth="2.75"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-              />
-            </svg>
-            <button
-              type="button"
-              onClick={() => scrollTo("contact")}
-              className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
-            >
-              {t.hero.cta1}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => scrollTo("contact")}
+            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
+          >
+            {t.hero.cta1}
+          </button>
           <button
             type="button"
             onClick={() => scrollTo("services")}

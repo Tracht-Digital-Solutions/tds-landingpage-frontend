@@ -24,38 +24,29 @@ body {
   overflow-x: clip;
 }
 
-/* About portrait — a heavily blurred silhouette of the cut-out sits behind
-   the sharp portrait as a soft shadow; on hover the blur eases down so the
-   silhouette firms up a little. brightness(0) turns the alpha cut-out into a
-   solid dark shape (light theme); dark theme inverts it to a faint light
-   halo so the shadow still reads against the dark ground. */
+/* About portrait — a heavily blurred, accent-coloured silhouette of the
+   cut-out sits behind the sharp portrait as a soft brand halo (the portrait
+   alpha is used as a mask, filled with --color-accent). Kept faint; on hover
+   the blur eases down so the silhouette firms up a touch. */
 .portrait-shadow {
   position: absolute;
   inset: 0;
   z-index: -5;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: top;
+  background-color: var(--color-accent);
+  mask: var(--portrait-src) center top / cover no-repeat;
   transform: scale(1.08) translateY(10px);
-  filter: brightness(0) blur(40px);
-  opacity: 0.45;
+  filter: blur(40px);
+  opacity: 0.2;
   pointer-events: none;
   transition:
     filter 400ms ease,
     opacity 400ms ease;
 }
 .portrait-frame:hover .portrait-shadow {
-  filter: brightness(0) blur(24px);
-  opacity: 0.6;
-}
-:root[data-theme="dark"] .portrait-shadow {
-  filter: brightness(0) invert(1) blur(40px);
-  opacity: 0.16;
-}
-:root[data-theme="dark"] .portrait-frame:hover .portrait-shadow {
-  filter: brightness(0) invert(1) blur(24px);
-  opacity: 0.26;
+  filter: blur(26px);
+  opacity: 0.3;
 }
 @media (prefers-reduced-motion: reduce) {
   .portrait-shadow {
@@ -190,22 +181,6 @@ body {
   50% { transform: translateY(6px); opacity: 0.4; }
 }
 
-/* Hero primary-CTA connector arrow — a gentle vertical bounce that nudges
-   the eye toward the "Gespräch vereinbaren" button. */
-.hero-cta-arrow {
-  animation: hero-cta-arrow-bounce 1.8s ease-in-out infinite;
-  transform-origin: top center;
-}
-@keyframes hero-cta-arrow-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-cta-arrow {
-    animation: none;
-  }
-}
-
 /* Hero availability dot */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -278,25 +253,25 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 9999px;
-  border: 1.5px solid color-mix(in srgb, var(--cursor-tint) 75%, transparent);
-  /* No transform transition — the rAF loop drives transform every frame. */
+  /* Flat design — a solid, borderless translucent fill (no outline, no
+     shadow). The rAF loop drives transform every frame, so no transform
+     transition here. */
+  background-color: color-mix(in srgb, var(--cursor-tint) 20%, transparent);
   transition:
     opacity 200ms ease,
     width 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
     height 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    background-color 200ms ease,
-    border-color 200ms ease;
+    background-color 200ms ease;
 }
 .tds-cursor-ring.is-hover {
   width: 54px;
   height: 54px;
-  background-color: color-mix(in srgb, var(--cursor-tint) 14%, transparent);
-  border-color: color-mix(in srgb, var(--cursor-tint) 95%, transparent);
+  background-color: color-mix(in srgb, var(--cursor-tint) 30%, transparent);
 }
 .tds-cursor-ring.is-down {
   width: 24px;
   height: 24px;
-  background-color: color-mix(in srgb, var(--cursor-tint) 22%, transparent);
+  background-color: color-mix(in srgb, var(--cursor-tint) 42%, transparent);
 }
 /* No custom cursor where there's no fine pointer or motion is reduced. */
 @media (pointer: coarse) {
