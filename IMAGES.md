@@ -214,6 +214,21 @@ PWA later. Reference them in `Layout.astro`'s `<head>`:
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 ```
 
+### 7. Process step photos — ✅ DONE
+
+Shipped: the "Wie ich arbeite" detail card (`Process.astro`) shows a per-step
+photo behind the icon + step number, over a brand-gradient fallback.
+
+| | |
+|---|---|
+| **File** | `src/components/sections/Process.astro` |
+| **Current** | Real `public/images/process/step-01..04.webp` (Erstgespräch / Konzept / Entwicklung / Launch) |
+| **Aspect** | **4:3 landscape** (the card header box is `aspect-[4/3]`) |
+| **Source asset** | **1200 × 900 px** WebP (q ≈ 80), one per step, served verbatim from `public/` |
+| **Format** | WebP |
+| **Drop files at** | `public/images/process/step-0N.webp` (N = step number, `01`–`04`) |
+| **Fallback** | If a file is missing the `<img>` 404s and the gradient header shows through — the build never breaks. |
+
 ## Once a real asset lands
 
 1. Drop the file at the path listed above.
@@ -229,6 +244,7 @@ PWA later. Reference them in `Layout.astro`'s `<head>`:
 | #8 | Portrait | ✅ done (transparent WebP) |
 | #9 | Portfolio screenshots (× 4) | ⬜ pending |
 | #10 | Journal cover images (× 3) | ⬜ pending |
+| — | Process step photos (× 4) | ✅ done (`public/images/process/`) |
 | — | Header logomark | ✅ done (`public/images/logo.webp`) |
 | — | Favicon | ✅ done (`public/favicon.png`) |
 | — | `public/legal/agb.pdf` placeholder (PDF, not image) | ⬜ pending |

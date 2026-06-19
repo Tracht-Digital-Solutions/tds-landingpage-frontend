@@ -121,6 +121,11 @@ See README's "Replace examples before go-live" section.
   semantic order; the visual numbering already lives in each
   step's title row. Replaces an earlier per-step gradient connector
   design that read as four chained cards instead of one arc.
+  On desktop the timeline pairs with a sticky detail panel: hovering or
+  keyboard-focusing a step reveals its longer copy (`src/lib/processDetails.ts`,
+  kept local like the FAQ copy) over a per-step photo
+  (`public/images/process/step-0N.webp`) with the brand gradient as a
+  fallback when an image is missing.
 - **Section rhythm**: paper → paper → soft → DARK → paper → soft →
   paper → paper → soft → paper → soft → DARK. Paper-backed
   narrative sections (About, Portfolio, Currently, PricingTeaser
@@ -211,6 +216,14 @@ See README's "Replace examples before go-live" section.
   "active section" band sits ~30 % from the top — matches where
   the eye rests under smooth scroll. No-ops on pages with fewer
   than two sections.
+- **Scroll + cursor** (`src/components/islands/SmoothScroll.tsx`,
+  `CustomCursor.tsx`): Lenis smooths the wheel with a plain expo ease-out; the
+  playful ease-out-back *bounce* is reserved for click-to-section jumps via a
+  global `window.tdsScrollTo` (used by the logo, hero CTAs, back-to-top, and a
+  delegated in-page anchor-click handler). `CustomCursor` is an additive dot +
+  trailing ring that recolours from sampled background luminance and
+  squash-stretches with pointer velocity — fine-pointer only, disabled under
+  reduced motion. Both mount `client:idle`.
 - **Favicon**: `public/favicon.png` (901 × 901) is the real TDS
   logomark, shared verbatim with tds-blog / admin / customer so the
   four properties read as one identity in browser tabs. Matches the

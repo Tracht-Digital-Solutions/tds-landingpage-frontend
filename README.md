@@ -256,22 +256,25 @@ src/
 │   ├── JsonLd.astro            # Inline <script type="application/ld+json"> utility
 │   ├── islands/                # React, hydrated via client:load|visible
 │   │   ├── ContactForm.tsx     # POSTs to PUBLIC_CONTACT_API_URL; takes lang prop
+│   │   ├── CustomCursor.tsx    # Trailing custom cursor; bg-aware colour + velocity stretch (fine-pointer only)
 │   │   ├── Hero.tsx            # Hero with motion entrance; takes lang prop
 │   │   ├── LanguageToggle.tsx  # SVG-flag dropdown; navigates between /  ↔ /en/
 │   │   ├── ScrollProgress.tsx  # Thin gradient reading-progress bar (top of viewport)
-│   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only)
+│   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only); exposes window.tdsScrollTo — bounce on click-jumps, plain wheel scroll
 │   ├── sections/               # Static .astro sections (no JS by default)
 │   │   ├── About.astro, Services.astro, TechMarquee.astro,
 │   │   │ Portfolio.astro, Process.astro, Currently.astro,
 │   │   │ PricingTeaser.astro, Journal.astro, Consulting.astro,
 │   │   │ FAQ.astro, Contact.astro
 │   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, ServiceCard + ServiceIcon, PortfolioCard, ProcessStep, SectionHeader)
-├── layouts/Layout.astro        # Mounts SmoothScroll + ScrollProgress; renders meta + JSON-LD
+├── layouts/Layout.astro        # Mounts SmoothScroll (load) + ScrollProgress/CustomCursor (idle); renders meta + JSON-LD
 ├── lib/
 │   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
 │   ├── content.ts              # fetchTopics() — build-time pull of recent blog posts
 │   ├── seo.ts                  # Single source of truth for org/person identity
-│   └── jsonld.ts               # Schema.org graph generators
+│   ├── jsonld.ts               # Schema.org graph generators
+│   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
+│   └── processDetails.ts       # Per-step detail copy for the Process hover panel
 ├── og/                         # Satori OG-card pipeline (build-time)
 │   ├── render.ts               # 1200×630 default card
 │   └── fonts/                  # Instrument Serif (woff) + Geist (ttf) for the OG card
