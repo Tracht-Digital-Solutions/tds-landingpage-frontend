@@ -1,14 +1,29 @@
 ---
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
+
+// Editable footer strings + contact info (shared with the Contact section's
+// block) — both override the tds-shared defaults at build time.
+const footer = await cmsFor("footer", lang, t.footer);
+const contact = await cmsFor("contact", lang, {
+  label: t.contact.label,
+  headline: t.contact.headline,
+  headlineAccent: t.contact.headlineAccent,
+  sub: t.contact.sub,
+  email: t.contact.info.email,
+  phone: t.contact.info.phone,
+  location: t.contact.info.location,
+});
+
 const pricingHref = localizePath("/preise", lang);
 // Section links resolve against the homepage so they work from subpages
 // like /preise, where these sections don't exist.
 const homeHref = localizePath("/", lang);
 // Strip spaces for the dialer href; keep the spaced version for display.
-const telHref = `tel:${t.contact.info.phone.replace(/\s+/g, "")}`;
+const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
 ---
 
 <footer class="bg-[var(--color-surface-ink)] text-white pt-16 pb-10">
@@ -19,51 +34,51 @@ const telHref = `tel:${t.contact.info.phone.replace(/\s+/g, "")}`;
           Tracht <span class="italic text-[var(--color-accent-pink)]">Digital</span> Solutions
         </p>
         <p class="font-[var(--font-display)] italic text-[var(--color-accent-pink)] text-base mb-4">
-          {t.footer.slogan}
+          {footer.slogan}
         </p>
         <p class="text-white/60 text-sm leading-relaxed max-w-xs">
-          {t.footer.tagline}
+          {footer.tagline}
         </p>
       </div>
 
       <div>
         <p class="eyebrow text-white/50 mb-4">
-          {t.footer.nav}
+          {footer.nav}
         </p>
         <ul class="space-y-2 text-sm">
           <li><a href={`${homeHref}#about`} class="text-white/70 hover:text-white">{t.nav.about}</a></li>
           <li><a href={`${homeHref}#services`} class="text-white/70 hover:text-white">{t.nav.services}</a></li>
           {/* Portfolio temporarily hidden — see README § "Portfolio (temporarily hidden)". */}
-          <li><a href={pricingHref} class="text-white/70 hover:text-white">{t.footer.pricing}</a></li>
+          <li><a href={pricingHref} class="text-white/70 hover:text-white">{footer.pricing}</a></li>
           <li><a href="https://blog.tracht-digital.de" class="text-white/70 hover:text-white">{t.nav.blog}</a></li>
         </ul>
       </div>
 
       <div>
         <p class="eyebrow text-white/50 mb-4">
-          {t.footer.contactTitle}
+          {footer.contactTitle}
         </p>
         <ul class="space-y-2 text-sm">
           <li>
-            <a href={`mailto:${t.contact.info.email}`} class="text-white/70 hover:text-white">
-              {t.contact.info.email}
+            <a href={`mailto:${contact.email}`} class="text-white/70 hover:text-white">
+              {contact.email}
             </a>
           </li>
           <li>
             <a href={telHref} class="text-white/70 hover:text-white">
-              {t.contact.info.phone}
+              {contact.phone}
             </a>
           </li>
-          <li class="text-white/50">{t.contact.info.location}</li>
+          <li class="text-white/50">{contact.location}</li>
         </ul>
       </div>
     </div>
 
     <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-white/40">
-      <p>{t.footer.copyright}</p>
+      <p>{footer.copyright}</p>
       <div class="flex flex-wrap gap-6">
-        <a href="/legal/impressum" class="hover:text-white">{t.footer.impressum}</a>
-        <a href="/legal/datenschutz" class="hover:text-white">{t.footer.datenschutz}</a>
+        <a href="/legal/impressum" class="hover:text-white">{footer.impressum}</a>
+        <a href="/legal/datenschutz" class="hover:text-white">{footer.datenschutz}</a>
         <a
           href="/legal/agb.pdf"
           download

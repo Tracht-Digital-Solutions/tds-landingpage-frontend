@@ -11,10 +11,14 @@
  * Copy lives in tds-shared under `translations.consulting`.
  */
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
+
+// Editable consulting copy — the shape matches t.consulting exactly.
+const consulting = await cmsFor("consulting", lang, t.consulting);
 
 const pricingHref = localizePath("/preise", lang);
 const homePrefix = lang === "de" ? "" : "/en";
@@ -38,16 +42,16 @@ const homePrefix = lang === "de" ? "" : "/en";
       ></span>
 
       <div class="relative max-w-3xl">
-        <p class="section-num text-white/60 mb-4">{t.consulting.label}</p>
+        <p class="section-num text-white/60 mb-4">{consulting.label}</p>
         <h2
           id="consulting-heading"
           class="display text-4xl md:text-5xl lg:text-6xl text-white mb-6"
         >
-          {t.consulting.headline}{" "}
-          <AccentLetters text={t.consulting.headlineAccent} tone="dark" />
+          {consulting.headline}{" "}
+          <AccentLetters text={consulting.headlineAccent} tone="dark" />
         </h2>
         <p class="text-base md:text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
-          {t.consulting.body}
+          {consulting.body}
         </p>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -55,7 +59,7 @@ const homePrefix = lang === "de" ? "" : "/en";
             href={`${homePrefix}/#contact`}
             class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium bg-white text-[var(--color-surface-navy)] hover:bg-white/85 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(0,0,0,0.25)] transition-all duration-200"
           >
-            {t.consulting.primaryCta}
+            {consulting.primaryCta}
             <span
               aria-hidden="true"
               class="group-hover:translate-x-0.5 transition-transform"
@@ -66,7 +70,7 @@ const homePrefix = lang === "de" ? "" : "/en";
             href={pricingHref}
             class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium border border-white/30 text-white hover:bg-white/10 hover:border-white/60 hover:-translate-y-0.5 transition-all duration-200"
           >
-            {t.consulting.secondaryCta}
+            {consulting.secondaryCta}
             <span
               aria-hidden="true"
               class="group-hover:translate-x-0.5 transition-transform"

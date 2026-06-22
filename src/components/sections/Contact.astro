@@ -1,17 +1,28 @@
 ---
 import { tFor, resolveLang } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
 
+// Editable contact heading + info (email/phone/location). Field *labels*
+// stay in tds-shared (t.contact.info.*Label, t.contact.form.*). Shared with
+// the Footer's contact block at build time (cms.ts memoises the fetch).
+const contact = await cmsFor("contact", lang, {
+  label: t.contact.label,
+  headline: t.contact.headline,
+  headlineAccent: t.contact.headlineAccent,
+  sub: t.contact.sub,
+  email: t.contact.info.email,
+  phone: t.contact.info.phone,
+  location: t.contact.info.location,
+});
+
 // Phone display reads with country code spaced for legibility; the
 // tel: href version strips the spaces so dialers handle it cleanly.
-// The phone is also exposed via tds-shared `t.contact.info.phone` for
-// the sidebar — kept in this file too because the `tel:` href needs
-// the no-space variant.
-const phoneDisplay = t.contact.info.phone;
+const phoneDisplay = contact.phone;
 const phoneHref = phoneDisplay.replace(/\s/g, "");
 const socials = {
   linkedin: "https://www.linkedin.com/in/julian-tracht/",
@@ -29,16 +40,16 @@ const socials = {
 >
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <div class="text-center md:text-left mb-4">
-      <p class="section-num text-white/60">{t.contact.label}</p>
+      <p class="section-num text-white/60">{contact.label}</p>
     </div>
     <h2
       id="contact-heading"
       class="display text-4xl md:text-5xl lg:text-6xl text-white mb-4 text-center md:text-left"
     >
-      {t.contact.headline}{" "}
-      <AccentLetters text={t.contact.headlineAccent} tone="dark" />
+      {contact.headline}{" "}
+      <AccentLetters text={contact.headlineAccent} tone="dark" />
     </h2>
-    <p class="text-white/60 max-w-lg mb-10 md:mb-16 leading-relaxed text-center md:text-left mx-auto md:mx-0">{t.contact.sub}</p>
+    <p class="text-white/60 max-w-lg mb-10 md:mb-16 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
 
     <div class="grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">
       <ContactForm client:visible lang={lang} />
@@ -49,7 +60,7 @@ const socials = {
             {t.contact.info.emailLabel}
           </p>
           <a
-            href={`mailto:${t.contact.info.email}`}
+            href={`mailto:${contact.email}`}
             class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors"
           >
             <svg
@@ -67,7 +78,7 @@ const socials = {
               <rect x="2" y="4" width="20" height="16" rx="2" />
               <path d="m2 7 10 6 10-6" />
             </svg>
-            {t.contact.info.email}
+            {contact.email}
           </a>
         </div>
 
@@ -119,7 +130,7 @@ const socials = {
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
-            {t.contact.info.location}
+            {contact.location}
           </span>
         </div>
 

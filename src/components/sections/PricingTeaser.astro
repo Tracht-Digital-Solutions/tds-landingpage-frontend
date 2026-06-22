@@ -1,9 +1,13 @@
 ---
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
+// Editable pricing block (shared with the /preise page) — overrides the
+// tds-shared default at build time.
+const pricing = await cmsFor("pricing", lang, t.pricing);
 const pricingHref = localizePath("/preise", lang);
 ---
 
@@ -21,21 +25,21 @@ const pricingHref = localizePath("/preise", lang);
 
       <div class="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
         <div>
-          <p class="section-num text-white/60 mb-4">{t.pricing.label}</p>
+          <p class="section-num text-white/60 mb-4">{pricing.label}</p>
           <h2
             id="pricing-teaser-heading"
             class="display text-4xl md:text-5xl lg:text-6xl mb-4"
           >
-            {t.pricing.teaserHeadline}{" "}
-            <AccentLetters text={t.pricing.teaserHeadlineAccent} tone="dark" />
+            {pricing.teaserHeadline}{" "}
+            <AccentLetters text={pricing.teaserHeadlineAccent} tone="dark" />
           </h2>
-          <p class="text-white/75 leading-relaxed max-w-xl">{t.pricing.teaserSub}</p>
+          <p class="text-white/75 leading-relaxed max-w-xl">{pricing.teaserSub}</p>
         </div>
 
         <div class="flex flex-col items-start md:items-end gap-6 md:text-right">
           <div class="flex items-baseline gap-2">
             <span class="font-[var(--font-display)] italic text-sm text-white/60 leading-none">
-              {t.pricing.teaserFromLabel}
+              {pricing.teaserFromLabel}
             </span>
             <span
               class="font-[var(--font-display)] text-5xl md:text-6xl font-medium leading-none tabular-nums"
@@ -43,11 +47,11 @@ const pricingHref = localizePath("/preise", lang);
             >
               95&nbsp;€
             </span>
-            <span class="text-sm text-white/60 leading-none">{t.pricing.hourSuffix}</span>
+            <span class="text-sm text-white/60 leading-none">{pricing.hourSuffix}</span>
           </div>
 
           <span class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-[var(--color-surface-navy)] text-sm font-medium group-hover:gap-3 transition-all">
-            {t.pricing.teaserCta}
+            {pricing.teaserCta}
             <span aria-hidden="true" class="group-hover:rotate-45 transition-transform duration-300">↗</span>
           </span>
         </div>

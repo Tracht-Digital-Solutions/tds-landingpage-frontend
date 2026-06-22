@@ -5,9 +5,11 @@ import AccentLetters from "~/components/ui/AccentLetters.astro";
 import { breadcrumbSchema, pricingSchema } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
+const pricing = await cmsFor("pricing", lang, t.pricing);
 const homeHref = localizePath("/", lang);
 
 const formatRate = (rate: number) =>
@@ -26,7 +28,7 @@ const pricingPath = localizePath("/preise", lang);
 
 const jsonLd = [
   pricingSchema(
-    t.pricing.items.map((item) => ({
+    pricing.items.map((item) => ({
       name: item.title,
       description: item.description,
       rate: item.rate,
@@ -34,13 +36,13 @@ const jsonLd = [
   ),
   breadcrumbSchema([
     { name: lang === "de" ? "Home" : "Home", url: `${siteConfig.url}${homeHref}` },
-    { name: t.pricing.label.replace(/^—\s*/, ""), url: `${siteConfig.url}${pricingPath}` },
+    { name: pricing.label.replace(/^—\s*/, ""), url: `${siteConfig.url}${pricingPath}` },
   ]),
 ];
 ---
 
 <Layout
-  title={`${t.pricing.label.replace(/^—\s*/, "")} — Tracht Digital Solutions`}
+  title={`${pricing.label.replace(/^—\s*/, "")} — Tracht Digital Solutions`}
   description={pageDescriptions[lang]}
   lang={lang}
   jsonLd={jsonLd}
@@ -59,28 +61,28 @@ const jsonLd = [
           class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors inline-flex items-center gap-2 group"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          {t.pricing.back}
+          {pricing.back}
         </a>
       </div>
 
       <p class="text-xs font-medium tracking-widest text-[var(--color-muted)] uppercase mb-6">
-        {t.pricing.label}
+        {pricing.label}
       </p>
 
       <h1
         class="text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-tight tracking-tight text-[var(--color-black)] mb-6 max-w-4xl"
         style='font-variation-settings: "opsz" 144;'
       >
-        {t.pricing.headline}{" "}
-        <AccentLetters text={t.pricing.headlineAccent} />
+        {pricing.headline}{" "}
+        <AccentLetters text={pricing.headlineAccent} />
       </h1>
 
       <p class="text-lg text-[var(--color-muted)] max-w-2xl mb-16 leading-relaxed">
-        {t.pricing.sub}
+        {pricing.sub}
       </p>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
-        {t.pricing.items.map((item) => {
+        {pricing.items.map((item) => {
           const isHighlight = item.highlight;
           return (
             <div
@@ -123,7 +125,7 @@ const jsonLd = [
                     isHighlight ? "text-white/70" : "text-[var(--color-muted)]",
                   ]}
                 >
-                  {t.pricing.hourSuffix}
+                  {pricing.hourSuffix}
                 </span>
               </div>
 
@@ -148,7 +150,7 @@ const jsonLd = [
                     isHighlight ? "text-white/60" : "text-[var(--color-muted)]",
                   ]}
                 >
-                  {t.pricing.includesLabel}
+                  {pricing.includesLabel}
                 </p>
                 <ul class="space-y-2">
                   {item.includes.map((inc) => (
@@ -194,10 +196,10 @@ const jsonLd = [
           id="pricing-notes-heading"
           class="font-[var(--font-display)] italic text-base text-[var(--color-muted)] mb-4"
         >
-          {t.pricing.notesTitle}
+          {pricing.notesTitle}
         </h2>
         <ul class="grid sm:grid-cols-2 gap-3">
-          {t.pricing.notes.map((note) => (
+          {pricing.notes.map((note) => (
             <li class="text-sm text-[var(--color-black)] leading-snug flex gap-2">
               <span class="text-[var(--color-accent)] select-none" aria-hidden="true">·</span>
               {note}
@@ -214,16 +216,16 @@ const jsonLd = [
           class="font-[var(--font-display)] font-medium text-3xl md:text-4xl mb-4"
           style='font-variation-settings: "opsz" 144;'
         >
-          {t.pricing.ctaTitle}
+          {pricing.ctaTitle}
         </h2>
         <p class="text-white/80 max-w-xl mx-auto mb-8 leading-relaxed">
-          {t.pricing.ctaSub}
+          {pricing.ctaSub}
         </p>
         <a
           href={`${homeHref === "/" ? "" : homeHref.replace(/\/$/, "")}/#contact`}
           class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
         >
-          {t.pricing.ctaButton}
+          {pricing.ctaButton}
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </a>
       </section>
