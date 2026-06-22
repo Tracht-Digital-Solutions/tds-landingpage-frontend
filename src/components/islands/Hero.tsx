@@ -52,8 +52,30 @@ type Lang = "de" | "en";
  * immediately on page load. The page passes `lang` via props so the EN
  * route hydrates with EN copy without a client-side swap.
  */
-export default function Hero({ lang = "de" }: { lang?: Lang }) {
+/** Editable hero copy — overrides the tds-shared default when the page
+ *  passes an admin-edited block (fetched at build time). */
+export type HeroContent = Partial<{
+  headline: string;
+  headlineAccent: string;
+  headlineSuffix: string;
+  tagline: string;
+  sub: string;
+  cta1: string;
+  cta2: string;
+  scrollHint: string;
+}>;
+
+export default function Hero({
+  lang = "de",
+  hero,
+}: {
+  lang?: Lang;
+  hero?: HeroContent;
+}) {
   const t = translations[lang];
+  // Merge the edited block over the shared default so any missing field
+  // falls back cleanly.
+  const h = { ...t.hero, ...(hero ?? {}) };
   const containerRef = useRef<HTMLElement>(null);
 
   // X axis tracks the cursor (spring-damped per layer for depth).
@@ -203,7 +225,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-[1.05] tracking-tight text-[var(--color-black)] mb-4 max-w-4xl mx-auto md:mx-0"
           style={{ fontVariationSettings: '"opsz" 144' }}
         >
-          {t.hero.headline}{" "}
+          {h.headline}{" "}
           <span className="relative inline-block">
             <span
               aria-hidden
@@ -213,9 +235,9 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
                   "radial-gradient(ellipse at center, rgba(255,122,156,0.55) 0%, rgba(130,9,51,0.25) 60%, transparent 80%)",
               }}
             />
-            <AccentLetters text={t.hero.headlineAccent} />
+            <AccentLetters text={h.headlineAccent} />
           </span>{" "}
-          {t.hero.headlineSuffix}
+          {h.headlineSuffix}
         </motion.h1>
 
         {/* Third title-tier strapline — picks up secondary SEO
@@ -226,7 +248,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
           {...fadeUp(0.07)}
           className="text-base sm:text-lg text-[var(--color-muted)] mb-4 max-w-2xl mx-auto md:mx-0"
         >
-          {t.hero.tagline}
+          {h.tagline}
         </motion.p>
 
         {/* Second main title — brand slogan picked up from
@@ -245,7 +267,7 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
           {...fadeUp(0.1)}
           className="text-base md:text-lg text-[var(--color-muted)] max-w-2xl mb-8 leading-relaxed mx-auto md:mx-0"
         >
-          {t.hero.sub}
+          {h.sub}
         </motion.p>
 
         <motion.div
@@ -257,14 +279,14 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
             onClick={() => scrollTo("contact")}
             className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
           >
-            {t.hero.cta1}
+            {h.cta1}
           </button>
           <button
             type="button"
             onClick={() => scrollTo("services")}
             className="px-7 py-3.5 text-sm font-medium border border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm text-[var(--color-black)] rounded-[100px] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
           >
-            {t.hero.cta2}
+            {h.cta2}
           </button>
         </motion.div>
       </div>
@@ -277,9 +299,9 @@ export default function Hero({ lang = "de" }: { lang?: Lang }) {
         transition={{ delay: 0.8, duration: 0.5 }}
         whileHover={{ y: -2 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-xs text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer p-2 rounded-md"
-        aria-label={t.hero.scrollHint}
+        aria-label={h.scrollHint}
       >
-        <span>{t.hero.scrollHint}</span>
+        <span>{h.scrollHint}</span>
         <span aria-hidden style={{ animation: "scrollHint 2s ease-in-out infinite" }}>↓</span>
       </motion.button>
     </section>

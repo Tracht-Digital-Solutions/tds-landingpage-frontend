@@ -27,6 +27,7 @@ import {
 import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
+import { cmsFor } from "~/lib/cms";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -34,7 +35,18 @@ const lang = resolveLang(Astro.currentLocale);
 // and WebSite all live here. Subpages reference them by @id rather than
 // redefining them.
 const t = tFor(Astro.currentLocale);
-const faq = getFaqContent(lang);
+const hero = await cmsFor("hero", lang, {
+  headline: t.hero.headline,
+  headlineAccent: t.hero.headlineAccent,
+  headlineSuffix: t.hero.headlineSuffix,
+  tagline: t.hero.tagline,
+  sub: t.hero.sub,
+  cta1: t.hero.cta1,
+  cta2: t.hero.cta2,
+  scrollHint: t.hero.scrollHint,
+});
+// Resolve FAQ here too so the FAQPage JSON-LD matches the rendered answers.
+const faq = await cmsFor("faq", lang, getFaqContent(lang));
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
@@ -69,7 +81,7 @@ const titles = {
 >
   <Header />
   <main id="main">
-    <Hero client:load lang={lang} />
+    <Hero client:load lang={lang} hero={hero} />
     <About />
     <Services />
     <TechMarquee />
