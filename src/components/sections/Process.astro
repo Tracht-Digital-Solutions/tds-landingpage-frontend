@@ -4,11 +4,32 @@ import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ProcessStep from "~/components/ui/ProcessStep.astro";
 import ProcessIcon from "~/components/ui/ProcessIcon.astro";
 import { getProcessDetails } from "~/lib/processDetails";
+import { cmsFor } from "~/lib/cms";
 
 const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
-const steps = t.process.steps;
 const pd = getProcessDetails(lang);
+
+// Default = the shared steps merged with the local detail copy. An
+// admin-edited "process" block overrides this at build time (cmsFor);
+// shape stays identical so the rendering below is source-agnostic.
+const defaultProcess = {
+  label: t.process.label,
+  headline: t.process.headline,
+  headlineAccent: t.process.headlineAccent,
+  body: t.process.body,
+  steps: t.process.steps.map((s) => ({
+    number: s.number,
+    title: s.title,
+    duration: s.duration,
+    description: s.description,
+    detail: pd[s.number]?.detail ?? "",
+    outcome: pd[s.number]?.outcome ?? "",
+  })),
+};
+
+const process = await cmsFor("process", lang, defaultProcess);
+const steps = process.steps;
 ---
 
 <section
@@ -18,14 +39,14 @@ const pd = getProcessDetails(lang);
 >
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <SectionHeader
-      label={t.process.label}
-      headline={t.process.headline}
-      headlineAccent={t.process.headlineAccent}
+      label={process.label}
+      headline={process.headline}
+      headlineAccent={process.headlineAccent}
       id="process-heading"
       headingClass="mb-6"
     />
     <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
-      {t.process.body}
+      {process.body}
     </p>
 
     {/* Two columns on desktop: the vertical-timeline steps on the left,
@@ -77,7 +98,6 @@ const pd = getProcessDetails(lang);
       <aside class="hidden lg:block lg:sticky lg:top-28 self-start" aria-hidden="true">
         {
           steps.map((step, i) => {
-            const detail = pd[step.number];
             return (
               <div class="process-detail" data-detail={i} hidden={i !== 0}>
                 <div class="rounded-2xl overflow-hidden border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_24px_60px_-32px_rgba(5,15,104,0.35)]">
@@ -115,10 +135,10 @@ const pd = getProcessDetails(lang);
                       </span>
                     </div>
                     <p class="text-sm text-[var(--color-muted)] leading-relaxed mb-4">
-                      {detail.detail}
+                      {step.detail}
                     </p>
                     <p class="text-sm font-medium text-[var(--color-accent)]">
-                      {detail.outcome}
+                      {step.outcome}
                     </p>
                   </div>
                 </div>

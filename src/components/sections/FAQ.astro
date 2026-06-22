@@ -16,10 +16,13 @@
  */
 import { resolveLang } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
+import { cmsFor } from "~/lib/cms";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 
 const lang = resolveLang(Astro.currentLocale);
-const content = getFaqContent(lang);
+// Admin-edited "faq" block overrides the local default at build time;
+// falls back to lib/faq.ts when no block is saved or the API is down.
+const content = await cmsFor("faq", lang, getFaqContent(lang));
 ---
 
 <section
