@@ -103,6 +103,18 @@ See README's "Replace examples before go-live" section.
   older browsers fall back to the default `<details>` snap. Copy
   is inlined per the same rule as Currently — FAQ answers drift
   faster than the rest of the bundle.
+- **Editable content via `src/lib/cms.ts`**: `fetchBlocks(lang)` does a
+  single build-time GET of `PUBLIC_CONTENT_API_URL/landing?lang=` (memoised)
+  and `cmsFor(section, lang, fallback)` merges the admin-edited block for that
+  section over its baked default, guarded by a shallow shape-check and
+  graceful fallback to `{}` so the build never breaks if the API is down.
+  Editable sections today: hero, about, services, pricing, consulting,
+  contact, footer, faq, process — edited in tds-admin's Landingpage editor.
+  **tds-shared i18n (and the local `lib/faq.ts` / `lib/processDetails.ts`)
+  remain the default/fallback**; a content block only *overrides* it. Honours
+  the "content baked at build time, never at runtime" rule — a `/landing` edit
+  goes live only after the API triggers a rebuild. (Hero is a `client:load`
+  island, so `index.astro` resolves its block and passes it as a prop.)
 - **Live topics via `src/lib/content.ts`**: `fetchTopics(lang, limit)`
   is a build-time fetch from `PUBLIC_CONTENT_API_URL/blog?…` that
   returns `[]` on any failure. Consumers fall back to their own

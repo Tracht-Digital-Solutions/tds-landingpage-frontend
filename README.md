@@ -271,6 +271,7 @@ src/
 ├── lib/
 │   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
 │   ├── content.ts              # fetchTopics() — build-time pull of recent blog posts
+│   ├── cms.ts                  # fetchBlocks()/cmsFor() — build-time pull of editable section content (/landing), merged over the tds-shared defaults
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   ├── jsonld.ts               # Schema.org graph generators
 │   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
