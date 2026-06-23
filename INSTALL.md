@@ -99,21 +99,23 @@ the build still succeeds.
 
 ## 6. Production deployment
 
-Deployment is automatic. On every push to `main`,
-`.github/workflows/build.yml` builds `dist/`, force-pushes it to an
-orphan `build` branch, then GET-pings the deploy webhook so the
-production host pulls that branch and goes live.
+Two branches (the old `build` branch is gone):
 
-One-time setup: add a `DEPLOY_WEBHOOK_URL` repository secret pointing at
-the host's deploy-hook URL (the deploy token is carried inside the URL).
-Until it's set, the build still publishes the `build` branch and the
-deploy ping is skipped.
+- **`dev`** — every push to `main` auto-builds `dist/` (Staging/Demo config) via
+  `.github/workflows/dev.yml` → orphan `dev` branch. Not deployed.
+- **`release`** — the manual *Actions → Release → Run workflow* button
+  (`release.yml`) builds the production `dist/` → `release` branch, then GET-pings
+  the deploy webhook so the host pulls `release` and goes live.
+
+One-time setup: add a `DEPLOY_WEBHOOK_URL` repository secret pointing at the
+host's deploy-hook URL (the deploy token is carried inside the URL) — used only
+by the release run.
 
 ```bash
-# Manual fallback: pull the latest built artifact from the build branch
-git fetch origin build
-git worktree add ../tds-landingpage-build origin/build
-# ../tds-landingpage-build/ now holds the built dist/
+# Manual fallback: pull the latest built artifact from the release branch
+git fetch origin release
+git worktree add ../tds-landingpage-release origin/release
+# ../tds-landingpage-release/ now holds the built dist/
 ```
 
 ## 7. Before go-live: replace placeholder values

@@ -115,26 +115,24 @@ npm run type-check   # astro check — catches .astro + .tsx errors
 
 ## Deploy
 
-Deployment is automatic. On every push to `main`,
-`.github/workflows/build.yml`:
+Two-track branch model (the old `build` branch is gone):
 
-1. builds the static `dist/`,
-2. force-pushes it to an orphan `build` branch (one commit per run,
-   latest build only), and
-3. GET-pings the deploy webhook so the production host pulls the
-   `build` branch and goes live.
+- **`dev`** — [`dev.yml`](.github/workflows/dev.yml), on **every push to `main`**:
+  builds `dist/` with the Staging/Demo config (`PUBLIC_DEMO_MODE=true`) and
+  force-pushes it to the orphan **`dev`** branch. **Not deployed** — the
+  continuously-built developer version + the push-to-main build gate.
+- **`release`** — [`release.yml`](.github/workflows/release.yml), **only on the
+  manual Actions button** (*Actions → Release → Run workflow*): builds with the
+  real production config and force-pushes to **`release`**, then GET-pings the
+  deploy webhook so the host pulls `release` and goes live.
 
-**Required secret:** set the `DEPLOY_WEBHOOK_URL` repository secret to
-the host's deploy-hook URL (the deploy token is carried inside the URL).
-If it isn't set, the build still publishes the `build` branch and the
-deploy ping is skipped — so you can always fall back to pulling the
-artifact manually:
+**Required secret:** `DEPLOY_WEBHOOK_URL` (host deploy-hook URL; token inside the
+URL) — used only by `release.yml`. The production host pulls **`release`**. Fall
+back manually with:
 
 ```bash
-# Inspect / roll back / deploy by hand from the latest build
-git fetch origin build
-git worktree add ../tds-landingpage-build origin/build
-# the worktree now holds the built dist/ for that commit
+git fetch origin release
+git worktree add ../tds-landingpage-release origin/release   # the built dist/
 ```
 
 ---
@@ -160,25 +158,17 @@ a constant at build time — safe to expose in the client bundle.
 
 ### GitHub Actions secrets
 
-`build.yml` needs **one** repo secret: `NPM_TOKEN`, a classic PAT
-with `read:packages` on the `Tracht-Digital-Solutions` org. Both
-the install (cross-repo read of `tds-shared` from GitHub Packages)
-and the `peaceiris/actions-gh-pages` push to the `build` branch
-authenticate via this PAT. The auto-provided `GITHUB_TOKEN` can't
-read `tds-shared` because that package lives in a different repo.
+Both `dev.yml` and `release.yml` need `NPM_TOKEN`, a classic PAT with
+`read:packages` on the `Tracht-Digital-Solutions` org. It authenticates both
+the install (cross-repo read of `tds-shared` from GitHub Packages) and the
+`peaceiris/actions-gh-pages` push to the `dev` / `release` branch. The
+auto-provided `GITHUB_TOKEN` can't read `tds-shared` (different repo).
 
-Workflow `permissions:` declared inline:
-
-- `contents: write` — required so the implicit `GITHUB_TOKEN` is
-  still scoped correctly for the workflow itself, even though the
-  actual push to `build` uses the PAT
-- `packages: read` — sanity default; the PAT is what actually
-  authenticates
-
-Deploy secrets: `NPM_TOKEN` (used both to install from GitHub Packages
-and to push the `build` branch) and `DEPLOY_WEBHOOK_URL` (the host's
-deploy-hook URL). The old `FTP_*` / `INSTALL_TOKEN` Repository Secrets
-and the `INSTALLER_URL` variable are now unused and can be cleaned up.
+Workflow `permissions:` are declared inline (`contents: write` for the branch
+push, `packages: read`). Deploy secrets: `NPM_TOKEN` (install + push the
+`dev`/`release` branches) and `DEPLOY_WEBHOOK_URL` (host deploy-hook URL, used
+only by `release.yml`). The old `FTP_*` / `INSTALL_TOKEN` secrets and the
+`INSTALLER_URL` variable are unused and can be cleaned up.
 
 ---
 
