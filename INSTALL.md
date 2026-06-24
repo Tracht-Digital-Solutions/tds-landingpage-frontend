@@ -104,7 +104,7 @@ Two branches (the old `build` branch is gone):
 - **`dev`** — every push to `main` auto-builds `dist/` (Staging/Demo config) via
   `.github/workflows/dev.yml` → orphan `dev` branch. Not deployed.
 - **`release`** — the manual *Actions → Release → Run workflow* button
-  (`release.yml`) builds the production `dist/` → `release` branch, then GET-pings
+  (`release.yml`) builds the production `dist/` → `release` branch, then POST-pings
   the deploy webhook so the host pulls `release` and goes live.
 
 One-time setup: add a `DEPLOY_WEBHOOK_URL` repository secret pointing at the

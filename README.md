@@ -123,7 +123,7 @@ Two-track branch model (the old `build` branch is gone):
   continuously-built developer version + the push-to-main build gate.
 - **`release`** — [`release.yml`](.github/workflows/release.yml), **only on the
   manual Actions button** (*Actions → Release → Run workflow*): builds with the
-  real production config and force-pushes to **`release`**, then GET-pings the
+  real production config and force-pushes to **`release`**, then POST-pings the
   deploy webhook so the host pulls `release` and goes live.
 
 **Required secret:** `DEPLOY_WEBHOOK_URL` (host deploy-hook URL; token inside the
