@@ -217,8 +217,15 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     box-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.6);
   }
   @media (min-width: 1024px) {
-    :global(:root[data-theme="dark"]) .site-header {
-      background-color: color-mix(in srgb, var(--color-card) 45%, transparent);
+    /* Docked at the very top: in dark mode the bar must dissolve into the
+       hero exactly like light mode — fully transparent fill + no border, so
+       only the heavy frosted blur and glass-rim read. (The earlier rule gave
+       it a card-tinted fill at every scroll state, leaving a visible navy
+       panel + hairline at the top of the hero.) Only the scrolled pill is
+       filled. */
+    :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
+      background-color: transparent;
+      border-color: transparent;
     }
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
       background-color: color-mix(in srgb, var(--color-card) 82%, transparent);
