@@ -19,7 +19,7 @@
     "@hookform/resolvers": "^5.2.0",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/postcss": "~4.2.4",
-    "@tracht-digital-solutions/tds-shared": "^0.4.2",
+    "@tracht-digital-solutions/tds-shared": "^0.6.0",
     "astro": "^6.4.2",
     "lenis": "^1.3.0",
     "lucide-react": "^1.14.0",
