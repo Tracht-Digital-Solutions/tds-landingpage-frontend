@@ -49,6 +49,9 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+      - name: Test
+        run: npm run test:run
+
       - name: OG smoke
         # Cheapest catch for the import.meta.url-vs-bundling
         # regression documented in AGENTS.md. Runs renderDefaultOgPng
