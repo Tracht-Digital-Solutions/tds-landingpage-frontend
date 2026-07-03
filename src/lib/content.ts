@@ -51,6 +51,41 @@ export async function fetchTopics(
   }
 }
 
+/**
+ * Build-time fetch of specific posts by slug, in the given order — used by
+ * the Journal section to render the admin-curated selection (max 4). Each
+ * slug is fetched via `GET /blog/{slug}?lang=…`; missing/unpublished posts
+ * (404) or transient failures are skipped so a stale curated slug never
+ * breaks the build. Returns the found posts in the requested order.
+ */
+export async function fetchPostsBySlug(
+  slugs: string[],
+  lang: "de" | "en",
+): Promise<ContentPost[]> {
+  if (import.meta.env.PUBLIC_DEMO_MODE === "true" || slugs.length === 0) return [];
+
+  const results = await Promise.all(
+    slugs.map(async (slug) => {
+      try {
+        const url = new URL(`${CONTENT_API_URL}/blog/${slug}`);
+        url.searchParams.set("lang", lang);
+        const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+        if (!res.ok) return null;
+        const data = (await res.json()) as { post?: ContentPost };
+        return data.post ?? null;
+      } catch (err) {
+        console.warn(
+          `[tds-landingpage] curated post "${slug}" fetch failed, skipping:`,
+          err,
+        );
+        return null;
+      }
+    }),
+  );
+
+  return results.filter((p): p is ContentPost => p !== null);
+}
+
 /** Build the public URL where a single post is read on the blog. */
 export function topicHref(slug: string): string {
   return `${siteConfig.blogUrl}/${slug}`;
