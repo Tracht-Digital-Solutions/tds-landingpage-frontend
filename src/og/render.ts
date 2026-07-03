@@ -24,24 +24,17 @@ import { Resvg } from "@resvg/resvg-js";
 // Resolved from the project root because Astro bundles this file into dist/,
 // where `import.meta.url`-based relative paths no longer reach src/og/fonts.
 const FONT_DIR = path.join(process.cwd(), "src/og/fonts");
-let serifRegular: Buffer | null = null;
-let serifItalic: Buffer | null = null;
 let geistMedium: Buffer | null = null;
 
 function loadFonts() {
-  if (serifRegular === null) {
-    serifRegular = fs.readFileSync(path.join(FONT_DIR, "InstrumentSerif-Regular.woff"));
-    serifItalic = fs.readFileSync(path.join(FONT_DIR, "InstrumentSerif-Italic.woff"));
+  if (geistMedium === null) {
     geistMedium = fs.readFileSync(path.join(FONT_DIR, "Geist-Medium.ttf"));
   }
   return {
-    serif: serifRegular!,
-    serifItalic: serifItalic!,
     geist: geistMedium!,
   };
 }
 
-const SERIF = "Instrument Serif";
 const PAPER = "#fafaf7";
 const INK = "#1a1a17";
 const PRIMARY = "#050f68";
@@ -50,7 +43,7 @@ const MUTED = "#6b6b66";
 const LINE = "#e8e6df";
 
 export async function renderDefaultOgPng(): Promise<Buffer> {
-  const { serif, serifItalic, geist } = loadFonts();
+  const { geist } = loadFonts();
 
   const svg = await satori(
     {
@@ -100,15 +93,16 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
               ],
             },
           },
-          // Headline — head primary navy, accent burgundy italic
+          // Headline — head primary navy, accent word burgundy
           {
             type: "div",
             props: {
               style: {
-                fontFamily: SERIF,
-                fontSize: "84px",
-                lineHeight: 1.02,
-                letterSpacing: "-0.025em",
+                fontFamily: "Geist",
+                fontWeight: 500,
+                fontSize: "80px",
+                lineHeight: 1.04,
+                letterSpacing: "-0.03em",
                 color: PRIMARY,
                 display: "flex",
                 flexWrap: "wrap",
@@ -123,11 +117,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                 {
                   type: "span",
                   props: {
-                    style: {
-                      fontFamily: SERIF,
-                      fontStyle: "italic",
-                      color: ACCENT,
-                    },
+                    style: { color: ACCENT },
                     children: "digitale Lösungen.",
                   },
                 },
@@ -160,7 +150,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "span",
                   props: {
                     style: {
-                      fontFamily: SERIF,
+                      fontFamily: "Geist",
                       fontSize: "22px",
                     },
                     children: "Schwarzenbek · Hamburg",
@@ -176,8 +166,6 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
       width: 1200,
       height: 630,
       fonts: [
-        { name: SERIF, data: serif, weight: 400, style: "normal" },
-        { name: SERIF, data: serifItalic, weight: 400, style: "italic" },
         { name: "Geist", data: geist, weight: 500, style: "normal" },
       ],
     },

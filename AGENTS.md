@@ -10,7 +10,7 @@ all shipped. As of 2026-05-28: upgraded to Astro 6, swapped Tailwind from
 the `@tailwindcss/vite` plugin to `@tailwindcss/postcss` (rolldown
 incompatibility with Vite 7 — withastro/astro#16542), wired real Astro
 i18n routing (DE at `/`, EN at `/en/`), swapped the heading family to
-Instrument Serif, dropped SectionSnap in favour of native scroll +
+the shared Hanken Grotesk grotesk, dropped SectionSnap in favour of native scroll +
 a thin ScrollProgress bar, and replaced the DE/EN pill toggle with a
 flag dropdown (inline-SVG flags — Win32 doesn't ship colour flag
 glyphs). Closing pill below `lg` docks flush against the top edge
@@ -42,11 +42,10 @@ See README's "Replace examples before go-live" section.
   `@tracht-digital-solutions/tds-shared/styles/base.css`, which
   `src/styles/global.css` imports (Tailwind v4 processes the imported
   `@theme`). Same brand colors as the legacy app (#050f68 navy, #820933
-  burgundy). Heading family is self-hosted `@fontsource/instrument-serif`
-  (regular + italic, non-variable); body is `@fontsource-variable/geist`.
-  Instrument Serif is the single canonical display font across all
-  frontends (it replaced Fraunces — its higher contrast reads better in
-  the editorial layout).
+  burgundy). Heading family is self-hosted `@fontsource-variable/hanken-grotesk`;
+  body is `@fontsource-variable/geist`. Hanken Grotesk is the single canonical
+  display font across all frontends — a flat, modern grotesk (it replaced
+  Instrument Serif, which read too editorial/serif for the brand).
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
   `.section-num`, `.eyebrow`, `.lead` — shared primitives from
   tds-shared's `base.css`, the same the portals and journal use. The
@@ -85,7 +84,7 @@ See README's "Replace examples before go-live" section.
   fallback in the same file when the API returns `[]` so the
   section still ships meaningfully on first-deploy or transient
   outage. Right column ("Im Fokus" / "Focused on") still lists
-  4 intentions / principles with italic Instrument Serif "→" arrow
+  4 intentions / principles with accent "→" arrow
   markers, `md:sticky` so they stay visible while the topics list
   scrolls past. Intentions copy stays inlined; topics are live.
 - **Consulting section** (`src/components/sections/Consulting.astro`):
@@ -260,9 +259,9 @@ See README's "Replace examples before go-live" section.
   jsonLd={...} />` passes through.
 - **`src/og/render.ts` + `src/pages/og/default.png.ts`** — Satori
   pipeline mirroring tds-blog. Builds a static 1200×630 brand
-  card at `/og/default.png` used as the fallback OG image. Fonts
-  live under `src/og/fonts/` (Instrument Serif `.woff` + Geist `.ttf`,
-  copied from tds-blog).
+  card at `/og/default.png` used as the fallback OG image. The card
+  renders in Geist (`src/og/fonts/Geist-Medium.ttf`) — the OG headline
+  dropped the former Instrument Serif when the brand retired the serif.
 - **`public/robots.txt`** explicitly allows GPTBot, OAI-SearchBot,
   PerplexityBot, ClaudeBot, Google-Extended (etc.) and points
   at the sitemap.
