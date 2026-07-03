@@ -87,6 +87,20 @@ See README's "Replace examples before go-live" section.
   4 intentions / principles with accent "→" arrow
   markers, `md:sticky` so they stay visible while the topics list
   scrolls past. Intentions copy stays inlined; topics are live.
+- **Journal section** (`src/components/sections/Journal.astro`): the "Gedanken
+  & Artikel" row. Fetch chain at build time: the admin-curated `journal` content
+  block (`{ slugs: [...] }`, max 4, via `fetchPostsBySlug`) → else the 3 most
+  recent posts (`fetchTopics`) → else the **tds-shared i18n placeholder posts**
+  (`t.blog.posts`). So the placeholder articles appear whenever the API returns
+  no published posts — NOT only when the API is down: a reachable-but-empty
+  `blog_post` table (e.g. seeds never ran on prod) yields `[]` and triggers the
+  same fallback, and any `PUBLIC_DEMO_MODE=true` build short-circuits the fetch
+  to `[]` by design. The three placeholder slugs
+  (`individuelle-software-kosten`, `drei-prozesse-automatisierung`,
+  `warum-ich-nicht-skaliere`) are now seeded into `tds-content-api` by its
+  `SeedInitialBlogPosts` migration (DE + EN), so a migrated prod shows the real
+  posts. `localCovers` in the component still maps those slugs to
+  `/journal/*.webp` when a post has no live `coverHint`.
 - **Consulting section** (`src/components/sections/Consulting.astro`):
   Gradient card matching `PricingTeaser`'s visual language so the
   two callouts pair as a system. Two CTAs — primary
@@ -231,7 +245,15 @@ See README's "Replace examples before go-live" section.
   `CustomCursor.tsx`): Lenis smooths the wheel with a plain expo ease-out; the
   playful ease-out-back *bounce* is reserved for click-to-section jumps via a
   global `window.tdsScrollTo` (used by the logo, hero CTAs, back-to-top, and a
-  delegated in-page anchor-click handler). `CustomCursor` is an additive dot +
+  delegated in-page anchor-click handler). **On coarse-pointer (touch) devices
+  Lenis is skipped** — it fights native momentum-scroll on iOS/Android — but
+  `tdsScrollTo` + the anchor-click handler are still installed via a
+  self-contained `requestAnimationFrame` tween that reuses the *same* bounce
+  easing, so mobile section-jumps bounce exactly like desktop while normal
+  touch scrolling stays fully native (the tween aborts on the first
+  `touchstart`/`wheel`). Don't reinstate the old blanket `if (isCoarsePointer)
+  return` early-out — it killed the bounce on mobile.
+  `CustomCursor` is an additive dot +
   trailing ring that recolours from sampled background luminance and
   squash-stretches with pointer velocity — fine-pointer only, disabled under
   reduced motion. Both mount `client:idle`.
