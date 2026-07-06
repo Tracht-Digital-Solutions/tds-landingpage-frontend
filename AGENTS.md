@@ -328,6 +328,19 @@ See README's "Replace examples before go-live" section.
 
 - Don't add `output: "server"` — the production host has no Node runtime.
   This site MUST stay `output: "static"`.
+- Don't loosen the exact `motion` pin back to a `^` range. CI installs with
+  `npm install --no-package-lock`, so a caret range floats to whatever npm
+  published that morning — an untested framer-motion lands straight in a
+  production build. Bump `motion` deliberately: change the pinned version,
+  build locally, and verify the Hero + ContactForm entrances (including
+  with `prefers-reduced-motion: reduce` emulated) before releasing.
+- Don't give a motion island an entrance variant whose *visible* state is
+  empty. The SSR HTML bakes the `hidden` state (e.g. `opacity:0`) into the
+  markup, so a reduced-motion branch like `{ hidden: {}, show: {} }` never
+  clears it and the content stays invisible for reduced-motion users —
+  that's how the contact form vanished. `show` must always target
+  `{ opacity: 1, y: 0 }`; only the *transition* may collapse to
+  `{ duration: 0 }` (see `ContactForm.tsx`).
 - Don't add per-frontend brand tokens or duplicate the shared design CSS.
   Always edit `tds-shared/styles/base.css` (tokens, base) or `app.css`
   (shared chrome) and bump the version.

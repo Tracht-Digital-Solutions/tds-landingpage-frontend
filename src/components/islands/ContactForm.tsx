@@ -37,7 +37,10 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   // Staggered entrance — the island hydrates via `client:visible`, so
   // mounting coincides with the section scrolling into view. The form
   // is the variants parent; each field below carries `fieldItem` and
-  // rises in sequence. Reduced motion drops both the offset and stagger.
+  // rises in sequence. Reduced motion drops the offset and stagger, but
+  // `show` must still target { opacity: 1, y: 0 }: the SSR HTML bakes the
+  // `hidden` state (opacity 0) into the markup, and an empty `show`
+  // variant would leave the form invisible for reduced-motion users.
   const formStagger = {
     hidden: {},
     show: {
@@ -46,16 +49,16 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
         : { staggerChildren: 0.08, delayChildren: 0.05 },
     },
   };
-  const fieldItem = prefersReduced
-    ? { hidden: {}, show: {} }
-    : {
-        hidden: { opacity: 0, y: 16 },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
-        },
-      };
+  const fieldItem = {
+    hidden: prefersReduced ? {} : { opacity: 0, y: 16 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: prefersReduced
+        ? { duration: 0 }
+        : { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+    },
+  };
 
   const {
     register,
