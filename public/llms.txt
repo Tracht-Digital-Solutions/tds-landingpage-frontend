@@ -1,14 +1,14 @@
 # Tracht Digital Solutions
 
-> Persönlich entwickelte digitale Lösungen für den Mittelstand —
-> Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und
-> Schulungen aus Schwarzenbek bei Hamburg, Deutschland.
+> Digitalisierung für Unternehmen — Beratung, Web- und App-Entwicklung,
+> Automatisierung, Wartung und Schulungen. Persönlich entwickelt in
+> Schwarzenbek bei Hamburg, für Unternehmen in ganz Deutschland.
 
 ## Über
 
 - Inhaber & Entwickler: Julian Tracht
 - Standort: Schwarzenbek (Schleswig-Holstein), bei Hamburg
-- Kontakt: hallo@tracht-digital.de
+- Kontakt: kontakt@tracht-digital.de
 - Sprachen: Deutsch (Standard), English
 
 ## Leistungen

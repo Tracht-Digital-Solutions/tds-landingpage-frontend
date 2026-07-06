@@ -19,8 +19,8 @@ export const siteConfig = {
   /** Primary content language. */
   defaultLocale: "de" as const,
   description: {
-    de: "Persönlich entwickelte digitale Lösungen für den Mittelstand — Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und Schulungen aus Schwarzenbek bei Hamburg.",
-    en: "Personally crafted digital solutions for the mid-market — consulting, web and app development, digitalization, maintenance and training from Schwarzenbek near Hamburg, Germany.",
+    de: "Digitalisierung für Unternehmen: Beratung, Web- & App-Entwicklung, Automatisierung, Wartung und Schulungen — persönlich, aus Schwarzenbek bei Hamburg, deutschlandweit.",
+    en: "Digitalization for businesses: consulting, web & app development, automation, maintenance and training — personally delivered from Schwarzenbek near Hamburg, Germany.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
@@ -43,8 +43,20 @@ export const siteConfig = {
     addressRegion: "Schleswig-Holstein",
     addressCountry: "DE",
   },
+  /** Approximate coordinates of the business address (Elbinger Straße 19,
+   * 21493 Schwarzenbek) — completes the LocalBusiness signal in schema. */
+  geo: { latitude: 53.504, longitude: 10.48 },
   /** Service-area for ProfessionalService schema. */
   areaServed: ["Hamburg", "Schwarzenbek", "Norddeutschland", "Deutschland"],
+  /** Topics for schema `knowsAbout` — the keyword set the site targets. */
+  knowsAbout: [
+    "Digitalisierung für Unternehmen",
+    "Prozessautomatisierung",
+    "Webentwicklung",
+    "App-Entwicklung",
+    "Individualsoftware",
+    "IT-Beratung",
+  ],
   /** Public social URLs — surface in JSON-LD `sameAs` and the
    * Contact aside. WhatsApp is a `wa.me` deep link to the
    * `contact.info.phone` number; it is intentionally not in

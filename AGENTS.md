@@ -266,16 +266,31 @@ See README's "Replace examples before go-live" section.
 
 - **`src/lib/seo.ts`** is the single source of truth for org/person
   identity (name, email, founder, areaServed, full address, phone,
-  socials). These are now the real verified values and flow into the
-  JSON-LD layer below. The **only** field still deliberately kept off
-  is `vatID` (no real USt-IdNr yet) — add it to `seo.ts` once issued
-  so Google + AI engines don't cache a fake one.
+  vatID, socials, `geo` coordinates, `knowsAbout` keyword topics).
+  These are the real verified values (they match the Impressum) and
+  flow into the JSON-LD layer below.
+- **Keyword strategy:** the home titles are keyword-first
+  ("Digitalisierung für Unternehmen — Tracht Digital Solutions",
+  ≤60 chars); the local qualifier (Schwarzenbek bei Hamburg) lives in
+  the descriptions, schema `geo`/NAP, footer and body copy — not the
+  title. Keep new page titles keyword-first + brand-second.
+- **Footer NAP:** the footer renders `siteConfig.address.postalCode +
+  addressLocality` ("21493 Schwarzenbek") hardcoded from `seo.ts`, NOT
+  the CMS `contact.location` string — it must always match the
+  Impressum and the JSON-LD PostalAddress (local-SEO NAP consistency).
+  The street deliberately stays Impressum-only.
 - **`src/lib/jsonld.ts`** renders Schema.org graphs
-  (Organization+ProfessionalService, Person, WebSite,
-  Service+OfferCatalog for `/preise`, BreadcrumbList). All entities
-  share stable `@id`s (`tracht-digital.de/#organization`,
-  `/#person`) so tds-blog can reference them by id instead of
-  duplicating.
+  (Organization+ProfessionalService with `geo` GeoCoordinates +
+  `knowsAbout`, Person, WebSite, Service+OfferCatalog for `/preise`,
+  BreadcrumbList). All entities share stable `@id`s
+  (`tracht-digital.de/#organization`, `/#person`) so tds-blog can
+  reference them by id instead of duplicating. Don't invent
+  `openingHours` — there are no verified hours.
+- **Sitemap** (`astro.config.mjs`) runs with an `i18n` option (emits
+  hreflang alternates into the sitemap — safe only because every
+  indexable route has an exact `/en/` twin; don't copy the option to
+  the blog) and a `filter` that drops `/legal/` (noindex), `/og/` and
+  the error pages.
 - **`src/components/JsonLd.astro`** is the head-injected
   `<script type="application/ld+json">` utility — `<Layout
   jsonLd={...} />` passes through.

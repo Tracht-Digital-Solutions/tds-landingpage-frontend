@@ -62,6 +62,14 @@ export function organizationSchema() {
       addressRegion: siteConfig.address.addressRegion,
       addressCountry: siteConfig.address.addressCountry,
     },
+    // Local-SEO completers: coordinates make the LocalBusiness signal
+    // unambiguous; knowsAbout states the topical focus in plain terms.
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: siteConfig.geo.latitude,
+      longitude: siteConfig.geo.longitude,
+    },
+    knowsAbout: [...siteConfig.knowsAbout],
   };
 
   if (socials.length > 0) base.sameAs = socials;

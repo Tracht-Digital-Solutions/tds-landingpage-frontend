@@ -1,6 +1,7 @@
 ---
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
+import { siteConfig } from "~/lib/seo";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -69,7 +70,12 @@ const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
               {contact.phone}
             </a>
           </li>
-          <li class="text-white/50">{contact.location}</li>
+          {/* Visible NAP for local SEO: postal code + locality from siteConfig
+              (not the CMS string) so it always matches the Impressum and the
+              PostalAddress in JSON-LD. Street stays Impressum-only. */}
+          <li class="text-white/50">
+            {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
+          </li>
         </ul>
       </div>
     </div>

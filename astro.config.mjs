@@ -8,7 +8,25 @@ import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 export default defineConfig({
   site: "https://tracht-digital.de",
   output: "static",
-  integrations: [react(), sitemap()],
+  integrations: [
+    react(),
+    sitemap({
+      // Emit xhtml:link hreflang alternates into the sitemap. Safe here
+      // because every indexable route has an exact /en/ twin (legal pages
+      // are noindex and filtered below) — do NOT copy this option to the
+      // blog, whose routes don't mirror by prefix (/kategorie vs /en/category).
+      i18n: {
+        defaultLocale: "de",
+        locales: { de: "de-DE", en: "en-GB" },
+      },
+      // Keep noindex legal pages, the OG endpoint and error pages out.
+      filter: (page) =>
+        !page.includes("/legal/") &&
+        !page.includes("/og/") &&
+        !page.includes("/404") &&
+        !page.includes("/500"),
+    }),
+  ],
   i18n: {
     defaultLocale: "de",
     locales: ["de", "en"],
