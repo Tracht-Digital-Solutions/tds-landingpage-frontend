@@ -43,7 +43,9 @@ See README's "Replace examples before go-live" section.
   `src/styles/global.css` imports (Tailwind v4 processes the imported
   `@theme`). Same brand colors as the legacy app (#050f68 navy, #820933
   burgundy). Heading family is self-hosted `@fontsource-variable/hanken-grotesk`;
-  body is `@fontsource-variable/geist`. Hanken Grotesk is the single canonical
+  body is `@fontsource-variable/geist` — both imported in `Layout.astro`
+  frontmatter, NOT via CSS `@import` (see the fontsource entry in "Don't"
+  below). Hanken Grotesk is the single canonical
   display font across all frontends — a flat, modern grotesk (it replaced
   Instrument Serif, which read too editorial/serif for the brand).
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
@@ -374,6 +376,15 @@ See README's "Replace examples before go-live" section.
   + AI engines cache it, the wrong data sticks until they re-crawl.
   Street, phone and socials are real and already in `src/lib/seo.ts`;
   `vatID` is the one field to flip on there once a real one exists.
+- Don't move the `@fontsource-variable/*` imports from `Layout.astro`
+  into a CSS `@import` in `global.css`. `@tailwindcss/postcss` inlines
+  CSS `@import`s without rebasing the packages' relative
+  `url(./files/*.woff2)` references, so Vite never emits the font
+  files — the build ships **zero** woff2 assets and every font 404s
+  at runtime (shipped broken until 2026-07-07; all frontends silently
+  rendered the system fallback). Font faces are imported as JS-style
+  imports in the layout frontmatter, where Vite resolves and emits
+  them with hashed URLs.
 - Don't reintroduce `@tailwindcss/vite`. Astro 6 ships Vite 7 with
   the rolldown bundler, and the Vite plugin's build hook hits
   `oxcResolvePlugin` with an incomplete `BindingViteResolvePluginConfig`

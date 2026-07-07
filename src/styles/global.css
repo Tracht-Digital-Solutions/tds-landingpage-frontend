@@ -1,7 +1,10 @@
 @import "tailwindcss";
 
-@import "@fontsource-variable/hanken-grotesk/index.css";
-@import "@fontsource-variable/geist/index.css";
+/* Font faces (@fontsource-variable) are imported in Layout.astro, NOT
+   here: an @import inside this file is inlined by @tailwindcss/postcss,
+   which does not rebase the packages' relative url(./files/*.woff2)
+   references — Vite then never emits the woff2 assets and every font
+   404s at runtime (build ships no font files at all). */
 
 /* Brand design system — tokens, dark theme, base resets, the brand
    scrollbar, focus ring, the animated theme-switch and the editorial
