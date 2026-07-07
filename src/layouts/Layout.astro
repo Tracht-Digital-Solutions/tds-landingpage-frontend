@@ -5,7 +5,9 @@ import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import CustomCursor from "~/components/islands/CustomCursor.tsx";
 import FloatingCta from "~/components/FloatingCta.astro";
 import JsonLd from "~/components/JsonLd.astro";
+import { CookieNotice } from "@tracht-digital-solutions/tds-shared/components";
 import { siteConfig } from "~/lib/seo";
+import { cookieBannerEnabled } from "~/lib/cms";
 
 interface Props {
   title: string;
@@ -52,6 +54,11 @@ const enAltUrl = new URL(
   neutralPath === "/" ? "/en/" : `/en${neutralPath}`,
   site,
 ).toString();
+
+// Admin-toggleable cookie banner — the `cookie_banner` content block is
+// resolved at build time (baked, like every other CMS block; toggling it
+// in tds-admin fires a rebuild). Off when absent / demo / API down.
+const showCookieNotice = !bare && (await cookieBannerEnabled());
 ---
 
 <!DOCTYPE html>
@@ -155,6 +162,9 @@ const enAltUrl = new URL(
     {!bare && <CustomCursor client:idle />}
     <slot />
     {!bare && <FloatingCta />}
+    {showCookieNotice && (
+      <CookieNotice client:idle lang={lang} privacyUrl="/legal/datenschutz" />
+    )}
 
     {/* Dynamic document.title — observes every <section id="…"> on
         the page and prefixes the tab title with the section name as

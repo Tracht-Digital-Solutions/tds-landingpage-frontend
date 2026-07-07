@@ -128,6 +128,15 @@ See README's "Replace examples before go-live" section.
   the "content baked at build time, never at runtime" rule — a `/landing` edit
   goes live only after the API triggers a rebuild. (Hero is a `client:load`
   island, so `index.astro` resolves its block and passes it as a prop.)
+- **Cookie banner (admin-toggleable)**: `cookieBannerEnabled()` in `cms.ts`
+  reads the language-agnostic `cookie_banner` block (always `lang=de`, like
+  the Journal selection) and `Layout.astro` bakes the shared `CookieNotice`
+  island (tds-shared ≥0.8.8, `client:idle`, local `/legal/datenschutz` link)
+  on every non-bare page when `{ enabled: true }`. Absent block / demo mode /
+  API down = banner off. Toggled in tds-admin (Landingpage → Cookie-Banner);
+  a save rebuilds landingpage **and** blog. Dismissal persists per origin in
+  localStorage (`tds-cookie-notice`) — no cookies involved, which is what the
+  banner itself states.
 - **Live topics via `src/lib/content.ts`**: `fetchTopics(lang, limit)`
   is a build-time fetch from `PUBLIC_CONTENT_API_URL/blog?…` that
   returns `[]` on any failure. Consumers fall back to their own

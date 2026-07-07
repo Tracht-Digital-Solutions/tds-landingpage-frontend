@@ -71,3 +71,19 @@ export async function cmsFor<T extends object>(
 function hasSameShape(candidate: object, fallback: object): boolean {
   return Object.keys(fallback).every((k) => k in candidate);
 }
+
+/**
+ * Whether the public cookie banner is enabled. The `cookie_banner` block is
+ * language-agnostic (stored under `lang=de`, like the Journal selection), so
+ * this always reads the DE block regardless of page locale. Absent block,
+ * demo mode or an unreachable API all mean "off" — the safe default.
+ */
+export async function cookieBannerEnabled(): Promise<boolean> {
+  const blocks = await fetchBlocks("de");
+  const block = blocks["cookie_banner"];
+  return (
+    typeof block === "object" &&
+    block !== null &&
+    (block as { enabled?: unknown }).enabled === true
+  );
+}
