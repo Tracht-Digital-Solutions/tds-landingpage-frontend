@@ -19,10 +19,12 @@ export default defineConfig({
         defaultLocale: "de",
         locales: { de: "de-DE", en: "en-GB" },
       },
-      // Keep noindex legal pages, the OG endpoint and error pages out.
+      // Keep noindex legal pages, the OG endpoint, the vCard file and error
+      // pages out.
       filter: (page) =>
         !page.includes("/legal/") &&
         !page.includes("/og/") &&
+        !page.includes(".vcf") &&
         !page.includes("/404") &&
         !page.includes("/500"),
     }),

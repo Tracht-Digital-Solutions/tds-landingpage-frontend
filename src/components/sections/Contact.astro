@@ -174,6 +174,36 @@ const socials = {
             </a>
           </div>
         </div>
+
+        <div>
+          {/* Single .vcf link: downloads on desktop, opens "add contact" on
+              mobile (text/vcard MIME set in public/.htaccess). Card generated
+              at build time from siteConfig → /kontakt.vcf.
+              TODO: promote to tds-shared contact.vcard */}
+          <a
+            href="/kontakt.vcf"
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm text-white hover:bg-white hover:text-[var(--color-surface-navy)] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="flex-shrink-0"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+            {lang === "en" ? "Save contact" : "Kontakt speichern"}
+          </a>
+        </div>
       </aside>
     </div>
   </div>

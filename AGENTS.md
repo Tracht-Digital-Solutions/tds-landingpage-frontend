@@ -310,6 +310,15 @@ See README's "Replace examples before go-live" section.
   card at `/og/default.png` used as the fallback OG image. The card
   renders in Geist (`src/og/fonts/Geist-Medium.ttf`) — the OG headline
   dropped the former Instrument Serif when the brand retired the serif.
+- **`src/pages/kontakt.vcf.ts`** — build-time static endpoint → `/kontakt.vcf`.
+  Generates a vCard 3.0 from `siteConfig` (single source of truth, so it never
+  drifts from the Impressum / LocalBusiness JSON-LD), served as the "Kontakt
+  speichern" / "Save contact" button in `Contact.astro`'s aside. The link has **no
+  `download` attribute** — with the `text/vcard` MIME (`AddType text/vcard .vcf` in
+  `public/.htaccess`) mobile opens the "add contact" flow while desktop downloads.
+  Excluded from the sitemap (`astro.config.mjs` filter drops `.vcf`). The button
+  label is inlined (`lang` ternary) with a `TODO: promote to tds-shared` — the only
+  copy not yet in tds-shared.
 - **`public/robots.txt`** explicitly allows GPTBot, OAI-SearchBot,
   PerplexityBot, ClaudeBot, Google-Extended (etc.) and points
   at the sitemap.

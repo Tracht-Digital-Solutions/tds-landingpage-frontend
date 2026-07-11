@@ -14,6 +14,12 @@
 # Clean URLs: a request for /preise should serve dist/preise/index.html.
 DirectoryIndex index.html
 
+# Serve the contact vCard as text/vcard so mobile clients offer "add contact"
+# (the prerendered /kontakt.vcf carries no MIME of its own — Apache decides it).
+<IfModule mod_mime.c>
+  AddType text/vcard .vcf
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
