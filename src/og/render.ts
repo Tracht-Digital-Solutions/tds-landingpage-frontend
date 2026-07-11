@@ -24,14 +24,14 @@ import { Resvg } from "@resvg/resvg-js";
 // Resolved from the project root because Astro bundles this file into dist/,
 // where `import.meta.url`-based relative paths no longer reach src/og/fonts.
 const FONT_DIR = path.join(process.cwd(), "src/og/fonts");
-let geistMedium: Buffer | null = null;
+let latoBold: Buffer | null = null;
 
 function loadFonts() {
-  if (geistMedium === null) {
-    geistMedium = fs.readFileSync(path.join(FONT_DIR, "Geist-Medium.ttf"));
+  if (latoBold === null) {
+    latoBold = fs.readFileSync(path.join(FONT_DIR, "Lato-Bold.ttf"));
   }
   return {
-    geist: geistMedium!,
+    lato: latoBold!,
   };
 }
 
@@ -43,7 +43,7 @@ const MUTED = "#6b6b66";
 const LINE = "#e8e6df";
 
 export async function renderDefaultOgPng(): Promise<Buffer> {
-  const { geist } = loadFonts();
+  const { lato } = loadFonts();
 
   const svg = await satori(
     {
@@ -57,7 +57,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
           justifyContent: "space-between",
           backgroundColor: PAPER,
           padding: "72px 80px",
-          fontFamily: "Geist",
+          fontFamily: "Lato",
           color: INK,
         },
         children: [
@@ -81,7 +81,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "div",
                   props: {
                     style: {
-                      fontFamily: "Geist",
+                      fontFamily: "Lato",
                       fontSize: "20px",
                       letterSpacing: "0.18em",
                       textTransform: "uppercase",
@@ -98,8 +98,8 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
             type: "div",
             props: {
               style: {
-                fontFamily: "Geist",
-                fontWeight: 500,
+                fontFamily: "Lato",
+                fontWeight: 700,
                 fontSize: "80px",
                 lineHeight: 1.04,
                 letterSpacing: "-0.03em",
@@ -134,7 +134,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                 justifyContent: "space-between",
                 borderTop: `1px solid ${LINE}`,
                 paddingTop: "32px",
-                fontFamily: "Geist",
+                fontFamily: "Lato",
                 fontSize: "22px",
                 color: MUTED,
               },
@@ -150,7 +150,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                   type: "span",
                   props: {
                     style: {
-                      fontFamily: "Geist",
+                      fontFamily: "Lato",
                       fontSize: "22px",
                     },
                     children: "Schwarzenbek · Hamburg",
@@ -166,7 +166,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
       width: 1200,
       height: 630,
       fonts: [
-        { name: "Geist", data: geist, weight: 500, style: "normal" },
+        { name: "Lato", data: lato, weight: 700, style: "normal" },
       ],
     },
   );

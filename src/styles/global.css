@@ -14,12 +14,12 @@
    @tracht-digital-solutions/tds-shared/styles. */
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 
-/* Display face — the flat, modern grotesk shared with the blog/admin/
-   customer apps (replaces the former Instrument Serif). Set locally so the
-   marketing build picks it up without waiting on a tds-shared republish;
-   .display/.display-tight carry real weight to register as headings. */
+/* Display face — Lato, the official Tracht Digital Solutions brand font
+   (replaces the former Hanken Grotesk). Set locally so the marketing build
+   picks it up without waiting on a tds-shared republish; .display/
+   .display-tight carry real weight to register as headings. */
 :root {
-  --font-display: "Hanken Grotesk Variable", "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Lato", "Helvetica Neue", Arial, sans-serif;
 }
 .display { font-weight: 700; letter-spacing: -0.03em; }
 .display-tight { font-weight: 600; letter-spacing: -0.025em; }
