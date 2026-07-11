@@ -318,7 +318,11 @@ See README's "Replace examples before go-live" section.
   `public/.htaccess`) mobile opens the "add contact" flow while desktop downloads.
   Excluded from the sitemap (`astro.config.mjs` filter drops `.vcf`). The button
   label is inlined (`lang` ternary) with a `TODO: promote to tds-shared` — the only
-  copy not yet in tds-shared.
+  copy not yet in tds-shared. Embeds the portrait as a **base64 JPEG `PHOTO`**
+  (`src/assets/portrait-vcard.jpg`, read at build via `process.cwd()` not
+  `import.meta.url` — same bundling trap as the OG renderer; folded to ≤75 octets
+  per RFC 2426). **No `ADR`/`GEO`** — the postal address is intentionally omitted
+  (private home address).
 - **`public/robots.txt`** explicitly allows GPTBot, OAI-SearchBot,
   PerplexityBot, ClaudeBot, Google-Extended (etc.) and points
   at the sitemap.

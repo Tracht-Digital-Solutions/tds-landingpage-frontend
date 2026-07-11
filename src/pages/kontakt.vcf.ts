@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { APIRoute } from "astro";
 import { siteConfig } from "~/lib/seo";
 
@@ -24,22 +26,42 @@ function esc(value: string): string {
     .replace(/\n/g, "\\n");
 }
 
+/**
+ * Fold a long content line to ≤75 octets with CRLF + single-space continuation
+ * (RFC 2426 §2.6) — required so the base64 PHOTO parses in stricter clients
+ * (Outlook) instead of being truncated.
+ */
+function fold(line: string): string {
+  const out = [line.slice(0, 75)];
+  for (let i = 75; i < line.length; i += 74) {
+    out.push(" " + line.slice(i, i + 74));
+  }
+  return out.join("\r\n");
+}
+
+/**
+ * The contact portrait, embedded as a base64 JPEG so the card is self-contained
+ * (many contacts apps don't fetch a remote PHOTO URI, and few render WebP). Read
+ * at build time from the committed 400×400 JPEG; anchored to `process.cwd()` (the
+ * project root during `astro build`) rather than `import.meta.url`, which ENOENTs
+ * once Astro bundles the endpoint (same trap as the OG renderer). Missing file →
+ * the card just ships without a photo.
+ */
+function photoLine(): string | null {
+  try {
+    const bytes = readFileSync(join(process.cwd(), "src/assets/portrait-vcard.jpg"));
+    return fold(`PHOTO;ENCODING=b;TYPE=JPEG:${bytes.toString("base64")}`);
+  } catch {
+    return null;
+  }
+}
+
 export const GET: APIRoute = () => {
-  const { name, url, email, telephone, vatID, founder, address, geo, socials } =
-    siteConfig;
+  const { name, url, email, telephone, vatID, founder, socials } = siteConfig;
   const tel = telephone.replace(/\s/g, ""); // → E.164, e.g. +491788224022
 
-  // ADR (v3): PO;ext;street;locality;region;postcode;country
-  const adr = [
-    "",
-    "",
-    esc(address.streetAddress),
-    esc(address.addressLocality),
-    esc(address.addressRegion),
-    address.postalCode,
-    "Deutschland",
-  ].join(";");
-
+  // Deliberately no ADR / GEO — the postal address is intentionally omitted from
+  // the vCard (it's a private home address).
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
@@ -49,12 +71,11 @@ export const GET: APIRoute = () => {
     `TITLE:${esc(founder.jobTitle)}`,
     `TEL;TYPE=WORK,VOICE:${tel}`,
     `EMAIL;TYPE=WORK,PREF:${email}`,
-    `ADR;TYPE=WORK:${adr}`,
     `URL:${url}`,
     socials.linkedin ? `X-SOCIALPROFILE;TYPE=linkedin:${socials.linkedin}` : "",
     socials.github ? `X-SOCIALPROFILE;TYPE=github:${socials.github}` : "",
-    `GEO:${geo.latitude};${geo.longitude}`,
     `NOTE:${esc(`USt-IdNr. ${vatID}`)}`,
+    photoLine() ?? "",
     "REV:2026-07-11T00:00:00Z",
     "END:VCARD",
   ].filter((line) => line !== "");
