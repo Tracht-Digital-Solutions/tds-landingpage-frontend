@@ -10,8 +10,8 @@
  *   ┌────────────────────────────────────────────────────────────┐
  *   │  TRACHT DIGITAL SOLUTIONS                                  │
  *   │                                                            │
- *   │  Persönlich entwickelte                                    │
- *   │  digitale Lösungen.                                        │
+ *   │  Digitale Lösungen, die                                    │
+ *   │  wirklich passen.                                         │
  *   │                                                            │
  *   │  ─── tracht-digital.de             Schwarzenbek · Hamburg  │
  *   └────────────────────────────────────────────────────────────┘
@@ -112,13 +112,13 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
               children: [
                 {
                   type: "span",
-                  props: { children: "Persönlich entwickelte" },
+                  props: { children: "Digitale Lösungen, die" },
                 },
                 {
                   type: "span",
                   props: {
                     style: { color: ACCENT },
-                    children: "digitale Lösungen.",
+                    children: "wirklich passen.",
                   },
                 },
               ],

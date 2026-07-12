@@ -19,8 +19,8 @@ export const siteConfig = {
   /** Primary content language. */
   defaultLocale: "de" as const,
   description: {
-    de: "Digitalisierung für Unternehmen: Beratung, Web- & App-Entwicklung, Automatisierung, Wartung und Schulungen — persönlich, aus Schwarzenbek bei Hamburg, deutschlandweit.",
-    en: "Digitalization for businesses: consulting, web & app development, automation, maintenance and training — personally delivered from Schwarzenbek near Hamburg, Germany.",
+    de: "Digitalisierung für Unternehmen: Beratung, Web- & App-Entwicklung, Automatisierung, Wartung und Schulungen — persönlich und passgenau, aus Schwarzenbek bei Hamburg, deutschlandweit.",
+    en: "Digitalization for businesses: consulting, web & app development, automation, maintenance and training — personal and tailored to fit, from Schwarzenbek near Hamburg, Germany.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
