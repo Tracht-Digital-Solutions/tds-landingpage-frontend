@@ -3,6 +3,11 @@
 Astro 6 + React islands + Tailwind v4. Static-rendered marketing site.
 Deploys to **the production host** at `tracht-digital.de`.
 
+> Status: **required, not superseded.** Still deployed. Its editable section content is
+> fetched at build time from `tds-content-api`'s `/landing` block API today; after the
+> panel-platform cutover that source becomes `tds-ext-website-cms` (`/cms/...`), read the
+> same way. See the root `MIGRATION-STATUS.md`.
+
 ## Status
 
 Phase 5 ported. Homepage sections, `/preise`, `/legal/{impressum,datenschutz}`
