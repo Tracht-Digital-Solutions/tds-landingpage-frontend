@@ -1,4 +1,4 @@
-# tds-landingpage
+# tds-landingpage-frontend
 
 > **Setting this up from scratch?** See [`INSTALL.md`](INSTALL.md) for
 > the step-by-step bring-up (Packages auth → npm install → env →
@@ -160,9 +160,9 @@ a constant at build time — safe to expose in the client bundle.
 
 Both `dev.yml` and `release.yml` need `NPM_TOKEN`, a classic PAT with
 `read:packages` on the `Tracht-Digital-Solutions` org. It authenticates both
-the install (cross-repo read of `tds-shared` from GitHub Packages) and the
+the install (cross-repo read of `tds-shared-pkg` from GitHub Packages) and the
 `peaceiris/actions-gh-pages` push to the `dev` / `release` branch. The
-auto-provided `GITHUB_TOKEN` can't read `tds-shared` (different repo).
+auto-provided `GITHUB_TOKEN` can't read `tds-shared-pkg` (different repo).
 
 Workflow `permissions:` are declared inline (`contents: write` for the branch
 push, `packages: read`). Deploy secrets: `NPM_TOKEN` (install + push the
@@ -185,7 +185,7 @@ favicon, the VAT ID (`DE450639725` — in `src/pages/legal/impressum.astro`
 - Real portfolio screenshots (× 4) — note the Portfolio section is
   currently hidden, see § [Portfolio (temporarily hidden)](#portfolio-temporarily-hidden)
 - ~~Real journal cover images (× 3)~~ — **shipped**: hosted in
-  `tds-blog/public/covers/<slug>.webp`, wired via the content-api
+  `tds-blog-frontend/public/covers/<slug>.webp`, wired via the content-api
   seeder `cover_hint`; the Journal card renders the photo when the
   cover URL is present (else the labelled placeholder).
 - Lawyer review of `/legal/impressum` + `/legal/datenschutz`
@@ -261,7 +261,7 @@ src/
 ├── lib/
 │   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
 │   ├── content.ts              # fetchTopics() — build-time pull of recent blog posts
-│   ├── cms.ts                  # fetchBlocks()/cmsFor() — build-time pull of editable section content (/landing), merged over the tds-shared defaults
+│   ├── cms.ts                  # fetchBlocks()/cmsFor() — build-time pull of editable section content (/landing), merged over the tds-shared-pkg defaults
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   ├── jsonld.ts               # Schema.org graph generators
 │   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
@@ -278,7 +278,7 @@ src/
 │   ├── og/default.png.ts       # Endpoint emitting the default OG card
 │   └── legal/{impressum,datenschutz}.astro
 ├── public/                     # Static assets (robots.txt, llms.txt, favicon)
-└── styles/global.css           # imports tds-shared base.css (tokens/@theme) + local marketing CSS
+└── styles/global.css           # imports tds-shared-pkg base.css (tokens/@theme) + local marketing CSS
 
 postcss.config.mjs              # @tailwindcss/postcss wiring — see Tailwind note above
 scripts/og-smoke.ts             # `npm run og:smoke` — renders default OG card

@@ -90,7 +90,7 @@ for reference.
 | **Format** | WebP (q ≈ 82) primary, JPEG (q ≈ 80) fallback if the export pipeline needs it |
 | **Drop file at** | `src/assets/portrait.webp` (use Astro's `<Image />` for responsive variants) |
 | **Briefing hint** | The placeholder description reads "Schwarz-Weiß-Portrait von Julian — schräg sitzend am Schreibtisch, leicht zur Kamera gewandt, naturnahes Licht." — keep the editorial feel (black-and-white, natural light) when shooting. |
-| **Tracker** | [#8](https://github.com/Tracht-Digital-Solutions/tds-landingpage/issues/8) |
+| **Tracker** | [#8](https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend/issues/8) |
 
 **Swap pattern:**
 
@@ -124,7 +124,7 @@ import portrait from "~/assets/portrait.webp";
 | **Format** | WebP (q ≈ 82) for product shots / UI mockups |
 | **Drop files at** | `src/assets/portfolio/<slug>.webp` (one per portfolio item) |
 | **Briefing hint** | Each placeholder carries a `coverHint` style description in the i18n bundle. Match the composition the copy describes (e.g., "Screenshot des Dashboards mit zentraler KPI-Übersicht, links Sidebar-Navigation, rechts ein Detailpanel.") |
-| **Tracker** | [#9](https://github.com/Tracht-Digital-Solutions/tds-landingpage/issues/9) |
+| **Tracker** | [#9](https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend/issues/9) |
 
 **Swap pattern** — add a `coverImage` field to each portfolio item
 in `tds-shared/src/i18n/translations.ts` (next 0.2.x bump) or read by
@@ -158,8 +158,8 @@ const cover = await import(`~/assets/portfolio/${slug}.webp`);
 | **Display size** | `~400 × 300 px` on desktop (3-col grid at sm+), full-width on mobile |
 | **Source asset** | **1200 × 900 px** WebP at the API origin — 2× the desktop render. Smaller than Portfolio because covers live on the content-api CDN, not in the landingpage build. |
 | **Format** | WebP (q ≈ 82) or AVIF (q ≈ 55) at the content-api side |
-| **Live source** | The blog API (`tds-content-api`) returns a `coverHint` per post; production builds receive an image URL. The static fallback list in tds-shared carries the placeholder descriptions. |
-| **Tracker** | [#10](https://github.com/Tracht-Digital-Solutions/tds-landingpage/issues/10) |
+| **Live source** | The blog API (`tds-content-api`) returns a `coverHint` per post; production builds receive an image URL. The static fallback list in tds-shared-pkg carries the placeholder descriptions. |
+| **Tracker** | [#10](https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend/issues/10) |
 
 **Swap pattern** — `BlogPostCard.astro` already accepts `imagePlaceholder` as a string. Wire a `coverImage` URL through from the API response in `Journal.astro` and pass it to the card; the card then renders an `<img>` when present, falling back to `<ImagePlaceholder />` when absent.
 
@@ -193,7 +193,7 @@ interface Props {
 | | |
 |---|---|
 | **File** | `public/favicon.png` |
-| **Current** | **Shipping**: the real TDS logomark, `public/favicon.png` (901 × 901). Shared verbatim with tds-blog / admin / customer so the four properties read as one identity. Matches the header `logo.webp`. |
+| **Current** | **Shipping**: the real TDS logomark, `public/favicon.png` (901 × 901). Shared verbatim with tds-blog-frontend / admin / customer so the four properties read as one identity. Matches the header `logo.webp`. |
 | **Optional bundle** | If you later want a full home-screen / PWA set, ship these alongside it: |
 
 | File | Size | Purpose |
@@ -233,7 +233,7 @@ photo behind the icon + step number, over a brand-gradient fallback.
 
 1. Drop the file at the path listed above.
 2. Replace the `<ImagePlaceholder />` line with the swap pattern.
-3. Remove any now-unused `*Placeholder` translation field from `tds-shared` (and bump 0.2.x). Until that bump lands, the field is harmless — only the rendered card stops calling it.
+3. Remove any now-unused `*Placeholder` translation field from `tds-shared-pkg` (and bump 0.2.x). Until that bump lands, the field is harmless — only the rendered card stops calling it.
 4. Update this guide if you change paths or aspect ratios.
 5. Close the related tracker issue.
 

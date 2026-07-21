@@ -1,7 +1,7 @@
-# Installation — tds-landingpage
+# Installation — tds-landingpage-frontend
 
 > Part of the Tracht Digital Solutions multi-repo project.
-> tds-landingpage is the **public marketing site** at `tracht-digital.de`.
+> tds-landingpage-frontend is the **public marketing site** at `tracht-digital.de`.
 > Astro SSG → static HTML; bring it up after `tds-contact-api` (the
 > Hero/Contact form POSTs there) and `tds-content-api` (the Journal
 > teaser fetches three posts from there at build time).
@@ -32,14 +32,14 @@ references it.
 If you get a 403 even with a valid token, the token may be missing
 SSO authorization for the `Tracht-Digital-Solutions` org, or the
 classic PAT lacks `read:packages`. See
-[tds-shared/INSTALL.md](https://github.com/Tracht-Digital-Solutions/tds-shared/blob/main/INSTALL.md)
+[tds-shared/INSTALL.md](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg/blob/main/INSTALL.md)
 section 5 for the full setup.
 
 ## 2. Clone + install
 
 ```bash
-git clone https://github.com/Tracht-Digital-Solutions/tds-landingpage.git
-cd tds-landingpage
+git clone https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend.git
+cd tds-landingpage-frontend
 npm install
 ```
 
@@ -139,10 +139,10 @@ git grep -nE 'DE 123 456 789'
 
 ## Related repos
 
-- [tds-shared](https://github.com/Tracht-Digital-Solutions/tds-shared) — design system (base.css), components, i18n strings, motion
+- [tds-shared-pkg](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg) — design system (base.css), components, i18n strings, motion
 - [tds-contact-api](https://github.com/Tracht-Digital-Solutions/tds-contact-api) — Contact form POSTs here
 - [tds-content-api](https://github.com/Tracht-Digital-Solutions/tds-content-api) — Journal teaser fetches at build time
-- [tds-blog](https://github.com/Tracht-Digital-Solutions/tds-blog) — `Alle Artikel →` link points at `https://blog.tracht-digital.de`
+- [tds-blog-frontend](https://github.com/Tracht-Digital-Solutions/tds-blog-frontend) — `Alle Artikel →` link points at `https://blog.tracht-digital.de`
 
 ## Troubleshooting
 
@@ -153,7 +153,7 @@ GitHub Packages auth missing/expired. See section 1.
 The token's classic-PAT scope is right but it isn't SSO-authorized
 for the org, or the workflow uses `secrets.GITHUB_TOKEN` instead
 of `secrets.NPM_TOKEN`. See
-[tds-shared INSTALL §5](https://github.com/Tracht-Digital-Solutions/tds-shared/blob/main/INSTALL.md).
+[tds-shared-pkg INSTALL §5](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg/blob/main/INSTALL.md).
 
 **Build succeeds but Journal section is empty.**
 `PUBLIC_CONTENT_API_URL` unreachable at build time, or no posts

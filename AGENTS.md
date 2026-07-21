@@ -1,11 +1,11 @@
-# Agent notes — tds-landingpage
+# Agent notes — tds-landingpage-frontend
 
 Astro 6 + React islands + Tailwind v4. Static-rendered marketing site.
 Deploys to **the production host** at `tracht-digital.de`.
 
 > Status: **required, not superseded.** Still deployed. Its editable section content is
 > fetched at build time from `tds-content-api`'s `/landing` block API today; after the
-> panel-platform cutover that source becomes `tds-ext-website-cms` (`/cms/...`), read the
+> panel-platform cutover that source becomes `tds-ext-website-cms-pkg` (`/cms/...`), read the
 > same way. See the root `MIGRATION-STATUS.md`.
 
 ## Status
@@ -55,7 +55,7 @@ See README's "Replace examples before go-live" section.
   Instrument Serif, which read too editorial/serif for the brand).
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
   `.section-num`, `.eyebrow`, `.lead` — shared primitives from
-  tds-shared's `base.css`, the same the portals and journal use. The
+  tds-shared-pkg's `base.css`, the same the portals and journal use. The
   marketing site imports only `base.css` (not `app.css`) and keeps its
   bespoke section styles (accent-letters, hero, marquee) local.
   `SectionHeader.astro` is the shared masthead component
@@ -97,7 +97,7 @@ See README's "Replace examples before go-live" section.
 - **Journal section** (`src/components/sections/Journal.astro`): the "Gedanken
   & Artikel" row. Fetch chain at build time: the admin-curated `journal` content
   block (`{ slugs: [...] }`, max 4, via `fetchPostsBySlug`) → else the 3 most
-  recent posts (`fetchTopics`) → else the **tds-shared i18n placeholder posts**
+  recent posts (`fetchTopics`) → else the **tds-shared-pkg i18n placeholder posts**
   (`t.blog.posts`). So the placeholder articles appear whenever the API returns
   no published posts — NOT only when the API is down: a reachable-but-empty
   `blog_post` table (e.g. seeds never ran on prod) yields `[]` and triggers the
@@ -113,7 +113,7 @@ See README's "Replace examples before go-live" section.
   two callouts pair as a system. Two CTAs — primary
   "Erstgespräch buchen" / "Book a discovery call" → `#contact`,
   secondary "Leistungen ansehen" / "See services" → `/preise`. Copy
-  via `t.consulting.*` in tds-shared 0.2.5+.
+  via `t.consulting.*` in tds-shared-pkg 0.2.5+.
 - **FAQ section** (`src/components/sections/FAQ.astro`): Native
   `<details>`/`<summary>` accordions — zero JS, accessible,
   keyboard-navigable. Six items (project timeline, remote/on-site,
@@ -130,7 +130,7 @@ See README's "Replace examples before go-live" section.
   graceful fallback to `{}` so the build never breaks if the API is down.
   Editable sections today: hero, about, services, pricing, consulting,
   contact, footer, faq, process — edited in tds-admin's Landingpage editor.
-  **tds-shared i18n (and the local `lib/faq.ts` / `lib/processDetails.ts`)
+  **tds-shared-pkg i18n (and the local `lib/faq.ts` / `lib/processDetails.ts`)
   remain the default/fallback**; a content block only *overrides* it. Honours
   the "content baked at build time, never at runtime" rule — a `/landing` edit
   goes live only after the API triggers a rebuild. (Hero is a `client:load`
@@ -138,7 +138,7 @@ See README's "Replace examples before go-live" section.
 - **Cookie banner (admin-toggleable)**: `cookieBannerEnabled()` in `cms.ts`
   reads the language-agnostic `cookie_banner` block (always `lang=de`, like
   the Journal selection) and `Layout.astro` bakes the shared `CookieNotice`
-  island (tds-shared ≥0.8.8, `client:idle`, local `/legal/datenschutz` link)
+  island (tds-shared-pkg ≥0.8.8, `client:idle`, local `/legal/datenschutz` link)
   on every non-bare page when `{ enabled: true }`. Absent block / demo mode /
   API down = banner off. Toggled in tds-admin (Landingpage → Cookie-Banner);
   a save rebuilds landingpage **and** blog. Dismissal persists per origin in
@@ -192,7 +192,7 @@ See README's "Replace examples before go-live" section.
   SVG keyed off the service `number` ("01" → browser-window,
   "02" → smartphone, "03" → stacked layers, "04" → connected
   nodes, "05" → sparkles). The mapping is editorial and intentionally
-  not derived from the title — titles can change in tds-shared
+  not derived from the title — titles can change in tds-shared-pkg
   without breaking the visuals. ServiceCard wraps the icon in an
   accent-tinted chip that flips to the full accent fill on hover.
 - **Contact form focus**: each input/textarea is wrapped in a
@@ -228,7 +228,7 @@ See README's "Replace examples before go-live" section.
   - **H1** (display): `t.hero.headline + headlineAccent +
     headlineSuffix` — currently **"Software, die mit Ihrem
     *Unternehmen* wächst." / "Software that grows with *your*
-    business."** (tds-shared 0.2.7). Italic accent on the personal
+    business."** (tds-shared-pkg 0.2.7). Italic accent on the personal
     pronoun ("Unternehmen" / "your") so the brand-distinctive
     emphasis lands on what the reader cares about.
   - **Tagline strapline**: `t.hero.tagline` ("Beratung · Konzept ·
@@ -274,7 +274,7 @@ See README's "Replace examples before go-live" section.
   squash-stretches with pointer velocity — fine-pointer only, disabled under
   reduced motion. Both mount `client:idle`.
 - **Favicon**: `public/favicon.png` (901 × 901) is the real TDS
-  logomark, shared verbatim with tds-blog / admin / customer so the
+  logomark, shared verbatim with tds-blog-frontend / admin / customer so the
   four properties read as one identity in browser tabs. Matches the
   header `public/images/logo.webp`.
 
@@ -299,7 +299,7 @@ See README's "Replace examples before go-live" section.
   (Organization+ProfessionalService with `geo` GeoCoordinates +
   `knowsAbout`, Person, WebSite, Service+OfferCatalog for `/preise`,
   BreadcrumbList). All entities share stable `@id`s
-  (`tracht-digital.de/#organization`, `/#person`) so tds-blog can
+  (`tracht-digital.de/#organization`, `/#person`) so tds-blog-frontend can
   reference them by id instead of duplicating. Don't invent
   `openingHours` — there are no verified hours.
 - **Sitemap** (`astro.config.mjs`) runs with an `i18n` option (emits
@@ -311,7 +311,7 @@ See README's "Replace examples before go-live" section.
   `<script type="application/ld+json">` utility — `<Layout
   jsonLd={...} />` passes through.
 - **`src/og/render.ts` + `src/pages/og/default.png.ts`** — Satori
-  pipeline mirroring tds-blog. Builds a static 1200×630 brand
+  pipeline mirroring tds-blog-frontend. Builds a static 1200×630 brand
   card at `/og/default.png` used as the fallback OG image. The card
   renders in Geist (`src/og/fonts/Geist-Medium.ttf`) — the OG headline
   dropped the former Instrument Serif when the brand retired the serif.
@@ -322,8 +322,8 @@ See README's "Replace examples before go-live" section.
   `download` attribute** — with the `text/vcard` MIME (`AddType text/vcard .vcf` in
   `public/.htaccess`) mobile opens the "add contact" flow while desktop downloads.
   Excluded from the sitemap (`astro.config.mjs` filter drops `.vcf`). The button
-  label is inlined (`lang` ternary) with a `TODO: promote to tds-shared` — the only
-  copy not yet in tds-shared. Embeds the portrait as a **base64 JPEG `PHOTO`**
+  label is inlined (`lang` ternary) with a `TODO: promote to tds-shared-pkg` — the only
+  copy not yet in tds-shared-pkg. Embeds the portrait as a **base64 JPEG `PHOTO`**
   (`src/assets/portrait-vcard.jpg`, read at build via `process.cwd()` not
   `import.meta.url` — same bundling trap as the OG renderer; folded to ≤75 octets
   per RFC 2426). **No `ADR`/`GEO`** — the postal address is intentionally omitted
@@ -411,18 +411,18 @@ See README's "Replace examples before go-live" section.
 - Don't hand-author the lightningcss `cssTarget` in `astro.config.mjs`.
   Spread the shared `tdsViteBuild` preset from
   `@tracht-digital-solutions/tds-shared/astro` into `vite.build`
-  (as of the 2026-06-04 build refactor on tds-shared 0.4.0). It pins the
+  (as of the 2026-06-04 build refactor on tds-shared-pkg 0.4.0). It pins the
   Safari floor so lightningcss keeps the `-webkit-backdrop-filter` prefix
   on the frosted header; a hand-copied array drifts and the blur silently
-  dies in Safari ≤17. See tds-shared#10.
+  dies in Safari ≤17. See tds-shared-pkg#10.
 - Don't read `translations.de` (or `.en`) directly from an .astro
   file. The `tFor(Astro.currentLocale)` helper is what makes the
   EN route actually render EN; bypassing it puts the file back
   into the "language toggle does nothing" pre-i18n era.
 - Don't inline service titles, descriptions, or form copy in the
-  `.astro` files. Editable copy lives in `tds-shared` so the same
+  `.astro` files. Editable copy lives in `tds-shared-pkg` so the same
   string ships to every front-end. Short-lived inlining is fine
-  during prototyping — wrap it in a `TODO: promote to tds-shared`
+  during prototyping — wrap it in a `TODO: promote to tds-shared-pkg`
   comment and fold it into the next 0.2.x bump (see
   `services.items` and `contact.form.*Placeholder` in 0.2.2).
 - Don't import `~/og/render` from a React island — Satori + Resvg
@@ -439,4 +439,4 @@ See README's "Replace examples before go-live" section.
   fails with "Object literal may only specify known properties".
   The alias now defaults the generic to `Record<string, unknown>`
   — just write `WithContext` (no explicit type argument). Same
-  pattern lives in tds-blog/src/lib/jsonld.ts.
+  pattern lives in tds-blog-frontend/src/lib/jsonld.ts.
