@@ -5,7 +5,7 @@ Deploys to **the production host** at `tracht-digital.de`.
 
 > Status: **required, not superseded.** Still deployed. Its editable section content is
 > fetched at build time from `tds-content-api`'s `/landing` block API today; after the
-> panel-platform cutover that source becomes `tds-ext-website-cms-pkg` (`/cms/...`), read the
+> frontend-platform cutover that source becomes `tds-ext-website-cms-pkg` (`/cms/...`), read the
 > same way. See the root `MIGRATION-STATUS.md`.
 
 ## Status
@@ -162,7 +162,7 @@ See README's "Replace examples before go-live" section.
   semantic order; the visual numbering already lives in each
   step's title row. Replaces an earlier per-step gradient connector
   design that read as four chained cards instead of one arc.
-  On desktop the timeline pairs with a sticky detail panel: hovering or
+  On desktop the timeline pairs with a sticky detail frontend: hovering or
   keyboard-focusing a step reveals its longer copy (`src/lib/processDetails.ts`,
   kept local like the FAQ copy) over a per-step photo
   (`public/images/process/step-0N.webp`) with the brand gradient as a
@@ -183,7 +183,7 @@ See README's "Replace examples before go-live" section.
   border, 24px-rounded bottom), is always rendered with chrome,
   spans `left-3 right-3`, and ends in a 44px hamburger that
   animates three CSS bars into an × via the `[aria-expanded]`
-  attribute. Mobile menu panel mounts as a separate fixed div
+  attribute. Mobile menu frontend mounts as a separate fixed div
   below the pill — Astro inline `<script>` toggles state and
   body scroll-lock. The "TDS" wordmark is paired with the real
   logomark at `public/images/logo.webp` (the with-text variant
@@ -344,7 +344,7 @@ See README's "Replace examples before go-live" section.
   (`--color-primary`, `--color-black`, `--color-paper`, …) **flip**
   in dark mode so they read as foreground accents on a dark ground.
   Anything that must stay a fixed dark surface in both themes uses
-  `--color-surface-navy` (brand navy panels/buttons),
+  `--color-surface-navy` (brand navy frontends/buttons),
   `--color-surface-accent` (burgundy, gradient end) or
   `--color-surface-ink` (footer). Elevated cards/glass use
   `--color-card` (white → dark), referenced via `color-mix()` for

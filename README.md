@@ -265,7 +265,7 @@ src/
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   ├── jsonld.ts               # Schema.org graph generators
 │   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
-│   └── processDetails.ts       # Per-step detail copy for the Process hover panel
+│   └── processDetails.ts       # Per-step detail copy for the Process hover frontend
 ├── og/                         # Satori OG-card pipeline (build-time)
 │   ├── render.ts               # 1200×630 default card
 │   └── fonts/                  # Geist (ttf) for the OG card
