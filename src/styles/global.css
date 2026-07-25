@@ -6,23 +6,29 @@
    references — Vite then never emits the woff2 assets and every font
    404s at runtime (build ships no font files at all). */
 
-/* Brand design system — tokens, dark theme, base resets, the brand
-   scrollbar, focus ring, the animated theme-switch and the editorial
-   type primitives (.display, .eyebrow, .lead, .section-spacing, …). The
-   marketing site does not pull in the shared application chrome
-   (./app.css); its section styles below stay local. See
-   @tracht-digital-solutions/tds-shared/styles. */
-@import "@tracht-digital-solutions/tds-shared/styles/base.css";
+/* Brand design system — one library, three surfaces. This app is the
+   `marketing` surface (see `data-surface` on <html> in Layout.astro).
 
-/* Display face — Lato, the official Tracht Digital Solutions brand font
-   (replaces the former Hanken Grotesk). Set locally so the marketing build
-   picks it up without waiting on a tds-shared republish; .display/
-   .display-tight carry real weight to register as headings. */
-:root {
-  --font-display: "Lato", "Helvetica Neue", Arial, sans-serif;
-}
-.display { font-weight: 700; letter-spacing: -0.03em; }
-.display-tight { font-weight: 600; letter-spacing: -0.025em; }
+     base.css        tokens, dark theme, resets, brand scrollbar, focus
+                     ring, theme-switch, type primitives (.display,
+                     .eyebrow, .lead, .section-spacing, …)
+     primitives.css  cross-surface components (.btn*, .chip*, .field,
+                     .section-num, .brand-header, .brand-wordmark, …)
+     surfaces/marketing.css   the geometry: round pills, 6px lifted cards,
+                     the 700 display voice
+
+   app.css is deliberately NOT imported — that is dashboard chrome
+   (sidebar, nav items, stat tiles) this site never renders. Before the
+   library was split, `.section-num` and `.brand-wordmark` lived only in
+   app.css, so skipping it meant both classes shipped UNSTYLED here even
+   though 7 components used them. They come from primitives.css now.
+
+   Nothing about the visual result is authored locally any more: no font
+   token, no `.display` weight, no radius. To change how this surface
+   looks, edit surfaces/marketing.css in tds-shared-pkg and bump. */
+@import "@tracht-digital-solutions/tds-shared/styles/base.css";
+@import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
+@import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
 
 /* The shared base sets `body { overflow-x: hidden }` to tame stray
    horizontal overflow. But `overflow-x: hidden` turns the body into a

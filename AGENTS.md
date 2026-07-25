@@ -47,20 +47,45 @@ See README's "Replace examples before go-live" section.
   `@tracht-digital-solutions/tds-shared/styles/base.css`, which
   `src/styles/global.css` imports (Tailwind v4 processes the imported
   `@theme`). Same brand colors as the legacy app (#050f68 navy, #820933
-  burgundy). Heading family is self-hosted `@fontsource-variable/hanken-grotesk`;
-  body is `@fontsource-variable/geist` — both imported in `Layout.astro`
-  frontmatter, NOT via CSS `@import` (see the fontsource entry in "Don't"
-  below). Hanken Grotesk is the single canonical
-  display font across all frontends — a flat, modern grotesk (it replaced
-  Instrument Serif, which read too editorial/serif for the brand).
+  burgundy). Type stack is `@fontsource/lato` (display, 400/700/900),
+  `@fontsource-variable/plus-jakarta-sans` (body) and
+  `@fontsource-variable/jetbrains-mono` (mono) — all imported in
+  `Layout.astro` frontmatter, NOT via CSS `@import` (see the fontsource
+  entry in "Don't" below). **Lato** is the canonical display face; any note
+  claiming Hanken Grotesk is stale. Body/mono moved off Geist when the
+  design library unified the three surfaces: this site was the outlier, and
+  its `--font-mono` resolved to *nothing at all* because
+  `@fontsource-variable/geist` is sans-only and Geist Mono was never
+  installed.
+- **This app is the `marketing` surface of the shared design library.**
+  `<html data-surface="marketing">` in `Layout.astro` selects
+  `tds-shared/styles/surfaces/marketing.css`, which owns the geometry: round
+  pill buttons, 6px cards, the only card elevation of the three surfaces,
+  and the 700 display voice. `global.css` imports
+  `base.css` → `primitives.css` → `surfaces/marketing.css` and authors **no
+  font token, no `.display` weight and no radius of its own** — all three
+  used to be duplicated here. To change how this surface looks, edit the
+  surface layer in tds-shared-pkg and bump; never re-declare a shared class
+  here.
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
-  `.section-num`, `.eyebrow`, `.lead` — shared primitives from
-  tds-shared-pkg's `base.css`, the same the portals and journal use. The
-  marketing site imports only `base.css` (not `app.css`) and keeps its
-  bespoke section styles (accent-letters, hero, marquee) local.
+  `.section-num`, `.eyebrow`, `.lead`. `.display*` / `.eyebrow` / `.lead`
+  come from `base.css`; **`.section-num` and `.brand-wordmark` come from
+  `primitives.css`** — they previously lived only in `app.css`, which this
+  site deliberately skips, so both shipped **completely unstyled** here
+  despite 7 components using them (verified: 0 occurrences in the built
+  `dist/_astro/Layout.*.css`). `app.css` is still not imported — that is
+  dashboard chrome — but the cross-surface primitives now are. The bespoke
+  section styles (accent-letters, hero, marquee, cursor, floating CTA, glass
+  nav pill) stay local.
   `SectionHeader.astro` is the shared masthead component
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
+- **The contact form's field wrapper is `.contact-field-row`** (with
+  `.contact-field-line` / `.contact-field-label`), not `.field`.
+  `primitives.css` owns `.field` as the *input element*, while the old local
+  `.field` was a *wrapper div* with an `::after` baseline rule — two
+  incompatible semantics under one name. Renaming it is what unblocked
+  importing the shared primitives here at all.
 - **Interactive accent letters** (`src/components/ui/AccentLetters.astro`
   + a React mirror in `Hero.tsx`): every italic `headlineAccent` word is
   rendered as per-character spans so each letter can react to pointer
@@ -370,9 +395,13 @@ See README's "Replace examples before go-live" section.
   that's how the contact form vanished. `show` must always target
   `{ opacity: 1, y: 0 }`; only the *transition* may collapse to
   `{ duration: 0 }` (see `ContactForm.tsx`).
-- Don't add per-frontend brand tokens or duplicate the shared design CSS.
-  Always edit `tds-shared/styles/base.css` (tokens, base) or `app.css`
-  (shared chrome) and bump the version.
+- Don't add per-frontend brand tokens, hand-author a radius, or duplicate
+  the shared design CSS. Geometry belongs to
+  `tds-shared/styles/surfaces/marketing.css`; tokens to `base.css`;
+  cross-surface components to `primitives.css`. Edit there and bump the
+  version. (The old convention was the opposite — "geometry stays
+  app-local" — and that is exactly what let one design drift into three
+  separately-maintained variations.)
 - Don't fetch the journal teaser at runtime. Build-time fetch in
   `index.astro` frontmatter so the rendered HTML ships static.
 - Don't reintroduce the navy→burgundy `linear-gradient` pill buttons.

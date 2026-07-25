@@ -95,18 +95,21 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
     }
   };
 
-  // Each field is wrapped in a `.field` <div> so the focus-within
-  // styles in the scoped <style> on Contact.astro can light up the
-  // label and underline together when the user lands on the input.
-  const fieldClass = (hasError: boolean) =>
+  // Each field is wrapped in a `.contact-field-row` <div> so the
+  // focus-within styles in the scoped <style> on Contact.astro can light
+  // up the label and underline together when the user lands on the input.
+  // The wrapper family is deliberately `contact-field-*`, not `field-*`:
+  // tds-shared's primitives.css owns a `.field` class for the *input
+  // element*, and the two semantics would collide (tds-shared#…).
+  // The error state is carried by the wrapper, not the input.
+  const fieldClass = () =>
     [
       "contact-field block w-full appearance-none bg-transparent",
       "px-3 py-3 text-base text-white leading-snug",
       "border-0 outline-none focus:outline-none focus:ring-0",
-      hasError ? "contact-field--error" : "",
     ].join(" ");
 
-  const labelClass = "field-label";
+  const labelClass = "contact-field-label";
 
   return (
     <div className={shake ? "shake" : ""}>
@@ -160,17 +163,17 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               />
             </div>
 
-            <motion.div variants={fieldItem} className={`field ${errors.name ? "field--error" : ""}`}>
+            <motion.div variants={fieldItem} className={`contact-field-row ${errors.name ? "contact-field-row--error" : ""}`}>
               <label htmlFor="name" className={labelClass}>{t.contact.form.name}</label>
               <input
                 id="name"
                 type="text"
                 autoComplete="name"
                 placeholder={t.contact.form.namePlaceholder}
-                className={fieldClass(!!errors.name)}
+                className={fieldClass()}
                 {...register("name")}
               />
-              <span className="field-line" aria-hidden="true" />
+              <span className="contact-field-line" aria-hidden="true" />
               {errors.name && (
                 <p className="text-xs mt-2" style={{ color: "var(--color-accent-pink)" }}>
                   {t.errors.name}
@@ -178,17 +181,17 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               )}
             </motion.div>
 
-            <motion.div variants={fieldItem} className={`field ${errors.email ? "field--error" : ""}`}>
+            <motion.div variants={fieldItem} className={`contact-field-row ${errors.email ? "contact-field-row--error" : ""}`}>
               <label htmlFor="email" className={labelClass}>{t.contact.form.email}</label>
               <input
                 id="email"
                 type="email"
                 autoComplete="email"
                 placeholder={t.contact.form.emailPlaceholder}
-                className={fieldClass(!!errors.email)}
+                className={fieldClass()}
                 {...register("email")}
               />
-              <span className="field-line" aria-hidden="true" />
+              <span className="contact-field-line" aria-hidden="true" />
               {errors.email && (
                 <p className="text-xs mt-2" style={{ color: "var(--color-accent-pink)" }}>
                   {t.errors.email}
@@ -196,29 +199,29 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               )}
             </motion.div>
 
-            <motion.div variants={fieldItem} className="field">
+            <motion.div variants={fieldItem} className="contact-field-row">
               <label htmlFor="company" className={labelClass}>{t.contact.form.company}</label>
               <input
                 id="company"
                 type="text"
                 autoComplete="organization"
                 placeholder={t.contact.form.companyPlaceholder}
-                className={fieldClass(false)}
+                className={fieldClass()}
                 {...register("company")}
               />
-              <span className="field-line" aria-hidden="true" />
+              <span className="contact-field-line" aria-hidden="true" />
             </motion.div>
 
-            <motion.div variants={fieldItem} className={`field ${errors.message ? "field--error" : ""}`}>
+            <motion.div variants={fieldItem} className={`contact-field-row ${errors.message ? "contact-field-row--error" : ""}`}>
               <label htmlFor="message" className={labelClass}>{t.contact.form.message}</label>
               <textarea
                 id="message"
                 rows={4}
                 placeholder={t.contact.form.messagePlaceholder}
-                className={`${fieldClass(!!errors.message)} resize-none`}
+                className={`${fieldClass()} resize-none`}
                 {...register("message")}
               />
-              <span className="field-line" aria-hidden="true" />
+              <span className="contact-field-line" aria-hidden="true" />
               {errors.message && (
                 <p className="text-xs mt-2" style={{ color: "var(--color-accent-pink)" }}>
                   {t.errors.message}

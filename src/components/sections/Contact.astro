@@ -212,19 +212,19 @@ const socials = {
 <style is:global>
   /* === Contact form: field + focus state ============================ */
 
-  /* Each input/textarea sits inside a `.field` wrapper. The wrapper
+  /* Each input/textarea sits inside a `.contact-field-row` wrapper. The wrapper
      paints the static baseline rule and an animated overlay rule
-     (`.field-line`) that grows from the centre on focus-within. The
+     (`.contact-field-line`) that grows from the centre on focus-within. The
      label and rules share the focus-within trigger so the entire
      row "lights up" at once. */
-  .field {
+  .contact-field-row {
     position: relative;
-    padding-bottom: 1px; /* leaves room for the .field-line absolute layer */
+    padding-bottom: 1px; /* leaves room for the .contact-field-line absolute layer */
   }
 
   /* Static baseline rule along the bottom of every field — always
      visible so a blank form still has visual structure. */
-  .field::after {
+  .contact-field-row::after {
     content: "";
     position: absolute;
     left: 0;
@@ -238,7 +238,7 @@ const socials = {
   /* Hover gives an immediate "this is interactive" cue before the
      visitor even clicks: the baseline brightens and the field lifts a
      hair on a faint wash (the wash itself lives on .contact-field). */
-  .field:hover::after {
+  .contact-field-row:hover::after {
     background-color: rgb(255 255 255 / 0.5);
   }
 
@@ -246,7 +246,7 @@ const socials = {
      focus-within. Kept slim (1px) and at 50 % alpha so the focus
      state reads as a soft highlight rather than a hard underline
      fighting the field copy. */
-  .field-line {
+  .contact-field-line {
     position: absolute;
     left: 0;
     right: 0;
@@ -270,14 +270,14 @@ const socials = {
 
   /* Hover: the accent line peeks in from the centre as a preview of
      the focus state. */
-  .field:hover:not(:focus-within) .field-line {
+  .contact-field-row:hover:not(:focus-within) .contact-field-line {
     transform: scaleX(0.3);
     opacity: 0.6;
   }
 
   /* Label baseline. The focus-within rule lifts it to accent-pink
      and tightens the tracking a hair so it reads as "active". */
-  .field-label {
+  .contact-field-label {
     display: block;
     font-size: 0.75rem;
     line-height: 1;
@@ -296,7 +296,7 @@ const socials = {
       transform 200ms ease;
   }
 
-  .field:hover .field-label {
+  .contact-field-row:hover .contact-field-label {
     color: rgb(255 255 255 / 0.78);
   }
 
@@ -304,7 +304,7 @@ const socials = {
      the previous pink looked like a "border lighting up", which is
      exactly the cue the user asked us to remove). Letter-spacing
      tightens a hair so the eye still picks up the focus state. */
-  .field:focus-within .field-label {
+  .contact-field-row:focus-within .contact-field-label {
     color: rgb(255 255 255 / 0.92);
     letter-spacing: 0.2em;
     transform: translateY(-1px);
@@ -313,12 +313,12 @@ const socials = {
      white underline and the animated brand line stays collapsed.
      Paired with the brighter white wash on `.contact-field:focus`
      below so the field reads as "lit up", not "outlined". */
-  .field:focus-within::after {
+  .contact-field-row:focus-within::after {
     background-color: rgb(255 255 255 / 0.35);
   }
   /* Focus: the accent underline sweeps out from the centre to full
      width — the headline interaction of the field. */
-  .field:focus-within .field-line {
+  .contact-field-row:focus-within .contact-field-line {
     transform: scaleX(1);
     opacity: 1;
   }
@@ -336,7 +336,7 @@ const socials = {
   }
   /* Faint wash on hover (before focus) so the field warms up under the
      cursor. */
-  .field:hover .contact-field:not(:focus) {
+  .contact-field-row:hover .contact-field:not(:focus) {
     background-color: rgb(255 255 255 / 0.07) !important;
   }
   .contact-field:focus {
@@ -349,10 +349,10 @@ const socials = {
   /* Error variant — solid pink baseline so the broken field reads
      immediately. The accent line still grows on focus, but it sits
      on top of the same colour so the underline keeps depth. */
-  .field--error::after {
+  .contact-field-row--error::after {
     background-color: var(--color-accent-pink);
   }
-  .field--error .field-label {
+  .contact-field-row--error .contact-field-label {
     color: var(--color-accent-pink);
   }
 
@@ -369,7 +369,7 @@ const socials = {
     color: rgb(255 255 255 / 0.4);
     transition: color 200ms ease;
   }
-  .field:focus-within .contact-field::placeholder {
+  .contact-field-row:focus-within .contact-field::placeholder {
     color: rgb(255 255 255 / 0.25);
   }
 

@@ -5,7 +5,11 @@
 import "@fontsource/lato/400.css";
 import "@fontsource/lato/700.css";
 import "@fontsource/lato/900.css";
-import "@fontsource-variable/geist";
+// Body + mono, matching --font-body / --font-mono in tds-shared's base.css.
+// This site used to load Geist and nothing at all for mono (Geist Mono was
+// never installed, so `font-mono` silently fell back to a system face).
+import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/jetbrains-mono";
 import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
@@ -69,7 +73,10 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
 ---
 
 <!DOCTYPE html>
-<html lang={lang}>
+<!-- data-surface selects the geometry layer from tds-shared's design
+     library (surfaces/marketing.css): round pills, 6px lifted cards, the
+     700 display voice. Do not author radii locally. -->
+<html lang={lang} data-surface="marketing">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
