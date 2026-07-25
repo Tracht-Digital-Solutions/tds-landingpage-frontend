@@ -12,7 +12,7 @@ import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import CustomCursor from "~/components/islands/CustomCursor.tsx";
 import FloatingCta from "~/components/FloatingCta.astro";
 import JsonLd from "~/components/JsonLd.astro";
-import { CookieNotice } from "@tracht-digital-solutions/tds-shared/components";
+import { CookieNotice, LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
 import { siteConfig } from "~/lib/seo";
 import { cookieBannerEnabled } from "~/lib/cms";
 
@@ -171,6 +171,16 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
     {!bare && <FloatingCta />}
     {showCookieNotice && (
       <CookieNotice client:idle lang={lang} privacyUrl="/legal/datenschutz" />
+    )}
+    {/* Floating support widget — self-hides unless the live-chat-cta extension
+        enables the "landingpage" frontend in the admin. Talks to the API gateway. */}
+    {!bare && (
+      <LiveChatCta
+        client:idle
+        frontend="landingpage"
+        apiBase="https://api.tracht-digital.de"
+        lang={lang}
+      />
     )}
 
     {/* Dynamic document.title — observes every <section id="…"> on
