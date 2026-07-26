@@ -15,7 +15,7 @@ all shipped. As of 2026-05-28: upgraded to Astro 6, swapped Tailwind from
 the `@tailwindcss/vite` plugin to `@tailwindcss/postcss` (rolldown
 incompatibility with Vite 7 — withastro/astro#16542), wired real Astro
 i18n routing (DE at `/`, EN at `/en/`), swapped the heading family to
-the shared Hanken Grotesk grotesk, dropped SectionSnap in favour of native scroll +
+the shared Lato display face, dropped SectionSnap in favour of native scroll +
 a thin ScrollProgress bar, and replaced the DE/EN pill toggle with a
 flag dropdown (inline-SVG flags — Win32 doesn't ship colour flag
 glyphs). Closing pill below `lg` docks flush against the top edge
@@ -338,7 +338,7 @@ See README's "Replace examples before go-live" section.
 - **`src/og/render.ts` + `src/pages/og/default.png.ts`** — Satori
   pipeline mirroring tds-blog-frontend. Builds a static 1200×630 brand
   card at `/og/default.png` used as the fallback OG image. The card
-  renders in Geist (`src/og/fonts/Geist-Medium.ttf`) — the OG headline
+  renders in Lato (`src/og/fonts/Lato-Bold.ttf`) — the OG headline
   dropped the former Instrument Serif when the brand retired the serif.
 - **`src/pages/kontakt.vcf.ts`** — build-time static endpoint → `/kontakt.vcf`.
   Generates a vCard 3.0 from `siteConfig` (single source of truth, so it never

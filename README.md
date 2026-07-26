@@ -11,7 +11,7 @@
 Marketing landing page for Tracht Digital Solutions. **Astro 6** +
 **React** islands + **Tailwind v4** (via the `@tailwindcss/postcss`
 plugin — see the *Tailwind note* below) with self-hosted
-**Hanken Grotesk + Geist**. Builds to fully static HTML and ships
+**Lato + Plus Jakarta Sans**. Builds to fully static HTML and ships
 in two locale trees (DE at `/`, EN at `/en/`); deploys automatically to
 the production host at `tracht-digital.de` on every push to `main`.
 
@@ -268,7 +268,7 @@ src/
 │   └── processDetails.ts       # Per-step detail copy for the Process hover frontend
 ├── og/                         # Satori OG-card pipeline (build-time)
 │   ├── render.ts               # 1200×630 default card
-│   └── fonts/                  # Geist (ttf) for the OG card
+│   └── fonts/                  # Lato Bold (ttf) for the OG card
 ├── pages/                      # Astro file-routing
 │   ├── index.astro             # DE home
 │   ├── preise.astro            # DE pricing
