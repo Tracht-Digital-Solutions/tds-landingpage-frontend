@@ -208,7 +208,13 @@ See README's "Replace examples before go-live" section.
   border, 24px-rounded bottom), is always rendered with chrome,
   spans `left-3 right-3`, and ends in a 44px hamburger that
   animates three CSS bars into an × via the `[aria-expanded]`
-  attribute. Mobile menu frontend mounts as a separate fixed div
+  attribute. **Those bars are `.tds-menu-bar*` from tds-shared
+  `primitives.css`** — the blog header carried the same rules under
+  `.jnl-menu-bar*`, so they were promoted. The 2px bar radius is
+  `--tds-radius-bar` (the marketing-surface default), and the shared
+  block also supplies the `prefers-reduced-motion` rule this header
+  never had. Don't re-add a local `.menu-bar` block.
+  Mobile menu frontend mounts as a separate fixed div
   below the pill — Astro inline `<script>` toggles state and
   body scroll-lock. The "TDS" wordmark is paired with the real
   logomark at `public/images/logo.webp` (the with-text variant

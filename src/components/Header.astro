@@ -105,9 +105,9 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         aria-expanded="false"
         aria-label={menuLabel}
       >
-        <span class="menu-bar menu-bar-top" aria-hidden="true"></span>
-        <span class="menu-bar menu-bar-mid" aria-hidden="true"></span>
-        <span class="menu-bar menu-bar-bot" aria-hidden="true"></span>
+        <span class="tds-menu-bar tds-menu-bar-top" aria-hidden="true"></span>
+        <span class="tds-menu-bar tds-menu-bar-mid" aria-hidden="true"></span>
+        <span class="tds-menu-bar tds-menu-bar-bot" aria-hidden="true"></span>
       </button>
     </div>
   </nav>
@@ -303,40 +303,11 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     }
   }
 
-  /* Animated hamburger ↔ × — three absolutely-positioned bars
-     transform on aria-expanded. The top and bottom bars rotate
-     into an × at the centre while the middle bar fades. */
-  .menu-bar {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 18px;
-    height: 1.75px;
-    background-color: currentColor;
-    border-radius: 2px;
-    transform-origin: center;
-    transform: translate(-50%, -50%);
-    transition:
-      transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 180ms ease;
-  }
-  .menu-bar-top {
-    transform: translate(-50%, calc(-50% - 6px));
-  }
-  .menu-bar-bot {
-    transform: translate(-50%, calc(-50% + 6px));
-  }
-
-  .menu-toggle[aria-expanded="true"] .menu-bar-top {
-    transform: translate(-50%, -50%) rotate(45deg);
-  }
-  .menu-toggle[aria-expanded="true"] .menu-bar-mid {
-    opacity: 0;
-    transform: translate(-50%, -50%) scaleX(0.6);
-  }
-  .menu-toggle[aria-expanded="true"] .menu-bar-bot {
-    transform: translate(-50%, -50%) rotate(-45deg);
-  }
+  /* The animated hamburger ↔ × bars are `.tds-menu-bar*` from
+     tds-shared primitives.css — the blog header carried the same block.
+     The 2px bar radius comes from `--tds-radius-bar` (the marketing
+     surface default), and the shared block also brings the
+     prefers-reduced-motion rule this copy never had. */
 
   /* Mobile menu panel — closed: scaled, transparent, untouchable.
      Open: full-size, opaque, interactive. Pointer-events flip with
