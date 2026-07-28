@@ -371,6 +371,14 @@ See README's "Replace examples before go-live" section.
   inline script in `Layout.astro` sets `data-theme` on `<html>` from
   the `tds-theme` localStorage key (or the OS `prefers-color-scheme`
   fallback); the `ThemeToggle` island flips and persists it.
+- **That script is no longer hand-written here.** It is
+  `themeBootstrapScript` from `@tracht-digital-solutions/tds-shared/astro`,
+  shared with the blog and the frontend host (all three had their own copy).
+  Inject it as `<script is:inline set:html={themeBootstrapScript} />` — as a
+  template body (`{…}`) Astro would leak the literal braces into `dist/` and the
+  script would never parse — and keep `is:inline`, or Astro defers it into a
+  module and the theme lands after first paint, which is the flash it prevents.
+  The storage key itself lives in `tds-shared/design` as `THEME_STORAGE_KEY`.
 - Tokens live in `src/styles/global.css`. The structural tokens
   (`--color-primary`, `--color-black`, `--color-paper`, …) **flip**
   in dark mode so they read as foreground accents on a dark ground.
