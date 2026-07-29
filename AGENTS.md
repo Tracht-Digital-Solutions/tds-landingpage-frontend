@@ -290,6 +290,14 @@ See README's "Replace examples before go-live" section.
   ≤60 chars); the local qualifier (Schwarzenbek bei Hamburg) lives in
   the descriptions, schema `geo`/NAP, footer and body copy — not the
   title. Keep new page titles keyword-first + brand-second.
+- **`siteConfig.description` is capped at 160 characters, both languages.**
+  Google renders roughly the first 155–160 and truncates the rest. Both
+  descriptions overflowed until 2026-07-29 (181 de / 175 en) and silently lost
+  their trailing Germany-wide qualifier in the SERP; they were shortened by
+  dropping one service from each list. `seo.test.ts` enforces the cap and also
+  asserts that both keyword targets — the exact phrase "Digitalisierung für
+  Unternehmen" and the town — still land *inside* the rendered window. When the
+  copy changes, trim the service list before either keyword.
 - **Footer NAP:** the footer renders `siteConfig.address.postalCode +
   addressLocality` ("21493 Schwarzenbek") hardcoded from `seo.ts`, NOT
   the CMS `contact.location` string — it must always match the
