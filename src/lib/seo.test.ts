@@ -75,28 +75,31 @@ describe("the keyword commitments", () => {
 });
 
 describe("the descriptions are usable as meta descriptions", () => {
-  it("does not grow any longer than it already is", () => {
+  it("fits inside what Google actually renders", () => {
     // Google renders roughly the first 155–160 characters of a meta
     // description and truncates the rest.
     //
-    // FINDING (2026-07, not fixed here): both descriptions run past that —
-    // 181 chars (de) and 175 (en) — so each loses its last ~20 characters in
-    // the SERP. The LOCAL signal survives (see the next test: "Schwarzenbek"
-    // sits around index 139), and what actually gets cut is the trailing
-    // Germany-wide qualifier ("deutschlandweit."). Worth tightening, but
-    // shortening marketing copy is an editorial decision, so this pins the
-    // CURRENT lengths as a no-regression bound instead of rewriting it.
-    // Lower these when the copy is shortened.
-    const BUDGET: Record<string, number> = { de: 181, en: 175 };
+    // This was a real defect until 2026-07-29: both descriptions ran past that
+    // (181 de / 175 en), so each lost its trailing Germany-wide qualifier
+    // ("deutschlandweit." / "Germany.") in the SERP while the local signal
+    // survived. Fixed by trimming one service from each list; every keyword
+    // target still fits.
+    //
+    // ONE budget for both languages, deliberately. The previous version of
+    // this test carried a per-language budget seeded from the then-current
+    // lengths, which is what let the overflow ossify — a per-language bound
+    // documents whatever the sentence happens to be, rather than asserting the
+    // constraint. 160 is a property of the search engine, not of the copy.
+    const RENDERED = 160;
     for (const [lang, text] of Object.entries(siteConfig.description)) {
-      expect(text.length, `${lang} description is ${text.length} chars`).toBeLessThanOrEqual(BUDGET[lang]!);
+      expect(text.length, `${lang} description is ${text.length} chars`).toBeLessThanOrEqual(RENDERED);
     }
   });
 
   it("keeps the LOCAL signal inside the part Google actually renders", () => {
     // The town is the half of the keyword target that has to survive
     // truncation — it is what local search matches on. Both descriptions
-    // currently place it around index 139, comfortably inside the cut.
+    // place it around index 113–117, comfortably inside the cut.
     const RENDERED = 160;
     for (const [lang, text] of Object.entries(siteConfig.description)) {
       expect(text.slice(0, RENDERED), `${lang} loses the town to truncation`).toMatch(/Schwarzenbek/);
