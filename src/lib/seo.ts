@@ -18,9 +18,19 @@ export const siteConfig = {
   blogUrl: "https://blog.tracht-digital.de",
   /** Primary content language. */
   defaultLocale: "de" as const,
+  /**
+   * Meta descriptions. Google renders roughly the first 155-160 characters and
+   * truncates the rest, so both of these are kept under 160 — see
+   * `seo.test.ts`, which fails the build if either grows past its budget.
+   *
+   * Both must keep the two keyword targets intact inside that budget: the exact
+   * phrase "Digitalisierung für Unternehmen" (Germany-wide) and the local
+   * signal "Schwarzenbek"/"Hamburg". Trim the service list before either of
+   * those.
+   */
   description: {
-    de: "Digitalisierung für Unternehmen: Beratung, Web- & App-Entwicklung, Automatisierung, Wartung und Schulungen — persönlich und passgenau, aus Schwarzenbek bei Hamburg, deutschlandweit.",
-    en: "Digitalization for businesses: consulting, web & app development, automation, maintenance and training — personal and tailored to fit, from Schwarzenbek near Hamburg, Germany.",
+    de: "Digitalisierung für Unternehmen: Beratung, Web- & App-Entwicklung, Automatisierung, Schulungen — persönlich, aus Schwarzenbek bei Hamburg, deutschlandweit.",
+    en: "Digitalization for businesses: consulting, web & app development, automation, training — personal and tailored, from Schwarzenbek near Hamburg, Germany.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
