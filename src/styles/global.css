@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss/index.css";
 
 /* Font faces (@fontsource-variable) are imported in Layout.astro, NOT
    here: an @import inside this file is inlined by @tailwindcss/postcss,
