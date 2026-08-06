@@ -30,6 +30,17 @@
 @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
 @import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
 
+/* Tailwind ignores node_modules by default, and the shared React islands
+   (`ThemeToggle`, `CookieNotice`, `LiveChatCta`) are built out of utility
+   classes. Nothing was visibly broken here without this line — every utility
+   the toggle needs happened to be generated because this site uses the same
+   ones in its own markup. That is precisely why it belongs here: drop one of
+   those usages in a redesign and a shared island silently loses its styling,
+   with no error and no obvious connection to the removed class. The blog had
+   the same gap and really was missing four of them (tds-blog-frontend#25).
+   MUST come after the @imports; `@source` before an `@import` is a build error. */
+@source "../../node_modules/@tracht-digital-solutions/tds-shared";
+
 /* The shared base sets `body { overflow-x: hidden }` to tame stray
    horizontal overflow. But `overflow-x: hidden` turns the body into a
    scroll container, which silently disables `backdrop-filter` on
