@@ -177,8 +177,12 @@ only by `release.yml`). The old `FTP_*` / `INSTALL_TOKEN` secrets and the
 All contact/legal placeholders are now real: the business address,
 phone, LinkedIn/GitHub, the portrait photo, the header logo, the
 favicon, the VAT ID (`DE450639725` — in `src/pages/legal/impressum.astro`
-+ `src/lib/seo.ts`, surfaced as `Organization.vatID`) and the AGB PDF
-(`public/legal/agb.pdf`).
++ `src/lib/seo.ts`, surfaced as `Organization.vatID`) and the AGB PDF.
+
+The AGB is no longer a committed static file: it is **uploaded in the frontend**
+(Website-CMS → Rechtsdokumente) and baked into the build, with
+`src/assets/legal/agb.pdf` kept only as the fallback for when the API is
+unreachable. See § [AGB](#agb-page--pdf).
 
 **Still TODO before launch** (tracked as open issues on this repo):
 
@@ -229,10 +233,44 @@ else changes — the section slots back in between **Tech** and
 | `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
 | `/legal/impressum` | `src/pages/legal/impressum.astro` | Legal notice (DE) |
 | `/legal/datenschutz` | `src/pages/legal/datenschutz.astro` | Privacy policy (DSGVO) |
+| `/legal/agb` | `src/pages/legal/agb.astro` | Terms & conditions, as a page (DE) |
+| `/legal/agb.pdf` | `src/pages/legal/agb.pdf.ts` | The same document as a PDF (DE) |
+| `/en/legal/agb` | `src/pages/en/legal/agb.astro` | Terms & conditions, as a page (EN) |
+| `/en/legal/agb.pdf` | `src/pages/en/legal/agb.pdf.ts` | The same document as a PDF (EN) |
 
-Legal pages are German-only by regulation. The language dropdown in
+Impressum and Datenschutz are German-only by regulation; the AGB has both
+trees because the document itself is uploaded per language. The language dropdown in
 the header navigates between the DE and EN trees via Astro's i18n
 routing (`defaultLocale: de`, `prefixDefaultLocale: false`).
+
+---
+
+## AGB page + PDF
+
+The AGB is served two ways from one document: a readable page at `/legal/agb`
+(heading, "Stand", download button, and an inline PDF viewer on desktop) and
+the file itself at `/legal/agb.pdf`. The footer links the page; the page offers
+the download.
+
+**To change the AGB** — no code, no deploy:
+
+1. Frontend → **Website-CMS** → open the site → **Rechtsdokumente**.
+2. Pick `agb`, the language, optionally a *Stand* label (e.g. `Stand: 09/2025`,
+   shown under the heading), choose the PDF, **Hochladen**.
+3. The upload fires this site's rebuild automatically, provided the site has a
+   *Rebuild-Konfiguration* (repo + workflow) and the panel has a rebuild token.
+   Without those, upload and then release this repo by hand — nothing is lost,
+   the document just goes live on the next build.
+
+PDF only, 8 MB maximum, one file per language. **The English document is a
+separate upload, not a translation** — legal text is never machine-translated,
+and until an `en` document exists `/en/legal/agb.pdf` serves the German one
+rather than 404ing.
+
+`src/assets/legal/agb.pdf` is the committed fallback used when the API is
+unreachable or nothing has been uploaded. Keep it in `src/assets/`, **not**
+`public/legal/` — a file there would collide with the generated
+`/legal/agb.pdf` route.
 
 ---
 
@@ -276,7 +314,7 @@ src/
 │   │   ├── index.astro         # EN home (thin shell; sections read Astro.currentLocale)
 │   │   └── preise.astro        # EN pricing
 │   ├── og/default.png.ts       # Endpoint emitting the default OG card
-│   └── legal/{impressum,datenschutz}.astro
+│   └── legal/{impressum,datenschutz,agb}.astro + agb.pdf.ts
 ├── public/                     # Static assets (robots.txt, llms.txt, favicon)
 └── styles/global.css           # imports tds-shared-pkg base.css (tokens/@theme) + local marketing CSS
 

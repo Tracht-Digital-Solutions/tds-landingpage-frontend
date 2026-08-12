@@ -169,6 +169,32 @@ See README's "Replace examples before go-live" section.
   a save rebuilds landingpage **and** blog. Dismissal persists per origin in
   localStorage (`tds-cookie-notice`) — no cookies involved, which is what the
   banner itself states.
+- **AGB page + PDF via `src/lib/legal.ts`**: `/legal/agb` and `/en/legal/agb`
+  (both `<LegalDocPage>`) render the document as a real page — heading, "Stand",
+  a download button and a desktop-only inline `<object>` viewer — while the
+  prerendered endpoints `src/pages/{,en/}legal/agb.pdf.ts` emit the bytes
+  themselves at `/legal/agb.pdf`. The document is **uploaded in the frontend**
+  (Website-CMS → Rechtsdokumente) and fetched at build time from
+  `PUBLIC_CONTENT_API_URL/legal/agb.pdf?lang=`; an upload fires the rebuild, so
+  the same build-time rule as the content blocks applies.
+  Three things worth keeping:
+  - **The fallback is stronger than `cms.ts`'s.** A section quietly reverting to
+    its baked default is invisible; an AGB that disappears is a legal problem.
+    So `legalDocBytes()` falls back to the committed
+    `src/assets/legal/agb.pdf` on *any* failure — unreachable API, 404, or a 200
+    whose body is not a PDF (which is what a misrouted request to a static host
+    looks like). `/legal/agb.pdf` therefore can be stale, never absent.
+  - **The committed copy must NOT live in `public/legal/`.** It used to; a file
+    there and the `agb.pdf.ts` route both claim `/legal/agb.pdf`. It lives in
+    `src/assets/legal/` and is read via `process.cwd()`, the same anchoring the
+    OG renderer and `kontakt.vcf.ts` need.
+  - **EN is a separate upload, not a translation.** Legal text never goes
+    through DeepL, so `lang=en` is its own document; with none uploaded the
+    German fallback is served rather than a dead link.
+  Page copy lives in `legalCopy` in the same module, with a TODO to promote it
+  to tds-shared-pkg — the two other legal pages inline their copy the same way,
+  and moving it now would drag this repo's `tds-shared` pin across five
+  unrelated minors.
 - **Live topics via `src/lib/content.ts`**: `fetchTopics(lang, limit)`
   is a build-time fetch from `PUBLIC_CONTENT_API_URL/blog?…` that
   returns `[]` on any failure. Consumers fall back to their own
@@ -426,6 +452,13 @@ See README's "Replace examples before go-live" section.
   separately-maintained variations.)
 - Don't fetch the journal teaser at runtime. Build-time fetch in
   `index.astro` frontmatter so the rendered HTML ships static.
+- Don't judge a mobile layout from the diff. `body { overflow-x: hidden }`
+  (base.css) *clips* horizontal overflow — no scrollbar, no console warning,
+  the content on the right simply is not there. The AGB heading overflowed
+  375px by 61px on the first pass because "Geschäftsbedingungen" is one
+  unbreakable 20-character word at `text-4xl`; a green build and a clean
+  `astro check` both said nothing. Render the page at 375px and measure
+  `document.documentElement.scrollWidth - window.innerWidth`.
 - Don't reintroduce the navy→burgundy `linear-gradient` pill buttons.
   Hero + Header CTAs are flat `bg-[var(--color-surface-navy)]` with
   `hover:bg-[var(--color-surface-accent)]`. The Consulting /
