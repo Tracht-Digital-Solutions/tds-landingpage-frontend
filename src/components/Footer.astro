@@ -1,6 +1,7 @@
 ---
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
+import { legalCopy } from "~/lib/legal";
 import { siteConfig } from "~/lib/seo";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -20,6 +21,10 @@ const contact = await cmsFor("contact", lang, {
 });
 
 const pricingHref = localizePath("/preise", lang);
+// The AGB link goes to the PAGE, not straight to the PDF — the page carries
+// the inline viewer and the download button, and works on a phone where an
+// embedded PDF does not.
+const agbHref = localizePath("/legal/agb", lang);
 // Section links resolve against the homepage so they work from subpages
 // like /preise, where these sections don't exist.
 const homeHref = localizePath("/", lang);
@@ -85,14 +90,7 @@ const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
       <div class="flex flex-wrap gap-6">
         <a href="/legal/impressum" class="hover:text-white">{footer.impressum}</a>
         <a href="/legal/datenschutz" class="hover:text-white">{footer.datenschutz}</a>
-        <a
-          href="/legal/agb.pdf"
-          download
-          class="inline-flex items-center gap-1 hover:text-white"
-        >
-          AGB
-          <span aria-hidden="true" class="text-[10px]">↓</span>
-        </a>
+        <a href={agbHref} class="hover:text-white">{legalCopy[lang].agbShort}</a>
       </div>
     </div>
   </div>

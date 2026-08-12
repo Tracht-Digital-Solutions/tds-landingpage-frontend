@@ -1,0 +1,94 @@
+---
+/**
+ * A legal document rendered as a real page: heading, "Stand", download and
+ * an inline PDF viewer. Shared by the DE and EN AGB routes so the two never
+ * drift apart.
+ *
+ * The document itself is uploaded in the admin panel and baked into `dist/`
+ * by the sibling `agb.pdf.ts` endpoint — this page only links to that URL, so
+ * it needs no bytes of its own and cannot disagree with the download.
+ *
+ * The `<object>` viewer is desktop-only on purpose. Mobile browsers largely
+ * refuse to render an embedded PDF (iOS Safari shows a blank box, not the
+ * fallback), so below `md` the page leads with the actions instead of an
+ * empty frame. The download button is present at every width.
+ */
+import Layout from "~/layouts/Layout.astro";
+import { legalCopy, legalDocMeta } from "~/lib/legal";
+import { localizePath, type Lang } from "~/lib/i18n";
+
+interface Props {
+  /** The `doc_key` in the panel — `agb` today. */
+  docKey: string;
+  lang: Lang;
+}
+
+const { docKey, lang } = Astro.props;
+const copy = legalCopy[lang];
+
+// Metadata is nice-to-have: the "Stand" line is skipped when the API is
+// unreachable or nothing is uploaded, but the page and the PDF still work
+// (the endpoint falls back to the committed copy).
+const meta = await legalDocMeta(docKey, lang);
+const pdfHref = localizePath(`/legal/${docKey}.pdf`, lang);
+const homeHref = localizePath("/", lang);
+---
+
+<Layout title={`${copy.agbTitle} — Tracht Digital Solutions`} description={copy.agbDescription} lang={lang} noindex>
+  <main id="main" class="min-h-screen bg-[var(--color-paper)]">
+    <div class="max-w-3xl mx-auto px-6 md:px-8 py-24">
+      <a
+        href={homeHref}
+        class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors mb-12 block"
+      >
+        {copy.back}
+      </a>
+
+      {/* text-3xl below sm, plus hyphens: "Geschäftsbedingungen" is one
+          unbreakable 20-character word and overflowed a 375px viewport by
+          61px at text-4xl. `body { overflow-x: hidden }` CLIPS that, so it
+          showed as a silently cut-off heading, not a scrollbar. */}
+      <h1
+        class="text-3xl sm:text-4xl md:text-5xl font-[var(--font-display)] font-medium text-[var(--color-black)] mb-4 hyphens-auto"
+      >
+        {copy.agbTitle}
+      </h1>
+
+      {meta?.versionLabel && <p class="text-sm text-[var(--color-muted)]">{meta.versionLabel}</p>}
+
+      <div class="mt-8 mb-10 flex flex-wrap items-center gap-3">
+        <a
+          href={pdfHref}
+          download
+          class="group inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium bg-[var(--color-black)] text-[var(--color-paper)] hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(0,0,0,0.18)] transition-all duration-200"
+        >
+          {copy.download}
+          <span aria-hidden="true" class="group-hover:translate-y-0.5 transition-transform">↓</span>
+        </a>
+        <a
+          href={pdfHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium border border-[var(--color-line)] text-[var(--color-black)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:-translate-y-0.5 transition-all duration-200"
+        >
+          {copy.openInNewTab}
+        </a>
+      </div>
+
+      {/* navpanes=0 suppresses Chrome's thumbnail sidebar, which otherwise
+          takes ~40% of an embed this narrow and leaves the text at 50%. */}
+      <object
+        data={`${pdfHref}#view=FitH&navpanes=0`}
+        type="application/pdf"
+        aria-label={copy.viewerLabel}
+        class="hidden md:block w-full h-[80vh] rounded-[6px] border border-[var(--color-line)] bg-white"
+      >
+        <p class="p-6 text-[var(--color-muted)] leading-relaxed">{copy.viewerFallback}</p>
+      </object>
+
+      <p class="md:hidden text-sm text-[var(--color-muted)] leading-relaxed">
+        {copy.viewerFallback}
+      </p>
+    </div>
+  </main>
+</Layout>

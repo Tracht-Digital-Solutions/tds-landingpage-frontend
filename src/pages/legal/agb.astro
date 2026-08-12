@@ -1,0 +1,10 @@
+---
+/**
+ * `/legal/agb` — the AGB as a readable page with an inline PDF viewer and a
+ * download. The document itself is uploaded in the admin panel (Website-CMS →
+ * Rechtsdokumente) and baked in by `agb.pdf.ts` on the next build.
+ */
+import LegalDocPage from "~/components/LegalDocPage.astro";
+---
+
+<LegalDocPage docKey="agb" lang="de" />
