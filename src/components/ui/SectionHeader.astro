@@ -19,6 +19,17 @@ interface Props {
   dark?: boolean;
   labelClass?: string;
   headingClass?: string;
+  /**
+   * Render the three-part brand accent (bordeaux · coral · gold) under
+   * the headline.
+   *
+   * OPT-IN, and deliberately so. The brand direction is explicit —
+   * "Nicht in jedem Abschnitt verwenden" — and this component is used by
+   * seven sections, so a default of `true` would turn a punctuation mark
+   * into wallpaper and it would stop meaning anything. Three chapters
+   * carry it today (About, Process, Contact).
+   */
+  bar?: boolean;
 }
 
 const {
@@ -29,7 +40,12 @@ const {
   dark = false,
   labelClass = "mb-6",
   headingClass = "mb-16",
+  bar = false,
 } = Astro.props;
+
+// With the bar showing, the headline's own bottom margin moves to the
+// bar so the section's rhythm below the masthead is unchanged.
+const headingSpacing = bar ? "mb-5" : headingClass;
 ---
 
 <div class="text-center md:text-left">
@@ -47,10 +63,25 @@ const {
     class:list={[
       "display text-4xl md:text-5xl lg:text-6xl",
       dark ? "text-white" : "text-[var(--color-black)]",
-      headingClass,
+      headingSpacing,
     ]}
   >
     {headline}{" "}
     <AccentLetters text={headlineAccent} tone={dark ? "dark" : "light"} />
   </h2>
+  {
+    bar && (
+      /* Decorative punctuation, not content — `aria-hidden` keeps it out
+         of the accessibility tree, and it is centred with the masthead on
+         phones the same way the type is. */
+      <span
+        aria-hidden="true"
+        class:list={[
+          "tds-brandbar mx-auto md:mx-0",
+          dark ? "tds-brandbar--on-dark" : null,
+          headingClass,
+        ]}
+      />
+    )
+  }
 </div>
