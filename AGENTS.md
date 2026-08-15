@@ -278,6 +278,21 @@ See README's "Replace examples before go-live" section.
   body scroll-lock. The "TDS" wordmark is paired with the real
   logomark at `public/images/logo.webp` (the with-text variant
   `logo-with-text.webp` sits alongside it).
+- **Floating chrome shares the corner via LANES, not z-index.**
+  `.floating-cta-group` is fixed bottom-right at `z-index: 35`. Two shared
+  components can occupy that same spot: the live-chat launcher
+  (`z-index: 95`, so it covers this outright) and — on a phone, where it spans
+  the full width — the cookie notice (`z-index: 90`). The CTA therefore adds
+  **`--tds-right-lane`** (published by `LiveChatCta`) and
+  **`--tds-bottom-lane`** (published by `CookieNotice`) to its own `bottom`,
+  plus `env(safe-area-inset-bottom)` it never had.
+  Both fall back to `0px`, so with neither component on screen the position is
+  the plain `1rem`/`1.5rem` it always was — verified by measurement, not by
+  eye: the gap to the viewport floor is 16px at 375 and 24px at 1440 with and
+  without the change.
+  **Don't "fix" this with a z-index instead.** Raising the CTA above the
+  launcher would just swap which of two persistent CTAs is buried, and the
+  brand direction rules out competing floating CTAs outright.
 - **Service icons**: `ServiceIcon.astro` renders a small inline
   SVG keyed off the service `number` ("01" → browser-window,
   "02" → smartphone, "03" → stacked layers, "04" → connected
