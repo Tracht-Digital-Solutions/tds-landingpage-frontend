@@ -1,12 +1,4 @@
-import { useEffect, useRef } from "react";
-import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "motion/react";
+import { motion } from "motion/react";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ease } from "@tracht-digital-solutions/tds-shared/motion";
 
@@ -33,24 +25,87 @@ function AccentLetters({
   );
 }
 
-/** Staggered fade-up factory for hero entrance animations. */
+/**
+ * Staggered fade-up factory for the hero's entrance.
+ *
+ * Shortened from 0.7s/24px to 0.45s/12px with the "Digitale Maßarbeit"
+ * pass: the brief rules out long intro animations, and a hero whose
+ * headline is still travelling most of a second after paint reads as a
+ * template's canned reveal rather than as a page that was simply ready.
+ * Motion's `useReducedMotion` is not consulted here because it does not
+ * need to be — `motion/react` already skips transitions entirely when
+ * the user prefers reduced motion, landing every element on its
+ * `animate` state immediately.
+ */
 function fadeUp(delay: number) {
   return {
-    initial: { opacity: 0, y: 24 },
+    initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.7, delay, ease },
+    transition: { duration: 0.45, delay, ease },
   };
+}
+
+/**
+ * "Digitale Leitungsbahnen" — a short run of conduit with rounded 90°
+ * corners and two nodes. Purely decorative, hence `aria-hidden`; the
+ * `data-circuit-line` / `data-circuit-node` hooks and the `pathLength="1"`
+ * are the contract `.tds-circuit--draw` in tds-shared animates against
+ * (see the decoration layer in primitives.css).
+ *
+ * It is authored at a fixed 320×170 and NOT stretched: `preserveAspectRatio`
+ * defaults to uniform scaling, and a squashed viewBox would turn the
+ * carefully rounded corners into ellipses — which is precisely the
+ * "organic blob" look the geometry exists to avoid.
+ */
+function CircuitRun({ className }: { className?: string }) {
+  return (
+    <span className={`tds-circuit tds-circuit--draw ${className ?? ""}`}>
+      <svg viewBox="0 0 320 170" fill="none" aria-hidden="true" focusable="false">
+        <path
+          data-circuit-line
+          pathLength="1"
+          d="M0 150 H74 Q92 150 92 132 V58 Q92 40 110 40 H236"
+        />
+        <path
+          data-circuit-line
+          pathLength="1"
+          d="M150 170 V116 Q150 98 168 98 H320"
+        />
+        <circle data-circuit-node cx="236" cy="40" r="4" />
+        <circle data-circuit-node cx="92" cy="95" r="3" />
+        <circle data-circuit-node cx="168" cy="98" r="3" />
+      </svg>
+    </span>
+  );
 }
 
 type Lang = "de" | "en";
 
 /**
- * Hero — full-viewport with a colourful three-blob aurora that drifts
- * behind the cursor. Ported from legacy tds-lp/app/components/sections/Hero.tsx.
+ * Hero — full-viewport, on the warm "Digitale Maßarbeit" ground.
  *
- * Renders as `client:load` so the parallax + entrance animations happen
- * immediately on page load. The page passes `lang` via props so the EN
- * route hydrates with EN copy without a client-side swap.
+ * WHAT REPLACED WHAT, so nobody restores it by accident. This used to be
+ * a three-blob aurora: three blurred radial gradients on `mix-blend-multiply`,
+ * each spring-following the cursor on X, parallaxing on Y at three
+ * different rates, scaling with scroll, drifting on an infinite 17–24s
+ * loop, over a 60px-blurred conic gradient that rotated with scroll and
+ * pulsed its own opacity on a 12s loop, under a fractal-noise overlay.
+ * It is exactly the "generischer bunter SaaS-Verlauf" + "zufällige
+ * organische Blobs" + "starke Parallax-Effekte" the brand direction
+ * rules out, and it cost a rAF-driven mousemove listener and eight
+ * motion values on every page load for it.
+ *
+ * The replacement is CONSTRUCTED: soft brand fields at the outer edges
+ * (`.tds-wash`, tds-shared), two large geometric shapes cut by the
+ * viewport edge, one outlined rectangle, a single diagonal reference to
+ * the logomark, and one run of conduit with three nodes. All of it is
+ * static CSS from the shared decoration layer — the only motion left in
+ * the hero is the entrance fade of the copy and the one-shot draw of the
+ * conduit.
+ *
+ * Still `client:load`: the entrance animation and the CTA scroll
+ * handlers want to be live immediately. The page passes `lang` via props
+ * so the EN route hydrates with EN copy without a client-side swap.
  */
 /** Editable hero copy — overrides the tds-shared default when the page
  *  passes an admin-edited block (fetched at build time). */
@@ -76,59 +131,6 @@ export default function Hero({
   // Merge the edited block over the shared default so any missing field
   // falls back cleanly.
   const h = { ...t.hero, ...(hero ?? {}) };
-  const containerRef = useRef<HTMLElement>(null);
-
-  // X axis tracks the cursor (spring-damped per layer for depth).
-  // Y axis is now scroll-driven — the blobs translate vertically with
-  // scroll and horizontally with the cursor, which reads as proper 3D drift.
-  const mouseX = useMotionValue(0);
-  const blob1X = useSpring(mouseX, { stiffness: 20, damping: 30 });
-  const blob2X = useSpring(mouseX, { stiffness: 15, damping: 35 });
-  const blob3X = useSpring(mouseX, { stiffness: 12, damping: 28 });
-
-  // Scroll-linked parallax. Each layer translates and scales at a
-  // different rate so the aurora moves visibly while the user
-  // scrolls. The base conic gradient rotates and pans as well so
-  // the whole hero background reads as alive without overpowering
-  // the cursor parallax.
-  const { scrollY } = useScroll();
-  const parallaxBack = useTransform(scrollY, [0, 800], [0, -160]);
-  const parallaxMid = useTransform(scrollY, [0, 800], [0, -260]);
-  const parallaxFront = useTransform(scrollY, [0, 800], [0, -360]);
-  const blob1Scale = useTransform(scrollY, [0, 800], [1, 1.15]);
-  const blob2Scale = useTransform(scrollY, [0, 800], [1, 0.9]);
-  const blob3Scale = useTransform(scrollY, [0, 800], [1, 1.25]);
-  const conicRotate = useTransform(scrollY, [0, 1200], [0, 60]);
-  const conicY = useTransform(scrollY, [0, 800], [0, -80]);
-
-  // Ambient drift — a slow, autonomous float on each blob so the
-  // aurora stays alive even with no cursor movement or scrolling
-  // (touch devices, or a visitor who's just reading). Applied to the
-  // inner gradient layer so it composes on top of the cursor (x) and
-  // scroll (y/scale) transforms on the wrapper rather than fighting
-  // them. Honour prefers-reduced-motion by dropping the loop entirely.
-  const prefersReduced = useReducedMotion();
-  const drift = (
-    keyframes: { x: number[]; y: number[]; scale: number[] },
-    duration: number,
-  ) =>
-    prefersReduced
-      ? undefined
-      : {
-          animate: keyframes,
-          transition: { duration, repeat: Infinity, ease: "easeInOut" as const },
-        };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      const cx = rect.width / 2;
-      mouseX.set(((e.clientX - rect.left - cx) / cx) * 30);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX]);
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -140,83 +142,63 @@ export default function Hero({
 
   return (
     <section
-      ref={containerRef}
       id="hero"
-      className="relative min-h-svh flex flex-col justify-center overflow-hidden pt-20 pb-28"
+      className="tds-wash relative min-h-svh flex flex-col justify-center overflow-hidden pt-20 pb-28"
       aria-label="Hero"
     >
-      <motion.div
-        aria-hidden
-        className="absolute -inset-20 pointer-events-none"
-        style={{
-          rotate: conicRotate,
-          y: conicY,
-          background:
-            "conic-gradient(from 220deg at 70% 30%, rgba(5,15,104,0.08), rgba(255,122,156,0.06), rgba(130,9,51,0.07), rgba(5,15,104,0.08))",
-          filter: "blur(60px)",
-        }}
-        animate={prefersReduced ? undefined : { opacity: [0.45, 0.68, 0.45] }}
-        transition={
-          prefersReduced
-            ? undefined
-            : { duration: 12, repeat: Infinity, ease: "easeInOut" }
-        }
-        initial={{ opacity: 0.6 }}
-      />
-
-      <motion.div
-        style={{ x: blob1X, y: parallaxBack, scale: blob1Scale }}
-        className="absolute top-[15%] -left-40 w-[640px] h-[640px] rounded-full pointer-events-none mix-blend-multiply"
-        aria-hidden
-      >
-        <motion.div
-          className="w-full h-full rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(5,15,104,0.22) 0%, rgba(5,15,104,0.05) 45%, transparent 70%)",
-          }}
-          {...drift({ x: [0, 30, -20, 0], y: [0, 25, -15, 0], scale: [1, 1.06, 0.97, 1] }, 20)}
+      {/* Constructed brand geometry. Everything here is inside
+          `.tds-decor`, which is inset-0, click-through and clipping — so
+          each shape can be authored oversized and deliberately CUT by
+          the viewport edge without ever producing horizontal overflow.
+          Sizes and positions are compositional and therefore inline;
+          the FORM and the tint come from the shared decoration layer. */}
+      <div className="tds-decor" aria-hidden="true">
+        {/* Große Kapsel, links angeschnitten — the anchor of the
+            composition. `hidden md:block` is load-bearing, not a
+            nicety: it is 38rem wide, so on a 375px screen the shape
+            spans the whole viewport and the headline sits ON it rather
+            than beside it. Verified at 375px, which is the only way to
+            see it — the diff looks identical either way. */}
+        <span
+          className="tds-shape tds-shape--capsule tds-shape--navy hidden md:block"
+          style={{ top: "9%", left: "-20rem", width: "38rem", height: "15rem" }}
         />
-      </motion.div>
-
-      <motion.div
-        style={{ x: blob2X, y: parallaxMid, scale: blob2Scale }}
-        className="absolute bottom-[10%] -right-40 w-[560px] h-[560px] rounded-full pointer-events-none mix-blend-multiply"
-        aria-hidden
-      >
-        <motion.div
-          className="w-full h-full rounded-full"
+        {/* Viertelkreis unten rechts, über beide Ränder hinaus. */}
+        <span
+          className="tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
           style={{
-            background:
-              "radial-gradient(circle, rgba(130,9,51,0.20) 0%, rgba(130,9,51,0.05) 45%, transparent 70%)",
+            bottom: "-9rem",
+            right: "-7rem",
+            width: "30rem",
+            height: "30rem",
           }}
-          {...drift({ x: [0, -35, 20, 0], y: [0, -20, 25, 0], scale: [1, 0.95, 1.05, 1] }, 24)}
         />
-      </motion.div>
-
-      <motion.div
-        style={{ x: blob3X, y: parallaxFront, scale: blob3Scale }}
-        className="absolute top-[40%] left-[35%] w-[440px] h-[440px] rounded-full pointer-events-none mix-blend-multiply"
-        aria-hidden
-      >
-        <motion.div
-          className="w-full h-full rounded-full"
+        {/* Stark gerundetes Rechteck als reine Kontur — a drawn frame
+            rather than a second filled mass. Hidden below `lg` because
+            at tablet width it lands in the copy column. */}
+        <span
+          className="tds-shape tds-shape--rect tds-shape--outline tds-shape--navy hidden lg:block"
+          style={{ top: "16%", right: "6%", width: "13rem", height: "22rem" }}
+        />
+        {/* Der eine diagonale Anschnitt — the logomark reference. One
+            per screen, never across the content. */}
+        <span
+          className="tds-shape tds-shape--diagonal tds-shape--bordeaux hidden md:block"
+          style={{ top: "-4rem", right: "26%", width: "1px", height: "20rem" }}
+        />
+        {/* Ein einzelner Ocker-Knoten als kleiner Überraschungsakzent. */}
+        <span
+          className="tds-shape tds-shape--capsule tds-shape--gold hidden md:block"
           style={{
-            background:
-              "radial-gradient(circle, rgba(255,122,156,0.22) 0%, rgba(255,122,156,0.06) 45%, transparent 70%)",
+            top: "72%",
+            left: "12%",
+            width: "0.5rem",
+            height: "0.5rem",
+            opacity: 0.9,
           }}
-          {...drift({ x: [0, 25, -30, 0], y: [0, 30, -10, 0], scale: [1, 1.08, 0.94, 1] }, 17)}
         />
-      </motion.div>
-
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-[0.025] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-        }}
-      />
+        <CircuitRun className="hidden md:block bottom-[8%] right-[12%] w-[20rem] h-[10.6rem]" />
+      </div>
 
       <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full text-center md:text-left">
         <motion.h1
@@ -226,15 +208,12 @@ export default function Hero({
           style={{ fontVariationSettings: '"opsz" 144' }}
         >
           {h.headline}{" "}
+          {/* The accent word used to sit on a blurred pink/bordeaux
+              ellipse. "Keine Dekoration direkt hinter Überschriften" —
+              and it was also the one place the palette got loud, at the
+              exact spot where legibility matters most. The word carries
+              its own colour; it needs no halo. */}
           <span className="relative inline-block">
-            <span
-              aria-hidden
-              className="absolute inset-0 -z-10 blur-2xl opacity-60"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(255,122,156,0.55) 0%, rgba(130,9,51,0.25) 60%, transparent 80%)",
-              }}
-            />
             <AccentLetters text={h.headlineAccent} />
           </span>{" "}
           {h.headlineSuffix}
@@ -277,7 +256,7 @@ export default function Hero({
           <button
             type="button"
             onClick={() => scrollTo("contact")}
-            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(5,15,104,0.28)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
+            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(5,15,104,0.45)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
           >
             {h.cta1}
           </button>

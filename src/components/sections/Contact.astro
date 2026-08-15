@@ -33,9 +33,15 @@ const socials = {
 };
 ---
 
+{/* Vollflächiges TDS-Navy, deliberately with NO wash and no shapes:
+    "keine konkurrierenden Farbverläufe hinter dem Formular". The
+    `.tds-tone-navy` primitive also re-maps the page tokens inside the
+    block (ink / muted / line / card), so any shared primitive rendered
+    in here — a `.field`, a hairline — reads on the dark ground without
+    the call site overriding it. */}
 <section
   id="contact"
-  class="section-spacing bg-[var(--color-surface-navy)]"
+  class="section-spacing tds-tone-navy"
   aria-labelledby="contact-heading"
 >
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
@@ -49,6 +55,12 @@ const socials = {
       {contact.headline}{" "}
       <AccentLetters text={contact.headlineAccent} tone="dark" />
     </h2>
+    {/* The three-part brand accent on its lifted (on-dark) run — the
+        bordeaux segment sinks into the navy at its light value. */}
+    <span
+      aria-hidden="true"
+      class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-6"
+    ></span>
     <p class="text-white/60 max-w-lg mb-10 md:mb-16 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
 
     <div class="grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">

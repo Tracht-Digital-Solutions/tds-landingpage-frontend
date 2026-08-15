@@ -32,13 +32,19 @@ const homeHref = localizePath("/", lang);
 const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
 ---
 
-<footer class="bg-[var(--color-surface-ink)] text-white pt-16 pb-10">
+{/* Fast Schwarz / sehr dunkles Navy, with the page tokens re-mapped by
+    `.tds-tone-ink` so the hairlines inside read as low-opacity white
+    rather than as the light ground's warm line. */}
+<footer class="tds-tone-ink pt-16 pb-10">
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <div class="grid md:grid-cols-3 gap-12 mb-12">
       <div>
         <p class="brand-wordmark text-2xl mb-3">
           Tracht <span class="italic text-[var(--color-accent-pink)]">Digital</span> Solutions
         </p>
+        {/* Small brand accent under the wordmark — the footer's one
+            decorative detail. */}
+        <span aria-hidden="true" class="tds-brandbar tds-brandbar--sm tds-brandbar--on-dark mb-4"></span>
         <p class="font-[var(--font-display)] italic text-[var(--color-accent-pink)] text-base mb-4">
           {footer.slogan}
         </p>

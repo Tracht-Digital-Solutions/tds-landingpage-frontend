@@ -67,6 +67,29 @@ See README's "Replace examples before go-live" section.
   used to be duplicated here. To change how this surface looks, edit the
   surface layer in tds-shared-pkg and bump; never re-declare a shared class
   here.
+- **Backgrounds and decoration come from the shared decoration layer
+  ("Digitale Maßarbeit", tds-shared ≥0.23.0).** This site does not author a
+  background of its own any more. What it uses:
+  - `.tds-tone-sand` / `.tds-tone-navy` / `.tds-tone-ink` for a section's
+    ground, replacing hand-written `bg-[var(--color-soft)]` /
+    `bg-[var(--color-surface-navy)]` utilities. The two dark tones re-map
+    ink/muted/line/card for their children, which is why the contact block's
+    hairlines need no override.
+  - `.tds-wash` (Hero, About, Services `--calm`, Process `--mirror`) for the
+    soft brand fields at a section's outer edges.
+  - `.tds-decor` + `.tds-shape*` + `.tds-circuit` for the hero composition and
+    the two navy callouts.
+  - `.tds-brandbar` under three headlines only (Services, Prozess, Kontakt)
+    plus the footer — **not** in every section; it is punctuation.
+
+  **What this replaced, so nobody restores it:** the hero's three-blob aurora
+  (cursor-springs + scroll parallax + infinite drift + a rotating conic
+  gradient + fractal noise), the blurred pink ellipse behind the H1's accent
+  word, the blurred radial behind the About portrait, and the 135°
+  navy→bordeaux gradient with a corner glow that the pricing teaser, the
+  consulting callout and the process image placeholder all shared. Every one
+  of those is on the brand direction's do-not-use list. **Also removed with
+  them: a `mousemove` listener and eight motion values on every page load.**
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
   `.section-num`, `.eyebrow`, `.lead`. `.display*` / `.eyebrow` / `.lead`
   come from `base.css`; **`.section-num` and `.brand-wordmark` come from
@@ -218,18 +241,28 @@ See README's "Replace examples before go-live" section.
   kept local like the FAQ copy) over a per-step photo
   (`public/images/process/step-0N.webp`) with the brand gradient as a
   fallback when an image is missing.
-- **Section rhythm**: paper → paper → soft → DARK → paper → soft →
-  paper → paper → soft → paper → soft → DARK. Paper-backed
+- **Section rhythm**: paper → paper → sand → DARK → paper → sand →
+  paper → paper → sand → paper → sand → DARK. Paper-backed
   narrative sections (About, Portfolio, Currently, PricingTeaser
-  inner card, Consulting) alternate with `--color-soft` callout
-  sections (Services, Process, Journal, FAQ) and dark-blue chrome
-  sections (Tech, Contact). The Currently + PricingTeaser paper
+  inner card, Consulting) alternate with **`.tds-tone-sand`** callout
+  sections (Services, Process, Journal, FAQ) and **`.tds-tone-navy`**
+  chrome sections (Tech, Contact). The tone classes replaced
+  hand-written `bg-[var(--color-soft)]` / `bg-[var(--color-surface-navy)]`
+  utilities so a section NAMES its ground instead of re-guessing it, and
+  so the dark ones re-map the page tokens for their children. The Currently + PricingTeaser paper
   pair sits inside the soft Process / Journal frame so the
   gradient pricing card lands in a calm space; Consulting's
   gradient card and the soft FAQ both buffer the dark Contact
   closing.
-- **Header / navigation**: floating pill on desktop (≥lg) with
-  `data-scrolled` morphing the chrome on scroll past 8px. Below
+- **Header / navigation**: a floating **paper** capsule on desktop (≥lg)
+  with `data-scrolled` morphing the chrome on scroll past 8px. It used to
+  be glass — `blur(40px) saturate(185%)`, a bright white inset rim and a
+  50px navy drop plume. "Digitale Maßarbeit" calls for "helle, schwebende
+  Kapselfläche · keine starke Glasoptik · keine ausgeprägten Schatten", so
+  the blur is 16–20px at ~115% saturation, the fill is a near-opaque warm
+  white, the rim is a warm hairline and the scrolled shadow is a
+  suggestion (`0 8px 22px -16px`). Depth comes from the fill contrast
+  against the page, not from the drop. Below
   `lg` the pill docks against the top edge (`top: 0`, flat top
   border, 24px-rounded bottom), is always rendered with chrome,
   spans `left-3 right-3`, and ends in a 44px hamburger that
@@ -266,16 +299,26 @@ See README's "Replace examples before go-live" section.
   pink immediately so a broken field still reads at a glance.
   Scoped via `<style is:global>` in Contact.astro because the React
   island can't carry the styles itself.
-- **Hero background motion** (`src/components/islands/Hero.tsx`):
-  three concentric layers translate + scale at staggered rates as
-  the user scrolls (back -160 / mid -260 / front -360 over 800 px,
-  with scale 1.15 / 0.9 / 1.25 respectively); the base conic
-  gradient rotates 60° over 1200 px of scroll and pans -80 px so
-  even the field behind the blobs drifts. Cursor parallax owns the
-  X axis only, scroll owns Y + scale + rotate — separating axes
-  reads as 3D drift rather than uniform zoom. Bumped from a much
-  subtler 2026-05-29 starting point because the original was too
-  quiet to notice.
+- **Hero background — STATIC, constructed geometry**
+  (`src/components/islands/Hero.tsx`). A `.tds-wash` ground, a large
+  capsule cut by the left edge (`hidden md:block` — at 38rem it spans a
+  375px viewport and the headline would sit on it), a quarter circle cut
+  by the bottom-right corner, an outlined rounded rectangle, one diagonal
+  logomark reference, a single gold node, and one `CircuitRun` (the
+  conduit lines). The ONLY motion is the copy's entrance fade
+  (0.45s / 12px) and the conduit's one-shot draw.
+
+  **Superseded — do not reintroduce.** Until 2026-08-15 this was a
+  three-blob aurora: three blurred radial gradients on
+  `mix-blend-multiply`, each spring-following the cursor on X and
+  parallaxing on Y at staggered rates (-160 / -260 / -360 over 800px)
+  with per-layer scale, over a conic gradient that rotated 60° with
+  scroll and pulsed its opacity on a 12s loop, under a fractal-noise
+  overlay. It was documented here as a feature; it is the brand
+  direction's do-not-use list almost item for item (organische Blobs,
+  generischer bunter Verlauf, starke Parallax-Effekte, dauerhaftes
+  Pulsieren), and it cost a `mousemove` listener plus eight motion values
+  on every load.
 - **Hero composition**: three stacked title tiers in addition to
   the data-driven pill.
   - **Pill**: when `featuredTopic` is passed it renders as an `<a>`

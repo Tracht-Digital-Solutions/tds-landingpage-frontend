@@ -34,7 +34,7 @@ const steps = process.steps;
 
 <section
   id="process"
-  class="section-spacing bg-[var(--color-soft)]"
+  class="tds-wash tds-wash--mirror section-spacing tds-tone-sand"
   aria-labelledby="process-heading"
 >
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
@@ -44,6 +44,7 @@ const steps = process.steps;
       headlineAccent={process.headlineAccent}
       id="process-heading"
       headingClass="mb-6"
+      bar
     />
     <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
       {process.body}
@@ -100,12 +101,15 @@ const steps = process.steps;
           steps.map((step, i) => {
             return (
               <div class="process-detail" data-detail={i} hidden={i !== 0}>
-                <div class="rounded-2xl overflow-hidden border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_24px_60px_-32px_rgba(5,15,104,0.35)]">
-                  {/* Per-step photo over a brand-gradient fallback: if the
-                      image is missing it simply doesn't render and the
-                      gradient shows through, so the build never breaks. The
-                      scrim keeps the icon + number legible over any photo. */}
-                  <div class="relative flex items-end justify-between aspect-[4/3] p-6 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] text-white overflow-hidden">
+                <div class="rounded-2xl overflow-hidden border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_8px_24px_-20px_rgba(5,15,104,0.3)]">
+                  {/* Per-step photo over a flat brand-navy fallback: if the
+                      image is missing it simply doesn't render and the navy
+                      shows through, so the build never breaks. (It was the
+                      same 135° navy→bordeaux gradient as the two callouts
+                      until the "Digitale Maßarbeit" pass; a focus surface
+                      is one colour now.) The scrim keeps the icon + number
+                      legible over any photo. */}
+                  <div class="relative flex items-end justify-between aspect-[4/3] p-6 bg-[var(--color-surface-navy)] text-white overflow-hidden">
                     <img
                       src={`/images/process/step-${step.number}.webp`}
                       alt=""

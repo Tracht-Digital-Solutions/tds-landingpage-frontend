@@ -13,14 +13,28 @@ const pricingHref = localizePath("/preise", lang);
 
 <section id="pricing-teaser" class="py-12 md:py-20" aria-labelledby="pricing-teaser-heading">
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    {/* A NAVY FOCUS SURFACE, not a gradient panel. This block used to be
+        a 135° navy→bordeaux gradient with a blurred pink circle bleeding
+        out of its top-right corner and a 60px navy drop shadow — three
+        of the things the brand direction rules out at once (generischer
+        bunter Verlauf, organischer Blob, schwerer Schatten), and the
+        second of two blocks on the page that looked identical. It is a
+        flat brand navy now, with the bordeaux entering as a cut
+        quarter-circle and a capsule — constructed geometry, so the panel
+        reads as built rather than as a stock hero card. */}
     <a
       href={pricingHref}
-      class="group relative block overflow-hidden text-white -mx-6 px-6 py-10 rounded-none md:mx-0 md:rounded-[6px] md:p-12 bg-[linear-gradient(135deg,var(--color-surface-navy)_0%,var(--color-surface-accent)_100%)] shadow-[0_24px_60px_-20px_rgba(5,15,104,0.45)] hover:shadow-[0_30px_70px_-20px_rgba(5,15,104,0.55)] transition-shadow"
+      class="group relative block overflow-hidden tds-tone-navy -mx-6 px-6 py-10 rounded-none md:mx-0 md:rounded-[6px] md:p-12"
     >
       <span
         aria-hidden="true"
-        class="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-60"
-        style="background: radial-gradient(circle, rgba(255,122,156,0.55) 0%, transparent 70%);"
+        class="tds-shape tds-shape--quarter-bl tds-shape--coral"
+        style="top: -3rem; right: -3rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.22;"
+      ></span>
+      <span
+        aria-hidden="true"
+        class="tds-shape tds-shape--capsule tds-shape--coral hidden md:block"
+        style="bottom: -5rem; left: 8%; width: 22rem; height: 8rem; --tds-decor-shape-alpha: 0.08;"
       ></span>
 
       <div class="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
