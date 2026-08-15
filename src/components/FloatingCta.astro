@@ -70,7 +70,26 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
   .floating-cta-group {
     position: fixed;
     right: 1rem;
-    bottom: 1rem;
+    /* Stack above whatever else already occupies this corner, rather than
+       underneath it. Two lanes, both published by tds-shared components that
+       measure themselves (the same mechanism the toast stack has always used):
+
+       - `--tds-right-lane` is the live-chat launcher's height. That widget is
+         fixed in THIS corner at `z-index: 95` — twelve layers above this
+         control — so with it switched on for the landingpage it covered the
+         CTA completely. It renders nothing until an admin enables it per
+         frontend, which is the only reason this was not already visible.
+       - `--tds-bottom-lane` is the cookie notice's height. That notice spans
+         the FULL width on a phone, so it occupies this corner too.
+
+       Both fall back to `0px`, so with neither component on screen this is the
+       plain 1rem it has always been. `env()` last — it clears the home
+       indicator on a notched phone and resolves to 0px everywhere else; this
+       control never had that and sat under the gesture bar. */
+    bottom: calc(
+      var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 1rem +
+        env(safe-area-inset-bottom, 0px)
+    );
     z-index: 35;
     display: flex;
     flex-direction: column;
@@ -81,7 +100,10 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
   @media (min-width: 768px) {
     .floating-cta-group {
       right: 1.5rem;
-      bottom: 1.5rem;
+      bottom: calc(
+        var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 1.5rem +
+          env(safe-area-inset-bottom, 0px)
+      );
     }
   }
 
