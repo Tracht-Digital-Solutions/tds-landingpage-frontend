@@ -170,13 +170,22 @@ See README's "Replace examples before go-live" section.
 - **Consulting section** (`src/components/sections/Consulting.astro`):
   Gradient card matching `PricingTeaser`'s visual language so the
   two callouts pair as a system. Two CTAs — primary
-  "Erstgespräch buchen" / "Book a discovery call" → `#contact`,
+  "Unverbindlich anfragen" / "Get in touch" → `#contact`,
   secondary "Leistungen ansehen" / "See services" → `/preise`. Copy
   via `t.consulting.*` in tds-shared-pkg 0.2.5+.
+  **The section deliberately promises no free or time-boxed initial
+  consultation** — the Kleinanzeigen carry that offer, the website does
+  not. Don't reintroduce "kostenfrei"/"30 Minuten" here, in `t.hero.cta1`
+  or in `lib/faq.ts`. (`t.pricing` still names a free intro call; that is
+  a separate, pre-existing commercial decision — see § Pricing.)
 - **FAQ section** (`src/components/sections/FAQ.astro`): Native
   `<details>`/`<summary>` accordions — zero JS, accessible,
-  keyboard-navigable. Six items (project timeline, remote/on-site,
-  NDA, first step, tech stacks, workshop/audit-only). Scoped
+  keyboard-navigable. Eleven items, written for the audience the
+  Kleinanzeigen address — freelancers, small businesses, local trades
+  (unclear requirements, first step, what drives the price, duration,
+  small jobs, taking over an existing site, ongoing maintenance,
+  website vs. online shop, self-service editing, GDPR, working outside
+  the region). Scoped
   `<style>` uses `@supports (interpolate-size: allow-keywords)`
   so modern browsers get a smooth height animation on open/close;
   older browsers fall back to the default `<details>` snap. Copy
@@ -358,13 +367,13 @@ See README's "Replace examples before go-live" section.
     pronoun ("Unternehmen" / "your") so the brand-distinctive
     emphasis lands on what the reader cares about.
   - **Tagline strapline**: `t.hero.tagline` ("Beratung · Konzept ·
-    Code — alles aus einer Hand." / "Consulting · concept · code
-    — all from one source."). Sized text-base → md:text-xl in muted
-    body colour. Sits directly under the H1 and picks up secondary
+    Umsetzung — alles aus einer Hand." / "Consulting · concept ·
+    delivery — all from one source."). Sized text-base → md:text-xl in
+    muted body colour. Sits directly under the H1 and picks up secondary
     SEO weight the H1 deliberately doesn't carry.
-  - **Brand slogan** (display-tier): `t.footer.slogan` ("Digitales
-    Handwerk für den Mittelstand." / "Digital craft for the
-    mid-market.") in italic accent — sized text-2xl → md:text-4xl
+  - **Brand slogan** (display-tier): `t.footer.slogan` ("Digitale
+    Lösungen, die wirklich passen." / "Digital solutions that truly
+    fit.") in italic accent — sized text-2xl → md:text-4xl
     so it reads as a banner. Reusing the footer slogan keeps the
     brand-tier promise consistent across both surfaces without a
     separate hero-only key.

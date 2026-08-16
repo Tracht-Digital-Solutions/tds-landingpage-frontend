@@ -97,63 +97,69 @@ export function topicHref(slug: string): string {
  * Currently section *and* the Hero pill both still surface meaningful,
  * in-sync topics. The **first entry is the most important one**: it is
  * what the Hero pill links to, and it leads the Currently list.
+ *
+ * The slugs must be real articles on the blog — they are rendered as links
+ * to `blogUrl/<slug>`. They therefore mirror the seed migration in
+ * `tds-ext-blog-cms-pkg`, which is what a fresh installation publishes;
+ * inventing a slug here produces a section full of 404s that nothing in the
+ * build would flag.
  */
 export function topicFallback(lang: "de" | "en"): ContentPost[] {
   return lang === "de"
     ? [
         {
-          slug: "tds-customer-portal",
-          category: "Build-Log",
-          title: "TDS Customer Portal",
+          slug: "digitalisierung-faengt-klein-an",
+          category: "Digitalisierung",
+          title: "Digitalisierung fängt nicht beim Großprojekt an",
           excerpt:
-            "Self-Service-Zugang für Mittelstandskunden — Projekte, Rechnungen, Dokumente. In aktiver Entwicklung.",
+            "Sie fängt bei dem einen Ablauf an, der jede Woche Stunden kostet — und den außer Ihnen niemand sieht.",
           publishedAt: "",
           coverHint: null,
         },
         {
-          slug: "ki-prozessanalyse",
-          category: "Case Study",
-          title: "KI-Prozessanalyse",
+          slug: "lohnt-sich-ein-webshop",
+          category: "Webshop",
+          title: "Lohnt sich ein Webshop für mein Ladengeschäft?",
           excerpt:
-            "Datenpipelines mit Claude und n8n für eine Manufaktur — von der Bestellannahme bis zur Auslieferung.",
+            "Nicht für jedes Sortiment. Vier Fragen, die die Antwort meist schon vorwegnehmen.",
           publishedAt: "",
           coverHint: null,
         },
         {
-          slug: "tracht-digital-journal",
-          category: "Meta",
-          title: "Tracht Digital Journal",
+          slug: "produktpflege-per-handy",
+          category: "Werkzeuge",
+          title: "Warum Produktpflege nicht am Schreibtisch hängen muss",
           excerpt:
-            "Längere Texte zu Architektur, Mittelstand und KI im täglichen Einsatz.",
+            "Wer Ware annimmt, steht selten am Rechner. Was sich ändert, wenn Artikel und Bestand vom Handy aus gepflegt werden.",
           publishedAt: "",
           coverHint: null,
         },
       ]
     : [
         {
-          slug: "tds-customer-portal",
-          category: "Build log",
-          title: "TDS Customer Portal",
+          slug: "digitalisierung-faengt-klein-an",
+          category: "Digitalization",
+          title: "Digitalization doesn't start with a big project",
           excerpt:
-            "Self-service access for mid-market clients — projects, invoices, documents. In active development.",
+            "It starts with the one routine that costs hours every week — the one nobody but you can see.",
           publishedAt: "",
           coverHint: null,
         },
         {
-          slug: "ai-process-analysis",
-          category: "Case study",
-          title: "AI process analysis",
+          slug: "lohnt-sich-ein-webshop",
+          category: "Online shop",
+          title: "Is an online shop worth it for my local business?",
           excerpt:
-            "Data pipelines with Claude and n8n for a manufactory — from order intake to delivery.",
+            "Not for every range of products. Four questions that usually answer it for you.",
           publishedAt: "",
           coverHint: null,
         },
         {
-          slug: "tracht-digital-journal",
-          category: "Meta",
-          title: "Tracht Digital Journal",
+          slug: "produktpflege-per-handy",
+          category: "Tools",
+          title: "Why product upkeep doesn't have to be tied to a desk",
           excerpt:
-            "Longer-form writing on architecture, mid-market work, and AI in daily use.",
+            "People taking in stock are rarely at a computer. What changes when items and stock can be maintained from a phone.",
           publishedAt: "",
           coverHint: null,
         },

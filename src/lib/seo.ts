@@ -29,8 +29,8 @@ export const siteConfig = {
    * those.
    */
   description: {
-    de: "Digitalisierung für Unternehmen: Beratung, Web- & App-Entwicklung, Automatisierung, Schulungen — persönlich, aus Schwarzenbek bei Hamburg, deutschlandweit.",
-    en: "Digitalization for businesses: consulting, web & app development, automation, training — personal and tailored, from Schwarzenbek near Hamburg, Germany.",
+    de: "Digitalisierung für Unternehmen: Websites, Webshops und individuelle Werkzeuge für kleine Betriebe — persönlich, aus Schwarzenbek bei Hamburg.",
+    en: "Digitalization for businesses: websites, online shops and custom tools for small businesses — personal, from Schwarzenbek near Hamburg, Germany.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
@@ -63,8 +63,10 @@ export const siteConfig = {
     "Digitalisierung für Unternehmen",
     "Prozessautomatisierung",
     "Webentwicklung",
-    "App-Entwicklung",
+    "Webshop",
+    "Onlineshop für lokale Geschäfte",
     "Individualsoftware",
+    "App-Entwicklung",
     "IT-Beratung",
   ],
   /** Public social URLs — surface in JSON-LD `sameAs` and the

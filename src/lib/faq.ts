@@ -29,51 +29,51 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Häufige",
         headlineAccent: "Fragen.",
         intro:
-          "Die Fragen, die in den meisten Erstgesprächen zuerst kommen — kurz vorab beantwortet, falls Sie sie sich auch stellen.",
+          "Die Fragen, die am häufigsten kommen, bevor jemand anfragt — hier kurz vorweg beantwortet.",
         items: [
           {
-            q: "Wie lange dauert ein typisches Projekt?",
-            a: "Stark abhängig vom Umfang. Ein klickbarer Prototyp ist in wenigen Tagen fertig, eine MVP-Web-App meist in 6–10 Wochen, eine ausgewachsene Plattform in 3–6 Monaten. Ich gebe vor dem Start eine ehrliche Schätzung mit Obergrenze ab.",
-          },
-          {
-            q: "Arbeiten Sie remote oder vor Ort?",
-            a: "Beides. Standard ist remote mit regelmäßigen Video-Updates. Vor-Ort-Termine in Hamburg und Umgebung sind möglich, alles Weitere nach Absprache. Reisekosten sind nicht in den Sätzen enthalten.",
-          },
-          {
-            q: "Unterschreiben Sie eine NDA?",
-            a: "Ja, gerne. Senden Sie mir Ihre NDA vor dem Erstgespräch zu, dann ist sie zum Start unterzeichnet. Wenn Sie keine eigene Vorlage haben, stelle ich einen schlanken Standard-Vertrag bereit.",
+            q: "Ich weiß noch nicht genau, was ich brauche. Können wir trotzdem sprechen?",
+            a: "Ja, und das ist eher der Normalfall als die Ausnahme. Es reicht, wenn Sie beschreiben können, was Sie im Alltag stört. Was daraus wird — eine Website, ein Shop, ein kleines Werkzeug oder erst einmal gar nichts — klären wir gemeinsam.",
           },
           {
             q: "Was ist der erste Schritt?",
-            a: "Ein 30–60-minütiges Erstgespräch per Video — kostenfrei, unverbindlich, ohne Sales-Pitch. Ich höre zu, frage nach und sage offen, ob ich der Richtige für Ihr Vorhaben bin.",
+            a: "Schreiben Sie mir in zwei Sätzen, wo es gerade hakt. Ich melde mich in der Regel innerhalb von 24 Stunden und stelle Rückfragen, bis ich Ihre Arbeit verstanden habe. Erst danach reden wir über Umsetzung.",
           },
           {
-            q: "Welche Tech-Stacks bevorzugen Sie?",
-            a: "Keine Religionskriege. TypeScript / Node.js fürs Backend, Vue / Angular / React fürs Frontend, Python und KNIME für Datenpipelines, C# für Desktop-Apps. Bei jedem Projekt wähle ich das Werkzeug nach dem Problem, nicht umgekehrt.",
+            q: "Wovon hängt der Preis ab?",
+            a: "Vom Umfang und davon, wie klar das Vorhaben umrissen ist. Für klar abgesteckte Arbeiten gebe ich gern einen Festpreis, sonst ein Stunden- oder Tagesbudget mit Obergrenze, auf die Sie sich verlassen können. Die Stundensätze stehen offen auf der Preise-Seite.",
           },
           {
-            q: "Können wir auch nur einen Workshop oder ein Audit buchen?",
-            a: "Ja. Architektur-Reviews, Code-Audits und Inhouse-Workshops (TypeScript, Architektur, KI im Mittelstand) sind eigenständige Formate. Stundensätze siehe Preise.",
+            q: "Wie lange dauert so etwas?",
+            a: "Eine überschaubare Website ist meist in zwei bis vier Wochen fertig, ein kleines Werkzeug oft in wenigen Tagen, ein Webshop je nach Sortiment in vier bis zehn Wochen. Vor dem Start bekommen Sie eine ehrliche Schätzung, keine Wunschzahl.",
           },
           {
-            q: "Was kostet ein Projekt ungefähr?",
-            a: "Pauschal oder nach Aufwand — je nach Projekt. Für klar umrissene Vorhaben gebe ich gern einen Festpreis ab, für offenere ein Tages- oder Stundenbudget mit Obergrenze. Konkrete Sätze finden Sie auf der Preise-Seite.",
+            q: "Nehmen Sie auch kleine Aufträge an?",
+            a: "Ja. Eine Excel-Vorlage, eine Auswertung oder ein paar Anpassungen an einer bestehenden Seite sind völlig in Ordnung. Nicht jedes Vorhaben muss ein Projekt sein, um sich zu lohnen.",
           },
           {
-            q: "Übernehmen Sie auch Wartung und Support nach dem Launch?",
-            a: "Ja. Nach dem Launch biete ich Wartung, Updates und Weiterentwicklung — auf Abruf oder als monatliches Kontingent. So bleibt Ihre Anwendung sicher und aktuell, ohne dass Sie ein eigenes Team aufbauen müssen.",
+            q: "Übernehmen Sie auch eine bestehende Website?",
+            a: "Häufig ja. Ich sehe mir zuerst an, worauf sie aufgebaut ist, und sage Ihnen dann ehrlich, ob Weiterpflegen, Überarbeiten oder Neubauen der günstigere Weg ist. Manchmal ist es das Weiterpflegen.",
           },
           {
-            q: "Wem gehört der Code am Ende?",
-            a: "Ihnen — vollständig. Nach Bezahlung gehen sämtliche Rechte am erstellten Code an Sie über, inklusive Repository-Zugriff. Kein Vendor-Lock-in, keine versteckten Lizenzen.",
+            q: "Kümmern Sie sich danach weiter darum?",
+            a: "Auf Wunsch ja — Updates, kleine Änderungen, neue Inhalte. Entweder bei Bedarf oder als festes monatliches Kontingent. Es ist aber kein Muss: Sie sind nach der Übergabe nicht an mich gebunden.",
           },
           {
-            q: "Können Sie ein bestehendes Projekt übernehmen?",
-            a: "Häufig ja. Ich starte mit einem kurzen Code- und Architektur-Audit, um Risiken und Aufwand einzuschätzen, und sage Ihnen ehrlich, ob eine Übernahme, ein Refactoring oder ein Neubau sinnvoller ist.",
+            q: "Brauche ich eine Website oder gleich einen Webshop?",
+            a: "Das hängt an Ihrem Sortiment und daran, wer online bei Ihnen kaufen würde. Ein Shop bringt laufende Arbeit mit sich, die eine Website nicht hat. Wenn das nicht passt, sage ich Ihnen das lieber vorher als hinterher.",
           },
           {
-            q: "Wie läuft die Zusammenarbeit und Kommunikation ab?",
-            a: "Transparent und in Ihrem Takt. Sie bekommen regelmäßige Updates, Zugang zum Projektboard und einen festen Ansprechpartner — mich. Keine Ticket-Hotline, kein Account-Manager dazwischen.",
+            q: "Kann ich Inhalte später selbst pflegen?",
+            a: "Ja. Texte, Bilder, Produkte und Preise können Sie selbst ändern, ohne mich zu fragen. Auf Wunsch richte ich das so ein, dass Artikel und Bestand auch vom Handy aus gepflegt werden können.",
+          },
+          {
+            q: "Wie ist das mit Datenschutz und DSGVO?",
+            a: "Gehört für mich zur Umsetzung, nicht zum Aufpreis. Kontaktformular, Cookies, Einwilligungen und Auftragsverarbeitung werden gleich richtig aufgesetzt, und Sie bekommen Impressum und Datenschutzerklärung so vorbereitet, dass Ihre Rechtsberatung nur noch prüfen muss.",
+          },
+          {
+            q: "Arbeiten Sie auch außerhalb von Schwarzenbek und Hamburg?",
+            a: "Ja, deutschlandweit. Der übliche Weg ist per Video und E-Mail; Termine vor Ort in Hamburg und Umgebung sind gut machbar, weitere Anfahrten nach Absprache. Reisekosten kommen dann separat dazu.",
           },
         ],
       }
@@ -82,51 +82,51 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Common",
         headlineAccent: "questions.",
         intro:
-          "The questions that come up first in most discovery calls — answered briefly here in case you're wondering the same.",
+          "The questions that come up most often before anyone gets in touch — answered briefly here.",
         items: [
           {
-            q: "How long does a typical project take?",
-            a: "Heavily scope-dependent. A clickable prototype takes a few days, an MVP web app usually 6–10 weeks, a full platform 3–6 months. I give an honest estimate with a ceiling before the project starts.",
-          },
-          {
-            q: "Do you work remote or on-site?",
-            a: "Both. The default is remote with regular video updates. On-site meetings around Hamburg are possible, further travel on request. Travel costs are not included in the rates.",
-          },
-          {
-            q: "Will you sign an NDA?",
-            a: "Happily. Send me your NDA before the discovery call so it's signed by the time we start. If you don't have a template, I'll provide a lean standard contract.",
+            q: "I don't know exactly what I need yet. Can we still talk?",
+            a: "Yes, and that's the normal case rather than the exception. It's enough if you can describe what gets in your way day to day. What comes of it — a website, a shop, a small tool, or nothing at all for now — we work out together.",
           },
           {
             q: "What's the first step?",
-            a: "A 30–60-minute video discovery call — free, no obligation, no sales pitch. I listen, ask questions, and tell you honestly whether I'm the right fit for your project.",
+            a: "Tell me in two sentences where things are getting stuck. I usually reply within 24 hours and keep asking until I understand how you work. Only then do we talk about building anything.",
           },
           {
-            q: "Which tech stacks do you prefer?",
-            a: "No religious wars. TypeScript / Node.js on the backend, Vue / Angular / React on the frontend, Python and KNIME for data pipelines, C# for desktop apps. I pick the tool to fit the problem, not the other way around.",
+            q: "What does the price depend on?",
+            a: "On scope, and on how clearly the job is defined. For clearly scoped work I'm happy to quote a fixed price; otherwise an hourly or daily budget with a ceiling you can rely on. The hourly rates are published openly on the pricing page.",
           },
           {
-            q: "Can I book just a workshop or an audit?",
-            a: "Yes. Architecture reviews, code audits, and in-house workshops (TypeScript, architecture, AI for mid-market) are standalone formats. See pricing for hourly rates.",
+            q: "How long does something like this take?",
+            a: "A manageable website is usually done in two to four weeks, a small tool often in a few days, an online shop in four to ten weeks depending on the range. You get an honest estimate before the start, not a hopeful one.",
           },
           {
-            q: "Roughly what does a project cost?",
-            a: "Fixed price or time-and-materials — depending on the project. For clearly scoped work I'm happy to quote a fixed price; for open-ended work, a day or hour budget with a ceiling. Concrete rates are on the pricing page.",
+            q: "Do you take on small jobs?",
+            a: "Yes. A spreadsheet template, a report, or a few changes to an existing site are all fine. Not every piece of work has to be a project to be worth doing.",
           },
           {
-            q: "Do you handle maintenance and support after launch?",
-            a: "Yes. After launch I offer maintenance, updates, and further development — on demand or as a monthly retainer. Your app stays secure and current without you building an in-house team.",
+            q: "Can you take over an existing website?",
+            a: "Often, yes. I first look at what it's built on, then tell you honestly whether maintaining, reworking or rebuilding is the cheaper route. Sometimes it's maintaining.",
           },
           {
-            q: "Who owns the code in the end?",
-            a: "You do — entirely. On payment, all rights to the code transfer to you, including repository access. No vendor lock-in, no hidden licences.",
+            q: "Do you keep looking after it afterwards?",
+            a: "If you want — updates, small changes, new content. Either as needed or as a fixed monthly allowance. It isn't compulsory: you aren't tied to me once it's handed over.",
           },
           {
-            q: "Can you take over an existing project?",
-            a: "Often, yes. I start with a short code and architecture audit to gauge risk and effort, and tell you honestly whether taking it over, refactoring, or rebuilding makes more sense.",
+            q: "Do I need a website or an online shop?",
+            a: "That depends on your range and on who would actually buy from you online. A shop brings ongoing work with it that a website doesn't. If that doesn't fit you, I'd rather say so beforehand than afterwards.",
           },
           {
-            q: "How does collaboration and communication work?",
-            a: "Transparently, at your pace. You get regular updates, access to the project board, and one fixed point of contact — me. No ticket hotline, no account manager in between.",
+            q: "Can I maintain the content myself later?",
+            a: "Yes. Text, images, products and prices are yours to change without asking me. On request I'll set it up so items and stock can also be maintained from a phone.",
+          },
+          {
+            q: "What about data protection and GDPR?",
+            a: "Part of the build for me, not a surcharge. The contact form, cookies, consent and data-processing agreements are set up correctly from the start, and you get the imprint and privacy policy prepared so your legal advisor only has to check them.",
+          },
+          {
+            q: "Do you work outside Schwarzenbek and Hamburg?",
+            a: "Yes, across Germany. The usual route is video and email; on-site meetings around Hamburg are straightforward, further travel on request. Travel costs are then billed separately.",
           },
         ],
       };
