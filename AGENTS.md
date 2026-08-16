@@ -469,6 +469,22 @@ See README's "Replace examples before go-live" section.
   asserts that both keyword targets — the exact phrase "Digitalisierung für
   Unternehmen" and the town — still land *inside* the rendered window. When the
   copy changes, trim the service list before either keyword.
+- **Every OTHER indexable page's description is capped too, and now measured.**
+  `siteConfig.description` is only the home page plus the fallback; `/preise`,
+  `/en/preise`, `/legal/impressum` and `/legal/datenschutz` write their own
+  literals, and those were unguarded — which is how both legal pages sat at
+  **62 characters** until 2026-08-16. That is below the length at which a
+  description carries information, so search engines discard it and synthesise
+  their own from the page body. `seo.test.ts` now reads the literals back out
+  of those pages and holds them to ONE budget (80 < n ≤ 160), requires each
+  page's description to be distinct (a page repeating the home copy is a
+  duplicate-content signal), and checks the Impressum description against the
+  published NAP, since it doubles as a local-search signal.
+  The two pricing pages each declare the same `{ de, en }` pair and select by
+  locale, so the test models the SELECTION — reading every declared literal
+  would report four strings where the site publishes two, and the duplicate
+  check would fail on correct copy.
+  `/legal/agb` is deliberately excluded: it renders `noindex`.
 - **Footer NAP:** the footer renders `siteConfig.address.postalCode +
   addressLocality` ("21493 Schwarzenbek") hardcoded from `seo.ts`, NOT
   the CMS `contact.location` string — it must always match the

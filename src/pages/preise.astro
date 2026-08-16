@@ -20,9 +20,12 @@ const formatRate = (rate: number) =>
     maximumFractionDigits: 0,
   }).format(rate);
 
+// Both stay under the ~160 characters Google renders, and both carry the
+// local signal — a pricing page is a high-intent landing page for
+// "Digitalisierung Kosten" style queries, so the town belongs inside the cut.
 const pageDescriptions = {
-  de: "Transparente Stundensätze für Beratung, Web- und App-Entwicklung, Digitalisierung, Wartung und Schulungen. Preise zzgl. MwSt.",
-  en: "Transparent hourly rates for consulting, web and app development, digitalization, maintenance and training. Prices exclude German VAT.",
+  de: "Transparente Stundensätze für Digitalisierung, Web- und App-Entwicklung, Wartung und Schulungen — klar kalkulierbar, zzgl. MwSt. Aus Schwarzenbek.",
+  en: "Transparent hourly rates for digitalization, web and app development, maintenance and training — clearly calculated, excl. VAT. From Schwarzenbek.",
 };
 
 const pricingPath = localizePath("/preise", lang);
