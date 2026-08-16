@@ -81,6 +81,17 @@ See README's "Replace examples before go-live" section.
     the two navy callouts.
   - `.tds-brandbar` under three headlines only (Services, Prozess, Kontakt)
     plus the footer — **not** in every section; it is punctuation.
+  - **`CircuitRun.astro`** (`components/ui/`) — the conduit run, promoted out
+    of `Hero.tsx` once a second consumer appeared. `Hero.tsx` keeps a React
+    twin on purpose: an `.astro` cannot be imported into an island, and making
+    the hero's decoration a second island just to share nine lines of SVG costs
+    more than the duplication. Change the path data in one, change it in both.
+  - **It sits in the FAQ section, not the Journal one.** The Journal was the
+    first choice and was wrong: it has no negative space, so the run landed
+    behind the CTA card. The FAQ's answer column is short and the area below it
+    is genuinely empty at `lg`+. A decorative shape that has to compete for its
+    own space is the "Dekoration hinter Inhalt" the brand direction rules out —
+    put it where there is room or leave it out.
 
   **What this replaced, so nobody restores it:** the hero's three-blob aurora
   (cursor-springs + scroll parallax + infinite drift + a rotating conic

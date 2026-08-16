@@ -18,6 +18,7 @@ import { resolveLang } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
+import CircuitRun from "~/components/ui/CircuitRun.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 // Admin-edited "faq" block overrides the local default at build time;
@@ -25,11 +26,21 @@ const lang = resolveLang(Astro.currentLocale);
 const content = await cmsFor("faq", lang, getFaqContent(lang));
 ---
 
+{/* The one conduit run outside the hero. It sits HERE and not in the Journal
+    section — which was the first choice — because this is the only section
+    with real negative space: the answer column is short and the area below it
+    is empty at `lg` and up. In the Journal it landed behind the CTA card, and
+    a shape that has to compete for its own space is exactly the "Dekoration
+    hinter Inhalt" the brand direction rules out. Hidden below `lg`, where the
+    two columns stack and that space no longer exists. */}
 <section
   id="faq"
-  class="section-spacing tds-tone-sand"
+  class="relative section-spacing tds-tone-sand"
   aria-labelledby="faq-heading"
 >
+  <div class="tds-decor" aria-hidden="true">
+    <CircuitRun class="hidden lg:block bottom-[12%] right-[8%] w-[17rem] h-[9rem]" />
+  </div>
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <SectionHeader
       label={content.label}

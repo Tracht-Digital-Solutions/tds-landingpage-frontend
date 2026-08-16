@@ -1,0 +1,42 @@
+---
+/**
+ * "Digitale Leitungsbahnen" — a short run of conduit with rounded 90° corners
+ * and three nodes. Purely decorative, hence `aria-hidden`.
+ *
+ * `data-circuit-line` / `data-circuit-node` and `pathLength="1"` are the
+ * contract `.tds-circuit--draw` (tds-shared primitives.css) animates against:
+ * the paths draw themselves once, the nodes fade in after, and both are gated
+ * on `prefers-reduced-motion: no-preference`.
+ *
+ * Authored at a fixed 320×170 and NOT stretched — `preserveAspectRatio`
+ * defaults to uniform scaling, and a squashed viewBox turns the carefully
+ * rounded corners into ellipses, which is the "organic blob" look the whole
+ * geometry exists to avoid. Give it a `class` with the position and a size in
+ * that ratio (e.g. `w-[20rem] h-[10.6rem]`).
+ *
+ * INTENTIONAL TWIN: `components/islands/Hero.tsx` carries the same run as a
+ * React function. An `.astro` component cannot be imported into a React
+ * island, and the alternative — making the hero's decoration a second island
+ * purely to share nine lines of SVG — costs more than the duplication. If the
+ * path data changes here, change it there too.
+ */
+interface Props {
+  /** Position + size utilities. `.tds-circuit` supplies `position: absolute`. */
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span class:list={["tds-circuit tds-circuit--draw", className]}>
+  <svg viewBox="0 0 320 170" fill="none" aria-hidden="true" focusable="false">
+    <path
+      data-circuit-line
+      pathLength="1"
+      d="M0 150 H74 Q92 150 92 132 V58 Q92 40 110 40 H236"
+    ></path>
+    <path data-circuit-line pathLength="1" d="M150 170 V116 Q150 98 168 98 H320"></path>
+    <circle data-circuit-node cx="236" cy="40" r="4"></circle>
+    <circle data-circuit-node cx="92" cy="95" r="3"></circle>
+    <circle data-circuit-node cx="168" cy="98" r="3"></circle>
+  </svg>
+</span>
