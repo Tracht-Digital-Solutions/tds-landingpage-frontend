@@ -8,7 +8,7 @@ interface Props {
 const { aspect = "aspect-[4/3]", label, description } = Astro.props;
 ---
 
-<div class:list={["relative overflow-hidden bg-[var(--color-soft)] border border-[var(--color-line)] rounded-[2px]", aspect]}>
+<div class:list={["relative overflow-hidden bg-[var(--color-soft)] rounded-[6px]", aspect]}>
   <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
     <span class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-3">
       {label}

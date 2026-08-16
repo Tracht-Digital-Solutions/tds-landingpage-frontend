@@ -90,8 +90,8 @@ const jsonLd = [
               class:list={[
                 "relative rounded-[6px] p-7 flex flex-col",
                 isHighlight
-                  ? "bg-[var(--color-surface-navy)] text-white border border-[var(--color-surface-navy)] shadow-[0_20px_50px_rgba(5,15,104,0.18)]"
-                  : "bg-[var(--color-paper)] border border-[var(--color-line)]",
+                  ? "bg-[var(--color-surface-navy)] text-white shadow-[0_20px_50px_rgba(5,15,104,0.18)]"
+                  : "bg-[var(--color-paper)]",
               ]}
             >
               {isHighlight && (
@@ -139,12 +139,7 @@ const jsonLd = [
                 {item.description}
               </p>
 
-              <div
-                class:list={[
-                  "pt-5 mt-auto border-t",
-                  isHighlight ? "border-white/15" : "border-[var(--color-line)]",
-                ]}
-              >
+              <div class="pt-8 mt-auto">
                 <p
                   class:list={[
                     "text-xs font-medium tracking-wider uppercase mb-3",
@@ -190,7 +185,7 @@ const jsonLd = [
       </div>
 
       <section
-        class="rounded-[6px] border border-[var(--color-line)] p-8 mb-16 bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm"
+        class="rounded-[6px] p-8 mb-16 bg-[var(--color-soft)]"
         aria-labelledby="pricing-notes-heading"
       >
         <h2

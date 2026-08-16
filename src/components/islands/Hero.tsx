@@ -263,7 +263,7 @@ export default function Hero({
           <button
             type="button"
             onClick={() => scrollTo("services")}
-            className="px-7 py-3.5 text-sm font-medium border border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-card)_40%,transparent)] backdrop-blur-sm text-[var(--color-black)] rounded-[100px] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
+            className="px-7 py-3.5 text-sm font-medium bg-[color-mix(in_srgb,var(--color-card)_70%,transparent)] backdrop-blur-sm text-[var(--color-black)] rounded-[100px] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
           >
             {h.cta2}
           </button>

@@ -114,6 +114,32 @@ See README's "Replace examples before go-live" section.
   `SectionHeader.astro` is the shared masthead component
   for the homepage sections; each section's eyebrow goes through
   `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
+- **The site is BORDERLESS: separation comes from fill, tone and spacing.**
+  Almost nothing here draws a 1px box around itself any more — cards,
+  buttons, chips, image frames, the pricing cards, the language dropdown,
+  the mobile menu, and every list/section divider (FAQ, Currently, About's
+  stat row, the footer bar, the pricing card feet). A card that used to be
+  outlined is now a tone against its section's ground (paper on
+  `.tds-tone-sand`, `--color-soft` on paper); a divider became spacing.
+  Two rules when touching this:
+  - **A control that recoloured its BORDER on hover must recolour its
+    FILL instead.** Several buttons (the secondary hero CTA, the service
+    tag chips, the Journal teaser, the AGB link) had
+    `hover:border-[…primary]` as their only hover feedback — drop the
+    border alone and the control reacts to the pointer with nothing.
+  - **A state carried by a border needs a replacement, not a deletion.**
+    The FAQ's selected question was a 2px accent left edge; it is now a
+    filled row (`color-mix` with `--color-accent`) plus the accent text it
+    already had, so the state never rests on colour alone.
+  What deliberately keeps a line: focus rings (never remove one — the
+  global `:focus-visible` ring is a WCAG requirement and tds-shared's
+  `design.test.ts` enforces it), the Process timeline rail (a `w-px`
+  gradient graphic that connects the steps, not a border) and the contact
+  form's own `:focus-within` underline treatment.
+  The shared half of this is `--tds-border-hairline: 0` on the marketing
+  surface (tds-shared) — which changes nothing on this site today, since
+  it uses no border-bearing shared primitive, but stops the next one from
+  arriving outlined.
 - **The contact form's field wrapper is `.contact-field-row`** (with
   `.contact-field-line` / `.contact-field-label`), not `.field`.
   `primitives.css` owns `.field` as the *input element*, while the old local
@@ -280,12 +306,22 @@ See README's "Replace examples before go-live" section.
   50px navy drop plume. "Digitale Maßarbeit" calls for "helle, schwebende
   Kapselfläche · keine starke Glasoptik · keine ausgeprägten Schatten", so
   the blur is 16–20px at ~115% saturation, the fill is a near-opaque warm
-  white, the rim is a warm hairline and the scrolled shadow is a
-  suggestion (`0 8px 22px -16px`). Depth comes from the fill contrast
-  against the page, not from the drop. Below
-  `lg` the pill docks against the top edge (`top: 0`, flat top
-  border, 24px-rounded bottom), is always rendered with chrome,
-  spans `left-3 right-3`, and ends in a 44px hamburger that
+  white and the scrolled shadow is a suggestion (`0 8px 22px -16px`).
+  Depth comes from the fill contrast against the page, not from the drop.
+  **It is a FULL pill in every state** — `var(--tds-radius-pill)`, declared
+  once. It used to be 24px on mobile, 22px docked and `9999px` only once
+  the desktop bar had scrolled, i.e. a rounded rectangle almost everywhere
+  it was actually seen. Because all states now share the radius, it is no
+  longer in the transition list; `max-width` + `top` still tween the morph.
+  **It also has no rim.** The warm hairline is gone with the borderless
+  pass — and note what carried it in light mode was an INSET `box-shadow`,
+  not a `border`, so a grep for `border` finds nothing and the rim is
+  still there. The dark-mode fill was raised (55% → 88% of `--color-card`,
+  92–94% scrolled) *because* the rim went: that hairline was the only
+  thing keeping the bar from dissolving into the dark hero, so don't lower
+  the tint without looking at the scrolled bar over that hero.
+  Below `lg` the pill docks against the top edge, is always rendered with
+  chrome, spans `left-3 right-3`, and ends in a 44px hamburger that
   animates three CSS bars into an × via the `[aria-expanded]`
   attribute. **Those bars are `.tds-menu-bar*` from tds-shared
   `primitives.css`** — the blog header carried the same rules under

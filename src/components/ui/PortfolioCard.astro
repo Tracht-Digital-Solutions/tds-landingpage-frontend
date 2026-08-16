@@ -15,7 +15,7 @@ interface Props {
 const { number, badge, title, description, stack, comingSoon, placeholderLabel, imagePlaceholder } = Astro.props;
 ---
 
-<article class="group bg-[var(--color-paper)] border border-[var(--color-line)] rounded-[2px] overflow-hidden transition-shadow duration-200 hover:shadow-[0_24px_48px_-24px_rgba(5,15,104,0.18)]">
+<article class="group bg-[var(--color-paper)] rounded-[6px] overflow-hidden transition-shadow duration-200 hover:shadow-[0_24px_48px_-24px_rgba(5,15,104,0.18)]">
   <ImagePlaceholder aspect="aspect-[4/3]" label={placeholderLabel} description={imagePlaceholder} />
   <div class="p-6 md:p-8">
     <div class="flex items-center justify-between mb-3">
