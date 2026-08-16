@@ -57,10 +57,10 @@ const content = await cmsFor("faq", lang, getFaqContent(lang));
         expands inline under its own question. Exclusive (shared `name`),
         first item open by default; no JS needed. The desktop master-detail
         block below is hidden here. */}
-    <div class="lg:hidden divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+    <div class="lg:hidden space-y-1">
       {content.items.map((item, i) => (
         <details name="faq-mobile" open={i === 0} class="faq-m">
-          <summary class="faq-m-summary flex items-start justify-between gap-6 py-5 pl-4 border-l-2 border-transparent cursor-pointer">
+          <summary class="faq-m-summary flex items-start justify-between gap-6 py-5 px-4 cursor-pointer">
             <span class="faq-m-q font-[var(--font-display)] text-lg text-[var(--color-black)] leading-snug transition-colors duration-200">
               {item.q}
             </span>
@@ -84,7 +84,7 @@ const content = await cmsFor("faq", lang, getFaqContent(lang));
         role="tablist"
         aria-orientation="vertical"
         aria-label={content.label.replace(/^[—–-]\s*/, "")}
-        class="faq-tablist divide-y divide-[var(--color-line)] border-y border-[var(--color-line)] lg:max-h-[30rem] lg:overflow-y-auto lg:pr-3"
+        class="faq-tablist space-y-1 lg:max-h-[30rem] lg:overflow-y-auto lg:pr-3"
       >
         {content.items.map((item, i) => (
           <li>
@@ -95,7 +95,7 @@ const content = await cmsFor("faq", lang, getFaqContent(lang));
               aria-controls={`faq-panel-${i}`}
               aria-selected={i === 0 ? "true" : "false"}
               tabindex={i === 0 ? 0 : -1}
-              class="faq-tab w-full flex items-start justify-between gap-6 text-left py-5 md:py-6 pl-4 border-l-2 border-transparent cursor-pointer transition-colors duration-200"
+              class="faq-tab w-full flex items-start justify-between gap-6 text-left py-5 md:py-6 px-4 cursor-pointer transition-colors duration-200"
             >
               <span class="faq-q font-[var(--font-display)] text-lg md:text-xl text-[var(--color-black)] leading-snug transition-colors duration-200">
                 {item.q}
@@ -134,11 +134,16 @@ const content = await cmsFor("faq", lang, getFaqContent(lang));
 </section>
 
 <style>
-  /* Active question: accent edge + colour. The 2px border is always
-     present (transparent → accent) so selecting never shifts width or
-     height — the row stays exactly as tall as its question. */
-  .faq-tab[aria-selected="true"] {
-    border-left-color: var(--color-accent);
+  /* Active question: a filled row + accent colour, replacing the accent
+     edge the borderless pass removed. The state must never rest on colour
+     ALONE, so the fill and the question's own recolour carry it together —
+     and the fill is the reason the selected row is still findable at a
+     glance in a list of ten. Padding-only geometry, so selecting shifts
+     nothing. */
+  .faq-tab[aria-selected="true"],
+  .faq-m[open] > .faq-m-summary {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    border-radius: 6px;
   }
   .faq-tab[aria-selected="true"] .faq-q,
   .faq-tab:hover .faq-q {
@@ -176,12 +181,11 @@ const content = await cmsFor("faq", lang, getFaqContent(lang));
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Mobile accordion (<details>). Strip the native marker, mirror the
-     desktop tab's accent edge + colour on the open row, rotate the chevron,
-     and fade the answer in to match the panel. */
+  /* Mobile accordion (<details>). Strip the native marker, rotate the
+     chevron, and fade the answer in to match the panel. The open row's
+     fill is shared with the desktop tab in the rule above. */
   .faq-m-summary { list-style: none; }
   .faq-m-summary::-webkit-details-marker { display: none; }
-  .faq-m[open] > .faq-m-summary { border-left-color: var(--color-accent); }
   .faq-m[open] > .faq-m-summary .faq-m-q,
   .faq-m-summary:hover .faq-m-q { color: var(--color-accent); }
   .faq-m[open] > .faq-m-summary .faq-m-arrow {

@@ -15,8 +15,8 @@ const servicesContent = await cmsFor("services", lang, {
   items: t.services.items,
 });
 
-// Odd lists: the last card spans both columns on sm+ so the bordered grid
-// stays balanced.
+// Odd lists: the last card spans both columns on sm+ so the grid stays
+// balanced.
 const services = servicesContent.items;
 ---
 
@@ -39,7 +39,7 @@ const services = servicesContent.items;
       bar
     />
 
-    <div class="grid sm:grid-cols-2 gap-px border border-[var(--color-line)] rounded-[2px] overflow-hidden">
+    <div class="grid sm:grid-cols-2 gap-4 md:gap-6">
       {services.map((item, i) => {
         const orphan = i === services.length - 1 && services.length % 2 === 1;
         return (

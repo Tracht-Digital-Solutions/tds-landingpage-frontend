@@ -69,7 +69,7 @@ const homeHref = localizePath("/", lang);
           href={pdfHref}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium border border-[var(--color-line)] text-[var(--color-black)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] hover:-translate-y-0.5 transition-all duration-200"
+          class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-medium bg-[var(--color-soft)] text-[var(--color-black)] hover:bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-soft))] hover:text-[var(--color-accent)] hover:-translate-y-0.5 transition-all duration-200"
         >
           {copy.openInNewTab}
         </a>
@@ -81,7 +81,7 @@ const homeHref = localizePath("/", lang);
         data={`${pdfHref}#view=FitH&navpanes=0`}
         type="application/pdf"
         aria-label={copy.viewerLabel}
-        class="hidden md:block w-full h-[80vh] rounded-[6px] border border-[var(--color-line)] bg-white"
+        class="hidden md:block w-full h-[80vh] rounded-[6px] bg-white"
       >
         <p class="p-6 text-[var(--color-muted)] leading-relaxed">{copy.viewerFallback}</p>
       </object>

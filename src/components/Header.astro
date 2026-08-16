@@ -56,10 +56,10 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     </a>
 
     {/* Links + controls live in one connected cluster so the nav reads
-        as a single unit. A hairline divider sets the theme/language
-        controls apart from the section links while keeping them
-        integrated into the same row rather than floating off the edge. */}
-    <div class="flex items-center gap-1">
+        as a single unit. The theme/language controls used to be set apart
+        by a hairline divider; with the borderless pass that separation is
+        carried by the wider gap alone. */}
+    <div class="flex items-center gap-1 lg:gap-3">
       <div class="hidden lg:flex items-center gap-1">
         {items.map((item) => (
           <a
@@ -84,11 +84,6 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
           <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
         </a>
       </div>
-
-      <span
-        class="hidden lg:block h-5 w-px mx-1 bg-[var(--color-line)]"
-        aria-hidden="true"
-      ></span>
 
       <ThemeToggle
         client:load
@@ -115,7 +110,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 
 <div
   id="mobile-menu"
-  class="mobile-menu lg:hidden fixed inset-x-3 top-[5.25rem] z-30 origin-top rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_97%,transparent)] backdrop-blur-md border border-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-line))] shadow-[0_10px_26px_-18px_rgba(5,15,104,0.3)] p-3"
+  class="mobile-menu lg:hidden fixed inset-x-3 top-[5.25rem] z-30 origin-top rounded-2xl bg-[var(--color-card)] backdrop-blur-md shadow-[0_10px_26px_-18px_rgba(5,15,104,0.3)] p-3"
   aria-hidden="true"
 >
   <ul class="space-y-0.5">
@@ -132,7 +127,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     ))}
   </ul>
 
-  <div class="my-2 mx-4 border-t border-[var(--color-line)]"></div>
+  <div class="h-4" aria-hidden="true"></div>
 
   <ul class="space-y-0.5">
     <li>
@@ -198,12 +193,18 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      blur is kept (not removed) because the decoration layer scrolling
      underneath still has to soften rather than smear. */
   .site-header {
-    border-radius: 24px;
-    border: 1px solid transparent;
-    background-color: color-mix(in srgb, var(--color-paper) 88%, transparent);
-    /* A warm hairline rim instead of the white glass highlight — that
-       bright white rim is what made the bar read as glass. */
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-line) 70%, transparent);
+    /* Fully round in EVERY state, not just once the desktop bar has
+       scrolled — "komplett rund und nicht nur runde Ecken". The radius is
+       the shared pill token rather than a hand-written literal (it used to
+       be 24px here and 22px docked), which is also what keeps the three
+       states from drifting apart again. */
+    border-radius: var(--tds-radius-pill);
+    background-color: color-mix(in srgb, var(--color-paper) 92%, transparent);
+    /* No rim. The fill alone separates the bar from the page — the warm
+       hairline (and before it the white glass highlight) is exactly the
+       kind of 1px box the borderless pass removes. It was an INSET
+       box-shadow, not a border, so it survived every `border` search;
+       whatever replaces it must be judged in a browser, not in a grep. */
     /* Only the unprefixed property is authored — lightningcss adds the
        `-webkit-` prefix at build time per the configured cssTarget.
        Hand-writing both makes lightningcss collapse them to `-webkit-`
@@ -211,54 +212,52 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     backdrop-filter: blur(16px) saturate(115%);
     transition:
       background-color 250ms ease,
-      border-color 250ms ease,
       box-shadow 250ms ease;
   }
 
-  /* Dark mode — give the bar a faint tinted fill + hairline border so the
-     nav stays legible against the dark hero instead of dissolving into it.
-     (Previously every shadow/rim was dropped and the bar could vanish.) */
+  /* Dark mode — the fill alone now has to keep the nav legible against the
+     dark hero. That is the whole risk of dropping the rim: the hairline
+     was what stopped the bar dissolving into the hero, so the tint rises
+     from 55% to 88% to pay for it. Do not lower it back without looking at
+     the scrolled bar over the dark hero. */
   :global(:root[data-theme="dark"]) .site-header {
-    background-color: color-mix(in srgb, var(--color-card) 55%, transparent);
-    border-color: color-mix(in srgb, var(--color-line) 60%, transparent);
+    background-color: color-mix(in srgb, var(--color-card) 88%, transparent);
     box-shadow: none;
   }
   :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
-    background-color: color-mix(in srgb, var(--color-card) 88%, transparent);
+    background-color: color-mix(in srgb, var(--color-card) 94%, transparent);
     box-shadow: 0 8px 22px -16px rgba(0, 0, 0, 0.55);
   }
 
   /* Mobile + tablet, docked at the very top of the hero: dissolve the bar
      into the background exactly like the desktop dock — transparent fill,
-     no border/shadow, only the frosted blur reads. Once the visitor
-     scrolls, the bar settles back into the floating glass pill (the base
+     no shadow, only the frosted blur reads. Once the visitor scrolls, the
+     bar settles back into the filled floating pill (the base
      `.site-header` styling above). */
   @media (max-width: 1023px) {
     .site-header[data-scrolled="false"] {
       background-color: transparent;
-      border-color: transparent;
       box-shadow: none;
     }
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
       background-color: transparent;
-      border-color: transparent;
       box-shadow: none;
     }
   }
 
   @media (min-width: 1024px) {
     /* Docked at the very top: in dark mode the bar must dissolve into the
-       hero exactly like light mode — fully transparent fill + no border, so
-       only the heavy frosted blur and glass-rim read. (The earlier rule gave
-       it a card-tinted fill at every scroll state, leaving a visible navy
-       panel + hairline at the top of the hero.) Only the scrolled pill is
-       filled. */
+       hero exactly like light mode — fully transparent fill, so only the
+       heavy frosted blur reads. (An earlier rule gave it a card-tinted fill
+       at every scroll state, leaving a visible navy panel at the top of the
+       hero.) Only the scrolled pill is filled — and since the dark base
+       fill above is now dense enough to replace the rim, this override is
+       what keeps the docked bar from inheriting it. */
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
       background-color: transparent;
-      border-color: transparent;
     }
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
-      background-color: color-mix(in srgb, var(--color-card) 82%, transparent);
+      background-color: color-mix(in srgb, var(--color-card) 92%, transparent);
     }
   }
 
@@ -266,14 +265,13 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      the user scrolls. The header spans the full viewport (left/right 0)
      and `margin-inline: auto` keeps it centred once it is constrained by
      max-width, so the same element can animate from an edge-to-edge dock
-     to a compact centred pill purely by tweening max-width + top +
-     border-radius.
+     to a compact centred pill purely by tweening max-width + top. The
+     radius no longer tweens: both states are the full pill now, so there
+     is nothing left to interpolate between.
 
      At the top of the page (data-scrolled="false") it is DOCKED: flush
-     against the top edge, full-bleed, top corners squared, integrated
-     into the hero with a fully transparent fill — only the heavy frosted
-     blur and the glass-rim highlight read. The blur stays very strong in
-     both states. */
+     against the top edge, full-bleed and fully transparent, so only the
+     heavy frosted blur reads. The blur stays very strong in both states. */
   @media (min-width: 1024px) {
     .site-header {
       left: 0;
@@ -283,34 +281,28 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 
       top: 0.75rem;
       max-width: 100%;
-      border-radius: 22px;
       background-color: transparent;
       box-shadow: none;
       backdrop-filter: blur(20px) saturate(115%);
       transition:
         max-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
         top 320ms cubic-bezier(0.4, 0, 0.2, 1),
-        border-radius 320ms cubic-bezier(0.4, 0, 0.2, 1),
         background-color 250ms ease,
         box-shadow 250ms ease;
     }
 
-    /* Scrolled away from the top — the bar lifts off the edge and morphs
-       into a compact, fully-rounded floating capsule: near-opaque warm
-       white, a warm hairline rim, and the SUGGESTION of a shadow. The
-       old `0 18px 50px -24px rgba(5,15,104,.45)` was a 50px navy plume
-       that read as grey haze on the warm ground — the brief's "keine
+    /* Scrolled away from the top — the bar lifts off the edge and shrinks
+       into a compact floating capsule: near-opaque warm white and the
+       SUGGESTION of a shadow, with no rim at all. The old
+       `0 18px 50px -24px rgba(5,15,104,.45)` was a 50px navy plume that
+       read as grey haze on the warm ground — the brief's "keine
        ausgeprägten Schatten". Depth here comes from the fill contrast
        against the page, not from the drop. */
     .site-header[data-scrolled="true"] {
       top: 1rem;
       max-width: 56rem;
-      border-radius: 9999px;
-      border-top-width: 1px;
-      background-color: color-mix(in srgb, var(--color-paper) 92%, transparent);
-      box-shadow:
-        inset 0 0 0 1px color-mix(in srgb, var(--color-line) 80%, transparent),
-        0 8px 22px -16px rgba(5, 15, 104, 0.28);
+      background-color: color-mix(in srgb, var(--color-paper) 96%, transparent);
+      box-shadow: 0 8px 22px -16px rgba(5, 15, 104, 0.28);
     }
   }
 

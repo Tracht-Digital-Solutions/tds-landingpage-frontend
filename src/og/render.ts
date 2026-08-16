@@ -40,7 +40,6 @@ const INK = "#1a1a17";
 const PRIMARY = "#050f68";
 const ACCENT = "#820933";
 const MUTED = "#6b6b66";
-const LINE = "#e8e6df";
 
 export async function renderDefaultOgPng(): Promise<Buffer> {
   const { lato } = loadFonts();
@@ -132,8 +131,7 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                borderTop: `1px solid ${LINE}`,
-                paddingTop: "32px",
+                paddingTop: "48px",
                 fontFamily: "Lato",
                 fontSize: "22px",
                 color: MUTED,

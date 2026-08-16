@@ -124,7 +124,7 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
       >
-        <span className="block w-5 h-3.5 overflow-hidden rounded-[2px] ring-1 ring-black/10">
+        <span className="block w-5 h-3.5 overflow-hidden rounded-[2px]">
           <CurrentFlag className="block w-full h-full" />
         </span>
         <svg
@@ -147,7 +147,7 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
         <ul
           role="listbox"
           aria-label={lang === "de" ? "Sprachen" : "Languages"}
-          className="absolute right-0 top-full mt-4 min-w-[160px] overflow-hidden rounded-xl bg-[var(--color-card)] shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] border border-[var(--color-line)] z-50"
+          className="absolute right-0 top-full mt-4 min-w-[160px] overflow-hidden rounded-xl bg-[var(--color-card)] shadow-[0_12px_32px_-12px_rgba(5,15,104,0.28)] z-50"
         >
           {options.map((opt) => {
             const active = opt.code === lang;
@@ -163,7 +163,7 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
                       : "text-[var(--color-black)] hover:bg-black/5"
                   }`}
                 >
-                  <span className="block w-6 h-4 overflow-hidden rounded-[2px] ring-1 ring-black/10 shrink-0">
+                  <span className="block w-6 h-4 overflow-hidden rounded-[2px] shrink-0">
                     <OptionFlag className="block w-full h-full" />
                   </span>
                   <span className="flex-1">{opt.label}</span>
