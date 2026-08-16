@@ -27,6 +27,47 @@ const read = (rel: string) => readFileSync(resolve(process.cwd(), rel), "utf8");
 const impressum = read("src/pages/legal/impressum.astro");
 const astroConfig = read("astro.config.mjs");
 
+/**
+ * PAGE-level descriptions, read back out of the pages that declare them.
+ *
+ * `siteConfig.description` is only the home page and the fallback; every other
+ * indexable page writes its own literal, and those were unguarded — which is
+ * how the two legal pages sat at 62 characters. Reading them from disk keeps
+ * one budget over every description the site publishes, rather than one that
+ * happens to cover the field this file already imported.
+ */
+const RENDERED = 160;
+const MIN_USEFUL = 80;
+
+/**
+ * What a page actually RENDERS into `<meta name="description">`.
+ *
+ * The two pricing pages each declare the same `{ de, en }` pair and then pick
+ * the entry matching their own locale, so reading every declared literal would
+ * report four strings where the site publishes two. Modelling the selection
+ * keeps the duplicate check honest — it is the rendered text that search
+ * engines compare, not the source.
+ */
+function renderedDescriptions(rel: string): string[] {
+  const src = read(rel);
+  const lang = rel.includes("/pages/en/") ? "en" : "de";
+  const out: string[] = [];
+  // `description="…"` as a Layout prop.
+  for (const m of src.matchAll(/description="([^"]+)"/g)) out.push(m[1]);
+  // `pageDescriptions = { de: "…", en: "…" }` — only the locale this page uses.
+  const block = src.match(/pageDescriptions\s*=\s*\{([\s\S]*?)\}/);
+  const picked = block?.[1].match(new RegExp(`${lang}:\\s*"([^"]+)"`));
+  if (picked) out.push(picked[1]);
+  return out;
+}
+
+const INDEXABLE_PAGES = [
+  "src/pages/preise.astro",
+  "src/pages/en/preise.astro",
+  "src/pages/legal/impressum.astro",
+  "src/pages/legal/datenschutz.astro",
+] as const;
+
 describe("the NAP matches the Impressum", () => {
   it("states the same street address", () => {
     expect(impressum).toContain(siteConfig.address.streetAddress);
@@ -123,6 +164,52 @@ describe("the descriptions are usable as meta descriptions", () => {
       expect(text.trim(), lang).toBe(text);
       expect(text, lang).not.toMatch(/\s{2,}/);
     }
+  });
+});
+
+describe("every indexable page's own description", () => {
+  it.each(INDEXABLE_PAGES)("%s declares at least one", (rel) => {
+    expect(renderedDescriptions(rel).length).toBeGreaterThan(0);
+  });
+
+  it.each(INDEXABLE_PAGES)("%s stays inside what Google renders", (rel) => {
+    for (const text of renderedDescriptions(rel)) {
+      expect(text.length, `${rel}: ${text.length} chars — ${text}`).toBeLessThanOrEqual(
+        RENDERED,
+      );
+    }
+  });
+
+  it.each(INDEXABLE_PAGES)("%s is long enough to be worth rendering", (rel) => {
+    // Both legal pages shipped at 62 characters until 2026-08-16. A
+    // description that thin carries no information, so search engines
+    // routinely discard it and synthesise their own from the page body — the
+    // copy was doing no work at all.
+    for (const text of renderedDescriptions(rel)) {
+      expect(text.length, `${rel}: ${text.length} chars — ${text}`).toBeGreaterThan(
+        MIN_USEFUL,
+      );
+    }
+  });
+
+  it("gives each page a DISTINCT description", () => {
+    // The home description is the fallback; a page repeating it verbatim is a
+    // duplicate-content signal rather than a description of that page.
+    const all = INDEXABLE_PAGES.flatMap(renderedDescriptions);
+    expect(new Set(all).size, "duplicate page descriptions").toBe(all.length);
+    for (const text of all) {
+      expect(text).not.toBe(siteConfig.description.de);
+      expect(text).not.toBe(siteConfig.description.en);
+    }
+  });
+
+  it("keeps the Impressum description consistent with the published NAP", () => {
+    // This one doubles as a local-search signal, so a drift here republishes
+    // the mismatch the NAP tests above exist to prevent.
+    const [text] = renderedDescriptions("src/pages/legal/impressum.astro");
+    expect(text).toContain(siteConfig.address.postalCode);
+    expect(text).toContain(siteConfig.address.addressLocality);
+    expect(text).toContain(siteConfig.legalName);
   });
 });
 
