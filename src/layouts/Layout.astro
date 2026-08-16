@@ -169,14 +169,14 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
       <CookieNotice client:idle lang={lang} privacyUrl="/legal/datenschutz" />
     )}
     {/* Floating support widget — self-hides unless the live-chat-cta extension
-        enables the "landingpage" frontend in the admin. Talks to the API gateway. */}
+        enables the "landingpage" frontend in the admin.
+        No apiBase prop on purpose: the widget then resolves through tds-shared's
+        apiFetch, which honours the host's tds-runtime.json — so
+        /_setup/install.php can re-point it (or route it through the same-origin
+        proxy) without a rebuild. A hard-coded origin would silently opt the
+        widget out of that. */}
     {!bare && (
-      <LiveChatCta
-        client:idle
-        frontend="landingpage"
-        apiBase="https://api.tracht-digital.de"
-        lang={lang}
-      />
+      <LiveChatCta client:idle frontend="landingpage" lang={lang} />
     )}
 
     {/* Dynamic document.title — observes every <section id="…"> on

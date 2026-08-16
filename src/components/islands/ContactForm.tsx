@@ -4,7 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
+import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
 
+/**
+ * Where this form posts if the host has not been configured.
+ *
+ * Baked in by Vite at build time. `runtimeSetting("contactUrl", …)` prefers
+ * whatever `/_setup/install.php` wrote into `tds-runtime.json` on the host, so
+ * the endpoint can be re-pointed (or routed through the same-origin proxy)
+ * without a rebuild. No config on the host means this value, i.e. exactly the
+ * behaviour before the wizard existed.
+ */
 const CONTACT_API_URL =
   (import.meta.env.PUBLIC_CONTACT_API_URL as string | undefined) ??
   "https://api.tracht-digital.de/contact";
@@ -78,7 +88,11 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const onSubmit = async (data: ContactFormData) => {
     setSubmitState("submitting");
     try {
-      const res = await fetch(CONTACT_API_URL, {
+      // Resolved on submit, not at mount: the config is one memoised request
+      // and this keeps it off the critical path of a page most visitors never
+      // submit anything on.
+      const endpoint = await runtimeSetting("contactUrl", CONTACT_API_URL);
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, lang }),
