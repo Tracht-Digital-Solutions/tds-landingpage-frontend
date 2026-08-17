@@ -13,15 +13,18 @@
                      ring, theme-switch, type primitives (.display,
                      .eyebrow, .lead, .section-spacing, …)
      primitives.css  cross-surface components (.btn*, .chip*, .field,
-                     .section-num, .brand-header, .brand-wordmark, …)
+                     .brand-header, .brand-wordmark, …)
      surfaces/marketing.css   the geometry: round pills, 6px lifted cards,
                      the 700 display voice
 
    app.css is deliberately NOT imported — that is dashboard chrome
    (sidebar, nav items, stat tiles) this site never renders. Before the
-   library was split, `.section-num` and `.brand-wordmark` lived only in
-   app.css, so skipping it meant both classes shipped UNSTYLED here even
-   though 7 components used them. They come from primitives.css now.
+   library was split, `.brand-wordmark` lived only in app.css, so skipping
+   it meant the class shipped UNSTYLED here even though components used
+   it. It comes from primitives.css now — that is what this import is for.
+   (`.section-num` had the same history, but this site no longer renders
+   any chapter marks; the class stays in the library for the blog + the
+   legacy customer portal.)
 
    Nothing about the visual result is authored locally any more: no font
    token, no `.display` weight, no radius. To change how this surface

@@ -1,23 +1,25 @@
 ---
 /**
- * Shared section masthead — eyebrow + display headline with italic
- * accent word. Used by About / Services / Tech / Portfolio / Process /
- * Journal / Contact so each section reads as a numbered chapter in
- * one publication.
+ * Shared section masthead — display headline with italic accent word.
+ * Used by Services / Tech / Portfolio / Process / Currently / FAQ so
+ * every section opens the same way.
  *
- * Dark-mode flips the eyebrow rule + headline to white and switches
- * the italic accent to --color-accent-pink for legibility against the
- * dark backgrounds (Tech, Contact, PricingTeaser callout).
+ * NO eyebrow. The site used to prefix each headline with a numbered
+ * chapter mark ("— 01 / Über mich", `.section-num`); those are gone
+ * from this site — the headline opens the section. `.section-num`
+ * itself stays in tds-shared for the blog + legacy portal.
+ *
+ * Dark-mode flips the headline to white and switches the italic accent
+ * to --color-accent-pink for legibility against the dark backgrounds
+ * (Tech, Contact, PricingTeaser callout).
  */
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 interface Props {
-  label: string;
   headline: string;
   headlineAccent: string;
   id: string;
   dark?: boolean;
-  labelClass?: string;
   headingClass?: string;
   /**
    * Render the three-part brand accent (bordeaux · coral · gold) under
@@ -33,12 +35,10 @@ interface Props {
 }
 
 const {
-  label,
   headline,
   headlineAccent,
   id,
   dark = false,
-  labelClass = "mb-6",
   headingClass = "mb-16",
   bar = false,
 } = Astro.props;
@@ -49,15 +49,6 @@ const headingSpacing = bar ? "mb-5" : headingClass;
 ---
 
 <div class="text-center md:text-left">
-  <p
-    class:list={[
-      "section-num",
-      dark ? "text-white/60" : null,
-      labelClass,
-    ]}
-  >
-    {label}
-  </p>
   <h2
     id={id}
     class:list={[
