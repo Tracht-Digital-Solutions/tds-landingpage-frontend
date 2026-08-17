@@ -121,6 +121,27 @@ See README's "Replace examples before go-live" section.
   stat row, the footer bar, the pricing card feet). A card that used to be
   outlined is now a tone against its section's ground (paper on
   `.tds-tone-sand`, `--color-soft` on paper); a divider became spacing.
+  **The rule that actually bites: a fill only separates against a DIFFERENT
+  ground.** Once the border is gone, a card is visible only if its own token
+  differs from the section tone behind it — and three shipped invisible for
+  exactly one release because they didn't:
+  - the pricing cards were `--color-paper` on the pricing page's
+    `--color-paper` ground (every card but the navy highlight vanished, on a
+    page where the card edge is what says which features belong to which rate);
+  - the Journal teaser was `--color-soft` inside a `.tds-tone-sand` section,
+    and sand IS `--color-soft`;
+  - `ImagePlaceholder` was `--color-soft` too, and it renders on BOTH grounds
+    (inside a paper card and directly on a sand section), so it now uses
+    `--color-card`, the only fill that reads against both.
+  The ladder is `--color-paper` (page) → `--color-soft` (sand tone) →
+  `--color-card` (elevated). Pick the card's fill by looking at the SECTION's
+  tone class, not by picking a nice-looking token.
+  **This is invisible to every gate in the repo** — `astro check` passes, the
+  build passes, the tests pass, and the page merely looks empty. Judge it in a
+  browser, or measure it: walk each card up to its first opaque ancestor and
+  compare the two `backgroundColor`s (a `playwright-core` script against the
+  built `dist/` does it in a few lines, no API needed).
+
   Two rules when touching this:
   - **A control that recoloured its BORDER on hover must recolour its
     FILL instead.** Several buttons (the secondary hero CTA, the service
