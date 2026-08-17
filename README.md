@@ -288,7 +288,7 @@ src/
 │   │   ├── Hero.tsx            # Hero with motion entrance; takes lang prop
 │   │   ├── LanguageToggle.tsx  # SVG-flag dropdown; navigates between /  ↔ /en/
 │   │   ├── ScrollProgress.tsx  # Thin gradient reading-progress bar (top of viewport)
-│   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only); exposes window.tdsScrollTo — bounce on click-jumps, plain wheel scroll
+│   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only); exposes window.tdsScrollTo — bounce on click-jumps, plain wheel scroll. Touch path is a rAF tween; both plan through lib/scrollJump.ts
 │   ├── sections/               # Static .astro sections (no JS by default)
 │   │   ├── About.astro, Services.astro, TechMarquee.astro,
 │   │   │ Portfolio.astro, Process.astro, Currently.astro,
@@ -303,6 +303,7 @@ src/
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   ├── jsonld.ts               # Schema.org graph generators
 │   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
+│   ├── scrollJump.ts           # DOM-free geometry + easing for the bounce section-jumps (both scroll paths)
 │   └── processDetails.ts       # Per-step detail copy for the Process hover frontend
 ├── og/                         # Satori OG-card pipeline (build-time)
 │   ├── render.ts               # 1200×630 default card
