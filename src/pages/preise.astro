@@ -85,6 +85,12 @@ const jsonLd = [
         {pricing.sub}
       </p>
 
+      {/* Cards are `--color-soft` on this page's `--color-paper` ground. They
+          were `--color-paper` for one release after the borderless pass, i.e.
+          the exact colour behind them — every card but the navy highlight was
+          invisible, and on a pricing table the card edge is what says which
+          features belong to which rate. A fill only separates against a
+          DIFFERENT ground. */}
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
         {pricing.items.map((item) => {
           const isHighlight = item.highlight;
@@ -94,7 +100,7 @@ const jsonLd = [
                 "relative rounded-[6px] p-7 flex flex-col",
                 isHighlight
                   ? "bg-[var(--color-surface-navy)] text-white shadow-[0_20px_50px_rgba(5,15,104,0.18)]"
-                  : "bg-[var(--color-paper)]",
+                  : "bg-[var(--color-soft)]",
               ]}
             >
               {isHighlight && (
