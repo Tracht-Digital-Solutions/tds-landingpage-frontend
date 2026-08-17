@@ -102,18 +102,25 @@ See README's "Replace examples before go-live" section.
   of those is on the brand direction's do-not-use list. **Also removed with
   them: a `mousemove` listener and eight motion values on every page load.**
 - **Editorial vocabulary**: `.display`, `.display-tight`, `.accent-italic`,
-  `.section-num`, `.eyebrow`, `.lead`. `.display*` / `.eyebrow` / `.lead`
-  come from `base.css`; **`.section-num` and `.brand-wordmark` come from
-  `primitives.css`** — they previously lived only in `app.css`, which this
-  site deliberately skips, so both shipped **completely unstyled** here
-  despite 7 components using them (verified: 0 occurrences in the built
-  `dist/_astro/Layout.*.css`). `app.css` is still not imported — that is
-  dashboard chrome — but the cross-surface primitives now are. The bespoke
-  section styles (accent-letters, hero, marquee, cursor, floating CTA, glass
-  nav pill) stay local.
-  `SectionHeader.astro` is the shared masthead component
-  for the homepage sections; each section's eyebrow goes through
-  `.section-num` (with leading hairline rule) or `.eyebrow` for callouts.
+  `.eyebrow`, `.lead` — all from `base.css`; **`.brand-wordmark` comes from
+  `primitives.css`**, which is why that file is imported. `app.css` is
+  deliberately not imported — that is dashboard chrome — but the
+  cross-surface primitives are. The bespoke section styles (accent-letters,
+  hero, marquee, cursor, floating CTA, glass nav pill) stay local.
+  `SectionHeader.astro` is the shared masthead component for the homepage
+  sections: **headline only, no eyebrow slot.**
+  > **The numbered chapter marks are GONE from this site (0.14.3).** Every
+  > section used to open with `.section-num` — "— 01 / Über mich" + a 24px
+  > gold rule — via `SectionHeader` (6 sections), four inline copies
+  > (About, Contact, Consulting, PricingTeaser) and two hand-rolled twins
+  > that skipped the class entirely (Journal, `/preise` DE+EN). The
+  > headline now opens each section. `.section-num` itself **stays in
+  > tds-shared** — the blog and the legacy customer portal still render it,
+  > so this was a landingpage change with no library release.
+  > The `label` fields were NOT deleted from the data: every section's
+  > `cmsFor(...)` default must keep the shape the API validator expects,
+  > `FAQ.astro` names its tablist with `content.label`, and the pricing
+  > pages build their `<title>` + breadcrumb JSON-LD from `pricing.label`.
 - **The site is BORDERLESS: separation comes from fill, tone and spacing.**
   Almost nothing here draws a 1px box around itself any more — cards,
   buttons, chips, image frames, the pricing cards, the language dropdown,
@@ -443,8 +450,11 @@ See README's "Replace examples before go-live" section.
   tab title with the section name as the user scrolls past it.
   Hero keeps the canonical page title; below-hero sections render
   as `<section name> · <brand>`. Label resolution falls back
-  through `data-title` → `.section-num`/`.eyebrow` text (strips
-  the "— 02 / " prefix) → aria-labelledby target → aria-label → id.
+  through `data-title` → the built-in id→name map → the
+  `aria-labelledby` heading's text → aria-label → id. It used to
+  read the section's eyebrow instead of the heading; with the
+  chapter marks gone the only `.eyebrow`s left are FIELD labels,
+  so that path would have titled Contact "E-Mail".
   IntersectionObserver `rootMargin: "-30% 0px -60% 0px"` so the
   "active section" band sits ~30 % from the top — matches where
   the eye rests under smooth scroll. No-ops on pages with fewer
@@ -622,9 +632,13 @@ See README's "Replace examples before go-live" section.
   `--color-surface-navy/-accent/-ink` for brand-dark surfaces and
   `--color-card` (via `color-mix()` for glass) for elevated/glass
   surfaces. See "Dark mode" above and `src/styles/global.css`.
-- Don't inline `text-xs font-medium tracking-widest uppercase` for
-  section eyebrows. Use `.section-num` (with leading rule) for
-  numbered chapter labels and `.eyebrow` for field labels.
+- Don't put a label above a section headline at all — no
+  `.section-num` chapter mark, and no hand-inlined
+  `text-xs font-medium tracking-widest uppercase` stand-in (that
+  inline form is exactly how Journal and `/preise` kept theirs after
+  the class was dropped everywhere else). `.eyebrow` is for FIELD
+  labels — contact details, footer columns, the Currently
+  sub-headings — not for naming a section.
 - Don't bake a *fake* USt-IdNr into the JSON-LD layer — once Google
   + AI engines cache it, the wrong data sticks until they re-crawl.
   Street, phone and socials are real and already in `src/lib/seo.ts`;

@@ -235,14 +235,15 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
         const labelFor = (el: HTMLElement): string => {
           if (el.dataset.title) return el.dataset.title;
           if (map[el.id]) return map[el.id];
-          // Defensive fallback if a new section id appears that's
-          // not yet mapped — keeps the title from going blank.
-          const eyebrow = el.querySelector(".section-num, .eyebrow");
-          if (eyebrow?.textContent) {
-            return eyebrow.textContent
-              .replace(/^[—–-]\s*(\d+\s*\/\s*)?/, "")
-              .trim();
-          }
+          // Defensive fallback if a new section id appears that's not yet
+          // mapped — keeps the title from going blank. It reads the
+          // heading each section already names itself by, NOT an eyebrow:
+          // the numbered chapter marks this used to read are gone, and
+          // the `.eyebrow` class that remains marks FIELD labels, so that
+          // query would have titled the Contact section "E-Mail".
+          const headingId = el.getAttribute("aria-labelledby");
+          const heading = headingId ? document.getElementById(headingId) : null;
+          if (heading?.textContent) return heading.textContent.trim();
           return el.getAttribute("aria-label") || el.id;
         };
 
