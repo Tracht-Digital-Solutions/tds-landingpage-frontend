@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { planJump } from "~/lib/scrollJump";
 
 type ScrollTarget = number | HTMLElement | string;
 
@@ -13,6 +14,54 @@ declare global {
      */
     tdsScrollTo?: (target: ScrollTarget, opts?: { immediate?: boolean }) => void;
   }
+}
+
+/** How long a click-jump takes, both paths. */
+const JUMP_DURATION_MS = 1200;
+
+/**
+ * Clearance for the fixed floating header, read back off `<html>`'s
+ * `scroll-padding-top` (set in `styles/global.css`) instead of a constant
+ * kept here.
+ *
+ * One value then drives all four kinds of section jump: these tweens, the
+ * browser's own fragment landing on a cross-page `/#about`, back/forward
+ * restoration, and find-in-page / keyboard focus. It is also responsive —
+ * the bar is shorter below `lg` — which a JS constant was not.
+ *
+ * `scroll-padding-top` defaults to the keyword `auto`, which parses to NaN;
+ * treat that as no clearance rather than shifting every jump by NaN px.
+ */
+function headerClearance(): number {
+  const raw = getComputedStyle(document.documentElement).scrollPaddingTop;
+  const px = Number.parseFloat(raw);
+  return Number.isFinite(px) ? px : 0;
+}
+
+/** Furthest the document can scroll. */
+function maxScrollY(): number {
+  const doc = document.documentElement;
+  return Math.max(0, doc.scrollHeight - doc.clientHeight);
+}
+
+/**
+ * Resolve any accepted target to an absolute document Y, then plan the jump
+ * against the live layout. A number is taken as-is (back-to-top passes 0);
+ * an element gets the header clearance subtracted.
+ */
+function planFor(target: ScrollTarget) {
+  const startY = window.scrollY;
+  const node =
+    typeof target === "string" ? document.querySelector(target) : target;
+
+  const targetY =
+    typeof node === "number"
+      ? node
+      : node instanceof HTMLElement
+        ? startY + node.getBoundingClientRect().top - headerClearance()
+        : startY;
+
+  return { startY, ...planJump({ startY, targetY, maxY: maxScrollY() }) };
 }
 
 /**
@@ -29,24 +78,14 @@ declare global {
  *    default. Wheel/touch scrolling stays fully native; only click-jumps are
  *    driven, via a self-contained `requestAnimationFrame` tween that reuses
  *    the exact same bounce easing so mobile section-jumps bounce like desktop.
+ *
+ * Both paths plan through `~/lib/scrollJump`, so the destination pixel and
+ * the curve are identical; only the thing doing the writing differs.
  */
 export default function SmoothScroll() {
   useEffect(() => {
     const prefersReduce = () =>
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // Gentle ease-out-back — settles a hair past the target and eases back.
-    // Used ONLY for click-jumps, never for wheel/touch scroll.
-    const overshoot = 1.05;
-    const bounce = (t: number) => {
-      const c3 = overshoot + 1;
-      return 1 + c3 * Math.pow(t - 1, 3) + overshoot * Math.pow(t - 1, 2);
-    };
-
-    // Leave a little room under the fixed floating header when jumping to a
-    // section so its heading isn't tucked beneath the bar.
-    const HEADER_OFFSET = -88;
-    const JUMP_DURATION_MS = 1200;
 
     // Delegated handler factory: in-page anchor links (nav, footer, CTAs)
     // bounce-jump through `scrollTo` instead of the browser's instant/native
@@ -100,34 +139,30 @@ export default function SmoothScroll() {
         }
       };
 
+      // `behavior: "instant"` is load-bearing, not tidiness. tds-shared's
+      // base.css sets `html { scroll-behavior: smooth }`, and the two-argument
+      // `window.scrollTo(x, y)` form scrolls with behavior `auto`, which
+      // resolves to that CSS value. Every frame below therefore used to hand
+      // the browser a NEW native smooth scroll to retarget, so the page
+      // crawled or sat still and the jump never arrived — the reason a
+      // section jump did nothing at all on a phone. Desktop never showed it
+      // because Lenis writes its own scroll position with "instant" too.
+      const jumpTo = (y: number) =>
+        window.scrollTo({ top: y, behavior: "instant" });
+
       const tdsScrollTo: Window["tdsScrollTo"] = (target, opts) => {
         cancelTween();
-        const reduce = prefersReduce();
-        const startY = window.scrollY;
-        const maxY = Math.max(
-          0,
-          document.documentElement.scrollHeight - window.innerHeight,
-        );
-        const el =
-          typeof target === "string" ? document.querySelector(target) : target;
-        const rawDest =
-          typeof el === "number"
-            ? el
-            : el instanceof HTMLElement
-              ? startY + el.getBoundingClientRect().top + HEADER_OFFSET
-              : startY;
-        const destY = Math.min(Math.max(rawDest, 0), maxY);
-        const dist = destY - startY;
+        const { startY, destY, distance, easing } = planFor(target);
 
-        if ((opts?.immediate ?? reduce) || dist === 0) {
-          window.scrollTo(0, destY);
+        if ((opts?.immediate ?? prefersReduce()) || distance === 0) {
+          jumpTo(destY);
           return;
         }
 
         const start = performance.now();
         const step = (now: number) => {
           const t = Math.min(1, (now - start) / JUMP_DURATION_MS);
-          window.scrollTo(0, startY + dist * bounce(t));
+          jumpTo(startY + distance * easing(t));
           rafId = t < 1 ? requestAnimationFrame(step) : 0;
         };
         rafId = requestAnimationFrame(step);
@@ -136,6 +171,7 @@ export default function SmoothScroll() {
 
       // Hand control straight back to the platform the moment the user
       // starts scrolling themselves, so the tween never fights their touch.
+      // (The tap that *starts* a jump is safe: touchstart precedes click.)
       const onUserScroll = () => cancelTween();
       window.addEventListener("touchstart", onUserScroll, { passive: true });
       window.addEventListener("wheel", onUserScroll, { passive: true });
@@ -163,13 +199,16 @@ export default function SmoothScroll() {
     (window as unknown as { lenis?: Lenis }).lenis = lenis;
 
     const tdsScrollTo: Window["tdsScrollTo"] = (target, opts) => {
-      const reduce = prefersReduce();
-      const offset = typeof target === "number" ? 0 : HEADER_OFFSET;
-      lenis.scrollTo(target, {
-        offset,
+      const { destY, easing } = planFor(target);
+      // Hand Lenis a resolved NUMBER: element lookup, header clearance and
+      // the clamp to the document's scroll range all happened in `planFor`,
+      // so both paths land on the same pixel. It also keeps Lenis from
+      // applying `scroll-padding-top` a second time — it only does that for
+      // element targets, which would double the clearance.
+      lenis.scrollTo(destY, {
         duration: JUMP_DURATION_MS / 1000,
-        easing: bounce,
-        immediate: opts?.immediate ?? reduce,
+        easing,
+        immediate: opts?.immediate ?? prefersReduce(),
       });
     };
     window.tdsScrollTo = tdsScrollTo;

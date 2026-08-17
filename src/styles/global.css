@@ -56,6 +56,24 @@ body {
   overflow-x: clip;
 }
 
+/* Clearance for the fixed floating header on ANY kind of section jump —
+   one value, four consumers. `islands/SmoothScroll.tsx` reads it back off
+   <html> rather than carrying its own constant, and the browser applies it
+   by itself to the jumps JS never sees: the fragment landing on a
+   cross-page `/#about` (the nav links are `/#about`, so every jump from
+   /preise is one), back/forward scroll restoration, find-in-page, and
+   keyboard focus. Without it those all land with the heading tucked under
+   the bar. Responsive because the bar is: the nav collapses to the burger
+   below `lg`, where the pill is ~24px shorter. */
+html {
+  scroll-padding-top: 5rem;
+}
+@media (min-width: 64rem) {
+  html {
+    scroll-padding-top: 5.5rem;
+  }
+}
+
 /* About portrait — the headshot is an isolated cut-out on a near-white
    background. Cropped into the 3:4 frame the figure ends on a hard
    rectangular line at the bottom (torso) and right (shoulder). Fade

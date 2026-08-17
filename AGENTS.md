@@ -471,6 +471,35 @@ See README's "Replace examples before go-live" section.
   touch scrolling stays fully native (the tween aborts on the first
   `touchstart`/`wheel`). Don't reinstate the old blanket `if (isCoarsePointer)
   return` early-out — it killed the bounce on mobile.
+  Both paths plan the jump through **`src/lib/scrollJump.ts`** (DOM-free, unit
+  tested), so the destination pixel and the curve are identical and only the
+  thing writing the scroll position differs. Three rules that came out of the
+  two defects it was extracted to fix — each was invisible to `astro check`,
+  the build and the test suite, and each is provable only in a browser:
+  - **The touch tween MUST write with `window.scrollTo({ top, behavior:
+    "instant" })`, never the two-argument `window.scrollTo(x, y)` form.**
+    tds-shared's base.css sets `html { scroll-behavior: smooth }`, and the
+    positional form scrolls with behavior `auto`, which resolves to that CSS
+    value — so every frame handed the browser a *new* native smooth scroll to
+    retarget and the page crawled: measured on an emulated iPhone 13, a jump
+    that wanted 4849px had moved **21px after 12 frames** and landed 1366px
+    short. That is why section jumps did nothing on a phone. Desktop never
+    showed it because Lenis writes its own position with `"instant"` too.
+  - **An overshooting ease needs somewhere to overshoot INTO.** Past the top
+    or bottom of the document the browser just clamps, so the fixed 1.05
+    ease-out-back froze back-to-top at 0 for **38 of its 73 frames** (~630ms,
+    over half the animation) while Lenis animated a phantom negative
+    `animatedScroll`. `planJump` measures the runway beyond the destination
+    *in the direction of travel* and fits the overshoot to it, degrading to a
+    plain ease-out at a hard edge. Never hard-code the back constant again.
+  - **The header clearance is `scroll-padding-top` on `<html>`**
+    (`styles/global.css`), read back by the island — not a JS constant. One
+    value then also covers the jumps JS never sees: the fragment landing on a
+    cross-page `/#about` (every nav link is one, so every jump from `/preise`),
+    back/forward restoration, find-in-page and keyboard focus. It is
+    responsive, which the old `-88` was not. Consequence: `tdsScrollTo` hands
+    Lenis a resolved **number**, because Lenis applies `scroll-padding-top`
+    itself for *element* targets and the clearance would be doubled.
   `CustomCursor` is an additive dot +
   trailing ring that recolours from sampled background luminance and
   squash-stretches with pointer velocity — fine-pointer only, disabled under
