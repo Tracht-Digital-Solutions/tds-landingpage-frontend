@@ -589,6 +589,29 @@ See README's "Replace examples before go-live" section.
 - **`public/llms.txt`** is the llmstxt.org-convention markdown
   directory of services + pages for AI crawlers.
 
+## Mobile navigation (2026-08-18, tds-shared 0.25.0)
+
+This header WAS the reference the blog and the tools site were aligned to, so it
+moved into the library rather than being copied twice more. `Header.astro` keeps
+its markup, its docked-pill look and its scroll morph; the menu's mechanics come
+from `mountMobileNav` (`@tracht-digital-solutions/tds-shared/nav`) and the sheet
+from `.tds-mobile-menu`.
+
+- **The reference lacked two things and now has them:** focus moves into the
+  panel on open, and Escape hands it back to the hamburger. The blog and the
+  panel host already did this; the shared version is the union, not this file's
+  old behaviour.
+- **Never hide the toggle or the panel with `lg:hidden`.** tds-shared is
+  unlayered CSS and Tailwind's utilities sit in `@layer utilities`, so `hidden`
+  on an element wearing `.btn` loses outright — the breakpoint belongs to
+  `.tds-menu-toggle` / `.tds-mobile-menu`. A utility here is a silent no-op.
+- **`--tds-mobile-menu-inset` must match the panel's `top-[…]`**, because the
+  shared `max-height` subtracts it. They agree at `5.25rem` today;
+  `src/__tests__/header.test.ts` fails if they drift, since a fixed panel that
+  overflows shows no scrollbar and throws no error.
+- The `<script>` must stay non-`is:inline` — an inline script is not bundled and
+  the import would reach the browser as a bare specifier.
+
 ## Dark mode
 
 - All four frontends share a `data-theme="dark"` theme. A no-flash

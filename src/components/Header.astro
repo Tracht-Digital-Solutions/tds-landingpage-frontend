@@ -92,10 +92,14 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       />
       <LanguageToggle client:load lang={lang} />
 
+      {/* Geometry, colour and the 44px target come from the shared classes;
+          the breakpoint comes from `.tds-menu-toggle` itself, NOT from an
+          `lg:hidden` here — a utility loses to unlayered `.btn { display }`
+          and the button would stay visible on desktop with nothing to say so. */}
       <button
         id="menu-toggle"
         type="button"
-        class="menu-toggle lg:hidden relative inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--color-primary)] hover:bg-black/5 active:bg-black/10 transition-colors cursor-pointer"
+        class="btn btn-ghost tds-menu-toggle"
         aria-controls="mobile-menu"
         aria-expanded="false"
         aria-label={menuLabel}
@@ -108,9 +112,14 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
   </nav>
 </header>
 
+{/* Sheet, motion, scroll behaviour and the breakpoint are `.tds-mobile-menu`
+    (tds-shared). Only the docking offset stays here, because each header
+    floats differently — and it is published as `--tds-mobile-menu-inset` so
+    the panel's max-height leaves the viewport instead of running past it. */}
 <div
   id="mobile-menu"
-  class="mobile-menu lg:hidden fixed inset-x-3 top-[5.25rem] z-30 origin-top rounded-2xl bg-[var(--color-card)] backdrop-blur-md shadow-[0_10px_26px_-18px_rgba(5,15,104,0.3)] p-3"
+  class="tds-mobile-menu inset-x-3 top-[5.25rem]"
+  style="--tds-mobile-menu-inset: 5.25rem"
   aria-hidden="true"
 >
   <ul class="space-y-0.5">
@@ -119,7 +128,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         <a
           href={sectionHref(item.id)}
           data-menu-link
-          class="flex items-center min-h-12 px-4 text-lg font-[var(--font-display)] text-[var(--color-black)] rounded-xl hover:bg-black/5 active:bg-black/10 transition-colors"
+          class="tds-mobile-menu__link"
         >
           {item.label}
         </a>
@@ -134,7 +143,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       <a
         href={pricingHref}
         data-menu-link
-        class="flex items-center min-h-12 px-4 text-lg font-[var(--font-display)] text-[var(--color-black)] rounded-xl hover:bg-black/5 active:bg-black/10 transition-colors"
+        class="tds-mobile-menu__link"
       >
         {t.nav.pricing}
       </a>
@@ -144,7 +153,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         href={siteConfig.blogUrl}
         rel="me noopener"
         data-menu-link
-        class="flex items-center justify-between min-h-12 px-4 text-lg font-[var(--font-display)] text-[var(--color-black)] rounded-xl hover:bg-black/5 active:bg-black/10 transition-colors"
+        class="tds-mobile-menu__link justify-between"
       >
         <span>{t.nav.blog}</span>
         <span aria-hidden="true" class="text-sm text-[var(--color-muted)]">↗</span>
@@ -312,39 +321,26 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      surface default), and the shared block also brings the
      prefers-reduced-motion rule this copy never had. */
 
-  /* Mobile menu panel — closed: scaled, transparent, untouchable.
-     Open: full-size, opaque, interactive. Pointer-events flip with
-     visibility so closed panel doesn't intercept taps. */
-  .mobile-menu {
-    opacity: 0;
-    transform: scale(0.96) translateY(-8px);
-    pointer-events: none;
-    visibility: hidden;
-    transition:
-      opacity 200ms ease,
-      transform 200ms ease,
-      visibility 0s linear 200ms;
-  }
-  .mobile-menu[data-open="true"] {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    pointer-events: auto;
-    visibility: visible;
-    transition:
-      opacity 200ms ease,
-      transform 200ms ease,
-      visibility 0s linear 0s;
-  }
+  /* The mobile menu panel is `.tds-mobile-menu` (tds-shared) as of 0.25.0.
+     This file used to own its geometry, its fade and its reduced-motion
+     rule; the blog and the tools site now render the same sheet, so the
+     copy that lived here was the thing keeping them apart. Its two
+     literal `200ms ease` transitions are `--tds-dur-base`/`--tds-ease-out`
+     in the shared block, which is also what the library's own test
+     demands. Only the docking offset stayed behind, on the element. */
 
   @media (prefers-reduced-motion: reduce) {
-    .site-header,
-    .mobile-menu {
+    .site-header {
       transition-duration: 0.01ms;
     }
   }
 </style>
 
 <script>
+  // NOT `is:inline` — an inline script is not bundled, so this import would
+  // reach the browser as a bare specifier.
+  import { mountMobileNav } from "@tracht-digital-solutions/tds-shared/nav";
+
   const header = document.getElementById("site-header");
   const toggle = document.getElementById("menu-toggle");
   const menu = document.getElementById("mobile-menu");
@@ -362,42 +358,14 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     window.addEventListener("scroll", updateScroll, { passive: true });
   }
 
+  // The open/close mechanics are shared (tds-shared 0.25.0). This file used
+  // to own ~35 lines of them and was the reference the blog and the tools
+  // site were measured against — which is exactly why it had to move rather
+  // than be copied twice more. The shared version also brings the two things
+  // this copy never had: focus moves into the panel on open, and Escape
+  // hands it back to the hamburger.
   if (toggle && menu) {
-    const setOpen = (open: boolean) => {
-      toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      menu.dataset.open = open ? "true" : "false";
-      menu.setAttribute("aria-hidden", open ? "false" : "true");
-      document.body.style.overflow = open ? "hidden" : "";
-    };
-
-    toggle.addEventListener("click", () => {
-      const next = toggle.getAttribute("aria-expanded") !== "true";
-      setOpen(next);
-    });
-
-    menu.querySelectorAll<HTMLAnchorElement>("[data-menu-link]").forEach((link) => {
-      link.addEventListener("click", () => setOpen(false));
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
-        setOpen(false);
-      }
-    });
-
-    document.addEventListener("click", (e) => {
-      if (toggle.getAttribute("aria-expanded") !== "true") return;
-      const target = e.target as Node;
-      if (menu.contains(target) || toggle.contains(target)) return;
-      setOpen(false);
-    });
-
-    // Close the panel automatically when crossing into the desktop
-    // (lg / 1024px) nav so it never lingers after a viewport resize.
-    const mq = window.matchMedia("(min-width: 1024px)");
-    mq.addEventListener("change", (e) => {
-      if (e.matches) setOpen(false);
-    });
+    mountMobileNav({ toggle, panel: menu });
   }
 
   // Logo: when we're already on the page it links to (the homepage in
