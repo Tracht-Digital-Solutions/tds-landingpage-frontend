@@ -1,48 +1,48 @@
 # Every group below is INDEPENDENT: a crawler obeys only the group that names
-# it, and ignores the "*" group entirely. So the /_setup/ rule has to be
+# it, and ignores the "*" group entirely. So the /install/ rule has to be
 # repeated in each group — a single Disallow in the "*" group would leave the
 # host-side setup wizard crawlable by every named bot here.
 
 User-agent: *
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 # AI search crawlers are welcome — content is meant to be cited.
 User-agent: GPTBot
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: OAI-SearchBot
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: ChatGPT-User
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: PerplexityBot
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: ClaudeBot
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: Claude-Web
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: Google-Extended
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: anthropic-ai
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 User-agent: Applebot-Extended
 Allow: /
-Disallow: /_setup/
+Disallow: /install/
 
 # Legal pages stay out of indexes via per-page meta robots; no
 # need to disallow here.
