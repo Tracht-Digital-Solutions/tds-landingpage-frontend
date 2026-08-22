@@ -230,8 +230,19 @@ See README's "Replace examples before go-live" section.
   **The section deliberately promises no free or time-boxed initial
   consultation** — the Kleinanzeigen carry that offer, the website does
   not. Don't reintroduce "kostenfrei"/"30 Minuten" here, in `t.hero.cta1`
-  or in `lib/faq.ts`. (`t.pricing` still names a free intro call; that is
-  a separate, pre-existing commercial decision — see § Pricing.)
+  or in `lib/faq.ts`.
+  **Seit 0.16.0 gilt das für die GANZE Site, auch `t.pricing`.** Die
+  Preise-Seite nannte weiterhin ein „Erstgespräch (kostenfrei, bis 60
+  Min.)" und warb mit „unverbindlich, kostenfrei und ohne Sales-Pitch"
+  — eine vorbestehende Ausnahme, die die Vorgabe an der Stelle aushebelte,
+  an der es ums Geld geht. Ersetzt durch „Aufnahme und Sortierung Ihrer
+  Anforderungen" bzw. „Schreiben Sie mir kurz, worum es geht."; der
+  Button heißt jetzt überall **„Unverbindlich anfragen"**.
+  Prüfbar im gebauten `dist/` per Suche nach `kostenlos` / `kostenfrei` /
+  `30 Minuten` / `60 Min` / `free`. **Ein legitimer Treffer bleibt:**
+  „your choice is free and can be changed at any time" in
+  `cookieNotice.consentText` — das ist die Freiwilligkeit der
+  AdSense-Einwilligung und ein geteilter Key, kein Angebot.
 - **FAQ section** (`src/components/sections/FAQ.astro`): Native
   `<details>`/`<summary>` accordions — zero JS, accessible,
   keyboard-navigable. Eleven items, written for the audience the
@@ -245,6 +256,22 @@ See README's "Replace examples before go-live" section.
   older browsers fall back to the default `<details>` snap. Copy
   is inlined per the same rule as Currently — FAQ answers drift
   faster than the rest of the bundle.
+  **Antworten bleiben bei höchstens zwei Sätzen** (0.16.0 kürzte sie von
+  je drei bis vier). Elf Fragen mit je vier Sätzen liest niemand, und
+  eine FAQ, die nicht gelesen wird, nimmt keiner Anfrage die Hürde —
+  sie ist nur Seitenlänge. Die Antworten sind 1:1 das FAQPage-JSON-LD,
+  eine Kürzung wirkt also auch im Suchergebnis.
+- **Textlänge ist eine Entscheidung, kein Zufall** (0.16.0). Die Seite
+  las sich wie eine Agentur, nicht wie ein Freelancer: Leistungskarten
+  ~300 Zeichen, About-Absätze ~250, Hero-Untertext 220. Richtwerte
+  seither: Hero-Untertext ≤ 130, Leistungsbeschreibung ≤ 170,
+  About-Absatz ≤ 170, Prozessschritt ≤ 110, FAQ-Antwort ≤ 150.
+  Ein Gedanke pro Satz, Ich-Stimme, **„Sie"-Form** (die Zielgruppe sind
+  Handwerk, Läden und kleine Betriebe — der Freelancer-Charakter kommt
+  über kurze Sätze, nicht über Duzen). **Nichts davon ist getestet** —
+  kein Build und kein Test sieht einen zu langen Absatz, anders als bei
+  der Meta-Description (`seo.test.ts`, 80–160). Wer Copy anfasst, prüft
+  sie im Browser.
 - **Editable content via `src/lib/cms.ts`**: `fetchBlocks(lang)` does a
   single build-time GET of `PUBLIC_CONTENT_API_URL/landing?lang=` (memoised)
   and `cmsFor(section, lang, fallback)` merges the admin-edited block for that
@@ -418,29 +445,39 @@ See README's "Replace examples before go-live" section.
   generischer bunter Verlauf, starke Parallax-Effekte, dauerhaftes
   Pulsieren), and it cost a `mousemove` listener plus eight motion values
   on every load.
-- **Hero composition**: three stacked title tiers in addition to
-  the data-driven pill.
+- **Hero composition: DREI Blöcke, das Motto führt** (seit 0.16.0 —
+  vorher vier). Reihenfolge im DOM ist Motto → H1 → Untertext → CTAs,
+  die `fadeUp`-Verzögerungen (0.05 / 0.08 / 0.1 / 0.15) laufen mit.
+  - **Brand slogan / Motto** (display-tier, führt): `t.footer.slogan`
+    ("Digitale Lösungen, die wirklich passen." / "Digital solutions
+    that truly fit.") in kursivem Akzent. Es stand vorher als DRITTE
+    von vier Zeilen zwischen Tagline und Untertext — begraben an der
+    Stelle, an der es am wenigsten wirkt. Dass die Footer-Zeile
+    wiederverwendet wird, hält das Markenversprechen über beide
+    Flächen identisch, ohne einen hero-eigenen Key. Die OG-Karte
+    (`src/og/render.ts`) trägt denselben Satz fest verdrahtet.
+  - **H1** (display): `t.hero.headline + headlineAccent +
+    headlineSuffix` — **"Digitalisierung, die *Arbeit* abnimmt." /
+    "Digitalization that takes *work* off your hands."** Kursiver
+    Akzent auf dem Wort, um das es geht.
+  - **`t.hero.tagline` GIBT ES NICHT MEHR.** Die Zeile ("Beratung ·
+    Konzept · Umsetzung — alles aus einer Hand.") sagte dasselbe wie
+    der Untertext direkt darunter; der Key ist in beiden Sprachen
+    entfernt, ebenso aus der `cmsFor`-Fallback-Form beider
+    index-Seiten und aus der i18n-Formprüfung. **Das Feld „Tagline"
+    im CMS-Editor** (`tds-ext-website-cms-pkg`, `SitesList.tsx`,
+    Gruppe `hero`) zeigt seitdem ins Leere — es zu entfernen braucht
+    einen eigenen Paket-Release und ist bewusst offen.
+  - **Untertext**: `t.hero.sub`, auf zwei Zeilen gekürzt.
   - **Pill**: when `featuredTopic` is passed it renders as an `<a>`
     to the live blog article (pulse-dot · "Im Journal" / "In the
     journal" · title · ↗). When absent, falls back to the static
     availability + location pill.
-  - **H1** (display): `t.hero.headline + headlineAccent +
-    headlineSuffix` — currently **"Software, die mit Ihrem
-    *Unternehmen* wächst." / "Software that grows with *your*
-    business."** (tds-shared-pkg 0.2.7). Italic accent on the personal
-    pronoun ("Unternehmen" / "your") so the brand-distinctive
-    emphasis lands on what the reader cares about.
-  - **Tagline strapline**: `t.hero.tagline` ("Beratung · Konzept ·
-    Umsetzung — alles aus einer Hand." / "Consulting · concept ·
-    delivery — all from one source."). Sized text-base → md:text-xl in
-    muted body colour. Sits directly under the H1 and picks up secondary
-    SEO weight the H1 deliberately doesn't carry.
-  - **Brand slogan** (display-tier): `t.footer.slogan` ("Digitale
-    Lösungen, die wirklich passen." / "Digital solutions that truly
-    fit.") in italic accent — sized text-2xl → md:text-4xl
-    so it reads as a banner. Reusing the footer slogan keeps the
-    brand-tier promise consistent across both surfaces without a
-    separate hero-only key.
+  > **Gemessen, nicht geschätzt:** das Motto über der H1 wiegt bei
+  > 1440 px 30 px gegen 72 px, bei 375 px 20 px gegen 32 px — es liest
+  > als Eyebrow, nicht als Konkurrenz. Die Klassenlisten sind
+  > unverändert; hier hat sich nur die DOM-Reihenfolge geändert. Wer
+  > die Größen anfasst, fasst das Design an.
 - **External APIs**: contact form POSTs to
   `https://api.tracht-digital.de/contact`. Journal teaser fetches
   from `https://api.tracht-digital.de/content/blog?limit=3` at
