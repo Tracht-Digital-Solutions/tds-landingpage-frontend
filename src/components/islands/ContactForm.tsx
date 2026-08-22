@@ -10,7 +10,7 @@ import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
  * Where this form posts if the host has not been configured.
  *
  * Baked in by Vite at build time. `runtimeSetting("contactUrl", …)` prefers
- * whatever `/_setup/install.php` wrote into `tds-runtime.json` on the host, so
+ * whatever `/install/` wrote into `tds-runtime.json` on the host, so
  * the endpoint can be re-pointed (or routed through the same-origin proxy)
  * without a rebuild. No config on the host means this value, i.e. exactly the
  * behaviour before the wizard existed.
