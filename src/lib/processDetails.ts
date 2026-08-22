@@ -19,44 +19,44 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
   de: {
     "01": {
       detail:
-        "Sie erzählen mir, was Sie im Alltag aufhält — die Liste, die dreimal geführt wird, das Formular, das jemand abtippt, die Seite, über die niemand anfragt. Ich frage nach, bis ich Ihre Arbeit verstanden habe, und sage ehrlich, ob sich eine Umsetzung überhaupt lohnt.",
+        "Sie erzählen mir, was Sie aufhält — die Liste, die dreimal geführt wird, die Seite, über die niemand anfragt. Ich frage nach und sage ehrlich, ob es sich lohnt.",
       outcome: "Ergebnis: Klarheit, ob und woran wir arbeiten.",
     },
     "02": {
       detail:
-        "Aus dem Gespräch wird eine verständliche Grundlage: was wirklich gebraucht wird, welcher Weg sinnvoll ist, was er ungefähr kostet und wie lange er dauert. Kein Fachchinesisch, sondern etwas, das Sie lesen und entscheiden können.",
+        "Daraus wird eine Grundlage, die Sie lesen und entscheiden können: was gebraucht wird, welcher Weg sinnvoll ist, was er kostet, wie lange er dauert.",
       outcome: "Ergebnis: Plan, Zeitrahmen und ein Budget mit Obergrenze.",
     },
     "03": {
       detail:
-        "Gebaut wird in kurzen, sichtbaren Schritten. Sie bekommen früh Zwischenstände zum Anschauen und Ausprobieren, statt am Ende vor etwas Fertigem zu stehen — nachsteuern ist unterwegs günstig und hinterher teuer.",
+        "Gebaut wird in kurzen, sichtbaren Schritten. Sie sehen früh Zwischenstände zum Ausprobieren — nachsteuern ist unterwegs günstig, hinterher teuer.",
       outcome: "Ergebnis: Sie sehen früh, wie es wird.",
     },
     "04": {
       detail:
-        "Übergabe mit Einweisung, damit Sie Inhalte, Produkte und Preise selbst pflegen können. Danach kümmere ich mich auf Wunsch weiter um Updates und Änderungen — Sie sind aber nicht daran gebunden.",
+        "Übergabe mit Einweisung, damit Sie Inhalte und Preise selbst pflegen können. Danach kümmere ich mich auf Wunsch weiter — gebunden sind Sie nicht.",
       outcome: "Ergebnis: Sie können selbst damit arbeiten.",
     },
   },
   en: {
     "01": {
       detail:
-        "You tell me what holds you up day to day — the list kept in three places, the form somebody retypes, the page nobody gets in touch through. I keep asking until I understand how you work, and say honestly whether building anything is worth it.",
+        "You tell me what holds you up — the list kept in three places, the page nobody gets in touch through. I keep asking, and say honestly whether it's worth it.",
       outcome: "Outcome: clarity on whether, and on what, we work.",
     },
     "02": {
       detail:
-        "The conversation turns into something you can actually read: what is genuinely needed, which route makes sense, roughly what it costs and how long it takes. Not jargon — something you can decide on.",
+        "That turns into something you can read and decide on: what is needed, which route makes sense, roughly what it costs and how long it takes.",
       outcome: "Outcome: a plan, a timeline and a budget with a ceiling.",
     },
     "03": {
       detail:
-        "It gets built in short, visible steps. You see work in progress early and can try it out, instead of being handed something finished at the end — changing course is cheap along the way and expensive afterwards.",
+        "It gets built in short, visible steps. You see work in progress early — changing course is cheap along the way and expensive afterwards.",
       outcome: "Outcome: you see early how it's shaping up.",
     },
     "04": {
       detail:
-        "Handover with a walkthrough, so you can maintain content, products and prices yourself. After that I'll keep handling updates and changes if you want — but you aren't tied to it.",
+        "Handover with a walkthrough, so you can maintain content and prices yourself. After that I'll keep going if you want — you aren't tied to it.",
       outcome: "Outcome: you can work with it yourself.",
     },
   },

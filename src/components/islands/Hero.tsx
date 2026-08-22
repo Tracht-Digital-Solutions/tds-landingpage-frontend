@@ -113,7 +113,6 @@ export type HeroContent = Partial<{
   headline: string;
   headlineAccent: string;
   headlineSuffix: string;
-  tagline: string;
   sub: string;
   cta1: string;
   cta2: string;
@@ -201,8 +200,21 @@ export default function Hero({
       </div>
 
       <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full text-center md:text-left">
-        <motion.h1
+        {/* Das Motto führt. Es stand vorher als DRITTE von vier Zeilen —
+            zwischen einer Tagline und dem Untertext, die beide dasselbe
+            noch einmal sagten. Die Tagline ist entfallen, das Motto ist
+            nach oben gezogen. Die Klassenliste ist absichtlich
+            unverändert: hier hat sich nur die Reihenfolge im DOM
+            geändert, nicht das Design. */}
+        <motion.p
           {...fadeUp(0.05)}
+          className="hero-slogan text-xl sm:text-2xl md:text-3xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-6 max-w-3xl leading-snug mx-auto md:mx-0"
+        >
+          {t.footer.slogan}
+        </motion.p>
+
+        <motion.h1
+          {...fadeUp(0.08)}
           id="hero-heading"
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-[1.05] tracking-tight text-[var(--color-black)] mb-4 max-w-4xl mx-auto md:mx-0"
           style={{ fontVariationSettings: '"opsz" 144' }}
@@ -218,29 +230,6 @@ export default function Hero({
           </span>{" "}
           {h.headlineSuffix}
         </motion.h1>
-
-        {/* Third title-tier strapline — picks up secondary SEO
-            (Beratung / Konzept / Code) the H1 doesn't carry. Sits
-            directly under the H1, sized small enough to read as a
-            supporting line. */}
-        <motion.p
-          {...fadeUp(0.07)}
-          className="text-base sm:text-lg text-[var(--color-muted)] mb-4 max-w-2xl mx-auto md:mx-0"
-        >
-          {h.tagline}
-        </motion.p>
-
-        {/* Second main title — brand slogan picked up from
-            tds-shared. Sits between the H1 strapline and the sub
-            paragraph, sized smaller than the h1 but still display-
-            tier so it reads as a secondary banner rather than an
-            eyebrow. */}
-        <motion.p
-          {...fadeUp(0.08)}
-          className="hero-slogan text-xl sm:text-2xl md:text-3xl font-[var(--font-display)] italic text-[var(--color-accent)] mb-6 max-w-3xl leading-snug mx-auto md:mx-0"
-        >
-          {t.footer.slogan}
-        </motion.p>
 
         <motion.p
           {...fadeUp(0.1)}
