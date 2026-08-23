@@ -1,3 +1,4 @@
+import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 /**
  * Build-time fetch of editable landingpage content blocks from
  * tds-content-api's `GET /landing?lang=…`. Each block is the content object
@@ -33,7 +34,8 @@ export async function fetchBlocks(lang: "de" | "en"): Promise<ContentBlocks> {
   try {
     const url = new URL(`${CONTENT_API_URL}/landing`);
     url.searchParams.set("lang", lang);
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
+    assertKeyAccepted(res, url);
     if (res.ok) {
       const data = (await res.json()) as { blocks?: ContentBlocks };
       blocks = data.blocks ?? {};

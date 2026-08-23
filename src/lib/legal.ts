@@ -14,6 +14,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 
 /** Resolved at build time from env, with the production default. */
 const CONTENT_API_URL =
@@ -44,7 +45,8 @@ export async function fetchLegalIndex(): Promise<LegalDocIndex> {
 
   let docs: LegalDocIndex = {};
   try {
-    const res = await fetch(`${CONTENT_API_URL}/legal`, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(`${CONTENT_API_URL}/legal`, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
+    assertKeyAccepted(res, `${CONTENT_API_URL}/legal`);
     if (res.ok) {
       const data = (await res.json()) as { docs?: LegalDocIndex };
       docs = data.docs ?? {};
@@ -89,7 +91,8 @@ export async function legalDocBytes(key: string, lang: "de" | "en"): Promise<Uin
     try {
       const url = new URL(`${CONTENT_API_URL}/legal/${key}.pdf`);
       url.searchParams.set("lang", lang);
-      const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+      const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(20_000) });
+      assertKeyAccepted(res, url);
       if (res.ok) {
         const bytes = Buffer.from(await res.arrayBuffer());
         // A truthful PDF or nothing: an error page or an HTML SPA fallback
