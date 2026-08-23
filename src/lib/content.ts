@@ -1,4 +1,5 @@
 import { siteConfig } from "~/lib/seo";
+import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 
 /**
  * Shared shape of a published post as returned by tds-content-api's
@@ -38,7 +39,8 @@ export async function fetchTopics(
     const url = new URL(`${CONTENT_API_URL}/blog`);
     url.searchParams.set("limit", String(limit));
     url.searchParams.set("lang", lang);
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
+    assertKeyAccepted(res, url);
     if (!res.ok) return [];
     const data = (await res.json()) as { posts?: ContentPost[] };
     return data.posts ?? [];
@@ -69,7 +71,8 @@ export async function fetchPostsBySlug(
       try {
         const url = new URL(`${CONTENT_API_URL}/blog/${slug}`);
         url.searchParams.set("lang", lang);
-        const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+        const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
+        assertKeyAccepted(res, url);
         if (!res.ok) return null;
         const data = (await res.json()) as { post?: ContentPost };
         return data.post ?? null;
