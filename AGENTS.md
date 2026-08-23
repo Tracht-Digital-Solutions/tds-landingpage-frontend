@@ -219,8 +219,24 @@ See README's "Replace examples before go-live" section.
   (`individuelle-software-kosten`, `drei-prozesse-automatisierung`,
   `warum-ich-nicht-skaliere`) are now seeded into `tds-content-api` by its
   `SeedInitialBlogPosts` migration (DE + EN), so a migrated prod shows the real
-  posts. `localCovers` in the component still maps those slugs to
-  `/journal/*.webp` when a post has no live `coverHint`.
+  posts.
+  - **A post with no uploaded cover gets the SAME abstract brand cover the blog
+    draws for it** — `AbstractCover` from `tds-shared/components`, keyed by a
+    hash of the slug, rendered without a `client:` directive so it costs no
+    JavaScript. What that replaced: three stock photos hosted here under
+    `public/journal/*.webp` (which the blog never showed) and, for everything
+    else, a grey box captioned with a *prose description* of the picture that
+    was meant to go there. The same article looked like two different things on
+    the two public properties. Those webp files are deleted; `ImagePlaceholder`
+    stays, but only `PortfolioCard` uses it now.
+  - **`coverHint` is resolved to an absolute URL at the data layer**
+    (`lib/content.ts` `resolveCoverHint`, the twin of the blog's). The CMS
+    persists an uploaded cover as a storage-relative `/uploads/…` path; rendered
+    as-is here it resolves against `tracht-digital.de` and 404s — a broken image
+    the build never sees, because the build never makes the request.
+  - **Never pass `t.blog.posts[].imagePlaceholder` to an `<img src>`.** It is a
+    German sentence describing the intended cover, not a URL. The i18n fallback
+    branch passes `coverHint: null` on purpose.
 - **Consulting section** (`src/components/sections/Consulting.astro`):
   Gradient card matching `PricingTeaser`'s visual language so the
   two callouts pair as a system. Two CTAs — primary
