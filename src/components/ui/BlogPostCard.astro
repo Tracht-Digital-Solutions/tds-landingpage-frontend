@@ -1,5 +1,5 @@
 ---
-import ImagePlaceholder from "./ImagePlaceholder.astro";
+import { AbstractCover, coverVariant, hasPhotoCover } from "@tracht-digital-solutions/tds-shared/components";
 
 interface Props {
   category: string;
@@ -8,21 +8,24 @@ interface Props {
   slug: string;
   formattedDate: string;
   readMore: string;
-  placeholderLabel: string;
-  imagePlaceholder: string;
+  /** Absolute (or site-local) cover image URL; null when the post has none. */
+  coverHint?: string | null;
 }
 
-const { category, title, excerpt, slug, formattedDate, readMore, placeholderLabel, imagePlaceholder } = Astro.props;
+const { category, title, excerpt, slug, formattedDate, readMore, coverHint = null } = Astro.props;
 
 const blogBase = (import.meta.env.PUBLIC_BLOG_BASE_URL as string | undefined) ?? "https://blog.tracht-digital.de";
 
-// When the post carries a real cover image — either a remote URL
-// (coverHint set to an uploaded image) or a local landingpage-hosted
-// placeholder (e.g. /journal/<slug>.webp) — render the photo; otherwise
-// fall back to the labelled placeholder box describing the cover.
-const coverUrl = /^(https?:\/\/|\/).+\.(webp|avif|png|jpe?g|svg)$/i.test(imagePlaceholder)
-  ? imagePlaceholder
-  : null;
+/**
+ * A post without an uploaded cover gets the SAME flat brand geometry the blog
+ * draws for it — `AbstractCover`, keyed by a hash of the slug, from tds-shared.
+ * It used to get a grey box captioned with a prose description of the picture
+ * that was meant to go there (plus three hand-hosted stock photos for the
+ * launch posts), so the same article looked like two different things on the
+ * two properties. Rendered without a `client:` directive: this is static
+ * markup, so the cover costs no JavaScript.
+ */
+const hasPhoto = hasPhotoCover(coverHint);
 ---
 
 <article class="group" data-journal-card>
@@ -30,10 +33,10 @@ const coverUrl = /^(https?:\/\/|\/).+\.(webp|avif|png|jpe?g|svg)$/i.test(imagePl
     href={`${blogBase}/${slug}`}
     class="block rounded-[6px] transition-transform duration-300 ease-out group-hover:-translate-y-1.5 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0"
   >
-    {coverUrl ? (
-      <div class="overflow-hidden rounded-[6px] bg-[var(--color-soft)] shadow-sm transition-shadow duration-300 group-hover:shadow-[0_18px_44px_-18px_rgba(5,15,104,0.4)]">
+    <div class="overflow-hidden rounded-[6px] bg-[var(--color-soft)] shadow-sm transition-shadow duration-300 group-hover:shadow-[0_18px_44px_-18px_rgba(5,15,104,0.4)]">
+      {hasPhoto ? (
         <img
-          src={coverUrl}
+          src={coverHint}
           alt={title}
           width="1200"
           height="900"
@@ -41,10 +44,12 @@ const coverUrl = /^(https?:\/\/|\/).+\.(webp|avif|png|jpe?g|svg)$/i.test(imagePl
           decoding="async"
           class="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
-      </div>
-    ) : (
-      <ImagePlaceholder aspect="aspect-[4/3]" label={placeholderLabel} description={imagePlaceholder} />
-    )}
+      ) : (
+        <div class="aspect-[4/3] w-full transition-transform duration-700 ease-out group-hover:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover:scale-100">
+          <AbstractCover variant={coverVariant(slug)} />
+        </div>
+      )}
+    </div>
     <div class="pt-5">
       <p class="text-xs font-medium tracking-widest text-[var(--color-accent)] uppercase mb-3">
         {category}

@@ -34,17 +34,14 @@ const formatter = new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-IE", {
   day: "numeric",
 });
 
-// Local cover placeholders, hosted on the landingpage itself. Used
-// whenever a post has no live cover URL yet (e.g. the content API
-// hasn't been re-seeded with the uploaded cover_hint) so the Journal
-// teaser still shows the real artwork instead of an empty box. The
-// live coverHint always wins when present.
-const localCovers: Record<string, string> = {
-  "individuelle-software-kosten": "/journal/individuelle-software-kosten.webp",
-  "drei-prozesse-automatisierung": "/journal/drei-prozesse-automatisierung.webp",
-  "warum-ich-nicht-skaliere": "/journal/warum-ich-nicht-skaliere.webp",
-};
-
+/**
+ * A post with no uploaded cover now renders the shared abstract brand cover —
+ * the same drawing the blog gives it, because the variant is a hash of the
+ * slug (see `BlogPostCard.astro`). What that replaced was three stock photos
+ * hosted here under `/journal/`, which the blog never showed, plus a grey box
+ * captioned with a prose description of the intended picture. Two surfaces,
+ * two pictures of the same article. `coverHint` from the API still wins.
+ */
 const posts =
   livePosts.length > 0
     ? livePosts.map((p) => ({
@@ -53,7 +50,7 @@ const posts =
         title: p.title,
         excerpt: p.excerpt,
         formattedDate: p.publishedAt ? formatter.format(new Date(p.publishedAt)) : "",
-        imagePlaceholder: p.coverHint ?? localCovers[p.slug] ?? "",
+        coverHint: p.coverHint,
       }))
     : t.blog.posts.map((p) => ({
         slug: p.slug,
@@ -61,7 +58,9 @@ const posts =
         title: p.title,
         excerpt: p.excerpt,
         formattedDate: formatter.format(new Date(p.date)),
-        imagePlaceholder: localCovers[p.slug] ?? p.imagePlaceholder,
+        // `p.imagePlaceholder` is a German sentence describing the cover, not
+        // a URL — it must never reach an <img src>.
+        coverHint: null,
       }));
 
 // Lay the cards out in a single flexible row (max 4), collapsing to one
@@ -103,8 +102,7 @@ const gridCols = colClass[Math.min(posts.length, 4)] ?? "sm:grid-cols-3";
           excerpt={post.excerpt}
           formattedDate={post.formattedDate}
           readMore={t.blog.readMore}
-          placeholderLabel={t.blog.placeholderLabel}
-          imagePlaceholder={post.imagePlaceholder}
+          coverHint={post.coverHint}
         />
       ))}
     </div>

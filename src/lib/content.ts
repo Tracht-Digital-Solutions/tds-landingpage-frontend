@@ -21,6 +21,27 @@ const CONTENT_API_URL =
   "https://api.tracht-digital.de/content";
 
 /**
+ * Make an uploaded cover URL absolute. The CMS persists `coverHint` as a
+ * storage-relative `/uploads/…` path; rendered as-is in an `<img src>` here it
+ * would resolve against `tracht-digital.de` and 404 — a broken image in the
+ * Journal row with nothing to say so, since the build never sees the request.
+ * Anchor it to the content API's origin at the data layer, exactly as
+ * `tds-blog-frontend`'s `resolveCoverHint` does, so every consumer downstream
+ * just works. Absolute or empty values pass through unchanged.
+ */
+export function resolveCoverHint(coverHint?: string | null): string | null {
+  if (!coverHint) return null;
+  if (/^https?:\/\//i.test(coverHint)) return coverHint;
+  if (coverHint.startsWith("/")) return `${CONTENT_API_URL}${coverHint}`;
+  return coverHint;
+}
+
+const withResolvedCover = (p: ContentPost): ContentPost => ({
+  ...p,
+  coverHint: resolveCoverHint(p.coverHint),
+});
+
+/**
  * Build-time fetch of the most recent published posts. Used by both
  * the Hero pill (the first / "main-theme" post) and the Currently
  * section (the full list). Returns `[]` on any failure so consumers
@@ -43,7 +64,7 @@ export async function fetchTopics(
     assertKeyAccepted(res, url);
     if (!res.ok) return [];
     const data = (await res.json()) as { posts?: ContentPost[] };
-    return data.posts ?? [];
+    return (data.posts ?? []).map(withResolvedCover);
   } catch (err) {
     console.warn(
       "[tds-landingpage] topics fetch failed, falling back to empty list:",
@@ -75,7 +96,7 @@ export async function fetchPostsBySlug(
         assertKeyAccepted(res, url);
         if (!res.ok) return null;
         const data = (await res.json()) as { post?: ContentPost };
-        return data.post ?? null;
+        return data.post ? withResolvedCover(data.post) : null;
       } catch (err) {
         console.warn(
           `[tds-landingpage] curated post "${slug}" fetch failed, skipping:`,
