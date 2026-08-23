@@ -22,6 +22,11 @@ export default defineConfig({
       // Keep noindex legal pages, the OG endpoint, the vCard file and error
       // pages out.
       filter: (page) =>
+        // `/install` is an operator page: noindex, and it has no /en/ twin, so
+        // the i18n option above would emit an hreflang alternate pointing at a
+        // 404 — which invalidates the whole set, this page's German side
+        // included. It was invisible here while it was a public/ directory.
+        !page.includes("/install") &&
         !page.includes("/legal/") &&
         !page.includes("/og/") &&
         !page.includes(".vcf") &&
