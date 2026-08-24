@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 import { planJump } from "~/lib/scrollJump";
+import { createScrollLock } from "~/lib/scrollLock";
 
 type ScrollTarget = number | HTMLElement | string;
 
@@ -81,11 +82,26 @@ function planFor(target: ScrollTarget) {
  *
  * Both paths plan through `~/lib/scrollJump`, so the destination pixel and
  * the curve are identical; only the thing doing the writing differs.
+ *
+ * While a jump is in flight the page belongs to it: wheel, touch and the
+ * scroll keys are swallowed (`~/lib/scrollLock`) until it lands, so the
+ * visitor and the tween are never writing the same scroll position in the
+ * same frame. Clicking a DIFFERENT section mid-jump still works and simply
+ * retargets — the lock is on scrolling, not on navigating.
  */
 export default function SmoothScroll() {
   useEffect(() => {
     const prefersReduce = () =>
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // The page belongs to the tween while a jump is running: wheel, touch
+    // and the scroll keys are swallowed until it lands. See ~/lib/scrollLock
+    // for what stays live (zoom, typing, Tab/Escape) and why. The safety
+    // window is the jump's own duration plus a margin, so even a jump that
+    // never reports completion cannot leave the page frozen.
+    const inputLock = createScrollLock({
+      maxDurationMs: JUMP_DURATION_MS + 600,
+    });
 
     // Delegated handler factory: in-page anchor links (nav, footer, CTAs)
     // bounce-jump through `scrollTo` instead of the browser's instant/native
@@ -137,6 +153,7 @@ export default function SmoothScroll() {
           cancelAnimationFrame(rafId);
           rafId = 0;
         }
+        inputLock.release();
       };
 
       // `behavior: "instant"` is load-bearing, not tidiness. tds-shared's
@@ -155,34 +172,44 @@ export default function SmoothScroll() {
         const { startY, destY, distance, easing } = planFor(target);
 
         if ((opts?.immediate ?? prefersReduce()) || distance === 0) {
+          // Nothing to protect: the position changes in one frame, or not
+          // at all. Locking here would only cost the visitor input for a
+          // jump that has already happened.
           jumpTo(destY);
           return;
         }
 
+        inputLock.engage();
         const start = performance.now();
         const step = (now: number) => {
           const t = Math.min(1, (now - start) / JUMP_DURATION_MS);
           jumpTo(startY + distance * easing(t));
-          rafId = t < 1 ? requestAnimationFrame(step) : 0;
+          if (t < 1) {
+            rafId = requestAnimationFrame(step);
+            return;
+          }
+          rafId = 0;
+          inputLock.release();
         };
         rafId = requestAnimationFrame(step);
       };
       window.tdsScrollTo = tdsScrollTo;
 
-      // Hand control straight back to the platform the moment the user
-      // starts scrolling themselves, so the tween never fights their touch.
-      // (The tap that *starts* a jump is safe: touchstart precedes click.)
-      const onUserScroll = () => cancelTween();
-      window.addEventListener("touchstart", onUserScroll, { passive: true });
-      window.addEventListener("wheel", onUserScroll, { passive: true });
-
+      // There used to be touchstart/wheel listeners here that ABANDONED the
+      // tween the moment the visitor touched the screen, on the reasoning
+      // that the platform should get control straight back. In practice the
+      // tap that starts a jump is often still on the glass a frame later —
+      // and the finger resting on a phone after tapping a nav link cancelled
+      // the jump it had just asked for, leaving the page stranded between two
+      // sections. The lock is the other half of that decision: rather than
+      // letting the tween lose the fight, there is no fight for the ~1.2s it
+      // runs.
       const onClick = makeAnchorClickHandler(tdsScrollTo);
       document.addEventListener("click", onClick);
 
       return () => {
         cancelTween();
-        window.removeEventListener("touchstart", onUserScroll);
-        window.removeEventListener("wheel", onUserScroll);
+        inputLock.destroy();
         document.removeEventListener("click", onClick);
         delete window.tdsScrollTo;
       };
@@ -199,7 +226,17 @@ export default function SmoothScroll() {
     (window as unknown as { lenis?: Lenis }).lenis = lenis;
 
     const tdsScrollTo: Window["tdsScrollTo"] = (target, opts) => {
-      const { destY, easing } = planFor(target);
+      const { destY, distance, easing } = planFor(target);
+      const immediate = opts?.immediate ?? prefersReduce();
+      const animated = !immediate && distance !== 0;
+
+      // Two locks, one for each thing that can move the page. Lenis owns the
+      // wheel here, so its own "lock" option is what stops the visitor retargeting
+      // the tween mid-flight; it knows nothing about the keyboard, which the
+      // browser still scrolls natively, so the shared input lock covers that
+      // (and the touchpad on a hybrid machine, where the desktop path runs).
+      if (animated) inputLock.engage();
+      else inputLock.release();
       // Hand Lenis a resolved NUMBER: element lookup, header clearance and
       // the clamp to the document's scroll range all happened in `planFor`,
       // so both paths land on the same pixel. It also keeps Lenis from
@@ -208,7 +245,15 @@ export default function SmoothScroll() {
       lenis.scrollTo(destY, {
         duration: JUMP_DURATION_MS / 1000,
         easing,
-        immediate: opts?.immediate ?? prefersReduce(),
+        immediate,
+        lock: animated,
+        // A locked Lenis REFUSES a further scrollTo, and that refusal is not
+        // what the lock is for: the visitor clicking a second nav link is
+        // asking for a different section, not fighting the tween. Without
+        // this, that click did nothing on desktop while the touch path
+        // happily retargeted — the two paths exist to feel the same.
+        force: true,
+        onComplete: () => inputLock.release(),
       });
     };
     window.tdsScrollTo = tdsScrollTo;
@@ -225,6 +270,7 @@ export default function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      inputLock.destroy();
       document.removeEventListener("click", onClick);
       lenis.destroy();
       delete (window as unknown as { lenis?: Lenis }).lenis;

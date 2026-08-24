@@ -112,7 +112,6 @@ export default defineConfig({
         // each revealing the next name.
         /^(framer-)?motion(-dom|-utils)?$/,
         "lenis",
-        "lucide-react",
         "react-hook-form",
         /^@hookform\//,
       ],

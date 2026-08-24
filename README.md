@@ -8,12 +8,21 @@
 ---
 
 
-Marketing landing page for Tracht Digital Solutions. **Astro 6** +
+Marketing landing page for Tracht Digital Solutions. **Astro 7** +
 **React** islands + **Tailwind v4** (via the `@tailwindcss/postcss`
 plugin — see the *Tailwind note* below) with self-hosted
-**Lato + Plus Jakarta Sans**. Builds to fully static HTML and ships
-in two locale trees (DE at `/`, EN at `/en/`); deploys automatically to
-the production host at `tracht-digital.de` on every push to `main`.
+**Lato + Plus Jakarta Sans**. Ships in two locale trees (DE at `/`,
+EN at `/en/`).
+
+It is **server-rendered behind a file-backed page cache** since
+2026-08-24, not a static build — a cache hit is served straight off disk by
+the web server and costs exactly what the old static file cost, because it is
+one. See *Server rendering + page cache* in `AGENTS.md`.
+
+Two branches, as everywhere in this workspace: a push to `main` builds the
+`dev` branch (a build gate, **not** deployed), and production goes out only
+via the manual **Release** button, which publishes the `release` branch and
+pings the deploy webhook.
 
 SEO surface includes Schema.org JSON-LD (Organization,
 ProfessionalService, Person, WebSite, Service+OfferCatalog,
@@ -43,7 +52,7 @@ Deploys automatically on every push to `main`; see [Deploy](#deploy).
 
 | Tool | Version | Why |
 |---|---|---|
-| Node.js | 22 LTS | Astro 6 requires ≥22.12 — Node 18/20 are no longer supported |
+| Node.js | 22 LTS | Astro 7 requires ≥22.12 — Node 18/20 are no longer supported |
 | npm | 10+ | Bundled with Node 22 |
 | Git | any | Repo hosting |
 | (optional) `gh` CLI | latest | Easiest way to mint a packages-scoped token |
@@ -51,14 +60,17 @@ Deploys automatically on every push to `main`; see [Deploy](#deploy).
 ### Tailwind note (why PostCSS, not Vite plugin)
 
 Tailwind is wired through **`@tailwindcss/postcss`** via
-`postcss.config.mjs`, not the `@tailwindcss/vite` plugin. Astro 6
-ships Vite 7 with the rolldown bundler under the hood, and the
-Tailwind Vite plugin's build hook calls into rolldown's
-`BindingViteResolvePluginConfig` with a shape missing the
-`tsconfigPaths` field — builds crash with `Missing field
-'tsconfigPaths'` (withastro/astro#16542). The PostCSS variant runs
-the same Tailwind 4 compiler outside the rolldown contract and is
-unaffected.
+`postcss.config.mjs`, not the `@tailwindcss/vite` plugin.
+
+The original reason is gone, so don't quote it: the Vite plugin used to
+crash against Astro 6's Vite 7 + rolldown with `Missing field
+'tsconfigPaths'` (withastro/astro#16542). Under Astro 7 / Vite 8 it builds
+fine — it was re-tested on 2026-08-06. The convention was **kept
+deliberately**: both routes work, and one setup across all six apps is what
+keeps `static-posture.test.ts` (which asserts `postcss.config.mjs` exists and
+the plugin appears in neither the Astro config nor `package.json`) meaningful.
+Nothing is broken here, so don't reintroduce the Vite plugin as a "fix" —
+adopting it would be a deliberate six-app change.
 
 ### Lockfile note
 

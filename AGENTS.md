@@ -521,9 +521,8 @@ See README's "Replace examples before go-live" section.
   `tdsScrollTo` + the anchor-click handler are still installed via a
   self-contained `requestAnimationFrame` tween that reuses the *same* bounce
   easing, so mobile section-jumps bounce exactly like desktop while normal
-  touch scrolling stays fully native (the tween aborts on the first
-  `touchstart`/`wheel`). Don't reinstate the old blanket `if (isCoarsePointer)
-  return` early-out — it killed the bounce on mobile.
+  touch scrolling stays fully native. Don't reinstate the old blanket
+  `if (isCoarsePointer) return` early-out — it killed the bounce on mobile.
   Both paths plan the jump through **`src/lib/scrollJump.ts`** (DOM-free, unit
   tested), so the destination pixel and the curve are identical and only the
   thing writing the scroll position differs. Three rules that came out of the
@@ -553,10 +552,49 @@ See README's "Replace examples before go-live" section.
     responsive, which the old `-88` was not. Consequence: `tdsScrollTo` hands
     Lenis a resolved **number**, because Lenis applies `scroll-padding-top`
     itself for *element* targets and the clearance would be doubled.
+  - **A jump owns the scroll position for as long as it runs**
+    (`src/lib/scrollLock.ts`, added 2026-08-24). Wheel, `touchmove` and the
+    scroll keys are swallowed until it lands, so the visitor and the tween are
+    never writing the same property in the same frame. The two paths used to
+    disagree about this and both were wrong: on desktop Lenis simply kept
+    overwriting the visitor's wheel, so the page felt stuck; on touch the tween
+    **cancelled itself** on the first `touchstart`, so a finger still resting on
+    the glass a frame after tapping a nav link abandoned the jump it had just
+    asked for and the page stopped between two sections. Four things that must
+    survive any edit here, each of which is a way to break a page silently:
+    - **The listeners are `{ passive: false }`.** `wheel` and `touchmove` are
+      passive by default on `window`, and `preventDefault()` in a passive
+      listener does nothing at all — no error, no warning in a production
+      build, just a lock that is not one.
+    - **Ctrl/⌘ + wheel is ZOOM and is never blocked**, nor are arrows/Home/End
+      inside an editable control (the contact form is on this page), nor Space
+      on a button or link, nor Tab and Escape. A scroll lock that eats page
+      zoom or traps focus is an accessibility bug, not a polish detail.
+    - **It always ends.** The listeners come off on completion *and* on a
+      safety timeout of the jump's own duration plus a margin. A lock that
+      outlives its animation is a page that cannot be scrolled at all, with
+      nothing anywhere to say why.
+    - **Locked is not frozen: `lenis.scrollTo` is called with `force: true`.**
+      A locked Lenis refuses a further `scrollTo`, and clicking a *different*
+      nav link mid-jump is navigation, not a fight with the tween — without
+      `force` that click did nothing on desktop while the touch path happily
+      retargeted.
   `CustomCursor` is an additive dot +
   trailing ring that recolours from sampled background luminance and
   squash-stretches with pointer velocity — fine-pointer only, disabled under
   reduced motion. Both mount `client:idle`.
+  Its rAF loop **parks itself** once the trailing ring has caught up and wakes
+  on pointer movement, clicks *and scroll*. Scroll is in that list for a reason
+  a diff cannot show: the pointer can sit perfectly still while the page moves
+  a dark section underneath it, and that is exactly when the ring has to flip
+  colour. Before this it ran for the entire life of the page — a wake-up every
+  vsync plus an `elementsFromPoint` + `getComputedStyle` walk several times a
+  second — on a decoration that is not even visible until the pointer first
+  moves. `ScrollProgress` likewise writes its bar's transform **straight to the
+  node**: as `useState` it cost a React render, reconciliation and commit on
+  every frame of every scroll to move one transform by a fraction of a percent.
+  `scrollable` stays state, because it changes about once per page and decides
+  whether anything is mounted at all.
 - **Favicon**: `public/favicon.png` (901 × 901) is the real TDS
   logomark, shared verbatim with tds-blog-frontend / admin / customer so the
   four properties read as one identity in browser tabs. Matches the
@@ -794,6 +832,39 @@ from `.tds-mobile-menu`.
 - The dark ground is a deliberate deep-navy family (not a warm black)
   with warm-ivory text — keep new dark surfaces in that family so the
   palette stays cohesive.
+
+## Toolchain + tests (2026-08-24)
+
+TypeScript **6**, vitest **4**, jsdom **30**, satori **0.33**, Astro **7.2.6**,
+motion **13** — the same line `tds-blog-frontend` and `tds-tools-frontend` are
+on, which this repo had fallen behind. `npm run type-check` (astro check) stays
+the correctness gate for `.astro`; `npm run test:run` covers `src/lib` and the
+islands. Three things worth knowing before touching either:
+
+- **`tsconfig.json` excludes `release/` and `var/`.** `release/` is the
+  deployable tree `scripts/pack-release.mjs` assembles out of `dist/` —
+  bundled, minified dependency code, not source. It is gitignored, so it is
+  invisible in a diff and absent in CI, and present on any machine that has run
+  `npm run build`: `astro check` was type-checking ~40 bundled chunks of every
+  dependency and reporting *their* internal deprecations as hints. 131 files
+  checked became 83, and 155 hints became 0. The same trap has already been
+  fixed in the blog and is still open in `tds-tools-frontend`, where it makes
+  `astro check` run out of V8 heap.
+- **The default vitest environment is `node`, not jsdom.** It was jsdom "so
+  island tests work", but not one suite in this repo ever touched a DOM global,
+  and building a jsdom per test file cost **127 of the run's 130 seconds**. A
+  suite that genuinely needs a document opts in per file with
+  `// @vitest-environment jsdom` — which is also the only place a reader can
+  see that it needs one. `src/lib/scrollLock.test.ts` is the current example.
+  The run is now ~0.5s.
+- **motion 13's only breaking change is the removal of
+  `@emotion/is-prop-valid`**, which affects CSS-in-JS consumers. Nothing here
+  is one — every island is styled with Tailwind classes — which is why the
+  upgrade needed no code change. Verified by a pixel diff of both languages at
+  desktop and mobile widths against a build of the previous code and the
+  previous deps: identical dimensions on every page, and a residual difference
+  no larger than the noise floor of loading the *same* build twice (the
+  `TechMarquee` animation offset).
 
 ## Don't
 
