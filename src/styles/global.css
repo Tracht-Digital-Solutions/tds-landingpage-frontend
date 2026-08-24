@@ -31,6 +31,11 @@
    looks, edit surfaces/marketing.css in tds-shared-pkg and bump. */
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
+/* Long-form typography. This site has exactly two consumers — the legal pages,
+   whose text became panel-editable markdown in 2026-08. Without it the rendered
+   markdown would arrive as unstyled runs of text: not an error, not a warning,
+   just a legal page that looks broken. */
+@import "@tracht-digital-solutions/tds-shared/styles/prose.css";
 @import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
 
 /* Tailwind ignores node_modules by default, and the shared React islands
