@@ -9,5 +9,11 @@
     }
   },
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "node_modules"]
+  // `release/` is the deployable tree scripts/pack-release.mjs assembles out
+  // of dist/ — bundled, minified output, not source. It is gitignored, so it
+  // is invisible in a diff and in CI, and it is present on any machine that
+  // has run `npm run build`: `astro check` was type-checking ~40 bundled
+  // chunks of every dependency, reporting their internal deprecations as
+  // hints. Same for `var/`, the local page-cache store.
+  "exclude": ["dist", "node_modules", "release", "var"]
 }

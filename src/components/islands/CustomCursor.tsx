@@ -34,7 +34,6 @@ export default function CustomCursor() {
     let visible = false;
     let hovering = false;
     let onDark = false;
-    let frame = 0;
 
     const interactiveSelector =
       "a, button, [role='tab'], [role='button'], input, textarea, select, label, summary, .process-step-item";
@@ -62,6 +61,7 @@ export default function CustomCursor() {
     const onMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+      wake();
       dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
       if (!visible) {
         visible = true;
@@ -84,8 +84,20 @@ export default function CustomCursor() {
     const onDown = () => ring.classList.add("is-down");
     const onUp = () => ring.classList.remove("is-down");
 
+    // How often the background under the pointer is re-sampled. It used to be
+    // "every 6th frame", which is ~100ms only while the loop happens to be
+    // running at 60fps; as a wall-clock interval it also survives the loop
+    // parking itself below.
+    const SAMPLE_MS = 100;
+    // Distance at which the trailing ring counts as having caught up. The
+    // follow is a 0.28 lerp, so it approaches asymptotically and never
+    // arrives exactly.
+    const SETTLED_PX = 0.05;
+
     let raf = 0;
-    const loop = () => {
+    let lastSample = -Infinity;
+
+    const loop = (now: number) => {
       // Snappy follow.
       ringX += (mouseX - ringX) * 0.28;
       ringY += (mouseY - ringY) * 0.28;
@@ -103,8 +115,8 @@ export default function CustomCursor() {
       ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${sx}, ${sy})`;
 
       // Re-sample the background colour a few times a second.
-      frame = (frame + 1) % 6;
-      if (frame === 0 && visible) {
+      if (visible && now - lastSample >= SAMPLE_MS) {
+        lastSample = now;
         const next = sampleOnDark();
         if (next !== onDark) {
           onDark = next;
@@ -113,14 +125,33 @@ export default function CustomCursor() {
         }
       }
 
+      // Park once the ring has caught up. This loop used to run for the
+      // entire life of the page whether or not anything moved: a wake-up on
+      // every vsync, a transform write and a hit-test-plus-getComputedStyle
+      // walk several times a second, on a decoration that is not even
+      // visible until the pointer first moves. Nothing about how it looks
+      // depends on the loop still spinning while everything is stationary.
+      if (Math.abs(mouseX - ringX) < SETTLED_PX && Math.abs(mouseY - ringY) < SETTLED_PX) {
+        raf = 0;
+        return;
+      }
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
+
+    // Anything that can change what the cursor should look like restarts it.
+    // SCROLL is in the list for a reason that is invisible in a diff: the
+    // pointer can sit perfectly still while the page moves a dark section
+    // underneath it, and that is exactly when the ring has to flip colour.
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    wake();
 
     window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
     window.addEventListener("mousedown", onDown, { passive: true });
     window.addEventListener("mouseup", onUp, { passive: true });
+    window.addEventListener("scroll", wake, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf);
@@ -128,6 +159,7 @@ export default function CustomCursor() {
       document.removeEventListener("mouseleave", onLeave);
       window.removeEventListener("mousedown", onDown);
       window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("scroll", wake);
     };
   }, []);
 

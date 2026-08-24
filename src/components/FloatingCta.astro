@@ -332,11 +332,22 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
 
     let frame = 0;
+    // Both flags are re-derived on every frame of every scroll, but they
+    // only CHANGE a handful of times per page. Writing a data-attribute
+    // costs the same whether or not the value differs: it invalidates style
+    // for this element and, because the control is styled through several
+    // `:has()` and attribute selectors, for the pieces inside it — sixty
+    // times a second, to arrive at the markup that was already there.
+    // Comparing first is free.
+    const setFlag = (key: "scrolledDown" | "onDark", on: boolean) => {
+      const value = on ? "true" : "false";
+      if (group.dataset[key] !== value) group.dataset[key] = value;
+    };
+
     const update = () => {
       frame = 0;
       // Reveal the scroll-to-top nub after ~one viewport of scroll.
-      group.dataset.scrolledDown =
-        window.scrollY > window.innerHeight * 0.8 ? "true" : "false";
+      setFlag("scrolledDown", window.scrollY > window.innerHeight * 0.8);
 
       // Invert over dark sections — sample the background behind the group.
       const rect = group.getBoundingClientRect();
@@ -346,7 +357,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
         .elementsFromPoint(x, y)
         .find((el) => el !== group && !group.contains(el));
       const rgb = backgroundUnder(behind ?? null);
-      group.dataset.onDark = rgb && isDark(rgb) ? "true" : "false";
+      setFlag("onDark", !!rgb && isDark(rgb));
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
