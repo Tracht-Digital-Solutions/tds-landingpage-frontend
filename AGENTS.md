@@ -592,6 +592,18 @@ only the route table is local.
 
 ### Things that cost time to find, in the order they bite
 
+- **`.htaccess` may not ask for `Options +FollowSymLinks`.** Plesk grants its
+  vhosts a restricted `AllowOverride Options=…` that omits it, and an Option the
+  host does not allow is **fatal rather than ignored**: Apache answers *every*
+  request with 500 and logs `Option FollowSymLinks not allowed here` — the whole
+  site, not just the rule that wanted it. It shipped that way with the SSR move
+  on 2026-08-24 and took the domain down on every path. `Options -Indexes` is
+  all this file may set. Nothing here needs more: per-directory rewriting
+  already works under the vhost's own grant (`api.tracht-digital.de` rewrites
+  everything with `-Indexes` alone), and the `_tds-cache` symlink is created by
+  the same user that owns its target, which satisfies SymLinksIfOwnerMatch. If a
+  cache hit ever answers 403, grant it at the **vhost** level in Plesk's
+  *Additional Apache directives*, which `AllowOverride` does not restrict.
 - **The control plane cannot be middleware.** Astro does not run middleware for
   a path no route matches — `App.render()` matches first and short-circuits into
   the 404 response. Mounted in middleware, every rebuild request came back as
