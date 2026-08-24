@@ -857,7 +857,31 @@ new names.
 
 Fixed in **tds-shared 0.32.0** (`resolveCacheDirs` fingerprints the asset
 filenames and empties the store when they change; an absent marker counts as a
-mismatch). Two consequences here:
+mismatch).
+
+### A deploy MUST restart the Node app — the cache only reveals it
+
+The same incident exposed a second, larger gap, and it is not about the cache
+at all. The deploy pulled the new tree but the running Node process was **not
+restarted**, and the site then failed in two different ways at once:
+
+| Route | Result | Why |
+|---|---|---|
+| `/`, `/preise` | `200`, hero invisible | Served by Apache off disk from the cache; never reaches Node. The HTML is older than the assets it names. |
+| `/en/`, `/en/preise`, `/legal/*` | **`500`** | Reaches Node. Astro code-splits its server routes into content-hashed chunks under `server/chunks/`, loaded lazily on first request — and the deploy replaced them with new names. The live process dynamically imports a file that no longer exists. |
+
+So **replacing the tree under a live process breaks every route that has not
+already been cached**, and the page cache hides exactly the ones that have. The
+diagnostic signature is that table: cached routes healthy, uncached routes 500.
+Both halves are cured by the same thing — restarting the app (Plesk → Node.js →
+*Restart App*, or `touch tmp/restart.txt`). On that boot the 0.32.0 fix also
+clears the stale cache, so the hero comes back with it.
+
+If a deploy ever again leaves the site with 500s on the pages nobody visits
+often, do not go looking in the application: look at whether the app was
+restarted. The host procedure lives in `tds-gateway-api/DEPLOY-PLESK.md`.
+
+Two more consequences here:
 
 - **Keep the `tds-shared` pin at `^0.32.0` or newer.** A 0.x caret is
   minor-locked, so pinning back below it silently restores the bug.
