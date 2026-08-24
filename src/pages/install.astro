@@ -7,13 +7,19 @@
  * (`tds-gateway-api/DEPLOY-PLESK.md`), so anything shipped here has to work as
  * a static file.
  *
- * `noindex` AND excluded from the sitemap in `astro.config.mjs` — the meta tag
- * alone would leave an operator page listed in `sitemap-index.xml`, and on this
- * site the sitemap also emits hreflang alternates, which would point at an
- * `/en/install` that does not exist.
+ * `noindex` AND excluded from the sitemap (`src/pages/sitemap-0.xml.ts`) — the
+ * meta tag alone would leave an operator page listed in `sitemap-index.xml`,
+ * and this site's sitemap also emits hreflang alternates, which would point at
+ * an `/en/install` that does not exist. A dangling alternate invalidates the
+ * whole set, this page's German side included.
  */
 import { InstallWizard, landingpage } from "@tracht-digital-solutions/tds-shared/install";
 import Layout from "~/layouts/Layout.astro";
+// Prerendered: nothing on this page varies with CMS content, so it is built
+// once at deploy time and served as a plain file. Keeping it out of the
+// on-demand set is also what keeps the OG renderer's build-only dependencies
+// (satori, @resvg/resvg-js) out of the server bundle.
+export const prerender = true;
 ---
 
 <Layout

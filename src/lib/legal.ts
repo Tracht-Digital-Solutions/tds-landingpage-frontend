@@ -1,10 +1,11 @@
 /**
- * Build-time fetch of the legal documents (AGB & co) uploaded in the admin
- * panel, from `tds-ext-website-cms-pkg`'s public read surface.
+ * Fetch of the legal documents (AGB & co) uploaded in the admin panel, from
+ * `tds-ext-website-cms-pkg`'s public read surface.
  *
- * Same model as `cms.ts`: the panel is the editing surface, a save fires a
- * rebuild, and this module bakes the result into the static `dist/`. Nothing
- * here runs in a visitor's browser — the PDF ships as a plain file.
+ * Same model as `cms.ts`: the panel is the editing surface, a save rebuilds
+ * the affected pages' cache, and this module supplies what those renders read.
+ * Nothing here runs in a visitor's browser — the PDF is served by the
+ * `/legal/{key}.pdf` route, which is a cached page like any other.
  *
  * The graceful-fallback contract is stricter than `cms.ts`'s, because a legal
  * document that silently disappears is worse than a stale one: when the API is
@@ -15,6 +16,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
+import { contentCache } from "./cache";
 
 /** Resolved at build time from env, with the production default. */
 const CONTENT_API_URL =
@@ -33,29 +35,31 @@ export interface LegalDocMeta {
 /** `{ agb: { de: {...}, en: {...} } }` */
 export type LegalDocIndex = Record<string, Record<string, LegalDocMeta>>;
 
-let indexCache: LegalDocIndex | null = null;
-
 /**
- * Every uploaded document's metadata, fetched once per build. `{}` on any
- * failure or in demo mode — callers then fall back to the committed copy.
+ * Every uploaded document's metadata. `{}` on any failure or in demo mode —
+ * callers then fall back to the committed copy.
+ *
+ * Generation-scoped rather than module-scoped: under SSR a module-level memo
+ * would pin the index for the life of the server, so a replaced AGB would
+ * never appear no matter how often its cache was rebuilt. See `./cache.ts`.
  */
 export async function fetchLegalIndex(): Promise<LegalDocIndex> {
   if (import.meta.env.PUBLIC_DEMO_MODE === "true") return {};
-  if (indexCache !== null) return indexCache;
 
-  let docs: LegalDocIndex = {};
-  try {
-    const res = await fetch(`${CONTENT_API_URL}/legal`, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
-    assertKeyAccepted(res, `${CONTENT_API_URL}/legal`);
-    if (res.ok) {
-      const data = (await res.json()) as { docs?: LegalDocIndex };
-      docs = data.docs ?? {};
+  return contentCache.get("legal:index", async () => {
+    let docs: LegalDocIndex = {};
+    try {
+      const res = await fetch(`${CONTENT_API_URL}/legal`, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
+      assertKeyAccepted(res, `${CONTENT_API_URL}/legal`);
+      if (res.ok) {
+        const data = (await res.json()) as { docs?: LegalDocIndex };
+        docs = data.docs ?? {};
+      }
+    } catch (err) {
+      console.warn("[tds-landingpage] legal document index fetch failed, using committed fallback:", err);
     }
-  } catch (err) {
-    console.warn("[tds-landingpage] legal document index fetch failed, using committed fallback:", err);
-  }
-  indexCache = docs;
-  return docs;
+    return docs;
+  });
 }
 
 /** One document's metadata for a language, or null when none is uploaded. */
@@ -65,17 +69,30 @@ export async function legalDocMeta(key: string, lang: "de" | "en"): Promise<Lega
 }
 
 /**
- * The committed fallback PDF for a document key. Anchored to `process.cwd()`
- * (the project root during `astro build`) rather than `import.meta.url`, which
- * ENOENTs once Astro bundles the endpoint — the same trap the OG renderer and
- * the vCard endpoint document.
+ * The committed fallback PDF for a document key.
+ *
+ * Anchored to `process.cwd()` rather than `import.meta.url`, which ENOENTs
+ * once Astro bundles the endpoint — the same trap the OG renderer and the
+ * vCard endpoint document.
+ *
+ * **Two locations, and the second one is the production one.** `src/assets`
+ * is right during `astro build`, where the cwd is the project root. This route
+ * is server-rendered now, so it also runs on the HOST, whose deploy tree has
+ * no `src/` at all — the fallback simply vanished and `/legal/agb.pdf`
+ * answered 404, i.e. the one outcome the committed copy exists to make
+ * impossible. `scripts/pack-release.mjs` copies the directory to
+ * `assets/legal` beside the server bundle (`tds.release.extraFiles`), and that
+ * is what the first candidate below reads.
  */
 function fallbackBytes(key: string): Uint8Array | null {
-  try {
-    return readFileSync(join(process.cwd(), "src/assets/legal", `${key}.pdf`));
-  } catch {
-    return null;
+  for (const dir of ["assets/legal", "src/assets/legal"]) {
+    try {
+      return readFileSync(join(process.cwd(), dir, `${key}.pdf`));
+    } catch {
+      // Try the next candidate.
+    }
   }
+  return null;
 }
 
 /**
@@ -109,7 +126,7 @@ export async function legalDocBytes(key: string, lang: "de" | "en"): Promise<Uin
 
 /** Reset the memoised index. Tests only. */
 export function resetLegalCache(): void {
-  indexCache = null;
+  contentCache.invalidate();
 }
 
 /**
