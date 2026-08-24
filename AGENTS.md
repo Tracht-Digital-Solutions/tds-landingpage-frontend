@@ -833,6 +833,38 @@ from `.tds-mobile-menu`.
   with warm-ivory text — keep new dark surfaces in that family so the
   palette stays cohesive.
 
+## The cache must not outlive the build (2026-08-24)
+
+The hero section disappeared from the live site a few minutes after a release,
+and the cause was neither the hero nor the release. Worth knowing in full,
+because every symptom pointed away from it:
+
+`public/.htaccess` serves a stored page straight off disk, and the store is
+deliberately built to survive a deploy (it lives outside the deploy tree, with
+a symlink re-created on every boot). That is right for the store and wrong for
+its contents: a stored page is HTML, and that HTML names the build's assets by
+content hash. **A deploy rotates every one of those names**, so the cached
+document asked for `/_astro/Hero.CXaElEfT.js` while the host had
+`Hero.xeQNzAUp.js`.
+
+Every island's JS 404ed, so nothing hydrated — and the *only* section that
+disappears when hydration dies is this one, because the hero's headline and
+slogan are `motion` elements whose SSR markup carries the `initial` state
+(`opacity: 0`) and are revealed by the entrance animation. Every other section
+is plain Astro HTML and rendered normally. Nothing was red: `200`,
+`x-tds-cache: HIT`, healthy server, and all the new assets present under their
+new names.
+
+Fixed in **tds-shared 0.32.0** (`resolveCacheDirs` fingerprints the asset
+filenames and empties the store when they change; an absent marker counts as a
+mismatch). Two consequences here:
+
+- **Keep the `tds-shared` pin at `^0.32.0` or newer.** A 0.x caret is
+  minor-locked, so pinning back below it silently restores the bug.
+- **After a deploy the first visitor to each page pays one render.** That is
+  the correct price and it is what the old static build charged on every
+  content change instead.
+
 ## Toolchain + tests (2026-08-24)
 
 TypeScript **6**, vitest **4**, jsdom **30**, satori **0.33**, Astro **7.2.6**,
