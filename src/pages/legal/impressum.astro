@@ -1,9 +1,25 @@
 ---
 /**
- * TEMPLATE — Julian must review and verify with a German lawyer
- * before going live. Placeholders marked with XXX remain.
+ * Impressum — panel-editable.
+ *
+ * The markup below is the BAKED FALLBACK, the same contract every other
+ * section on this site keeps: an editor's version is used when there is one,
+ * and an empty or unreachable API leaves exactly the text that shipped with
+ * the repository. A legal page that silently blanks would be worse than a
+ * stale one, so this is the one place the fallback really has to be in git.
+ *
+ * TEMPLATE — Julian must review and verify with a German lawyer before going
+ * live. Placeholders marked with XXX remain in the fallback text.
  */
 import Layout from "~/layouts/Layout.astro";
+import { renderMarkdown } from "@tracht-digital-solutions/tds-shared/markdown";
+import { cmsFor } from "~/lib/cms";
+
+// A single markdown field rather than a structured block: legal text is
+// long-form prose whose headings and lists are part of the text, not a schema
+// somebody should have to fill in section by section.
+const edited = await cmsFor("legal_impressum", "de", { markdown: "" });
+const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdown);
 ---
 
 <Layout
@@ -26,104 +42,110 @@ import Layout from "~/layouts/Layout.astro";
         Impressum
       </h1>
 
-      <div class="max-w-none space-y-8 text-[var(--color-black)]">
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Angaben gemäß § 5 DDG
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Julian Tracht<br />
-            Tracht Digital Solutions<br />
-            Elbinger Straße 19<br />
-            21493 Schwarzenbek<br />
-            Deutschland
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Kontakt
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Telefon: +49 178 822 4022<br />
-            E-Mail:{" "}
-            <a href="mailto:kontakt@tracht-digital.de" class="text-[var(--color-accent)]">
-              kontakt@tracht-digital.de
-            </a>
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Umsatzsteuer-ID
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br />
-            <strong>DE 450 639 725</strong>
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Julian Tracht<br />
-            Elbinger Straße 19<br />
-            21493 Schwarzenbek
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Streitschlichtung
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer
-            Verbraucherschlichtungsstelle teilzunehmen.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Haftung für Inhalte
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den
-            allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht
-            unter der Voraussetzung verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
-            überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
-          </p>
-          <p class="text-[var(--color-muted)] leading-relaxed mt-3">
-            Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen
-            Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der
-            Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden
-            Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Haftung für Links
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben.
-            Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der
-            verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
-            Urheberrecht
-          </h2>
-          <p class="text-[var(--color-muted)] leading-relaxed">
-            Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
-            Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der
-            Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
-          </p>
-        </section>
-      </div>
+      {
+        html ? (
+          <div class="tds-prose" set:html={html} />
+        ) : (
+        <div class="max-w-none space-y-8 text-[var(--color-black)]">
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Angaben gemäß § 5 DDG
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Julian Tracht<br />
+              Tracht Digital Solutions<br />
+              Elbinger Straße 19<br />
+              21493 Schwarzenbek<br />
+              Deutschland
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Kontakt
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Telefon: +49 178 822 4022<br />
+              E-Mail:{" "}
+              <a href="mailto:kontakt@tracht-digital.de" class="text-[var(--color-accent)]">
+                kontakt@tracht-digital.de
+              </a>
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Umsatzsteuer-ID
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br />
+              <strong>DE 450 639 725</strong>
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Julian Tracht<br />
+              Elbinger Straße 19<br />
+              21493 Schwarzenbek
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Streitschlichtung
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer
+              Verbraucherschlichtungsstelle teilzunehmen.
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Haftung für Inhalte
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den
+              allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als Diensteanbieter jedoch nicht
+              unter der Voraussetzung verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
+              überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+            </p>
+            <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+              Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen
+              Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der
+              Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden
+              Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Haftung für Links
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben.
+              Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der
+              verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.
+            </p>
+          </section>
+  
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              Urheberrecht
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
+              Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der
+              Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+            </p>
+          </section>
+        </div>
+        )
+      }
     </div>
   </main>
 </Layout>

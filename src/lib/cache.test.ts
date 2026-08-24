@@ -12,18 +12,18 @@ import { alwaysPaths, cacheEvents } from "./cache";
  * nothing, which is the exact silence the page cache exists to remove.
  */
 describe("cacheEvents", () => {
-  const paths = (events: Parameters<typeof resolveEvents>[1]) =>
-    resolveEvents(cacheEvents, events).paths;
+  const paths = async (events: Parameters<typeof resolveEvents>[1]) =>
+    (await resolveEvents(cacheEvents, events)).paths;
 
-  it("rebuilds both content pages of a language when a block is saved", () => {
+  it("rebuilds both content pages of a language when a block is saved", async () => {
     // Both, deliberately: `pricing` renders on /preise AND in the home page's
     // teaser, `footer` and `contact` appear on both.
-    expect(paths([{ type: "block", id: "hero", lang: "de" }])).toEqual(["/", "/preise"]);
-    expect(paths([{ type: "block", id: "hero", lang: "en" }])).toEqual(["/en/", "/en/preise"]);
+    expect(await paths([{ type: "block", id: "hero", lang: "de" }])).toEqual(["/", "/preise"]);
+    expect(await paths([{ type: "block", id: "hero", lang: "en" }])).toEqual(["/en/", "/en/preise"]);
   });
 
-  it("covers both language trees when the block event names no language", () => {
-    expect(paths([{ type: "block", id: "footer" }])).toEqual([
+  it("covers both language trees when the block event names no language", async () => {
+    expect(await paths([{ type: "block", id: "footer" }])).toEqual([
       "/",
       "/en/",
       "/en/preise",
@@ -31,47 +31,47 @@ describe("cacheEvents", () => {
     ]);
   });
 
-  it("keeps a legal text off the home page", () => {
+  it("keeps a legal text off the home page", async () => {
     // These are content blocks like any other, but they render on their own
     // pages. Dragging a home-page render along would be harmless; missing
     // /legal/impressum would not.
-    expect(paths([{ type: "block", id: "legal_impressum", lang: "de" }])).toEqual([
+    expect(await paths([{ type: "block", id: "legal_impressum", lang: "de" }])).toEqual([
       "/legal/impressum",
     ]);
-    expect(paths([{ type: "block", id: "legal_datenschutz", lang: "de" }])).toEqual([
+    expect(await paths([{ type: "block", id: "legal_datenschutz", lang: "de" }])).toEqual([
       "/legal/datenschutz",
     ]);
   });
 
-  it("has no English twin for the legal texts", () => {
+  it("has no English twin for the legal texts", async () => {
     // There is no /en/legal/impressum route. Emitting the path would make the
     // rebuild endpoint report a 404 for every save of that block.
-    expect(paths([{ type: "block", id: "legal_impressum", lang: "en" }])).toEqual([]);
+    expect(await paths([{ type: "block", id: "legal_impressum", lang: "en" }])).toEqual([]);
   });
 
-  it("rebuilds the AGB page AND its PDF endpoint", () => {
+  it("rebuilds the AGB page AND its PDF endpoint", async () => {
     // The PDF is a server-rendered route streaming a CMS blob, not a static
     // file — a replaced upload has to invalidate both.
-    expect(paths([{ type: "legal", id: "agb", lang: "de" }])).toEqual([
+    expect(await paths([{ type: "legal", id: "agb", lang: "de" }])).toEqual([
       "/legal/agb",
       "/legal/agb.pdf",
     ]);
   });
 
-  it("treats a published blog post as a change to this site too", () => {
+  it("treats a published blog post as a change to this site too", async () => {
     // The home page's Journal and Currently sections read /content/blog at
     // render time. Missing this is how the marketing page ends up advertising
     // last month's articles.
-    expect(paths([{ type: "post", id: "mein-artikel", lang: "de" }])).toEqual(["/", "/preise"]);
+    expect(await paths([{ type: "post", id: "mein-artikel", lang: "de" }])).toEqual(["/", "/preise"]);
   });
 
-  it("reports an event type it does not know instead of silently doing nothing", () => {
-    const result = resolveEvents(cacheEvents, [{ type: "tool", id: "qr" }]);
+  it("reports an event type it does not know instead of silently doing nothing", async () => {
+    const result = await resolveEvents(cacheEvents, [{ type: "tool", id: "qr" }]);
     expect(result.paths).toEqual([]);
     expect(result.unknown).toEqual(["tool"]);
   });
 
-  it("lists every indexable page in alwaysPaths", () => {
+  it("lists every indexable page in alwaysPaths", async () => {
     // "Rebuild everything" can only enumerate what is already cached, so a
     // cold cache would otherwise report success having rendered nothing.
     expect(alwaysPaths).toEqual(["/", "/en/", "/preise", "/en/preise"]);
