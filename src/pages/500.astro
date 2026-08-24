@@ -1,6 +1,11 @@
 ---
 import Layout from "~/layouts/Layout.astro";
 import ErrorView from "~/components/ErrorView.astro";
+// Prerendered: nothing on this page varies with CMS content, so it is built
+// once at deploy time and served as a plain file. Keeping it out of the
+// on-demand set is also what keeps the OG renderer's build-only dependencies
+// (satori, @resvg/resvg-js) out of the server bundle.
+export const prerender = true;
 ---
 
 <Layout title="500 · Serverfehler" bare noindex>

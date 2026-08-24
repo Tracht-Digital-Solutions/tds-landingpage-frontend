@@ -1,4 +1,5 @@
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
+import { contentCache } from "./cache";
 /**
  * Build-time fetch of editable landingpage content blocks from
  * tds-content-api's `GET /landing?lang=…`. Each block is the content object
@@ -18,36 +19,44 @@ const CONTENT_API_URL =
 /** Map of section key → content object, as returned by the API. */
 export type ContentBlocks = Record<string, unknown>;
 
-const cache = new Map<string, ContentBlocks>();
-
 /**
- * Fetch every saved content block for a language, once per build (memoised
- * so multiple sections share a single request). Returns `{}` on any
- * failure or in demo mode.
+ * Fetch every saved content block for a language, memoised so the dozen
+ * section components rendering one page share a single request. Returns `{}`
+ * on any failure or in demo mode.
+ *
+ * **The memo is generation-scoped, not module-scoped.** A plain module-level
+ * `Map` was right while this site was a static build — one process, one fetch
+ * per language, then exit. Under SSR the same `Map` lives as long as the
+ * server does, so the site would answer with the blocks it read at boot
+ * forever, and a cache rebuild would faithfully re-render that stale content
+ * and report success. `contentCache.invalidate()` runs before any render a
+ * rebuild performs; see `src/lib/cache.ts`.
  */
 export async function fetchBlocks(lang: "de" | "en"): Promise<ContentBlocks> {
   if (import.meta.env.PUBLIC_DEMO_MODE === "true") return {};
-  const cached = cache.get(lang);
-  if (cached) return cached;
 
-  let blocks: ContentBlocks = {};
-  try {
-    const url = new URL(`${CONTENT_API_URL}/landing`);
-    url.searchParams.set("lang", lang);
-    const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
-    assertKeyAccepted(res, url);
-    if (res.ok) {
-      const data = (await res.json()) as { blocks?: ContentBlocks };
-      blocks = data.blocks ?? {};
+  return contentCache.get(`landing:${lang}`, async () => {
+    let blocks: ContentBlocks = {};
+    try {
+      const url = new URL(`${CONTENT_API_URL}/landing`);
+      url.searchParams.set("lang", lang);
+      const res = await fetch(url, {
+        headers: siteKeyHeaders(),
+        signal: AbortSignal.timeout(10_000),
+      });
+      assertKeyAccepted(res, url);
+      if (res.ok) {
+        const data = (await res.json()) as { blocks?: ContentBlocks };
+        blocks = data.blocks ?? {};
+      }
+    } catch (err) {
+      console.warn(
+        "[tds-landingpage] content blocks fetch failed, using baked defaults:",
+        err,
+      );
     }
-  } catch (err) {
-    console.warn(
-      "[tds-landingpage] content blocks fetch failed, using baked defaults:",
-      err,
-    );
-  }
-  cache.set(lang, blocks);
-  return blocks;
+    return blocks;
+  });
 }
 
 /**

@@ -562,6 +562,97 @@ See README's "Replace examples before go-live" section.
   four properties read as one identity in browser tabs. Matches the
   header `public/images/logo.webp`.
 
+## Server rendering + page cache (2026-08-24)
+
+This site is `output: "server"` (`@astrojs/node`, standalone) behind a
+**file-backed full-page cache**. It used to be a static build, and the only
+cache between the CMS database and a visitor *was* that build: correcting one
+sentence in a content block meant a full CI rebuild and redeploy of every page.
+Now a page renders on demand, the result is stored as a plain file the web
+server hands out directly, and a content change costs one page render triggered
+from the admin panel.
+
+**A cache hit is exactly as fast as the old static site, because it is the same
+thing** — `public/.htaccess` serves the stored file and Node never wakes up.
+
+### The moving parts
+
+| Where | What |
+|---|---|
+| `src/lib/cache.ts` | This site's route table: which pages a content change dates, plus the shared `contentCache` memo |
+| `src/lib/pageCache.ts` | The single `pageCache(...)` instance both halves share |
+| `src/middleware.ts` | Serves hits, stores renders, refuses to store a bad-site-key render |
+| `src/pages/tds/cache/[action].ts` | The control plane: `status`, `rebuild`, `purge` |
+| `public/.htaccess` | Cache-first rewrite; ships to `dist/client/.htaccess`, the document root |
+| `app.cjs` | Passenger startup file — CommonJS, deliberately |
+| `scripts/pack-release.mjs` | Assembles + verifies `release/`, the tree the host checks out |
+
+The mechanism itself lives in `@tracht-digital-solutions/tds-shared/cache`;
+only the route table is local.
+
+### Things that cost time to find, in the order they bite
+
+- **The control plane cannot be middleware.** Astro does not run middleware for
+  a path no route matches — `App.render()` matches first and short-circuits into
+  the 404 response. Mounted in middleware, every rebuild request came back as
+  this site's own 404 page: HTML, no cache activity, and a status code that
+  reads like a typo in the URL. It is a real route now. (And it cannot live
+  under `_cache/` either: Astro excludes any path segment beginning with `_`
+  from routing.)
+- **A POST to that route must send `Content-Type: application/json`.** Astro's
+  `security.checkOrigin` treats a cross-site POST with a form-ish content type
+  as CSRF and answers *"Cross-site POST form submissions are forbidden"* —
+  which says nothing about content types. The API client sends JSON.
+- **Every module-level memo becomes permanent under SSR.** `cms.ts` and
+  `legal.ts` both kept one; unchanged, the server would answer with whatever it
+  read at boot forever, and a rebuild would faithfully re-render that and report
+  success. They go through `contentCache`, which the rebuild invalidates.
+- **`process.cwd()` is the project root during a build and the deploy tree at
+  runtime.** The committed fallback AGB lived at `src/assets/legal/agb.pdf`, and
+  the deploy tree has no `src/` — `/legal/agb.pdf` answered 404 in production,
+  i.e. the exact outcome a committed fallback exists to prevent. It is copied to
+  `assets/legal` by `tds.release.extraFiles`. The OG renderer has the same
+  anchor, which is one of the two reasons its route stays prerendered.
+- **A dependency left external must be shipped, and "external" is not
+  obvious.** `motion` was, so island SSR resolved `react` by walking *up* out of
+  the release tree into the development checkout and ran against a **second**
+  React instance — every hook threw `Cannot read properties of null (reading
+  'useState')` from a stack naming neither cause. On the host, with no parent
+  `node_modules`, the same setup is a bare `ERR_MODULE_NOT_FOUND`.
+  `pack-release.mjs` now resolves every external specifier against the release
+  tree and fails the build naming the package.
+- **`prerender = true` is what keeps satori, `@resvg/resvg-js` and their native
+  addon out of the runtime.** Prerendered routes render during `astro build`,
+  so their imports never enter the server bundle. The OG card, `404`, `500`,
+  `/install`, `kontakt.vcf` and both sitemap routes are prerendered; everything
+  else is on demand.
+- **`@astrojs/sitemap` is gone.** It derives entries from the routes the build
+  *emits*, and this site's two indexable pages are no longer emitted — it would
+  have produced a sitemap containing only the pages its own `filter` used to
+  exclude, with nothing red anywhere. `src/lib/sitemap.ts` +
+  `src/pages/sitemap-{index,0}.xml.ts` replace it, keeping the exact filenames
+  `robots.txt` and Search Console already know.
+
+### Running it locally
+
+```bash
+npm run build                 # → dist/ + release/ (postbuild assembles + verifies)
+cd release && node app.cjs    # the exact tree the host runs
+curl -sI localhost:4321/      # X-TDS-Cache: MISS, then HIT
+```
+
+The control plane, with the token the app was started with:
+
+```bash
+curl -H 'x-tds-cache-token: …' localhost:4321/tds/cache/status
+curl -X POST -H 'x-tds-cache-token: …' -H 'content-type: application/json' \
+     -d '{"events":[{"type":"block","id":"hero","lang":"de"}]}' \
+     localhost:4321/tds/cache/rebuild
+```
+
+`npm run dev` is unchanged and uses the same cache, so a stale page in dev is
+the same `rebuild` call away.
+
 ## SEO + structured data
 
 - **`src/lib/seo.ts`** is the single source of truth for org/person
@@ -694,8 +785,17 @@ from `.tds-mobile-menu`.
 
 ## Don't
 
-- Don't add `output: "server"` — the production host has no Node runtime.
-  This site MUST stay `output: "static"`.
+- **Don't revert to `output: "static"`.** This entry used to say the opposite —
+  *"the production host has no Node runtime, this site MUST stay static"* — and
+  it was true until 2026-08-24. The Plesk host now runs this site as a Node app
+  under Passenger, and the site is `output: "server"` behind a file-backed page
+  cache. See "Server rendering + page cache" below before changing anything in
+  `astro.config.mjs`, `src/middleware.ts` or `scripts/pack-release.mjs`.
+- Don't add a route that renders per-visitor state on the server. Every page
+  here is cached by path, so anything derived from a cookie, a session or an
+  `Accept-Language` header would be served to the next visitor as well.
+  `AccountMenu` is `client:idle` and reads `/me` in the browser precisely for
+  this reason — keep it that way.
 - Don't loosen the exact `motion` pin back to a `^` range. CI installs with
   `npm install --no-package-lock`, so a caret range floats to whatever npm
   published that morning — an untested framer-motion lands straight in a

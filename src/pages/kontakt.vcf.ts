@@ -4,6 +4,13 @@ import type { APIRoute } from "astro";
 import { siteConfig } from "~/lib/seo";
 
 /**
+ * Prerendered: the card is built from `siteConfig`, which only changes with a
+ * deploy. It also reads a file relative to `process.cwd()`, which is the
+ * project root during the build and a deploy tree without `src/` at runtime.
+ */
+export const prerender = true;
+
+/**
  * Build-time vCard endpoint → `/kontakt.vcf`. Prerendered under
  * `output: "static"`, so it ships as a plain file (no runtime).
  *
