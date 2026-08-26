@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Build-time CMS layer for the landingpage content editor. The contract:
- * a failed/partial fetch must never blank a section — cmsFor falls back to
- * the baked default unless the API block is present AND shape-compatible.
+ * Server-rendered CMS layer for the landingpage content editor. The contract:
+ * a failed/partial fetch must never blank a section — cmsFor validates the
+ * fields it can use and merges them over the baked default.
  * fetchBlocks memoises per language so all sections share one request.
  *
- * cms.ts keeps a module-level cache, so each test re-imports the module
- * fresh (vi.resetModules) to isolate that cache.
+ * cms.ts uses the shared generation cache, so each test re-imports the module
+ * fresh (`vi.resetModules`) to isolate the cache instance.
  */
 async function load() {
   vi.resetModules();
@@ -32,7 +32,7 @@ afterEach(() => {
 describe("cmsFor", () => {
   const fallback = { headline: "Default", body: "Default body" };
 
-  it("returns the API block when present and shape-compatible", async () => {
+  it("returns all valid API fields when a complete block is present", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(jsonOk({ blocks: { hero: { headline: "Edited", body: "Edited body" } } })),
@@ -40,7 +40,7 @@ describe("cmsFor", () => {
     const { cmsFor } = await load();
 
     const out = await cmsFor("hero", "de", fallback);
-    expect(out.headline).toBe("Edited");
+    expect(out).toEqual({ headline: "Edited", body: "Edited body" });
   });
 
   it("falls back to the default when the section is absent", async () => {
@@ -50,15 +50,208 @@ describe("cmsFor", () => {
     expect(await cmsFor("hero", "de", fallback)).toBe(fallback);
   });
 
-  it("falls back when the API block is missing a fallback key (partial/malformed)", async () => {
+  it("merges a partial first block over the local defaults", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(jsonOk({ blocks: { hero: { headline: "only headline" } } })),
     );
     const { cmsFor } = await load();
 
-    // body key missing → shape guard rejects → baked default wins.
+    // A newly connected site starts this editor form from `{}`. Touching one
+    // field therefore persists only that field; the untouched copy must still
+    // come from the local fallback.
+    expect(await cmsFor("hero", "de", fallback)).toEqual({
+      headline: "only headline",
+      body: "Default body",
+    });
+  });
+
+  it("keeps the fallback object when the saved block is empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonOk({ blocks: { hero: {} } })),
+    );
+    const { cmsFor } = await load();
+
     expect(await cmsFor("hero", "de", fallback)).toBe(fallback);
+  });
+
+  it("uses valid siblings while rejecting wrong, empty and unknown fields", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonOk({
+          blocks: {
+            hero: {
+              headline: 42,
+              body: "Edited body",
+              unused: "must not leak into the render shape",
+            },
+          },
+        }),
+      ),
+    );
+    const { cmsFor } = await load();
+
+    expect(await cmsFor("hero", "de", fallback)).toEqual({
+      headline: "Default",
+      body: "Edited body",
+    });
+  });
+
+  it("does not let blank values erase baked copy", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonOk({ blocks: { hero: { headline: "   ", body: "" } } }),
+      ),
+    );
+    const { cmsFor } = await load();
+
+    expect(await cmsFor("hero", "de", fallback)).toBe(fallback);
+  });
+
+  it("validates nested list items and preserves their missing defaults", async () => {
+    const listFallback = {
+      headline: "Default",
+      items: [
+        { title: "First", description: "First body", tags: ["one"] },
+        { title: "Second", description: "Second body", tags: ["two"] },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonOk({
+          blocks: {
+            services: {
+              items: [
+                { title: "Edited first" },
+                { title: 99, description: "Edited second body" },
+              ],
+            },
+          },
+        }),
+      ),
+    );
+    const { cmsFor } = await load();
+
+    expect(await cmsFor("services", "de", listFallback)).toEqual({
+      headline: "Default",
+      items: [
+        { title: "Edited first", description: "First body", tags: ["one"] },
+        { title: "Second", description: "Edited second body", tags: ["two"] },
+      ],
+    });
+  });
+
+  it("rejects a newly appended list item with an invalid required value", async () => {
+    const listFallback = {
+      items: [
+        {
+          title: "Consulting",
+          rate: 120,
+          includes: ["Workshop"],
+          highlight: false,
+        },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonOk({
+          blocks: {
+            pricing: {
+              items: [
+                {
+                  title: "Edited consulting",
+                  rate: 125,
+                  includes: ["Review"],
+                  highlight: false,
+                },
+                {
+                  title: "Broken package",
+                  rate: "not-a-number",
+                  includes: [],
+                  highlight: false,
+                },
+              ],
+            },
+          },
+        }),
+      ),
+    );
+    const { cmsFor } = await load();
+
+    // There is no baked second item whose rate could be used as a fallback.
+    // Publishing an invented zero price would be worse than keeping the
+    // complete committed list at this list boundary.
+    expect(await cmsFor("pricing", "de", listFallback)).toBe(listFallback);
+  });
+
+  it("accepts a complete appended item without copying the template's list content", async () => {
+    const listFallback = {
+      items: [
+        {
+          number: "01",
+          title: "Default service",
+          description: "Default body",
+          tags: ["Default tag"],
+        },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonOk({
+          blocks: {
+            services: {
+              items: [
+                {
+                  number: "01",
+                  title: "Edited service",
+                  description: "Edited body",
+                },
+                {
+                  number: "02",
+                  title: "New service",
+                  description: "New body",
+                },
+              ],
+            },
+          },
+        }),
+      ),
+    );
+    const { cmsFor } = await load();
+
+    expect(await cmsFor("services", "de", listFallback)).toEqual({
+      items: [
+        {
+          number: "01",
+          title: "Edited service",
+          description: "Edited body",
+          tags: ["Default tag"],
+        },
+        {
+          number: "02",
+          title: "New service",
+          description: "New body",
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  it("keeps a list default when the override list is empty", async () => {
+    const listFallback = { items: [{ title: "Default item" }] };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(jsonOk({ blocks: { services: { items: [] } } })),
+    );
+    const { cmsFor } = await load();
+
+    expect(await cmsFor("services", "de", listFallback)).toBe(listFallback);
   });
 });
 

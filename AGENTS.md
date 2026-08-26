@@ -118,7 +118,7 @@ See README's "Replace examples before go-live" section.
   > tds-shared** — the blog and the legacy customer portal still render it,
   > so this was a landingpage change with no library release.
   > The `label` fields were NOT deleted from the data: every section's
-  > `cmsFor(...)` default must keep the shape the API validator expects,
+  > `cmsFor(...)` default is also the runtime schema the CMS merge validates,
   > `FAQ.astro` names its tablist with `content.label`, and the pricing
   > pages build their `<title>` + breadcrumb JSON-LD from `pricing.label`.
 - **The site is BORDERLESS: separation comes from fill, tone and spacing.**
@@ -289,10 +289,21 @@ See README's "Replace examples before go-live" section.
   der Meta-Description (`seo.test.ts`, 80–160). Wer Copy anfasst, prüft
   sie im Browser.
 - **Editable content via `src/lib/cms.ts`**: `fetchBlocks(lang)` does a
-  single build-time GET of `PUBLIC_CONTENT_API_URL/landing?lang=` (memoised)
-  and `cmsFor(section, lang, fallback)` merges the admin-edited block for that
-  section over its baked default, guarded by a shallow shape-check and
-  graceful fallback to `{}` so the build never breaks if the API is down.
+  single server-side GET of `PUBLIC_CONTENT_API_URL/landing?lang=` per cache
+  generation (memoised), and `cmsFor(section, lang, fallback)` validates the
+  admin-edited fields against the local fallback and merges them recursively.
+  A block is intentionally sparse: the Website-CMS opens a section with no
+  stored row as `{}`, and its first save contains only controls the editor
+  touched. Missing, blank, unknown or type-incompatible fields keep the baked
+  value instead of blanking the section; a non-object block falls back in full
+  and a malformed list falls back at the list boundary.
+  An appended list item has no baked item to inherit from, so all of its scalar
+  fields must be present, non-blank and type-correct; otherwise the complete
+  list falls back. List-valued fields may be omitted and become `[]` (the
+  structured editor does not expose the shared service `tags`, for example).
+  The fallback is therefore both content and runtime schema — a field omitted
+  there cannot be admitted safely from the CMS. An API failure still degrades
+  to `{}`, so a page render never loses its committed copy.
   Editable sections today: hero, about, services, pricing, consulting,
   contact, footer, faq, process — edited in tds-admin's Landingpage editor.
   **tds-shared-pkg i18n (and the local `lib/faq.ts` / `lib/processDetails.ts`)
@@ -883,8 +894,9 @@ restarted. The host procedure lives in `tds-gateway-api/DEPLOY-PLESK.md`.
 
 Two more consequences here:
 
-- **Keep the `tds-shared` pin at `^0.32.0` or newer.** A 0.x caret is
-  minor-locked, so pinning back below it silently restores the bug.
+- **Keep the `tds-shared` pin at `^0.33.0` or newer.** This is the current
+  platform line and includes the 0.32.0 cache fingerprint fix. A 0.x caret is
+  minor-locked, so pinning back below it silently restores the stale-build bug.
 - **After a deploy the first visitor to each page pays one render.** That is
   the correct price and it is what the old static build charged on every
   content change instead.

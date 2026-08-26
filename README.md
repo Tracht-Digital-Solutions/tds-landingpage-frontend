@@ -257,6 +257,26 @@ routing (`defaultLocale: de`, `prefixDefaultLocale: false`).
 
 ---
 
+## Website-CMS content overrides
+
+Editable section blocks are sparse overrides, not complete copies of the page.
+`src/lib/cms.ts` validates every stored field against that section's committed
+fallback and merges only compatible values over it. Missing, blank, unknown or
+wrongly typed fields keep the local text, so saving one headline on a newly
+connected site cannot erase the untouched body, buttons or list data.
+
+New list entries are stricter because there is no same-index default to borrow:
+their scalar fields must be complete and type-correct, or the whole edited list
+falls back. This prevents a malformed new price from silently becoming `0`.
+
+That sparse contract is intentional: the Website-CMS starts a section without
+a stored block at `{}` and only adds a field when it is edited. Content is read
+server-side while a page fills its file-backed cache; saving in the panel asks
+the site to rebuild only the affected cached pages. If the content API is down
+or returns a malformed block, the committed fallback remains publishable.
+
+---
+
 ## AGB page + PDF
 
 The AGB is served two ways from one document: a readable page at `/legal/agb`
@@ -311,7 +331,7 @@ src/
 ├── lib/
 │   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
 │   ├── content.ts              # fetchTopics() — build-time pull of recent blog posts
-│   ├── cms.ts                  # fetchBlocks()/cmsFor() — build-time pull of editable section content (/landing), merged over the tds-shared-pkg defaults
+│   ├── cms.ts                  # fetchBlocks()/cmsFor() — server-side pull of sparse section overrides (/landing), validated + merged over local defaults
 │   ├── seo.ts                  # Single source of truth for org/person identity
 │   ├── jsonld.ts               # Schema.org graph generators
 │   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
