@@ -1,4 +1,5 @@
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
+import { contentApiBase } from "./connection";
 import { contentCache } from "./cache";
 /**
  * Server-side fetch of editable landingpage content blocks from
@@ -12,10 +13,6 @@ import { contentCache } from "./cache";
  */
 
 /** Resolved at build time from env, with the production default. */
-const CONTENT_API_URL =
-  (import.meta.env.PUBLIC_CONTENT_API_URL as string | undefined) ??
-  "https://api.tracht-digital.de/content";
-
 /** Map of section key → content object, as returned by the API. */
 export type ContentBlocks = Record<string, unknown>;
 
@@ -202,7 +199,7 @@ export async function fetchBlocks(lang: "de" | "en"): Promise<ContentBlocks> {
   return contentCache.get(`landing:${lang}`, async () => {
     let blocks: ContentBlocks = {};
     try {
-      const url = new URL(`${CONTENT_API_URL}/landing`);
+      const url = new URL(`${contentApiBase()}/landing`);
       url.searchParams.set("lang", lang);
       const res = await fetch(url, {
         headers: siteKeyHeaders(),

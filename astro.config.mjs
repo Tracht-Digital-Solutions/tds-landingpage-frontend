@@ -4,7 +4,6 @@ import react from "@astrojs/react";
 // Shared CSS minify settings (incl. the cssTarget that keeps lightningcss
 // from dropping the header backdrop-filter prefix). See tds-shared#10.
 import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
-import { siteKeyGuard } from "./src/lib/siteKey";
 
 export default defineConfig({
   site: "https://tracht-digital.de",
@@ -38,17 +37,6 @@ export default defineConfig({
 
   integrations: [
     react(),
-    // Fails the build when TDS_SITE_KEY was rejected. It has to live here,
-    // not in the fetch helpers: every content fetch is wrapped in a
-    // fail-soft try/catch, and a throw from inside one is swallowed — a
-    // real build against a 401 stub printed the abort message five times
-    // and then completed green. astro:build:done runs outside all of them.
-    //
-    // NOTE: with content now fetched at REQUEST time, this guard only covers
-    // whatever the prerendered routes read. The runtime counterpart is in
-    // src/lib/siteKey.ts: a rejected key fails the cache WRITE, so a bad key
-    // can never be baked into a stored page.
-    siteKeyGuard(),
     // @astrojs/sitemap is deliberately gone. It derives its entries from the
     // BUILT routes, and under `output: "server"` the two indexable pages of
     // this site are no longer built — it would have emitted a sitemap holding

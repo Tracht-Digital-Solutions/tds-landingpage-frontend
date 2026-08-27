@@ -1,5 +1,6 @@
 import { siteConfig } from "~/lib/seo";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
+import { contentApiBase } from "./connection";
 
 /**
  * Shared shape of a published post as returned by tds-content-api's
@@ -15,11 +16,6 @@ export interface ContentPost {
   coverHint: string | null;
 }
 
-/** Resolved at build time from env, with the production default. */
-const CONTENT_API_URL =
-  (import.meta.env.PUBLIC_CONTENT_API_URL as string | undefined) ??
-  "https://api.tracht-digital.de/content";
-
 /**
  * Make an uploaded cover URL absolute. The CMS persists `coverHint` as a
  * storage-relative `/uploads/…` path; rendered as-is in an `<img src>` here it
@@ -32,7 +28,7 @@ const CONTENT_API_URL =
 export function resolveCoverHint(coverHint?: string | null): string | null {
   if (!coverHint) return null;
   if (/^https?:\/\//i.test(coverHint)) return coverHint;
-  if (coverHint.startsWith("/")) return `${CONTENT_API_URL}${coverHint}`;
+  if (coverHint.startsWith("/")) return `${contentApiBase()}${coverHint}`;
   return coverHint;
 }
 
@@ -57,7 +53,7 @@ export async function fetchTopics(
   if (import.meta.env.PUBLIC_DEMO_MODE === "true") return [];
 
   try {
-    const url = new URL(`${CONTENT_API_URL}/blog`);
+    const url = new URL(`${contentApiBase()}/blog`);
     url.searchParams.set("limit", String(limit));
     url.searchParams.set("lang", lang);
     const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
@@ -90,7 +86,7 @@ export async function fetchPostsBySlug(
   const results = await Promise.all(
     slugs.map(async (slug) => {
       try {
-        const url = new URL(`${CONTENT_API_URL}/blog/${slug}`);
+        const url = new URL(`${contentApiBase()}/blog/${slug}`);
         url.searchParams.set("lang", lang);
         const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
         assertKeyAccepted(res, url);

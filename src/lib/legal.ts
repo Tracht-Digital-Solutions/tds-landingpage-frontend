@@ -17,11 +17,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { contentCache } from "./cache";
-
-/** Resolved at build time from env, with the production default. */
-const CONTENT_API_URL =
-  (import.meta.env.PUBLIC_CONTENT_API_URL as string | undefined) ??
-  "https://api.tracht-digital.de/content";
+import { contentApiBase } from "./connection";
 
 /** Metadata for one uploaded document, as `GET /content/legal` returns it. */
 export interface LegalDocMeta {
@@ -49,8 +45,9 @@ export async function fetchLegalIndex(): Promise<LegalDocIndex> {
   return contentCache.get("legal:index", async () => {
     let docs: LegalDocIndex = {};
     try {
-      const res = await fetch(`${CONTENT_API_URL}/legal`, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
-      assertKeyAccepted(res, `${CONTENT_API_URL}/legal`);
+      const url = `${contentApiBase()}/legal`;
+      const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
+      assertKeyAccepted(res, url);
       if (res.ok) {
         const data = (await res.json()) as { docs?: LegalDocIndex };
         docs = data.docs ?? {};
@@ -106,7 +103,7 @@ function fallbackBytes(key: string): Uint8Array | null {
 export async function legalDocBytes(key: string, lang: "de" | "en"): Promise<Uint8Array | null> {
   if (import.meta.env.PUBLIC_DEMO_MODE !== "true" && (await legalDocMeta(key, lang)) !== null) {
     try {
-      const url = new URL(`${CONTENT_API_URL}/legal/${key}.pdf`);
+      const url = new URL(`${contentApiBase()}/legal/${key}.pdf`);
       url.searchParams.set("lang", lang);
       const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(20_000) });
       assertKeyAccepted(res, url);
