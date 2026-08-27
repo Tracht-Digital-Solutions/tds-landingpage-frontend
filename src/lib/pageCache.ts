@@ -10,6 +10,7 @@
 import { pageCache, resolveCacheDirs } from "@tracht-digital-solutions/tds-shared/cache";
 
 import { alwaysPaths, cacheEvents, contentCache } from "./cache";
+import { connection } from "./connection";
 
 export const siteCache = pageCache({
   // Creates the store and re-links it into the document root on every boot —
@@ -18,6 +19,7 @@ export const siteCache = pageCache({
   ...resolveCacheDirs({ logger: (m) => console.warn(`[tds-landingpage] ${m}`) }),
   events: cacheEvents,
   alwaysPaths,
+  tokenProvider: () => connection.cacheToken(),
   // Without this a rebuild re-renders whatever the process read at boot and
   // reports success. It is the single most important line in this file.
   onInvalidate: () => contentCache.invalidate(),
