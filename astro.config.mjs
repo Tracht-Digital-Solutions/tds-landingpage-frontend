@@ -13,7 +13,7 @@ export default defineConfig({
   // This site used to be `output: "static"`, and the repo AGENTS.md used to
   // forbid anything else on the grounds that the production host has no Node
   // runtime. That is no longer true: the Plesk host runs the site as a Node
-  // app under Passenger (see DEPLOY-PLESK.md).
+  // app under Passenger (see INSTALL.md, sections 7 and 9).
   //
   // Why the change: the ONLY cache between the CMS database and a visitor used
   // to be the static build itself, so correcting one sentence in a content

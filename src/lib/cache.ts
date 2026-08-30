@@ -1,6 +1,8 @@
 /**
- * This site's half of the page cache: which pages a content change dates, and
- * the memo that a rebuild throws away.
+ * This site's half of the page cache: which pages a content change dates.
+ *
+ * The memo a rebuild throws away lives in `contentCache.ts` and is re-exported
+ * here, so a content fetch never has to import this route table.
  *
  * The API sends *what changed* (`{type:"block", id:"hero", lang:"de"}`); this
  * file answers *which of my pages that is*. Keeping the answer here rather
@@ -8,35 +10,22 @@
  * `@tracht-digital-solutions/tds-shared/cache`.
  */
 
-import {
-  createGenerationCache,
-  forLanguages,
-  type EventMap,
-} from "@tracht-digital-solutions/tds-shared/cache";
+import { forLanguages, type EventMap } from "@tracht-digital-solutions/tds-shared/cache";
+import { serviceDefinitions, serviceHref } from "./services";
 
-/**
- * The one memo every content fetch on this site shares.
- *
- * It replaces the module-level `Map`/`let … = null` caches that `cms.ts` and
- * `legal.ts` used to keep. Those were exactly right while this site was a
- * static build — one process, one fetch per language, then exit — and become
- * *permanent* under SSR: the server would answer with whatever it read at
- * boot, for the life of the process, and a cache rebuild would faithfully
- * re-render that stale content and report success. Nothing logs, nothing
- * throws, nothing is red.
- *
- * The middleware calls `invalidate()` before any render a rebuild performs.
- */
-export const contentCache = createGenerationCache();
+export { contentCache } from "./contentCache";
 
 /** Every page that shows editable landing content, per language. */
 function contentPages(lang: "de" | "en"): string[] {
-  // Both, unconditionally: `pricing` is rendered by /preise AND by the
-  // PricingTeaser on the home page, `footer` and `contact` appear on both, and
-  // getting the mapping subtly wrong shows up as a page that never updates —
-  // the exact silence this mechanism exists to remove. Two renders is a
-  // rounding error against that.
-  return lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"];
+  const base = lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"];
+  return [
+    ...base,
+    ...serviceDefinitions.map((service) => serviceHref(service, lang)),
+  ];
+}
+
+function homePages(lang: "de" | "en"): string[] {
+  return [lang === "de" ? "/" : "/en/"];
 }
 
 /** Where a legal document is published, per key and language. */
@@ -75,12 +64,12 @@ export const cacheEvents: EventMap = {
   /**
    * A blog post changed.
    *
-   * This is not the blog — but the home page's Journal and Currently sections
+   * This is not the blog — but the home page's Journal section
    * read `/content/blog` at render time, so a published post changes this site
    * too. Missing that is how the marketing page ends up advertising last
    * month's articles.
    */
-  post: (event) => forLanguages(event, contentPages),
+  post: (event) => forLanguages(event, homePages),
 };
 
 /**
@@ -89,4 +78,13 @@ export const cacheEvents: EventMap = {
  * The cache can only enumerate what it already holds, so without this a
  * rebuild on a cold cache would report success having rendered nothing.
  */
-export const alwaysPaths = ["/", "/en/", "/preise", "/en/preise"];
+export const alwaysPaths = [
+  "/",
+  "/en/",
+  "/preise",
+  "/en/preise",
+  ...serviceDefinitions.flatMap((service) => [
+    serviceHref(service, "de"),
+    serviceHref(service, "en"),
+  ]),
+];

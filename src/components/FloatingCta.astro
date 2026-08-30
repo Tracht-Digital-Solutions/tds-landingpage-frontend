@@ -1,5 +1,5 @@
 ---
-import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { resolveLang, localizePath } from "~/lib/i18n";
 
 /**
  * Persistent bottom-right control. Idle: just the "book a call" CTA
@@ -10,11 +10,9 @@ import { tFor, resolveLang, localizePath } from "~/lib/i18n";
  * floats over a dark section so it never disappears.
  */
 const lang = resolveLang(Astro.currentLocale);
-const t = tFor(Astro.currentLocale);
-
 const home = localizePath("/", lang);
 const href = `${home === "/" ? "" : home.replace(/\/$/, "")}/#contact`;
-const label = t.nav.cta;
+const label = lang === "de" ? "Erstgespräch vereinbaren" : "Arrange an initial consultation";
 const topLabel = lang === "en" ? "Back to top" : "Nach oben";
 ---
 

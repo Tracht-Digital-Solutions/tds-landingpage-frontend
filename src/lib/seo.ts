@@ -29,8 +29,8 @@ export const siteConfig = {
    * those.
    */
   description: {
-    de: "Digitalisierung für Unternehmen: Websites, Webshops und individuelle Werkzeuge für kleine Betriebe — persönlich, aus Schwarzenbek bei Hamburg.",
-    en: "Digitalization for businesses: websites, online shops and custom tools for small businesses — personal, from Schwarzenbek near Hamburg, Germany.",
+    de: "Digitalisierung für Unternehmen mit fester Ansprechperson: Beratung, Umsetzung und komplette IT aus einer Hand — aus Schwarzenbek bei Hamburg.",
+    en: "Your dedicated contact for business digitalization: advice, implementation and complete IT from one source — from Schwarzenbek near Hamburg.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
@@ -42,7 +42,7 @@ export const siteConfig = {
   vatID: "DE450639725",
   founder: {
     name: "Julian Tracht",
-    jobTitle: "Inhaber & Entwickler",
+    jobTitle: "Digitalisierungsberater & Inhaber",
     sameAs: [] as string[], // populated from socials below post-launch
   },
   /** Verified business address (matches the Impressum). */
@@ -68,6 +68,8 @@ export const siteConfig = {
     "Individualsoftware",
     "App-Entwicklung",
     "IT-Beratung",
+    "IT-Betreuung",
+    "IT-Sicherheit",
   ],
   /** Public social URLs — surface in JSON-LD `sameAs` and the
    * Contact aside. WhatsApp is a `wa.me` deep link to the

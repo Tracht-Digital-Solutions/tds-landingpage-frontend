@@ -106,7 +106,12 @@ export default function LanguageToggle({ lang }: { lang: Lang }) {
       // ignore — Safari private mode etc.
     }
     if (typeof window !== "undefined") {
-      const target = swapLocaleInPath(window.location.pathname, next);
+      const alternate = document.querySelector<HTMLLinkElement>(
+        `link[rel="alternate"][hreflang="${next}"]`,
+      );
+      const target = alternate
+        ? new URL(alternate.href, window.location.origin).pathname
+        : swapLocaleInPath(window.location.pathname, next);
       window.location.assign(target + window.location.hash);
     }
   };

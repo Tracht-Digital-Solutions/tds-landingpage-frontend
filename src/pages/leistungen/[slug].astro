@@ -1,0 +1,21 @@
+---
+import ServiceDetailPage from "~/components/services/ServiceDetailPage.astro";
+import ErrorView from "~/components/ErrorView.astro";
+import Layout from "~/layouts/Layout.astro";
+import { getServiceBySlug, resolveServiceContent } from "~/lib/services";
+
+const lang = "de" as const;
+const service = getServiceBySlug(lang, Astro.params.slug);
+const content = service ? await resolveServiceContent(service, lang) : undefined;
+if (!service) Astro.response.status = 404;
+---
+
+{
+  service && content ? (
+    <ServiceDetailPage service={service} content={content} lang={lang} />
+  ) : (
+    <Layout title="404 · Seite nicht gefunden" lang={lang} bare noindex>
+      <ErrorView code="404" />
+    </Layout>
+  )
+}

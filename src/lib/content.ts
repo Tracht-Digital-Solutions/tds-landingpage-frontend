@@ -1,4 +1,3 @@
-import { siteConfig } from "~/lib/seo";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { contentApiBase } from "./connection";
 
@@ -38,17 +37,16 @@ const withResolvedCover = (p: ContentPost): ContentPost => ({
 });
 
 /**
- * Build-time fetch of the most recent published posts. Used by both
- * the Hero pill (the first / "main-theme" post) and the Currently
- * section (the full list). Returns `[]` on any failure so consumers
- * can render their own fallback — the build never breaks if the
+ * Fetch of the most recent published posts, used by the Journal section
+ * when no curated slug list is configured. Returns `[]` on any failure so
+ * consumers can render their own fallback — a render never breaks if the
  * content API is unreachable.
  */
 export async function fetchTopics(
   lang: "de" | "en",
   limit = 3,
 ): Promise<ContentPost[]> {
-  // Demo build: skip the API so consumers fall back to topicFallback()
+  // Demo build: skip the API so consumers fall back to their baked copy
   // (the in-sync demo topics) — no backend required.
   if (import.meta.env.PUBLIC_DEMO_MODE === "true") return [];
 
@@ -104,84 +102,4 @@ export async function fetchPostsBySlug(
   );
 
   return results.filter((p): p is ContentPost => p !== null);
-}
-
-/** Build the public URL where a single post is read on the blog. */
-export function topicHref(slug: string): string {
-  return `${siteConfig.blogUrl}/${slug}`;
-}
-
-/**
- * Hand-written fallback list of "current topics" — used when the live
- * content API returns nothing (first deploy / transient outage) so the
- * Currently section *and* the Hero pill both still surface meaningful,
- * in-sync topics. The **first entry is the most important one**: it is
- * what the Hero pill links to, and it leads the Currently list.
- *
- * The slugs must be real articles on the blog — they are rendered as links
- * to `blogUrl/<slug>`. They therefore mirror the seed migration in
- * `tds-ext-blog-cms-pkg`, which is what a fresh installation publishes;
- * inventing a slug here produces a section full of 404s that nothing in the
- * build would flag.
- */
-export function topicFallback(lang: "de" | "en"): ContentPost[] {
-  return lang === "de"
-    ? [
-        {
-          slug: "digitalisierung-faengt-klein-an",
-          category: "Digitalisierung",
-          title: "Digitalisierung fängt nicht beim Großprojekt an",
-          excerpt:
-            "Sie fängt bei dem einen Ablauf an, der jede Woche Stunden kostet — und den außer Ihnen niemand sieht.",
-          publishedAt: "",
-          coverHint: null,
-        },
-        {
-          slug: "lohnt-sich-ein-webshop",
-          category: "Webshop",
-          title: "Lohnt sich ein Webshop für mein Ladengeschäft?",
-          excerpt:
-            "Nicht für jedes Sortiment. Vier Fragen, die die Antwort meist schon vorwegnehmen.",
-          publishedAt: "",
-          coverHint: null,
-        },
-        {
-          slug: "produktpflege-per-handy",
-          category: "Werkzeuge",
-          title: "Warum Produktpflege nicht am Schreibtisch hängen muss",
-          excerpt:
-            "Wer Ware annimmt, steht selten am Rechner. Was sich ändert, wenn Artikel und Bestand vom Handy aus gepflegt werden.",
-          publishedAt: "",
-          coverHint: null,
-        },
-      ]
-    : [
-        {
-          slug: "digitalisierung-faengt-klein-an",
-          category: "Digitalization",
-          title: "Digitalization doesn't start with a big project",
-          excerpt:
-            "It starts with the one routine that costs hours every week — the one nobody but you can see.",
-          publishedAt: "",
-          coverHint: null,
-        },
-        {
-          slug: "lohnt-sich-ein-webshop",
-          category: "Online shop",
-          title: "Is an online shop worth it for my local business?",
-          excerpt:
-            "Not for every range of products. Four questions that usually answer it for you.",
-          publishedAt: "",
-          coverHint: null,
-        },
-        {
-          slug: "produktpflege-per-handy",
-          category: "Tools",
-          title: "Why product upkeep doesn't have to be tied to a desk",
-          excerpt:
-            "People taking in stock are rarely at a computer. What changes when items and stock can be maintained from a phone.",
-          publishedAt: "",
-          coverHint: null,
-        },
-      ];
 }

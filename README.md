@@ -1,366 +1,185 @@
 # tds-landingpage-frontend
 
-> **Setting this up from scratch?** See [`INSTALL.md`](INSTALL.md) for
-> the step-by-step bring-up (Packages auth → npm install → env →
-> dev → build → auto-deploy). This README documents pages,
-> structure and brand notes.
+The bilingual public marketing site for Tracht Digital Solutions at
+[`tracht-digital.de`](https://tracht-digital.de). It presents Julian Tracht as
+the long-term contact for a company's digitalization—from advice and planning
+through implementation to agreed operational IT support.
 
----
+The site uses Astro 7, React 19 islands and Tailwind CSS 4. It is rendered by a
+standalone Node server and cached as files, so common page requests are served
+directly by the web server. German is the default locale at `/`; English lives
+under `/en/`.
 
+For a fresh checkout, production configuration or deployment, use
+[`INSTALL.md`](INSTALL.md). Agent-specific implementation invariants live in
+[`AGENTS.md`](AGENTS.md). Open image/content work is tracked in
+[`IMAGES.md`](IMAGES.md).
 
-Marketing landing page for Tracht Digital Solutions. **Astro 7** +
-**React** islands + **Tailwind v4** (via the `@tailwindcss/postcss`
-plugin — see the *Tailwind note* below) with self-hosted
-**Lato + Plus Jakarta Sans**. Ships in two locale trees (DE at `/`,
-EN at `/en/`).
+## Experience and pages
 
-It is **server-rendered behind a file-backed page cache** since
-2026-08-24, not a static build — a cache hit is served straight off disk by
-the web server and costs exactly what the old static file cost, because it is
-one. See *Server rendering + page cache* in `AGENTS.md`.
+The home page keeps the existing Tracht Digital Solutions visual system while
+organizing the content around one clear responsibility:
 
-Two branches, as everywhere in this workspace: a push to `main` builds the
-`dev` branch (a build gate, **not** deployed), and production goes out only
-via the manual **Release** button, which publishes the `release` branch and
-pings the deploy webhook.
+1. Hero and initial-consultation CTA
+2. Wieso ich? / Why me?
+3. Six linked service areas
+4. Digitalization-responsibility callout
+5. Process
+6. Pricing teaser
+7. Compact journal teaser
+8. FAQ
+9. Contact
 
-SEO surface includes Schema.org JSON-LD (Organization,
-ProfessionalService, Person, WebSite, Service+OfferCatalog,
-BreadcrumbList), per-page OG/Twitter meta, `robots.txt` with explicit
-allow-list for AI crawlers (GPTBot, OAI-SearchBot, PerplexityBot,
-ClaudeBot, Google-Extended, etc.) and an `llms.txt` directory file.
-See `AGENTS.md` § *SEO + structured data* for the layout.
+The former tech-stack and current-topics sections are no longer part of the
+home-page story. The placeholder portfolio remains hidden. Approved,
+anonymized references appear within the relevant service page; when none are
+available, the complete references section is omitted.
 
----
-
-## Quick start (TL;DR)
-
-```bash
-# 1. One-time: GitHub Packages auth (see "Prerequisites" if this fails)
-export NPM_TOKEN=ghp_yourClassicPATWithReadPackagesScope
-
-# 2. Install + run
-npm install
-npm run dev          # http://localhost:4321
-```
-
-Deploys automatically on every push to `main`; see [Deploy](#deploy).
-
----
-
-## Prerequisites
-
-| Tool | Version | Why |
-|---|---|---|
-| Node.js | 22 LTS | Astro 7 requires ≥22.12 — Node 18/20 are no longer supported |
-| npm | 10+ | Bundled with Node 22 |
-| Git | any | Repo hosting |
-| (optional) `gh` CLI | latest | Easiest way to mint a packages-scoped token |
-
-### Tailwind note (why PostCSS, not Vite plugin)
-
-Tailwind is wired through **`@tailwindcss/postcss`** via
-`postcss.config.mjs`, not the `@tailwindcss/vite` plugin.
-
-The original reason is gone, so don't quote it: the Vite plugin used to
-crash against Astro 6's Vite 7 + rolldown with `Missing field
-'tsconfigPaths'` (withastro/astro#16542). Under Astro 7 / Vite 8 it builds
-fine — it was re-tested on 2026-08-06. The convention was **kept
-deliberately**: both routes work, and one setup across all six apps is what
-keeps `static-posture.test.ts` (which asserts `postcss.config.mjs` exists and
-the plugin appears in neither the Astro config nor `package.json`) meaningful.
-Nothing is broken here, so don't reintroduce the Vite plugin as a "fix" —
-adopting it would be a deliberate six-app change.
-
-### Lockfile note
-
-A `package-lock.json` is committed. Locally, `npm install` uses it
-for reproducible installs. **CI installs with `npm install
---no-package-lock`** — the lockfile is generated on Windows and
-only registers win32 platform binaries for native deps (rollup,
-lightningcss, esbuild, sharp, tailwindcss-oxide), so `npm ci` /
-`npm install` on the Linux runner would honor the lockfile and
-skip the Linux binaries, crashing at type-check
-(npm/cli#4828). `--no-package-lock` bypasses the lockfile on the
-runner and lets npm resolve from `package.json` directly.
-
-### GitHub Packages authentication
-
-`@tracht-digital-solutions/tds-shared` lives on GitHub Packages, not
-on npm. Installing requires a token with the `read:packages` scope.
-
-Two ways to provide it:
-
-**(a) Local `~/.npmrc`** — recommended for dev machines:
-
-```ini
-@tracht-digital-solutions:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=ghp_yourClassicPATWithReadPackagesScope
-```
-
-**(b) Environment variable** — picked up by the repo's `.npmrc`,
-which references `${NPM_TOKEN}`:
-
-```bash
-export NPM_TOKEN=ghp_yourClassicPATWithReadPackagesScope
-```
-
-Either way, the token must be a **classic** PAT (not fine-grained)
-with `read:packages` scope on the `Tracht-Digital-Solutions` org.
-
-If `npm install` fails with `401 Unauthorized`, the token is missing,
-expired, or lacks the scope. Mint a new one at
-<https://github.com/settings/tokens> → classic → `read:packages`.
-
----
-
-## Scripts
-
-```bash
-npm run dev          # Astro dev server (HMR, http://localhost:4321)
-npm run build        # → dist/ (static HTML/CSS/JS, what gets deployed)
-npm run preview      # serve dist/ to inspect the production build
-npm run type-check   # astro check — catches .astro + .tsx errors
-```
-
----
-
-## Deploy
-
-Two-track branch model (the old `build` branch is gone):
-
-- **`dev`** — [`dev.yml`](.github/workflows/dev.yml), on **every push to `main`**:
-  builds `dist/` with the Staging/Demo config (`PUBLIC_DEMO_MODE=true`) and
-  force-pushes it to the orphan **`dev`** branch. **Not deployed** — the
-  continuously-built developer version + the push-to-main build gate.
-- **`release`** — [`release.yml`](.github/workflows/release.yml), **only on the
-  manual Actions button** (*Actions → Release → Run workflow*): builds with the
-  real production config and force-pushes to **`release`**, then POST-pings the
-  deploy webhook so the host pulls `release` and goes live.
-
-**Required secret:** `DEPLOY_WEBHOOK_URL` (host deploy-hook URL; token inside the
-URL) — used only by `release.yml`. The production host pulls **`release`**. Fall
-back manually with:
-
-```bash
-git fetch origin release
-git worktree add ../tds-landingpage-release origin/release   # the built dist/
-```
-
----
-
-## Configuration
-
-### Runtime env vars (build-time, baked into the static HTML)
-
-| Var | Default | What it does |
-|---|---|---|
-| `PUBLIC_CONTACT_API_URL` | `https://api.tracht-digital.de/contact` | Where `ContactForm` POSTs |
-| `PUBLIC_CONTENT_API_URL` | `https://api.tracht-digital.de/content` | Where `Journal.astro` build-time-fetches teaser posts |
-| `PUBLIC_BLOG_BASE_URL` | `https://blog.tracht-digital.de` | Base href for `BlogPostCard` links — each teaser navigates to `${base}/${slug}` |
-
-Copy [`.env.example`](.env.example) to `.env` (gitignored) and
-edit values to taste. Astro inlines anything prefixed `PUBLIC_` as
-a constant at build time — safe to expose in the client bundle.
-`.env.production` overrides `.env` for production builds.
-
-> `NPM_TOKEN` is **not** an Astro env var. npm doesn't auto-load
-> `.env`, so set it in your shell (`$env:NPM_TOKEN = "ghp_…"` on
-> PowerShell, `export NPM_TOKEN=ghp_…` on bash) before `npm install`.
-
-### GitHub Actions secrets
-
-Both `dev.yml` and `release.yml` need `NPM_TOKEN`, a classic PAT with
-`read:packages` on the `Tracht-Digital-Solutions` org. It authenticates both
-the install (cross-repo read of `tds-shared-pkg` from GitHub Packages) and the
-`peaceiris/actions-gh-pages` push to the `dev` / `release` branch. The
-auto-provided `GITHUB_TOKEN` can't read `tds-shared-pkg` (different repo).
-
-Workflow `permissions:` are declared inline (`contents: write` for the branch
-push, `packages: read`). Deploy secrets: `NPM_TOKEN` (install + push the
-`dev`/`release` branches) and `DEPLOY_WEBHOOK_URL` (host deploy-hook URL, used
-only by `release.yml`). The old `FTP_*` / `INSTALL_TOKEN` secrets and the
-`INSTALLER_URL` variable are unused and can be cleaned up.
-
----
-
-## Replace examples before go-live
-
-All contact/legal placeholders are now real: the business address,
-phone, LinkedIn/GitHub, the portrait photo, the header logo, the
-favicon, the VAT ID (`DE450639725` — in `src/pages/legal/impressum.astro`
-+ `src/lib/seo.ts`, surfaced as `Organization.vatID`) and the AGB PDF.
-
-The AGB is no longer a committed static file: it is **uploaded in the frontend**
-(Website-CMS → Rechtsdokumente) and baked into the build, with
-`src/assets/legal/agb.pdf` kept only as the fallback for when the API is
-unreachable. See § [AGB](#agb-page--pdf).
-
-**Still TODO before launch** (tracked as open issues on this repo):
-
-- Real portfolio screenshots (× 4) — note the Portfolio section is
-  currently hidden, see § [Portfolio (temporarily hidden)](#portfolio-temporarily-hidden)
-- ~~Real journal cover images (× 3)~~ — **shipped**: hosted in
-  `tds-blog-frontend/public/covers/<slug>.webp`, wired via the content-api
-  seeder `cover_hint`; the Journal card renders the photo when the
-  cover URL is present (else the labelled placeholder).
-- Lawyer review of `/legal/impressum` + `/legal/datenschutz`
-  (issue #5)
-
-See [`IMAGES.md`](IMAGES.md) for the per-image swap guide — file
-paths, aspect ratios, recommended sizes, and the exact pattern for
-replacing each remaining `<ImagePlaceholder />` with an
-`<Image />` / `<img>`.
-
----
-
-## Portfolio (temporarily hidden)
-
-The **Portfolio** section is temporarily hidden from both homepages
-(`/` and `/en/`) until real project screenshots and case-study copy
-are ready. The `Portfolio.astro` component and its data are left in
-place — only the rendering and the navigation links are switched off:
-
-| File | What is commented out |
+| Path | Purpose |
 |---|---|
-| `src/pages/index.astro` | `import Portfolio` + `<Portfolio />` |
-| `src/pages/en/index.astro` | `import Portfolio` + `<Portfolio />` |
-| `src/components/Header.astro` | `portfolio` entry in the `items` nav array |
-| `src/components/Footer.astro` | Portfolio `<li>` in the footer nav |
+| `/`, `/en/` | German and English home pages |
+| `/leistungen/[slug]` | German service detail pages |
+| `/en/services/[slug]` | English service detail pages |
+| `/preise`, `/en/preise` | Hourly rates and the custom Complete IT pricing model |
+| `/legal/impressum`, `/legal/datenschutz` | German legal notice and privacy policy |
+| `/legal/agb`, `/en/legal/agb` | Terms pages backed by uploaded PDFs |
+| `/legal/agb.pdf`, `/en/legal/agb.pdf` | The corresponding PDF endpoints |
+| `/install` | Browser-assisted connection setup for a deployed site |
 
-**To restore:** uncomment those four spots (each is marked with a
-`Portfolio temporarily hidden` comment pointing back here). Nothing
-else changes — the section slots back in between **Tech** and
-**Process**.
+The six stable service identities are Beratung & Konzeption,
+Prozessoptimierung, Individuelle Lösungen, Auftragsprogrammierung, Webauftritt
+and Komplette IT. Localized slugs are controlled by source code; editors cannot
+change routing.
 
----
-
-## Pages
-
-| Path | Source | Purpose |
+| Service | German | English |
 |---|---|---|
-| `/` | `src/pages/index.astro` | Single-page scroll layout (DE) — narrative order: Hero → About → Services → Tech → Process → Currently → PricingTeaser → Journal → Consulting → FAQ → Contact (Portfolio currently hidden, see § [Portfolio (temporarily hidden)](#portfolio-temporarily-hidden)) |
-| `/en/` | `src/pages/en/index.astro` | Same layout, EN copy |
-| `/preise` | `src/pages/preise.astro` | Hourly-rate pricing (DE) |
-| `/en/preise` | `src/pages/en/preise.astro` | Hourly-rate pricing (EN) |
-| `/legal/impressum` | `src/pages/legal/impressum.astro` | Legal notice (DE) |
-| `/legal/datenschutz` | `src/pages/legal/datenschutz.astro` | Privacy policy (DSGVO) |
-| `/legal/agb` | `src/pages/legal/agb.astro` | Terms & conditions, as a page (DE) |
-| `/legal/agb.pdf` | `src/pages/legal/agb.pdf.ts` | The same document as a PDF (DE) |
-| `/en/legal/agb` | `src/pages/en/legal/agb.astro` | Terms & conditions, as a page (EN) |
-| `/en/legal/agb.pdf` | `src/pages/en/legal/agb.pdf.ts` | The same document as a PDF (EN) |
+| Beratung & Konzeption | `/leistungen/beratung-konzeption` | `/en/services/consulting-planning` |
+| Prozessoptimierung | `/leistungen/prozessoptimierung` | `/en/services/process-optimization` |
+| Individuelle Lösungen | `/leistungen/individuelle-loesungen` | `/en/services/tailored-solutions` |
+| Auftragsprogrammierung | `/leistungen/auftragsprogrammierung` | `/en/services/contract-development` |
+| Webauftritt | `/leistungen/webauftritt` | `/en/services/web-presence` |
+| Komplette IT | `/leistungen/komplette-it` | `/en/services/complete-it` |
 
-Impressum and Datenschutz are German-only by regulation; the AGB has both
-trees because the document itself is uploaded per language. The language dropdown in
-the header navigates between the DE and EN trees via Astro's i18n
-routing (`defaultLocale: de`, `prefixDefaultLocale: false`).
+## Content model
 
----
+Most shared default copy comes from `tds-shared-pkg`; landing-specific defaults
+live beside their renderers. The Website CMS supplies sparse DE/EN overrides
+through the public `/content/landing` endpoint. `src/lib/cms.ts` validates each
+stored value against the committed fallback and applies only compatible data.
+Missing, partial or malformed blocks therefore remain publishable using local
+defaults.
 
-## Website-CMS content overrides
+Each service has one CMS block shared by its home-page card, pricing entry and
+detail page. A block contains the summary, introduction, typical situations,
+responsibilities, outcomes, boundaries, process, pricing principle, optional
+references and CTA. Stable IDs, slugs and hrefs are not CMS fields.
 
-Editable section blocks are sparse overrides, not complete copies of the page.
-`src/lib/cms.ts` validates every stored field against that section's committed
-fallback and merges only compatible values over it. Missing, blank, unknown or
-wrongly typed fields keep the local text, so saving one headline on a newly
-connected site cannot erase the untouched body, buttons or list data.
+Reference records are deliberately factual: title, context, challenge,
+solution, result and an optional verified metric. Never add placeholder clients,
+quotes or results. An empty references list is a valid editorial state and
+renders nothing.
 
-New list entries are stricter because there is no same-index default to borrow:
-their scalar fields must be complete and type-correct, or the whole edited list
-falls back. This prevents a malformed new price from silently becoming `0`.
+The journal teaser reads published blog content and falls back to committed
+copy when the API is unavailable. Legal PDFs are uploaded independently per
+language through Website CMS; `src/assets/legal/agb.pdf` is the committed
+fallback.
 
-That sparse contract is intentional: the Website-CMS starts a section without
-a stored block at `{}` and only adds a field when it is edited. Content is read
-server-side while a page fills its file-backed cache; saving in the panel asks
-the site to rebuild only the affected cached pages. If the content API is down
-or returns a malformed block, the committed fallback remains publishable.
+## Rendering and cache
 
----
+The site is not a static-only build:
 
-## AGB page + PDF
+- Astro renders cache misses through the standalone Node adapter.
+- The shared page-cache middleware stores complete responses on disk.
+- Apache serves existing cache entries before Passenger wakes Node.
+- CMS and blog changes call the token-protected cache control route, invalidate
+  the server-side content memo, and re-render only affected pages.
+- Routes that never vary with content—such as the OG image and sitemap
+  endpoints—remain prerendered.
 
-The AGB is served two ways from one document: a readable page at `/legal/agb`
-(heading, "Stand", download button, and an inline PDF viewer on desktop) and
-the file itself at `/legal/agb.pdf`. The footer links the page; the page offers
-the download.
+The cache is path-wide and must not contain visitor-specific server state.
+Login/session UI, if any, belongs in the browser. Deployments must restart the
+Node process after replacing the release tree.
 
-**To change the AGB** — no code, no deploy:
+## Localization, SEO and accessibility
 
-1. Frontend → **Website-CMS** → open the site → **Rechtsdokumente**.
-2. Pick `agb`, the language, optionally a *Stand* label (e.g. `Stand: 09/2025`,
-   shown under the heading), choose the PDF, **Hochladen**.
-3. The upload fires this site's rebuild automatically, provided the site has a
-   *Rebuild-Konfiguration* (repo + workflow) and the panel has a rebuild token.
-   Without those, upload and then release this repo by hand — nothing is lost,
-   the document just goes live on the next build.
+Astro i18n resolves German at the unprefixed path and English under `/en/`.
+Components use `tFor()` for copy and `localizePath()` for internal navigation.
+Every indexable German route has a real English counterpart with reciprocal
+canonical and hreflang links.
 
-PDF only, 8 MB maximum, one file per language. **The English document is a
-separate upload, not a translation** — legal text is never machine-translated,
-and until an `en` document exists `/en/legal/agb.pdf` serves the German one
-rather than 404ing.
+SEO output includes per-page titles/descriptions, Open Graph/Twitter metadata,
+an explicit SSR-safe sitemap, `robots.txt`, `llms.txt` and Schema.org JSON-LD.
+Structured data is built from the same resolved content the visitor sees.
+Complete IT has an individually assessed monthly offer and is intentionally not
+published as a made-up numeric price.
 
-`src/assets/legal/agb.pdf` is the committed fallback used when the API is
-unreachable or nothing has been uploaded. Keep it in `src/assets/`, **not**
-`public/legal/` — a file there would collide with the generated
-`/legal/agb.pdf` route.
+The navigation, service cards, FAQ and forms use native semantics and keyboard
+interaction. Visible focus, heading order, labels, both themes and
+`prefers-reduced-motion` are release requirements.
 
----
+## Development
 
-## Project structure
+Requirements are Node.js 22.12+, npm 10+, Git and an authorized classic GitHub
+PAT with `read:packages` for `@tracht-digital-solutions/tds-shared`.
 
-```
-src/
-├── components/
-│   ├── Header.astro            # Floating pill nav; data-scrolled morph + LanguageToggle
-│   ├── Footer.astro            # Dark footer; links to /preise + /legal/* via localizePath
-│   ├── JsonLd.astro            # Inline <script type="application/ld+json"> utility
-│   ├── islands/                # React, hydrated via client:load|visible
-│   │   ├── ContactForm.tsx     # POSTs to PUBLIC_CONTACT_API_URL; takes lang prop
-│   │   ├── CustomCursor.tsx    # Trailing custom cursor; bg-aware colour + velocity stretch (fine-pointer only)
-│   │   ├── Hero.tsx            # Hero with motion entrance; takes lang prop
-│   │   ├── LanguageToggle.tsx  # SVG-flag dropdown; navigates between /  ↔ /en/
-│   │   ├── ScrollProgress.tsx  # Thin gradient reading-progress bar (top of viewport)
-│   │   └── SmoothScroll.tsx    # Lenis singleton (desktop only); exposes window.tdsScrollTo — bounce on click-jumps, plain wheel scroll. Touch path is a rAF tween; both plan through lib/scrollJump.ts
-│   ├── sections/               # Static .astro sections (no JS by default)
-│   │   ├── About.astro, Services.astro, TechMarquee.astro,
-│   │   │ Portfolio.astro, Process.astro, Currently.astro,
-│   │   │ PricingTeaser.astro, Journal.astro, Consulting.astro,
-│   │   │ FAQ.astro, Contact.astro
-│   └── ui/                     # Reusable bits (BlogPostCard, ImagePlaceholder, ServiceCard + ServiceIcon, PortfolioCard, ProcessStep, SectionHeader)
-├── layouts/Layout.astro        # Mounts SmoothScroll (load) + ScrollProgress/CustomCursor (idle); renders meta + JSON-LD
-├── lib/
-│   ├── i18n.ts                 # tFor / resolveLang / localizePath — locale-aware translation
-│   ├── content.ts              # fetchTopics() — build-time pull of recent blog posts
-│   ├── cms.ts                  # fetchBlocks()/cmsFor() — server-side pull of sparse section overrides (/landing), validated + merged over local defaults
-│   ├── seo.ts                  # Single source of truth for org/person identity
-│   ├── jsonld.ts               # Schema.org graph generators
-│   ├── faq.ts                  # FAQ Q&A source (DE/EN) — also feeds the FAQPage JSON-LD
-│   ├── scrollJump.ts           # DOM-free geometry + easing for the bounce section-jumps (both scroll paths)
-│   └── processDetails.ts       # Per-step detail copy for the Process hover frontend
-├── og/                         # Satori OG-card pipeline (build-time)
-│   ├── render.ts               # 1200×630 default card
-│   └── fonts/                  # Lato Bold (ttf) for the OG card
-├── pages/                      # Astro file-routing
-│   ├── index.astro             # DE home
-│   ├── preise.astro            # DE pricing
-│   ├── en/
-│   │   ├── index.astro         # EN home (thin shell; sections read Astro.currentLocale)
-│   │   └── preise.astro        # EN pricing
-│   ├── og/default.png.ts       # Endpoint emitting the default OG card
-│   └── legal/{impressum,datenschutz,agb}.astro + agb.pdf.ts
-├── public/                     # Static assets (robots.txt, llms.txt, favicon)
-└── styles/global.css           # imports tds-shared-pkg base.css (tokens/@theme) + local marketing CSS
-
-postcss.config.mjs              # @tailwindcss/postcss wiring — see Tailwind note above
-scripts/og-smoke.ts             # `npm run og:smoke` — renders default OG card
-                                # to disk; regression guard for the bundling
-                                # gotcha called out in AGENTS.md
+```text
+npm install
+npm run dev          # local Astro server on http://localhost:4321
+npm run type-check   # Astro/TypeScript checks
+npm run test:run     # Vitest suite
+npm run og:smoke     # render the default social card
+npm run build        # SSR build + verified self-contained release tree
+npm run preview      # inspect the production build locally
 ```
 
-See `AGENTS.md` for the porting rationale and "don't reach for an
-island when an .astro will do" guidance.
+Tailwind runs through `@tailwindcss/postcss` in `postcss.config.mjs`. A
+Windows-generated `package-lock.json` is committed for local reproducibility;
+the Linux workflow installs with `--no-package-lock` so native dependencies are
+resolved for Linux.
 
----
+The main source areas are:
+
+```text
+src/components/       Astro sections/UI and React islands
+src/layouts/          global HTML, metadata, theme and shared islands
+src/lib/              CMS, cache, connection, i18n, SEO and JSON-LD helpers
+src/pages/            localized routes and server endpoints
+src/og/               prerendered 1200×630 social-card renderer
+src/styles/            shared marketing surface imports and local composition
+public/                static assets and Apache rules
+scripts/               release assembly and smoke helpers
+```
+
+## Configuration and release overview
+
+Public API defaults point at `api.tracht-digital.de`; blog links point at
+`blog.tracht-digital.de`. Copy `.env.example` to `.env` for local overrides.
+Values beginning with `PUBLIC_` can be exposed to the browser. Site and cache
+tokens are server-only and must keep their unprefixed names.
+
+The repository publishes two generated branches:
+
+- Pushes to `main` build a demo-configured, non-deployed `dev` artifact.
+- The manual Release workflow builds the production `release` tree and pings
+  the deployment webhook.
+
+The published artifact is `release/`, not raw `dist/`: it contains the Node SSR
+bundle, browser assets, Passenger startup file and runtime dependencies needed
+to start without a GitHub Packages token on the host. See `INSTALL.md` for
+secrets, first-time connection and host deployment steps.
+
+## Legal documents and remaining content
+
+To replace an AGB PDF, open Website CMS → Rechtsdokumente, select `agb` and the
+language, optionally enter its revision label, and upload the approved PDF.
+English is a separate legal upload, not a machine translation. The committed
+fallback must remain under `src/assets/legal/` because `public/legal/` would
+collide with the generated route.
+
+The old portfolio screenshots are no longer a launch dependency: the portfolio
+section stays hidden. The remaining publishable-content dependency is approved,
+anonymized reference material per service. `IMAGES.md` lists only unresolved
+asset work.
 
 ## License
 

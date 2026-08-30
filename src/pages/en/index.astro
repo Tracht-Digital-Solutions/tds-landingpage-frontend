@@ -6,11 +6,7 @@ import Hero from "~/components/islands/Hero.tsx";
 import About from "~/components/sections/About.astro";
 import Services from "~/components/sections/Services.astro";
 import PricingTeaser from "~/components/sections/PricingTeaser.astro";
-import TechMarquee from "~/components/sections/TechMarquee.astro";
-// Portfolio temporarily hidden — see README § "Portfolio (temporarily hidden)".
-// import Portfolio from "~/components/sections/Portfolio.astro";
 import Process from "~/components/sections/Process.astro";
-import Currently from "~/components/sections/Currently.astro";
 import Journal from "~/components/sections/Journal.astro";
 import Consulting from "~/components/sections/Consulting.astro";
 import FAQ from "~/components/sections/FAQ.astro";
@@ -28,6 +24,7 @@ import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -35,23 +32,20 @@ const lang = resolveLang(Astro.currentLocale);
 // and WebSite all live here. Subpages reference them by @id rather than
 // redefining them.
 const t = tFor(Astro.currentLocale);
-const hero = await cmsFor("hero", lang, {
-  headline: t.hero.headline,
-  headlineAccent: t.hero.headlineAccent,
-  headlineSuffix: t.hero.headlineSuffix,
-  sub: t.hero.sub,
-  cta1: t.hero.cta1,
-  cta2: t.hero.cta2,
-  scrollHint: t.hero.scrollHint,
-});
+const hero = await cmsFor("home_hero", lang, getHomeContent(lang).hero);
 // Resolve FAQ here too so the FAQPage JSON-LD matches the rendered answers.
-const faq = await cmsFor("faq", lang, getFaqContent(lang));
+const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
+const process = await cmsFor("process", lang, {
+  headline: t.process.headline,
+  headlineAccent: t.process.headlineAccent,
+  steps: t.process.steps,
+});
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
   websiteSchema(),
   faqPageSchema(faq.items),
-  howToSchema(`${t.process.headline} ${t.process.headlineAccent}`, t.process.steps),
+  howToSchema(`${process.headline} ${process.headlineAccent}`, process.steps),
   {
     "@type": "WebPage",
     "@id": `${siteConfig.url}/#webpage-${lang}`,
@@ -61,7 +55,7 @@ const jsonLd = asGraph(
     primaryImageOfPage: `${siteConfig.url}/og/default.png`,
     speakable: speakableSchema([
       "#hero-heading",
-      "[aria-labelledby='currently-heading']",
+      "[aria-labelledby='digital-responsibility-heading']",
     ]),
   },
 );
@@ -85,14 +79,10 @@ const titles = {
     <Hero client:load lang={lang} hero={hero} />
     <About />
     <Services />
-    <TechMarquee />
-    {/* Portfolio temporarily hidden — re-add <Portfolio /> here to restore.
-        See README § "Portfolio (temporarily hidden)". */}
+    <Consulting />
     <Process />
-    <Currently />
     <PricingTeaser />
     <Journal />
-    <Consulting />
     <FAQ />
     <Contact />
   </main>
