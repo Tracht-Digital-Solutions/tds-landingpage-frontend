@@ -6,11 +6,7 @@ import Hero from "~/components/islands/Hero.tsx";
 import About from "~/components/sections/About.astro";
 import Services from "~/components/sections/Services.astro";
 import PricingTeaser from "~/components/sections/PricingTeaser.astro";
-import TechMarquee from "~/components/sections/TechMarquee.astro";
-// Portfolio temporarily hidden — see README § "Portfolio (temporarily hidden)".
-// import Portfolio from "~/components/sections/Portfolio.astro";
 import Process from "~/components/sections/Process.astro";
-import Currently from "~/components/sections/Currently.astro";
 import Journal from "~/components/sections/Journal.astro";
 import Consulting from "~/components/sections/Consulting.astro";
 import FAQ from "~/components/sections/FAQ.astro";
@@ -28,19 +24,12 @@ import { siteConfig } from "~/lib/seo";
 import { resolveLang, tFor } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
 
 const lang = resolveLang(Astro.currentLocale);
 
 // Hero copy is editable over the API; the island gets the resolved block.
-const hero = await cmsFor("hero", lang, {
-  headline: tFor(Astro.currentLocale).hero.headline,
-  headlineAccent: tFor(Astro.currentLocale).hero.headlineAccent,
-  headlineSuffix: tFor(Astro.currentLocale).hero.headlineSuffix,
-  sub: tFor(Astro.currentLocale).hero.sub,
-  cta1: tFor(Astro.currentLocale).hero.cta1,
-  cta2: tFor(Astro.currentLocale).hero.cta2,
-  scrollHint: tFor(Astro.currentLocale).hero.scrollHint,
-});
+const hero = await cmsFor("home_hero", lang, getHomeContent(lang).hero);
 
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than
@@ -52,13 +41,18 @@ const t = tFor(Astro.currentLocale);
 // Resolve the FAQ block here too so the FAQPage JSON-LD stays 1:1 with the
 // (possibly admin-edited) answers FAQ.astro renders. cms.ts memoises the
 // fetch, so this shares FAQ.astro's request.
-const faq = await cmsFor("faq", lang, getFaqContent(lang));
+const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
+const process = await cmsFor("process", lang, {
+  headline: t.process.headline,
+  headlineAccent: t.process.headlineAccent,
+  steps: t.process.steps,
+});
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
   websiteSchema(),
   faqPageSchema(faq.items),
-  howToSchema(`${t.process.headline} ${t.process.headlineAccent}`, t.process.steps),
+  howToSchema(`${process.headline} ${process.headlineAccent}`, process.steps),
   {
     "@type": "WebPage",
     "@id": `${siteConfig.url}/#webpage-${lang}`,
@@ -68,7 +62,7 @@ const jsonLd = asGraph(
     primaryImageOfPage: `${siteConfig.url}/og/default.png`,
     speakable: speakableSchema([
       "#hero-heading",
-      "[aria-labelledby='currently-heading']",
+      "[aria-labelledby='digital-responsibility-heading']",
     ]),
   },
 );
@@ -89,21 +83,13 @@ const titles = {
 >
   <Header />
   <main id="main">
-    {/* Narrative arc: hook → who → what → capability → proof → method →
-        cost → thinking → convert. PricingTeaser moved after Process
-        because pricing reads better once the visitor knows how the work
-        actually happens. */}
     <Hero client:load lang={lang} hero={hero} />
     <About />
     <Services />
-    <TechMarquee />
-    {/* Portfolio temporarily hidden — re-add <Portfolio /> here to restore.
-        See README § "Portfolio (temporarily hidden)". */}
+    <Consulting />
     <Process />
-    <Currently />
     <PricingTeaser />
     <Journal />
-    <Consulting />
     <FAQ />
     <Contact />
   </main>

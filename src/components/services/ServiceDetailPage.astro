@@ -1,0 +1,437 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { breadcrumbSchema } from "~/lib/jsonld";
+import { localizePath, type Lang } from "~/lib/i18n";
+import { siteConfig } from "~/lib/seo";
+import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import {
+  serviceHref,
+  type ServiceContent,
+  type ServiceDefinition,
+} from "~/lib/services";
+
+interface Props {
+  service: ServiceDefinition;
+  content: ServiceContent;
+  lang: Lang;
+}
+
+const { service, content, lang } = Astro.props;
+const path = serviceHref(service, lang);
+const canonical = `${siteConfig.url}${path}`;
+const homeHref = localizePath("/", lang);
+const servicesHref = `${homeHref}#services`;
+const contactHref = `${homeHref}#contact`;
+const alternatePaths = {
+  de: serviceHref(service, "de"),
+  en: serviceHref(service, "en"),
+};
+const pricing = await getPricingContent(lang);
+const serviceRate = getServiceRate(pricing, service.id);
+
+// UI chrome stays code-owned and localized; all editorial service and
+// reference content is resolved from the service's CMS block.
+const ui = lang === "de"
+  ? {
+      breadcrumb: "Brotkrümelnavigation",
+      referenceContext: "Kontext",
+      referenceChallenge: "Ausgangslage",
+      referenceSolution: "Lösungsweg",
+      referenceResult: "Ergebnis",
+      referenceMetric: "Belegbare Kennzahl",
+    }
+  : {
+      breadcrumb: "Breadcrumb",
+      referenceContext: "Context",
+      referenceChallenge: "Starting point",
+      referenceSolution: "Approach",
+      referenceResult: "Outcome",
+      referenceMetric: "Verifiable metric",
+    };
+
+const offer = serviceRate !== undefined
+  ? {
+      "@type": "Offer",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: serviceRate,
+        priceCurrency: "EUR",
+        unitCode: "HUR",
+        referenceQuantity: {
+          "@type": "QuantitativeValue",
+          value: 1,
+          unitCode: "HUR",
+        },
+        valueAddedTaxIncluded: false,
+      },
+    }
+  : undefined;
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${canonical}#service`,
+  url: canonical,
+  name: content.title,
+  description: content.summary,
+  serviceType: content.title,
+  provider: { "@id": `${siteConfig.url}/#organization` },
+  areaServed: siteConfig.areaServed.map((name) => ({
+    "@type": "Place",
+    name,
+  })),
+  inLanguage: lang === "de" ? "de-DE" : "en-GB",
+  serviceOutput: content.outcomes,
+  ...(offer ? { offers: offer } : {}),
+};
+
+const jsonLd = [
+  serviceSchema,
+  breadcrumbSchema([
+    { name: "Home", url: `${siteConfig.url}${homeHref}` },
+    { name: content.title, url: canonical },
+  ]),
+];
+---
+
+<Layout
+  title={`${content.title} — Tracht Digital Solutions`}
+  description={content.summary}
+  lang={lang}
+  canonical={canonical}
+  alternates={alternatePaths}
+  jsonLd={jsonLd}
+>
+  <Header />
+
+  <main id="main" class="bg-[var(--color-paper)]">
+    <section
+      class="tds-wash tds-wash--calm relative overflow-hidden pt-36 pb-20 md:pt-44 md:pb-28"
+      aria-labelledby="service-title"
+    >
+      <div class="tds-decor" aria-hidden="true">
+        <span
+          class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
+          style="right: -8rem; bottom: -11rem; width: 29rem; height: 29rem; --tds-decor-shape-alpha: 0.13;"
+        ></span>
+        <span
+          class="tds-shape tds-shape--rect tds-shape--outline tds-shape--navy hidden lg:block"
+          style="right: 8%; top: 8rem; width: 12rem; height: 18rem; --tds-decor-shape-alpha: 0.2;"
+        ></span>
+      </div>
+
+      <div class="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+        <nav aria-label={ui.breadcrumb} class="mb-10">
+          <a
+            href={servicesHref}
+            class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors group"
+          >
+            <svg
+              aria-hidden="true"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-transform group-hover:-translate-x-0.5"
+            >
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            {content.label}
+          </a>
+        </nav>
+
+        <div class="max-w-4xl">
+          <span
+            aria-hidden="true"
+            class="block font-mono text-xs tracking-[0.18em] text-[var(--color-accent)] mb-5"
+          >
+            {service.number}
+          </span>
+          <h1
+            id="service-title"
+            class="display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[var(--color-black)] leading-[1.04] break-words mb-6"
+          >
+            {content.title}
+          </h1>
+          <span aria-hidden="true" class="tds-brandbar mb-8"></span>
+          <p class="lead max-w-3xl text-[var(--color-muted)] mb-9">
+            {content.summary}
+          </p>
+          <a href={contactHref} class="btn btn-primary group">
+            {content.ctaButton}
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-transform group-hover:translate-x-0.5"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="max-w-5xl mx-auto px-6 md:px-8 lg:px-12 py-12 md:py-16">
+      <p class="font-[var(--font-display)] text-2xl md:text-3xl leading-snug text-[var(--color-black)]">
+        {content.intro}
+      </p>
+    </div>
+
+    <div class="section-spacing tds-tone-sand">
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-2 gap-5 md:gap-6">
+        <section
+          class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10"
+          aria-labelledby="service-situations-title"
+        >
+          <h2
+            id="service-situations-title"
+            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+          >
+            {content.situationsTitle}
+          </h2>
+          <ul class="space-y-5">
+            {content.situations.map((item) => (
+              <li class="flex gap-4 text-[var(--color-muted)] leading-relaxed">
+                <span aria-hidden="true" class="text-[var(--color-accent)] mt-0.5">→</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section
+          class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10"
+          aria-labelledby="service-responsibilities-title"
+        >
+          <h2
+            id="service-responsibilities-title"
+            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+          >
+            {content.responsibilitiesTitle}
+          </h2>
+          <ul class="space-y-5">
+            {content.responsibilities.map((item) => (
+              <li class="flex gap-4 text-[var(--color-black)] leading-relaxed">
+                <span
+                  aria-hidden="true"
+                  class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-paper))] text-[var(--color-accent)] text-xs"
+                >
+                  ✓
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <div class="section-spacing">
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-2 gap-12 lg:gap-20">
+        <section aria-labelledby="service-outcomes-title">
+          <h2
+            id="service-outcomes-title"
+            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+          >
+            {content.outcomesTitle}
+          </h2>
+          <ul class="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            {content.outcomes.map((item) => (
+              <li class="bg-[var(--color-soft)] rounded-[6px] px-5 py-4 text-[var(--color-black)] leading-snug">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section aria-labelledby="service-boundaries-title">
+          <h2
+            id="service-boundaries-title"
+            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+          >
+            {content.boundariesTitle}
+          </h2>
+          <ul class="space-y-6">
+            {content.boundaries.map((item) => (
+              <li class="flex gap-4 text-[var(--color-muted)] leading-relaxed">
+                <span aria-hidden="true" class="font-mono text-[var(--color-accent)]">—</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <div class="section-spacing tds-tone-sand">
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-[1.35fr_0.65fr] gap-6">
+        <section
+          class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10"
+          aria-labelledby="service-process-title"
+        >
+          <h2
+            id="service-process-title"
+            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+          >
+            {content.processTitle}
+          </h2>
+          <ol class="grid sm:grid-cols-2 gap-x-8 gap-y-7">
+            {content.process.map((step, index) => (
+              <li class="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  class="font-mono text-xs tracking-widest text-[var(--color-accent)] mt-1 tabular-nums"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span class="text-[var(--color-black)] leading-relaxed">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <aside class="tds-tone-navy relative overflow-hidden rounded-[6px] p-7 md:p-10">
+          <span
+            aria-hidden="true"
+            class="tds-shape tds-shape--quarter-bl tds-shape--coral"
+            style="top: -3rem; right: -3rem; width: 12rem; height: 12rem; --tds-decor-shape-alpha: 0.18;"
+          ></span>
+          <div class="relative">
+            <p class="eyebrow text-white/60 mb-5">{content.priceLabel}</p>
+            <p class="font-[var(--font-display)] text-xl md:text-2xl leading-snug text-white">
+              {content.priceText}
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    {content.references.length > 0 && (
+      <section
+        class="section-spacing"
+        aria-labelledby="service-references-title"
+      >
+        <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+          <h2
+            id="service-references-title"
+            class="display text-4xl md:text-5xl text-[var(--color-black)] mb-5"
+          >
+            {content.referencesHeadline}
+          </h2>
+          <p class="text-[var(--color-muted)] max-w-2xl mb-12">
+            {content.referencesLabel}
+          </p>
+
+          <div class="grid lg:grid-cols-2 gap-5 md:gap-6">
+            {content.references.map((reference) => (
+              <article class="bg-[var(--color-soft)] rounded-[6px] p-7 md:p-10">
+                <p class="eyebrow text-[var(--color-accent)] mb-4">
+                  <span class="sr-only">{ui.referenceContext}: </span>
+                  {reference.context}
+                </p>
+                <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-8">
+                  {reference.title}
+                </h3>
+                <dl class="space-y-7">
+                  <div>
+                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
+                      {ui.referenceChallenge}
+                    </dt>
+                    <dd class="text-[var(--color-black)] leading-relaxed">
+                      {reference.challenge}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
+                      {ui.referenceSolution}
+                    </dt>
+                    <dd class="text-[var(--color-black)] leading-relaxed">
+                      {reference.solution}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
+                      {ui.referenceResult}
+                    </dt>
+                    <dd class="text-[var(--color-black)] leading-relaxed">
+                      {reference.result}
+                    </dd>
+                  </div>
+                  {reference.metric && (
+                    <div class="bg-[var(--color-card)] rounded-[6px] px-5 py-4">
+                      <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-accent)] mb-2">
+                        {ui.referenceMetric}
+                      </dt>
+                      <dd class="font-[var(--font-display)] text-xl text-[var(--color-black)]">
+                        {reference.metric}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <div class="pb-16 md:pb-24 px-6 md:px-8 lg:px-12">
+      <section
+        class="tds-tone-navy relative overflow-hidden max-w-7xl mx-auto rounded-[6px] px-7 py-12 md:px-12 md:py-16 text-center"
+        aria-labelledby="service-cta-title"
+      >
+        <span
+          aria-hidden="true"
+          class="tds-shape tds-shape--quarter-tr tds-shape--coral"
+          style="left: -5rem; bottom: -6rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.18;"
+        ></span>
+        <div class="relative max-w-3xl mx-auto">
+          <h2 id="service-cta-title" class="display text-3xl md:text-5xl text-white mb-5">
+            {content.ctaTitle}
+          </h2>
+          <p class="text-white/75 leading-relaxed max-w-2xl mx-auto mb-8">
+            {content.ctaText}
+          </p>
+          <a
+            href={contactHref}
+            class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
+          >
+            {content.ctaButton}
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-transform group-hover:translate-x-0.5"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

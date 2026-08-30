@@ -27,6 +27,8 @@ interface Props {
   lang?: "de" | "en";
   /** Canonical URL — defaults to the current page's URL on `astro.config.site`. */
   canonical?: string;
+  /** Explicit locale siblings for routes whose slugs differ by language. */
+  alternates?: { de: string; en: string };
   /** Absolute URL or site-relative path. Used for og:image + twitter:image. */
   ogImage?: string;
   /** Set `noindex` to keep the page out of search (legal pages, drafts). */
@@ -42,6 +44,7 @@ const {
   description = siteConfig.description.de,
   lang = "de",
   canonical,
+  alternates,
   ogImage = siteConfig.defaultOgImage,
   noindex = false,
   jsonLd,
@@ -61,11 +64,14 @@ const altOgLocale = lang === "de" ? "en_GB" : "de_DE";
 // alternates entirely when the page opts out of search via
 // `noindex` (legal pages are DE-only by regulation, no EN sibling).
 const neutralPath = Astro.url.pathname.replace(/^\/en\/?/, "/") || "/";
-const deAltUrl = new URL(neutralPath, site).toString();
-const enAltUrl = new URL(
-  neutralPath === "/" ? "/en/" : `/en${neutralPath}`,
-  site,
-).toString();
+const absoluteUrl = (value: string) =>
+  value.startsWith("http") ? value : new URL(value, site).toString();
+const deAltUrl = alternates
+  ? absoluteUrl(alternates.de)
+  : new URL(neutralPath, site).toString();
+const enAltUrl = alternates
+  ? absoluteUrl(alternates.en)
+  : new URL(neutralPath === "/" ? "/en/" : `/en${neutralPath}`, site).toString();
 
 // Admin-toggleable cookie banner — the `cookie_banner` content block is
 // resolved at build time (baked, like every other CMS block; toggling it
@@ -99,7 +105,7 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
 
     <!-- Resource hints — connect to the API origins we know we'll
          hit (the contact form on submit, the content API on every
-         page that has a Currently / Journal section). `preconnect`
+         page that has a Journal section). `preconnect`
          opens the TLS handshake early; `dns-prefetch` is the cheap
          fallback for browsers that ignore preconnect on a different
          origin. -->
@@ -202,28 +208,22 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
 
       const TITLES: Record<"de" | "en", Record<string, string>> = {
         de: {
-          about: "Über mich",
-          services: "Leistungen",
-          tech: "Tech-Stack",
-          portfolio: "Portfolio",
+          about: "Wieso ich?",
+          services: "Was ich anbiete?",
+          "digital-responsibility": "Digitalisierung mit Verantwortung",
           process: "Vorgehen",
-          currently: "Aktuelle Themen",
           "pricing-teaser": "Preise",
           blog: "Journal",
-          consulting: "Beratung",
           faq: "Häufige Fragen",
           contact: "Kontakt",
         },
         en: {
-          about: "About",
-          services: "Services",
-          tech: "Tech stack",
-          portfolio: "Portfolio",
+          about: "Why me?",
+          services: "What I offer?",
+          "digital-responsibility": "Digitalization with ownership",
           process: "Process",
-          currently: "Current topics",
           "pricing-teaser": "Pricing",
           blog: "Journal",
-          consulting: "Consulting",
           faq: "FAQ",
           contact: "Contact",
         },

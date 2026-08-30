@@ -33,51 +33,35 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Häufige",
         headlineAccent: "Fragen.",
         intro:
-          "Was am häufigsten gefragt wird, bevor jemand anfragt — hier kurz vorweg.",
+          "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten — kurz beantwortet.",
         items: [
           {
             q: "Ich weiß noch nicht genau, was ich brauche. Können wir trotzdem sprechen?",
-            a: "Ja, das ist eher der Normalfall. Es reicht, wenn Sie beschreiben können, was Sie im Alltag stört — was daraus wird, klären wir gemeinsam.",
+            a: "Ja. Es reicht, wenn Sie beschreiben, was im Alltag Zeit kostet, unsicher ist oder nicht gut funktioniert — den sinnvollen nächsten Schritt klären wir gemeinsam.",
+          },
+          {
+            q: "Können Sie die Digitalisierung insgesamt verantworten?",
+            a: "Ja. Je nach Vereinbarung übernehme ich Planung, Umsetzung, Koordination bestehender Dienstleister und die laufende Betreuung als feste Ansprechperson.",
+          },
+          {
+            q: "Was umfasst ‚Komplette IT‘?",
+            a: "Das kann Geräte, Nutzerzugänge, Netzwerk, Sicherheit, Backups, Lizenzen und Support umfassen. Der genaue Umfang und die Erreichbarkeit werden nach einer Bestandsaufnahme vereinbart.",
+          },
+          {
+            q: "Arbeiten Sie mit vorhandenen Systemen und Dienstleistern weiter?",
+            a: "Wenn es sinnvoll ist, ja. Ich prüfe, was bleiben kann, schließe Lücken und koordiniere Beteiligte, statt funktionierende Lösungen unnötig zu ersetzen.",
           },
           {
             q: "Was ist der erste Schritt?",
-            a: "Schreiben Sie mir in zwei Sätzen, wo es hakt. Ich melde mich in der Regel innerhalb von 24 Stunden und frage nach.",
+            a: "Im Erstgespräch klären wir Ausgangslage, Ziel und Dringlichkeit. Danach erhalten Sie eine klare Empfehlung für das weitere Vorgehen.",
           },
           {
             q: "Wovon hängt der Preis ab?",
-            a: "Vom Umfang und davon, wie klar das Vorhaben ist. Klar abgestecktes gern zum Festpreis, sonst ein Budget mit Obergrenze.",
+            a: "Vom Leistungsbereich, Umfang und der Klarheit der Aufgabe. Abgegrenzte Vorhaben sind als Festpreis möglich; laufende Betreuung wird individuell vereinbart.",
           },
           {
-            q: "Wie lange dauert so etwas?",
-            a: "Eine überschaubare Website meist zwei bis vier Wochen, ein kleines Werkzeug oft wenige Tage, ein Webshop vier bis zehn Wochen.",
-          },
-          {
-            q: "Nehmen Sie auch kleine Aufträge an?",
-            a: "Ja. Eine Excel-Vorlage, eine Auswertung oder ein paar Anpassungen sind völlig in Ordnung — nicht jedes Vorhaben muss ein Projekt sein.",
-          },
-          {
-            q: "Übernehmen Sie auch eine bestehende Website?",
-            a: "Häufig ja. Ich sehe mir an, worauf sie aufgebaut ist, und sage ehrlich, ob Pflegen, Überarbeiten oder Neubauen günstiger ist.",
-          },
-          {
-            q: "Kümmern Sie sich danach weiter darum?",
-            a: "Auf Wunsch ja — Updates, kleine Änderungen, neue Inhalte. Entweder bei Bedarf oder als monatliches Kontingent; ein Muss ist es nicht.",
-          },
-          {
-            q: "Brauche ich eine Website oder gleich einen Webshop?",
-            a: "Das hängt an Ihrem Sortiment und daran, wer online bei Ihnen kaufen würde. Ein Shop bringt laufende Arbeit mit, eine Website nicht.",
-          },
-          {
-            q: "Kann ich Inhalte später selbst pflegen?",
-            a: "Ja. Texte, Bilder, Produkte und Preise ändern Sie selbst — auf Wunsch so eingerichtet, dass das auch vom Handy aus geht.",
-          },
-          {
-            q: "Wie ist das mit Datenschutz und DSGVO?",
-            a: "Gehört zur Umsetzung, nicht zum Aufpreis. Formular, Cookies und Einwilligungen setze ich gleich richtig auf, Impressum und Datenschutz vorbereitet.",
-          },
-          {
-            q: "Arbeiten Sie auch außerhalb von Schwarzenbek und Hamburg?",
-            a: "Ja, deutschlandweit. Üblich sind Video und E-Mail; Termine vor Ort rund um Hamburg sind gut machbar, Reisekosten kommen separat dazu.",
+            q: "Bleiben Sie nach der Umsetzung zuständig?",
+            a: "Auf Wunsch ja. Betreuung, Anpassungen und operative Verantwortung können bedarfsgerecht oder als monatliches Modell vereinbart werden.",
           },
         ],
       }
@@ -86,51 +70,35 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Common",
         headlineAccent: "questions.",
         intro:
-          "What gets asked most often before anyone gets in touch — answered here.",
+          "The key questions about working together, ownership and pricing — answered briefly.",
         items: [
           {
             q: "I don't know exactly what I need yet. Can we still talk?",
-            a: "Yes, that's the normal case. It's enough if you can describe what gets in your way day to day — what comes of it we work out together.",
+            a: "Yes. It is enough to describe what costs time, creates uncertainty or does not work well day to day — we will identify the sensible next step together.",
           },
           {
-            q: "What's the first step?",
-            a: "Tell me in two sentences where things are getting stuck. I usually reply within 24 hours and ask follow-up questions.",
+            q: "Can you take responsibility for digitalization as a whole?",
+            a: "Yes. Depending on the agreement, I can handle planning, implementation, coordination of existing providers and ongoing support as your dedicated contact.",
           },
           {
-            q: "What does the price depend on?",
-            a: "On scope, and on how clearly the job is defined. Clearly scoped work at a fixed price, otherwise a budget with a ceiling.",
+            q: "What does ‘Complete IT’ include?",
+            a: "It can include devices, user accounts, networks, security, backups, licences and support. The exact scope and availability are agreed after an assessment.",
           },
           {
-            q: "How long does something like this take?",
-            a: "A manageable website usually two to four weeks, a small tool often a few days, an online shop four to ten weeks.",
+            q: "Will you work with our existing systems and providers?",
+            a: "Yes, where that makes sense. I assess what can stay, close the gaps and coordinate contributors instead of replacing working solutions without reason.",
           },
           {
-            q: "Do you take on small jobs?",
-            a: "Yes. A spreadsheet template, a report or a few changes are all fine — not every piece of work has to be a project.",
+            q: "What is the first step?",
+            a: "In the initial consultation we clarify the current situation, goal and urgency. You then receive a clear recommendation for what should happen next.",
           },
           {
-            q: "Can you take over an existing website?",
-            a: "Often, yes. I look at what it's built on, then tell you honestly whether maintaining, reworking or rebuilding is cheaper.",
+            q: "What determines the price?",
+            a: "The service area, scope and how clearly the task is defined. Clearly bounded projects can use a fixed price; ongoing support is agreed individually.",
           },
           {
-            q: "Do you keep looking after it afterwards?",
-            a: "If you want — updates, small changes, new content. Either as needed or as a monthly allowance; it isn't compulsory.",
-          },
-          {
-            q: "Do I need a website or an online shop?",
-            a: "That depends on your range and on who would actually buy from you online. A shop brings ongoing work with it, a website doesn't.",
-          },
-          {
-            q: "Can I maintain the content myself later?",
-            a: "Yes. Text, images, products and prices are yours to change — set up, on request, so it works from a phone too.",
-          },
-          {
-            q: "What about data protection and GDPR?",
-            a: "Part of the build, not a surcharge. Form, cookies and consent are set up correctly from the start, imprint and privacy policy prepared.",
-          },
-          {
-            q: "Do you work outside Schwarzenbek and Hamburg?",
-            a: "Yes, across Germany. Usually video and email; on-site meetings around Hamburg are straightforward, travel costs billed separately.",
+            q: "Will you remain responsible after implementation?",
+            a: "If you wish. Support, changes and operational responsibility can be agreed as needed or as a monthly arrangement.",
           },
         ],
       };

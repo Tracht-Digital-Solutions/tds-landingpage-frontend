@@ -1,33 +1,24 @@
 ---
-/**
- * Consulting / "Beratung" call-to-action. Sits between Journal and
- * Contact in the narrative arc — a soft landing for visitors who
- * are interested but not ready to fill out the contact form yet.
- *
- * Two CTAs:
- *   - Primary: jumps to #contact (discovery call)
- *   - Secondary: jumps to /preise (rate transparency)
- *
- * Copy lives in tds-shared under `translations.consulting`.
- */
-import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
-const t = tFor(Astro.currentLocale);
-
-// Editable consulting copy — the shape matches t.consulting exactly.
-const consulting = await cmsFor("consulting", lang, t.consulting);
+const consulting = await cmsFor(
+  "digital_responsibility",
+  lang,
+  getHomeContent(lang).digitalResponsibility,
+);
 
 const pricingHref = localizePath("/preise", lang);
 const homePrefix = lang === "de" ? "" : "/en";
 ---
 
 <section
-  id="consulting"
+  id="digital-responsibility"
   class="section-spacing"
-  aria-labelledby="consulting-heading"
+  aria-labelledby="digital-responsibility-heading"
 >
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     {/* The second navy focus surface. It pairs with the PricingTeaser as
@@ -52,7 +43,7 @@ const homePrefix = lang === "de" ? "" : "/en";
 
       <div class="relative max-w-3xl">
         <h2
-          id="consulting-heading"
+          id="digital-responsibility-heading"
           class="display text-4xl md:text-5xl lg:text-6xl text-white mb-6"
         >
           {consulting.headline}{" "}
@@ -61,6 +52,15 @@ const homePrefix = lang === "de" ? "" : "/en";
         <p class="text-base md:text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
           {consulting.body}
         </p>
+
+        <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-3 mb-9 max-w-3xl">
+          {consulting.points.map((point) => (
+            <li class="flex gap-3 text-sm leading-relaxed text-white/85">
+              <span aria-hidden="true" class="text-[var(--color-accent-pink)]">✓</span>
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
 
         <div class="flex flex-wrap items-center gap-3">
           <a

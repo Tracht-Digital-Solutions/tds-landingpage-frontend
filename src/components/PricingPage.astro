@@ -1,0 +1,220 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
+import { breadcrumbSchema, pricingSchema } from "~/lib/jsonld";
+import { localizePath, type Lang } from "~/lib/i18n";
+import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import { siteConfig } from "~/lib/seo";
+import {
+  resolveServiceContent,
+  serviceDefinitions,
+  serviceHref,
+} from "~/lib/services";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const pricing = await getPricingContent(lang);
+const services = await Promise.all(
+  serviceDefinitions.map(async (definition) => ({
+    definition,
+    content: await resolveServiceContent(definition, lang),
+  })),
+);
+
+const formatRate = (rate: number) =>
+  new Intl.NumberFormat(lang === "de" ? "de-DE" : "en-IE", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(rate);
+
+const homeHref = localizePath("/", lang);
+const pricingPath = localizePath("/preise", lang);
+const contactHref = `${homeHref}#contact`;
+const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
+// Both pricing pages are wrappers around this component, so their meta
+// descriptions live here. The name is load-bearing: seo.test.ts reads this
+// literal off disk to keep every indexable page inside one length budget.
+const pageDescriptions = {
+  de: "Nettostundensätze für Beratung, Prozesse, individuelle Lösungen, Programmierung und Webauftritte sowie ein individuelles Modell für komplette IT.",
+  en: "Net hourly rates for consulting, processes, tailored solutions, development and web presence, plus an individual model for complete IT.",
+};
+
+const jsonLd = [
+  pricingSchema(
+    services.flatMap(({ definition, content }) => {
+      const rate = getServiceRate(pricing, definition.id);
+      return rate === undefined
+        ? []
+        : [{ name: content.title, description: content.summary, rate }];
+    }),
+  ),
+  breadcrumbSchema([
+    { name: "Home", url: `${siteConfig.url}${homeHref}` },
+    {
+      name: pricing.label.replace(/^—\s*/, ""),
+      url: `${siteConfig.url}${pricingPath}`,
+    },
+  ]),
+];
+---
+
+<Layout
+  title={`${pricing.label.replace(/^—\s*/, "")} — Tracht Digital Solutions`}
+  description={pageDescriptions[lang]}
+  lang={lang}
+  jsonLd={jsonLd}
+>
+  <Header />
+  <main id="main" class="tds-wash min-h-screen bg-[var(--color-paper)] relative overflow-hidden">
+    <div class="page-flyin relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 pt-36 pb-20 md:pt-44 md:pb-28">
+      <a
+        href={homeHref}
+        class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors inline-flex items-center gap-2 group mb-12"
+      >
+        <span aria-hidden="true" class="group-hover:-translate-x-0.5 transition-transform">←</span>
+        {pricing.back}
+      </a>
+
+      <h1 class="display text-5xl md:text-6xl lg:text-7xl text-[var(--color-black)] mb-6 max-w-5xl">
+        {pricing.headline} <AccentLetters text={pricing.headlineAccent} />
+      </h1>
+      <p class="text-lg text-[var(--color-muted)] max-w-3xl mb-16 leading-relaxed">
+        {pricing.sub}
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+        {services.map(({ definition, content }) => {
+          const rate = getServiceRate(pricing, definition.id);
+          const isCustom = rate === undefined;
+          const isHighlight = definition.id === "complete-it";
+          return (
+            <article
+              class:list={[
+                "relative rounded-[6px] p-7 flex flex-col",
+                isHighlight
+                  ? "tds-tone-navy text-white"
+                  : "bg-[var(--color-soft)]",
+              ]}
+            >
+              <span class:list={[
+                "font-mono text-xs tracking-widest mb-4",
+                isHighlight ? "text-white/55" : "text-[var(--color-accent)]",
+              ]}>
+                {definition.number}
+              </span>
+              <h2 class:list={[
+                "font-[var(--font-display)] text-2xl mb-3",
+                isHighlight ? "text-white" : "text-[var(--color-black)]",
+              ]}>
+                {content.title}
+              </h2>
+
+              <div class="flex items-baseline gap-2 mb-5 min-h-12">
+                <span class:list={[
+                  "font-[var(--font-display)] font-medium tabular-nums",
+                  isCustom ? "text-2xl leading-tight" : "text-4xl",
+                  isHighlight ? "text-white" : "text-[var(--color-primary)]",
+                ]}>
+                  {isCustom ? pricing.customRateLabel : formatRate(rate)}
+                </span>
+                {!isCustom && (
+                  <span class:list={[
+                    "text-sm",
+                    isHighlight ? "text-white/65" : "text-[var(--color-muted)]",
+                  ]}>
+                    {pricing.hourSuffix}
+                  </span>
+                )}
+              </div>
+
+              <p class:list={[
+                "text-sm leading-relaxed mb-7",
+                isHighlight ? "text-white/78" : "text-[var(--color-muted)]",
+              ]}>
+                {content.summary}
+              </p>
+
+              <div class="mt-auto">
+                <p class:list={[
+                  "text-xs font-medium tracking-wider uppercase mb-3",
+                  isHighlight ? "text-white/55" : "text-[var(--color-muted)]",
+                ]}>
+                  {pricing.includesLabel}
+                </p>
+                <ul class="space-y-2 mb-7">
+                  {content.responsibilities.slice(0, 4).map((item) => (
+                    <li class:list={[
+                      "text-sm leading-snug flex gap-2",
+                      isHighlight ? "text-white/88" : "text-[var(--color-black)]",
+                    ]}>
+                      <span aria-hidden="true" class={isHighlight ? "text-[var(--color-accent-pink)]" : "text-[var(--color-accent)]"}>✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={serviceHref(definition, lang)}
+                  class:list={[
+                    "inline-flex items-center gap-2 text-sm font-medium transition-colors",
+                    isHighlight
+                      ? "text-white hover:text-[var(--color-accent-pink)]"
+                      : "text-[var(--color-primary)] hover:text-[var(--color-accent)]",
+                  ]}
+                >
+                  {detailsLabel}<span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <section class="rounded-[6px] p-8 mb-16 bg-[var(--color-soft)]" aria-labelledby="pricing-notes-heading">
+        <h2 id="pricing-notes-heading" class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5">
+          {pricing.notesTitle}
+        </h2>
+        <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+          {pricing.notes.map((note) => (
+            <li class="text-sm text-[var(--color-black)] leading-relaxed flex gap-3">
+              <span class="text-[var(--color-accent)]" aria-hidden="true">—</span>
+              <span>{note}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="tds-tone-navy relative overflow-hidden rounded-[6px] p-10 md:p-14 text-center" aria-labelledby="pricing-cta-heading">
+        <span aria-hidden="true" class="tds-shape tds-shape--quarter-bl tds-shape--coral" style="top: -4rem; right: -4rem; width: 20rem; height: 20rem; --tds-decor-shape-alpha: 0.2;"></span>
+        <div class="relative">
+          <h2 id="pricing-cta-heading" class="display text-3xl md:text-4xl text-white mb-4">
+            {pricing.ctaTitle}
+          </h2>
+          <p class="text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
+            {pricing.ctaSub}
+          </p>
+          <a href={contactHref} class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group">
+            {pricing.ctaButton}<span aria-hidden="true" class="group-hover:translate-x-0.5 transition-transform">→</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  @keyframes page-flyin {
+    from { opacity: 0; transform: translateX(-2rem); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .page-flyin { animation: page-flyin 500ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @media (prefers-reduced-motion: reduce) {
+    .page-flyin { animation: none; }
+  }
+</style>

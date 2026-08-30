@@ -21,9 +21,9 @@ import SectionHeader from "~/components/ui/SectionHeader.astro";
 import CircuitRun from "~/components/ui/CircuitRun.astro";
 
 const lang = resolveLang(Astro.currentLocale);
-// Admin-edited "faq" block overrides the local default at build time;
+// Admin-edited v2 block overrides the local default at render time;
 // falls back to lib/faq.ts when no block is saved or the API is down.
-const content = await cmsFor("faq", lang, getFaqContent(lang));
+const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
 ---
 
 {/* The one conduit run outside the hero. It sits HERE and not in the Journal

@@ -58,9 +58,8 @@ const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
           {footer.nav}
         </p>
         <ul class="space-y-2 text-sm">
-          <li><a href={`${homeHref}#about`} class="text-white/70 hover:text-white">{t.nav.about}</a></li>
-          <li><a href={`${homeHref}#services`} class="text-white/70 hover:text-white">{t.nav.services}</a></li>
-          {/* Portfolio temporarily hidden — see README § "Portfolio (temporarily hidden)". */}
+          <li><a href={`${homeHref}#about`} class="text-white/70 hover:text-white">{lang === "de" ? "Wieso ich?" : "Why me?"}</a></li>
+          <li><a href={`${homeHref}#services`} class="text-white/70 hover:text-white">{lang === "de" ? "Was ich anbiete?" : "What I offer?"}</a></li>
           <li><a href={pricingHref} class="text-white/70 hover:text-white">{footer.pricing}</a></li>
           <li><a href="https://blog.tracht-digital.de" class="text-white/70 hover:text-white">{t.nav.blog}</a></li>
         </ul>

@@ -1,36 +1,13 @@
 ---
 import { Image } from "astro:assets";
-import { tFor, resolveLang } from "~/lib/i18n";
+import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import portrait from "~/assets/portrait.webp";
 
-const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
-
-// Editable about copy — admin block overrides the tds-shared default at
-// build time. portraitPlaceholder is excluded (the portrait is a real
-// asset now), so the editable shape matches the API validator.
-const about = await cmsFor("about", lang, {
-  label: t.about.label,
-  headline: t.about.headline,
-  headlineAccent: t.about.headlineAccent,
-  lead: t.about.lead,
-  p1: t.about.p1,
-  p2: t.about.p2,
-  stat1Value: t.about.stat1Value,
-  stat1Label: t.about.stat1Label,
-  stat2Value: t.about.stat2Value,
-  stat2Label: t.about.stat2Label,
-  stat3Value: t.about.stat3Value,
-  stat3Label: t.about.stat3Label,
-});
-
-const stats = [
-  { value: about.stat1Value, label: about.stat1Label },
-  { value: about.stat2Value, label: about.stat2Label },
-  { value: about.stat3Value, label: about.stat3Label },
-];
+const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
 ---
 
 {/* Warmweiß mit weichen Markenfeldern an den Außenrändern — the first
@@ -88,16 +65,21 @@ const stats = [
         <p class="text-[var(--color-muted)] mb-4 leading-relaxed">{about.p1}</p>
         <p class="text-[var(--color-muted)] mb-12 leading-relaxed">{about.p2}</p>
 
-        <div class="grid grid-cols-3 gap-4 pt-12">
-          {stats.map(({ value, label }) => (
-            <div class="text-center">
-              <div class="text-3xl md:text-4xl font-[var(--font-display)] font-medium text-[var(--color-primary)] mb-1">
-                {value}
-              </div>
-              <div class="text-xs text-[var(--color-muted)] leading-tight">{label}</div>
-            </div>
+        <ul class="grid sm:grid-cols-2 gap-4 pt-8">
+          {about.reasons.map((reason, index) => (
+            <li class="rounded-[6px] bg-[var(--color-soft)] p-5 text-left">
+              <span class="block text-xs font-medium tracking-widest text-[var(--color-accent)] tabular-nums mb-3">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 class="font-[var(--font-display)] text-lg text-[var(--color-black)] mb-2 leading-tight">
+                {reason.title}
+              </h3>
+              <p class="text-sm text-[var(--color-muted)] leading-relaxed">
+                {reason.description}
+              </p>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </div>
   </div>

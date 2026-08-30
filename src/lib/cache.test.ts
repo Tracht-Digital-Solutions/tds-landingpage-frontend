@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { resolveEvents } from "@tracht-digital-solutions/tds-shared/cache";
 
 import { alwaysPaths, cacheEvents } from "./cache";
+import { serviceDefinitions, serviceHref } from "./services";
+import { SITEMAP_ENTRIES } from "./sitemap";
 
 /**
  * This site's route table, as the cache sees it.
@@ -15,20 +17,26 @@ describe("cacheEvents", () => {
   const paths = async (events: Parameters<typeof resolveEvents>[1]) =>
     (await resolveEvents(cacheEvents, events)).paths;
 
-  it("rebuilds both content pages of a language when a block is saved", async () => {
-    // Both, deliberately: `pricing` renders on /preise AND in the home page's
-    // teaser, `footer` and `contact` appear on both.
-    expect(await paths([{ type: "block", id: "hero", lang: "de" }])).toEqual(["/", "/preise"]);
-    expect(await paths([{ type: "block", id: "hero", lang: "en" }])).toEqual(["/en/", "/en/preise"]);
+  /** Every page of one language tree that renders editable landing content. */
+  const contentPaths = (lang: "de" | "en") =>
+    [
+      ...(lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"]),
+      ...serviceDefinitions.map((service) => serviceHref(service, lang)),
+    ].sort();
+
+  it("rebuilds every content page of a language when a block is saved", async () => {
+    // All of them, deliberately: `pricing` renders on /preise, in the home
+    // page's teaser AND on each service page; `footer` and `contact` appear
+    // everywhere. A service block additionally owns its own detail page, so
+    // narrowing this would leave an edited service stale.
+    expect(await paths([{ type: "block", id: "hero", lang: "de" }])).toEqual(contentPaths("de"));
+    expect(await paths([{ type: "block", id: "hero", lang: "en" }])).toEqual(contentPaths("en"));
   });
 
   it("covers both language trees when the block event names no language", async () => {
-    expect(await paths([{ type: "block", id: "footer" }])).toEqual([
-      "/",
-      "/en/",
-      "/en/preise",
-      "/preise",
-    ]);
+    expect(await paths([{ type: "block", id: "footer" }])).toEqual(
+      [...contentPaths("de"), ...contentPaths("en")].sort(),
+    );
   });
 
   it("keeps a legal text off the home page", async () => {
@@ -58,11 +66,13 @@ describe("cacheEvents", () => {
     ]);
   });
 
-  it("treats a published blog post as a change to this site too", async () => {
-    // The home page's Journal and Currently sections read /content/blog at
-    // render time. Missing this is how the marketing page ends up advertising
-    // last month's articles.
-    expect(await paths([{ type: "post", id: "mein-artikel", lang: "de" }])).toEqual(["/", "/preise"]);
+  it("dates only the home page when a blog post is published", async () => {
+    // The home page's Journal section reads /content/blog at render time, so a
+    // published post changes this site too. It is the ONLY page that does —
+    // rebuilding the service or pricing pages for a blog post would be work
+    // nobody asked for.
+    expect(await paths([{ type: "post", id: "mein-artikel", lang: "de" }])).toEqual(["/"]);
+    expect(await paths([{ type: "post", id: "my-article", lang: "en" }])).toEqual(["/en/"]);
   });
 
   it("reports an event type it does not know instead of silently doing nothing", async () => {
@@ -71,9 +81,20 @@ describe("cacheEvents", () => {
     expect(result.unknown).toEqual(["tool"]);
   });
 
-  it("lists every indexable page in alwaysPaths", async () => {
+  it("lists every indexable page in alwaysPaths", () => {
     // "Rebuild everything" can only enumerate what is already cached, so a
     // cold cache would otherwise report success having rendered nothing.
-    expect(alwaysPaths).toEqual(["/", "/en/", "/preise", "/en/preise"]);
+    //
+    // The sitemap is the definition of "indexable" on this site, so it is the
+    // honest source to check against: adding a page there without adding it
+    // here is exactly the drift this test exists to catch.
+    for (const entry of SITEMAP_ENTRIES) {
+      expect(alwaysPaths, `missing ${entry.de}`).toContain(entry.de);
+      expect(alwaysPaths, `missing ${entry.en}`).toContain(entry.en);
+    }
+  });
+
+  it("keeps alwaysPaths free of duplicates", () => {
+    expect(alwaysPaths).toEqual([...new Set(alwaysPaths)]);
   });
 });

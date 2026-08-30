@@ -1,216 +1,260 @@
 # Installation — tds-landingpage-frontend
 
-> Part of the Tracht Digital Solutions multi-repo project.
-> tds-landingpage-frontend is the **public marketing site** at `tracht-digital.de`.
-> Astro SSG → static HTML; bring it up after `tds-contact-api` (the
-> Hero/Contact form POSTs there) and `tds-content-api` (the Journal
-> teaser fetches three posts from there at build time).
+This is the setup and deployment guide for the public marketing site at
+`tracht-digital.de`. The current application is Astro 7 in server mode with the
+standalone Node adapter. Production runs under Passenger and serves rendered
+pages through a file-backed cache; instructions for an SSG-only `dist/` are
+obsolete.
 
 ## Prerequisites
 
-| Tool | Version | Why |
-|---|---|---|
-| Node.js | 22.12+ | Astro 6 baseline (Node 18/20 unsupported) |
-| npm | 10+ | Bundled with Node 20 |
-| Git | any | Repo hosting |
-| Classic GitHub PAT | with `read:packages` | Install `@tracht-digital-solutions/tds-shared` |
+| Tool/service | Requirement |
+|---|---|
+| Node.js | 22.12 or newer |
+| npm | 10 or newer |
+| Git | Current supported version |
+| GitHub Packages token | Classic PAT with `read:packages` for the Tracht Digital Solutions organization |
+| Production host | Node/Passenger application with a writable persistent cache location |
 
-## 1. GitHub Packages access
+## 1. Authenticate to GitHub Packages
 
-`@tracht-digital-solutions/tds-shared` lives on GitHub Packages,
-not on npm. You need a token to install it.
+`@tracht-digital-solutions/tds-shared` is private. Configure a classic PAT in
+the user-level npm configuration:
 
 ```ini
-# ~/.npmrc (one-time setup)
 @tracht-digital-solutions:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=ghp_yourClassicPATWithReadPackagesScope
 ```
 
-…or set `NPM_TOKEN` in your environment — the repo's `.npmrc`
-references it.
+Alternatively, expose `NPM_TOKEN` in the shell; the repository's `.npmrc` reads
+it. npm does not load `.env`, so putting this token there will not authenticate
+an install. Never commit the token.
 
-If you get a 403 even with a valid token, the token may be missing
-SSO authorization for the `Tracht-Digital-Solutions` org, or the
-classic PAT lacks `read:packages`. See
-[tds-shared/INSTALL.md](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg/blob/main/INSTALL.md)
-section 5 for the full setup.
+A 401 usually means a missing or expired token. A 403 with the right scope
+usually means the classic PAT has not been authorized for the organization.
 
-## 2. Clone + install
+## 2. Clone and install
 
-```bash
+```text
 git clone https://github.com/Tracht-Digital-Solutions/tds-landingpage-frontend.git
 cd tds-landingpage-frontend
 npm install
 ```
 
-A `package-lock.json` is committed and `npm install` honors it
-locally. CI installs with `--no-package-lock` to bypass the
-Windows-biased lockfile on the Linux runner — see the README's
-*Lockfile note* for context.
+The Windows-generated `package-lock.json` is used locally. Linux CI runs
+`npm install --no-package-lock` so npm resolves native Rollup, Lightning CSS,
+esbuild, Sharp and Tailwind binaries for Linux instead of reusing Windows-only
+optional-dependency entries.
 
-## 3. Configure
+## 3. Configure local defaults
 
-```bash
-cp .env.example .env       # if .env.example exists, otherwise create .env
-```
-
-Fill in:
+Copy `.env.example` to `.env` and override only what the local environment
+needs:
 
 ```ini
-# Where ContactForm POSTs
-PUBLIC_CONTACT_API_URL=http://localhost:8002
-
-# Where the Journal section fetches teaser posts at build time
-PUBLIC_CONTENT_API_URL=http://localhost:8003
+PUBLIC_CONTACT_API_URL=http://localhost:8000/contact
+PUBLIC_CONTENT_API_URL=http://localhost:8000/content
+PUBLIC_BLOG_BASE_URL=http://localhost:4322
+PUBLIC_DEMO_MODE=false
 ```
 
-Both have sane production defaults baked into the code (the
-`api.tracht-digital.de/*` URLs), so for a quick build against
-production APIs you can leave `.env` empty.
+The committed defaults point at the production services, so an empty `.env`
+is enough for read-only development against production content.
 
-## 4. Local development
+`PUBLIC_*` values are public by definition: Vite can expose or compile them
+into browser assets. Do not put credentials in them. `TDS_SITE_KEY` and
+`TDS_CACHE_TOKEN` are server-only fallback values used by the connection and
+cache layers; production should normally receive its paired connection through
+the `/install` flow described below.
 
-```bash
-npm run dev            # http://localhost:4321
-```
+Behavior of the variables:
 
-The site hot-reloads on edits. Contact form submissions go to
-whichever `PUBLIC_CONTACT_API_URL` you set; without a running
-contact-api locally, leave the form alone or POST to production.
-
-## 5. Verify the production build
-
-```bash
-npm run type-check     # astro check — must be 0 errors
-npm run og:smoke       # render the default OG card to scripts/og-smoke.png
-npm run build          # → dist/
-npm run preview        # serve dist/ for visual inspection
-```
-
-`og:smoke` is the cheapest catch for the font-loading regression
-called out in `AGENTS.md` (it renders `renderDefaultOgPng` via
-tsx, bypassing the Astro bundler that breaks `import.meta.url`-
-based font paths). Open `scripts/og-smoke.png` and check it looks
-right.
-
-The build does NOT need a reachable content-api — if the teaser
-fetch fails, the Journal section gracefully shows zero posts and
-the build still succeeds.
-
-## 6. Production deployment
-
-Two branches (the old `build` branch is gone):
-
-- **`dev`** — every push to `main` auto-builds `dist/` (Staging/Demo config) via
-  `.github/workflows/dev.yml` → orphan `dev` branch. Not deployed.
-- **`release`** — the manual *Actions → Release → Run workflow* button
-  (`release.yml`) builds the production `dist/` → `release` branch, then POST-pings
-  the deploy webhook so the host pulls `release` and goes live.
-
-One-time setup: add a `DEPLOY_WEBHOOK_URL` repository secret pointing at the
-host's deploy-hook URL (the deploy token is carried inside the URL) — used only
-by the release run.
-
-```bash
-# Manual fallback: pull the latest built artifact from the release branch
-git fetch origin release
-git worktree add ../tds-landingpage-release origin/release
-# ../tds-landingpage-release/ now holds the built dist/
-```
-
-## 7. Before go-live: replace placeholder values
-
-Address, phone, socials, portrait, logo and favicon are now real. The
-only contact placeholder left is the VAT ID:
-
-| Where | Value |
+| Variable | Purpose |
 |---|---|
-| `src/pages/legal/impressum.astro` — VAT ID | `DE 123 456 789` → real USt-IdNr |
+| `PUBLIC_CONTACT_API_URL` | Fallback endpoint used by the contact-form island |
+| `PUBLIC_CONTENT_API_URL` | Fallback API base for CMS blocks, journal posts and legal documents |
+| `PUBLIC_BLOG_BASE_URL` | Public origin for journal links |
+| `PUBLIC_DEMO_MODE` | `true` disables live content reads and displays committed fallbacks |
+| `TDS_SITE_KEY` | Private fallback credential for API content reads; never prefix with `PUBLIC_` |
+| `TDS_CACHE_TOKEN` | Private fallback credential for cache status/rebuild/purge controls |
 
-Plus, before launch: real portfolio (× 4) and journal (× 3) images
-(see [`IMAGES.md`](IMAGES.md)), a real `public/legal/agb.pdf`, and a
-lawyer review of the legal pages.
+## 4. Run locally
 
-Smoke search:
-
-```bash
-git grep -nE 'DE 123 456 789'
+```text
+npm run dev
 ```
 
+Open `http://localhost:4321`. Astro renders requests in server mode; content
+failures are fail-soft and use committed defaults. The contact form still
+submits to its configured endpoint, so do not send test enquiries to production.
 
-## Setup auf dem Host: `/install`
+For a production-style local server:
 
-Jeder Produktions-Build enthält einen Setup-Assistenten unter
-`https://<domain>/install`. Er verbindet die ausgelieferte Site mit der API —
-**ohne Rebuild**. Er ist eine ganz normale Seite der Site: auf den
-Frontend-Domains ist PHP abgeschaltet (`tds-gateway-api/DEPLOY-PLESK.md`), also
-muss alles, was hier liegt, statisch funktionieren.
+```text
+npm run build
+npm run preview
+```
 
-**Warum es ihn gibt.** Diese Site ist statisch: Vite backt jede `PUBLIC_*`-URL
-zur Buildzeit ein. Eine deployte `dist/` lässt sich deshalb nicht
-umkonfigurieren, und — schlimmer — eine Site, die die API gar nicht erreicht,
-fällt still auf ihre statischen Platzhalter zurück: kein Fehler, kein Log,
-nichts wird rot.
+`npm run build` creates both `dist/server` and `dist/client`, then runs
+`postbuild` to assemble the deployable `release/` tree. It is expected to write
+generated output in `dist/`, `release/` and the local cache under `var/`; all
+three are ignored by Git.
 
-**Er installiert nichts.** Ein Browser kann keine Datei auf dem Host anlegen.
-Der Assistent *prüft*, *erzeugt* die `tds-runtime.json` zum Herunterladen und
-*bestätigt* danach, dass die abgelegte Datei wirklich ausgeliefert wird.
+## 5. Verify a change
 
-**Ablauf.**
+Run the same gates as CI:
 
-1. `https://<domain>/install` aufrufen. Keine Anmeldung — die Seite schreibt
-   nichts, und ein Passwortformular auf einer öffentlichen Domain wäre eine
-   Angriffsfläche ohne Gegenwert.
-2. **Endpunkte** eintragen (vorbelegt mit dem, was die Site gerade benutzt).
-3. **Prüfen.** Die Aufrufe laufen in Ihrem Browser und damit auf genau dem Weg,
-   den die Site selbst nimmt — ein grüner Haken beweist die CORS-Freigabe für
-   *dieses* Origin.
-4. **Erzeugen** und die Datei als `tds-runtime.json` in den Docroot legen, neben
-   die `index.html` (Plesk-Dateimanager, FTP oder SSH). Ein erneuter Deploy
-   überschreibt sie nicht.
-5. **Bestätigen.** Ohne diesen Schritt bleibt eine fehlende oder veraltete
-   Konfiguration unsichtbar.
+```text
+npm run type-check
+npm run test:run
+npm run og:smoke
+npm run build
+```
 
-**Fehlermeldungen sind absichtlich unbestimmt.** Scheitert ein Aufruf, nennt der
-Browser den Grund nicht: DNS, TLS, toter Host und CORS-Ablehnung sehen identisch
-aus. Der Assistent behauptet deshalb keine Ursache, grenzt sie aber ein, so weit
-es geht.
+Open `scripts/og-smoke.png` after the social-card check. For page changes,
+inspect German and English routes at desktop and 375 px, in light/dark mode and
+with reduced motion enabled. A green build does not detect clipped horizontal
+content, invisible same-color cards or a missing focus state.
 
-**Nur ein Origin pro Aufruf.** Diese Site ist unter zwei Origins erreichbar (`tracht-digital.de` und `www.`), also bitte beide einmal besuchen. Eine Seite kann ihren `Origin`-Header
-nicht setzen, also lässt sich immer nur das Origin prüfen, auf dem der Assistent
-geladen ist.
+The build intentionally tolerates an unavailable content API and renders local
+fallbacks. At request time, a configured site key rejected with 401/403 prevents
+that fallback response from being stored in the page cache so a credential
+problem cannot become a long-lived page.
 
-**Was der Assistent nicht ablöst.** Die Inhalte, die beim `astro build` geholt
-werden, kommen weiterhin aus den Umgebungsvariablen der GitHub Action — dort
-gibt es keinen Host und keine `tds-runtime.json`. Laufzeit und Buildzeit sind
-getrennt konfiguriert und müssen zusammenpassen; der Assistent prüft beides,
-konfiguriert aber nur die Laufzeit.
+## 6. Release artifact
 
-## Related repos
+`scripts/pack-release.mjs` assembles a self-contained production tree:
 
-- [tds-shared-pkg](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg) — design system (base.css), components, i18n strings, motion
-- [tds-contact-api](https://github.com/Tracht-Digital-Solutions/tds-contact-api) — Contact form POSTs here
-- [tds-content-api](https://github.com/Tracht-Digital-Solutions/tds-content-api) — Journal teaser fetches at build time
-- [tds-blog-frontend](https://github.com/Tracht-Digital-Solutions/tds-blog-frontend) — `Alle Artikel →` link points at `https://blog.tracht-digital.de`
+```text
+release/
+├── app.cjs          Passenger startup file
+├── package.json     public-registry runtime dependencies only
+├── server/          Astro SSR bundle; not web-accessible
+├── client/          document root, assets, prerendered files and .htaccess
+├── node_modules/    preinstalled runtime dependencies
+└── tmp/             Passenger restart marker
+```
+
+The host must not run `npm install`: first-party packages are bundled into the
+server output and native/public dependencies are already present. `client/`
+must remain the web document root and a sibling of `server/`; flattening either
+directory breaks Astro's runtime paths and can expose server files.
+
+The packer verifies that the server entry, client tree and startup file exist,
+that first-party imports did not leak from the bundle, and that remaining
+runtime imports resolve inside the artifact. Treat a packer failure as a
+deployment blocker.
+
+## 7. Configure the production host
+
+Create the domain as a Node application with these effective settings:
+
+- application root: the checkout/published `release` tree;
+- document root: `client/`;
+- startup file: `app.cjs`;
+- Node.js: 22.12 or newer;
+- production environment;
+- persistent, writable page-cache storage outside disposable build output.
+
+`public/.htaccess` is copied to `client/.htaccess`. It serves real files,
+prerendered pages and cache entries before falling through to Passenger. Do not
+disable Passenger in this file and do not expose the internal `_tds-cache`
+link.
+
+Every deployment must restart the Node application after the release tree is
+replaced. In Plesk use **Node.js → Restart App**; the conventional command-line
+fallback is to update `tmp/restart.txt`. Without a restart, cached routes can
+still answer while an uncached route returns 500 because the live process
+references server chunks removed by the deploy.
+
+After restart, request at least `/`, `/en/`, `/preise`, `/en/preise` and one
+service page in each locale. Confirm a cache miss renders, the next request is
+served as a cache hit, and no hashed asset returns 404.
+
+## 8. Pair the deployed site through `/install`
+
+Open `https://<domain>/install` after the Node application is running. This
+prerendered, `noindex` wizard connects the deployed site to the composed API;
+it does not install application files.
+
+Use the wizard to check the API endpoint, pair the site's private content key
+and establish the cache-rebuild credential. Complete the verification step and
+then inspect `/tds/connect/status`. Repeat for each production origin that is
+actually served, because browser-origin and CORS checks are origin-specific.
+
+The relevant server routes are:
+
+| Route | Purpose |
+|---|---|
+| `POST /tds/connect` | Receive and store the paired connection configuration |
+| `GET /tds/connect/status` | Report whether the server has a usable connection |
+| `GET /tds-runtime.json` | Expose public, non-secret runtime settings to browser islands |
+| `/tds/cache/{status,rebuild,purge}` | Token-protected page-cache control plane |
+
+The public runtime response must never contain the private site or cache token.
+If the host cannot persist the paired configuration, fix the application-root
+permissions rather than publishing secrets as `PUBLIC_*` values.
+
+## 9. GitHub Actions and deployment
+
+The reusable workflow runs type-check, tests, social-card smoke and build. It
+publishes the verified `release/` directory—not raw `dist/`—to generated
+branches:
+
+- A push to `main` triggers `dev.yml`, builds with `PUBLIC_DEMO_MODE=true` and
+  force-publishes the non-deployed `dev` branch.
+- The manual **Actions → Release → Run workflow** action runs `release.yml`
+  with production content, publishes `release`, then POSTs the deploy webhook.
+
+Repository secrets:
+
+| Secret | Used for |
+|---|---|
+| `NPM_TOKEN` | Reading private packages and publishing the generated branch |
+| `DEPLOY_WEBHOOK_URL` | Notifying the production host after the release branch is ready |
+
+If the webhook fails, the workflow leaves the successfully published release
+available and emits a warning. Pull/deploy that `release` branch on the host,
+then restart the Node application manually.
+
+## 10. Content and legal readiness
+
+Website copy and service references are maintained through Website CMS. Saving
+a block should call the site's cache control plane and re-render every affected
+home, pricing or service route without a new application release. If an update
+does not appear, check the connection status and cache-event response before
+rebuilding the application.
+
+AGB PDFs are uploaded per language under Website CMS → Rechtsdokumente. Keep
+`src/assets/legal/agb.pdf` as the offline fallback. English legal content must
+be an independently approved upload; do not machine-translate it.
+
+Open image/content dependencies are listed in `IMAGES.md`. Placeholder
+portfolio screenshots are not a go-live step because that section remains
+hidden.
 
 ## Troubleshooting
 
-**`npm install` returns 401.**
-GitHub Packages auth missing/expired. See section 1.
+**`npm install` returns 401/403.** Verify a classic PAT with `read:packages`,
+organization authorization and that npm can see `NPM_TOKEN` in the shell.
 
-**`npm install` returns 403 `read_package` despite valid token.**
-The token's classic-PAT scope is right but it isn't SSO-authorized
-for the org, or the workflow uses `secrets.GITHUB_TOKEN` instead
-of `secrets.NPM_TOKEN`. See
-[tds-shared-pkg INSTALL §5](https://github.com/Tracht-Digital-Solutions/tds-shared-pkg/blob/main/INSTALL.md).
+**Linux CI cannot load a `*-linux-x64-*` package.** Confirm the workflow still
+uses `npm install --no-package-lock`; do not replace it with `npm ci` while the
+committed lockfile is Windows-generated.
 
-**Build succeeds but Journal section is empty.**
-`PUBLIC_CONTENT_API_URL` unreachable at build time, or no posts
-published yet. Graceful fallback — log shows the failed fetch.
+**Content remains unchanged after a CMS save.** Check `/tds/connect/status`,
+the cache token, the cache-control response and that `src/lib/cache.ts` maps the
+block to the affected route. A process-lifetime content memo is not valid under
+SSR.
 
-**`Cannot find module @rollup/rollup-linux-x64-gnu` (or similar
-`*-linux-x64-gnu` failure) in CI.**
-The lockfile was generated on Windows and only registers win32
-platform binaries (npm/cli#4828). CI's install step uses `npm
-install --no-package-lock` to bypass this — confirm the workflow
-hasn't been reverted to `npm ci` / plain `npm install`.
+**Cached routes work but uncached routes return 500 after deployment.** Restart
+Passenger/Node. The process is still holding the previous server manifest.
+
+**Hashed browser assets return 404 after deployment.** Confirm the web document
+root is `release/client`, the release tree was deployed as a unit, and the Node
+process was restarted so stale cache entries were invalidated for the new asset
+fingerprint.
+
+**The contact form targets the wrong API.** Check `/tds-runtime.json` and the
+paired connection first, then `PUBLIC_CONTACT_API_URL` as its build-time
+fallback.

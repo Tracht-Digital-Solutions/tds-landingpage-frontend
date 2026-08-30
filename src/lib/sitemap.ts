@@ -16,6 +16,7 @@
  */
 
 import { siteConfig } from "./seo";
+import { serviceDefinitions, serviceHref } from "./services";
 
 /** One indexable page, in both languages. */
 export interface SitemapEntry {
@@ -40,6 +41,12 @@ export interface SitemapEntry {
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { de: "/", en: "/en/", changefreq: "weekly", priority: 1.0 },
   { de: "/preise", en: "/en/preise", changefreq: "monthly", priority: 0.8 },
+  ...serviceDefinitions.map((service) => ({
+    de: serviceHref(service, "de"),
+    en: serviceHref(service, "en"),
+    changefreq: "monthly" as const,
+    priority: 0.8,
+  })),
 ];
 
 /** Absolute URL for a path on this site. */

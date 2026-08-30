@@ -1,23 +1,28 @@
 ---
-import { tFor, resolveLang } from "~/lib/i18n";
+import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+import {
+  resolveServiceContent,
+  serviceDefinitions,
+  serviceHref,
+} from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceCard from "~/components/ui/ServiceCard.astro";
 
-const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
 
-// Editable services — admin block overrides the tds-shared default.
-const servicesContent = await cmsFor("services", lang, {
-  label: t.services.label,
-  headline: t.services.headline,
-  headlineAccent: t.services.headlineAccent,
-  items: t.services.items,
-});
-
-// Odd lists: the last card spans both columns on sm+ so the grid stays
-// balanced.
-const services = servicesContent.items;
+const servicesContent = await cmsFor(
+  "services_overview",
+  lang,
+  getHomeContent(lang).servicesOverview,
+);
+const services = await Promise.all(
+  serviceDefinitions.map(async (definition) => ({
+    definition,
+    content: await resolveServiceContent(definition, lang),
+  })),
+);
 ---
 
 {/* Sand — the quiet alternate ground, with the single-field variant of
@@ -35,23 +40,25 @@ const services = servicesContent.items;
       headline={servicesContent.headline}
       headlineAccent={servicesContent.headlineAccent}
       id="services-heading"
+      headingClass="mb-6"
       bar
     />
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
+      {servicesContent.intro}
+    </p>
 
     <div class="grid sm:grid-cols-2 gap-4 md:gap-6">
-      {services.map((item, i) => {
-        const orphan = i === services.length - 1 && services.length % 2 === 1;
-        return (
-          <div class:list={["h-full", orphan && "sm:col-span-2"]}>
+      {services.map(({ definition, content }) => (
+          <div class="h-full">
             <ServiceCard
-              number={item.number}
-              title={item.title}
-              description={item.description}
-              tags={item.tags}
+              href={serviceHref(definition, lang)}
+              number={definition.number}
+              title={content.title}
+              description={content.summary}
+              tags={content.responsibilities.slice(0, 3)}
             />
           </div>
-        );
-      })}
+      ))}
     </div>
   </div>
 </section>

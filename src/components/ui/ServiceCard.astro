@@ -2,16 +2,20 @@
 import ServiceIcon from "./ServiceIcon.astro";
 
 interface Props {
+  href: string;
   number: string;
   title: string;
   description: string;
   tags: readonly string[];
 }
 
-const { number, title, description, tags } = Astro.props;
+const { href, number, title, description, tags } = Astro.props;
 ---
 
-<div class="relative flex flex-col h-full bg-[var(--color-paper)] rounded-[6px] p-6 sm:p-8 md:p-10 cursor-pointer group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left">
+<a
+  href={href}
+  class="relative flex flex-col h-full bg-[var(--color-paper)] rounded-[6px] p-6 sm:p-8 md:p-10 group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
+>
   <div class="flex items-start justify-center sm:justify-between gap-4 mb-6">
     <span
       aria-hidden="true"
@@ -46,4 +50,4 @@ const { number, title, description, tags } = Astro.props;
       </span>
     ))}
   </div>
-</div>
+</a>

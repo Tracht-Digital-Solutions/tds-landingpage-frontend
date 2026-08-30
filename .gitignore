@@ -9,6 +9,9 @@ dist/
 .vscode/
 scripts/og-smoke.png
 
+# Active local Claude worktrees live here but are not part of this checkout.
+.claude/worktrees/
+
 # Windows OS files
 Thumbs.db
 Desktop.ini

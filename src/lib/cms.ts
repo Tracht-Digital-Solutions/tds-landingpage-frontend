@@ -1,6 +1,6 @@
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { contentApiBase } from "./connection";
-import { contentCache } from "./cache";
+import { contentCache } from "./contentCache";
 /**
  * Server-side fetch of editable landingpage content blocks from
  * tds-content-api's `GET /landing?lang=…`. Each block is the content object

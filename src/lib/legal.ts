@@ -16,7 +16,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
-import { contentCache } from "./cache";
+import { contentCache } from "./contentCache";
 import { contentApiBase } from "./connection";
 
 /** Metadata for one uploaded document, as `GET /content/legal` returns it. */
