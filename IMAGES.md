@@ -41,16 +41,21 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 
 | Ground | Rendered by | Opacity (light / dark) |
 |---|---|---|
-| `services/*.webp` | `ui/ServiceCard.astro` — `.service-card__photo` | 0.26 / 0.17, 0.34 on hover |
-| `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.28 / 0.18 |
-| `sections/hero.webp` | `islands/Hero.tsx` — `.hero-photo`, CSS in `styles/global.css` | 0.24 / 0.15 |
-| `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.27 / 0.17 |
-| `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.40, no dark variant |
-| `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.30, no dark variant |
+| `services/*.webp` | `ui/ServiceCard.astro` — `.service-card__photo` | 0.34 / 0.22, 0.42 on hover |
+| `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.36 / 0.23 |
+| `sections/hero.webp` | `islands/Hero.tsx` — `.hero-photo`, CSS in `styles/global.css` | 0.32 / 0.20 |
+| `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.35 / 0.22 |
+| `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.50, no dark variant |
+| `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
+
+These values were raised twice after the first pass; the ratios between the
+slots stayed put. The rule when a bump costs legibility is to strengthen the
+SCRIM, not to weaken the photo — otherwise the two dials keep undoing each
+other. Contrast is measured in the browser, not judged by eye.
 
 The two navy blocks run higher and have no dark-mode variant on purpose: their
 surface is `--color-surface-navy` in both themes, and a nearly black photograph
-disappears into it below roughly 0.25.
+disappears into it below roughly 0.3.
 
 Each of the four section grounds sits in a `.tds-decor` span as the section's
 first child. That is the shared primitive (`tds-shared/styles/primitives.css`):

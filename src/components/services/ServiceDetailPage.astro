@@ -216,7 +216,7 @@ const jsonLd = [
     <div class="section-spacing tds-tone-sand">
       <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-2 gap-5 md:gap-6">
         <section
-          class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10"
+          class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
           aria-labelledby="service-situations-title"
         >
           <h2
@@ -236,7 +236,7 @@ const jsonLd = [
         </section>
 
         <section
-          class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10"
+          class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
           aria-labelledby="service-responsibilities-title"
         >
           <h2
@@ -250,7 +250,7 @@ const jsonLd = [
               <li class="flex gap-4 text-[var(--color-black)] leading-relaxed">
                 <span
                   aria-hidden="true"
-                  class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-paper))] text-[var(--color-accent)] text-xs"
+                  class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_20%,var(--lp-surface-card))] text-[var(--color-accent)] text-xs"
                 >
                   ✓
                 </span>
@@ -278,7 +278,7 @@ const jsonLd = [
           <ul class="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
             {content.outcomes.map((item) => (
               <li
-                class="flex items-start gap-3 bg-[var(--color-soft)] rounded-[6px] px-5 py-4 text-[var(--color-black)] leading-snug"
+                class="flex items-start gap-3 bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] px-5 py-4 text-[var(--color-black)] leading-snug"
                 data-reveal
               >
                 <svg
@@ -323,7 +323,7 @@ const jsonLd = [
     <div class="section-spacing tds-tone-sand">
       <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-[1.35fr_0.65fr] gap-6">
         <section
-          class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10"
+          class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
           aria-labelledby="service-process-title"
         >
           <h2
@@ -388,7 +388,7 @@ const jsonLd = [
 
           <div class="grid lg:grid-cols-2 gap-5 md:gap-6">
             {content.references.map((reference) => (
-              <article class="bg-[var(--color-soft)] rounded-[6px] p-7 md:p-10">
+              <article class="bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] p-7 md:p-10">
                 <p class="eyebrow text-[var(--color-accent)] mb-4">
                   <span class="sr-only">{ui.referenceContext}: </span>
                   {reference.context}
@@ -490,10 +490,10 @@ const jsonLd = [
      on top of it, so it stays quiet enough that the scrim beside it does
      not have to fight for the text. */
   .service-hero__photo {
-    opacity: 0.28;
+    opacity: 0.36;
   }
   :global(:root[data-theme="dark"]) .service-hero__photo {
-    opacity: 0.18;
+    opacity: 0.23;
   }
 
   /* ── Stepper ──────────────────────────────────────────────────────
@@ -522,7 +522,7 @@ const jsonLd = [
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-paper));
+    background: color-mix(in srgb, var(--color-accent) 20%, var(--color-paper));
     color: var(--color-accent);
     font-family: var(--font-mono);
     font-size: 0.75rem;
