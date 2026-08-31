@@ -107,13 +107,13 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
         <ul class="grid sm:grid-cols-2 gap-4 pt-8">
           {about.reasons.map((reason) => (
             <li
-              class="rounded-[6px] bg-[var(--color-soft)] p-5 text-left"
+              class="rounded-[6px] bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] p-5 text-left"
               data-reveal
             >
               <span
                 aria-hidden="true"
                 title={gainLabel}
-                class="mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-paper))] text-[var(--color-accent)]"
+                class="mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_20%,var(--color-paper))] text-[var(--color-accent)]"
               >
                 <svg
                   width="15"
@@ -148,10 +148,10 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
      ruhigste der Seite und trägt vier Textkacheln plus das Portrait.
      Dark Mode geht weiter herunter, wie die geteilten Decor-Tokens. */
   .about-photo {
-    opacity: 0.27;
+    opacity: 0.35;
   }
   :global(:root[data-theme="dark"]) .about-photo {
-    opacity: 0.17;
+    opacity: 0.22;
   }
   /* Die PAPIERFARBE des Abschnitts, von rechts auslaufend — kein grauer
      Schleier, damit die Fläche ihren Farbton behält. Rechts steht die

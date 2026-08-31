@@ -39,10 +39,12 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
 const ui = lang === "de"
   ? {
       moreTitle: "Ihre Frage war nicht dabei?",
+      moreText: "Schreiben Sie mir direkt — Antwort in der Regel innerhalb von 24 Stunden.",
       moreCta: "Schreiben Sie mir",
     }
   : {
       moreTitle: "Not the question you had?",
+      moreText: "Write to me directly — usually answered within 24 hours.",
       moreCta: "Get in touch",
     };
 const contactHref = lang === "de" ? "/#contact" : "/en/#contact";
@@ -151,33 +153,66 @@ const contactHref = lang === "de" ? "/#contact" : "/en/#contact";
 
     {/* The list can only ever answer the questions it anticipated. This is
         the exit for everyone else, and it replaces the intro paragraph that
-        used to sit above the list saying nothing. */}
-    <div
-      class="mt-12 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
+        used to sit above the list saying nothing.
+
+        Die ganze Fläche ist der Link, nicht nur der Knopf darin. Vorher
+        standen Satz und Knopf nebeneinander und nur der Knopf war
+        anklickbar — das Ziel ist dasselbe, die Trefferfläche war nur
+        unnötig klein.
+
+        Aufgebaut wie das Pricing-Panel (`sections/PricingTeaser.astro`):
+        ein `<a>` mit `.tds-decor` für die Dekoration, der Inhalt als
+        einziges folgendes Geschwister darüber. KEIN `.btn` — ungelayertes
+        tds-shared schlägt jede Tailwind-Utility, eine eigene Fläche an
+        `.btn btn-primary` würde also nicht greifen.
+
+        Rosé statt Navy, obwohl Navy die naheliegende Knopf-Farbe wäre:
+        das Pricing-Panel weiter oben ist navy und der Kontaktabschnitt
+        direkt darunter auch. Ein drittes Navy in Folge liest sich als
+        derselbe Block dreimal.
+
+        Der Titel bleibt ein `<p>`. Ein `<h3>` hier würde eine Ebene in die
+        Gliederung einziehen, die inhaltlich keine ist. */}
+    <a
+      href={contactHref}
+      class="faq-cta group relative block overflow-hidden mt-12 rounded-[6px] p-7 md:p-9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
       data-reveal
     >
-      <p class="font-[var(--font-display)] text-xl text-[var(--color-black)]">
-        {ui.moreTitle}
-      </p>
-      <a href={contactHref} class="btn btn-primary group self-start sm:self-auto">
-        {ui.moreCta}
-        <svg
-          aria-hidden="true"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="faq-cta-arrow"
-        >
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
-      </a>
-    </div>
+      <span class="tds-decor" aria-hidden="true">
+        <span
+          class="tds-shape tds-shape--quarter-bl tds-shape--coral"
+          style="top: -4rem; right: -4rem; width: 16rem; height: 16rem;"
+        ></span>
+      </span>
+      <span class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+        <span class="block">
+          <span class="block font-[var(--font-display)] text-xl text-[var(--color-black)]">
+            {ui.moreTitle}
+          </span>
+          <span class="faq-cta-sub mt-1.5 block text-sm">
+            {ui.moreText}
+          </span>
+        </span>
+        <span class="faq-cta-pill inline-flex shrink-0 items-center gap-2 self-start rounded-full px-5 py-2.5 text-sm font-medium sm:self-auto">
+          {ui.moreCta}
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="faq-cta-arrow"
+          >
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </span>
+      </span>
+    </a>
   </div>
 </section>
 
@@ -190,7 +225,7 @@ const contactHref = lang === "de" ? "/#contact" : "/en/#contact";
      nothing. */
   .faq-tab[aria-selected="true"],
   .faq-m[open] > .faq-m-summary {
-    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
     border-radius: 6px;
   }
   .faq-tab[aria-selected="true"] .faq-q,
@@ -301,11 +336,59 @@ const contactHref = lang === "de" ? "/#contact" : "/en/#contact";
     }
   }
 
+  /* Die Ausstiegsfläche. Rosé auf dem Sand-Grund des Abschnitts: warm
+     genug, um als Einladung zu lesen, und weit genug von den beiden
+     Navy-Blöcken darüber und darunter entfernt, um nicht als deren
+     Wiederholung durchzugehen. Beim Hover eine Stufe kräftiger statt
+     einer Bewegung — der Block ist breit, ein Anheben würde die ganze
+     Zeile schieben. */
+  .faq-cta {
+    background: color-mix(in srgb, var(--color-accent-pink) 16%, var(--color-paper));
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .faq-cta:hover {
+    background: color-mix(in srgb, var(--color-accent-pink) 24%, var(--color-paper));
+  }
+  /* Der Pseudo-Knopf. Kein `.btn`, siehe Kommentar am Markup — die Fläche
+     ist der Link, das hier ist nur seine sichtbare Handlungsaufforderung. */
+  .faq-cta-pill {
+    background: var(--color-accent);
+    /* NICHT `#fff`. Der Akzent ist hell Bordeaux (#820933) und dunkel
+       Koralle (#ff8fab) — Weiss darauf misst im Dark Mode 2.15:1. Das
+       Papier-Token kippt mit dem Theme und liefert in beiden Richtungen
+       den hellen bzw. dunklen Gegenpol. */
+    color: var(--color-paper);
+    transition: gap 200ms var(--tds-ease-out);
+  }
+  /* `--color-muted` auf der rosé Flaeche misst 4.47:1 und verfehlt die
+     4.5 damit um Haaresbreite. Eine Spur dunkler statt die Flaeche heller:
+     die Toenung ist der Punkt der Karte. */
+  .faq-cta-sub {
+    color: color-mix(in srgb, var(--color-muted) 82%, var(--color-black));
+  }
+  .faq-cta:hover .faq-cta-pill {
+    gap: 0.75rem;
+  }
+
   .faq-cta-arrow {
     transition: transform 280ms var(--lp-ease-bounce);
   }
-  .group:hover .faq-cta-arrow {
+  .faq-cta:hover .faq-cta-arrow {
     transform: translateX(3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-cta,
+    .faq-cta-pill,
+    .faq-cta-arrow {
+      transition: none;
+    }
+    .faq-cta:hover .faq-cta-arrow {
+      transform: none;
+    }
+    .faq-cta:hover .faq-cta-pill {
+      gap: 0.5rem;
+    }
   }
 </style>
 

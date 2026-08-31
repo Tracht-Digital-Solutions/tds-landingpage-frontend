@@ -1,6 +1,7 @@
 ---
 import { tFor, resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
@@ -10,10 +11,17 @@ const t = tFor(Astro.currentLocale);
 // Editable contact heading + info (email/phone/location). Field *labels*
 // stay in tds-shared (t.contact.info.*Label, t.contact.form.*). Shared with
 // the Footer's contact block at build time (cms.ts memoises the fetch).
+//
+// Die ÜBERSCHRIFT kommt aus `lib/homeContent.ts`, nicht mehr aus tds-shared:
+// sie ist Startseiten-Copy und wird von genau diesem `<h2>` gelesen. Der
+// Footer ruft denselben CMS-Block auf, nimmt daraus aber nur E-Mail, Telefon
+// und Ort — die beiden Aufrufe dürfen also verschiedene Defaults übergeben,
+// weil `cmsFor` pro Aufruf mergt und nur den FETCH memoisiert.
+const heading = getHomeContent(lang).contactHeading;
 const contact = await cmsFor("contact", lang, {
   label: t.contact.label,
-  headline: t.contact.headline,
-  headlineAccent: t.contact.headlineAccent,
+  headline: heading.headline,
+  headlineAccent: heading.headlineAccent,
   sub: t.contact.sub,
   email: t.contact.info.email,
   phone: t.contact.info.phone,
@@ -253,7 +261,7 @@ const socials = {
      zurückhaltender. Die Fläche ist in beiden Themes Navy — keine
      zweite Deckkraft für Dark Mode. */
   #contact .contact-photo {
-    opacity: 0.3;
+    opacity: 0.38;
   }
   /* Deckend über der linken oberen Hälfte, wo Überschrift, Fließtext
      und die Formularfelder stehen; erst nach unten rechts läuft es aus.

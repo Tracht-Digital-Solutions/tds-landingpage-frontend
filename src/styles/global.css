@@ -80,6 +80,53 @@
   interpolate-size: allow-keywords;
 }
 
+/* === Farbdosierung ================================================= */
+
+/* Die Seite soll waermer und farbiger lesen, ohne ein zweites Design zu
+   erfinden. Beides sind daher DOSIERUNGEN vorhandener Marken-Token, keine
+   neuen Farben — und jede Farbe behaelt ihre Rolle: Navy ist die Struktur,
+   Bordeaux der Akzent, Koralle die warme Toenung.
+
+   1. Die Dekor-Regler aus tds-shared. `--tds-decor-field-strength` stand im
+      hellen Desktop-Modus schon auf dem Maximum 1, weiter aufdrehen geht nur
+      ueber diesen Wert hinaus; die Alphas rechnen `calc(0.14 * strength)`,
+      ein Faktor > 1 ist also vorgesehen und kein Missbrauch.
+
+   2. `--lp-surface-card` ersetzt das papierweisse `--color-paper` als
+      Kartenfuellung. Das ist der groesste Einzelhebel gegen "zu viel Weiss":
+      die weisse Masse der Seite sind nicht die Abschnitte (die wechseln
+      laengst zwischen Papier und Sand), sondern die Karten darauf. */
+:root {
+  --tds-decor-field-strength: 1.5;
+  --tds-decor-shape-alpha: 0.16;
+  --lp-surface-card: color-mix(in srgb, var(--color-accent-pink) 5%, var(--color-card));
+}
+
+/* ACHTUNG, und der Grund, warum der Block oben nicht allein stehen darf:
+   base.css senkt die Dekoration auf Telefonen ueber `:root` in einem
+   `@media (max-width: 48rem)`. Das ist dieselbe Spezifitaet (0,1,0) wie das
+   `:root` darueber — und weil global.css NACH base.css geschrieben wird,
+   gewinnt das hiesige. Ohne diese Wiederholung waere die Absenkung auf dem
+   Telefon still verschwunden: kein Fehler, kein Test, nur eine Seite, auf der
+   die Felder unter der Schrift liegen. Die Werte sind im selben Verhaeltnis
+   angehoben wie die Desktop-Werte. */
+@media (max-width: 48rem) {
+  :root {
+    --tds-decor-field-strength: 0.8;
+    --tds-decor-shape-alpha: 0.1;
+  }
+}
+
+/* Dark Mode gewinnt von selbst — `:root[data-theme="dark"]` ist (0,2,0) und
+   schlaegt beide Bloecke oben. Er wird hier trotzdem angefasst, weil die
+   Absicht dieselbe ist: auch im Dunkeln soll mehr Farbe zu sehen sein. Die
+   dunklen Dekorfarben sind bereits die aufgehellten Varianten, deshalb
+   bleibt der Abstand zu Hell kleiner. */
+:root[data-theme="dark"] {
+  --tds-decor-field-strength: 0.8;
+  --tds-decor-shape-alpha: 0.13;
+}
+
 /* === Scroll reveal ================================================= */
 
 /* One implementation for the whole site (`src/lib/reveal.ts`, mounted once
@@ -213,10 +260,10 @@ html {
    Farbton statt schmutzig zu werden. Beide Regeln greifen erst ab `md`,
    weil das Bild darunter gar nicht gerendert wird. */
 .hero-photo {
-  opacity: 0.24;
+  opacity: 0.32;
 }
 :root[data-theme="dark"] .hero-photo {
-  opacity: 0.15;
+  opacity: 0.2;
 }
 .hero-photo-scrim {
   background: linear-gradient(

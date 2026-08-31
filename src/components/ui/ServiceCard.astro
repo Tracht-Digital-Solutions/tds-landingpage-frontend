@@ -68,7 +68,7 @@ const shape = shapes[number] ?? shapes["01"];
 
 <a
   href={href}
-  class="service-card relative flex flex-col h-full overflow-hidden bg-[var(--color-paper)] rounded-[6px] p-6 sm:p-8 md:p-10 group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
+  class="service-card relative flex flex-col h-full overflow-hidden bg-[var(--lp-surface-card)] rounded-[6px] p-6 sm:p-8 md:p-10 group transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--color-accent-pink)_10%,var(--color-card))] text-center sm:text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
   data-reveal
 >
   {/* `.tds-decor` is inset-0, click-through and CLIPPING, so each shape is
@@ -92,7 +92,7 @@ const shape = shapes[number] ?? shapes["01"];
             doing behind it. The scrim is the CARD's own fill fading out,
             not a grey wash, so the card keeps its colour. */}
         <span
-          class="absolute inset-0 bg-[linear-gradient(to_top,var(--color-paper)_28%,color-mix(in_srgb,var(--color-paper)_78%,transparent)_70%,color-mix(in_srgb,var(--color-paper)_55%,transparent)_100%)]"
+          class="absolute inset-0 bg-[linear-gradient(to_top,var(--lp-surface-card)_28%,color-mix(in_srgb,var(--lp-surface-card)_78%,transparent)_70%,color-mix(in_srgb,var(--lp-surface-card)_55%,transparent)_100%)]"
         ></span>
       </>
     )}
@@ -101,7 +101,7 @@ const shape = shapes[number] ?? shapes["01"];
   <div class="flex items-start justify-center sm:justify-between gap-4 mb-6">
     <span
       aria-hidden="true"
-      class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-paper))] text-[var(--color-accent)] group-hover:bg-[var(--color-accent)] group-hover:text-white group-hover:-rotate-3 transition-all duration-300"
+      class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[color-mix(in_srgb,var(--color-accent)_20%,var(--lp-surface-card))] text-[var(--color-accent)] group-hover:bg-[var(--color-accent)] group-hover:text-white group-hover:-rotate-3 transition-all duration-300"
     >
       <ServiceIcon number={number} />
     </span>
@@ -129,7 +129,7 @@ const shape = shapes[number] ?? shapes["01"];
       a chip three words wide cannot carry a sentence. */}
   <div class="flex flex-wrap gap-2 justify-center sm:justify-start mt-auto">
     {keywords.map((keyword) => (
-      <span class="px-3 py-1 text-xs rounded-full bg-[var(--color-soft)] text-[var(--color-muted)] group-hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] group-hover:text-[var(--color-primary)] transition-colors duration-200">
+      <span class="px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] group-hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))] transition-colors duration-200">
         {keyword}
       </span>
     ))}
@@ -159,16 +159,16 @@ const shape = shapes[number] ?? shapes["01"];
      sind gemeinsam angehoben worden, der Abstand zwischen Ruhe, Hover
      und Dark Mode ist derselbe geblieben. */
   .service-card__photo {
-    opacity: 0.26;
+    opacity: 0.34;
     transition: transform 700ms var(--lp-ease-soft), opacity 300ms ease;
   }
   .service-card:hover .service-card__photo,
   .service-card:focus-visible .service-card__photo {
-    opacity: 0.34;
+    opacity: 0.42;
     transform: scale(1.05);
   }
   :global(:root[data-theme="dark"]) .service-card__photo {
-    opacity: 0.17;
+    opacity: 0.22;
   }
 
   @media (prefers-reduced-motion: reduce) {

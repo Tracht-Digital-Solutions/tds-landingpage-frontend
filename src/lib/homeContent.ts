@@ -49,11 +49,28 @@ export interface DigitalResponsibilityContent {
   secondaryCta: string;
 }
 
+/**
+ * Nur die Überschrift des Kontaktabschnitts.
+ *
+ * Der Rest des `contact`-Blocks (Label, Untertitel, E-Mail, Telefon, Ort)
+ * kommt weiterhin aus tds-shared, weil der Footer dieselben Felder liest.
+ * Die Überschrift ist dagegen reine Startseiten-Copy: sie steht in genau
+ * einem `<h2>` in `sections/Contact.astro` und nirgends sonst — deshalb
+ * liegt sie hier bei den anderen Startseiten-Texten statt im geteilten
+ * Paket, wo eine Textänderung eine Minor-Release samt Nachziehen der Pins
+ * in allen Konsumenten bedeuten würde.
+ */
+export interface ContactHeadingContent {
+  headline: string;
+  headlineAccent: string;
+}
+
 interface HomeContent {
   hero: HomeHeroContent;
   whyMe: WhyMeContent;
   servicesOverview: ServicesOverviewContent;
   digitalResponsibility: DigitalResponsibilityContent;
+  contactHeading: ContactHeadingContent;
 }
 
 const content: Record<Lang, HomeContent> = {
@@ -120,6 +137,10 @@ const content: Record<Lang, HomeContent> = {
       primaryCta: "Erstgespräch vereinbaren",
       secondaryCta: "Preise ansehen",
     },
+    contactHeading: {
+      headline: "Womit fangen",
+      headlineAccent: "wir an?",
+    },
   },
   en: {
     hero: {
@@ -179,6 +200,10 @@ const content: Record<Lang, HomeContent> = {
       ],
       primaryCta: "Arrange an initial consultation",
       secondaryCta: "View pricing",
+    },
+    contactHeading: {
+      headline: "Where shall we",
+      headlineAccent: "start?",
     },
   },
 };
