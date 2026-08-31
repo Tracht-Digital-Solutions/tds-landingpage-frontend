@@ -113,7 +113,7 @@ export const serviceDefinitions = [
       de: ["Einordnung", "Optionen & Kosten", "Konzept", "Fahrplan"],
       en: ["Assessment", "Options & costs", "Concept", "Roadmap"],
     },
-    image: null,
+    image: "/images/services/01-beratung.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -232,7 +232,7 @@ export const serviceDefinitions = [
       de: ["Abläufe", "Automatisierung", "Weniger Handarbeit"],
       en: ["Workflows", "Automation", "Less manual work"],
     },
-    image: null,
+    image: "/images/services/02-prozesse.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -351,7 +351,7 @@ export const serviceDefinitions = [
       de: ["Systeme verbinden", "Schnittstellen", "Eigene Software"],
       en: ["Connected systems", "Integrations", "Custom software"],
     },
-    image: null,
+    image: "/images/services/03-loesungen.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -470,7 +470,7 @@ export const serviceDefinitions = [
       de: ["Software", "Schnittstellen", "Erweiterungen"],
       en: ["Software", "Interfaces", "Extensions"],
     },
-    image: null,
+    image: "/images/services/04-programmierung.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -589,7 +589,7 @@ export const serviceDefinitions = [
       de: ["Webseiten", "Webshops", "SEO", "Backlinks"],
       en: ["Websites", "Online shops", "SEO", "Backlinks"],
     },
-    image: null,
+    image: "/images/services/05-webauftritt.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -708,7 +708,7 @@ export const serviceDefinitions = [
       de: ["Geräte & Zugänge", "Netzwerk", "Backups", "Support"],
       en: ["Devices & accounts", "Network", "Backups", "Support"],
     },
-    image: null,
+    image: "/images/services/06-komplette-it.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",

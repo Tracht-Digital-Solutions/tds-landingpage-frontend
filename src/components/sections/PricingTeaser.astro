@@ -23,16 +23,42 @@ const pricingHref = localizePath("/preise", lang);
       href={pricingHref}
       class="group relative block overflow-hidden tds-tone-navy -mx-6 px-6 py-10 rounded-none md:mx-0 md:rounded-[6px] md:p-12"
     >
-      <span
-        aria-hidden="true"
-        class="tds-shape tds-shape--quarter-bl tds-shape--coral"
-        style="top: -3rem; right: -3rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.22;"
-      ></span>
-      <span
-        aria-hidden="true"
-        class="tds-shape tds-shape--capsule tds-shape--coral hidden md:block"
-        style="bottom: -5rem; left: 8%; width: 22rem; height: 8rem; --tds-decor-shape-alpha: 0.08;"
-      ></span>
+      {/* Formen UND Foto liegen jetzt zusammen in einer `.tds-decor`.
+          Das ist nicht kosmetisch: die Regel `.tds-decor ~ *` hebt jedes
+          folgende Geschwister auf z-index 1 — stünde das Foto als bloßes
+          Geschwister der Formen davor, bekämen auch die beiden Formen
+          diese Anhebung ab. So bleibt genau ein Geschwister übrig, der
+          Inhalt, und der liegt über allem. */}
+      <span class="tds-decor" aria-hidden="true">
+        {/* Sehr dunkles Motiv mit EINER hellen Fläche. Es steht auf
+            Navy, nicht auf Papier, deshalb läuft es deutlich höher als
+            die hellen Gründe der Seite — darunter versinkt es schlicht
+            in der Fläche. Waagerecht wird hier nichts beschnitten (das
+            Panel ist breiter als 2,22:1), `object-position` also nur
+            senkrecht: das Blatt sitzt mittig in der Höhe. */}
+        <img
+          src="/images/sections/pricing.webp"
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          class="pricing-photo absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Der Scrim ist das NAVY des Panels selbst, von rechts stärker:
+            dort stehen Preis und Button, und das ist genau die Stelle, an
+            die der Bildausschnitt die helle Fläche legt. */}
+        <span class="pricing-photo-scrim absolute inset-0"></span>
+        <span
+          aria-hidden="true"
+          class="tds-shape tds-shape--quarter-bl tds-shape--coral"
+          style="top: -3rem; right: -3rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.22;"
+        ></span>
+        <span
+          aria-hidden="true"
+          class="tds-shape tds-shape--capsule tds-shape--coral hidden md:block"
+          style="bottom: -5rem; left: 8%; width: 22rem; height: 8rem; --tds-decor-shape-alpha: 0.08;"
+        ></span>
+      </span>
 
       <div class="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
         <div>
@@ -69,3 +95,22 @@ const pricingHref = localizePath("/preise", lang);
     </a>
   </div>
 </section>
+
+<style>
+  /* Höher als die hellen Gründe (`.about-photo` 0.14,
+     `.service-card__photo` 0.18): das Motiv ist fast schwarz und muss
+     gegen Navy anlaufen, statt darin zu verschwinden. Im Dark Mode ist
+     die Fläche dieselbe — das Panel ist in beiden Themes Navy —, deshalb
+     gibt es hier KEINE zweite Deckkraft. */
+  .pricing-photo {
+    opacity: 0.3;
+  }
+  .pricing-photo-scrim {
+    background: linear-gradient(
+      to left,
+      var(--color-surface-navy) 20%,
+      color-mix(in srgb, var(--color-surface-navy) 72%, transparent) 58%,
+      color-mix(in srgb, var(--color-surface-navy) 48%, transparent) 100%
+    );
+  }
+</style>
