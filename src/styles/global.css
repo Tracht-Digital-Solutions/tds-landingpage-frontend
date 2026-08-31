@@ -213,15 +213,15 @@ html {
    Farbton statt schmutzig zu werden. Beide Regeln greifen erst ab `md`,
    weil das Bild darunter gar nicht gerendert wird. */
 .hero-photo {
-  opacity: 0.16;
+  opacity: 0.24;
 }
 :root[data-theme="dark"] .hero-photo {
-  opacity: 0.1;
+  opacity: 0.15;
 }
 .hero-photo-scrim {
   background: linear-gradient(
     to right,
-    var(--color-paper) 26%,
+    var(--color-paper) 20%,
     color-mix(in srgb, var(--color-paper) 72%, transparent) 62%,
     color-mix(in srgb, var(--color-paper) 42%, transparent) 100%
   );

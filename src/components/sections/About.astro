@@ -148,10 +148,10 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
      ruhigste der Seite und trägt vier Textkacheln plus das Portrait.
      Dark Mode geht weiter herunter, wie die geteilten Decor-Tokens. */
   .about-photo {
-    opacity: 0.19;
+    opacity: 0.27;
   }
   :global(:root[data-theme="dark"]) .about-photo {
-    opacity: 0.12;
+    opacity: 0.17;
   }
   /* Die PAPIERFARBE des Abschnitts, von rechts auslaufend — kein grauer
      Schleier, damit die Fläche ihren Farbton behält. Rechts steht die
@@ -159,7 +159,7 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
   .about-photo-scrim {
     background: linear-gradient(
       to left,
-      var(--color-paper) 30%,
+      var(--color-paper) 24%,
       color-mix(in srgb, var(--color-paper) 74%, transparent) 66%,
       color-mix(in srgb, var(--color-paper) 46%, transparent) 100%
     );
