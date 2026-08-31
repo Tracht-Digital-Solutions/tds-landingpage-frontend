@@ -6,11 +6,12 @@ an uploaded cover when one exists and the shared abstract cover otherwise.
 Every task below is **optional**: the page is complete without it. Service
 cards and service hero bands already carry a constructed geometry background
 from the shared decoration layer, and `image: null` in
-`src/lib/services.ts` renders no `<img>` at all — no 404, no empty box. An
-image is an extra layer over that ground, not a missing piece.
+`src/lib/services.ts` renders no `<img>` at all — no 404, no empty box. A
+photograph is an extra layer over that ground, not a missing piece.
 
 Do not add placeholder customer screenshots or infer assets from anonymised
-references.
+references. A generated photograph is decoration; it must never be presentable
+as a picture of a real client, a real project or a real result.
 
 ## Conventions
 
@@ -28,133 +29,172 @@ references.
 image: "/images/services/05-webauftritt.webp",
 ```
 
-`services.test.ts` checks the path shape; nothing else has to change. The card
-renders the photo at 18 % opacity (12 % in dark mode) under a scrim of the
-card's own fill, and the hero band at 20 % (13 % dark) — they are grounds, so
-they are quiet on purpose. A picture that only works at full strength is the
-wrong picture for this slot.
+`services.test.ts` checks the path shape; nothing else has to change.
+
+## What the slot does to the picture
+
+This is the part that decides whether a photograph works here, and it is not
+obvious from looking at the file on its own.
+
+- **The card renders it at 18 % opacity** (12 % in dark mode) under a scrim of
+  the card's own fill; the service hero band renders it at 20 % (13 %). At that
+  strength fine detail does not read as detail — it reads as grain. A picture
+  survives only if it is built from a few LARGE tonal shapes: one bright
+  window, one dark mass, one clear silhouette.
+- **The quiet area is in a different place per slot.** The card's scrim is
+  strongest at the bottom, so the lower third is nearly covered — put the
+  subject in the upper two thirds. The hero band's scrim runs left to right, so
+  the left half sits under the headline — put the subject on the right.
+- **Mid-key beats dramatic.** A very dark or very contrasty frame turns into a
+  dirty smear at 18 %; a bright, airy frame with one confident dark accent
+  keeps its shape.
+- **No legible screens, no signage, no faces.** A readable interface would look
+  like a product screenshot of something that does not exist, and a recognisable
+  face on a service card reads as "this is my customer". Hands, backs, cropped
+  figures and turned-away monitors carry the same meaning without the claim.
 
 ## Generation prompts
 
-Written for an image model. Every prompt states the same non-negotiables
-because models drop them otherwise:
+Written for a photorealistic image model (Midjourney, Flux, Imagen, DALL·E).
+Each prompt below is the SUBJECT; append the two shared blocks to every one of
+them.
 
-> **no text, no logos, no people, no user interfaces, no stock-photo look, no
-> colourful SaaS gradients, no organic blobs, no heavy shadows.**
+*(An earlier set of prompts produced flat vector geometry rather than
+photographs. That is what the CSS decoration layer already draws underneath, so
+the two would only compete — the flat set is in this file's git history if it
+is ever wanted back.)*
 
-The brand is "Digitale Maßarbeit": constructed geometry, warm paper, flat.
-Palette — put the hex values in the prompt verbatim:
+### Shared style block — append to every prompt
 
-`#050f68` navy · `#820933` burgundy · `#ff7a9c` coral/pink ·
-`#b9791c` ochre · `#fafaf7` warm white · `#f1efe8` sand · `#0b0a07` near-black
+> Editorial documentary photograph, real place, unstaged. Natural available
+> light only. 50mm prime lens at f/2.0, shallow depth of field, subject sharp
+> and background softly out of focus. Muted warm-neutral colour grade: warm
+> off-white highlights, slightly cool navy-leaning shadows, low saturation,
+> soft matte contrast, gentle natural film grain. Calm, quiet, patient mood.
+> Composed from a few large tonal shapes with generous empty space, not from
+> fine detail.
+
+### Shared negative block — append to every prompt
+
+> no text, no lettering, no signage, no logos, no watermark, no legible screen
+> content, no user interface, no charts or dashboards, no recognisable faces,
+> no eye contact with the camera, no smiling stock-photo poses, no handshakes,
+> no business suits, no open-plan startup office, no bean bags, no neon, no
+> teal-and-orange grade, no lens flare, no heavy vignette, no HDR, no
+> tilt-shift, no clutter, no crowds.
+
+---
 
 ### 1 · Beratung & Konzeption — `services/01-beratung.webp`
 
-> A flat vector-style abstract composition on a warm off-white paper ground
-> (#fafaf7). Overlapping translucent geometric planes: one large deep navy
-> (#050f68) rounded rectangle cut off by the left edge of the frame, one
-> burgundy (#820933) quarter circle entering from the bottom right, and three
-> thin 1.5px navy connector lines drawn at exact 90-degree angles with rounded
-> corners, with small filled dots where they meet. A single ochre (#b9791c) dot
-> as the one warm accent. Extremely minimal, architectural, print-poster
-> quality. No gradients, no shadows, no texture, no text, no icons, no people.
-> Keep the lower third generous and empty so overlaid type stays readable.
+The conversation before anything gets built.
+
+> Two people sitting at the corner of a plain wooden table in the small back
+> office of a family trade business, seen from the side and cropped at chest
+> height so no face is visible. Between them a printed A4 sheet with
+> hand-drawn pencil marks, a closed laptop pushed aside, two coffee cups. One
+> hand rests on the paper mid-explanation. Daylight from a window on the left.
+> Subject in the upper two thirds, the lower third an empty stretch of table.
 > 16:10.
 
 ### 2 · Prozessoptimierung — `services/02-prozesse.webp`
 
-> Flat abstract diagram of flow on warm off-white paper (#fafaf7). Four navy
-> (#050f68) capsule shapes of decreasing width arranged along one horizontal
-> axis, connected by a single continuous thin line with rounded right-angle
-> turns and small filled circles at each junction. One coral (#ff7a9c) capsule
-> among the navy ones marks the step that changed. Strictly orthogonal, flat
-> colour. No perspective, no gradient, no shadow, no text, no arrowheads, no
-> people. Large calm empty area on the left. 16:10.
+The daily routine that costs an hour a week.
+
+> A worn counter in a small workshop, photographed slightly from above. A stack
+> of paper delivery notes weighed down by a metal clip, an open ring binder, a
+> tablet lying flat and switched off, a ballpoint pen. Everything in the upper
+> half; the lower third is empty counter surface with soft daylight falling
+> across it. No hands, no people. 16:10.
 
 ### 3 · Individuelle Lösungen — `services/03-loesungen.webp`
 
-> Flat constructed composition on a warm sand ground (#f1efe8). Several
-> rectangles and one quarter circle of different sizes fitted together like cut
-> paper, in deep navy (#050f68), burgundy (#820933) and a pale coral (#ff7a9c
-> at low opacity), leaving one deliberate empty notch where a piece is missing.
-> Hard edges, 2px corner radius, no outlines except a single thin navy hairline
-> frame around one shape. Swiss graphic design, poster-like, completely flat.
-> No shadow, no gradient, no text, no people. 16:10.
+Parts that were made to fit each other.
+
+> A wall of shallow labelled wooden storage drawers in a small workshop, most
+> closed, one pulled halfway open showing sorted small parts. Warm side light
+> grazes the fronts and makes a strong grid of light and shadow. Shot straight
+> on, slightly off-centre. The lower third falls into soft shadow with no
+> detail. No people. 16:10.
 
 ### 4 · Auftragsprogrammierung — `services/04-programmierung.webp`
 
-> Flat abstract circuit routing on warm off-white paper (#fafaf7). Five thin
-> 1.5px navy (#050f68) lines running horizontally and vertically with rounded
-> 90-degree corners, branching and rejoining, with small filled navy node dots
-> and one burgundy (#820933) node at a branch point. No board, no chip, no
-> device, no code, no text. The lines occupy the right two thirds; the left
-> third is empty warm paper. Precise technical-drawing feel, flat. No shadow,
-> no gradient, no glow. 16:10.
+The making itself, without pretending to show a product.
+
+> A tidy desk at dusk in a small home office. A monitor turned away from the
+> camera so only its edge and the glow spilling onto the desk are visible, a
+> mechanical keyboard, a spiral notebook open at a page of pencil sketches, a
+> desk lamp just out of frame casting warm light from the upper right. The
+> screen glow is the brightest thing in the picture. Empty desk surface across
+> the lower third. No people, no visible screen content. 16:10.
 
 ### 5 · Webauftritt — `services/05-webauftritt.webp`
 
-> Flat abstract page-structure composition on warm off-white (#fafaf7): stacked
-> rectangles of varying width suggesting a layout grid — one wide navy
-> (#050f68) band at the top, three equal sand (#f1efe8) blocks below it, one
-> burgundy (#820933) rectangle offset to the right breaking the grid, and a
-> coral (#ff7a9c) horizontal rule. Absolutely no letters, no lorem ipsum, no
-> browser chrome, no cursor, no device frame — only the abstract rhythm of a
-> layout. Flat, hard-edged, 2px radius. No shadow, no gradient. 16:10.
+The shopfront, seen from the owner's side.
+
+> The counter of a small independent shop photographed from behind it, looking
+> towards a large window with bright daylight flooding in. A laptop sits open
+> on the counter facing away from the camera, a plant, a stack of paper bags. The
+> window is a large bright rectangle in the upper half; the counter surface in
+> the lower third is calm and mostly empty. Backlit, airy, slightly
+> overexposed towards the window. No people, no readable screen. 16:10.
 
 ### 6 · Komplette IT — `services/06-komplette-it.webp`
 
-> Flat abstract composition of one whole made of many parts, on a deep navy
-> ground (#050f68). Twelve small warm-white (#fafaf7) squares and capsules of
-> equal visual weight on an invisible grid, all connected by thin warm-white
-> lines at right angles into a single closed network; two nodes highlighted in
-> coral (#ff7a9c), one in ochre (#b9791c). Calm and orderly, with no centre
-> point and no hierarchy pyramid. No cloud shape, no server, no icons, no text,
-> no people. Flat. No shadow, no gradient, no glow. 16:10.
+Infrastructure that is supposed to be boring.
 
-### 7 · "Wieso ich" section ground — `sections/why-me.webp`
+> A small wall-mounted network cabinet in a clean utility room, door open,
+> patch cables neatly bundled and combed into parallel runs, one small status
+> LED lit. Photographed straight on from a short distance in cool even
+> daylight. The cable runs form strong parallel lines across the upper two
+> thirds; painted wall fills the lower third. Orderly, understated, no
+> data-centre drama, no blue glow, no server aisle. 16:10.
 
-Very quiet backdrop behind the reasons column. 2000 × 900.
+---
 
-> Extremely subtle flat background texture on warm off-white (#fafaf7): three
-> very large geometric shapes — a navy (#050f68) capsule cut off by the left
-> edge, a burgundy (#820933) quarter circle cut off by the bottom right corner,
-> and a thin navy outlined rounded rectangle — all at 6–9 % opacity so the
-> ground stays almost white. Nothing in the centre. No text, no fine detail, no
-> gradient, no shadow, no noise. 2000×900.
+### 7 · „Wieso ich" section ground — `sections/why-me.webp`
+
+Behind the reasons column. Very quiet. 2000 × 900.
+
+> The corner of a wooden desk in early morning light: a closed notebook, a pair
+> of glasses folded on top, a half-full glass of water, one pencil. Shot from a
+> low oblique angle with a long soft shadow reaching across the frame. The
+> right two thirds are empty desk and wall. Extremely calm, almost still-life.
+> No people, no devices. 2000×900.
 
 ### 8 · Pricing teaser ground — `sections/pricing.webp`
 
-2000 × 900.
+Behind the navy price panel, so it has to read as a dark picture. 2000 × 900.
 
-> Flat abstract composition on deep navy (#050f68): a stepped arrangement of
-> five warm-white capsules of increasing height along the bottom edge, cut off
-> by the frame, at 10–18 % opacity, plus one coral (#ff7a9c) quarter circle
-> entering from the top right at 20 % opacity. No numbers, no currency symbols,
-> no chart axes, no text. Flat. No gradient, no shadow. 2000×900.
+> A single printed one-page document lying on a dark table beside a fountain
+> pen, photographed from above in low warm side light so most of the frame
+> falls away into deep shadow. The paper is the one bright shape, positioned in
+> the right third; the left two thirds are almost black table. Restrained,
+> serious, no props, no hands, no readable text on the page. 2000×900.
 
 ### 9 · Contact section ground — `sections/contact.webp`
 
-2000 × 900.
+Behind the navy contact block. 2000 × 900.
 
-> Flat abstract composition on deep navy (#050f68): two thin warm-white conduit
-> lines entering from opposite edges, turning at rounded right angles and
-> meeting at one single filled coral (#ff7a9c) node in the lower left third.
-> Everything else empty navy. No envelope, no phone, no speech bubble, no text,
-> no people. Flat. No gradient, no shadow, no glow. 2000×900.
+> A mobile phone lying face down on a wooden table next to a closed notebook,
+> in warm low evening light from a window off to the right. Long soft shadows
+> across the wood. Most of the frame is empty table falling into shadow; the
+> objects sit in the lower right quarter. Quiet, end-of-day, no people, no
+> screen visible. 2000×900.
 
 ### 10 · Hero ground (optional) — `sections/hero.webp`
 
 2400 × 1400. Only if the pure CSS geometry ever reads as too empty; the hero
-composition is currently deliberate and complete without it.
+composition is currently deliberate and complete without it. **The left half
+must stay empty — the headline sits there.**
 
-> Very large, very quiet flat geometric composition on warm off-white
-> (#fafaf7). One deep navy (#050f68) capsule cut off by the left edge, one
-> burgundy (#820933) quarter circle cut off by the bottom right corner, one
-> thin navy outlined rounded rectangle upper right, one single diagonal navy
-> hairline, and a short run of right-angled conduit with three dots in the
-> lower right. All shapes at 7–10 % opacity. The middle-left half must stay
-> completely empty for the headline. No text, no people, no gradient, no
-> shadow, no noise. 2400×1400.
+> Wide interior view of a small German craft workshop early in the morning,
+> before work starts. Empty workbench in the middle distance, tools hanging in
+> orderly rows on the right-hand wall, bright daylight coming through a large
+> window on the right and falling across a swept concrete floor. Nobody
+> present. The entire left half of the frame is empty floor and plain wall in
+> soft even light with no detail. Wide angle but undistorted, shot from
+> standing height. 2400×1400.
 
 ## Adding a task here
 
