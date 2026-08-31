@@ -147,8 +147,21 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
      `.service-card__photo`, nur noch leiser: dieser Abschnitt ist der
      ruhigste der Seite und trägt vier Textkacheln plus das Portrait.
      Dark Mode geht weiter herunter, wie die geteilten Decor-Tokens. */
+  /* Spiegelverkehrt, per CSS statt durch ein zweites WebP: die Datei bleibt
+     damit identisch mit dem Prompt, den IMAGES.md dokumentiert.
+
+     `scaleX(-1)` greift NACH `object-fit`/`object-position` — erst waehlt
+     `object-left` den Ausschnitt aus der Quelle, dann wird das Ergebnis als
+     Ganzes umgeklappt. `object-position` mitzudrehen bringt deshalb nichts:
+     die Gegenstaende liegen in der Quelle links, und KEIN Ausschnitt kann sie
+     nach dem Spiegeln wieder auf die linke Seite bringen. Das ist die Folge,
+     die man vorher wissen sollte: der Scrim deckt rechts (dort steht die
+     Textspalte), also wandert das Motiv unter die gedeckte Haelfte und der
+     Grund liest sich als ruhiger Lichtverlauf statt als Stillleben. Genau so
+     gewollt — nicht ein Versehen, das man durch Verschieben "repariert". */
   .about-photo {
     opacity: 0.35;
+    transform: scaleX(-1);
   }
   :global(:root[data-theme="dark"]) .about-photo {
     opacity: 0.22;
