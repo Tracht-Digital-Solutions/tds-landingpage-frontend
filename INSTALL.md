@@ -52,11 +52,17 @@ Copy `.env.example` to `.env` and override only what the local environment
 needs:
 
 ```ini
-PUBLIC_CONTACT_API_URL=http://localhost:8000/contact
-PUBLIC_CONTENT_API_URL=http://localhost:8000/content
+PUBLIC_CONTACT_API_URL=http://localhost:8080/contact
+PUBLIC_CONTENT_API_URL=http://localhost:8080/content
 PUBLIC_BLOG_BASE_URL=http://localhost:4322
 PUBLIC_DEMO_MODE=false
 ```
+
+Port `8080` is the gateway in the Docker stack (`tds-gateway-api`,
+`INSTALL-DOCKER.md`); `8000` is the one `composer start` brings up. Both serve
+the same routes — `/content` and `/contact` are answered by
+`tds-core-frontend-api`, the composed frontend API that is the gateway's
+default catch-all.
 
 The committed defaults point at the production services, so an empty `.env`
 is enough for read-only development against production content.
