@@ -201,6 +201,32 @@ html {
   mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
 }
 
+/* Hero-Fotogrund. Dieselbe Rolle wie `.service-card__photo`: ein GRUND,
+   keine Abbildung. Die Deckkraft liegt tiefer als dort, weil hier keine
+   Karte drumherum abgrenzt und das Bild über die volle Breite unter
+   Motto, Headline und CTAs läuft — und im Dark Mode noch einmal tiefer,
+   wie die geteilten Decor-Tokens es auch tun.
+
+   Der Scrim ist die PAPIERFARBE der Seite, die nach rechts ausläuft,
+   nicht ein grauer Schleier: die linke Bildhälfte bleibt damit exakt so
+   ruhig wie die reine CSS-Geometrie vorher, und die Fläche behält ihren
+   Farbton statt schmutzig zu werden. Beide Regeln greifen erst ab `md`,
+   weil das Bild darunter gar nicht gerendert wird. */
+.hero-photo {
+  opacity: 0.16;
+}
+:root[data-theme="dark"] .hero-photo {
+  opacity: 0.1;
+}
+.hero-photo-scrim {
+  background: linear-gradient(
+    to right,
+    var(--color-paper) 26%,
+    color-mix(in srgb, var(--color-paper) 72%, transparent) 62%,
+    color-mix(in srgb, var(--color-paper) 42%, transparent) 100%
+  );
+}
+
 /* Hero — on short viewports (laptops, landscape phones) the stacked
    headline + straplines + sub + CTAs can exceed the screen height and
    spill past the scroll hint. Pull the type and rhythm in so the whole

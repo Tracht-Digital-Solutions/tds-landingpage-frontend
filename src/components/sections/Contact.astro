@@ -33,17 +33,45 @@ const socials = {
 };
 ---
 
-{/* Vollflächiges TDS-Navy, deliberately with NO wash and no shapes:
-    "keine konkurrierenden Farbverläufe hinter dem Formular". The
-    `.tds-tone-navy` primitive also re-maps the page tokens inside the
-    block (ink / muted / line / card), so any shared primitive rendered
-    in here — a `.field`, a hairline — reads on the dark ground without
-    the call site overriding it. */}
+{/* Vollflächiges TDS-Navy. Weiterhin KEIN Wash und keine Formen —
+    "keine konkurrierenden Farbverläufe hinter dem Formular" gilt
+    unverändert; ein zweiter Farbverlauf hinter Eingabefeldern ist genau
+    das, was hier nie passieren darf. Was dazugekommen ist, ist etwas
+    anderes: ein stark gedämpfter Fotogrund unter unverändertem Navy.
+    Er bringt keine zweite Farbe ein, sondern nur Textur, und der Scrim
+    darüber ist dieselbe Navy-Fläche — die Ecke mit dem Formular bleibt
+    deckend.
+
+    `relative` ist hier Voraussetzung, nicht Kosmetik: `.tds-tone-navy`
+    setzt nur Farbe, keine `position`, und ohne einen positionierten
+    Vorfahr würde die `.tds-decor` darunter auf den nächsten
+    positionierten Vorfahren aufspannen statt auf diesen Abschnitt.
+
+    Das `.tds-tone-navy` primitive re-mapped außerdem die Seiten-Tokens
+    innerhalb des Blocks (ink / muted / line / card), so any shared
+    primitive rendered in here — a `.field`, a hairline — reads on the
+    dark ground without the call site overriding it. */}
 <section
   id="contact"
-  class="section-spacing tds-tone-navy"
+  class="section-spacing tds-tone-navy relative"
   aria-labelledby="contact-heading"
 >
+  <span class="tds-decor" aria-hidden="true">
+    {/* Objekte unten rechts, warmes Abendlicht, der Rest fällt in den
+        Schatten — die leere Hälfte liegt also dort, wo Überschrift und
+        Formular stehen. `object-right-bottom`, damit dieser Aufbau den
+        Zuschnitt überlebt: der Abschnitt ist hoch, `object-cover`
+        beschneidet hier waagerecht. */}
+    <img
+      src="/images/sections/contact.webp"
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      class="contact-photo absolute inset-0 h-full w-full object-cover object-right-bottom"
+    />
+    <span class="contact-photo-scrim absolute inset-0"></span>
+  </span>
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <h2
       id="contact-heading"
@@ -219,6 +247,26 @@ const socials = {
 </section>
 
 <style is:global>
+  /* Fotogrund. Wie beim Pricing-Panel höher als auf den hellen Flächen
+     der Seite, weil das Motiv gegen Navy anlaufen muss; anders als dort
+     gibt es aber ein Formular darunter, deshalb bleibt es deutlich
+     zurückhaltender. Die Fläche ist in beiden Themes Navy — keine
+     zweite Deckkraft für Dark Mode. */
+  #contact .contact-photo {
+    opacity: 0.22;
+  }
+  /* Deckend über der linken oberen Hälfte, wo Überschrift, Fließtext
+     und die Formularfelder stehen; erst nach unten rechts läuft es aus.
+     Reines Panel-Navy, damit die Fläche ihren Farbton behält. */
+  #contact .contact-photo-scrim {
+    background: linear-gradient(
+      to bottom right,
+      var(--color-surface-navy) 34%,
+      color-mix(in srgb, var(--color-surface-navy) 74%, transparent) 70%,
+      color-mix(in srgb, var(--color-surface-navy) 52%, transparent) 100%
+    );
+  }
+
   /* === Contact form: field + focus state ============================ */
 
   /* Each input/textarea sits inside a `.contact-field-row` wrapper. The wrapper

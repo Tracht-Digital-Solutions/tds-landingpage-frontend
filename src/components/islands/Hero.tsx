@@ -184,6 +184,27 @@ export default function Hero({
           Sizes and positions are compositional and therefore inline;
           the FORM and the tint come from the shared decoration layer. */}
       <div className="tds-decor" aria-hidden="true">
+        {/* Der Fotogrund liegt VOR den Formen, damit Geometrie und
+            Conduit darüber laufen — das Bild ist der Boden, nicht die
+            oberste Schicht. `object-right`, weil die linke Bildhälfte
+            bewusst leer komponiert ist und die Headline dort steht; der
+            Scrim von links hält sie frei, auch wenn der Ausschnitt bei
+            sehr breiten Fenstern wandert.
+
+            `hidden md:block` aus demselben Grund wie bei der Kapsel
+            darunter: im Hochformat schneidet `object-cover` aus einem
+            1,71:1-Bild einen Mittelausschnitt, in dem genau die leer
+            komponierte linke Hälfte nicht mehr vorkommt — das Motiv
+            läge dann unter der Schrift statt neben ihr. */}
+        <img
+          src="/images/sections/hero.webp"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="low"
+          decoding="async"
+          className="hero-photo hidden md:block absolute inset-0 h-full w-full object-cover object-right"
+        />
+        <span className="hero-photo-scrim hidden md:block absolute inset-0" />
         {/* Große Kapsel, links angeschnitten — the anchor of the
             composition. `hidden md:block` is load-bearing, not a
             nicety: it is 38rem wide, so on a 375px screen the shape
