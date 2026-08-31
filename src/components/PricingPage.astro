@@ -3,6 +3,7 @@ import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
 import { breadcrumbSchema, pricingSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
@@ -85,7 +86,7 @@ const jsonLd = [
         {pricing.headline} <AccentLetters text={pricing.headlineAccent} />
       </h1>
       <p class="text-lg text-[var(--color-muted)] max-w-3xl mb-16 leading-relaxed">
-        {pricing.sub}
+        <Emphasis text={pricing.sub} />
       </p>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
@@ -95,6 +96,7 @@ const jsonLd = [
           const isHighlight = definition.id === "complete-it";
           return (
             <article
+              data-reveal
               class:list={[
                 "relative rounded-[6px] p-7 flex flex-col",
                 isHighlight
@@ -147,14 +149,19 @@ const jsonLd = [
                 ]}>
                   {pricing.includesLabel}
                 </p>
+                {/* The code-owned keyword list, not the first four lines of
+                    "Was ich übernehme". Six cards side by side are scanned,
+                    not read, and four full sentences per card turned this
+                    grid into a wall of prose. The detail page behind each
+                    card is where the sentences belong. */}
                 <ul class="space-y-2 mb-7">
-                  {content.responsibilities.slice(0, 4).map((item) => (
+                  {definition.keywords[lang].map((keyword) => (
                     <li class:list={[
                       "text-sm leading-snug flex gap-2",
                       isHighlight ? "text-white/88" : "text-[var(--color-black)]",
                     ]}>
                       <span aria-hidden="true" class={isHighlight ? "text-[var(--color-accent-pink)]" : "text-[var(--color-accent)]"}>✓</span>
-                      <span>{item}</span>
+                      <span>{keyword}</span>
                     </li>
                   ))}
                 </ul>
@@ -213,7 +220,7 @@ const jsonLd = [
     from { opacity: 0; transform: translateX(-2rem); }
     to { opacity: 1; transform: translateX(0); }
   }
-  .page-flyin { animation: page-flyin 500ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .page-flyin { animation: page-flyin 520ms var(--lp-ease-soft) both; }
   @media (prefers-reduced-motion: reduce) {
     .page-flyin { animation: none; }
   }

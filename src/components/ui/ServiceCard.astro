@@ -6,16 +6,98 @@ interface Props {
   number: string;
   title: string;
   description: string;
-  tags: readonly string[];
+  /** Plain everyday words, code-owned per service (see `lib/services.ts`). */
+  keywords: readonly string[];
+  /** Optional background photo under `/images/services/`; null renders none. */
+  image?: string | null;
 }
 
-const { href, number, title, description, tags } = Astro.props;
+const { href, number, title, description, keywords, image = null } = Astro.props;
+
+/**
+ * A background for every card, with no asset dependency.
+ *
+ * The six cards were six identical text boxes: same fill, same rhythm, one
+ * icon apiece. The brief asks for background imagery, and photography for
+ * six abstract services does not exist yet (IMAGES.md tracks it) — so the
+ * ground is CONSTRUCTED, from the same shared decoration layer the hero and
+ * the section callouts use. Each service gets a different form and tint, so
+ * the six read as six things at a glance rather than as one thing repeated.
+ *
+ * When `image` is filled in, the photo layers OVER this and the geometry
+ * keeps showing through the scrim — the card does not become a different
+ * component, it gains a layer.
+ *
+ * Keyed on `number` rather than `id` because the number is the display
+ * order, and this is a decision about the visual rhythm of the grid.
+ */
+const shapes: Record<string, { form: string; tint: string; style: string }> = {
+  "01": {
+    form: "tds-shape--capsule",
+    tint: "tds-shape--navy",
+    style: "top: -3rem; left: -6rem; width: 20rem; height: 9rem;",
+  },
+  "02": {
+    form: "tds-shape--quarter-tl",
+    tint: "tds-shape--bordeaux",
+    style: "bottom: -5rem; right: -4rem; width: 16rem; height: 16rem;",
+  },
+  "03": {
+    form: "tds-shape--rect tds-shape--outline",
+    tint: "tds-shape--navy",
+    style: "top: 2rem; right: -5rem; width: 13rem; height: 15rem;",
+  },
+  "04": {
+    form: "tds-shape--quarter-br",
+    tint: "tds-shape--navy",
+    style: "top: -4rem; right: -3rem; width: 14rem; height: 14rem;",
+  },
+  "05": {
+    form: "tds-shape--capsule",
+    tint: "tds-shape--coral",
+    style: "bottom: -3.5rem; left: 15%; width: 18rem; height: 8rem;",
+  },
+  "06": {
+    form: "tds-shape--half",
+    tint: "tds-shape--gold",
+    style: "bottom: -6rem; right: -6rem; width: 17rem; height: 17rem;",
+  },
+};
+const shape = shapes[number] ?? shapes["01"];
 ---
 
 <a
   href={href}
-  class="relative flex flex-col h-full bg-[var(--color-paper)] rounded-[6px] p-6 sm:p-8 md:p-10 group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
+  class="service-card relative flex flex-col h-full overflow-hidden bg-[var(--color-paper)] rounded-[6px] p-6 sm:p-8 md:p-10 group transition-colors duration-200 hover:bg-[var(--color-card)] text-center sm:text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
+  data-reveal
 >
+  {/* `.tds-decor` is inset-0, click-through and CLIPPING, so each shape is
+      authored oversized and cut by the card's own edge — the same grammar
+      as the hero. It also lifts every following sibling to `z-index: 1`
+      (primitives.css), which is what keeps the copy above the ground
+      without a `relative` on each block. */}
+  <span class="tds-decor" aria-hidden="true">
+    <span class:list={["service-card__shape tds-shape", shape.form, shape.tint]} style={shape.style}></span>
+    {image && (
+      <>
+        <img
+          src={image}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          class="service-card__photo absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Without this the copy sits on whatever the photo happens to be
+            doing behind it. The scrim is the CARD's own fill fading out,
+            not a grey wash, so the card keeps its colour. */}
+        <span
+          class="absolute inset-0 bg-[linear-gradient(to_top,var(--color-paper)_28%,color-mix(in_srgb,var(--color-paper)_78%,transparent)_70%,color-mix(in_srgb,var(--color-paper)_55%,transparent)_100%)]"
+        ></span>
+      </>
+    )}
+  </span>
+
   <div class="flex items-start justify-center sm:justify-between gap-4 mb-6">
     <span
       aria-hidden="true"
@@ -43,11 +125,58 @@ const { href, number, title, description, tags } = Astro.props;
   <p class="text-[var(--color-muted)] text-sm leading-relaxed mb-8">
     {description}
   </p>
+  {/* Plain words, not the first three sentences of "Was ich übernehme" —
+      a chip three words wide cannot carry a sentence. */}
   <div class="flex flex-wrap gap-2 justify-center sm:justify-start mt-auto">
-    {tags.map((tag) => (
+    {keywords.map((keyword) => (
       <span class="px-3 py-1 text-xs rounded-full bg-[var(--color-soft)] text-[var(--color-muted)] group-hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] group-hover:text-[var(--color-primary)] transition-colors duration-200">
-        {tag}
+        {keyword}
       </span>
     ))}
   </div>
 </a>
+
+<style>
+  /* The ground reacts, gently. Scale rather than travel so nothing can be
+     pushed past the card's clipped edge and reveal a gap, and the spring
+     is on `transform` only — see the rule in global.css. */
+  .service-card__shape {
+    transition: transform 420ms var(--lp-ease-bounce);
+  }
+  .service-card:hover .service-card__shape,
+  .service-card:focus-visible .service-card__shape {
+    transform: scale(1.08);
+  }
+
+  /* Deliberately low. This is a GROUND, not an illustration: at full
+     strength a photo behind eight lines of copy is a legibility problem
+     the scrim then has to undo, which leaves a washed-out picture and
+     grey text. Dark mode drops it further — the same reason the shared
+     decor tokens dial themselves down there. */
+  .service-card__photo {
+    opacity: 0.18;
+    transition: transform 700ms var(--lp-ease-soft), opacity 300ms ease;
+  }
+  .service-card:hover .service-card__photo,
+  .service-card:focus-visible .service-card__photo {
+    opacity: 0.26;
+    transform: scale(1.05);
+  }
+  :global(:root[data-theme="dark"]) .service-card__photo {
+    opacity: 0.12;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .service-card__shape,
+    .service-card__photo {
+      transition: none;
+      transform: none;
+    }
+    .service-card:hover .service-card__shape,
+    .service-card:focus-visible .service-card__shape,
+    .service-card:hover .service-card__photo,
+    .service-card:focus-visible .service-card__photo {
+      transform: none;
+    }
+  }
+</style>

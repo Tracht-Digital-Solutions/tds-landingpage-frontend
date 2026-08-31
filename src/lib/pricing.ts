@@ -2,6 +2,18 @@ import { cmsFor } from "./cms";
 import type { Lang } from "./i18n";
 import type { ServiceId } from "./services";
 
+/**
+ * Pricing copy and the five numeric hourly rates.
+ *
+ * `pricing.test.ts` pins the rates and the fact that Complete IT has none —
+ * it is quoted monthly after an assessment, and inventing a number here
+ * would also put an invented `Offer` price into the pricing JSON-LD.
+ * `customRateLabel` must therefore keep saying "Monatsangebot" in German.
+ *
+ * `*asterisks*` mark a word for emphasis (see `./emphasis`); a CMS override
+ * without them renders as plain text.
+ */
+
 export interface PricingContent {
   label: string;
   headline: string;
@@ -31,19 +43,19 @@ export interface PricingContent {
 const defaults: Record<Lang, PricingContent> = {
   de: {
     label: "— Preise",
-    headline: "Klare Preise für",
-    headlineAccent: "klare Verantwortung.",
+    headline: "Preise ohne",
+    headlineAccent: "Überraschungen.",
     sub:
-      "Sie sehen, welcher Stundensatz für welche Leistung gilt. Klar abgegrenzte Vorhaben können als Festpreis angeboten werden; laufende Betreuung wird passend zu Ihrem Betrieb vereinbart.",
+      "Sie sehen, was welche Leistung kostet. Steht der Umfang vorher fest, geht es auch zum *Festpreis*.",
     teaserHeadline: "Planbare Sätze,",
     teaserHeadlineAccent: "passende Modelle.",
     teaserSub:
-      "Stundensätze ab 95 € netto. Für die komplette IT entsteht nach einer Bestandsaufnahme ein individuelles Monatsangebot.",
+      "Ab 95 € netto pro Stunde. Für die komplette IT gibt es nach einer Bestandsaufnahme ein Monatsangebot.",
     teaserCta: "Preise ansehen",
     teaserFromLabel: "ab",
     hourSuffix: "/ Stunde",
-    customRateLabel: "Individuelles Monatsangebot",
-    includesLabel: "Typische Bestandteile:",
+    customRateLabel: "Monatsangebot",
+    includesLabel: "Enthalten:",
     rateConsulting: 120,
     rateProcess: 110,
     rateSolutions: 110,
@@ -51,32 +63,32 @@ const defaults: Record<Lang, PricingContent> = {
     rateWebPresence: 95,
     notesTitle: "Gut zu wissen",
     notes: [
-      "Alle genannten Preise sind Nettopreise zuzüglich gesetzlicher Umsatzsteuer.",
-      "Ein Festpreis ist möglich, wenn Ziel, Umfang und Abnahme vorab klar abgegrenzt sind.",
-      "Für laufende Betreuung sind individuelle Monatsmodelle möglich.",
-      "Bei kompletter IT bestimmen unter anderem Arbeitsplätze, Geräte, Lizenzen, Sicherheitsumfang, Vor-Ort-Leistungen und vereinbarte Erreichbarkeit den Preis.",
+      "Alle Preise sind netto, zuzüglich Mehrwertsteuer.",
+      "Festpreis, wenn Ziel und Umfang vorher klar sind.",
+      "Für laufende Betreuung gibt es Monatsmodelle.",
+      "Bei kompletter IT bestimmen Arbeitsplätze, Geräte, Lizenzen, Sicherheit und Erreichbarkeit den Preis.",
     ],
-    ctaTitle: "Lassen Sie uns den passenden Rahmen klären.",
+    ctaTitle: "Welcher Rahmen passt zu Ihnen?",
     ctaSub:
-      "Im Erstgespräch ordnen wir Ihr Vorhaben ein. Danach wissen Sie, welches Leistungs- und Preismodell sinnvoll ist.",
+      "Im Erstgespräch ordnen wir Ihr Vorhaben ein. Danach wissen Sie, welches Modell passt.",
     ctaButton: "Erstgespräch vereinbaren",
     back: "Zurück zur Startseite",
   },
   en: {
     label: "— Pricing",
-    headline: "Clear pricing for",
-    headlineAccent: "clear ownership.",
+    headline: "Pricing without",
+    headlineAccent: "surprises.",
     sub:
-      "You can see which hourly rate applies to each service. Clearly bounded projects can be offered at a fixed price; ongoing support is tailored to your business.",
+      "You can see what each service costs. When the scope is settled up front, a *fixed price* works too.",
     teaserHeadline: "Predictable rates,",
     teaserHeadlineAccent: "models that fit.",
     teaserSub:
-      "Hourly rates start at €95 excluding VAT. Complete IT is quoted as an individual monthly arrangement after an assessment.",
+      "From €95 net per hour. Complete IT is quoted monthly after an assessment.",
     teaserCta: "View pricing",
     teaserFromLabel: "from",
     hourSuffix: "/ hour",
-    customRateLabel: "Individual monthly proposal",
-    includesLabel: "Typical elements:",
+    customRateLabel: "Monthly quote",
+    includesLabel: "Included:",
     rateConsulting: 120,
     rateProcess: 110,
     rateSolutions: 110,
@@ -84,14 +96,14 @@ const defaults: Record<Lang, PricingContent> = {
     rateWebPresence: 95,
     notesTitle: "Good to know",
     notes: [
-      "All stated prices are net prices and exclude applicable VAT.",
-      "A fixed price is possible when the goal, scope and acceptance criteria are clearly defined in advance.",
-      "Individual monthly arrangements are available for ongoing support.",
-      "For Complete IT, the price depends on factors such as users, devices, licences, security scope, on-site work and agreed availability.",
+      "All prices are net and exclude VAT.",
+      "A fixed price works when the goal and scope are clear up front.",
+      "Monthly arrangements are available for ongoing support.",
+      "For Complete IT the price depends on workstations, devices, licences, security and agreed availability.",
     ],
-    ctaTitle: "Let us define the right setup.",
+    ctaTitle: "Which setup fits you?",
     ctaSub:
-      "In the initial consultation we assess your needs. You will then know which service and pricing model makes sense.",
+      "In the first conversation we place your project. After that you know which model fits.",
     ctaButton: "Arrange an initial consultation",
     back: "Back to the homepage",
   },

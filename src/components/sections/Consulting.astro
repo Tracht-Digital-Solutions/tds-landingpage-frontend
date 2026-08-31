@@ -3,6 +3,7 @@ import { resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const consulting = await cmsFor(
@@ -50,12 +51,12 @@ const homePrefix = lang === "de" ? "" : "/en";
           <AccentLetters text={consulting.headlineAccent} tone="dark" />
         </h2>
         <p class="text-base md:text-lg text-white/80 leading-relaxed mb-8 max-w-2xl">
-          {consulting.body}
+          <Emphasis text={consulting.body} />
         </p>
 
         <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-3 mb-9 max-w-3xl">
           {consulting.points.map((point) => (
-            <li class="flex gap-3 text-sm leading-relaxed text-white/85">
+            <li class="flex gap-3 text-sm leading-relaxed text-white/85" data-reveal>
               <span aria-hidden="true" class="text-[var(--color-accent-pink)]">✓</span>
               <span>{point}</span>
             </li>

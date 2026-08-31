@@ -24,6 +24,28 @@ const lang = resolveLang(Astro.currentLocale);
 // Admin-edited v2 block overrides the local default at render time;
 // falls back to lib/faq.ts when no block is saved or the API is down.
 const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
+
+// `content.intro` is deliberately NOT rendered any more. A heading that
+// says "Häufige Fragen" followed by a sentence explaining that these are
+// the frequent questions is the definition of a line that earns nothing.
+// The field stays in `FaqContent` and in the `faq_v2` block so text an
+// admin already saved remains readable in the editor rather than being
+// silently dropped from the schema.
+
+// Code-owned chrome, localized here rather than added to the CMS block —
+// the same arrangement `ServiceDetailPage.astro` uses for its labels, and
+// it means the Website-CMS structured schema (another repository) does not
+// have to change in step with this file.
+const ui = lang === "de"
+  ? {
+      moreTitle: "Ihre Frage war nicht dabei?",
+      moreCta: "Schreiben Sie mir",
+    }
+  : {
+      moreTitle: "Not the question you had?",
+      moreCta: "Get in touch",
+    };
+const contactHref = lang === "de" ? "/#contact" : "/en/#contact";
 ---
 
 {/* The one conduit run outside the hero. It sits HERE and not in the Journal
@@ -46,11 +68,8 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
       headline={content.headline}
       headlineAccent={content.headlineAccent}
       id="faq-heading"
-      headingClass="mb-6"
+      headingClass="mb-12"
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
-      {content.intro}
-    </p>
 
     {/* Mobile/tablet (< lg): native <details> accordion — each answer
         expands inline under its own question. Exclusive (shared `name`),
@@ -58,12 +77,12 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
         block below is hidden here. */}
     <div class="lg:hidden space-y-1">
       {content.items.map((item, i) => (
-        <details name="faq-mobile" open={i === 0} class="faq-m">
+        <details name="faq-mobile" open={i === 0} class="faq-m" data-reveal>
           <summary class="faq-m-summary flex items-start justify-between gap-6 py-5 px-4 cursor-pointer">
             <span class="faq-m-q font-[var(--font-display)] text-lg text-[var(--color-black)] leading-snug transition-colors duration-200">
               {item.q}
             </span>
-            <span aria-hidden="true" class="faq-m-arrow flex-shrink-0 mt-1 text-[var(--color-muted)] transition-transform duration-200">
+            <span aria-hidden="true" class="faq-m-arrow flex-shrink-0 mt-1 text-[var(--color-muted)]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 6 15 12 9 18" />
               </svg>
@@ -99,7 +118,7 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
               <span class="faq-q font-[var(--font-display)] text-lg md:text-xl text-[var(--color-black)] leading-snug transition-colors duration-200">
                 {item.q}
               </span>
-              <span aria-hidden="true" class="faq-arrow flex-shrink-0 mt-1 text-[var(--color-muted)] transition-all duration-200">
+              <span aria-hidden="true" class="faq-arrow flex-shrink-0 mt-1 text-[var(--color-muted)]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="9 6 15 12 9 18" />
                 </svg>
@@ -128,6 +147,36 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
           </div>
         ))}
       </div>
+    </div>
+
+    {/* The list can only ever answer the questions it anticipated. This is
+        the exit for everyone else, and it replaces the intro paragraph that
+        used to sit above the list saying nothing. */}
+    <div
+      class="mt-12 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
+      data-reveal
+    >
+      <p class="font-[var(--font-display)] text-xl text-[var(--color-black)]">
+        {ui.moreTitle}
+      </p>
+      <a href={contactHref} class="btn btn-primary group self-start sm:self-auto">
+        {ui.moreCta}
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="faq-cta-arrow"
+        >
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
     </div>
   </div>
 </section>
@@ -171,18 +220,32 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
     background: transparent;
   }
 
-  .faq-panel { animation: faq-fade 220ms ease both; }
+  /* Both chevrons spring rather than ease. The rotation is the only thing
+     on this section that MOVES, so it is where the site's voice has to be
+     audible; the colour beside it still eases, because a colour that
+     overshoots lands outside the palette. */
+  .faq-arrow,
+  .faq-m-arrow {
+    transition:
+      transform 320ms var(--lp-ease-bounce),
+      color 200ms var(--tds-ease-out);
+  }
+
+  .faq-panel {
+    animation: faq-fade 280ms var(--lp-ease-bounce) both;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .faq-panel { animation: none; }
+    .faq-panel {
+      animation: none;
+    }
   }
   @keyframes faq-fade {
-    from { opacity: 0; transform: translateY(0.35rem); }
+    from { opacity: 0; transform: translateY(0.5rem); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   /* Mobile accordion (<details>). Strip the native marker, rotate the
-     chevron, and fade the answer in to match the panel. The open row's
-     fill is shared with the desktop tab in the rule above. */
+     chevron, and give the answer a real height transition. */
   .faq-m-summary { list-style: none; }
   .faq-m-summary::-webkit-details-marker { display: none; }
   .faq-m[open] > .faq-m-summary .faq-m-q,
@@ -191,9 +254,58 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
     color: var(--color-accent);
     transform: rotate(90deg);
   }
-  .faq-m[open] > .faq-m-answer { animation: faq-fade 220ms ease both; }
+
+  /* A `<details>` used to SNAP open and then fade its answer in, which
+     reads as the row jumping and the text arriving late. `::details-content`
+     is the element the browser wraps the answer in, and with
+     `interpolate-size: allow-keywords` (set on :root in global.css) a
+     transition to `auto` height is animatable.
+
+     `@supports` is doing real work: in a browser without either feature
+     the whole block is skipped and the row opens instantly, exactly as it
+     did before — no measured heights, no JS, no jump. */
+  @supports selector(::details-content) {
+    .faq-m::details-content {
+      block-size: 0;
+      overflow: clip;
+      opacity: 0;
+      transition:
+        block-size 320ms var(--lp-ease-soft),
+        opacity 220ms var(--tds-ease-out),
+        content-visibility 320ms allow-discrete;
+      transition-behavior: allow-discrete;
+    }
+    .faq-m[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .faq-m[open] > .faq-m-answer { animation: none; }
+    .faq-arrow,
+    .faq-m-arrow {
+      transition: none;
+    }
+    /* END STATE. The shared reduced-motion block clamps duration, which
+       for a discrete `content-visibility` step is not enough — without
+       this an opened row could sit at height 0. */
+    @supports selector(::details-content) {
+      .faq-m::details-content,
+      .faq-m[open]::details-content {
+        transition: none;
+      }
+      .faq-m[open]::details-content {
+        block-size: auto;
+        opacity: 1;
+      }
+    }
+  }
+
+  .faq-cta-arrow {
+    transition: transform 280ms var(--lp-ease-bounce);
+  }
+  .group:hover .faq-cta-arrow {
+    transform: translateX(3px);
   }
 </style>
 

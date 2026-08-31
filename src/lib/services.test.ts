@@ -95,6 +95,55 @@ describe("service summaries double as meta descriptions", () => {
   }
 });
 
+/**
+ * The card chips and the optional background image.
+ *
+ * Both are code-owned — never CMS-sourced — for the same reason ids and
+ * slugs are: the overview card, the pricing card and the detail hero all
+ * read them, and a blank or malformed value there is a hole in the layout
+ * rather than a missing sentence. Nothing else guards them, because the
+ * components take whatever the catalog hands over.
+ */
+describe("service keywords", () => {
+  for (const lang of ["de", "en"] as const) {
+    it(`gives every service two to four ${lang} keywords`, () => {
+      for (const service of serviceDefinitions) {
+        const keywords = service.keywords[lang];
+        // Two is the floor at which a chip row reads as a list; above four
+        // the card's chip row wraps to three lines on a phone.
+        expect(keywords.length, `${service.id} (${lang})`).toBeGreaterThanOrEqual(2);
+        expect(keywords.length, `${service.id} (${lang})`).toBeLessThanOrEqual(4);
+        for (const keyword of keywords) {
+          expect(keyword.trim(), `${service.id} (${lang}) has stray whitespace`).toBe(keyword);
+          expect(keyword.length, `"${keyword}" is empty`).toBeGreaterThan(0);
+          // A chip is not a sentence. This is the exact regression that
+          // motivated the field: the chips used to be
+          // `responsibilities.slice(0, 3)`, i.e. full sentences in a pill.
+          expect(keyword.length, `"${keyword}" reads as a sentence`).toBeLessThanOrEqual(24);
+          expect(keyword, `"${keyword}" ends in a full stop`).not.toMatch(/[.!?]$/);
+        }
+        expect(new Set(keywords).size, `${service.id} (${lang}) repeats a keyword`).toBe(
+          keywords.length,
+        );
+      }
+    });
+  }
+});
+
+describe("service background images", () => {
+  it("is either absent or a path the site actually serves", () => {
+    for (const service of serviceDefinitions) {
+      if (service.image === null) continue;
+      // `public/` is served verbatim from the site root, so anything that
+      // is not a site-absolute path under this folder is a 404 in a
+      // decorative <img> — invisible in review, visible on the page.
+      expect(service.image, service.id).toMatch(
+        /^\/images\/services\/[a-z0-9-]+\.(webp|avif|png|jpg)$/,
+      );
+    }
+  });
+});
+
 describe("validateServiceReferences", () => {
   const complete = {
     title: "Anonymised project",

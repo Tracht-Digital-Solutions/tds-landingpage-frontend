@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ease } from "@tracht-digital-solutions/tds-shared/motion";
+import { splitEmphasis } from "~/lib/emphasis";
 
 /**
  * Inline mirror of `src/components/ui/AccentLetters.astro` for use
@@ -36,13 +37,44 @@ function AccentLetters({
  * need to be — `motion/react` already skips transitions entirely when
  * the user prefers reduced motion, landing every element on its
  * `animate` state immediately.
+ *
+ * The two properties are timed SEPARATELY. The rest of the site now
+ * enters on a spring (`--lp-ease-bounce` in global.css), and the hero has
+ * to share that voice or it reads as a different page — but a spring on
+ * `opacity` overshoots past 1, where it clamps, so the fade appears to
+ * stall and then snap. The travel springs; the fade does not.
  */
 function fadeUp(delay: number) {
   return {
-    initial: { opacity: 0, y: 12 },
+    initial: { opacity: 0, y: 14 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.45, delay, ease },
+    transition: {
+      opacity: { duration: 0.42, delay, ease },
+      y: { type: "spring" as const, stiffness: 210, damping: 17, delay },
+    },
   };
+}
+
+/**
+ * React twin of `~/components/ui/Emphasis.astro`, for the same reason
+ * `AccentLetters` has one: this is an island, so it cannot render an
+ * `.astro` component. The parsing is imported, not repeated — only the
+ * four lines of markup exist twice, and `.text-emph` is styled globally.
+ */
+function Emphasis({ text }: { text: string }) {
+  return (
+    <>
+      {splitEmphasis(text).map((segment, i) =>
+        segment.strong ? (
+          <strong key={i} className="text-emph">
+            {segment.text}
+          </strong>
+        ) : (
+          <span key={i}>{segment.text}</span>
+        ),
+      )}
+    </>
+  );
 }
 
 /**
@@ -219,7 +251,12 @@ export default function Hero({
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[var(--font-display)] font-medium leading-[1.05] tracking-tight text-[var(--color-black)] mb-4 max-w-4xl mx-auto md:mx-0"
           style={{ fontVariationSettings: '"opsz" 144' }}
         >
-          {h.headline}{" "}
+          {h.headline}
+          {/* A real break, not a hope. The three fields ARE the two lines —
+              `text-wrap: balance` (global.css) evens the line lengths, which
+              for "Ihre IT. Ein Ansprechpartner." means it breaks after "Ein"
+              and cuts the second sentence in half. */}
+          <br />
           {/* The accent word used to sit on a blurred pink/bordeaux
               ellipse. "Keine Dekoration direkt hinter Überschriften" —
               and it was also the one place the palette got loud, at the
@@ -235,24 +272,33 @@ export default function Hero({
           {...fadeUp(0.1)}
           className="text-base md:text-lg text-[var(--color-muted)] max-w-2xl mb-8 leading-relaxed mx-auto md:mx-0"
         >
-          {h.sub}
+          <Emphasis text={h.sub} />
         </motion.p>
 
+        {/* Stacked and full-width on a phone. Side by side they were each
+            only as wide as their own label, wrapped onto two lines anyway
+            at 375px, and left the primary action as a ~150px target for a
+            thumb. `items-stretch` is what makes them equal width — with
+            `items-center` a column flex would shrink each to its content. */}
         <motion.div
           {...fadeUp(0.15)}
-          className="flex flex-wrap items-center justify-center md:justify-start gap-4"
+          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-3 sm:gap-4"
         >
           <button
             type="button"
             onClick={() => scrollTo("contact")}
-            className="px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(5,15,104,0.45)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
+            className="inline-flex items-center justify-center min-h-[3.25rem] sm:min-h-0 px-7 py-3.5 text-sm font-medium text-white rounded-[100px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-12px_rgba(5,15,104,0.45)] bg-[var(--color-surface-navy)] hover:bg-[var(--color-surface-accent)] cursor-pointer"
           >
             {h.cta1}
           </button>
+          {/* No `backdrop-blur-sm` any more. It put a compositing layer over
+              the hero for a translucency nobody can see against the warm
+              ground, and it is one of the layers the theme wipe has to
+              rasterise on a phone. The fill is simply denser instead. */}
           <button
             type="button"
             onClick={() => scrollTo("services")}
-            className="px-7 py-3.5 text-sm font-medium bg-[color-mix(in_srgb,var(--color-card)_70%,transparent)] backdrop-blur-sm text-[var(--color-black)] rounded-[100px] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
+            className="inline-flex items-center justify-center min-h-[3.25rem] sm:min-h-0 px-7 py-3.5 text-sm font-medium bg-[color-mix(in_srgb,var(--color-card)_88%,transparent)] text-[var(--color-black)] rounded-[100px] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))] hover:text-[var(--color-primary)] transition-colors duration-200 cursor-pointer"
           >
             {h.cta2}
           </button>

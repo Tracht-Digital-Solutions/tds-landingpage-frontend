@@ -4,10 +4,15 @@ import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
 import portrait from "~/assets/portrait.webp";
 
 const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
+
+// The list is a list of GAINS, so the marker says so. It is decorative —
+// each item's own heading carries the meaning — hence `aria-hidden`.
+const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
 ---
 
 {/* Warmweiß mit weichen Markenfeldern an den Außenrändern — the first
@@ -34,11 +39,15 @@ const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
               lower left was tried and removed: at this size it read as a
               stray grey block behind the shoulder rather than as a cut
               corner, which is the failure mode of small geometry — it
-              needs enough length for the arc to be legible as an arc. */}
+              needs enough length for the arc to be legible as an arc.
+
+              It now runs down to the image's own bottom edge and fades
+              there (`.portrait-shape`, global.css) instead of stopping
+              short and showing through the portrait's faded torso. */}
           <span
             aria-hidden="true"
-            class="tds-shape tds-shape--rect tds-shape--coral -z-10"
-            style="inset: -1.25rem -2rem 2.5rem -1.25rem;"></span>
+            class="portrait-shape tds-shape tds-shape--rect tds-shape--coral -z-10"
+            style="inset: -1.25rem -2rem 0 -1.25rem;"></span>
           <Image
             src={portrait}
             alt="Julian Tracht"
@@ -60,16 +69,39 @@ const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
         </h2>
 
         <p class="text-lg font-medium text-[var(--color-black)] mb-6 leading-relaxed">
-          {about.lead}
+          <Emphasis text={about.lead} />
         </p>
         <p class="text-[var(--color-muted)] mb-4 leading-relaxed">{about.p1}</p>
         <p class="text-[var(--color-muted)] mb-12 leading-relaxed">{about.p2}</p>
 
+        {/* Each tile used to open with a counter — 01, 02, 03, 04 — which
+            says "there are four of these" and nothing else. These are the
+            reasons to hire someone, so the marker is a PLUS in a filled
+            accent disc: the same chip geometry the service pages use for
+            their checkmarks, read as a gain rather than as an index. */}
         <ul class="grid sm:grid-cols-2 gap-4 pt-8">
-          {about.reasons.map((reason, index) => (
-            <li class="rounded-[6px] bg-[var(--color-soft)] p-5 text-left">
-              <span class="block text-xs font-medium tracking-widest text-[var(--color-accent)] tabular-nums mb-3">
-                {String(index + 1).padStart(2, "0")}
+          {about.reasons.map((reason) => (
+            <li
+              class="rounded-[6px] bg-[var(--color-soft)] p-5 text-left"
+              data-reveal
+            >
+              <span
+                aria-hidden="true"
+                title={gainLabel}
+                class="mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-paper))] text-[var(--color-accent)]"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
               </span>
               <h3 class="font-[var(--font-display)] text-lg text-[var(--color-black)] mb-2 leading-tight">
                 {reason.title}
