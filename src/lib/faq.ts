@@ -11,6 +11,13 @@
  * Antworten bleiben bei höchstens zwei Sätzen. Elf Fragen mit je vier
  * Sätzen liest niemand; eine FAQ, die gelesen wird, nimmt der Anfrage
  * die Hürde, eine ungelesene ist nur Seitenlänge.
+ *
+ * `intro` IS STILL PART OF THE SHAPE but is no longer rendered: a heading
+ * reading "Häufige Fragen" followed by a sentence saying these are the
+ * frequent questions earned nothing. It stays in the type and therefore in
+ * the `faq_v2` block schema so text an admin already saved keeps showing
+ * up in the editor instead of vanishing from the field list. Do not delete
+ * it to "clean up" — that is what would drop it from the CMS.
  */
 
 export interface FaqItem {
@@ -22,6 +29,7 @@ export interface FaqContent {
   label: string;
   headline: string;
   headlineAccent: string;
+  /** Not rendered — see the note above before removing it. */
   intro: string;
   items: FaqItem[];
 }
@@ -36,32 +44,32 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten — kurz beantwortet.",
         items: [
           {
-            q: "Ich weiß noch nicht genau, was ich brauche. Können wir trotzdem sprechen?",
-            a: "Ja. Es reicht, wenn Sie beschreiben, was im Alltag Zeit kostet, unsicher ist oder nicht gut funktioniert — den sinnvollen nächsten Schritt klären wir gemeinsam.",
+            q: "Ich weiß noch nicht, was ich brauche. Können wir trotzdem reden?",
+            a: "Ja. Sagen Sie einfach, was im Alltag Zeit kostet oder nicht rundläuft. Den nächsten Schritt finden wir gemeinsam.",
           },
           {
-            q: "Können Sie die Digitalisierung insgesamt verantworten?",
-            a: "Ja. Je nach Vereinbarung übernehme ich Planung, Umsetzung, Koordination bestehender Dienstleister und die laufende Betreuung als feste Ansprechperson.",
+            q: "Können Sie sich um alles Digitale kümmern?",
+            a: "Ja. Je nach Absprache übernehme ich Planung, Umsetzung, die Abstimmung mit Ihren bisherigen Anbietern und die laufende Betreuung.",
           },
           {
-            q: "Was umfasst ‚Komplette IT‘?",
-            a: "Das kann Geräte, Nutzerzugänge, Netzwerk, Sicherheit, Backups, Lizenzen und Support umfassen. Der genaue Umfang und die Erreichbarkeit werden nach einer Bestandsaufnahme vereinbart.",
+            q: "Was gehört zu „Komplette IT“?",
+            a: "Geräte, Zugänge, Netzwerk, Sicherheit, Backups, Lizenzen und Support. Was genau dazugehört, vereinbaren wir nach einer Bestandsaufnahme.",
           },
           {
-            q: "Arbeiten Sie mit vorhandenen Systemen und Dienstleistern weiter?",
-            a: "Wenn es sinnvoll ist, ja. Ich prüfe, was bleiben kann, schließe Lücken und koordiniere Beteiligte, statt funktionierende Lösungen unnötig zu ersetzen.",
+            q: "Arbeiten Sie mit meinen bisherigen Anbietern weiter?",
+            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt — ich schließe die Lücken und koordiniere die Beteiligten.",
           },
           {
             q: "Was ist der erste Schritt?",
-            a: "Im Erstgespräch klären wir Ausgangslage, Ziel und Dringlichkeit. Danach erhalten Sie eine klare Empfehlung für das weitere Vorgehen.",
+            a: "Ein Erstgespräch. Danach wissen Sie, was zuerst dran ist und was es ungefähr kostet.",
           },
           {
             q: "Wovon hängt der Preis ab?",
-            a: "Vom Leistungsbereich, Umfang und der Klarheit der Aufgabe. Abgegrenzte Vorhaben sind als Festpreis möglich; laufende Betreuung wird individuell vereinbart.",
+            a: "Vom Bereich, vom Umfang und davon, wie klar die Aufgabe ist. Abgegrenzte Vorhaben gehen auch zum Festpreis.",
           },
           {
-            q: "Bleiben Sie nach der Umsetzung zuständig?",
-            a: "Auf Wunsch ja. Betreuung, Anpassungen und operative Verantwortung können bedarfsgerecht oder als monatliches Modell vereinbart werden.",
+            q: "Bleiben Sie nach der Umsetzung dabei?",
+            a: "Auf Wunsch ja — nach Bedarf oder als festes Monatsmodell.",
           },
         ],
       }
@@ -73,32 +81,32 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           "The key questions about working together, ownership and pricing — answered briefly.",
         items: [
           {
-            q: "I don't know exactly what I need yet. Can we still talk?",
-            a: "Yes. It is enough to describe what costs time, creates uncertainty or does not work well day to day — we will identify the sensible next step together.",
+            q: "I don't know what I need yet. Can we still talk?",
+            a: "Yes. Just say what costs you time or does not run smoothly. We work out the next step together.",
           },
           {
-            q: "Can you take responsibility for digitalization as a whole?",
-            a: "Yes. Depending on the agreement, I can handle planning, implementation, coordination of existing providers and ongoing support as your dedicated contact.",
+            q: "Can you look after everything digital?",
+            a: "Yes. Depending on what we agree, I handle planning, delivery, coordination with your existing suppliers and the ongoing support.",
           },
           {
-            q: "What does ‘Complete IT’ include?",
-            a: "It can include devices, user accounts, networks, security, backups, licences and support. The exact scope and availability are agreed after an assessment.",
+            q: "What is included in “Complete IT”?",
+            a: "Devices, accounts, network, security, backups, licences and support. Exactly what is included is agreed after an assessment.",
           },
           {
-            q: "Will you work with our existing systems and providers?",
-            a: "Yes, where that makes sense. I assess what can stay, close the gaps and coordinate contributors instead of replacing working solutions without reason.",
+            q: "Will you keep working with my current suppliers?",
+            a: "Where it makes sense, yes. What works stays — I close the gaps and coordinate the people involved.",
           },
           {
             q: "What is the first step?",
-            a: "In the initial consultation we clarify the current situation, goal and urgency. You then receive a clear recommendation for what should happen next.",
+            a: "A first conversation. After it you know what comes first and roughly what it costs.",
           },
           {
-            q: "What determines the price?",
-            a: "The service area, scope and how clearly the task is defined. Clearly bounded projects can use a fixed price; ongoing support is agreed individually.",
+            q: "What does the price depend on?",
+            a: "The area, the scope, and how clearly the task is defined. Bounded projects can be done at a fixed price.",
           },
           {
-            q: "Will you remain responsible after implementation?",
-            a: "If you wish. Support, changes and operational responsibility can be agreed as needed or as a monthly arrangement.",
+            q: "Do you stay involved after launch?",
+            a: "If you want — as needed, or as a fixed monthly arrangement.",
           },
         ],
       };

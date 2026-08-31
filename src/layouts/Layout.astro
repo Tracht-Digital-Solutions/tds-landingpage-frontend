@@ -185,6 +185,16 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
       <LiveChatCta client:idle frontend="landingpage" lang={lang} />
     )}
 
+    {/* Scroll reveal for every `[data-reveal]` element on the page. NOT
+        `is:inline` — an inline script is not bundled, so the import below
+        would reach the browser as a bare specifier. The visual state lives
+        in styles/global.css; this only decides when each element arrives. */}
+    <script>
+      import { mountReveal } from "~/lib/reveal";
+
+      mountReveal();
+    </script>
+
     {/* Dynamic document.title — observes every <section id="…"> on
         the page and prefixes the tab title with the section name as
         the user scrolls past it. Hero keeps the canonical page
@@ -209,8 +219,8 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
       const TITLES: Record<"de" | "en", Record<string, string>> = {
         de: {
           about: "Wieso ich?",
-          services: "Was ich anbiete?",
-          "digital-responsibility": "Digitalisierung mit Verantwortung",
+          services: "Leistungen",
+          "digital-responsibility": "Eine Ansprechperson",
           process: "Vorgehen",
           "pricing-teaser": "Preise",
           blog: "Journal",
@@ -219,8 +229,8 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
         },
         en: {
           about: "Why me?",
-          services: "What I offer?",
-          "digital-responsibility": "Digitalization with ownership",
+          services: "Services",
+          "digital-responsibility": "One point of contact",
           process: "Process",
           "pricing-teaser": "Pricing",
           blog: "Journal",

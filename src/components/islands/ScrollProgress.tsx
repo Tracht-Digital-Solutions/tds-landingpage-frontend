@@ -36,14 +36,26 @@ export default function ScrollProgress() {
   useEffect(() => {
     let rafId = 0;
 
+    // Mirrors the state React holds. `setScrollable` is called from inside
+    // the scroll rAF, and React only bails out of a re-render AFTER it has
+    // entered the update path — on a long page that is a scheduler entry
+    // and a bailout check per frame, for a value that flips once. Comparing
+    // here means the setter is not reached at all while scrolling.
+    let scrollableNow = false;
+    const setScrollableOnce = (next: boolean) => {
+      if (next === scrollableNow) return;
+      scrollableNow = next;
+      setScrollable(next);
+    };
+
     const update = () => {
       const doc = document.documentElement;
       const max = doc.scrollHeight - doc.clientHeight;
       if (max <= 0) {
-        setScrollable(false);
+        setScrollableOnce(false);
         return;
       }
-      setScrollable(true);
+      setScrollableOnce(true);
       progressRef.current = Math.min(1, Math.max(0, window.scrollY / max));
       if (barRef.current) {
         barRef.current.style.transform = `scaleX(${progressRef.current})`;

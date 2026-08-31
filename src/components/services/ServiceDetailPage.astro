@@ -2,6 +2,7 @@
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
 import { breadcrumbSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
@@ -112,6 +113,26 @@ const jsonLd = [
       aria-labelledby="service-title"
     >
       <div class="tds-decor" aria-hidden="true">
+        {/* When artwork exists for this service it becomes the band's
+            ground; the constructed geometry stays on top of it either way,
+            so the page looks composed with or without the file. `null`
+            renders nothing at all — no broken image, no empty box. See
+            IMAGES.md for the open assets. */}
+        {service.image && (
+          <>
+            <img
+              src={service.image}
+              alt=""
+              aria-hidden="true"
+              fetchpriority="low"
+              decoding="async"
+              class="service-hero__photo absolute inset-0 h-full w-full object-cover"
+            />
+            <span
+              class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-paper)_20%,color-mix(in_srgb,var(--color-paper)_82%,transparent)_60%,color-mix(in_srgb,var(--color-paper)_58%,transparent)_100%)]"
+            ></span>
+          </>
+        )}
         <span
           class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
           style="right: -8rem; bottom: -11rem; width: 29rem; height: 29rem; --tds-decor-shape-alpha: 0.13;"
@@ -188,7 +209,7 @@ const jsonLd = [
 
     <div class="max-w-5xl mx-auto px-6 md:px-8 lg:px-12 py-12 md:py-16">
       <p class="font-[var(--font-display)] text-2xl md:text-3xl leading-snug text-[var(--color-black)]">
-        {content.intro}
+        <Emphasis text={content.intro} />
       </p>
     </div>
 
@@ -250,10 +271,31 @@ const jsonLd = [
           >
             {content.outcomesTitle}
           </h2>
+          {/* Goals, not by-products. The heading is "Das erreichen Sie" and
+              each line is written as something the reader ends up with, so
+              the marker is a target rather than a bullet. Decorative — the
+              text carries the meaning. */}
           <ul class="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
             {content.outcomes.map((item) => (
-              <li class="bg-[var(--color-soft)] rounded-[6px] px-5 py-4 text-[var(--color-black)] leading-snug">
-                {item}
+              <li
+                class="flex items-start gap-3 bg-[var(--color-soft)] rounded-[6px] px-5 py-4 text-[var(--color-black)] leading-snug"
+                data-reveal
+              >
+                <svg
+                  aria-hidden="true"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="mt-0.5 shrink-0 text-[var(--color-accent)]"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <circle cx="12" cy="12" r="4.5" />
+                  <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+                </svg>
+                <span>{item}</span>
               </li>
             ))}
           </ul>
@@ -290,16 +332,23 @@ const jsonLd = [
           >
             {content.processTitle}
           </h2>
-          <ol class="grid sm:grid-cols-2 gap-x-8 gap-y-7">
+          {/* A STEPPER, not a two-column list. The steps are a sequence and
+              the old grid actively hid that: read left-to-right it went
+              1, 2 / 3, 4, and nothing connected one step to the next. The
+              markers now sit on a continuous line — stacked on a phone,
+              laid out along the row from `sm` up — so the order is the
+              first thing the eye gets. Still an `<ol>`; the order is the
+              content, not decoration. */}
+          <ol class="stepper">
             {content.process.map((step, index) => (
-              <li class="flex gap-4">
-                <span
-                  aria-hidden="true"
-                  class="font-mono text-xs tracking-widest text-[var(--color-accent)] mt-1 tabular-nums"
-                >
+              <li class="stepper__step" data-reveal data-reveal-index={index}>
+                {index < content.process.length - 1 && (
+                  <span class="stepper__line" aria-hidden="true"></span>
+                )}
+                <span aria-hidden="true" class="stepper__marker">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <span class="text-[var(--color-black)] leading-relaxed">{step}</span>
+                <span class="stepper__text">{step}</span>
               </li>
             ))}
           </ol>
@@ -435,3 +484,116 @@ const jsonLd = [
 
   <Footer />
 </Layout>
+
+<style>
+  /* Hero band artwork — a ground, not an illustration. The headline sits
+     on top of it, so it stays quiet enough that the scrim beside it does
+     not have to fight for the text. */
+  .service-hero__photo {
+    opacity: 0.2;
+  }
+  :global(:root[data-theme="dark"]) .service-hero__photo {
+    opacity: 0.13;
+  }
+
+  /* ── Stepper ──────────────────────────────────────────────────────
+     Stacked on a phone, laid along the row from 40rem up. Both layouts
+     are the same three parts — a marker, its text, and a connector to the
+     next step — so only the geometry is restated, never the markup. */
+  .stepper {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .stepper__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .stepper__marker {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-paper));
+    color: var(--color-accent);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stepper__text {
+    color: var(--color-black);
+    line-height: 1.55;
+    padding-top: 0.5rem;
+  }
+
+  /* The connector is its own element rather than a `::before` on the step,
+     because it carries a transform of its own (the draw-in below) and the
+     two orientations need different origins. Sharing one pseudo-element
+     with the step's own state would mean composing those transforms by
+     hand in four places. */
+  .stepper__line {
+    position: absolute;
+    left: 1.25rem;
+    top: 2.5rem;
+    bottom: -1.75rem;
+    width: 2px;
+    transform: translateX(-1px);
+    background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+    transform-origin: top;
+    transition: transform 480ms var(--tds-ease-out) var(--lp-reveal-delay, 0ms);
+  }
+
+  /* Drawn once, as its step arrives. Hooked onto the same `[data-revealed]`
+     flag `src/lib/reveal.ts` writes, so the line and the step it belongs to
+     cannot get out of step with each other. The hidden state is gated
+     behind `[data-reveal-active]`, which only that script sets — with no
+     JavaScript, or under reduced motion, every line is simply drawn. */
+  :global(html[data-reveal-active]) .stepper__step:not([data-revealed]) .stepper__line {
+    transform: translateX(-1px) scaleY(0);
+  }
+
+  @media (min-width: 40rem) {
+    .stepper {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+    .stepper__step {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.875rem;
+    }
+    .stepper__text {
+      padding-top: 0;
+      font-size: 0.9375rem;
+    }
+    .stepper__line {
+      left: 2.5rem;
+      right: -1.25rem;
+      top: 1.25rem;
+      bottom: auto;
+      width: auto;
+      height: 2px;
+      transform: translateY(-1px);
+      transform-origin: left;
+    }
+    :global(html[data-reveal-active]) .stepper__step:not([data-revealed]) .stepper__line {
+      transform: translateY(-1px) scaleX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stepper__line {
+      transition: none;
+    }
+  }
+</style>

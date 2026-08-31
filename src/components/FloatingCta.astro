@@ -2,12 +2,22 @@
 import { resolveLang, localizePath } from "~/lib/i18n";
 
 /**
- * Persistent bottom-right control. Idle: just the "book a call" CTA
- * (links to the contact section). Once the visitor scrolls ~one viewport
- * down, a small arrow-sized scroll-to-top button rises out of the CTA and
- * fuses with it — same navy fill, its base tucked behind the CTA so the
- * two read as one merged shape. The whole control flips to white when it
- * floats over a dark section so it never disappears.
+ * Persistent bottom-corner control, in two shapes.
+ *
+ * **Fine pointer.** Idle: just the "book a call" CTA (links to the contact
+ * section). Once the visitor scrolls ~one viewport down, a small arrow-sized
+ * scroll-to-top button rises out of the CTA and fuses with it — same navy
+ * fill, its base tucked behind the CTA so the two read as one merged shape.
+ *
+ * **Coarse pointer.** The fused shape is a mouse idea: it announces itself by
+ * growing as the cursor approaches, and it shrinks to an unlabelled 44px
+ * circle on a phone — the single most important call to action on the site,
+ * reduced to a calendar glyph with no word next to it. On touch it is a
+ * labelled bar across the bottom instead, and the scroll-to-top button sits
+ * above it as its own round target rather than fusing with it.
+ *
+ * The whole control flips to white when it floats over a dark section so it
+ * never disappears.
  */
 const lang = resolveLang(Astro.currentLocale);
 const home = localizePath("/", lang);
@@ -59,6 +69,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
     <span class="floating-cta__label">{label}</span>
+    <span aria-hidden="true" class="floating-cta__arrow">→</span>
   </a>
 </div>
 
@@ -93,7 +104,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     flex-direction: column;
     align-items: center;
     /* Lifts as one unit when the CTA is hovered (see :has rule below). */
-    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: transform 220ms var(--lp-ease-soft);
   }
   @media (min-width: 768px) {
     .floating-cta-group {
@@ -130,7 +141,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     pointer-events: none;
     transition:
       opacity 220ms ease,
-      transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      transform 380ms var(--lp-ease-bounce),
       background-color 220ms ease,
       color 220ms ease;
   }
@@ -156,19 +167,8 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     pointer-events: auto;
     transform: translateY(0) scale(1);
   }
-  /* Cursor nearby — slides up so it reads more clearly. */
-  .floating-cta-group[data-scrolled-down="true"][data-near="true"] .floating-cta-top {
-    transform: translateY(-0.4rem) scale(1.02);
-  }
-  /* Hovering the control — slides up the most. */
-  .floating-cta-group[data-scrolled-down="true"]:hover .floating-cta-top {
-    transform: translateY(-0.8rem) scale(1.06);
-  }
   .floating-cta-top__icon {
     transition: transform 220ms ease;
-  }
-  .floating-cta-group:hover .floating-cta-top__icon {
-    transform: translateY(-2px);
   }
 
   /* --- CTA pill ----------------------------------------------------- */
@@ -179,7 +179,9 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    /* Phones: a compact icon-only tap target. */
+    /* Fine-pointer phones (a small desktop window): a compact icon-only
+       tap target. The touch block at the bottom of this file replaces it
+       with a labelled bar wherever there is no hover. */
     padding: 0.85rem;
     font-size: 0.875rem;
     font-weight: 500;
@@ -194,7 +196,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       background-color 220ms ease,
       color 220ms ease,
       box-shadow 220ms ease;
-    animation: floating-cta-in 500ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+    animation: floating-cta-in 500ms var(--lp-ease-bounce) 600ms both;
   }
   @media (min-width: 640px) {
     .floating-cta {
@@ -209,35 +211,60 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       display: inline;
     }
   }
+  /* Only the touch bar shows the arrow — on the round pill it would be a
+     third glyph competing with the icon inside a 44px circle. */
+  .floating-cta__arrow {
+    display: none;
+  }
   .floating-cta__icon {
     transition: transform 220ms ease;
     animation: floating-cta-bob 3s ease-in-out 1.2s infinite;
   }
-  .floating-cta:hover .floating-cta__icon {
-    transform: scale(1.1) rotate(-6deg);
-  }
 
-  /* Hover either piece: the whole merged control lifts and warms to
-     burgundy with white text — applies in both the navy and inverted
-     states (the :has selector out-specifies the [data-on-dark] rules),
-     and recolours both pieces so the fused shape stays one colour.
-     Hovering the arrow nub yields the identical look to hovering the CTA. */
-  .floating-cta-group:has(.floating-cta:hover),
-  .floating-cta-group:has(.floating-cta-top:hover) {
-    transform: translateY(-2px);
-  }
-  .floating-cta-group:has(.floating-cta:hover) .floating-cta,
-  .floating-cta-group:has(.floating-cta:hover) .floating-cta-top,
-  .floating-cta-group:has(.floating-cta-top:hover) .floating-cta,
-  .floating-cta-group:has(.floating-cta-top:hover) .floating-cta-top {
-    background-color: var(--color-surface-accent);
-    color: #fff;
-  }
-  .floating-cta-group:has(.floating-cta:hover) .floating-cta,
-  .floating-cta-group:has(.floating-cta-top:hover) .floating-cta {
-    box-shadow:
-      0 22px 48px -14px rgba(5, 15, 104, 0.55),
-      0 8px 18px -6px rgba(5, 15, 104, 0.4);
+  /* --- Hover states, fine pointers only ----------------------------- */
+
+  /* All of this is behind `(hover: hover)` on purpose. `:hover` on a touch
+     screen is a STICKY state: the browser applies it on tap and leaves it
+     applied until the next tap elsewhere, so the "lift + warm to burgundy"
+     read as the control changing colour permanently after being used once. */
+  @media (hover: hover) {
+    .floating-cta-group:hover .floating-cta-top__icon {
+      transform: translateY(-2px);
+    }
+    /* Cursor nearby — slides up so it reads more clearly. */
+    .floating-cta-group[data-scrolled-down="true"][data-near="true"] .floating-cta-top {
+      transform: translateY(-0.4rem) scale(1.02);
+    }
+    /* Hovering the control — slides up the most. */
+    .floating-cta-group[data-scrolled-down="true"]:hover .floating-cta-top {
+      transform: translateY(-0.8rem) scale(1.06);
+    }
+    .floating-cta:hover .floating-cta__icon {
+      transform: scale(1.1) rotate(-6deg);
+    }
+
+    /* Hover either piece: the whole merged control lifts and warms to
+       burgundy with white text — applies in both the navy and inverted
+       states (the :has selector out-specifies the [data-on-dark] rules),
+       and recolours both pieces so the fused shape stays one colour.
+       Hovering the arrow nub yields the identical look to hovering the CTA. */
+    .floating-cta-group:has(.floating-cta:hover),
+    .floating-cta-group:has(.floating-cta-top:hover) {
+      transform: translateY(-2px);
+    }
+    .floating-cta-group:has(.floating-cta:hover) .floating-cta,
+    .floating-cta-group:has(.floating-cta:hover) .floating-cta-top,
+    .floating-cta-group:has(.floating-cta-top:hover) .floating-cta,
+    .floating-cta-group:has(.floating-cta-top:hover) .floating-cta-top {
+      background-color: var(--color-surface-accent);
+      color: #fff;
+    }
+    .floating-cta-group:has(.floating-cta:hover) .floating-cta,
+    .floating-cta-group:has(.floating-cta-top:hover) .floating-cta {
+      box-shadow:
+        0 22px 48px -14px rgba(5, 15, 104, 0.55),
+        0 8px 18px -6px rgba(5, 15, 104, 0.4);
+    }
   }
 
   /* Over a dark section both pieces flip to white (toggled in script). */
@@ -250,6 +277,74 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     box-shadow:
       0 14px 34px -12px rgba(0, 0, 0, 0.45),
       0 4px 10px -4px rgba(0, 0, 0, 0.3);
+  }
+
+  /* --- Touch: a labelled bar, not a glyph --------------------------- */
+
+  /* Keyed on `(hover: none)` rather than a width, because the problem is
+     the input device: a 44px unlabelled circle is fine next to a cursor
+     that can hover it for a tooltip, and useless under a thumb. Placed
+     LAST so it wins over the `min-width: 640px` rules above without
+     needing a specificity bump. */
+  @media (hover: none) {
+    .floating-cta-group {
+      left: 1rem;
+      right: 1rem;
+      align-items: flex-end;
+    }
+    @media (min-width: 768px) {
+      .floating-cta-group {
+        left: 1.5rem;
+        right: 1.5rem;
+      }
+    }
+
+    .floating-cta {
+      width: 100%;
+      /* 56px, comfortably past the 44px floor the shared `.btn` uses —
+         this is a primary action a thumb reaches for at the bottom of the
+         screen, where accuracy is worst. */
+      min-height: 3.5rem;
+      padding: 0.75rem 1.5rem;
+      gap: 0.625rem;
+    }
+    .floating-cta__label {
+      display: inline;
+    }
+    .floating-cta__arrow {
+      display: inline;
+      margin-left: auto;
+      /* Pushed to the trailing edge with the icon at the leading one, so
+         the bar reads as a row rather than as a centred blob. */
+      padding-left: 0.5rem;
+    }
+    .floating-cta__icon {
+      /* The bob loop is a "look at me" idle for a small distant circle; in
+         a full-width bar it just wobbles the row's leading glyph. */
+      animation: none;
+      flex-shrink: 0;
+    }
+
+    /* No fusion on touch. The nub grew out of the pill because a cursor
+       approached it; a thumb does not approach, it arrives — so this is
+       its own round target above the bar, at a size a thumb can hit. */
+    .floating-cta-top {
+      width: 2.75rem;
+      height: 2.75rem;
+      margin-bottom: 0.625rem;
+      transform: translateY(0.75rem) scale(0.6);
+    }
+    .floating-cta-top::after {
+      display: none;
+    }
+
+    /* The bar is fixed over the end of the document, so the last thing on
+       every page (the footer's bottom row) sat underneath it. The lanes in
+       `bottom` keep the bar clear of the cookie notice; this keeps the
+       PAGE clear of the bar. */
+    :global(body) {
+      padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   @keyframes floating-cta-in {
@@ -299,35 +394,48 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
   const topBtn = group?.querySelector<HTMLElement>(".floating-cta-top");
 
   if (group) {
-    // Parse a computed `rgb(...)` / `rgba(...)` string into [r,g,b,a].
-    const parseRgb = (
-      value: string,
-    ): [number, number, number, number] | null => {
-      const match = value.match(/rgba?\(([^)]+)\)/);
-      if (!match) return null;
-      const [r, g, b, a = 1] = match[1]
-        .split(",")
-        .map((part) => parseFloat(part.trim()));
-      return [r, g, b, a];
+    /**
+     * Which parts of the DOCUMENT are a dark ground, in absolute page
+     * coordinates, measured once and re-measured only when the page's own
+     * geometry changes.
+     *
+     * This replaces a per-frame `elementsFromPoint()` + a `getComputedStyle()`
+     * walk up the ancestor chain, which ran inside the scroll rAF: three
+     * forced synchronous layouts, sixty times a second, for the whole life of
+     * the page, to answer a question whose answer changes about four times per
+     * visit. It was the single largest source of scroll jank on a phone, and
+     * because a `data-theme` MutationObserver also scheduled it, it ran in the
+     * middle of the theme transition as well.
+     *
+     * The dark grounds are the two shared tone primitives — `.tds-tone-navy`
+     * (contact, both navy callouts, the pricing highlight card, the service
+     * price aside and CTA panel) and `.tds-tone-ink` (the footer). Those are
+     * CLASSES, so unlike a sampled colour they do not change with the theme,
+     * which is what lets the answer be cached at all.
+     */
+    let darkRanges: Array<[number, number]> = [];
+
+    /** The control's own centre, as a distance up from the viewport bottom. */
+    let anchorFromBottom = 0;
+
+    const measure = () => {
+      const offset = window.scrollY;
+      darkRanges = Array.from(
+        document.querySelectorAll<HTMLElement>(".tds-tone-navy, .tds-tone-ink"),
+      ).map((element) => {
+        const rect = element.getBoundingClientRect();
+        return [rect.top + offset, rect.bottom + offset] as [number, number];
+      });
+
+      const rect = group.getBoundingClientRect();
+      anchorFromBottom = window.innerHeight - (rect.top + rect.height / 2);
     };
 
-    // Walk up from the element under the group until an opaque background
-    // is found; falls back to the document background.
-    const backgroundUnder = (
-      start: Element | null,
-    ): [number, number, number] | null => {
-      let node: Element | null = start;
-      while (node) {
-        const rgb = parseRgb(getComputedStyle(node).backgroundColor);
-        if (rgb && rgb[3] > 0.5) return [rgb[0], rgb[1], rgb[2]];
-        node = node.parentElement;
-      }
-      const doc = parseRgb(getComputedStyle(document.body).backgroundColor);
-      return doc ? [doc[0], doc[1], doc[2]] : null;
-    };
-
-    const isDark = ([r, g, b]: [number, number, number]) =>
-      0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
+    // In dark mode every ground is dark, including the paper between the
+    // navy blocks — so the inverted (white) control is correct everywhere and
+    // the ranges do not need consulting at all.
+    const documentIsDark = () =>
+      document.documentElement.getAttribute("data-theme") === "dark";
 
     let frame = 0;
     // Both flags are re-derived on every frame of every scroll, but they
@@ -347,28 +455,37 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
       // Reveal the scroll-to-top nub after ~one viewport of scroll.
       setFlag("scrolledDown", window.scrollY > window.innerHeight * 0.8);
 
-      // Invert over dark sections — sample the background behind the group.
-      const rect = group.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const behind = document
-        .elementsFromPoint(x, y)
-        .find((el) => el !== group && !group.contains(el));
-      const rgb = backgroundUnder(behind ?? null);
-      setFlag("onDark", !!rgb && isDark(rgb));
+      // Pure arithmetic from here down — no layout is read during a scroll.
+      const centre = window.scrollY + window.innerHeight - anchorFromBottom;
+      setFlag(
+        "onDark",
+        documentIsDark() ||
+          darkRanges.some(([top, bottom]) => centre >= top && centre <= bottom),
+      );
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    const remeasure = () => {
+      measure();
+      update();
+    };
 
+    measure();
     update();
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
+    window.addEventListener("resize", remeasure);
 
-    // Re-sample when the colour theme flips. `update()` otherwise only runs
-    // on scroll/resize, so toggling dark mode while idle left the CTA's
-    // navy/white fill stale until the next scroll.
-    new MutationObserver(schedule).observe(document.documentElement, {
+    // Anything that changes the page's height moves every range below it:
+    // late-loading images and web fonts, an opened FAQ row, the cookie
+    // notice appearing. A ResizeObserver on the document element catches
+    // all of them and fires only when the height actually changes — which
+    // is the whole point of not doing this per frame.
+    new ResizeObserver(remeasure).observe(document.documentElement);
+
+    // Re-evaluate when the colour theme flips. This no longer measures
+    // anything; it only re-reads the attribute the scroll handler consults.
+    new MutationObserver(update).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });

@@ -49,6 +49,94 @@
    MUST come after the @imports; `@source` before an `@import` is a build error. */
 @source "../../node_modules/@tracht-digital-solutions/tds-shared";
 
+/* === Motion voice ================================================== */
+
+/* The shared scale (`--tds-ease-out`, `--tds-dur-fast|base|slow`) stays the
+   base — these three add the site's own SPRING, which the library does not
+   carry because the panel and the blog deliberately do not bounce.
+
+   The curve is not new: `cubic-bezier(0.34, 1.56, 0.64, 1)` was already
+   hand-written in three places here (accent letters, the cursor ring, the
+   floating CTA's nub). Naming it is what keeps a fourth author from
+   inventing a fifth curve that is almost the same.
+
+   HARD RULE — an overshoot belongs on `transform` ONLY. `--lp-ease-bounce`
+   on `opacity` produces values above 1, which clamp: the fade appears to
+   stall at the top of the curve and then snap. Every entrance therefore
+   declares two transitions, one per property. */
+:root {
+  --lp-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --lp-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --lp-dur-enter: 520ms;
+
+  /* Opts this document into animating TO and FROM the intrinsic size
+     keywords (`auto`, `min-content`, …). Without it a height transition to
+     `auto` simply does not run and the element snaps — which is why the
+     FAQ accordion used to jump open and then fade its answer in after the
+     fact. Declared here rather than in the FAQ component because it is a
+     document-level switch: `:root` inside an Astro scoped `<style>` would
+     be rewritten to `:root[data-astro-cid-…]` and match nothing.
+     Browsers without it ignore the line and keep the instant open. */
+  interpolate-size: allow-keywords;
+}
+
+/* === Scroll reveal ================================================= */
+
+/* One implementation for the whole site (`src/lib/reveal.ts`, mounted once
+   in Layout.astro). It used to exist exactly once, inline at the bottom of
+   Journal.astro, which is why every other section entered with no motion
+   at all.
+
+   PROGRESSIVE ENHANCEMENT, in the strict sense: the hidden state is gated
+   behind `[data-reveal-active]` on <html>, which only the script writes.
+   With no JavaScript — and with the script throwing — the selector never
+   matches and every element simply stays visible. */
+[data-reveal] {
+  transition:
+    opacity var(--lp-dur-enter) var(--tds-ease-out) var(--lp-reveal-delay, 0ms),
+    transform var(--lp-dur-enter) var(--lp-ease-bounce) var(--lp-reveal-delay, 0ms);
+}
+
+html[data-reveal-active] [data-reveal]:not([data-revealed]) {
+  opacity: 0;
+  /* Small travel on purpose: the spring overshoots by ~9%, so 20px of
+     declared travel lands as ~22px of felt movement. */
+  transform: translateY(1.25rem);
+}
+
+/* END STATE, spelled out. The shared reduced-motion block
+   (tds-shared/styles/base.css) clamps DURATION to 0.01ms — a clamped
+   transition still travels, it just arrives instantly, and anything that
+   never receives the revealed flag would sit at opacity 0 forever. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-reveal-active] [data-reveal],
+  html[data-reveal-active] [data-reveal]:not([data-revealed]) {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* === Line breaking ================================================= */
+
+/* Headlines here are short and set very large, which is exactly the case
+   where the browser's greedy line breaker leaves one word alone on the
+   last line. `balance` evens the lines out; the spec caps it at 6 lines,
+   so it costs nothing on long text. `pretty` on body copy fixes only the
+   last line (no orphan), which is the cheaper of the two. */
+h1,
+h2,
+h3,
+.display {
+  text-wrap: balance;
+}
+
+p,
+li,
+figcaption {
+  text-wrap: pretty;
+}
+
 /* The shared base sets `body { overflow-x: hidden }` to tame stray
    horizontal overflow. But `overflow-x: hidden` turns the body into a
    scroll container, which silently disables `backdrop-filter` on
@@ -95,6 +183,24 @@ html {
   mask-composite: intersect;
 }
 
+/* The coral rectangle behind the portrait. It used to stop 2.5rem above
+   the image's bottom edge — but the mask above turns the bottom 30% of
+   the portrait transparent, so what the visitor saw in that band was the
+   rectangle showing straight THROUGH the torso: a hard pink edge crossing
+   the figure, reading as an overlap rather than as a frame.
+
+   Moving the shape does not fix that (it is visible through the fade
+   wherever it sits), and hardening the portrait's edge was not wanted. So
+   the shape ends the way the portrait ends: the same kind of fade, pulled
+   in slightly so the geometry never outlives the figure it frames. Both
+   now dissolve on one baseline instead of one cutting across the other.
+
+   Bottom-only — the left/right/top overhang is the frame and stays. */
+.portrait-shape {
+  -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
+  mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
+}
+
 /* Hero — on short viewports (laptops, landscape phones) the stacked
    headline + straplines + sub + CTAs can exceed the screen height and
    spill past the scroll hint. Pull the type and rhythm in so the whole
@@ -116,9 +222,30 @@ html {
   }
 }
 
-@media (max-height: 640px) {
+/* Releasing `min-height` is for LANDSCAPE phones, where the viewport is
+   genuinely too short to hold the hero. It used to fire on height alone,
+   which also caught tall narrow phones in portrait — and there it did the
+   opposite of what it exists for: the section collapsed to its content
+   height, so `justify-center` had nothing left to centre against and the
+   hero sat under the header instead of in the middle of the screen. */
+@media (max-height: 640px) and (orientation: landscape) {
   #hero {
     min-height: auto;
+  }
+}
+
+/* Optical centring on phones. The section is `min-h-svh` + `justify-center`,
+   but the padding was 5rem top against 7rem bottom — asymmetric to leave
+   room for the scroll hint, which is `hidden md:flex` and therefore does
+   not exist at this width at all. The hero measurably sat above centre.
+
+   The top padding still has to clear the fixed header (~4.5rem including
+   its 0.75rem offset); the bottom gets the same value, so the leftover
+   space is split evenly and the block lands where the eye expects it. */
+@media (max-width: 767px) {
+  #hero {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
   }
 }
 
@@ -140,8 +267,8 @@ html {
 .accent-letter {
   display: inline-block;
   transition:
-    color 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    color 220ms var(--tds-ease-out),
+    transform 280ms var(--lp-ease-bounce),
     text-shadow 240ms ease;
   cursor: default;
   will-change: transform, color;
@@ -215,17 +342,11 @@ html {
   animation: pulse-dot 2.5s ease-in-out infinite;
 }
 
-/* Tech marquee — duplicated items + translateX(-50%) gives a seamless loop */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.marquee-track {
-  animation: marquee 30s linear infinite;
-}
-.marquee-track:hover {
-  animation-play-state: paused;
-}
+/* (`@keyframes marquee` / `.marquee-track` lived here until this pass, with
+   their own reduced-motion override. The TechMarquee section was removed
+   from the home page — see AGENTS.md, "the old TechMarquee and Currently
+   sections do not belong on the home page" — so the rules had no element
+   left to style and the override had nothing left to override.) */
 
 /* Contact form error shake */
 @keyframes shake {
@@ -237,12 +358,6 @@ html {
 }
 .shake {
   animation: shake 0.5s ease-in-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
 }
 
 /* Custom cursor — an additive dot + trailing ring layered over the native
@@ -284,8 +399,8 @@ html {
   background-color: color-mix(in srgb, var(--cursor-tint) 20%, transparent);
   transition:
     opacity 200ms ease,
-    width 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    height 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 180ms var(--lp-ease-bounce),
+    height 180ms var(--lp-ease-bounce),
     background-color 200ms ease;
 }
 .tds-cursor-ring.is-hover {

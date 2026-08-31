@@ -1,0 +1,60 @@
+---
+/**
+ * Renders a plain copy string, turning `*marked*` runs into an accented
+ * `<strong>`. See `~/lib/emphasis` for why the marker is an asterisk and
+ * why an unpaired one is left alone.
+ *
+ * There is a React twin of this markup inside `islands/Hero.tsx` — the hero
+ * is an island and cannot render an `.astro` component. Both call
+ * `splitEmphasis`, so the PARSING has one source; only the four lines of
+ * markup are stated twice, which is the same arrangement `AccentLetters`
+ * already uses for the same reason.
+ */
+import { splitEmphasis } from "~/lib/emphasis";
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const segments = splitEmphasis(text);
+---
+
+{
+  segments.map((segment) =>
+    segment.strong ? (
+      <strong class="text-emph">{segment.text}</strong>
+    ) : (
+      <Fragment>{segment.text}</Fragment>
+    ),
+  )
+}
+
+<style is:global>
+  /* The weight alone is not enough on `--color-muted` body copy at 16px —
+     it reads as an accident rather than as a decision. Colour carries it,
+     and a soft rule underneath keeps it legible for anyone who does not
+     perceive the hue difference. `is:global` because the React twin in the
+     hero island emits the same class outside this component's scope. */
+  .text-emph {
+    font-weight: 600;
+    color: var(--color-black);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.22em;
+  }
+
+  /* Inside the navy/ink tone blocks the page tokens are re-mapped to white
+     by `.tds-tone-*`, so `--color-black` already resolves to white there —
+     but the accent underline would sit at 45% burgundy on navy, which is
+     invisible. The pink accent is the one the dark tones publish. */
+  .tds-tone-navy .text-emph,
+  .tds-tone-ink .text-emph {
+    text-decoration-color: color-mix(
+      in srgb,
+      var(--color-accent-pink) 55%,
+      transparent
+    );
+  }
+</style>

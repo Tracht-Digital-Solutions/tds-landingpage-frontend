@@ -9,6 +9,7 @@ import {
 } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceCard from "~/components/ui/ServiceCard.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -44,7 +45,7 @@ const services = await Promise.all(
       bar
     />
     <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
-      {servicesContent.intro}
+      <Emphasis text={servicesContent.intro} />
     </p>
 
     <div class="grid sm:grid-cols-2 gap-4 md:gap-6">
@@ -55,7 +56,8 @@ const services = await Promise.all(
               number={definition.number}
               title={content.title}
               description={content.summary}
-              tags={content.responsibilities.slice(0, 3)}
+              keywords={definition.keywords[lang]}
+              image={definition.image}
             />
           </div>
       ))}
