@@ -41,16 +41,16 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 
 | Ground | Rendered by | Opacity (light / dark) |
 |---|---|---|
-| `services/*.webp` | `ui/ServiceCard.astro` — `.service-card__photo` | 0.18 / 0.12, 0.26 on hover |
-| `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.20 / 0.13 |
-| `sections/hero.webp` | `islands/Hero.tsx` — `.hero-photo`, CSS in `styles/global.css` | 0.16 / 0.10 |
-| `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.19 / 0.12 |
-| `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.30, no dark variant |
-| `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.22, no dark variant |
+| `services/*.webp` | `ui/ServiceCard.astro` — `.service-card__photo` | 0.26 / 0.17, 0.34 on hover |
+| `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.28 / 0.18 |
+| `sections/hero.webp` | `islands/Hero.tsx` — `.hero-photo`, CSS in `styles/global.css` | 0.24 / 0.15 |
+| `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.27 / 0.17 |
+| `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.40, no dark variant |
+| `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.30, no dark variant |
 
 The two navy blocks run higher and have no dark-mode variant on purpose: their
 surface is `--color-surface-navy` in both themes, and a nearly black photograph
-disappears into it below roughly 0.2.
+disappears into it below roughly 0.25.
 
 Each of the four section grounds sits in a `.tds-decor` span as the section's
 first child. That is the shared primitive (`tds-shared/styles/primitives.css`):
@@ -93,8 +93,8 @@ obvious from looking at the file on its own.
   `object-left` and `Contact` `object-right-bottom`, so the composed subject is
   in the part that stays. Centring them would have kept only the empty half.
 - **Mid-key beats dramatic.** A very dark or very contrasty frame turns into a
-  dirty smear at 18 %; a bright, airy frame with one confident dark accent
-  keeps its shape.
+  dirty smear at these strengths; a bright, airy frame with one confident
+  dark accent keeps its shape.
 - **No legible screens, no signage, no faces.** A readable interface would look
   like a product screenshot of something that does not exist, and a recognisable
   face on a service card reads as "this is my customer". Hands, backs, cropped

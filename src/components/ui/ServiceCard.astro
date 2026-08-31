@@ -148,22 +148,27 @@ const shape = shapes[number] ?? shapes["01"];
     transform: scale(1.08);
   }
 
-  /* Deliberately low. This is a GROUND, not an illustration: at full
-     strength a photo behind eight lines of copy is a legibility problem
-     the scrim then has to undo, which leaves a washed-out picture and
-     grey text. Dark mode drops it further — the same reason the shared
-     decor tokens dial themselves down there. */
+  /* Low, but not invisible. This is a GROUND, not an illustration: at
+     full strength a photo behind eight lines of copy is a legibility
+     problem the scrim then has to undo, which leaves a washed-out
+     picture and grey text. Dark mode drops it further — the same reason
+     the shared decor tokens dial themselves down there.
+
+     Der erste Durchgang stand hier auf 0.18 und war zu zurueckhaltend:
+     die Motive lasen sich als Papierstruktur statt als Bild. Die Werte
+     sind gemeinsam angehoben worden, der Abstand zwischen Ruhe, Hover
+     und Dark Mode ist derselbe geblieben. */
   .service-card__photo {
-    opacity: 0.18;
+    opacity: 0.26;
     transition: transform 700ms var(--lp-ease-soft), opacity 300ms ease;
   }
   .service-card:hover .service-card__photo,
   .service-card:focus-visible .service-card__photo {
-    opacity: 0.26;
+    opacity: 0.34;
     transform: scale(1.05);
   }
   :global(:root[data-theme="dark"]) .service-card__photo {
-    opacity: 0.12;
+    opacity: 0.17;
   }
 
   @media (prefers-reduced-motion: reduce) {
