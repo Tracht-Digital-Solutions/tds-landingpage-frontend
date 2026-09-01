@@ -57,7 +57,14 @@ export interface ServiceContent {
 export interface ServiceDefinition {
   /** Stable, code-owned identity. Never sourced from the CMS. */
   id: ServiceId;
-  /** Stable display order shared by overview, sitemap and navigation. */
+  /**
+   * Stable display ORDER shared by overview, sitemap and navigation — and by
+   * `ServiceCard`, which keys each card's decorative shape off it.
+   *
+   * It is never rendered as text. A visitor reaching a service from a card or
+   * from search is told "05" about a list they never saw, so the numerals came
+   * off the detail hero and the pricing cards; only the sequence survives.
+   */
   number: string;
   /** Stable, code-owned CMS block key. */
   cmsKey: ServiceCmsKey;

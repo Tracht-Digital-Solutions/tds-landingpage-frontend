@@ -51,6 +51,12 @@ visual language rather than rebuilding it locally:
 - Avoid generic SaaS styling, new palettes, glows, organic blobs, heavy
   shadows, strong gradients, gratuitous motion and framework/tech-stack
   diagrams on the home page.
+- Subpages carry no numbering. Service detail pages and the pricing cards show
+  no chapter number above the title, and the process stepper marks its steps
+  with dots rather than `01`…`04`; the sequence is carried by the `<ol>` and by
+  the connector line. `ServiceDefinition.number` still orders the catalog and
+  keys the card decoration — it is not display text. The home page's Process
+  section is the one place that still numbers, deliberately.
 - Keep `SectionHeader` and `AccentLetters` semantics. Accent letters need one
   accessible label and must stop transforming under `prefers-reduced-motion`.
 - Test desktop, 375 px mobile, both themes and reduced motion. Horizontal

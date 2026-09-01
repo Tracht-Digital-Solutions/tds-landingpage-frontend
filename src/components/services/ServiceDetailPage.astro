@@ -169,13 +169,13 @@ const jsonLd = [
           </a>
         </nav>
 
+        {/* No chapter number above the title. `service.number` still orders
+            the catalog and keys the card decoration, but it is not a thing a
+            visitor is told: "05" says nothing about a service, and on a page
+            reached from a card or from search it names a position in a list
+            the reader never saw. The brandbar under the headline is the
+            punctuation now. Same removal as on the pricing cards. */}
         <div class="max-w-4xl">
-          <span
-            aria-hidden="true"
-            class="block font-mono text-xs tracking-[0.18em] text-[var(--color-accent)] mb-5"
-          >
-            {service.number}
-          </span>
           <h1
             id="service-title"
             class="display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[var(--color-black)] leading-[1.04] break-words mb-6"
@@ -346,9 +346,12 @@ const jsonLd = [
                 {index < content.process.length - 1 && (
                   <span class="stepper__line" aria-hidden="true"></span>
                 )}
-                <span aria-hidden="true" class="stepper__marker">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+                {/* A dot, not a numeral. The marker still has to exist — it
+                    is what the connector line starts and ends at, and it is
+                    what makes the row read as a sequence — but the step's
+                    position is already carried by the `<ol>` and by the line
+                    itself, so printing "01" only restated it. */}
+                <span aria-hidden="true" class="stepper__marker"></span>
                 <span class="stepper__text">{step}</span>
               </li>
             ))}
@@ -509,6 +512,13 @@ const jsonLd = [
      are the same three parts — a marker, its text, and a connector to the
      next step — so only the geometry is restated, never the markup. */
   .stepper {
+    /* Every offset below is derived from the marker rather than restated as
+       a magic number, because the line has to meet it in four places (two
+       orientations × the hidden state). Resizing the dot used to mean
+       editing all four by hand and finding the one that was missed in the
+       browser. */
+    --stepper-marker: 0.875rem;
+
     display: grid;
     gap: 1.75rem;
   }
@@ -518,30 +528,24 @@ const jsonLd = [
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
-    gap: 1rem;
+    gap: 0.875rem;
   }
 
   .stepper__marker {
     position: relative;
     z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    /* Sat above the text's first line once the numeral left; nudged down so
+       the dot reads as centred on it. */
+    margin-top: 0.35rem;
+    width: var(--stepper-marker);
+    height: var(--stepper-marker);
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent) 20%, var(--color-paper));
-    color: var(--color-accent);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    font-variant-numeric: tabular-nums;
+    background: var(--color-accent);
   }
 
   .stepper__text {
     color: var(--color-black);
     line-height: 1.55;
-    padding-top: 0.5rem;
   }
 
   /* The connector is its own element rather than a `::before` on the step,
@@ -551,8 +555,8 @@ const jsonLd = [
      hand in four places. */
   .stepper__line {
     position: absolute;
-    left: 1.25rem;
-    top: 2.5rem;
+    left: calc(var(--stepper-marker) / 2);
+    top: calc(var(--stepper-marker) + 0.35rem);
     bottom: -1.75rem;
     width: 2px;
     transform: translateX(-1px);
@@ -580,14 +584,18 @@ const jsonLd = [
       grid-template-columns: minmax(0, 1fr);
       gap: 0.875rem;
     }
+    .stepper__marker {
+      /* Its own row now, not beside the text — nothing to optically centre
+         against, so the nudge comes back off. */
+      margin-top: 0;
+    }
     .stepper__text {
-      padding-top: 0;
       font-size: 0.9375rem;
     }
     .stepper__line {
-      left: 2.5rem;
+      left: var(--stepper-marker);
       right: -1.25rem;
-      top: 1.25rem;
+      top: calc(var(--stepper-marker) / 2);
       bottom: auto;
       width: auto;
       height: 2px;
