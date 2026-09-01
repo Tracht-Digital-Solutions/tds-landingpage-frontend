@@ -104,12 +104,10 @@ const jsonLd = [
                   : "bg-[var(--color-soft)]",
               ]}
             >
-              <span class:list={[
-                "font-mono text-xs tracking-widest mb-4",
-                isHighlight ? "text-white/55" : "text-[var(--color-accent)]",
-              ]}>
-                {definition.number}
-              </span>
+              {/* No number above the title — see the note in
+                  ServiceDetailPage.astro. The card's own edge separates it
+                  from its neighbours; a mono "03" only ever said which slot
+                  it happened to sit in. */}
               <h2 class:list={[
                 "font-[var(--font-display)] text-2xl mb-3",
                 isHighlight ? "text-white" : "text-[var(--color-black)]",
