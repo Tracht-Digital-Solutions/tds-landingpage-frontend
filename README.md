@@ -128,6 +128,7 @@ npm run dev          # local Astro server on http://localhost:4321
 npm run type-check   # Astro/TypeScript checks
 npm run test:run     # Vitest suite
 npm run og:smoke     # render the default social card
+npm run demos:sync   # re-harvest the demo sites (see AGENTS.md, "Website demos")
 npm run build        # SSR build + verified self-contained release tree
 npm run preview      # inspect the production build locally
 ```

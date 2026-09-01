@@ -19,8 +19,10 @@ Use current code, configuration and tests as the source of truth. Keep setup in
 - German is the default locale at `/`; English pages live under `/en/`.
   Resolve copy with `resolveLang()`/`tFor()` and generate internal links with
   `localizePath()` from `src/lib/i18n.ts`.
-- The home-page order is Hero → Wieso ich? → Was ich anbiete? → positioning
-  callout → Process → PricingTeaser → compact Journal → FAQ → Contact. The old
+- The home-page order is Hero → Wieso ich? → Was ich anbiete? → Webseiten-Demos
+  → positioning callout → Process → PricingTeaser → compact Journal → FAQ →
+  Contact. The demos section renders nothing at all when no demo is available,
+  so the order above describes a full house, not a guaranteed one. The old
   TechMarquee and Currently sections do not belong on the home page. Portfolio
   stays hidden; approved references belong to their service instead.
 - Public service detail routes are `/leistungen/[slug]` and
@@ -117,6 +119,47 @@ them to `PUBLIC_*`. Public variables are browser-visible or compiled into the
 bundle. Content/API failures may fall back to committed content, but a rejected
 configured site key must be surfaced by the existing guard.
 
+## Website demos
+
+The demo sites (`demo1`…`demo5.tracht-digital.de`) render on the home page and
+on the Webauftritt service page through `sections/WebsiteDemos.astro`. Three
+files own them and the split is load-bearing:
+
+- `src/lib/demoCatalog.ts` — id, order, host and URL. Code-owned like
+  `ServiceDefinition.slug`; the CMS must never name a host this site sends a
+  visitor to. Imported by the sync script, so it has no other imports.
+- `src/lib/demoData.json` — the committed snapshot `npm run demos:sync` writes:
+  each demo's own title, meta description, favicon and screenshot. Never edit
+  it by hand.
+- `src/lib/demos.ts` — `getDemos()`, the snapshot filtered by a live probe.
+
+**A demo that is not available is not loaded and not shown.** Only a snapshot
+entry with `status: "ok"`, a title and a screenshot can render, and it must
+also answer a `HEAD` request at render time. Three separate failures are all
+disqualifying, because from here each one looks like a working link:
+
+- a **placeholder or control panel** — Plesk answers `200 OK` for a subdomain
+  with no document root;
+- an **invalid certificate** — checked with TLS verification on and with no
+  insecure retry, deliberately: a certificate the visitor's browser rejects is
+  a page the visitor cannot reach;
+- a host that was fine at sync time and is **down now**.
+
+Unknown status strings fail closed. There is no "show it anyway" path, and
+none should be added: a card leading to a certificate warning or to "Hier
+entsteht eine neue Webseite" costs more than an absent card.
+
+Everything a visitor reads on a demo card came from that demo. `homeContent.ts`
+owns only the section's own framing, overridable through the `website_demos`
+block; that block has no Website-CMS schema yet and falls back cleanly until it
+does. Never write a description for someone's site — a demo without a meta
+description simply shows none.
+
+The live probe is memoised per render generation, so the home page and the
+service page share one round of probes and a cache rebuild re-checks. That memo
+is also the feature's latency: a demo that goes down disappears at the next
+rebuild of the pages it appears on, not at the next visitor.
+
 ## SSR, page cache and deployment
 
 `src/middleware.ts` wraps server-rendered responses with the shared page cache.
@@ -176,6 +219,7 @@ Use the repository scripts:
 npm run type-check   # Astro/TypeScript correctness
 npm run test:run     # Vitest unit and contract tests
 npm run og:smoke     # render the default social card for inspection
+npm run demos:sync   # re-harvest the demo sites; prints why each one is hidden
 npm run build        # SSR build plus deployable release assembly/verification
 npm run preview      # production-style local inspection
 ```

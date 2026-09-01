@@ -16,10 +16,19 @@ Do not add placeholder customer screenshots or infer assets from anonymised
 references. A generated photograph is decoration; it must never be presentable
 as a picture of a real client, a real project or a real result.
 
+`public/demos/` is the one exception, and only because it breaks none of that:
+those files are machine-made screenshots of **our own** demo sites, taken from
+the live page by `npm run demos:sync`, of a site anyone can open by clicking
+the card. Nothing there stands in for a client, a project or a result. The
+rule that stays is the same one: never hand-place a picture into that folder,
+and never keep one for a demo that is no longer reachable — the sync script
+owns the folder and deletes what no longer qualifies.
+
 ## Conventions
 
 | | |
 |---|---|
+| Demo previews | `public/demos/<id>.webp`, **1440 × 900** (16:10), plus `<id>-favicon.<ext>` |
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
 | Section grounds | `public/images/sections/<name>.webp`, **1870 × 841** (≈2.22:1); hero **1642 × 958** (≈1.71:1) |
 | Format | WebP, quality 82 (AVIF 55 if a second source is ever added) |
@@ -47,6 +56,13 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 | `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.35 / 0.22 |
 | `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.50, no dark variant |
 | `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
+| `demos/*.webp` | `ui/DemoCard.astro` — `.demo-card__shot img` | **1.0 — content, not a ground** |
+
+The last row is the odd one out on purpose. Every other image on this page is
+decoration under copy, which is why it runs at a third of its strength behind a
+scrim with `alt=""`. A demo screenshot is the thing the visitor came to look
+at, so it sits in front at full opacity with a real `alt`, in both themes. If a
+future pass dims images site-wide, that row is the one to leave alone.
 
 These values were raised twice after the first pass; the ratios between the
 slots stayed put. The rule when a bump costs legibility is to strengthen the

@@ -1,0 +1,286 @@
+---
+/**
+ * One website demo: screenshot, favicon, name, the site's own description and
+ * its address.
+ *
+ * The picture here is CONTENT, not a ground. `ServiceCard` renders its photo
+ * at 0.34 opacity behind a scrim with `alt=""` because there the image is
+ * decoration under the copy; here the screenshot IS the point — it is what a
+ * visitor came to look at — so it runs at full strength, in front, with a real
+ * `alt`. That is the whole difference between the two card families, and it is
+ * why this is a separate component rather than a variant.
+ *
+ * Everything textual on this card came from the demo itself via
+ * `npm run demos:sync`. Nothing here is written about a site; a demo with no
+ * meta description simply shows no description.
+ */
+import type { Lang } from "~/lib/i18n";
+import { demoUi, type ResolvedDemo } from "~/lib/demos";
+
+interface Props {
+  demo: ResolvedDemo;
+  lang: Lang;
+}
+
+const { demo, lang } = Astro.props;
+const ui = demoUi[lang];
+
+const { definition, title, description, favicon, preview, previewWidth, previewHeight } = demo;
+
+/**
+ * The screenshot's alt text, in the language of the PAGE.
+ *
+ * A screenshot's accessible description is this site talking about the demo,
+ * so it follows the visitor's locale — unlike `title` and `description`, which
+ * are the demo's own words and stay in whatever language it wrote them.
+ */
+const previewAlt =
+  lang === "de"
+    ? `Startseite der Demo-Webseite ${title}`
+    : `Home page of the demo website ${title}`;
+---
+
+<article class="demo-card-slot" data-reveal>
+  <a
+    class="demo-card"
+    href={definition.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    hreflang={demo.siteLang ?? undefined}
+  >
+    <div class="demo-card__shot">
+      {/* Intrinsic size stated so the 16:10 box is reserved before the file
+          arrives — five screenshots loading lazily into unsized boxes is a
+          section that reflows under the reader. */}
+      <img
+        src={preview}
+        alt={previewAlt}
+        width={previewWidth}
+        height={previewHeight}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+
+    <div class="demo-card__body">
+      <div class="demo-card__head">
+        {favicon && (
+          /* Decorative: the site's name is right beside it in text, so a
+             screen reader announcing the icon too would just say it twice. */
+          <img
+            class="demo-card__favicon"
+            src={favicon}
+            alt=""
+            aria-hidden="true"
+            width="20"
+            height="20"
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+        <h3 class="demo-card__title">{title}</h3>
+      </div>
+
+      {description && <p class="demo-card__text">{description}</p>}
+
+      <div class="demo-card__foot">
+        <span class="demo-card__host">{definition.host}</span>
+        <span class="demo-card__go">
+          {ui.visit}
+          {/* The link opens a new tab; saying so only in an icon leaves a
+              keyboard or screen-reader user to discover it by surprise. */}
+          <span class="sr-only"> ({ui.newTab})</span>
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .demo-card-slot {
+    /* A grid child, not a flex item: under size containment a flex item takes
+       its base size from max-content and collapses. Same note as the journal
+       card, same reason. */
+    container-type: inline-size;
+  }
+
+  .demo-card {
+    /* The section this sits in keeps the plain paper ground, so the card takes
+       the sand fill — the inverse of the service grid one section above, where
+       sand is the ground and the cards are paper. A borderless card whose fill
+       matches its section is not a card. */
+    --demo-card-bg: var(--color-soft);
+    --demo-card-bg-hover: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Without it a card in a shorter row stops at its content and the row's
+       cards end on different baselines. */
+    height: 100%;
+    background: var(--demo-card-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .demo-card:hover,
+  .demo-card:focus-within {
+    background: var(--demo-card-bg-hover);
+  }
+  .demo-card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .demo-card__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    /* Shows through while the screenshot is still loading, and behind a
+       capture whose own background is transparent. */
+    background: var(--color-paper);
+    /* A screenshot of a page has a page edge; without this it bleeds into the
+       card's fill and the card reads as a broken layout rather than a picture
+       of one. */
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .demo-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* `cover` anchored to the top: a demo's hero belongs on the card, and the
+       bottom of a 900px capture is whatever happened to be in the fold. */
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 700ms var(--lp-ease-soft);
+  }
+  .demo-card:hover .demo-card__shot img,
+  .demo-card:focus-within .demo-card__shot img {
+    transform: scale(1.03);
+  }
+
+  .demo-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1.125rem 1.25rem 1rem;
+  }
+
+  .demo-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .demo-card__favicon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+  .demo-card__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    margin: 0;
+    /* A demo's own <title> can be a sentence. Two lines, then it stops. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .demo-card:hover .demo-card__title,
+  .demo-card:focus-within .demo-card__title {
+    color: var(--color-primary);
+  }
+
+  .demo-card__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .demo-card__foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    /* Pinned to the bottom so the addresses line up across a row whose
+       descriptions are different lengths. */
+    margin-top: auto;
+    padding-top: 0.75rem;
+  }
+  .demo-card__host {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+  .demo-card__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+  .demo-card__go svg {
+    transition: transform 200ms var(--tds-ease-out);
+  }
+  .demo-card:hover .demo-card__go svg,
+  .demo-card:focus-within .demo-card__go svg {
+    transform: translate(2px, -2px);
+  }
+
+  /* A narrow card cannot carry the address and the label side by side. */
+  @container (max-width: 20rem) {
+    .demo-card__foot {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-card__shot img,
+    .demo-card__go svg {
+      transition: none;
+    }
+    .demo-card:hover .demo-card__shot img,
+    .demo-card:focus-within .demo-card__shot img,
+    .demo-card:hover .demo-card__go svg,
+    .demo-card:focus-within .demo-card__go svg {
+      transform: none;
+    }
+  }
+</style>
