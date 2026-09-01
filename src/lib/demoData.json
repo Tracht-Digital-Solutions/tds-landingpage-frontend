@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-09-01T11:28:09.536Z",
+  "demos": {
+    "demo1": {
+      "status": "placeholder",
+      "title": null,
+      "description": null,
+      "siteLang": null,
+      "favicon": null,
+      "preview": null,
+      "previewWidth": null,
+      "previewHeight": null,
+      "checkedAt": "2026-09-01T11:28:09.299Z"
+    },
+    "demo2": {
+      "status": "tls-invalid",
+      "title": null,
+      "description": null,
+      "siteLang": null,
+      "favicon": null,
+      "preview": null,
+      "previewWidth": null,
+      "previewHeight": null,
+      "checkedAt": "2026-09-01T11:28:09.359Z"
+    },
+    "demo3": {
+      "status": "tls-invalid",
+      "title": null,
+      "description": null,
+      "siteLang": null,
+      "favicon": null,
+      "preview": null,
+      "previewWidth": null,
+      "previewHeight": null,
+      "checkedAt": "2026-09-01T11:28:09.411Z"
+    },
+    "demo4": {
+      "status": "tls-invalid",
+      "title": null,
+      "description": null,
+      "siteLang": null,
+      "favicon": null,
+      "preview": null,
+      "previewWidth": null,
+      "previewHeight": null,
+      "checkedAt": "2026-09-01T11:28:09.477Z"
+    },
+    "demo5": {
+      "status": "tls-invalid",
+      "title": null,
+      "description": null,
+      "siteLang": null,
+      "favicon": null,
+      "preview": null,
+      "previewWidth": null,
+      "previewHeight": null,
+      "checkedAt": "2026-09-01T11:28:09.536Z"
+    }
+  }
+}

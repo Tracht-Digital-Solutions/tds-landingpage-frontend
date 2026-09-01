@@ -40,6 +40,25 @@ export interface ServicesOverviewContent {
   intro: string;
 }
 
+/**
+ * Section copy for the website demos.
+ *
+ * Only the framing lives here. Every word ON a demo card — its name, its
+ * description — comes from the demo site itself through
+ * `npm run demos:sync`, and the hosts are code-owned in `demoCatalog.ts`. So
+ * there is deliberately no list here to override: the CMS can retitle the
+ * section, never repopulate it.
+ *
+ * `serviceIntro` is the shorter lead used on the Webauftritt service page,
+ * where the surrounding page has already made the argument.
+ */
+export interface WebsiteDemosContent {
+  headline: string;
+  headlineAccent: string;
+  intro: string;
+  serviceIntro: string;
+}
+
 export interface DigitalResponsibilityContent {
   headline: string;
   headlineAccent: string;
@@ -69,6 +88,7 @@ interface HomeContent {
   hero: HomeHeroContent;
   whyMe: WhyMeContent;
   servicesOverview: ServicesOverviewContent;
+  websiteDemos: WebsiteDemosContent;
   digitalResponsibility: DigitalResponsibilityContent;
   contactHeading: ContactHeadingContent;
 }
@@ -122,6 +142,14 @@ const content: Record<Lang, HomeContent> = {
       headlineAccent: "anbiete?",
       intro:
         "Sechs Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
+    },
+    websiteDemos: {
+      headline: "Webseiten zum",
+      headlineAccent: "Anschauen.",
+      intro:
+        "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch* — so sehen Sie vorher, was Sie bekommen, statt es sich vorstellen zu müssen.",
+      serviceIntro:
+        "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch*, bevor wir über Ihre sprechen.",
     },
     digitalResponsibility: {
       headline: "Ein Ansprechpartner für",
@@ -186,6 +214,14 @@ const content: Record<Lang, HomeContent> = {
       headlineAccent: "offer?",
       intro:
         "Six areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
+    },
+    websiteDemos: {
+      headline: "Websites to",
+      headlineAccent: "look at.",
+      intro:
+        "Finished example sites, live on the web. *Click through them* — so you can see beforehand what you get instead of having to imagine it.",
+      serviceIntro:
+        "Finished example sites, live on the web. *Click through them* before we talk about yours.",
     },
     digitalResponsibility: {
       headline: "One point of contact for",

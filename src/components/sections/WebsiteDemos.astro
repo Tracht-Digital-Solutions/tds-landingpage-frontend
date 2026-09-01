@@ -1,0 +1,89 @@
+---
+/**
+ * The website demos section.
+ *
+ * **Renders nothing at all when no demo qualifies** — no `<section>`, no
+ * heading, no "coming soon" box. Same gate as the references block on a
+ * service detail page, and for the same reason: an empty shelf advertises the
+ * emptiness. `getDemos()` decides, and it is strict; see `lib/demos.ts`.
+ *
+ * Used twice with different framing:
+ *
+ * - `home` — a full section on the home page, straight after the six services.
+ * - `service` — the same grid inside the Webauftritt detail page, where the
+ *   surrounding page has already made the argument and the lead can be shorter.
+ *
+ * Ground: PLAIN PAPER, no `tds-tone-*`. `Services.astro` above is
+ * `tds-tone-sand`, and two sand grounds in a row read as one long section; the
+ * cards take the sand fill instead, which is the inverse of the service grid
+ * one section up.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+import { getDemos } from "~/lib/demos";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
+import DemoCard from "~/components/ui/DemoCard.astro";
+
+interface Props {
+  variant?: "home" | "service";
+}
+
+const { variant = "home" } = Astro.props;
+const lang = resolveLang(Astro.currentLocale);
+
+const demos = await getDemos();
+const content = await cmsFor("website_demos", lang, getHomeContent(lang).websiteDemos);
+const intro = variant === "service" ? content.serviceIntro : content.intro;
+
+// The heading id has to be unique per page. Only one variant is ever rendered
+// on a given page today, but naming them apart costs nothing and stops a
+// duplicate id the day both are.
+const headingId = variant === "service" ? "service-demos-heading" : "website-demos-heading";
+---
+
+{
+  demos.length > 0 && (
+    <section
+      id="website-demos"
+      class="section-spacing"
+      aria-labelledby={headingId}
+    >
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+        <SectionHeader
+          headline={content.headline}
+          headlineAccent={content.headlineAccent}
+          id={headingId}
+          headingClass="mb-6"
+        />
+        <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
+          <Emphasis text={intro} />
+        </p>
+
+        {/* `auto-fit` with a floor rather than a fixed column count: the
+            number of cards is whatever survived the availability check, so a
+            hard `lg:grid-cols-3` would leave a two-card row hanging half
+            empty. */}
+        <div class="demo-grid">
+          {demos.map((demo) => (
+            <DemoCard demo={demo} lang={lang} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .demo-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+  @media (min-width: 768px) {
+    .demo-grid {
+      gap: 1.5rem;
+    }
+  }
+</style>
