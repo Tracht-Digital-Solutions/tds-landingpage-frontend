@@ -1,0 +1,140 @@
+---
+/**
+ * The published reference cases on the home page.
+ *
+ * **Renders nothing at all when the catalog is empty** — no `<section>`, no
+ * heading, no "coming soon". Same gate, and the same reason, as
+ * `WebsiteDemos.astro` and the references block on a service detail page: an
+ * empty shelf advertises the emptiness.
+ *
+ * ### Why the home page has this at all
+ *
+ * `AGENTS.md` used to say references belong to their service and the home page
+ * keeps none. That held while the only reference surface was a detail page.
+ * A case is now shown here as well, deliberately: a visitor who never opens a
+ * service page never saw one, and the section that used to occupy this idea —
+ * the placeholder portfolio — is gone rather than merely hidden.
+ *
+ * What has NOT changed is the rule about content. Cases stay anonymised: no
+ * customer name, no link to a customer's site. The card links to the service
+ * the case belongs to and, when there is one, to the journal article about the
+ * subject. Both destinations are code-owned (`lib/references.ts`).
+ *
+ * Ground: `tds-tone-sand`. `WebsiteDemos` immediately above is deliberately
+ * plain paper with sand-filled cards, so taking the sand for the section here
+ * inverts that rhythm instead of running two identical grounds together.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+import { referenceCases, articleUrl } from "~/lib/references";
+import { getServiceById, serviceHref } from "~/lib/services";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
+
+const lang = resolveLang(Astro.currentLocale);
+const content = await cmsFor("references_home", lang, getHomeContent(lang).referencesHome);
+
+const cards = referenceCases.map((entry) => {
+  const primary = getServiceById(entry.services[0]);
+  return {
+    id: entry.id,
+    reference: entry.content[lang],
+    serviceTitle: primary.fallback[lang].title,
+    serviceHref: serviceHref(primary, lang),
+    articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
+  };
+});
+
+const ui = lang === "de"
+  ? { context: "Kontext", challenge: "Ausgangslage", solution: "Lösungsweg", result: "Ergebnis", metric: "Belegbare Kennzahl", article: "Der Artikel dazu im Journal" }
+  : { context: "Context", challenge: "Starting point", solution: "Approach", result: "Outcome", metric: "Verifiable metric", article: "The article on this in the Journal" };
+---
+
+{
+  cards.length > 0 && (
+    <section
+      id="references"
+      class="tds-tone-sand section-spacing"
+      aria-labelledby="references-heading"
+    >
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+        <SectionHeader
+          headline={content.headline}
+          headlineAccent={content.headlineAccent}
+          id="references-heading"
+          headingClass="mb-6"
+        />
+        <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-4">
+          <Emphasis text={content.intro} />
+        </p>
+        <p class="max-w-2xl text-sm text-[var(--color-muted)] mb-12">
+          {content.label}
+        </p>
+
+        <div class="grid lg:grid-cols-2 gap-5 md:gap-6">
+          {cards.map((card) => (
+            <article class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10">
+              <p class="eyebrow text-[var(--color-accent)] mb-4">
+                <span class="sr-only">{ui.context}: </span>
+                {card.reference.context}
+              </p>
+              <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-8">
+                {card.reference.title}
+              </h3>
+              <dl class="space-y-7">
+                <div>
+                  <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
+                    {ui.challenge}
+                  </dt>
+                  <dd class="text-[var(--color-black)] leading-relaxed">
+                    {card.reference.challenge}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
+                    {ui.solution}
+                  </dt>
+                  <dd class="text-[var(--color-black)] leading-relaxed">
+                    {card.reference.solution}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
+                    {ui.result}
+                  </dt>
+                  <dd class="text-[var(--color-black)] leading-relaxed">
+                    {card.reference.result}
+                  </dd>
+                </div>
+                {card.reference.metric && (
+                  <div class="bg-[var(--color-card)] rounded-[6px] px-5 py-4">
+                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-accent)] mb-2">
+                      {ui.metric}
+                    </dt>
+                    <dd class="font-[var(--font-display)] text-xl text-[var(--color-black)]">
+                      {card.reference.metric}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+
+              <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                <a href={card.serviceHref} class="link-underline text-[var(--color-accent)]">
+                  {content.serviceCta}
+                  <span aria-hidden="true"> →</span>
+                </a>
+                {card.articleHref && (
+                  <a href={card.articleHref} class="link-underline text-[var(--color-accent)]">
+                    {ui.article}
+                    <span aria-hidden="true"> →</span>
+                  </a>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

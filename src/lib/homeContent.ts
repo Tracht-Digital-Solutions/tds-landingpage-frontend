@@ -59,6 +59,23 @@ export interface WebsiteDemosContent {
   serviceIntro: string;
 }
 
+/**
+ * Framing for the home page's references section.
+ *
+ * `label` repeats the anonymisation promise the service pages already make.
+ * It belongs next to the cards, not only on the detail pages: the home page is
+ * where most people meet a reference first, and "why is there no company name
+ * here" is a question the section should answer before it is asked.
+ */
+export interface ReferencesHomeContent {
+  headline: string;
+  headlineAccent: string;
+  intro: string;
+  label: string;
+  /** Link text on each card, pointing at the service the case belongs to. */
+  serviceCta: string;
+}
+
 export interface DigitalResponsibilityContent {
   headline: string;
   headlineAccent: string;
@@ -89,6 +106,7 @@ interface HomeContent {
   whyMe: WhyMeContent;
   servicesOverview: ServicesOverviewContent;
   websiteDemos: WebsiteDemosContent;
+  referencesHome: ReferencesHomeContent;
   digitalResponsibility: DigitalResponsibilityContent;
   contactHeading: ContactHeadingContent;
 }
@@ -150,6 +168,15 @@ const content: Record<Lang, HomeContent> = {
         "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch* — so sehen Sie vorher, was Sie bekommen, statt es sich vorstellen zu müssen.",
       serviceIntro:
         "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch*, bevor wir über Ihre sprechen.",
+    },
+    referencesHome: {
+      headline: "Aus der",
+      headlineAccent: "Praxis.",
+      intro:
+        "Ein Projekt, das über Jahre läuft — von der ersten Einrichtung bis zur *laufenden Pflege*.",
+      label:
+        "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+      serviceCta: "Zur passenden Leistung",
     },
     digitalResponsibility: {
       headline: "Ein Ansprechpartner für",
@@ -222,6 +249,15 @@ const content: Record<Lang, HomeContent> = {
         "Finished example sites, live on the web. *Click through them* — so you can see beforehand what you get instead of having to imagine it.",
       serviceIntro:
         "Finished example sites, live on the web. *Click through them* before we talk about yours.",
+    },
+    referencesHome: {
+      headline: "From",
+      headlineAccent: "practice.",
+      intro:
+        "One project running over years — from the first setup through to the *ongoing upkeep*.",
+      label:
+        "Published examples appear anonymised and only with the client's approval.",
+      serviceCta: "See the matching service",
     },
     digitalResponsibility: {
       headline: "One point of contact for",
