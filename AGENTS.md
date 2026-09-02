@@ -24,7 +24,13 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   Contact. The demos section renders nothing at all when no demo is available,
   so the order above describes a full house, not a guaranteed one. The old
   TechMarquee and Currently sections do not belong on the home page. Portfolio
-  stays hidden; approved references belong to their service instead.
+  stays hidden — the placeholder grid was removed, not merely unmounted, and
+  must not come back. **Approved references now appear in two places**: on the
+  detail page of each service they belong to, and in `sections/References.astro`
+  on the home page (between the demos and the positioning callout). The home
+  section exists because a visitor who never opens a service page never saw a
+  reference at all. It renders nothing when the catalog is empty, exactly like
+  the demos section.
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
   accept a slug or href from CMS content.
@@ -111,9 +117,33 @@ Each block exposes `label`, `title`, `summary`, `intro`; titled lists for
 `priceLabel`/`priceText`; `referencesLabel`/`referencesHeadline`; references
 with `title`, `context`, `challenge`, `solution`, `result` and optional
 `metric`; and `ctaTitle`, `ctaText`, `ctaButton`. Do not add editable IDs,
-slugs or URLs. An explicitly empty references list is valid and hides the
-entire references section—never render placeholders or invent customer names,
-quotes, screenshots, metrics or outcomes.
+slugs or URLs — never render placeholders or invent customer names, quotes,
+screenshots, metrics or outcomes.
+
+The published cases themselves live in `src/lib/references.ts`, code-owned like
+`demoCatalog.ts`, because a card links to a service page and to a journal
+article and the CMS must not name a destination. `ServiceReference.articleUrl`
+is therefore **unreachable from the CMS**: `validateServiceReferences` rebuilds
+each item field by field and never copies it, and `mergeReferences` restores it
+from the committed case. `resolveServiceContent` resolves three distinct
+states, and the third is easy to break:
+
+- no `references` key, or a malformed list ⇒ the committed cases render;
+- a valid non-empty list ⇒ it overrides the TEXT position by position, links
+  unchanged, extra entries kept without links;
+- an **explicitly empty array** ⇒ the whole section disappears. This is the way
+  to pull a reference off the site without a deploy. It is detected by the key
+  being present, not by the validated result being empty — a length check would
+  silently take the ability away now that a committed base exists.
+
+Reference copy stays **anonymised**: no customer name, no link to a customer's
+own site. `references.test.ts` greps the committed prose for that, because it
+is a standing instruction a string edit could otherwise undo unnoticed.
+
+The home section's framing is the `references_home` block, defaulting to
+`homeContent.ts`. Like `website_demos` it has no Website-CMS schema yet and
+falls back cleanly until it does; `block` cache events already rebuild the home
+and service pages for any block id, so no event mapping was added for it.
 
 Home cards, pricing and detail pages resolve from one service catalog/default;
 DE and EN are edited separately. Change fallbacks, the Website-CMS

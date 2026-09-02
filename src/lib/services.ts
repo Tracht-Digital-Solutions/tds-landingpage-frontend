@@ -1,5 +1,9 @@
 import { cmsFor, fetchBlocks } from "./cms";
 import type { Lang } from "./i18n";
+// `references.ts` takes only TYPES back from this module (`import type`, so
+// erased at build), which is what keeps this pair from becoming a runtime
+// cycle of the kind `contentCache.ts` exists to document.
+import { referencesForService } from "./references";
 
 export type ServiceId =
   | "consulting"
@@ -25,6 +29,14 @@ export interface ServiceReference {
   result: string;
   /** Optional, verifiable metric. An empty string means no metric is shown. */
   metric: string;
+  /**
+   * Journal article this case links to. **Code-owned and unreachable from the
+   * CMS** — `validateServiceReferences` rebuilds each item field by field and
+   * never copies this one, so a block that carries an `articleUrl` cannot put
+   * a link on the page. Same rule as `ServiceDefinition.slug` and the demo
+   * hosts: editable copy, never an editable destination.
+   */
+  articleUrl?: string;
 }
 
 export interface ServiceContent {
@@ -894,7 +906,44 @@ export function serviceHref(service: ServiceDefinition, lang: Lang): string {
     : `/en/services/${service.slug.en}`;
 }
 
-/** Resolve the editable CMS block over the committed localized fallback. */
+/**
+ * Merge CMS reference text onto the committed cases, position by position.
+ *
+ * The committed list is the base and owns every `articleUrl`; the CMS owns the
+ * words. An editor rewriting the first card rewrites the first committed case
+ * and keeps its link. A CMS entry past the end of the committed list is an
+ * editor-authored case and simply has no link — there is nowhere for it to
+ * point that this repo could vouch for.
+ */
+export function mergeReferences(
+  committed: readonly ServiceReference[],
+  fromCms: readonly ServiceReference[],
+): ServiceReference[] {
+  if (fromCms.length === 0) return [...committed];
+
+  return fromCms.map((override, i) => {
+    const base = committed[i];
+    return base?.articleUrl ? { ...override, articleUrl: base.articleUrl } : override;
+  });
+}
+
+/**
+ * Resolve the editable CMS block over the committed localized fallback.
+ *
+ * References do not go through `cmsFor` — it infers its schema from the
+ * fallback and cannot describe this list — so they are resolved here, in three
+ * cases that are deliberately distinct:
+ *
+ *  - **No `references` key**, or a malformed one: the committed cases render.
+ *    That is the normal state; nobody has to retype a published case into the
+ *    panel for it to appear.
+ *  - **An explicitly empty array**: the section disappears entirely. This is
+ *    the documented way to pull a reference off the site without a deploy, and
+ *    a committed base would have silently taken it away — hence the key check
+ *    rather than a length check on the validated result.
+ *  - **A valid non-empty array**: it overrides the text, position by position,
+ *    and never the links (see {@link mergeReferences}).
+ */
 export async function resolveServiceContent(
   service: ServiceDefinition,
   lang: Lang,
@@ -903,9 +952,17 @@ export async function resolveServiceContent(
   const resolved = await cmsFor(service.cmsKey, lang, fallback);
   const blocks = await fetchBlocks(lang);
   const block = blocks[service.cmsKey];
-  const references = isRecord(block)
-    ? validateServiceReferences(block.references)
-    : [];
+
+  const committed = referencesForService(service.id, lang);
+  const hasKey = isRecord(block) && "references" in block;
+  const emptied = hasKey && Array.isArray(block.references) && block.references.length === 0;
+
+  const references = emptied
+    ? []
+    : mergeReferences(
+        committed,
+        isRecord(block) ? validateServiceReferences(block.references) : [],
+      );
 
   return { ...resolved, references };
 }

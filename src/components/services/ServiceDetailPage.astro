@@ -43,6 +43,7 @@ const ui = lang === "de"
       referenceSolution: "Lösungsweg",
       referenceResult: "Ergebnis",
       referenceMetric: "Belegbare Kennzahl",
+      referenceArticle: "Der Artikel dazu im Journal",
     }
   : {
       breadcrumb: "Breadcrumb",
@@ -51,6 +52,7 @@ const ui = lang === "de"
       referenceSolution: "Approach",
       referenceResult: "Outcome",
       referenceMetric: "Verifiable metric",
+      referenceArticle: "The article on this in the Journal",
     };
 
 const offer = serviceRate !== undefined
@@ -436,6 +438,18 @@ const jsonLd = [
                     </div>
                   )}
                 </dl>
+
+                {/* Present only when the committed case carries one — the CMS
+                    cannot put a link here (see `ServiceReference.articleUrl`). */}
+                {reference.articleUrl && (
+                  <a
+                    href={reference.articleUrl}
+                    class="link-underline inline-block mt-8 text-[var(--color-accent)]"
+                  >
+                    {ui.referenceArticle}
+                    <span aria-hidden="true"> →</span>
+                  </a>
+                )}
               </article>
             ))}
           </div>
