@@ -19,6 +19,7 @@ import JsonLd from "~/components/JsonLd.astro";
 import { CookieNotice, LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
 import { themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
 import { siteConfig } from "~/lib/seo";
+import { isExcluded } from "~/lib/sitemap";
 import { cookieBannerEnabled } from "~/lib/cms";
 
 interface Props {
@@ -59,6 +60,14 @@ const ogImageAbs = ogImage.startsWith("http")
 const ogLocale = lang === "de" ? "de_DE" : "en_GB";
 const altOgLocale = lang === "de" ? "en_GB" : "de_DE";
 
+// A page the panel excluded from the sitemap is also served `noindex`, and
+// loses its alternates with it. Both halves are required and neither is
+// sufficient: a sitemap omission is a hint a crawler may ignore, while
+// `noindex` beside an alternate tells it to follow a link it is simultaneously
+// told to disregard. `noindex` (the prop) stays the local override for pages
+// that are never public — the legal texts, `/install`, the error pages.
+const hidden = noindex || (await isExcluded(Astro.url.pathname));
+
 // Compute hreflang alternates. The neutral path is the URL without
 // the /en prefix; the EN alternate is /en + the neutral path. Skip
 // alternates entirely when the page opts out of search via
@@ -98,7 +107,7 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
         on <html> by the time CSS resolves. `set:html` (not a template body —
         that would leak literal braces into dist/). */}
     <script is:inline set:html={themeBootstrapScript} />
-    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    {hidden && <meta name="robots" content="noindex,nofollow" />}
 
     <link rel="icon" type="image/png" href="/favicon.png" sizes="any" />
     <link rel="canonical" href={url} />
@@ -116,7 +125,7 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
 
     <!-- i18n alternates — only emitted when the page is indexable.
          Legal pages opt out of both search and hreflang. -->
-    {!noindex && (
+    {!hidden && (
       <>
         <link rel="alternate" hreflang="de" href={deAltUrl} />
         <link rel="alternate" hreflang="en" href={enAltUrl} />
@@ -145,7 +154,7 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={title} />
     <meta property="og:locale" content={ogLocale} />
-    {!noindex && <meta property="og:locale:alternate" content={altOgLocale} />}
+    {!hidden && <meta property="og:locale:alternate" content={altOgLocale} />}
     <meta property="og:site_name" content={siteConfig.name} />
 
     <!-- Twitter Card -->

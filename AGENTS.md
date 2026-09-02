@@ -200,7 +200,23 @@ process; cache fingerprinting does not replace the restart.
   service and pricing pages.
 - `src/lib/sitemap.ts` is the explicit route inventory because SSR routes are
   not emitted as pages during the build. Add both locale paths together and
-  cover them in sitemap tests.
+  cover them in `src/lib/sitemap.test.ts`.
+- **`SITEMAP_ENTRIES` stays the FULL inventory; `sitemapEntries()` is what the
+  document renders.** The panel maintains a per-site list of paths to leave out
+  (`src/lib/sitemapExclusions.ts`, read from `/content/sitemap-exclusions`), and
+  an excluded page is also served `noindex` by `Layout.astro`. `cache.ts`
+  derives `alwaysPaths` from the unfiltered constant on purpose — a rebuild must
+  still be able to render a page that is merely hidden from search.
+- **An exclusion drops the PAIR, never one URL.** Every entry here carries
+  reciprocal alternates, so removing one side would leave the other naming a
+  page no longer offered, and a single dangling alternate invalidates the whole
+  set. `hreflangGroup()` reads the pairing from the inventory because
+  `/leistungen/<slug.de>` ↔ `/en/services/<slug.en>` is neither a prefix nor a
+  slug match.
+- **`/sitemap-0.xml` renders on demand** (it was prerendered until the exclusion
+  list arrived, which would have frozen the exclusions at build time). It is in
+  `alwaysPaths` and on the `sitemap` cache event; `/sitemap-index.xml` stays
+  prerendered because its only variable content is `lastmod`.
 - Keep page titles and descriptions distinct, truthful and within the limits
   enforced by `src/lib/seo.test.ts`. `Layout.astro` must use the route's actual
   title rather than a hard-coded tab title.

@@ -94,6 +94,27 @@ describe("cacheEvents", () => {
     }
   });
 
+  it("rebuilds every indexable page when the exclusion list changes", async () => {
+    // The list moves the `robots` meta of each page it touches, not just the
+    // sitemap. Rebuilding only the sitemap would leave the excluded page
+    // serving its old indexable head from cache — the omission visible in the
+    // XML, the `noindex` nowhere, and nothing red.
+    const result = await paths([{ type: "sitemap" }]);
+    expect(result).toContain("/sitemap-0.xml");
+    expect(result).toContain("/sitemap-index.xml");
+    expect(result).toContain("/");
+    expect(result).toContain("/en/");
+    expect(result).toContain("/preise");
+    expect(result).toContain(serviceHref(serviceDefinitions[0], "de"));
+  });
+
+  it("includes the sitemap in alwaysPaths now that it renders on demand", () => {
+    // It used to be prerendered, so there was nothing to invalidate. The
+    // panel's exclusion list is what made that untrue.
+    expect(alwaysPaths).toContain("/sitemap-0.xml");
+    expect(alwaysPaths).toContain("/sitemap-index.xml");
+  });
+
   it("keeps alwaysPaths free of duplicates", () => {
     expect(alwaysPaths).toEqual([...new Set(alwaysPaths)]);
   });

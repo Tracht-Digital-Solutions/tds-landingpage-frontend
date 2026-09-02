@@ -70,6 +70,26 @@ export const cacheEvents: EventMap = {
    * month's articles.
    */
   post: (event) => forLanguages(event, homePages),
+
+  /**
+   * The sitemap exclusion list changed.
+   *
+   * The widest event this site has, and it has to be. The list moves TWO
+   * things: the sitemap, and the `robots` meta of every page that entered or
+   * left it. Rebuilding only the sitemap would leave the excluded page itself
+   * serving its old, indexable head out of cache — the omission visible in the
+   * XML, the `noindex` nowhere, and nothing red.
+   *
+   * A pattern may be a prefix, so which pages it covers is not knowable from
+   * the event. `contentPages` is the whole indexable inventory, which is
+   * exactly the set a new `noindex` might have to reach.
+   */
+  sitemap: (event) =>
+    forLanguages(event, (lang) => [
+      ...contentPages(lang),
+      "/sitemap-0.xml",
+      "/sitemap-index.xml",
+    ]),
 };
 
 /**
@@ -77,6 +97,10 @@ export const cacheEvents: EventMap = {
  *
  * The cache can only enumerate what it already holds, so without this a
  * rebuild on a cold cache would report success having rendered nothing.
+ *
+ * The sitemap is in the list now that it renders on demand: it used to be
+ * prerendered, so there was nothing to invalidate, and the panel's exclusion
+ * list is exactly the thing that made that untrue.
  */
 export const alwaysPaths = [
   "/",
@@ -87,4 +111,6 @@ export const alwaysPaths = [
     serviceHref(service, "de"),
     serviceHref(service, "en"),
   ]),
+  "/sitemap-0.xml",
+  "/sitemap-index.xml",
 ];

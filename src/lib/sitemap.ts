@@ -17,6 +17,7 @@
 
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
+import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
 
 /** One indexable page, in both languages. */
 export interface SitemapEntry {
@@ -49,6 +50,49 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   })),
 ];
 
+/**
+ * Both URLs of the page this path belongs to.
+ *
+ * Read from the inventory rather than derived: `/leistungen/<slug.de>` pairs
+ * with `/en/services/<slug.en>`, a different segment AND a different slug, so
+ * no prefix rule could produce it. A path that is not in the inventory is its
+ * own group — it has no twin in the sitemap to strand.
+ */
+export function hreflangGroup(pathname: string): string[] {
+  // Folded the same way on both sides of the comparison: the inventory stores
+  // the home pages as `/` and `/en/`, so a raw string match against a request
+  // path that lost its slash would miss them.
+  const path = canonicalPath(pathname);
+  const entry = SITEMAP_ENTRIES.find(
+    (e) => canonicalPath(e.de) === path || canonicalPath(e.en) === path,
+  );
+  return entry ? [entry.de, entry.en] : [pathname];
+}
+
+/**
+ * The entries that actually go in the sitemap.
+ *
+ * `SITEMAP_ENTRIES` stays the full, code-owned inventory — `cache.ts` derives
+ * `alwaysPaths` from it, and a rebuild must still be able to render a page the
+ * panel has merely hidden from search.
+ */
+export async function sitemapEntries(): Promise<SitemapEntry[]> {
+  const patterns = await exclusionPatterns();
+  if (patterns.length === 0) return SITEMAP_ENTRIES;
+
+  // Filtered as a PAIR: every URL here carries reciprocal alternates, so
+  // dropping one side would leave the other naming a page no longer offered,
+  // and one dangling alternate invalidates the set on both sides.
+  return SITEMAP_ENTRIES.filter((entry) => !groupExcluded([entry.de, entry.en], patterns));
+}
+
+/** Is this page excluded — counting its twin in the other tree as the same page? */
+export async function isExcluded(pathname: string): Promise<boolean> {
+  const patterns = await exclusionPatterns();
+  if (patterns.length === 0) return false;
+  return groupExcluded(hreflangGroup(pathname), patterns);
+}
+
 /** Absolute URL for a path on this site. */
 export function absolute(path: string): string {
   return new URL(path, siteConfig.url).href;
@@ -69,9 +113,13 @@ function escapeXml(value: string): string {
  * Search Console only treats a set as valid when the two URLs name each other,
  * and the commonest way a set goes wrong is one side pointing at a URL that
  * does not point back.
+ *
+ * Takes the entries rather than reading the constant, so the caller decides
+ * whether the panel's exclusions have been applied — and so the rendering can
+ * be tested against a fixed list instead of the live inventory.
  */
-export function renderUrlset(lastmod: string): string {
-  const urls = SITEMAP_ENTRIES.flatMap((entry) =>
+export function renderUrlset(entries: readonly SitemapEntry[], lastmod: string): string {
+  const urls = entries.flatMap((entry) =>
     (["de", "en"] as const).map((lang) => {
       const loc = absolute(entry[lang]);
       const alternates = [
