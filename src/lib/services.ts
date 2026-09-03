@@ -11,6 +11,7 @@ export type ServiceId =
   | "solutions"
   | "custom-development"
   | "web-presence"
+  | "marketing"
   | "complete-it";
 
 export type ServiceCmsKey =
@@ -19,6 +20,7 @@ export type ServiceCmsKey =
   | "service_solutions"
   | "service_custom_development"
   | "service_web_presence"
+  | "service_marketing"
   | "service_complete_it";
 
 export interface ServiceReference {
@@ -728,15 +730,142 @@ export const serviceDefinitions = [
     },
   },
   {
-    id: "complete-it",
+    // Sits directly behind Web Presence: a site that nobody finds is the
+    // problem this one picks up. The media budget is named in `boundaries`
+    // because it goes to Google, not to me — quoting an hourly rate without
+    // that sentence would understate what a campaign actually costs.
+    id: "marketing",
     number: "06",
+    cmsKey: "service_marketing",
+    slug: { de: "marketing", en: "marketing" },
+    keywords: {
+      de: ["Google Ads", "Lokale Sichtbarkeit", "SEO", "Newsletter"],
+      en: ["Google Ads", "Local visibility", "SEO", "Newsletter"],
+    },
+    image: null,
+    fallback: {
+      de: {
+        label: "Alle Leistungen",
+        title: "Marketing",
+        summary:
+          "Google Ads, lokale Sichtbarkeit, SEO und Newsletter: Ich bringe Ihr Angebot dorthin, wo Kunden suchen – und zeige Ihnen, was es bringt.",
+        intro:
+          "Eine gute Seite hilft wenig, wenn niemand sie findet. Marketing sorgt dafür, dass Ihr Angebot dort auftaucht, wo gesucht wird – und dass Sie sehen, was das gebracht hat.",
+        situationsTitle: "Kommt Ihnen das bekannt vor?",
+        situations: [
+          "Die Seite ist gut, aber es kommt kaum jemand.",
+          "Anzeigen laufen, doch niemand erklärt Ihnen die Zahlen.",
+          "Bei Google steht der Wettbewerb weiter oben.",
+          "Ihre Kundenliste liegt brach, statt zu arbeiten.",
+        ],
+        responsibilitiesTitle: "Was ich übernehme",
+        responsibilities: [
+          "Suchbegriffe, Zielgebiet und Budgetrahmen festlegen",
+          "Google-Ads-Konto einrichten, Anzeigen schreiben und betreuen",
+          "Unternehmensprofil und lokale Auffindbarkeit in Ordnung bringen",
+          "Inhalte und Seitenaufbau für die organische Suche schärfen",
+          "Newsletter aufsetzen und rechtssicher versenden",
+        ],
+        outcomesTitle: "Das erreichen Sie",
+        outcomes: [
+          "Ihr Angebot erscheint, wenn jemand danach sucht",
+          "Sie wissen, was eine Anfrage kostet",
+          "Im Umkreis werden Sie zuverlässig gefunden",
+          "Bestandskunden hören regelmäßig von Ihnen",
+        ],
+        boundariesTitle: "Was nicht dazugehört",
+        boundaries: [
+          "Das Mediabudget zahlen Sie direkt an Google – es ist kein Teil meines Honorars.",
+          "Anzeigen tragen nur, wenn Angebot und Landeseite dahinter stimmen.",
+          "Organische Platzierungen lassen sich nicht kaufen, sie brauchen Zeit.",
+          "Texte, Bilder und Freigaben für den Newsletter kommen von Ihnen.",
+        ],
+        processTitle: "So gehen wir vor",
+        process: [
+          "Angebot, Zielgruppe und Umkreis klären",
+          "Kanäle auswählen und einen Budgetrahmen festlegen",
+          "Konten einrichten, Anzeigen und Inhalte aufsetzen",
+          "Zahlen auswerten, nachschärfen und offen berichten",
+        ],
+        priceLabel: "Preis",
+        priceText:
+          "95 € netto pro Stunde, dazu Ihr Mediabudget. Für die laufende Betreuung ist ein fester Monatsumfang möglich.",
+        referencesLabel:
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
+        referencesHeadline: "Einblicke aus der Praxis",
+        references: [],
+        ctaTitle: "Sollen mehr Menschen von Ihnen erfahren?",
+        ctaText:
+          "Erzählen Sie mir, wen Sie erreichen wollen. Wir sortieren Kanäle, Umkreis und einen Budgetrahmen, der zu Ihnen passt.",
+        ctaButton: "Erstgespräch vereinbaren",
+      },
+      en: {
+        label: "All services",
+        title: "Marketing",
+        summary:
+          "Google Ads, local visibility, SEO and newsletters: I put your offer where customers are looking – and show you what it returns.",
+        intro:
+          "A good site helps little if nobody finds it. Marketing puts your offer where people are searching – and shows you what that brought in.",
+        situationsTitle: "Does this sound familiar?",
+        situations: [
+          "The site is fine, but hardly anyone comes.",
+          "Ads are running, yet nobody explains the numbers.",
+          "Competitors rank above you on Google.",
+          "Your customer list sits idle instead of working.",
+        ],
+        responsibilitiesTitle: "What I take care of",
+        responsibilities: [
+          "Settle the search terms, the target area and a budget frame",
+          "Set up the Google Ads account, write the ads and look after them",
+          "Put the business profile and local findability in order",
+          "Sharpen content and site structure for organic search",
+          "Set up the newsletter and send it lawfully",
+        ],
+        outcomesTitle: "What you achieve",
+        outcomes: [
+          "Your offer shows up when someone searches for it",
+          "You know what an enquiry costs",
+          "You are reliably found in your area",
+          "Existing customers hear from you regularly",
+        ],
+        boundariesTitle: "What this does not cover",
+        boundaries: [
+          "The media budget goes to Google directly – it is not part of my fee.",
+          "Ads only work when the offer and the landing page behind them hold up.",
+          "Organic rankings cannot be bought; they take time.",
+          "Copy, images and newsletter approvals come from you.",
+        ],
+        processTitle: "How we proceed",
+        process: [
+          "Clarify the offer, the audience and the area",
+          "Pick the channels and settle a budget frame",
+          "Set up the accounts, the ads and the content",
+          "Review the numbers, adjust and report openly",
+        ],
+        priceLabel: "Price",
+        priceText:
+          "€95 net per hour, plus your media budget. For ongoing support a fixed monthly scope is possible.",
+        referencesLabel:
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
+        referencesHeadline: "Examples from practice",
+        references: [],
+        ctaTitle: "Should more people hear about you?",
+        ctaText:
+          "Tell me who you want to reach. We sort out the channels, the area and a budget frame that fits you.",
+        ctaButton: "Arrange an initial conversation",
+      },
+    },
+  },
+  {
+    id: "complete-it",
+    number: "07",
     cmsKey: "service_complete_it",
     slug: { de: "komplette-it", en: "complete-it" },
     keywords: {
       de: ["Geräte & Zugänge", "Netzwerk", "Backups", "Support"],
       en: ["Devices & accounts", "Network", "Backups", "Support"],
     },
-    image: "/images/services/06-komplette-it.webp",
+    image: "/images/services/07-komplette-it.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",

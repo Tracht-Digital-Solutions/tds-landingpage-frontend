@@ -178,7 +178,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Was ich",
       headlineAccent: "anbiete?",
       intro:
-        "Sechs Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
+        "Sieben Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
     },
     websiteDemos: {
       headline: "Webseiten zum",
@@ -264,7 +264,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "What I",
       headlineAccent: "offer?",
       intro:
-        "Six areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
+        "Seven areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
     },
     websiteDemos: {
       headline: "Websites to",

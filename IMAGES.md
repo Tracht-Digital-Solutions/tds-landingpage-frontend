@@ -1,8 +1,10 @@
 # Image work
 
-All image slots on the site are filled. The logo, portrait, favicon and process
-images were always there; the ten photographic grounds below — six service
-grounds and four section grounds — were added in the image pass. Journal cards
+One slot is still open: the Marketing service ships with `image: null` and its
+brief below is waiting for a photo. Everything else is filled. The logo,
+portrait, favicon and process images were always there; the ten photographic
+grounds below — six service grounds and four section grounds — were added in
+the image pass. Journal cards
 use an uploaded cover when one exists and the shared abstract cover otherwise.
 
 The mechanism that made them optional is unchanged and stays: `image: null` in
@@ -208,7 +210,20 @@ The shopfront, seen from the owner's side.
 > the lower third is calm and mostly empty. Backlit, airy, slightly
 > overexposed towards the window. No people, no readable screen. 16:10.
 
-### 6 · Komplette IT — `services/06-komplette-it.webp`
+### 6 · Marketing — `services/06-marketing.webp` (open)
+
+Not shot yet. The service renders with `image: null` until this file exists;
+dropping it in and setting `image` in `services.ts` is the whole change.
+
+The reach of a small shop, not a marketing department.
+
+> A handwritten shop sign or A-board on a pavement in a small town, seen at a
+> slight angle in late afternoon light, with the street receding softly out of
+> focus behind it. The sign occupies the left third; the blurred street fills
+> the rest as a calm wash. Warm, unglamorous, local. No brand names, no
+> readable text, no people in focus, no screens, no charts. 16:10.
+
+### 7 · Komplette IT — `services/07-komplette-it.webp`
 
 Infrastructure that is supposed to be boring.
 
@@ -221,7 +236,7 @@ Infrastructure that is supposed to be boring.
 
 ---
 
-### 7 · „Wieso ich" section ground — `sections/why-me.webp`
+### 8 · „Wieso ich" section ground — `sections/why-me.webp`
 
 Behind the reasons column. Very quiet. Rendered with `object-left`, so the
 objects stay in frame and the empty right two thirds fall under the scrim.
@@ -232,7 +247,7 @@ objects stay in frame and the empty right two thirds fall under the scrim.
 > right two thirds are empty desk and wall. Extremely calm, almost still-life.
 > No people, no devices. 2000×900.
 
-### 8 · Pricing teaser ground — `sections/pricing.webp`
+### 9 · Pricing teaser ground — `sections/pricing.webp`
 
 Behind the navy price panel, so it has to read as a dark picture. The panel is
 much wider than the source, so only the vertical axis is cropped.
@@ -243,7 +258,7 @@ much wider than the source, so only the vertical axis is cropped.
 > the right third; the left two thirds are almost black table. Restrained,
 > serious, no props, no hands, no readable text on the page. 2000×900.
 
-### 9 · Contact section ground — `sections/contact.webp`
+### 10 · Contact section ground — `sections/contact.webp`
 
 Behind the navy contact block. The scrim runs to the bottom right and stays
 fully opaque over the headline and the form, so the block reads as textured
@@ -256,7 +271,7 @@ Formular" still holds.
 > objects sit in the lower right quarter. Quiet, end-of-day, no people, no
 > screen visible. 2000×900.
 
-### 10 · Hero ground — `sections/hero.webp`
+### 11 · Hero ground — `sections/hero.webp`
 
 Full-bleed behind the hero, under the constructed geometry. **The left half is
 empty because the headline sits there** — that is the whole composition, and it
