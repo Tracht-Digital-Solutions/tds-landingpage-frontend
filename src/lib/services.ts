@@ -37,6 +37,15 @@ export interface ServiceReference {
    * hosts: editable copy, never an editable destination.
    */
   articleUrl?: string;
+  /**
+   * The customer's own site, on a case published under their name. Same rule
+   * and same enforcement as {@link ServiceReference.articleUrl}: the CMS may
+   * rewrite the words around it, never supply or change it.
+   *
+   * Unlike `articleUrl` this does not vary by language — see
+   * `ReferenceCase.siteUrl`.
+   */
+  siteUrl?: string;
 }
 
 export interface ServiceContent {
@@ -179,7 +188,7 @@ export const serviceDefinitions = [
         priceText:
           "120 € netto pro Stunde. Für ein klar abgegrenztes Konzept ist nach der Bestandsaufnahme auch ein Festpreis möglich.",
         referencesLabel:
-          "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
         ctaTitle: "Sie möchten zuerst Klarheit?",
@@ -232,7 +241,7 @@ export const serviceDefinitions = [
         priceText:
           "€120 net per hour. For a clearly bounded concept, a fixed price is possible after the initial assessment.",
         referencesLabel:
-          "Published examples appear only in anonymised form and after approval.",
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
         ctaTitle: "Want clarity first?",
@@ -298,7 +307,7 @@ export const serviceDefinitions = [
         priceText:
           "110 € netto pro Stunde. Ein Festpreis ist möglich, sobald Ablauf, Datenquellen und Ziel klar sind.",
         referencesLabel:
-          "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
         ctaTitle: "Welcher Ablauf kostet Sie jede Woche Zeit?",
@@ -351,7 +360,7 @@ export const serviceDefinitions = [
         priceText:
           "€110 net per hour. A fixed price is possible once the workflow, the data sources and the goal are clear.",
         referencesLabel:
-          "Published examples appear only in anonymised form and after approval.",
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
         ctaTitle: "Which routine costs you time every week?",
@@ -417,7 +426,7 @@ export const serviceDefinitions = [
         priceText:
           "110 € netto pro Stunde. Steht der Umfang fest, sind Festpreise für einzelne Etappen oder das ganze Paket möglich.",
         referencesLabel:
-          "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
         ctaTitle: "Ihre Werkzeuge passen nicht zusammen?",
@@ -470,7 +479,7 @@ export const serviceDefinitions = [
         priceText:
           "€110 net per hour. Once the scope is set, fixed prices are possible for single stages or the whole package.",
         referencesLabel:
-          "Published examples appear only in anonymised form and after approval.",
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
         ctaTitle: "Your tools do not fit together?",
@@ -536,7 +545,7 @@ export const serviceDefinitions = [
         priceText:
           "105 € netto pro Stunde. Ist die Aufgabe vollständig beschrieben, kann ein Festpreis vereinbart werden.",
         referencesLabel:
-          "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
         ctaTitle: "Sie haben eine konkrete Aufgabe?",
@@ -589,7 +598,7 @@ export const serviceDefinitions = [
         priceText:
           "€105 net per hour. When the task is fully described, a fixed price can be agreed.",
         referencesLabel:
-          "Published examples appear only in anonymised form and after approval.",
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
         ctaTitle: "Have a concrete task?",
@@ -655,7 +664,7 @@ export const serviceDefinitions = [
         priceText:
           "95 € netto pro Stunde. Steht fest, wie viele Seiten und Funktionen es werden, ist ein Festpreis möglich.",
         referencesLabel:
-          "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
         ctaTitle: "Soll Ihre Seite mehr für Sie arbeiten?",
@@ -708,7 +717,7 @@ export const serviceDefinitions = [
         priceText:
           "€95 net per hour. Once the number of pages and functions is settled, a fixed price is possible.",
         referencesLabel:
-          "Published examples appear only in anonymised form and after approval.",
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
         ctaTitle: "Should your site work harder for you?",
@@ -774,7 +783,7 @@ export const serviceDefinitions = [
         priceText:
           "Individuelles Monatsangebot nach einer Bestandsaufnahme. Arbeitsplätze, Geräte, Lizenzen, Sicherheit, Vor-Ort-Einsätze und die vereinbarte Erreichbarkeit bestimmen den Preis.",
         referencesLabel:
-          "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
         ctaTitle: "Sie wollen einen Zuständigen für Ihre IT?",
@@ -827,7 +836,7 @@ export const serviceDefinitions = [
         priceText:
           "An individual monthly proposal after an initial assessment. Workstations, devices, licences, security, on-site work and the agreed availability determine the price.",
         referencesLabel:
-          "Published examples appear only in anonymised form and after approval.",
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
         ctaTitle: "Want one owner for your IT?",
@@ -909,11 +918,19 @@ export function serviceHref(service: ServiceDefinition, lang: Lang): string {
 /**
  * Merge CMS reference text onto the committed cases, position by position.
  *
- * The committed list is the base and owns every `articleUrl`; the CMS owns the
- * words. An editor rewriting the first card rewrites the first committed case
- * and keeps its link. A CMS entry past the end of the committed list is an
- * editor-authored case and simply has no link — there is nowhere for it to
+ * The committed list is the base and owns **every destination**; the CMS owns
+ * the words. An editor rewriting the first card rewrites the first committed
+ * case and keeps its links. A CMS entry past the end of the committed list is
+ * an editor-authored case and simply has none — there is nowhere for it to
  * point that this repo could vouch for.
+ *
+ * Every destination is stripped off the override before anything is restored,
+ * rather than only overwritten where a committed one exists. `validateService
+ * References` already drops them upstream, so this is belt and braces — but
+ * the old form leaned entirely on that: at any position whose committed case
+ * lacks a link, a CMS-supplied one passed straight through. That was
+ * unreachable while every committed case had an article; it stopped being
+ * unreachable the moment a case without one was published.
  */
 export function mergeReferences(
   committed: readonly ServiceReference[],
@@ -923,7 +940,12 @@ export function mergeReferences(
 
   return fromCms.map((override, i) => {
     const base = committed[i];
-    return base?.articleUrl ? { ...override, articleUrl: base.articleUrl } : override;
+    const { articleUrl: _article, siteUrl: _site, ...text } = override;
+    return {
+      ...text,
+      ...(base?.articleUrl ? { articleUrl: base.articleUrl } : {}),
+      ...(base?.siteUrl ? { siteUrl: base.siteUrl } : {}),
+    };
   });
 }
 

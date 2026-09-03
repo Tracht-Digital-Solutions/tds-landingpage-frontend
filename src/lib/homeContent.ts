@@ -75,10 +75,16 @@ export interface WebsiteDemosContent {
 /**
  * Framing for the home page's references section.
  *
- * `label` repeats the anonymisation promise the service pages already make.
- * It belongs next to the cards, not only on the detail pages: the home page is
- * where most people meet a reference first, and "why is there no company name
- * here" is a question the section should answer before it is asked.
+ * `label` repeats the publication promise the service pages already make. It
+ * belongs next to the cards, not only on the detail pages: the home page is
+ * where most people meet a reference first, and the question the section has
+ * to answer before it is asked is now "why does one card name a company and
+ * the other does not" — so the sentence leads with approval, and treats
+ * anonymity as the default it actually is.
+ *
+ * `references.test.ts` checks this string against the catalog: while a case is
+ * published under a customer's name, no surface may claim that references are
+ * anonymous without exception.
  */
 export interface ReferencesHomeContent {
   headline: string;
@@ -191,9 +197,9 @@ const content: Record<Lang, HomeContent> = {
       headline: "Aus der",
       headlineAccent: "Praxis.",
       intro:
-        "Ein Projekt, das über Jahre läuft — von der ersten Einrichtung bis zur *laufenden Pflege*.",
+        "Projekte, die nicht mit dem Livegang enden — von der ersten Einrichtung bis zur *laufenden Pflege*.",
       label:
-        "Veröffentlichte Beispiele erscheinen ausschließlich anonymisiert und nach Freigabe.",
+        "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
       serviceCta: "Zur passenden Leistung",
     },
     digitalResponsibility: {
@@ -277,9 +283,9 @@ const content: Record<Lang, HomeContent> = {
       headline: "From",
       headlineAccent: "practice.",
       intro:
-        "One project running over years — from the first setup through to the *ongoing upkeep*.",
+        "Projects that do not end at launch — from the first setup through to the *ongoing upkeep*.",
       label:
-        "Published examples appear anonymised and only with the client's approval.",
+        "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
       serviceCta: "See the matching service",
     },
     digitalResponsibility: {

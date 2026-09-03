@@ -178,4 +178,21 @@ describe("validateServiceReferences", () => {
       validateServiceReferences([{ ...complete, metric: 42 }]),
     ).toEqual([]);
   });
+
+  it("never copies a destination the CMS supplied", () => {
+    // The enforcement point for "editable copy, never an editable
+    // destination". It works because the validator rebuilds each item from a
+    // fixed field list rather than spreading the candidate — which is easy to
+    // undo with a well-meaning `...candidate`, and nothing else would notice.
+    // `toEqual` fails on the extra keys, so this is a real assertion.
+    expect(
+      validateServiceReferences([
+        {
+          ...complete,
+          articleUrl: "https://example.invalid/a",
+          siteUrl: "https://example.invalid/b",
+        },
+      ]),
+    ).toEqual([{ ...complete, metric: "" }]);
+  });
 });

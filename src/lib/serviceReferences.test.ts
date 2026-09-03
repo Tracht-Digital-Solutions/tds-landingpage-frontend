@@ -27,10 +27,16 @@ beforeEach(() => {
 });
 
 describe("resolveServiceContent — references", () => {
-  it("has a committed case to work with at all", () => {
-    // Guards the fixture: every assertion below is vacuous without this.
-    expect(committed.length).toBeGreaterThan(0);
+  it("has the committed cases the assertions below assume", () => {
+    // Guards the fixture: every assertion below is vacuous without this, and
+    // the shape matters as much as the count. Position 0 must be the case with
+    // a journal article, position 1 the named one with a customer site —
+    // reorder the catalog and these tests would keep passing while proving
+    // something else.
+    expect(committed.length).toBeGreaterThan(1);
     expect(committed[0].articleUrl).toBeTruthy();
+    expect(committed[0].siteUrl).toBeUndefined();
+    expect(committed[1].siteUrl).toBeTruthy();
   });
 
   it("renders the committed cases when the block has no references key", async () => {
@@ -47,18 +53,22 @@ describe("resolveServiceContent — references", () => {
     expect(content.references).toEqual(committed);
   });
 
-  it("keeps the code-owned link when the panel rewrites the text", async () => {
+  it("keeps every code-owned link when the panel rewrites the text", async () => {
+    // Two entries, not one: the merge maps over the CMS list, so a one-entry
+    // override would truncate the result and never reach the named case at
+    // position 1 — the only place the customer link can be proven to survive.
+    const edited = {
+      context: "Kontext",
+      challenge: "Ausgangslage",
+      solution: "Lösungsweg",
+      result: "Ergebnis",
+      metric: "",
+    };
     vi.mocked(cms.fetchBlocks).mockResolvedValue({
       service_web_presence: {
         references: [
-          {
-            title: "Im Panel umformuliert",
-            context: "Kontext",
-            challenge: "Ausgangslage",
-            solution: "Lösungsweg",
-            result: "Ergebnis",
-            metric: "",
-          },
+          { ...edited, title: "Im Panel umformuliert" },
+          { ...edited, title: "Ebenfalls umformuliert" },
         ],
       },
     } as never);
@@ -66,39 +76,55 @@ describe("resolveServiceContent — references", () => {
     const content = await resolveServiceContent(service, "de");
     expect(content.references[0].title).toBe("Im Panel umformuliert");
     expect(content.references[0].articleUrl).toBe(committed[0].articleUrl);
+    expect(content.references[1].title).toBe("Ebenfalls umformuliert");
+    expect(content.references[1].siteUrl).toBe(committed[1].siteUrl);
   });
 
-  it("never takes a link from the CMS", async () => {
+  it("never takes a destination from the CMS", async () => {
+    // Three entries, each carrying both kinds of link, because the interesting
+    // positions are now different from one another: one committed case with an
+    // article, one named committed case with a customer site, and one past the
+    // end of the committed list.
+    const hostile = {
+      context: "c",
+      challenge: "c",
+      solution: "c",
+      result: "c",
+      metric: "",
+      articleUrl: "https://example.invalid/anywhere",
+      siteUrl: "https://example.invalid/anywhere",
+    };
     vi.mocked(cms.fetchBlocks).mockResolvedValue({
       service_web_presence: {
         references: [
-          {
-            title: "A",
-            context: "c",
-            challenge: "c",
-            solution: "c",
-            result: "c",
-            metric: "",
-            articleUrl: "https://example.invalid/anywhere",
-          },
-          {
-            title: "B",
-            context: "c",
-            challenge: "c",
-            solution: "c",
-            result: "c",
-            metric: "",
-            articleUrl: "https://example.invalid/anywhere",
-          },
+          { ...hostile, title: "A" },
+          { ...hostile, title: "B" },
+          { ...hostile, title: "C" },
         ],
       },
     } as never);
 
-    const content = await resolveServiceContent(service, "de");
-    expect(content.references[0].articleUrl).toBe(committed[0].articleUrl);
-    // Position 1 has no committed case behind it, so it gets no link — the
-    // CMS value is dropped rather than trusted.
-    expect(content.references[1].articleUrl).toBeUndefined();
+    const references = (await resolveServiceContent(service, "de")).references;
+
+    // The committed article link wins — and no customer site is bolted onto an
+    // anonymised case. That second assertion is the one that matters now that
+    // naming a customer is possible at all: it must not be reachable from the
+    // panel.
+    expect(references[0].articleUrl).toBe(committed[0].articleUrl);
+    expect(references[0].siteUrl).toBeUndefined();
+
+    // The committed customer link wins over the supplied one, rather than
+    // merely coexisting with it.
+    expect(references[1].siteUrl).toBe(committed[1].siteUrl);
+    expect(references[1].siteUrl).not.toBe(hostile.siteUrl);
+    expect(references[1].articleUrl).toBeUndefined();
+
+    // Past the committed list: an editor may add a case, never a destination
+    // for it. This position is what keeps the rule under test as the catalog
+    // grows — the ones above stop proving it as soon as something committed
+    // sits behind them.
+    expect(references[2].articleUrl).toBeUndefined();
+    expect(references[2].siteUrl).toBeUndefined();
   });
 
   it("hides the section on an EXPLICITLY empty list", async () => {
