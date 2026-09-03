@@ -233,8 +233,9 @@ describe("getDemos", () => {
   });
 
   /**
-   * The state the site actually ships in today: five hosts, none of them
-   * presentable, so the section renders nothing at all.
+   * The state the site actually ships in today: five hosts, of which only the
+   * ones `npm run demos:sync` found presentable render. When that is none, the
+   * section renders nothing at all.
    */
   it("returns nothing for the committed snapshot when nothing qualifies", async () => {
     const presentable = resolveSnapshotDemos();
@@ -246,6 +247,36 @@ describe("getDemos", () => {
       for (const demo of presentable) {
         expect(demo.preview.startsWith("/demos/")).toBe(true);
         expect(demo.title.length).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
+/**
+ * The half of the snapshot that lives outside the JSON.
+ *
+ * `demos:sync` writes `demoData.json` AND the files under `public/demos/`, and
+ * only the JSON is tracked by default — a sync committed without its assets
+ * ships a card whose screenshot 404s. Nothing else would catch it: the entry
+ * is perfectly well formed, `getDemos()` returns it, and the page renders an
+ * empty box. So the paths in the committed snapshot are checked against disk.
+ */
+describe("the committed assets", () => {
+  it("has every file the committed snapshot points at", async () => {
+    const fs = await import("node:fs/promises");
+    const { fileURLToPath } = await import("node:url");
+    const publicDir = fileURLToPath(new URL("../../public/", import.meta.url));
+
+    for (const demo of resolveSnapshotDemos()) {
+      const paths = [demo.preview, demo.favicon].filter(
+        (value): value is string => typeof value === "string" && value !== "",
+      );
+      for (const publicPath of paths) {
+        const file = publicDir + publicPath.replace(/^\//, "");
+        await expect(
+          fs.access(file),
+          `${demo.definition.id}: ${publicPath} is in demoData.json but not on disk`,
+        ).resolves.toBeUndefined();
       }
     }
   });

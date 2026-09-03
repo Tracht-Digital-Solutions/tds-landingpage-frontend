@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-01T11:28:09.536Z",
+  "generatedAt": "2026-09-03T04:45:57.732Z",
   "demos": {
     "demo1": {
-      "status": "placeholder",
-      "title": null,
-      "description": null,
-      "siteLang": null,
-      "favicon": null,
-      "preview": null,
-      "previewWidth": null,
-      "previewHeight": null,
-      "checkedAt": "2026-09-01T11:28:09.299Z"
+      "status": "ok",
+      "title": "Demo & Partner Rechtsanwälte",
+      "description": "Hochwertige Demonstrationsseite einer fiktiven deutschen Wirtschaftskanzlei. Keine Rechtsberatung, keine echten Kontaktdaten.",
+      "siteLang": "de",
+      "favicon": "/demos/demo1-favicon.svg",
+      "preview": "/demos/demo1.webp",
+      "previewWidth": 1440,
+      "previewHeight": 900,
+      "checkedAt": "2026-09-03T04:45:54.014Z"
     },
     "demo2": {
       "status": "tls-invalid",
@@ -21,7 +21,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-01T11:28:09.359Z"
+      "checkedAt": "2026-09-03T04:45:54.102Z"
     },
     "demo3": {
       "status": "tls-invalid",
@@ -32,7 +32,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-01T11:28:09.411Z"
+      "checkedAt": "2026-09-03T04:45:54.210Z"
     },
     "demo4": {
       "status": "tls-invalid",
@@ -43,7 +43,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-01T11:28:09.477Z"
+      "checkedAt": "2026-09-03T04:45:54.314Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-01T11:28:09.536Z"
+      "checkedAt": "2026-09-03T04:45:54.405Z"
     }
   }
 }
