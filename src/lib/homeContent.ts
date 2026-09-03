@@ -51,12 +51,25 @@ export interface ServicesOverviewContent {
  *
  * `serviceIntro` is the shorter lead used on the Webauftritt service page,
  * where the surrounding page has already made the argument.
+ *
+ * ### Why there is a second, singular set
+ *
+ * How many demos render is decided by `getDemos()`, not by an editor — a host
+ * with an expired certificate simply drops out. The plural copy ("Fertige
+ * Beispielseiten", "Klicken Sie sich durch") then stands over a single card
+ * and promises a shelf that is not there. So the section carries both counts
+ * and `demosCopy()` picks; the accent word is shared because it does not
+ * inflect in either language.
  */
 export interface WebsiteDemosContent {
   headline: string;
   headlineAccent: string;
   intro: string;
   serviceIntro: string;
+  /** Used verbatim when exactly one demo survived the availability check. */
+  headlineSingle: string;
+  introSingle: string;
+  serviceIntroSingle: string;
 }
 
 /**
@@ -168,6 +181,11 @@ const content: Record<Lang, HomeContent> = {
         "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch* — so sehen Sie vorher, was Sie bekommen, statt es sich vorstellen zu müssen.",
       serviceIntro:
         "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch*, bevor wir über Ihre sprechen.",
+      headlineSingle: "Eine Webseite zum",
+      introSingle:
+        "Eine fertige Beispielseite, live im Netz. *Sehen Sie sich um* — so sehen Sie vorher, was Sie bekommen, statt es sich vorstellen zu müssen.",
+      serviceIntroSingle:
+        "Eine fertige Beispielseite, live im Netz. *Sehen Sie sich um*, bevor wir über Ihre sprechen.",
     },
     referencesHome: {
       headline: "Aus der",
@@ -249,6 +267,11 @@ const content: Record<Lang, HomeContent> = {
         "Finished example sites, live on the web. *Click through them* — so you can see beforehand what you get instead of having to imagine it.",
       serviceIntro:
         "Finished example sites, live on the web. *Click through them* before we talk about yours.",
+      headlineSingle: "A website to",
+      introSingle:
+        "A finished example site, live on the web. *Take a look around* — so you can see beforehand what you get instead of having to imagine it.",
+      serviceIntroSingle:
+        "A finished example site, live on the web. *Take a look around* before we talk about yours.",
     },
     referencesHome: {
       headline: "From",
@@ -282,4 +305,41 @@ const content: Record<Lang, HomeContent> = {
 
 export function getHomeContent(lang: Lang): HomeContent {
   return content[lang];
+}
+
+/** The three strings the demos section renders, for one count and one surface. */
+export interface DemosCopy {
+  headline: string;
+  headlineAccent: string;
+  intro: string;
+}
+
+/**
+ * Pick the demo section's framing for the number of cards that survived.
+ *
+ * Takes the already-merged content, so a CMS override of any single field is
+ * honoured on both counts. `count` is the length of `getDemos()`, never a
+ * configured number: the section only ever describes what it is about to show.
+ *
+ * A count of 0 never reaches a reader — the section renders nothing at all —
+ * but it returns the plural set rather than throwing, because a section header
+ * is not the place to discover an empty list.
+ */
+export function demosCopy(
+  content: WebsiteDemosContent,
+  count: number,
+  variant: "home" | "service",
+): DemosCopy {
+  const single = count === 1;
+  return {
+    headline: single ? content.headlineSingle : content.headline,
+    headlineAccent: content.headlineAccent,
+    intro: single
+      ? variant === "service"
+        ? content.serviceIntroSingle
+        : content.introSingle
+      : variant === "service"
+        ? content.serviceIntro
+        : content.intro,
+  };
 }

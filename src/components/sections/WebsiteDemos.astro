@@ -20,7 +20,7 @@
  */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
-import { getHomeContent } from "~/lib/homeContent";
+import { demosCopy, getHomeContent } from "~/lib/homeContent";
 import { getDemos } from "~/lib/demos";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
@@ -35,7 +35,9 @@ const lang = resolveLang(Astro.currentLocale);
 
 const demos = await getDemos();
 const content = await cmsFor("website_demos", lang, getHomeContent(lang).websiteDemos);
-const intro = variant === "service" ? content.serviceIntro : content.intro;
+// Plural framing over a single card promises a shelf that is not there, and
+// how many cards there are is decided by availability, not by an editor.
+const copy = demosCopy(content, demos.length, variant);
 
 // The heading id has to be unique per page. Only one variant is ever rendered
 // on a given page today, but naming them apart costs nothing and stops a
@@ -52,20 +54,20 @@ const headingId = variant === "service" ? "service-demos-heading" : "website-dem
     >
       <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
         <SectionHeader
-          headline={content.headline}
-          headlineAccent={content.headlineAccent}
+          headline={copy.headline}
+          headlineAccent={copy.headlineAccent}
           id={headingId}
           headingClass="mb-6"
         />
         <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
-          <Emphasis text={intro} />
+          <Emphasis text={copy.intro} />
         </p>
 
         {/* `auto-fit` with a floor rather than a fixed column count: the
             number of cards is whatever survived the availability check, so a
             hard `lg:grid-cols-3` would leave a two-card row hanging half
             empty. */}
-        <div class="demo-grid">
+        <div class="demo-grid" style={`--demo-count: ${demos.length}`}>
           {demos.map((demo) => (
             <DemoCard demo={demo} lang={lang} />
           ))}
@@ -78,12 +80,27 @@ const headingId = variant === "service" ? "service-demos-heading" : "website-dem
 <style>
   .demo-grid {
     display: grid;
-    gap: 1rem;
+    --demo-gap: 1rem;
+    gap: var(--demo-gap);
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    /* A demo card is a screenshot with a caption; stretched past ~26rem it
+       stops being a card and becomes a poster that outweighs every other
+       section on the page. `auto-fit` alone cannot prevent that: with one
+       surviving demo it collapses the empty tracks and hands the whole 7xl
+       container to the single card.
+
+       The cap is a width on the GRID rather than a maximum on the track, so
+       the columns stay `1fr` and a full house keeps its rhythm — with five
+       cards the calculated width is far wider than the container and this
+       does nothing at all. `--demo-count` comes from the number that
+       survived the availability check, not from the catalog. */
+    max-width: calc(
+      var(--demo-count, 5) * 26rem + (var(--demo-count, 5) - 1) * var(--demo-gap)
+    );
   }
   @media (min-width: 768px) {
     .demo-grid {
-      gap: 1.5rem;
+      --demo-gap: 1.5rem;
     }
   }
 </style>

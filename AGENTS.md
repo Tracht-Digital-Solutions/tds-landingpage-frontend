@@ -191,6 +191,14 @@ block; that block has no Website-CMS schema yet and falls back cleanly until it
 does. Never write a description for someone's site — a demo without a meta
 description simply shows none.
 
+The framing exists **twice, for one card and for several** (`headlineSingle`,
+`introSingle`, `serviceIntroSingle`), and `demosCopy()` picks by the number
+that survived the availability check. Availability is not editorial: four of
+five demos can drop out overnight, and plural copy over a single card promises
+a shelf that is not there. For the same reason the grid caps its own width —
+`auto-fit` hands the whole container to a lone card, which turns a card into a
+poster.
+
 The live probe is memoised per render generation, so the home page and the
 service page share one round of probes and a cache rebuild re-checks. That memo
 is also the feature's latency: a demo that goes down disappears at the next
