@@ -121,12 +121,14 @@ slugs or URLs — never render placeholders or invent customer names, quotes,
 screenshots, metrics or outcomes.
 
 The published cases themselves live in `src/lib/references.ts`, code-owned like
-`demoCatalog.ts`, because a card links to a service page and to a journal
-article and the CMS must not name a destination. `ServiceReference.articleUrl`
-is therefore **unreachable from the CMS**: `validateServiceReferences` rebuilds
-each item field by field and never copies it, and `mergeReferences` restores it
-from the committed case. `resolveServiceContent` resolves three distinct
-states, and the third is easy to break:
+`demoCatalog.ts`, because a card links to a service page, to a journal article
+and — on a named case — to the customer's own site, and the CMS must not name a
+destination. `ServiceReference.articleUrl` and `.siteUrl` are therefore
+**unreachable from the CMS**: `validateServiceReferences` rebuilds each item
+field by field and never copies them, and `mergeReferences` strips both off the
+override before restoring them from the committed case.
+`resolveServiceContent` resolves three distinct states, and the third is easy
+to break:
 
 - no `references` key, or a malformed list ⇒ the committed cases render;
 - a valid non-empty list ⇒ it overrides the TEXT position by position, links
@@ -136,9 +138,32 @@ states, and the third is easy to break:
   being present, not by the validated result being empty — a length check would
   silently take the ability away now that a committed base exists.
 
-Reference copy stays **anonymised**: no customer name, no link to a customer's
-own site. `references.test.ts` greps the committed prose for that, because it
-is a standing instruction a string edit could otherwise undo unnoticed.
+Reference copy is **anonymised by default**: no customer name, no link to a
+customer's own site. A case may be published under a customer's name only with
+that customer's approval, and it must then be marked `disclosure: "named"` and
+carry their address in `siteUrl`. `references.test.ts` enforces the whole rule,
+because every part of it is a standing instruction a string edit could
+otherwise undo unnoticed: an anonymous case is grepped for customer vocabulary,
+no case may carry a URL in its prose, `disclosure` and `siteUrl` must agree in
+**both** directions, and a `siteUrl` may not point at any origin of ours.
+
+While a named case is published, no surface may still promise that references
+appear anonymised without exception — that sentence lives in `homeContent.ts`
+(`referencesHome.label`) **and twelve times in `services.ts`**
+(`referencesLabel`, six services × two languages), rendered directly above the
+cards. A test ties the copy to the catalog so the promise and the cards cannot
+drift apart.
+
+Two asymmetries to know before hunting for them:
+
+- `sections/References.astro` reads `referenceCases` directly, not
+  `resolveServiceContent`. The empty-array off-switch below therefore does
+  **not** reach the home page: removing a named customer from there is a code
+  change and a deploy.
+- `mergeReferences` maps over the CMS list, so a stored `references` array
+  shorter than the committed list hides committed cases on that service page
+  while the home page still shows them. Check the stored block when adding a
+  case.
 
 The home section's framing is the `references_home` block, defaulting to
 `homeContent.ts`. Like `website_demos` it has no Website-CMS schema yet and

@@ -44,6 +44,8 @@ const ui = lang === "de"
       referenceResult: "Ergebnis",
       referenceMetric: "Belegbare Kennzahl",
       referenceArticle: "Der Artikel dazu im Journal",
+      referenceSite: "Die Webseite ansehen",
+      referenceNewTab: "öffnet in neuem Tab",
     }
   : {
       breadcrumb: "Breadcrumb",
@@ -53,6 +55,8 @@ const ui = lang === "de"
       referenceResult: "Outcome",
       referenceMetric: "Verifiable metric",
       referenceArticle: "The article on this in the Journal",
+      referenceSite: "View the website",
+      referenceNewTab: "opens in a new tab",
     };
 
 const offer = serviceRate !== undefined
@@ -439,16 +443,51 @@ const jsonLd = [
                   )}
                 </dl>
 
-                {/* Present only when the committed case carries one — the CMS
-                    cannot put a link here (see `ServiceReference.articleUrl`). */}
-                {reference.articleUrl && (
-                  <a
-                    href={reference.articleUrl}
-                    class="link-underline inline-block mt-8 text-[var(--color-accent)]"
-                  >
-                    {ui.referenceArticle}
-                    <span aria-hidden="true"> →</span>
-                  </a>
+                {/* Both links are present only when the committed case carries
+                    them — the CMS cannot put a destination here (see
+                    `ServiceReference.articleUrl` and `.siteUrl`). The row
+                    replaces the article link's own `mt-8`: two links needed a
+                    wrapper that wraps rather than a second inline-block. */}
+                {(reference.articleUrl || reference.siteUrl) && (
+                  <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                    {reference.articleUrl && (
+                      <a
+                        href={reference.articleUrl}
+                        class="link-underline text-[var(--color-accent)]"
+                      >
+                        {ui.referenceArticle}
+                        <span aria-hidden="true"> →</span>
+                      </a>
+                    )}
+                    {/* Outward arrow, not "→": this one leaves the site.
+                        `hreflang` hardcoded — see `References.astro`. */}
+                    {reference.siteUrl && (
+                      <a
+                        href={reference.siteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        hreflang="de"
+                        class="link-underline inline-flex items-center gap-1.5 text-[var(--color-accent)]"
+                      >
+                        {ui.referenceSite}
+                        <span class="sr-only"> ({ui.referenceNewTab})</span>
+                        <svg
+                          aria-hidden="true"
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.75"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <line x1="7" y1="17" x2="17" y2="7"></line>
+                          <polyline points="7 7 17 7 17 17"></polyline>
+                        </svg>
+                      </a>
+                    )}
+                  </div>
                 )}
               </article>
             ))}

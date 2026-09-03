@@ -31,9 +31,10 @@ organizing the content around one clear responsibility:
 9. Contact
 
 The former tech-stack and current-topics sections are no longer part of the
-home-page story. The placeholder portfolio remains hidden. Approved,
-anonymized references appear within the relevant service page; when none are
-available, the complete references section is omitted.
+home-page story. The placeholder portfolio remains hidden. Approved references
+appear within the relevant service page and on the home page — anonymized
+unless that customer agreed to be named; when none are available, the complete
+references section is omitted.
 
 | Path | Purpose |
 |---|---|
@@ -178,9 +179,9 @@ fallback must remain under `src/assets/legal/` because `public/legal/` would
 collide with the generated route.
 
 The old portfolio screenshots are no longer a launch dependency: the portfolio
-section stays hidden. The remaining publishable-content dependency is approved,
-anonymized reference material per service. `IMAGES.md` lists only unresolved
-asset work.
+section stays hidden. The remaining publishable-content dependency is approved
+reference material per service, anonymized by default. `IMAGES.md` lists only
+unresolved asset work.
 
 ## License
 

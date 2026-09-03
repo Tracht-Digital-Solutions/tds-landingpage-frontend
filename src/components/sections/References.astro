@@ -15,10 +15,18 @@
  * service page never saw one, and the section that used to occupy this idea —
  * the placeholder portfolio — is gone rather than merely hidden.
  *
- * What has NOT changed is the rule about content. Cases stay anonymised: no
- * customer name, no link to a customer's site. The card links to the service
- * the case belongs to and, when there is one, to the journal article about the
- * subject. Both destinations are code-owned (`lib/references.ts`).
+ * Cases are anonymised **by default** — no customer name, no link to their
+ * site — and a named one exists only where that customer approved being named.
+ * `disclosure` in `lib/references.ts` records which is which. The card links to
+ * the service the case belongs to, to the journal article when there is one,
+ * and on a named case to the customer's own site. Every destination is
+ * code-owned; none of them can come from the CMS.
+ *
+ * Worth knowing before someone goes looking for it: this section reads
+ * `referenceCases` directly, NOT `resolveServiceContent`. So the documented
+ * way to pull a case off a service page without a deploy — an explicitly empty
+ * `references` array in the CMS — does not reach the home page. Removing a
+ * named customer from here is a code change.
  *
  * Ground: `tds-tone-sand`. `WebsiteDemos` immediately above is deliberately
  * plain paper with sand-filled cards, so taking the sand for the section here
@@ -43,12 +51,16 @@ const cards = referenceCases.map((entry) => {
     serviceTitle: primary.fallback[lang].title,
     serviceHref: serviceHref(primary, lang),
     articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
+    siteHref: entry.siteUrl,
   };
 });
 
+// `newTab` duplicates a word `demoUi` already has, deliberately: importing the
+// demo cards' vocabulary here would couple two card families that are kept
+// apart on purpose, for one string.
 const ui = lang === "de"
-  ? { context: "Kontext", challenge: "Ausgangslage", solution: "Lösungsweg", result: "Ergebnis", metric: "Belegbare Kennzahl", article: "Der Artikel dazu im Journal" }
-  : { context: "Context", challenge: "Starting point", solution: "Approach", result: "Outcome", metric: "Verifiable metric", article: "The article on this in the Journal" };
+  ? { context: "Kontext", challenge: "Ausgangslage", solution: "Lösungsweg", result: "Ergebnis", metric: "Belegbare Kennzahl", article: "Der Artikel dazu im Journal", site: "Die Webseite ansehen", newTab: "öffnet in neuem Tab" }
+  : { context: "Context", challenge: "Starting point", solution: "Approach", result: "Outcome", metric: "Verifiable metric", article: "The article on this in the Journal", site: "View the website", newTab: "opens in a new tab" };
 ---
 
 {
@@ -128,6 +140,40 @@ const ui = lang === "de"
                   <a href={card.articleHref} class="link-underline text-[var(--color-accent)]">
                     {ui.article}
                     <span aria-hidden="true"> →</span>
+                  </a>
+                )}
+                {/* Present only on a named case, and only from the committed
+                    catalog — the CMS cannot put a customer link here. The
+                    outward arrow rather than the internal "→": DemoCard
+                    established that mark for a destination that leaves this
+                    site, and reusing the internal glyph would disguise it.
+                    `hreflang` is hardcoded: the one named case today is a
+                    German-only site. A customer site in another language needs
+                    a field on the case, not a guess here. */}
+                {card.siteHref && (
+                  <a
+                    href={card.siteHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    hreflang="de"
+                    class="link-underline inline-flex items-center gap-1.5 text-[var(--color-accent)]"
+                  >
+                    {ui.site}
+                    <span class="sr-only"> ({ui.newTab})</span>
+                    <svg
+                      aria-hidden="true"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="7" y1="17" x2="17" y2="7"></line>
+                      <polyline points="7 7 17 7 17 17"></polyline>
+                    </svg>
                   </a>
                 )}
               </div>
