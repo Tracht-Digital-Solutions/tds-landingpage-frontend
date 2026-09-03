@@ -32,6 +32,7 @@ export interface PricingContent {
   rateSolutions: number;
   rateCustomDevelopment: number;
   rateWebPresence: number;
+  rateMarketing: number;
   notesTitle: string;
   notes: string[];
   ctaTitle: string;
@@ -61,6 +62,7 @@ const defaults: Record<Lang, PricingContent> = {
     rateSolutions: 110,
     rateCustomDevelopment: 105,
     rateWebPresence: 95,
+    rateMarketing: 95,
     notesTitle: "Gut zu wissen",
     notes: [
       "Alle Preise sind netto, zuzüglich Mehrwertsteuer.",
@@ -94,6 +96,7 @@ const defaults: Record<Lang, PricingContent> = {
     rateSolutions: 110,
     rateCustomDevelopment: 105,
     rateWebPresence: 95,
+    rateMarketing: 95,
     notesTitle: "Good to know",
     notes: [
       "All prices are net and exclude VAT.",
@@ -127,6 +130,7 @@ export function getServiceRate(
     solutions: pricing.rateSolutions,
     "custom-development": pricing.rateCustomDevelopment,
     "web-presence": pricing.rateWebPresence,
+    marketing: pricing.rateMarketing,
   };
   return rates[serviceId];
 }

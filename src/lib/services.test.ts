@@ -7,13 +7,14 @@ import {
 } from "./services";
 
 describe("service catalog", () => {
-  it("pins the six services in the agreed display order", () => {
+  it("pins the seven services in the agreed display order", () => {
     expect(serviceDefinitions.map((service) => service.id)).toEqual([
       "consulting",
       "process",
       "solutions",
       "custom-development",
       "web-presence",
+      "marketing",
       "complete-it",
     ]);
     expect(serviceDefinitions.map((service) => service.cmsKey)).toEqual([
@@ -22,8 +23,19 @@ describe("service catalog", () => {
       "service_solutions",
       "service_custom_development",
       "service_web_presence",
+      "service_marketing",
       "service_complete_it",
     ]);
+  });
+
+  it("pins the display numbers the card decorations are keyed on", () => {
+    // `ServiceCard` keys its background shape on `number` and falls back to
+    // "01" for anything it does not know, so a service added without a shape
+    // silently wears the first card's decoration. Nothing renders wrong; the
+    // grid just repeats itself.
+    const numbers = serviceDefinitions.map((service) => service.number);
+    expect(new Set(numbers).size).toBe(numbers.length);
+    expect(numbers).toEqual(["01", "02", "03", "04", "05", "06", "07"]);
   });
 
   it("keeps ids, CMS keys and localized slugs unique", () => {
