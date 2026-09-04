@@ -15,6 +15,7 @@
  * is enforceable.
  */
 
+import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
 import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
@@ -37,11 +38,21 @@ export interface SitemapEntry {
  * its twin points `hreflang` at a 404 — which invalidates the whole set, the
  * German side included. That is why `/install`, `/legal/*`, `/404`, `/500`,
  * the OG endpoint and the vCard are absent: the first has no English twin, the
- * legal pages are `noindex`, and the rest are not pages.
+ * legal pages are `noindex`, and the rest are not pages. The business CARD is
+ * listed — it is a real page in both trees; the `.vcf` beside it is not.
  */
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { de: "/", en: "/en/", changefreq: "weekly", priority: 1.0 },
   { de: "/preise", en: "/en/preise", changefreq: "monthly", priority: 0.8 },
+  // Lower than a service page on purpose: it is one person's contact card, so
+  // it earns a place in the index but should not compete with the pages that
+  // describe what is for sale.
+  {
+    de: BUSINESS_CARD_SLUG.de,
+    en: BUSINESS_CARD_SLUG.en,
+    changefreq: "monthly",
+    priority: 0.5,
+  },
   ...serviceDefinitions.map((service) => ({
     de: serviceHref(service, "de"),
     en: serviceHref(service, "en"),
