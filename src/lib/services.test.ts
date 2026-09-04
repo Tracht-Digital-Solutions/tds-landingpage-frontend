@@ -7,35 +7,30 @@ import {
 } from "./services";
 
 describe("service catalog", () => {
-  it("pins the seven services in the agreed display order", () => {
+  it("pins the four services in the agreed display order", () => {
     expect(serviceDefinitions.map((service) => service.id)).toEqual([
       "consulting",
       "process",
       "solutions",
-      "custom-development",
       "web-presence",
-      "marketing",
-      "complete-it",
     ]);
     expect(serviceDefinitions.map((service) => service.cmsKey)).toEqual([
       "service_consulting",
       "service_process",
       "service_solutions",
-      "service_custom_development",
       "service_web_presence",
-      "service_marketing",
-      "service_complete_it",
     ]);
   });
 
-  it("pins the display numbers the card decorations are keyed on", () => {
-    // `ServiceCard` keys its background shape on `number` and falls back to
-    // "01" for anything it does not know, so a service added without a shape
-    // silently wears the first card's decoration. Nothing renders wrong; the
-    // grid just repeats itself.
+  it("keeps the display numbers a contiguous sequence", () => {
+    // `number` is pure ordering — it is never rendered, and since the mosaic
+    // replaced the per-card decoration it no longer keys anything visual
+    // either. It is pinned because it is the order the overview, the pricing
+    // grid and the sitemap all iterate in, and a gap or a duplicate here is
+    // invisible until two services swap places on one surface but not another.
     const numbers = serviceDefinitions.map((service) => service.number);
     expect(new Set(numbers).size).toBe(numbers.length);
-    expect(numbers).toEqual(["01", "02", "03", "04", "05", "06", "07"]);
+    expect(numbers).toEqual(["01", "02", "03", "04"]);
   });
 
   it("keeps ids, CMS keys and localized slugs unique", () => {
@@ -100,7 +95,7 @@ describe("service summaries double as meta descriptions", () => {
 
     it(`gives each ${lang} service a distinct summary`, () => {
       // Duplicate descriptions across indexable pages are a self-inflicted
-      // ranking problem; six near-identical service pages would be exactly that.
+      // ranking problem; near-identical service pages would be exactly that.
       const summaries = serviceDefinitions.map((service) => service.fallback[lang].summary);
       expect(new Set(summaries).size).toBe(summaries.length);
     });

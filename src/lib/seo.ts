@@ -29,8 +29,8 @@ export const siteConfig = {
    * those.
    */
   description: {
-    de: "Digitalisierung für Unternehmen mit fester Ansprechperson: Beratung, Umsetzung und komplette IT aus einer Hand — aus Schwarzenbek bei Hamburg.",
-    en: "Your dedicated contact for business digitalization: advice, implementation and complete IT from one source — from Schwarzenbek near Hamburg.",
+    de: "Digitalisierung für Unternehmen mit fester Ansprechperson: Beratung, Prozesse, eigene Lösungen und Webauftritt — aus Schwarzenbek bei Hamburg.",
+    en: "Your dedicated contact for business digitalization: advice, processes, tailored software and web presence — from Schwarzenbek near Hamburg.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
@@ -69,10 +69,8 @@ export const siteConfig = {
     "Suchmaschinenwerbung",
     "Lokale Sichtbarkeit",
     "Individualsoftware",
-    "App-Entwicklung",
+    "Auftragsentwicklung",
     "IT-Beratung",
-    "IT-Betreuung",
-    "IT-Sicherheit",
   ],
   /** Public social URLs — surface in JSON-LD `sameAs` and the
    * Contact aside. WhatsApp is a `wa.me` deep link to the

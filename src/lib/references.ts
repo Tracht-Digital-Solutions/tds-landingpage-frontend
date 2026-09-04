@@ -68,6 +68,19 @@ export interface ReferenceCase {
    * living in there would trip this repo's own guard, correctly.
    */
   siteUrl: string | null;
+  /**
+   * Whether a screenshot of {@link ReferenceCase.siteUrl} may be published.
+   *
+   * Separate from `disclosure` and, like it, deliberately without a default.
+   * Naming a customer and linking their site is one permission; reproducing
+   * the site as a picture on our own page is another, and inferring the second
+   * from the first would decide it for them. `false` is always safe: the card
+   * simply renders without a band.
+   *
+   * Only ever true together with `disclosure: "named"` and a `siteUrl`, which
+   * `references.test.ts` enforces.
+   */
+  previewAllowed: boolean;
   content: Record<Lang, ServiceReference>;
 }
 
@@ -85,6 +98,7 @@ export const referenceCases: readonly ReferenceCase[] = [
     articleSlug: "vom-baukasten-shop-zum-eigenen-shop",
     disclosure: "anonymous",
     siteUrl: null,
+    previewAllowed: false,
     content: {
       de: {
         title: "Vom Baukasten-Shop zum eigenen Shop",
@@ -121,6 +135,12 @@ export const referenceCases: readonly ReferenceCase[] = [
     // The canonical origin. `www.` answers with a 301 to exactly this, and
     // linking at a redirect spends a round trip on every visitor who clicks.
     siteUrl: "https://hof-meerheck.de/",
+    // FALSE until the customer has been asked about the screenshot itself.
+    // They approved being named and linked; reproducing their site as a
+    // picture on this page is a second thing to approve, and deciding it
+    // from the first would decide it for them. Flip to true once asked —
+    // `npm run references:sync` then captures the shot.
+    previewAllowed: false,
     content: {
       de: {
         title: "Eine bestehende Webseite, wieder auf dem Stand",

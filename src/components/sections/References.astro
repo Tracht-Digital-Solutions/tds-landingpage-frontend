@@ -36,17 +36,22 @@ import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import { referenceCases, articleUrl } from "~/lib/references";
+import { getReferencePreviews } from "~/lib/referencePreviews";
 import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const content = await cmsFor("references_home", lang, getHomeContent(lang).referencesHome);
+// Consent, a live site and a captured screenshot — a case missing any one of
+// the three is simply absent from this map and its card renders without a band.
+const previews = await getReferencePreviews();
 
 const cards = referenceCases.map((entry) => {
   const primary = getServiceById(entry.services[0]);
   return {
     id: entry.id,
+    preview: previews.get(entry.id) ?? null,
     reference: entry.content[lang],
     serviceTitle: primary.fallback[lang].title,
     serviceHref: serviceHref(primary, lang),
@@ -59,8 +64,8 @@ const cards = referenceCases.map((entry) => {
 // demo cards' vocabulary here would couple two card families that are kept
 // apart on purpose, for one string.
 const ui = lang === "de"
-  ? { context: "Kontext", challenge: "Ausgangslage", solution: "Lösungsweg", result: "Ergebnis", metric: "Belegbare Kennzahl", article: "Der Artikel dazu im Journal", site: "Die Webseite ansehen", newTab: "öffnet in neuem Tab" }
-  : { context: "Context", challenge: "Starting point", solution: "Approach", result: "Outcome", metric: "Verifiable metric", article: "The article on this in the Journal", site: "View the website", newTab: "opens in a new tab" };
+  ? { context: "Kontext", result: "Ergebnis", metric: "Belegbare Kennzahl", article: "Der Artikel dazu im Journal", site: "Die Webseite ansehen", newTab: "öffnet in neuem Tab", previewAlt: (title: string) => `Startseite der Webseite: ${title}` }
+  : { context: "Context", result: "Outcome", metric: "Verifiable metric", article: "The article on this in the Journal", site: "View the website", newTab: "opens in a new tab", previewAlt: (title: string) => `Home page of the website: ${title}` };
 ---
 
 {
@@ -84,54 +89,54 @@ const ui = lang === "de"
           {content.label}
         </p>
 
-        <div class="grid lg:grid-cols-2 gap-5 md:gap-6">
+        {/* `items-start` rather than the default stretch: one card may carry
+            a website preview and its neighbour may not, and forcing the shorter
+            one to the taller one's height opens a hole under its text that no
+            content will ever fill. */}
+        <div class="grid lg:grid-cols-2 items-start gap-5 md:gap-6">
           {cards.map((card) => (
-            <article class="bg-[var(--color-paper)] rounded-[6px] p-7 md:p-10">
-              <p class="eyebrow text-[var(--color-accent)] mb-4">
-                <span class="sr-only">{ui.context}: </span>
-                {card.reference.context}
-              </p>
-              <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-8">
-                {card.reference.title}
-              </h3>
-              <dl class="space-y-7">
-                <div>
-                  <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
-                    {ui.challenge}
-                  </dt>
-                  <dd class="text-[var(--color-black)] leading-relaxed">
-                    {card.reference.challenge}
-                  </dd>
+            <article class="reference-card bg-[var(--color-paper)] rounded-[6px] overflow-hidden flex flex-col">
+              {/* The picture, where the customer allowed one. A screenshot,
+                  captured offline by `npm run references:sync` — never an
+                  iframe: a live embed of somebody else's site fails on their
+                  `X-Frame-Options` with no way to know in advance, and the
+                  page cache would then freeze the broken state. */}
+              {card.preview && (
+                <div class="reference-card__shot">
+                  <img
+                    src={card.preview.src}
+                    alt={ui.previewAlt(card.reference.title)}
+                    width={card.preview.width}
+                    height={card.preview.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
-                <div>
-                  <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
-                    {ui.solution}
-                  </dt>
-                  <dd class="text-[var(--color-black)] leading-relaxed">
-                    {card.reference.solution}
-                  </dd>
-                </div>
-                <div>
-                  <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
-                    {ui.result}
-                  </dt>
-                  <dd class="text-[var(--color-black)] leading-relaxed">
-                    {card.reference.result}
-                  </dd>
-                </div>
-                {card.reference.metric && (
-                  <div class="bg-[var(--color-card)] rounded-[6px] px-5 py-4">
-                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-accent)] mb-2">
-                      {ui.metric}
-                    </dt>
-                    <dd class="font-[var(--font-display)] text-xl text-[var(--color-black)]">
-                      {card.reference.metric}
-                    </dd>
-                  </div>
-                )}
-              </dl>
+              )}
 
-              <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+              <div class="flex flex-col flex-1 p-7 md:p-9">
+                <p class="eyebrow text-[var(--color-accent)] mb-3">
+                  <span class="sr-only">{ui.context}: </span>
+                  {card.reference.context}
+                </p>
+                <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-5">
+                  {card.reference.title}
+                </h3>
+                {/* Result only. The starting point and the approach are the
+                    article's job — repeating them here made every card three
+                    labelled paragraphs long, which is not a card. */}
+                <p class="text-[var(--color-black)] leading-relaxed">
+                  <span class="sr-only">{ui.result}: </span>
+                  {card.reference.result}
+                </p>
+                {card.reference.metric && (
+                  <p class="mt-6 font-[var(--font-display)] text-xl text-[var(--color-black)]">
+                    <span class="sr-only">{ui.metric}: </span>
+                    {card.reference.metric}
+                  </p>
+                )}
+
+                <div class="mt-auto pt-8 flex flex-wrap gap-x-8 gap-y-3">
                 <a href={card.serviceHref} class="link-underline text-[var(--color-accent)]">
                   {content.serviceCta}
                   <span aria-hidden="true"> →</span>
@@ -176,6 +181,7 @@ const ui = lang === "de"
                     </svg>
                   </a>
                 )}
+                </div>
               </div>
             </article>
           ))}
@@ -184,3 +190,28 @@ const ui = lang === "de"
     </section>
   )
 }
+
+<style>
+  /* The screenshot is CONTENT, not a ground: full strength, in front, with a
+     real alt. Same rule as DemoCard — the difference between a picture of a
+     site and a texture behind text is the whole point of showing it.
+
+     The ratio is reserved before the image loads so the two cards in a row
+     keep their headings aligned while the shot arrives. */
+  .reference-card__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-soft);
+    /* A screenshot of a page has a page edge. Without this it bleeds into the
+       card's fill and reads as a broken layout rather than a picture of one. */
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .reference-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+</style>

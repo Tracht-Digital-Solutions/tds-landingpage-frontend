@@ -135,13 +135,13 @@ const content: Record<Lang, HomeContent> = {
     hero: {
       // Three parts, and the split is the line break: the headline is set
       // on one line, the accent word starts the second. `text-wrap: balance`
-      // would otherwise put "Ihre IT. Ein" on line one, which reads as a
+      // would otherwise pull "Ein" up onto line one, which reads as a
       // sentence cut in half.
-      headline: "Ihre IT.",
+      headline: "Alles Digitale.",
       headlineAccent: "Ein",
       headlineSuffix: "Ansprechpartner.",
       sub:
-        "Ich plane, baue und betreue Ihre Technik. *Sie haben einen Ansprechpartner* — nicht fünf Firmen, die aufeinander zeigen.",
+        "Ich plane und baue, was Ihr Betrieb wirklich braucht. *Sie haben einen Ansprechpartner* — nicht fünf Firmen, die aufeinander zeigen.",
       cta1: "Erstgespräch vereinbaren",
       cta2: "zu den Leistungen",
       scrollHint: "Wieso ich?",
@@ -178,7 +178,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Was ich",
       headlineAccent: "anbiete?",
       intro:
-        "Sieben Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
+        "Vier Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
     },
     websiteDemos: {
       headline: "Webseiten zum",
@@ -211,7 +211,7 @@ const content: Record<Lang, HomeContent> = {
         "Sagen, was zuerst dran ist — verständlich",
         "Projekte selbst umsetzen oder Beteiligte steuern",
         "Vorhandene Systeme und neue Lösungen zusammenbringen",
-        "Auf Wunsch die ganze IT übernehmen",
+        "Den Auftritt sichtbar machen und dort pflegen, wo er wirkt",
       ],
       primaryCta: "Erstgespräch vereinbaren",
       secondaryCta: "Preise ansehen",
@@ -223,11 +223,11 @@ const content: Record<Lang, HomeContent> = {
   },
   en: {
     hero: {
-      headline: "Your IT.",
+      headline: "Everything digital.",
       headlineAccent: "One",
       headlineSuffix: "point of contact.",
       sub:
-        "I plan, build and look after your technology. *You get one contact* — not five suppliers pointing at each other.",
+        "I plan and build what your business actually needs. *You get one contact* — not five suppliers pointing at each other.",
       cta1: "Arrange an initial consultation",
       cta2: "View services",
       scrollHint: "Why me?",
@@ -264,7 +264,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "What I",
       headlineAccent: "offer?",
       intro:
-        "Seven areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
+        "Four areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
     },
     websiteDemos: {
       headline: "Websites to",
@@ -297,7 +297,7 @@ const content: Record<Lang, HomeContent> = {
         "Say what comes first — in plain terms",
         "Deliver projects directly or steer the people involved",
         "Bring existing systems and new solutions together",
-        "Take over the whole of your IT if you want",
+        "Make the presence visible and keep it working over time",
       ],
       primaryCta: "Arrange an initial consultation",
       secondaryCta: "View pricing",

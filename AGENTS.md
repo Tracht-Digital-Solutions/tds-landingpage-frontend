@@ -96,21 +96,25 @@ page's description, and only the committed defaults are covered by tests.
 
 The redesigned page-level blocks are `home_hero`, `why_me`,
 `services_overview`, `digital_responsibility`, `pricing_services` and `faq_v2`.
-The flat pricing block owns the page/teaser copy, five numeric hourly rates,
-the custom-rate label, notes and CTA. Legacy `hero`, `about`, `services`,
+The flat pricing block owns the page/teaser copy, four numeric hourly rates,
+notes and CTA. Every service has a rate, so there is no custom-rate label and
+no highlighted card any more. Legacy `hero`, `about`, `services`,
 `consulting`, `pricing` and `faq` rows remain readable in the editor for stored
 content but have no active home/pricing renderer; do not wire them back. The
 `tech` and `portfolio` blocks were removed from the CMS schema together with
 their renderers — any stored rows are inert and must not be reintroduced.
 
-The six service blocks are:
+The four service blocks are:
 
 - `service_consulting`
 - `service_process`
 - `service_solutions`
-- `service_custom_development`
-- `service_web_presence`
-- `service_complete_it`
+- `service_web_presence` — websites, online shops AND marketing
+
+Contract development was folded into Individuelle Lösungen, marketing into
+Webauftritt, and Komplette IT was withdrawn. Their retired URLs answer with a
+301 from `retiredServiceTargets` in `src/lib/services.ts`; do not turn those
+back into 404s and do not reuse a retired slug for a new service.
 
 Each block exposes `label`, `title`, `summary`, `intro`; titled lists for
 `situations`, `responsibilities`, `outcomes`, `boundaries` and `process`;
@@ -150,7 +154,7 @@ no case may carry a URL in its prose, `disclosure` and `siteUrl` must agree in
 While a named case is published, no surface may still promise that references
 appear anonymised without exception — that sentence lives in `homeContent.ts`
 (`referencesHome.label`) **and twelve times in `services.ts`**
-(`referencesLabel`, six services × two languages), rendered directly above the
+(`referencesLabel`, four services × two languages), rendered directly above the
 cards. A test ties the copy to the catalog so the promise and the cards cannot
 drift apart.
 
@@ -285,8 +289,7 @@ process; cache fingerprinting does not replace the restart.
   title rather than a hard-coded tab title.
 - JSON-LD must match visible content after CMS resolution. FAQ answers and
   process steps must use the same resolved values as their rendered sections.
-  Pricing structured data may include numeric hourly offers only; the custom
-  monthly `Komplette IT` offer must not receive an invented numeric price.
+  Pricing structured data may include numeric hourly offers only.
 - Service cards are semantic links with a full-card hit area, a visible
   keyboard focus and meaningful accessible text. Prefer native links,
   headings, lists, `<details>/<summary>` and form controls over scripted
@@ -327,9 +330,9 @@ invalidation, sitemap/hreflang, JSON-LD, keyboard focus and responsive layout.
   locale into a shared component.
 - Do not duplicate CMS copy in components, accept CMS-controlled route keys,
   or publish fabricated references and service promises.
-- Do not add unconditional 24/7, response-time or availability guarantees for
-  Complete IT; scope and availability are contractual.
-- Do not create a numeric public price or Offer price for Complete IT before an
-  assessment.
+- Do not reintroduce Komplette IT or Auftragsprogrammierung as offers; a test
+  greps the committed prose for both.
+- Do not publish a screenshot of a customer site without `previewAllowed` on
+  the case; see IMAGES.md.
 - Do not put secrets in source, `PUBLIC_*` variables, browser code or generated
   runtime JSON.

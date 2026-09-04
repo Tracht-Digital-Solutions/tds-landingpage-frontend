@@ -38,7 +38,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import sharp from "sharp";
-import { chromium, type Browser } from "playwright-core";
+import { chromium } from "playwright-core";
+import { capturePreview } from "./capture-preview.ts";
 import {
   DEMO_ASSET_DIR,
   DEMO_PREVIEW,
@@ -51,7 +52,6 @@ const assetDir = path.join(root, "public", DEMO_ASSET_DIR);
 const snapshotFile = path.join(root, "src", "lib", "demoData.json");
 
 const FETCH_TIMEOUT_MS = 15_000;
-const NAVIGATION_TIMEOUT_MS = 30_000;
 /** A favicon larger than this is not a favicon; do not commit it. */
 const MAX_FAVICON_BYTES = 100 * 1024;
 /** Below this much visible text a page is a placeholder, not a site. */
@@ -229,42 +229,6 @@ async function fetchFavicon(demo: DemoDefinition, candidates: string[]): Promise
   return null;
 }
 
-/**
- * Screenshot the demo as a visitor first sees it.
- *
- * `reducedMotion: "reduce"` so an entrance animation is not caught halfway
- * through, and the capture is viewport-sized rather than full-page: the card
- * shows the top of the site, not a metre-long strip scaled into illegibility.
- */
-async function capturePreview(browser: Browser, demo: DemoDefinition): Promise<string | null> {
-  const context = await browser.newContext({
-    viewport: { ...DEMO_PREVIEW },
-    deviceScaleFactor: 1,
-    reducedMotion: "reduce",
-    colorScheme: "light",
-    locale: "de-DE",
-  });
-
-  try {
-    const page = await context.newPage();
-    try {
-      await page.goto(demo.url, { waitUntil: "networkidle", timeout: NAVIGATION_TIMEOUT_MS });
-    } catch {
-      // A site that polls never goes idle. `load` plus the settle below is
-      // enough for a screenshot, and is better than no preview at all.
-      await page.goto(demo.url, { waitUntil: "load", timeout: NAVIGATION_TIMEOUT_MS });
-    }
-    await page.waitForTimeout(1_000);
-
-    const png = await page.screenshot({ type: "png" });
-    const file = `${demo.id}.webp`;
-    await sharp(png).webp({ quality: 82 }).toFile(path.join(assetDir, file));
-    return `/${DEMO_ASSET_DIR}/${file}`;
-  } finally {
-    await context.close();
-  }
-}
-
 // ─── Harvest ─────────────────────────────────────────────────────────────────
 
 function unavailable(status: string, note?: string): Harvest {
@@ -399,7 +363,7 @@ if (photogenic.length > 0) {
       const result = results.get(demo.id)!;
       process.stdout.write(`  ${demo.id}  screenshot … `);
       try {
-        result.preview = await capturePreview(browser, demo);
+        result.preview = await capturePreview(browser, demo, assetDir, DEMO_ASSET_DIR);
         // eslint-disable-next-line no-console
         console.log(result.preview ? "ok" : "failed");
       } catch (error) {

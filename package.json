@@ -13,7 +13,8 @@
     "og:smoke": "tsx scripts/og-smoke.ts",
     "demos:sync": "tsx scripts/demos-sync.ts",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "references:sync": "tsx scripts/references-sync.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

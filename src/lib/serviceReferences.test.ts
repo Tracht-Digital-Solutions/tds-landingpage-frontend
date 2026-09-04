@@ -150,7 +150,7 @@ describe("resolveServiceContent — references", () => {
   });
 
   it("shows nothing for a service no case names, unchanged from before", async () => {
-    const content = await resolveServiceContent(getServiceById("complete-it"), "de");
+    const content = await resolveServiceContent(getServiceById("consulting"), "de");
     expect(content.references).toEqual([]);
   });
 

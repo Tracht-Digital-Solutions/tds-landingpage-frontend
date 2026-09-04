@@ -1,41 +1,69 @@
 # Image work
 
-One slot is still open: the Marketing service ships with `image: null` and its
-brief below is waiting for a photo. Everything else is filled. The logo,
-portrait, favicon and process images were always there; the ten photographic
-grounds below — six service grounds and four section grounds — were added in
-the image pass. Journal cards
+All image slots on the site are filled. The logo, portrait, favicon and process
+images were always there; the eight photographic grounds below — four service
+grounds and four section grounds — were added in the image pass. Journal cards
 use an uploaded cover when one exists and the shared abstract cover otherwise.
 
+**The service grounds are no longer grounds.** Since the services section
+became a gapless mosaic they render as a 16:10 band at the top of each tile, at
+full strength and cropped from the top — `object-position: top`, because every
+brief below composes the subject into the upper two thirds and leaves the lower
+third empty. A band cropped from the bottom shows table. The detail-page hero
+still uses the same file as a ground behind the headline, so each photo has to
+survive both readings.
+
 The mechanism that made them optional is unchanged and stays: `image: null` in
-`src/lib/services.ts` renders no `<img>` at all — no 404, no empty box — and
-service cards and service hero bands still carry a constructed geometry
-background from the shared decoration layer underneath. A photograph is an
-extra layer over that ground, not a load-bearing piece. Remove one and the page
-is still complete.
+`src/lib/services.ts` renders no `<img>` at all — no 404, no empty box. On the
+detail hero the constructed geometry underneath carries the band on its own. On
+a mosaic tile there is now no band at all: the tile is copy only, and the
+neighbouring seams still hold the composition together. Remove one and the page
+is still complete — it is just quieter.
 
 Do not add placeholder customer screenshots or infer assets from anonymised
 references. A generated photograph is decoration; it must never be presentable
 as a picture of a real client, a real project or a real result.
 
-`public/demos/` is the one exception, and only because it breaks none of that:
-those files are machine-made screenshots of **our own** demo sites, taken from
-the live page by `npm run demos:sync`, of a site anyone can open by clicking
-the card. Nothing there stands in for a client, a project or a result. The
-rule that stays is the same one: never hand-place a picture into that folder,
-and never keep one for a demo that is no longer reachable — the sync script
-owns the folder and deletes what no longer qualifies.
+There are exactly **two** exceptions, and both are machine-made screenshots of
+a page anyone can open for themselves, captured from the live site by a sync
+script that owns its folder and deletes what no longer qualifies. Neither
+stands in for a client, a project or a result: they ARE the thing they show.
+
+`public/demos/` — screenshots of **our own** demo sites, by
+`npm run demos:sync`. Nothing about them belongs to anyone else.
+
+`public/references/` — screenshots of a **customer's** site, by
+`npm run references:sync`. This one is new, and it is the reason the paragraph
+above needed a second exception rather than a quiet workaround. It carries
+three conditions that the demos do not:
+
+1. The case is `named` — an anonymised customer's site would identify them,
+   which is the whole thing anonymity exists to prevent.
+2. `previewAllowed` on the case is `true`. Approval to be named and linked is
+   not approval to have your site reproduced as a picture on someone else's
+   page. It is a separate field with no default, so the decision is made, not
+   inherited.
+3. The site still answers a live probe at render time. A screenshot outlives
+   the page it was taken from; without the probe the card would keep showing a
+   site that is gone.
+
+Withdrawing consent is one boolean: set `previewAllowed: false` and the picture
+stops rendering immediately, before the asset is even deleted. Run the sync to
+remove the file as well.
+
+Never hand-place a picture into either folder.
 
 ## Conventions
 
 | | |
 |---|---|
 | Demo previews | `public/demos/<id>.webp`, **1440 × 900** (16:10), plus `<id>-favicon.<ext>` |
+| Reference previews | `public/references/<case-id>.webp`, **1440 × 900** (16:10) |
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
 | Section grounds | `public/images/sections/<name>.webp`, **1870 × 841** (≈2.22:1); hero **1642 × 958** (≈1.71:1) |
 | Format | WebP, quality 82 (AVIF 55 if a second source is ever added) |
 | Alt text | none — these are decorative grounds and render `alt=""` + `aria-hidden` |
-| Weight | 41–86 KB each; ~500 KB for all ten |
+| Weight | 41–86 KB each; ~350 KB for all eight |
 
 The dimensions are the SOURCE dimensions. Nothing is upscaled: the generated
 sources came in just under the sizes this file used to ask for, at the same
@@ -52,19 +80,21 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 
 | Ground | Rendered by | Opacity (light / dark) |
 |---|---|---|
-| `services/*.webp` | `ui/ServiceCard.astro` — `.service-card__photo` | 0.34 / 0.22, 0.42 on hover |
+| `services/*.webp` | `ui/ServiceCard.astro` — `.service-tile__shot img` | **1.0 — content, not a ground** |
 | `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.36 / 0.23 |
 | `sections/hero.webp` | `islands/Hero.tsx` — `.hero-photo`, CSS in `styles/global.css` | 0.32 / 0.20 |
 | `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.35 / 0.22 |
 | `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.50, no dark variant |
 | `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
 | `demos/*.webp` | `ui/DemoCard.astro` — `.demo-card__shot img` | **1.0 — content, not a ground** |
+| `references/*.webp` | `sections/References.astro`, `services/ServiceDetailPage.astro` — `.reference-card__shot img` | **1.0 — content, not a ground** |
 
-The last row is the odd one out on purpose. Every other image on this page is
+The last three rows are the odd ones out on purpose. A section ground is
 decoration under copy, which is why it runs at a third of its strength behind a
-scrim with `alt=""`. A demo screenshot is the thing the visitor came to look
-at, so it sits in front at full opacity with a real `alt`, in both themes. If a
-future pass dims images site-wide, that row is the one to leave alone.
+scrim with `alt=""`. A screenshot — and, since the mosaic, a service photo — is
+the thing the visitor came to look at, so it sits in front at full opacity with
+a real `alt` where one is warranted, in both themes. If a future pass dims
+images site-wide, those rows are the ones to leave alone.
 
 These values were raised twice after the first pass; the ratios between the
 slots stayed put. The rule when a bump costs legibility is to strengthen the
@@ -188,18 +218,7 @@ Parts that were made to fit each other.
 > on, slightly off-centre. The lower third falls into soft shadow with no
 > detail. No people. 16:10.
 
-### 4 · Auftragsprogrammierung — `services/04-programmierung.webp`
-
-The making itself, without pretending to show a product.
-
-> A tidy desk at dusk in a small home office. A monitor turned away from the
-> camera so only its edge and the glow spilling onto the desk are visible, a
-> mechanical keyboard, a spiral notebook open at a page of pencil sketches, a
-> desk lamp just out of frame casting warm light from the upper right. The
-> screen glow is the brightest thing in the picture. Empty desk surface across
-> the lower third. No people, no visible screen content. 16:10.
-
-### 5 · Webauftritt — `services/05-webauftritt.webp`
+### 4 · Webauftritt — `services/04-webauftritt.webp`
 
 The shopfront, seen from the owner's side.
 
@@ -210,33 +229,7 @@ The shopfront, seen from the owner's side.
 > the lower third is calm and mostly empty. Backlit, airy, slightly
 > overexposed towards the window. No people, no readable screen. 16:10.
 
-### 6 · Marketing — `services/06-marketing.webp` (open)
-
-Not shot yet. The service renders with `image: null` until this file exists;
-dropping it in and setting `image` in `services.ts` is the whole change.
-
-The reach of a small shop, not a marketing department.
-
-> A handwritten shop sign or A-board on a pavement in a small town, seen at a
-> slight angle in late afternoon light, with the street receding softly out of
-> focus behind it. The sign occupies the left third; the blurred street fills
-> the rest as a calm wash. Warm, unglamorous, local. No brand names, no
-> readable text, no people in focus, no screens, no charts. 16:10.
-
-### 7 · Komplette IT — `services/07-komplette-it.webp`
-
-Infrastructure that is supposed to be boring.
-
-> A small wall-mounted network cabinet in a clean utility room, door open,
-> patch cables neatly bundled and combed into parallel runs, one small status
-> LED lit. Photographed straight on from a short distance in cool even
-> daylight. The cable runs form strong parallel lines across the upper two
-> thirds; painted wall fills the lower third. Orderly, understated, no
-> data-centre drama, no blue glow, no server aisle. 16:10.
-
----
-
-### 8 · „Wieso ich" section ground — `sections/why-me.webp`
+### 5 · „Wieso ich" section ground — `sections/why-me.webp`
 
 Behind the reasons column. Very quiet. Rendered with `object-left`, so the
 objects stay in frame and the empty right two thirds fall under the scrim.
@@ -247,7 +240,7 @@ objects stay in frame and the empty right two thirds fall under the scrim.
 > right two thirds are empty desk and wall. Extremely calm, almost still-life.
 > No people, no devices. 2000×900.
 
-### 9 · Pricing teaser ground — `sections/pricing.webp`
+### 6 · Pricing teaser ground — `sections/pricing.webp`
 
 Behind the navy price panel, so it has to read as a dark picture. The panel is
 much wider than the source, so only the vertical axis is cropped.
@@ -258,7 +251,7 @@ much wider than the source, so only the vertical axis is cropped.
 > the right third; the left two thirds are almost black table. Restrained,
 > serious, no props, no hands, no readable text on the page. 2000×900.
 
-### 10 · Contact section ground — `sections/contact.webp`
+### 7 · Contact section ground — `sections/contact.webp`
 
 Behind the navy contact block. The scrim runs to the bottom right and stays
 fully opaque over the headline and the form, so the block reads as textured
@@ -271,7 +264,7 @@ Formular" still holds.
 > objects sit in the lower right quarter. Quiet, end-of-day, no people, no
 > screen visible. 2000×900.
 
-### 11 · Hero ground — `sections/hero.webp`
+### 8 · Hero ground — `sections/hero.webp`
 
 Full-bleed behind the hero, under the constructed geometry. **The left half is
 empty because the headline sits there** — that is the whole composition, and it
