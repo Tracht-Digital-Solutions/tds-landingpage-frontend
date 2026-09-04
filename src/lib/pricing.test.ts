@@ -10,7 +10,7 @@ describe("pricing defaults", () => {
         serviceDefinitions.map((service) =>
           getServiceRate(pricing, service.id),
         ),
-      ).toEqual([120, 110, 110, 95]);
+      ).toEqual([110, 100, 100, 85]);
     }
   });
 
