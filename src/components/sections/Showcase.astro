@@ -1,0 +1,426 @@
+---
+/**
+ * The showcase — reference cases and website demos on ONE horizontally
+ * navigable shelf.
+ *
+ * ### Why these two are one section
+ *
+ * The home page used to carry them back to back: `WebsiteDemos` (paper ground,
+ * sand cards) and then `References` (sand ground, paper cards). Two headings,
+ * two intros, two grids, in sequence, both answering "here is work you can
+ * look at" — and the second one read as a repeat of the first. They are one
+ * shelf now, with one masthead, and the visitor pages through it left/right
+ * instead of scrolling past the same argument twice.
+ *
+ * `WebsiteDemos.astro` still exists and is still used with `variant="service"`
+ * on the Webauftritt detail page, where the demos ARE the argument and stand
+ * on their own. Only the home page's copy of it moved here.
+ *
+ * ### Order
+ *
+ * Reference cases first, demos after. A delivered project is the stronger
+ * claim and it is the one a stranger will not assume — a demo is understood as
+ * a sample either way, so it reads correctly wherever it sits.
+ *
+ * ### The gate
+ *
+ * **Renders nothing at all when both lists are empty** — no `<section>`, no
+ * heading, no "coming soon" box. Inherited unchanged from both sections it
+ * replaces, and for their reason: an empty shelf advertises the emptiness.
+ * `getDemos()` is strict about what counts as a live demo (see `lib/demos.ts`)
+ * and `getReferencePreviews()` about what counts as a showable screenshot.
+ *
+ * ### Ground
+ *
+ * PLAIN PAPER, no `tds-tone-*`. `Services.astro` immediately above is
+ * `tds-tone-sand`, and two sand grounds in a row read as one long section; the
+ * cards take the sand fill instead — both families, so the shelf is one shelf.
+ * The references half used to be the other way round; see `ReferenceCard`.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+import { getDemos } from "~/lib/demos";
+import { referenceCases, articleUrl } from "~/lib/references";
+import { getReferencePreviews } from "~/lib/referencePreviews";
+import { getServiceById, serviceHref } from "~/lib/services";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
+import DemoCard from "~/components/ui/DemoCard.astro";
+import ReferenceCard from "~/components/ui/ReferenceCard.astro";
+
+const lang = resolveLang(Astro.currentLocale);
+const content = await cmsFor("references_home", lang, getHomeContent(lang).referencesHome);
+
+const demos = await getDemos();
+
+// Consent, a live site and a captured screenshot — a case missing any one of
+// the three is simply absent from this map and its card renders without a band.
+const previews = await getReferencePreviews();
+
+// This reads `referenceCases` directly, NOT `resolveServiceContent`. So the
+// documented way to pull a case off a service page without a deploy — an
+// explicitly empty `references` array in the CMS — does not reach the home
+// page. Removing a named customer from here is a code change.
+const cards = referenceCases.map((entry) => {
+  const primary = getServiceById(entry.services[0]);
+  return {
+    id: entry.id,
+    preview: previews.get(entry.id) ?? null,
+    reference: entry.content[lang],
+    serviceHref: serviceHref(primary, lang),
+    articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
+    siteHref: entry.siteUrl,
+  };
+});
+
+const slideCount = cards.length + demos.length;
+
+/** Carousel chrome. This site's own words about its own control, so it follows
+ *  the page's locale and is not editable copy — a mislabelled control is an
+ *  accessibility defect, not a matter of tone. */
+const ui =
+  lang === "de"
+    ? {
+        carousel: "Referenzen und Beispielseiten",
+        prev: "Vorherige Karten",
+        next: "Weitere Karten",
+      }
+    : {
+        carousel: "References and example sites",
+        prev: "Previous cards",
+        next: "More cards",
+      };
+---
+
+{
+  slideCount > 0 && (
+    <section id="showcase" class="section-spacing" aria-labelledby="showcase-heading">
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+        {/* Masthead and controls share a row on desktop: the arrows belong to
+            the shelf, and putting them at its top-right is what tells a
+            visitor the row scrolls before they have touched it. On phones they
+            drop below the copy, where a thumb can reach them. */}
+        <div class="flex flex-col gap-8 md:flex-row md:items-end md:justify-between md:gap-12">
+          <div class="max-w-2xl">
+            <SectionHeader
+              headline={content.headline}
+              headlineAccent={content.headlineAccent}
+              id="showcase-heading"
+              headingClass="mb-6"
+            />
+            <p class="text-[var(--color-muted)] leading-relaxed mb-4">
+              <Emphasis text={content.intro} />
+            </p>
+            <p class="text-sm text-[var(--color-muted)]">{content.label}</p>
+          </div>
+
+          {/* Hidden from assistive tech, and that is the point rather than an
+              oversight: the track below is a plain scroll container that a
+              screen reader already walks card by card, and a keyboard user
+              reaches every card in DOM order. These buttons add nothing there
+              — they are a pointer affordance. Announcing them would offer a
+              second, worse way to do what Tab already does.
+
+              They are also NOT rendered when everything fits: `data-carousel`
+              hides them until the script measures an overflow. */}
+          <div class="showcase-nav" aria-hidden="true" data-carousel-nav hidden>
+            <button type="button" class="showcase-nav__btn" data-carousel-prev tabindex="-1">
+              <span class="sr-only">{ui.prev}</span>
+              <svg
+                aria-hidden="true"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 5 8 12l7 7" />
+              </svg>
+            </button>
+            <button type="button" class="showcase-nav__btn" data-carousel-next tabindex="-1">
+              <span class="sr-only">{ui.next}</span>
+              <svg
+                aria-hidden="true"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m9 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* The track is a real scroll container, not a transformed strip. That
+            is the whole design: a trackpad swipe, a touch drag, a shift-wheel
+            and the arrow buttons all move the same thing, and a card that
+            receives focus is scrolled into view by the browser rather than by
+            code we would have to write. `data-carousel` is what the script
+            binds to; with no JavaScript the row still scrolls, just without
+            the buttons — which is why they start `hidden`. */}
+        <div class="showcase" data-carousel>
+          <div
+            class="showcase__track"
+            data-carousel-track
+            tabindex="0"
+            role="group"
+            aria-label={ui.carousel}
+          >
+            {cards.map((card) => (
+              <div class="showcase__slide">
+                <ReferenceCard card={card} lang={lang} serviceCta={content.serviceCta} />
+              </div>
+            ))}
+            {demos.map((demo) => (
+              <div class="showcase__slide">
+                <DemoCard demo={demo} lang={lang} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .showcase {
+    position: relative;
+    margin-top: 3rem;
+    /* The track bleeds to both viewport edges on phones so a half-visible next
+       card sits at the screen edge instead of behind a 1.5rem margin — that
+       peek is the only thing telling a touch user there is more. The padding
+       puts the first card back on the page's text edge. Above the container
+       width there is nothing to bleed into, so it is switched off. */
+    margin-inline: -1.5rem;
+  }
+
+  .showcase__track {
+    display: flex;
+    /* Cards size to their own content instead of all taking the tallest
+       one's height. Carried over from the grid this replaced, where it was
+       `items-start` and argued for in the same words: one card may have a
+       website screenshot and its neighbour may not, and stretching the
+       shorter one opens ~240px of empty fill under its text that no content
+       will ever arrive to fill. A ragged bottom edge on a shelf you page
+       through reads as cards; a hole in the middle of one reads as a bug. */
+    align-items: start;
+    gap: 1rem;
+    padding-inline: 1.5rem;
+    /* MUST match `padding-inline`. `scroll-snap-align: start` aligns a slide
+       to the scrollport's start edge, and without a matching scroll-padding
+       that edge is INSIDE the padding: the track's resting position is then
+       `scrollLeft = 24`, not 0, and the first card sits flush against the
+       bleeding edge instead of on the page's text edge. It also broke the
+       "prev" button, which disables on `scrollLeft <= 2` and so never
+       disabled at all — a control that is always live on a shelf that cannot
+       go further left. */
+    scroll-padding-inline: 1.5rem;
+    /* A little vertical room: the cards' focus ring is drawn with a 3px
+       offset and would be clipped by the scroll container without it. */
+    padding-block: 0.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    /* The scrollbar is chrome the arrows already replace, and on the desktop
+       widths where it is drawn permanently it cuts a grey line under the
+       shelf. Hidden, never the scrolling itself. */
+    scrollbar-width: none;
+  }
+  .showcase__track::-webkit-scrollbar {
+    display: none;
+  }
+  .showcase__track:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  .showcase__slide {
+    /* `flex: none` with an explicit basis, NOT a percentage width: a flex item
+       in a scroll container shrinks to its content otherwise and the whole
+       track collapses into one screen of squeezed cards.
+
+       One card and a peek of the next on a phone; the peek is what says the
+       row scrolls. */
+    flex: 0 0 min(82%, 22rem);
+    scroll-snap-align: start;
+
+    /* GRID, and it has to be — this slot was `display: flex` first and the
+       demo card rendered exactly 0 pixels wide.
+
+       `DemoCard`'s root carries `container-type: inline-size`, which brings
+       inline-size containment with it, which makes the element's max-content
+       contribution zero. As a FLEX item that is its base size, so it
+       collapses; the reference cards next to it were unaffected and the bug
+       looked like one missing card rather than like a layout rule. The
+       obvious patch — `.showcase__slide > * { flex: 1 }` — does not work
+       either: Astro scopes that selector to THIS component's elements, and
+       the card is another component's root, so the rule never matches it.
+
+       A grid item is stretched to its track instead of measured from its
+       content, so the width is definite before containment is consulted.
+       Same for the row, which is what lets the cards' own `height: 100%`
+       resolve. */
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .showcase {
+      margin-inline: 0;
+    }
+    .showcase__track {
+      gap: 1.5rem;
+      padding-inline: 0;
+      scroll-padding-inline: 0;
+    }
+    .showcase__slide {
+      flex-basis: calc((100% - 1.5rem) / 2);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .showcase__slide {
+      flex-basis: calc((100% - 3rem) / 3);
+    }
+  }
+
+  /* `.showcase-nav { display: flex }` below beats the user agent's
+     low-specificity `[hidden] { display: none }`, so the attribute the script
+     writes would do nothing at all without this rule — the buttons would sit
+     there, enabled-looking, on a shelf with nothing left to scroll. Same trap
+     as an `lg:hidden` utility losing to an unlayered `.btn { display }`. */
+  .showcase-nav[hidden] {
+    display: none;
+  }
+
+  .showcase-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex: none;
+  }
+
+  .showcase-nav__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* The shared 44px minimum. These are pointer targets on a page whose
+       visitors are as likely to be on a phone as on a mouse. */
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--tds-radius-pill);
+    background: var(--color-soft);
+    color: var(--color-black);
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out),
+      opacity 200ms var(--tds-ease-out);
+  }
+  .showcase-nav__btn:hover {
+    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-soft));
+    color: var(--color-primary);
+  }
+  /* Disabled rather than removed at the ends of the track: a control that
+     disappears moves the one beside it under the cursor mid-click. */
+  .showcase-nav__btn[disabled] {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .showcase-nav__btn[disabled]:hover {
+    background: var(--color-soft);
+    color: var(--color-black);
+  }
+</style>
+
+<script>
+  /**
+   * Arrow navigation for the showcase shelf.
+   *
+   * Everything here is an enhancement on top of a track that already scrolls:
+   * the buttons ship `hidden` and are only revealed once this measures a real
+   * overflow, so a shelf whose cards all fit shows no controls at all, and a
+   * failed bundle leaves a plain scrolling row rather than dead arrows.
+   *
+   * The step is measured from a slide instead of being written down, because
+   * the slide width is three different values across two breakpoints and a
+   * hardcoded number would drift the first time one of them is tuned.
+   */
+  const carousels = document.querySelectorAll<HTMLElement>("[data-carousel]");
+
+  for (const root of carousels) {
+    const track = root.querySelector<HTMLElement>("[data-carousel-track]");
+    // The nav is a sibling of the track's wrapper, not a child, so it is found
+    // from the section rather than from `root`.
+    const section = root.closest("section");
+    const nav = section?.querySelector<HTMLElement>("[data-carousel-nav]") ?? null;
+    const prev = nav?.querySelector<HTMLButtonElement>("[data-carousel-prev]") ?? null;
+    const next = nav?.querySelector<HTMLButtonElement>("[data-carousel-next]") ?? null;
+    if (!track || !nav || !prev || !next) continue;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    /** One slide plus one gap — how far a click travels. */
+    const step = () => {
+      const slide = track.firstElementChild as HTMLElement | null;
+      if (!slide) return track.clientWidth;
+      const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
+      return slide.getBoundingClientRect().width + gap;
+    };
+
+    /**
+     * Native smooth scrolling on the TRACK, not a rAF tween.
+     *
+     * This is deliberate and worth keeping: the page sets
+     * `scroll-behavior: smooth` globally, which starves any hand-written
+     * requestAnimationFrame tween (it fights the browser's own animation for
+     * the same scroll position). `scrollBy` is the same mechanism, so the two
+     * cannot disagree.
+     */
+    const go = (direction: 1 | -1) => {
+      track.scrollBy({
+        left: direction * step(),
+        behavior: reduce.matches ? "auto" : "smooth",
+      });
+    };
+
+    prev.addEventListener("click", () => go(-1));
+    next.addEventListener("click", () => go(1));
+
+    const sync = () => {
+      // `scrollWidth - clientWidth` can be a fraction of a pixel off on a
+      // fractional layout, so both ends get a 2px tolerance rather than an
+      // exact comparison — without it the "next" button never disables.
+      const max = track.scrollWidth - track.clientWidth;
+      const overflowing = max > 2;
+
+      nav.hidden = !overflowing;
+      // The nav is `aria-hidden`, so its buttons must be unreachable by Tab as
+      // well; a focusable element inside an aria-hidden subtree is exactly the
+      // state assistive tech has no way to describe.
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft >= max - 2;
+    };
+
+    sync();
+    track.addEventListener("scroll", sync, { passive: true });
+    // Slide width changes at both breakpoints and when the scrollbar-less
+    // track is re-laid-out by a font or image load, so the end states are
+    // recomputed from the element rather than from the window.
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(sync).observe(track);
+    } else {
+      window.addEventListener("resize", sync, { passive: true });
+    }
+  }
+</script>

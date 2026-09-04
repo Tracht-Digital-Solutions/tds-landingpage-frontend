@@ -8,59 +8,72 @@ const pricing = await getPricingContent(lang);
 const pricingHref = localizePath("/preise", lang);
 ---
 
-<section id="pricing-teaser" class="py-12 md:py-20" aria-labelledby="pricing-teaser-heading">
-  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
-    {/* A NAVY FOCUS SURFACE, not a gradient panel. This block used to be
-        a 135° navy→bordeaux gradient with a blurred pink circle bleeding
-        out of its top-right corner and a 60px navy drop shadow — three
-        of the things the brand direction rules out at once (generischer
-        bunter Verlauf, organischer Blob, schwerer Schatten), and the
-        second of two blocks on the page that looked identical. It is a
-        flat brand navy now, with the bordeaux entering as a cut
-        quarter-circle and a capsule — constructed geometry, so the panel
-        reads as built rather than as a stock hero card. */}
-    <a
-      href={pricingHref}
-      class="group relative block overflow-hidden tds-tone-navy -mx-6 px-6 py-10 rounded-none md:mx-0 md:rounded-[6px] md:p-12"
-    >
-      {/* Formen UND Foto liegen jetzt zusammen in einer `.tds-decor`.
-          Das ist nicht kosmetisch: die Regel `.tds-decor ~ *` hebt jedes
-          folgende Geschwister auf z-index 1 — stünde das Foto als bloßes
-          Geschwister der Formen davor, bekämen auch die beiden Formen
-          diese Anhebung ab. So bleibt genau ein Geschwister übrig, der
-          Inhalt, und der liegt über allem. */}
-      <span class="tds-decor" aria-hidden="true">
-        {/* Sehr dunkles Motiv mit EINER hellen Fläche. Es steht auf
-            Navy, nicht auf Papier, deshalb läuft es deutlich höher als
-            die hellen Gründe der Seite — darunter versinkt es schlicht
-            in der Fläche. Waagerecht wird hier nichts beschnitten (das
-            Panel ist breiter als 2,22:1), `object-position` also nur
-            senkrecht: das Blatt sitzt mittig in der Höhe. */}
-        <img
-          src="/images/sections/pricing.webp"
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-          class="pricing-photo absolute inset-0 h-full w-full object-cover"
-        />
-        {/* Der Scrim ist das NAVY des Panels selbst, von rechts stärker:
-            dort stehen Preis und Button, und das ist genau die Stelle, an
-            die der Bildausschnitt die helle Fläche legt. */}
-        <span class="pricing-photo-scrim absolute inset-0"></span>
-        <span
-          aria-hidden="true"
-          class="tds-shape tds-shape--quarter-bl tds-shape--coral"
-          style="top: -3rem; right: -3rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.22;"
-        ></span>
-        <span
-          aria-hidden="true"
-          class="tds-shape tds-shape--capsule tds-shape--coral hidden md:block"
-          style="bottom: -5rem; left: 8%; width: 22rem; height: 8rem; --tds-decor-shape-alpha: 0.08;"
-        ></span>
-      </span>
+{/* FULL-BLEED BAND. The same move as Consulting.astro, and the two are
+    meant to stay in step: the navy runs the whole width of the page, the
+    section's own `py-12 md:py-20` is gone (the band's padding is the
+    spacing now), and the radius plus the `-mx-6 … md:mx-0` bleed hack went
+    with it — with no side margin at any breakpoint there is nothing left
+    to round, and a radius would only cut the viewport edge. The 7xl
+    container moved INSIDE, around the grid, so the headline keeps the same
+    left edge as every other section.
 
-      <div class="relative grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
+    The whole band is still ONE link. That is deliberate rather than an
+    oversight worth "fixing": the block's only job is to reach /preise, and
+    the visible capsule inside says so. */}
+<section id="pricing-teaser" aria-labelledby="pricing-teaser-heading">
+  {/* A NAVY FOCUS SURFACE, not a gradient panel. This block used to be
+      a 135° navy→bordeaux gradient with a blurred pink circle bleeding
+      out of its top-right corner and a 60px navy drop shadow — three
+      of the things the brand direction rules out at once (generischer
+      bunter Verlauf, organischer Blob, schwerer Schatten), and the
+      second of two blocks on the page that looked identical. It is a
+      flat brand navy now, with the bordeaux entering as a cut
+      quarter-circle and a capsule — constructed geometry, so the panel
+      reads as built rather than as a stock hero card. */}
+  <a
+    href={pricingHref}
+    class="group relative block overflow-hidden tds-tone-navy py-14 md:py-20 lg:py-24"
+  >
+    {/* Formen UND Foto liegen jetzt zusammen in einer `.tds-decor`.
+        Das ist nicht kosmetisch: die Regel `.tds-decor ~ *` hebt jedes
+        folgende Geschwister auf z-index 1 — stünde das Foto als bloßes
+        Geschwister der Formen davor, bekämen auch die beiden Formen
+        diese Anhebung ab. So bleibt genau ein Geschwister übrig, der
+        Inhalt, und der liegt über allem. */}
+    <span class="tds-decor" aria-hidden="true">
+      {/* Sehr dunkles Motiv mit EINER hellen Fläche. Es steht auf
+          Navy, nicht auf Papier, deshalb läuft es deutlich höher als
+          die hellen Gründe der Seite — darunter versinkt es schlicht
+          in der Fläche. Waagerecht wird hier nichts beschnitten (das
+          Band ist über die volle Seitenbreite noch flacher als 2,22:1),
+          `object-position` also nur senkrecht: das Blatt sitzt mittig
+          in der Höhe. */}
+      <img
+        src="/images/sections/pricing.webp"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        class="pricing-photo absolute inset-0 h-full w-full object-cover"
+      />
+      {/* Der Scrim ist das NAVY des Panels selbst, von rechts stärker:
+          dort stehen Preis und Button, und das ist genau die Stelle, an
+          die der Bildausschnitt die helle Fläche legt. */}
+      <span class="pricing-photo-scrim absolute inset-0"></span>
+      <span
+        aria-hidden="true"
+        class="tds-shape tds-shape--quarter-bl tds-shape--coral"
+        style="top: -3rem; right: -3rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.22;"
+      ></span>
+      <span
+        aria-hidden="true"
+        class="tds-shape tds-shape--capsule tds-shape--coral hidden md:block"
+        style="bottom: -5rem; left: 8%; width: 22rem; height: 8rem; --tds-decor-shape-alpha: 0.08;"
+      ></span>
+    </span>
+
+    <div class="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+      <div class="grid md:grid-cols-[1.4fr_1fr] gap-8 md:gap-12 items-center">
         <div>
           <h2
             id="pricing-teaser-heading"
@@ -92,8 +105,8 @@ const pricingHref = localizePath("/preise", lang);
           </span>
         </div>
       </div>
-    </a>
-  </div>
+    </div>
+  </a>
 </section>
 
 <style>

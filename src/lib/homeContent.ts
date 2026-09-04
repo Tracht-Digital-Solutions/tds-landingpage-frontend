@@ -73,14 +73,29 @@ export interface WebsiteDemosContent {
 }
 
 /**
- * Framing for the home page's references section.
+ * Framing for the home page's SHOWCASE — the merged carousel of reference
+ * cases and website demos (`sections/Showcase.astro`).
+ *
+ * The home page used to carry two adjacent sections: the demos, then the
+ * references. They were two headings, two intros and two grids saying the same
+ * thing in sequence — "here is work you can look at" — and a visitor scrolled
+ * past the second assuming they had already read it. They are one section and
+ * one horizontally navigable shelf now, which is why this block's headline and
+ * intro have to cover BOTH kinds of card and no longer mention only practice.
+ *
+ * The CMS key stays `references_home`. Renaming it would orphan whatever is
+ * already stored under it in the panel and silently drop back to these
+ * defaults; the demos keep their own `website_demos` block, which still frames
+ * the Webauftritt service page.
  *
  * `label` repeats the publication promise the service pages already make. It
  * belongs next to the cards, not only on the detail pages: the home page is
  * where most people meet a reference first, and the question the section has
- * to answer before it is asked is now "why does one card name a company and
- * the other does not" — so the sentence leads with approval, and treats
- * anonymity as the default it actually is.
+ * to answer before it is asked is "why does one card name a company and the
+ * other does not" — so the sentence leads with approval, and treats anonymity
+ * as the default it actually is. It also has to draw the line between the two
+ * card families now: a demo is this studio's own example site and was never
+ * anybody's project to approve.
  *
  * `references.test.ts` checks this string against the catalog: while a case is
  * published under a customer's name, no surface may claim that references are
@@ -194,12 +209,12 @@ const content: Record<Lang, HomeContent> = {
         "Eine fertige Beispielseite, live im Netz. *Sehen Sie sich um*, bevor wir über Ihre sprechen.",
     },
     referencesHome: {
-      headline: "Aus der",
-      headlineAccent: "Praxis.",
+      headline: "Gebaut und",
+      headlineAccent: "gezeigt.",
       intro:
-        "Projekte, die nicht mit dem Livegang enden — von der ersten Einrichtung bis zur *laufenden Pflege*.",
+        "Umgesetzte Projekte und fertige Beispielseiten in einer Ansicht — *blättern Sie durch*, statt sich vorstellen zu müssen, was Sie bekommen.",
       label:
-        "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
+        "Projekte werden nur nach ausdrücklicher Freigabe veröffentlicht — anonymisiert, sofern nicht anders vereinbart. Die Beispielseiten sind eigene Demos und stehen frei im Netz.",
       serviceCta: "Zur passenden Leistung",
     },
     digitalResponsibility: {
@@ -280,12 +295,12 @@ const content: Record<Lang, HomeContent> = {
         "A finished example site, live on the web. *Take a look around* before we talk about yours.",
     },
     referencesHome: {
-      headline: "From",
-      headlineAccent: "practice.",
+      headline: "Built and",
+      headlineAccent: "shown.",
       intro:
-        "Projects that do not end at launch — from the first setup through to the *ongoing upkeep*.",
+        "Delivered projects and finished example sites in one place — *page through them* instead of having to imagine what you get.",
       label:
-        "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
+        "Projects are published only with the client's explicit approval — anonymised unless agreed otherwise. The example sites are our own demos and are openly on the web.",
       serviceCta: "See the matching service",
     },
     digitalResponsibility: {
