@@ -1,0 +1,50 @@
+# Every group below is INDEPENDENT: a crawler obeys only the group that names
+# it, and ignores the "*" group entirely. So the /install/ rule has to be
+# repeated in each group — a single Disallow in the "*" group would leave the
+# host-side setup wizard crawlable by every named bot here.
+
+User-agent: *
+Allow: /
+Disallow: /install/
+
+# AI search crawlers are welcome — content is meant to be cited.
+User-agent: GPTBot
+Allow: /
+Disallow: /install/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /install/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /install/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /install/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /install/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /install/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /install/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /install/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /install/
+
+# Legal pages stay out of indexes via per-page meta robots; no
+# need to disallow here.
+
+Sitemap: https://tracht-digital.de/sitemap-index.xml

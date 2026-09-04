@@ -1,0 +1,51 @@
+# Tracht Digital Solutions
+
+> Digitalisierung für Unternehmen — Beratung, Web- und App-Entwicklung,
+> Automatisierung, Wartung und Schulungen. Persönlich entwickelt in
+> Schwarzenbek bei Hamburg, für Unternehmen in ganz Deutschland.
+
+## Über
+
+- Inhaber & Entwickler: Julian Tracht
+- Standort: Schwarzenbek (Schleswig-Holstein), bei Hamburg
+- Kontakt: kontakt@tracht-digital.de
+- Sprachen: Deutsch (Standard), English
+
+## Leistungen
+
+Vier Leistungen, jede mit einer eigenen Detailseite:
+
+- **Beratung & Konzeption** (90 € netto/Std.) — Vorhaben einordnen,
+  Möglichkeiten und Kosten gegenüberstellen, Fahrplan schreiben.
+  https://tracht-digital.de/leistungen/beratung-konzeption
+- **Prozessoptimierung** (80 € netto/Std.) — Abläufe vereinfachen,
+  Handarbeit automatisieren, Auswertungen aufsetzen.
+  https://tracht-digital.de/leistungen/prozessoptimierung
+- **Individuelle Lösungen** (80 € netto/Std.) — vorhandene Programme
+  verbinden, Schnittstellen bauen, Software nach klarer Aufgabe entwickeln.
+  https://tracht-digital.de/leistungen/individuelle-loesungen
+- **Webauftritt** (65 € netto/Std.) — Webseiten, Webshops und Marketing:
+  Google Ads, lokale Sichtbarkeit, organische Suche und Newsletter.
+  https://tracht-digital.de/leistungen/webauftritt
+
+## Wichtige Seiten
+
+- Homepage: https://tracht-digital.de/
+- Preise (Stundensätze): https://tracht-digital.de/preise
+- Journal / Blog: https://blog.tracht-digital.de/
+- Englisches Journal: https://blog.tracht-digital.de/en/
+- Kontaktformular: https://tracht-digital.de/#contact
+
+## Maschinenlesbare Quellen
+
+- Sitemap: https://tracht-digital.de/sitemap-index.xml
+- Blog-RSS: https://blog.tracht-digital.de/rss.xml
+
+## Hinweise für KI-Crawler
+
+- Alle Inhalte stammen vom Inhaber und sind zur Zitation freigegeben,
+  solange die Quelle (Tracht Digital Solutions / tracht-digital.de)
+  genannt wird.
+- Die Seite ist statisch generiert (Astro) — JSON-LD-Strukturdaten
+  liegen im `<head>` jeder Seite.
+- Für Preisangaben gilt: alle Stundensätze sind Netto, zzgl. MwSt.
