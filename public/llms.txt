@@ -15,16 +15,16 @@
 
 Vier Leistungen, jede mit einer eigenen Detailseite:
 
-- **Beratung & Konzeption** (110 € netto/Std.) — Vorhaben einordnen,
+- **Beratung & Konzeption** (90 € netto/Std.) — Vorhaben einordnen,
   Möglichkeiten und Kosten gegenüberstellen, Fahrplan schreiben.
   https://tracht-digital.de/leistungen/beratung-konzeption
-- **Prozessoptimierung** (100 € netto/Std.) — Abläufe vereinfachen,
+- **Prozessoptimierung** (80 € netto/Std.) — Abläufe vereinfachen,
   Handarbeit automatisieren, Auswertungen aufsetzen.
   https://tracht-digital.de/leistungen/prozessoptimierung
-- **Individuelle Lösungen** (100 € netto/Std.) — vorhandene Programme
+- **Individuelle Lösungen** (80 € netto/Std.) — vorhandene Programme
   verbinden, Schnittstellen bauen, Software nach klarer Aufgabe entwickeln.
   https://tracht-digital.de/leistungen/individuelle-loesungen
-- **Webauftritt** (85 € netto/Std.) — Webseiten, Webshops und Marketing:
+- **Webauftritt** (65 € netto/Std.) — Webseiten, Webshops und Marketing:
   Google Ads, lokale Sichtbarkeit, organische Suche und Newsletter.
   https://tracht-digital.de/leistungen/webauftritt
 
