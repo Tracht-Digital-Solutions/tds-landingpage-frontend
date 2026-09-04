@@ -62,17 +62,26 @@ const previews = await getReferencePreviews();
 // documented way to pull a case off a service page without a deploy — an
 // explicitly empty `references` array in the CMS — does not reach the home
 // page. Removing a named customer from here is a code change.
-const cards = referenceCases.map((entry) => {
-  const primary = getServiceById(entry.services[0]);
-  return {
-    id: entry.id,
-    preview: previews.get(entry.id) ?? null,
-    reference: entry.content[lang],
-    serviceHref: serviceHref(primary, lang),
-    articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
-    siteHref: entry.siteUrl,
-  };
-});
+const cards = referenceCases.map((entry) => ({
+  id: entry.id,
+  preview: previews.get(entry.id) ?? null,
+  reference: entry.content[lang],
+  // EVERY service the case used, not just the first. The card used to carry
+  // one "Zur passenden Leistung" link built from `entry.services[0]`, which
+  // on a three-service case silently spoke for the other two.
+  //
+  // The label comes from the committed catalog, NOT through `cmsFor`. A badge
+  // is a category etiquette — the name of a page this site owns — and pulling
+  // four CMS blocks per render to spell four words would trade a request for
+  // nothing. The trade it does make: an editor who renames a service in the
+  // panel renames it everywhere except here.
+  services: entry.services.map((id) => {
+    const service = getServiceById(id);
+    return { label: service.fallback[lang].title, href: serviceHref(service, lang) };
+  }),
+  articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
+  siteHref: entry.siteUrl,
+}));
 
 const slideCount = cards.length + demos.length;
 
@@ -177,7 +186,7 @@ const ui =
           >
             {cards.map((card) => (
               <div class="showcase__slide">
-                <ReferenceCard card={card} lang={lang} serviceCta={content.serviceCta} />
+                <ReferenceCard card={card} lang={lang} />
               </div>
             ))}
             {demos.map((demo) => (

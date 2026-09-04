@@ -22,7 +22,11 @@
  * there is no single thing being hovered.
  *
  * Every destination is code-owned (`lib/references.ts`); none of them can come
- * from the CMS. Only the two link LABELS below are editable copy.
+ * from the CMS, and since the service badges replaced the "Zur passenden
+ * Leistung" link, no LABEL on this card is editable either — the two remaining
+ * link labels follow the page's locale, the badges name pages this site owns.
+ * `references_home.serviceCta` is therefore unrendered; it stays in the CMS
+ * schema so an existing panel block keeps loading.
  */
 import type { Lang } from "~/lib/i18n";
 
@@ -35,7 +39,8 @@ export interface ReferenceCardData {
     result: string;
     metric?: string | null;
   };
-  serviceHref: string;
+  /** Every service the case used, in catalog order, each with its page. */
+  services: { label: string; href: string }[];
   articleHref: string | null;
   siteHref: string | null;
 }
@@ -43,11 +48,9 @@ export interface ReferenceCardData {
 interface Props {
   card: ReferenceCardData;
   lang: Lang;
-  /** Editable label for the link to the service the case belongs to. */
-  serviceCta: string;
 }
 
-const { card, lang, serviceCta } = Astro.props;
+const { card, lang } = Astro.props;
 
 // `newTab` duplicates a word `demoUi` already has, deliberately: importing the
 // demo cards' vocabulary here would couple two card families that are kept
@@ -114,11 +117,26 @@ const ui =
       </p>
     )}
 
+    {/* The services this case used, as links. They replaced a single
+        "Zur passenden Leistung →" built from the FIRST service, which on the
+        three-service case spoke for two others without naming them.
+
+        `.status-pill` is the shared badge from tds-shared/styles/primitives.css
+        rather than a fourth local pill. It carries `white-space: nowrap`, so
+        the row it sits in MUST wrap — "Individuelle Lösungen" set in caps is
+        wider than a phone column, and `body { overflow-x: hidden }` would clip
+        the overflow rather than show it. */}
+    <ul class="reference-card__services">
+      {card.services.map((service) => (
+        <li>
+          <a href={service.href} class="status-pill status-pill--accent reference-card__service">
+            {service.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
     <div class="reference-card__links">
-      <a href={card.serviceHref} class="link-underline text-[var(--color-accent)]">
-        {serviceCta}
-        <span aria-hidden="true"> →</span>
-      </a>
       {card.articleHref && (
         <a href={card.articleHref} class="link-underline text-[var(--color-accent)]">
           {ui.article}
@@ -240,15 +258,41 @@ const ui =
     color: var(--color-black);
   }
 
+  /* Pinned to the bottom together with the links below: the badges are the
+     card's footer now, and both have to sit on one line across cards whose
+     outcomes are different lengths. `margin-top: auto` therefore belongs
+     HERE, on the first of the two, not on the links. */
+  .reference-card__services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: auto 0 0;
+    padding: 1.75rem 0 0;
+    list-style: none;
+  }
+  .reference-card__service {
+    text-decoration: none;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      border-color 200ms var(--tds-ease-out);
+  }
+  .reference-card__service:hover {
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    border-color: var(--color-accent);
+  }
+
   .reference-card__links {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 1.5rem;
-    /* Pinned to the bottom so the links line up across cards whose outcomes
-       are different lengths. */
-    margin-top: auto;
-    padding-top: 1.75rem;
+    padding-top: 0.875rem;
     font-size: 0.9375rem;
+  }
+  /* A case with neither an article nor a customer site renders an empty
+     <div> here; without this its padding would push the badges off the
+     baseline the other cards keep. */
+  .reference-card__links:empty {
+    display: none;
   }
 
   @media (min-width: 768px) {
