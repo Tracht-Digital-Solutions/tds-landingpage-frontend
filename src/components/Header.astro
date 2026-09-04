@@ -190,22 +190,29 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
   /* Mobile + tablet default — a light capsule floating a little below
      the top edge with a matching margin on every side, fully rounded.
 
-     "Digitale Maßarbeit" retunes this from glass to PAPER: the brief is
-     explicit — "helle, schwebende Kapselfläche · Warmweiß oder Weiß mit
-     sehr dezenter warmer Kontur · keine starke Glasoptik · keine
-     ausgeprägten Schatten". The blur drops from 28px/180% to 16px/115%
-     and the fill rises to a near-opaque warm white, so the bar reads as
-     a sheet of paper resting on the page rather than a smoked pane. The
-     blur is kept (not removed) because the decoration layer scrolling
-     underneath still has to soften rather than smear. */
+     TRANSLUCENT, not the near-opaque sheet this used to be. The bar has
+     three states and only the middle one changed: docked at the top it is
+     fully transparent (below), and once the visitor scrolls away from the
+     dock it becomes FROSTED GLASS — a light tint plus a heavy blur, so the
+     page keeps moving visibly underneath instead of disappearing behind a
+     solid strip.
+
+     `--tds-header-tint` is the single knob for that. It exists because the
+     value is set in four places (light/dark × docked/scrolled) and they
+     drifted apart the last two times they were tuned by hand. Anything
+     below roughly 45% stops carrying dark body text over a light photo;
+     anything above ~75% is not glass any more. Judge it in a browser
+     against the hero, not in the diff — the whole effect is the
+     background showing through, which no test can see. */
   .site-header {
+    --tds-header-tint: 62%;
     /* Fully round in EVERY state, not just once the desktop bar has
        scrolled — "komplett rund und nicht nur runde Ecken". The radius is
        the shared pill token rather than a hand-written literal (it used to
        be 24px here and 22px docked), which is also what keeps the three
        states from drifting apart again. */
     border-radius: var(--tds-radius-pill);
-    background-color: color-mix(in srgb, var(--color-paper) 92%, transparent);
+    background-color: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
     /* No rim. The fill alone separates the bar from the page — the warm
        hairline (and before it the white glass highlight) is exactly the
        kind of 1px box the borderless pass removes. It was an INSET
@@ -214,24 +221,32 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     /* Only the unprefixed property is authored — lightningcss adds the
        `-webkit-` prefix at build time per the configured cssTarget.
        Hand-writing both makes lightningcss collapse them to `-webkit-`
-       only, which drops the blur in Firefox. See astro.config.mjs. */
-    backdrop-filter: blur(16px) saturate(115%);
+       only, which drops the blur in Firefox. See astro.config.mjs.
+
+       The blur now carries the bar on its own: with a 62% tint it is the
+       difference between "frosted" and "you can read the hero straight
+       through the nav". Removing it does not merely soften the look, it
+       breaks legibility — a browser that does not support backdrop-filter
+       gets the tint alone, which is why the tint is not lower still. */
+    backdrop-filter: blur(22px) saturate(150%);
     transition:
       background-color 250ms ease,
       box-shadow 250ms ease;
   }
 
-  /* Dark mode — the fill alone now has to keep the nav legible against the
-     dark hero. That is the whole risk of dropping the rim: the hairline
-     was what stopped the bar dissolving into the hero, so the tint rises
-     from 55% to 88% to pay for it. Do not lower it back without looking at
-     the scrolled bar over the dark hero. */
+  /* Dark mode — same glass, a slightly denser tint. There is no rim to
+     help here (the borderless pass removed it), and white-on-dark type
+     over a bright photo scrolling underneath is the harder of the two
+     directions, so dark runs a few points above light rather than at the
+     same value. Do not lower it without looking at the scrolled bar over
+     the dark hero. */
   :global(:root[data-theme="dark"]) .site-header {
-    background-color: color-mix(in srgb, var(--color-card) 88%, transparent);
+    --tds-header-tint: 68%;
+    background-color: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
     box-shadow: none;
   }
   :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
-    background-color: color-mix(in srgb, var(--color-card) 94%, transparent);
+    background-color: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
     box-shadow: 0 8px 22px -16px rgba(0, 0, 0, 0.55);
   }
 
@@ -263,7 +278,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       background-color: transparent;
     }
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
-      background-color: color-mix(in srgb, var(--color-card) 92%, transparent);
+      background-color: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
     }
   }
 
@@ -289,7 +304,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       max-width: 100%;
       background-color: transparent;
       box-shadow: none;
-      backdrop-filter: blur(20px) saturate(115%);
+      backdrop-filter: blur(24px) saturate(150%);
       transition:
         max-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
         top 320ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -298,16 +313,21 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     }
 
     /* Scrolled away from the top — the bar lifts off the edge and shrinks
-       into a compact floating capsule: near-opaque warm white and the
-       SUGGESTION of a shadow, with no rim at all. The old
-       `0 18px 50px -24px rgba(5,15,104,.45)` was a 50px navy plume that
-       read as grey haze on the warm ground — the brief's "keine
-       ausgeprägten Schatten". Depth here comes from the fill contrast
-       against the page, not from the drop. */
+       into a compact floating capsule of FROSTED GLASS: a light tint over
+       a heavy blur, so the page reads through it, plus the SUGGESTION of a
+       shadow and no rim at all. This state used to be a near-opaque warm
+       white; it is the one the visitor spends the whole page inside, which
+       is why the translucency is spent here rather than on the dock.
+
+       The old `0 18px 50px -24px rgba(5,15,104,.45)` was a 50px navy plume
+       that read as grey haze on the warm ground. The shadow that replaced
+       it is doing more work now than it was: with a translucent fill it is
+       most of what separates the capsule from the content sliding under
+       it, so do not remove it along with the opacity. */
     .site-header[data-scrolled="true"] {
       top: 1rem;
       max-width: 56rem;
-      background-color: color-mix(in srgb, var(--color-paper) 96%, transparent);
+      background-color: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
       box-shadow: 0 8px 22px -16px rgba(5, 15, 104, 0.28);
     }
   }

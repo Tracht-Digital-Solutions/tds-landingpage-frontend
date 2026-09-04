@@ -16,33 +16,46 @@ const pricingHref = localizePath("/preise", lang);
 const homePrefix = lang === "de" ? "" : "/en";
 ---
 
+{/* FULL-BLEED BAND, not a card inside a container. The navy used to be a
+    rounded 7xl panel with paper showing down both sides; it runs the whole
+    width of the page now. Three consequences worth stating, because each
+    one is a thing somebody will otherwise "fix" back:
+
+    - `section-spacing` is gone from the `<section>`. The band's own
+      padding IS the spacing; leaving both would stack two paddings and
+      push the navy into the middle of a very tall paper gap.
+    - The radius and the `-mx-6 … md:mx-0` bleed hack are gone with it.
+      There is nothing left to round: the panel has no side margin at any
+      breakpoint, so a corner radius would only cut the viewport edge.
+    - The 7xl container moved INSIDE, around the copy. That is what keeps
+      the text column on the same left edge as every other section — drop
+      it and the headline starts at the window edge.
+
+    PricingTeaser.astro made the same move; the two remain a pair. */}
 <section
   id="digital-responsibility"
-  class="section-spacing"
   aria-labelledby="digital-responsibility-heading"
 >
-  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
-    {/* The second navy focus surface. It pairs with the PricingTeaser as
-        a system — same tone, same geometry family — but the composition
-        is MIRRORED (the quarter circle cuts the bottom-left corner, not
-        the top-right) so the two read as two members of one family
-        rather than as the same card twice. See the note in
-        PricingTeaser.astro for what this replaced. */}
-    <div
-      class="relative overflow-hidden -mx-6 px-6 py-10 rounded-none md:mx-0 md:rounded-[6px] md:p-12 lg:p-16 tds-tone-navy"
-    >
-      <span
-        aria-hidden="true"
-        class="tds-shape tds-shape--quarter-tr tds-shape--coral"
-        style="bottom: -6rem; left: -6rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.2;"
-      ></span>
-      <span
-        aria-hidden="true"
-        class="tds-shape tds-shape--rect tds-shape--outline tds-shape--coral hidden md:block"
-        style="top: -5rem; right: 8%; width: 15rem; height: 16rem; --tds-decor-line-opacity: 0.28;"
-      ></span>
+  {/* The second navy focus surface. It pairs with the PricingTeaser as
+      a system — same tone, same geometry family — but the composition
+      is MIRRORED (the quarter circle cuts the bottom-left corner, not
+      the top-right) so the two read as two members of one family
+      rather than as the same card twice. See the note in
+      PricingTeaser.astro for what this replaced. */}
+  <div class="relative overflow-hidden py-14 md:py-20 lg:py-24 tds-tone-navy">
+    <span
+      aria-hidden="true"
+      class="tds-shape tds-shape--quarter-tr tds-shape--coral"
+      style="bottom: -6rem; left: -6rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.2;"
+    ></span>
+    <span
+      aria-hidden="true"
+      class="tds-shape tds-shape--rect tds-shape--outline tds-shape--coral hidden md:block"
+      style="top: -5rem; right: 8%; width: 15rem; height: 16rem; --tds-decor-line-opacity: 0.28;"
+    ></span>
 
-      <div class="relative max-w-3xl">
+    <div class="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+      <div class="max-w-3xl">
         <h2
           id="digital-responsibility-heading"
           class="display text-4xl md:text-5xl lg:text-6xl text-white mb-6"

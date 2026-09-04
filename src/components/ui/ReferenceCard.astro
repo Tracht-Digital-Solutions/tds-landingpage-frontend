@@ -1,0 +1,259 @@
+---
+/**
+ * One published reference case: an optional screenshot of the customer's site,
+ * the context, the outcome, an optional metric, and the links the case earns.
+ *
+ * Extracted out of `sections/References.astro` when that section merged into
+ * `sections/Showcase.astro`. It is a component now for one concrete reason:
+ * the merged shelf puts reference cards and demo cards side by side in the
+ * same track, and two card families that sit next to each other have to be
+ * tuned against each other in one place rather than inside a section body.
+ *
+ * ### What this card shares with `DemoCard`, and what it does not
+ *
+ * Shared, because they are neighbours in the same carousel: the sand fill on
+ * the paper ground, the 16:10 screenshot band with its page edge, `height:
+ * 100%` so a row of slides ends on one baseline, and the 6px radius.
+ *
+ * NOT shared: this card is not one big link. A demo card has exactly one
+ * destination and can be an `<a>`; a reference case has up to three (the
+ * service, the journal article, the customer's own site) and wrapping it would
+ * nest links. That is why the picture here does not zoom on hover either —
+ * there is no single thing being hovered.
+ *
+ * Every destination is code-owned (`lib/references.ts`); none of them can come
+ * from the CMS. Only the two link LABELS below are editable copy.
+ */
+import type { Lang } from "~/lib/i18n";
+
+export interface ReferenceCardData {
+  id: string;
+  preview: { src: string; width: number; height: number } | null;
+  reference: {
+    title: string;
+    context: string;
+    result: string;
+    metric?: string | null;
+  };
+  serviceHref: string;
+  articleHref: string | null;
+  siteHref: string | null;
+}
+
+interface Props {
+  card: ReferenceCardData;
+  lang: Lang;
+  /** Editable label for the link to the service the case belongs to. */
+  serviceCta: string;
+}
+
+const { card, lang, serviceCta } = Astro.props;
+
+// `newTab` duplicates a word `demoUi` already has, deliberately: importing the
+// demo cards' vocabulary here would couple two card families that are kept
+// apart on purpose, for one string.
+const ui =
+  lang === "de"
+    ? {
+        context: "Kontext",
+        result: "Ergebnis",
+        metric: "Belegbare Kennzahl",
+        article: "Artikel im Journal",
+        site: "Webseite ansehen",
+        newTab: "öffnet in neuem Tab",
+        previewAlt: (title: string) => `Startseite der Webseite: ${title}`,
+      }
+    : {
+        context: "Context",
+        result: "Outcome",
+        metric: "Verifiable metric",
+        article: "Article in the Journal",
+        site: "View the website",
+        newTab: "opens in a new tab",
+        previewAlt: (title: string) => `Home page of the website: ${title}`,
+      };
+---
+
+<article class="reference-card" data-reveal>
+  {/* The picture, where the customer allowed one. A screenshot, captured
+      offline by `npm run references:sync` — never an iframe: a live embed of
+      somebody else's site fails on their `X-Frame-Options` with no way to know
+      in advance, and the page cache would then freeze the broken state. */}
+  {card.preview && (
+    <div class="reference-card__shot">
+      <img
+        src={card.preview.src}
+        alt={ui.previewAlt(card.reference.title)}
+        width={card.preview.width}
+        height={card.preview.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  )}
+
+  <div class="reference-card__body">
+    <p class="eyebrow text-[var(--color-accent)] mb-3">
+      <span class="sr-only">{ui.context}: </span>
+      {card.reference.context}
+    </p>
+    <h3 class="reference-card__title">{card.reference.title}</h3>
+    {/* Result only. The starting point and the approach are the article's job
+        — repeating them here made every card three labelled paragraphs long,
+        which is not a card. In the carousel it is clamped as well: slides in a
+        flex track all take the height of the tallest one, so a single long
+        outcome would set the height of every demo card beside it. */}
+    <p class="reference-card__result">
+      <span class="sr-only">{ui.result}: </span>
+      {card.reference.result}
+    </p>
+    {card.reference.metric && (
+      <p class="reference-card__metric">
+        <span class="sr-only">{ui.metric}: </span>
+        {card.reference.metric}
+      </p>
+    )}
+
+    <div class="reference-card__links">
+      <a href={card.serviceHref} class="link-underline text-[var(--color-accent)]">
+        {serviceCta}
+        <span aria-hidden="true"> →</span>
+      </a>
+      {card.articleHref && (
+        <a href={card.articleHref} class="link-underline text-[var(--color-accent)]">
+          {ui.article}
+          <span aria-hidden="true"> →</span>
+        </a>
+      )}
+      {/* Present only on a named case, and only from the committed catalog —
+          the CMS cannot put a customer link here. The outward arrow rather
+          than the internal "→": DemoCard established that mark for a
+          destination that leaves this site, and reusing the internal glyph
+          would disguise it. `hreflang` is hardcoded: the one named case today
+          is a German-only site. A customer site in another language needs a
+          field on the case, not a guess here. */}
+      {card.siteHref && (
+        <a
+          href={card.siteHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          hreflang="de"
+          class="link-underline inline-flex items-center gap-1.5 text-[var(--color-accent)]"
+        >
+          {ui.site}
+          <span class="sr-only"> ({ui.newTab})</span>
+          <svg
+            aria-hidden="true"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .reference-card {
+    display: flex;
+    flex-direction: column;
+    /* Without it a card in a shorter row stops at its content and the row's
+       cards end on different baselines. Same line, same reason, as
+       `.demo-card` — the two are neighbours in one track. */
+    height: 100%;
+    /* Sand on the showcase's paper ground: the same fill as `.demo-card`, so
+       the two families read as one shelf rather than as two pasted-together
+       sections. A borderless card whose fill matches its section is not a
+       card, which is why this is NOT `--color-paper` any more — it was, back
+       when the references section carried the sand ground itself. */
+    background: var(--color-soft);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  /* The screenshot is CONTENT, not a ground: full strength, in front, with a
+     real alt. Same rule as DemoCard — the difference between a picture of a
+     site and a texture behind text is the whole point of showing it.
+
+     The ratio is reserved before the image loads so neighbouring cards keep
+     their headings aligned while the shot arrives. */
+  .reference-card__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+    /* A screenshot of a page has a page edge. Without this it bleeds into the
+       card's fill and reads as a broken layout rather than a picture of one. */
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .reference-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .reference-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 1.5rem 1.5rem 1.375rem;
+  }
+
+  .reference-card__title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    margin: 0 0 1rem;
+  }
+
+  .reference-card__result {
+    margin: 0;
+    color: var(--color-black);
+    line-height: 1.6;
+    /* See the note at the call site: one long outcome would otherwise set the
+       height of every slide in the track. The full text stays on the service
+       page and in the journal article, which is where it belongs. */
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .reference-card__metric {
+    margin: 1.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--color-black);
+  }
+
+  .reference-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    /* Pinned to the bottom so the links line up across cards whose outcomes
+       are different lengths. */
+    margin-top: auto;
+    padding-top: 1.75rem;
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 768px) {
+    .reference-card__body {
+      padding: 1.75rem 1.75rem 1.625rem;
+    }
+  }
+</style>
