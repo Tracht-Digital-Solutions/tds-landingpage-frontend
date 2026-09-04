@@ -2,9 +2,20 @@
 import ServiceDetailPage from "~/components/services/ServiceDetailPage.astro";
 import ErrorView from "~/components/ErrorView.astro";
 import Layout from "~/layouts/Layout.astro";
-import { getServiceBySlug, resolveServiceContent } from "~/lib/services";
+import {
+  getServiceBySlug,
+  resolveServiceContent,
+  retiredServiceTarget,
+} from "~/lib/services";
 
 const lang = "de" as const;
+
+// A withdrawn service keeps answering, with a 301 to where its content went.
+// This has to come before anything else: the redirect is the response, so
+// resolving content for a page nobody will see would be wasted work.
+const retired = retiredServiceTarget(lang, Astro.params.slug);
+if (retired) return Astro.redirect(retired, 301);
+
 const service = getServiceBySlug(lang, Astro.params.slug);
 const content = service ? await resolveServiceContent(service, lang) : undefined;
 if (!service) Astro.response.status = 404;

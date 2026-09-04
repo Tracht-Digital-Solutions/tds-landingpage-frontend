@@ -42,18 +42,20 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
 // descriptions live here. The name is load-bearing: seo.test.ts reads this
 // literal off disk to keep every indexable page inside one length budget.
 const pageDescriptions = {
-  de: "Nettostundensätze für Beratung, Prozesse, individuelle Lösungen, Programmierung und Webauftritte sowie ein individuelles Modell für komplette IT.",
-  en: "Net hourly rates for consulting, processes, tailored solutions, development and web presence, plus an individual model for complete IT.",
+  de: "Nettostundensätze für Beratung und Konzeption, Prozessoptimierung, individuelle Lösungen und den Webauftritt mit Webshop und Marketing.",
+  en: "Net hourly rates for consulting and planning, process optimisation, tailored solutions, and web presence including online shop and marketing.",
 };
 
 const jsonLd = [
   pricingSchema(
-    services.flatMap(({ definition, content }) => {
-      const rate = getServiceRate(pricing, definition.id);
-      return rate === undefined
-        ? []
-        : [{ name: content.title, description: content.summary, rate }];
-    }),
+    // Every remaining service carries a rate, so nothing is filtered out here
+    // any more — the guard that skipped a rate-less service went with
+    // Complete IT, and `getServiceRate` is total now.
+    services.map(({ definition, content }) => ({
+      name: content.title,
+      description: content.summary,
+      rate: getServiceRate(pricing, definition.id),
+    })),
   ),
   breadcrumbSchema([
     { name: "Home", url: `${siteConfig.url}${homeHref}` },
@@ -92,59 +94,34 @@ const jsonLd = [
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
         {services.map(({ definition, content }) => {
           const rate = getServiceRate(pricing, definition.id);
-          const isCustom = rate === undefined;
-          const isHighlight = definition.id === "complete-it";
           return (
             <article
               data-reveal
-              class:list={[
-                "relative rounded-[6px] p-7 flex flex-col",
-                isHighlight
-                  ? "tds-tone-navy text-white"
-                  : "bg-[var(--color-soft)]",
-              ]}
+              class="relative rounded-[6px] p-7 flex flex-col bg-[var(--color-soft)]"
             >
               {/* No number above the title — see the note in
                   ServiceDetailPage.astro. The card's own edge separates it
                   from its neighbours; a mono "03" only ever said which slot
                   it happened to sit in. */}
-              <h2 class:list={[
-                "font-[var(--font-display)] text-2xl mb-3",
-                isHighlight ? "text-white" : "text-[var(--color-black)]",
-              ]}>
+              <h2 class="font-[var(--font-display)] text-2xl mb-3 text-[var(--color-black)]">
                 {content.title}
               </h2>
 
               <div class="flex items-baseline gap-2 mb-5 min-h-12">
-                <span class:list={[
-                  "font-[var(--font-display)] font-medium tabular-nums",
-                  isCustom ? "text-2xl leading-tight" : "text-4xl",
-                  isHighlight ? "text-white" : "text-[var(--color-primary)]",
-                ]}>
-                  {isCustom ? pricing.customRateLabel : formatRate(rate)}
+                <span class="font-[var(--font-display)] font-medium tabular-nums text-4xl text-[var(--color-primary)]">
+                  {formatRate(rate)}
                 </span>
-                {!isCustom && (
-                  <span class:list={[
-                    "text-sm",
-                    isHighlight ? "text-white/65" : "text-[var(--color-muted)]",
-                  ]}>
-                    {pricing.hourSuffix}
-                  </span>
-                )}
+                <span class="text-sm text-[var(--color-muted)]">
+                  {pricing.hourSuffix}
+                </span>
               </div>
 
-              <p class:list={[
-                "text-sm leading-relaxed mb-7",
-                isHighlight ? "text-white/78" : "text-[var(--color-muted)]",
-              ]}>
+              <p class="text-sm leading-relaxed mb-7 text-[var(--color-muted)]">
                 {content.summary}
               </p>
 
               <div class="mt-auto">
-                <p class:list={[
-                  "text-xs font-medium tracking-wider uppercase mb-3",
-                  isHighlight ? "text-white/55" : "text-[var(--color-muted)]",
-                ]}>
+                <p class="text-xs font-medium tracking-wider uppercase mb-3 text-[var(--color-muted)]">
                   {pricing.includesLabel}
                 </p>
                 {/* The code-owned keyword list, not the first four lines of
@@ -154,23 +131,15 @@ const jsonLd = [
                     card is where the sentences belong. */}
                 <ul class="space-y-2 mb-7">
                   {definition.keywords[lang].map((keyword) => (
-                    <li class:list={[
-                      "text-sm leading-snug flex gap-2",
-                      isHighlight ? "text-white/88" : "text-[var(--color-black)]",
-                    ]}>
-                      <span aria-hidden="true" class={isHighlight ? "text-[var(--color-accent-pink)]" : "text-[var(--color-accent)]"}>✓</span>
+                    <li class="text-sm leading-snug flex gap-2 text-[var(--color-black)]">
+                      <span aria-hidden="true" class="text-[var(--color-accent)]">✓</span>
                       <span>{keyword}</span>
                     </li>
                   ))}
                 </ul>
                 <a
                   href={serviceHref(definition, lang)}
-                  class:list={[
-                    "inline-flex items-center gap-2 text-sm font-medium transition-colors",
-                    isHighlight
-                      ? "text-white hover:text-[var(--color-accent-pink)]"
-                      : "text-[var(--color-primary)] hover:text-[var(--color-accent)]",
-                  ]}
+                  class="inline-flex items-center gap-2 text-sm font-medium transition-colors text-[var(--color-primary)] hover:text-[var(--color-accent)]"
                 >
                   {detailsLabel}<span aria-hidden="true">→</span>
                 </a>

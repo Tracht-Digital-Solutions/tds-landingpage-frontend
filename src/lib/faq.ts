@@ -48,12 +48,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             a: "Ja. Sagen Sie einfach, was im Alltag Zeit kostet oder nicht rundläuft. Den nächsten Schritt finden wir gemeinsam.",
           },
           {
-            q: "Können Sie sich um alles Digitale kümmern?",
-            a: "Ja. Je nach Absprache übernehme ich Planung, Umsetzung, die Abstimmung mit Ihren bisherigen Anbietern und die laufende Betreuung.",
+            q: "Können Sie ein Vorhaben von Anfang bis Ende übernehmen?",
+            a: "Ja. Je nach Absprache übernehme ich Planung, Umsetzung, die Abstimmung mit Ihren bisherigen Anbietern und die laufende Pflege.",
           },
           {
-            q: "Was gehört zu „Komplette IT“?",
-            a: "Geräte, Zugänge, Netzwerk, Sicherheit, Backups, Lizenzen und Support. Was genau dazugehört, vereinbaren wir nach einer Bestandsaufnahme.",
+            q: "Was gehört zum Webauftritt dazu?",
+            a: "Die Webseite, auf Wunsch ein Webshop und das Marketing, über das Kunden Sie finden — Google Ads, Auffindbarkeit und Newsletter. Was davon sinnvoll ist, klären wir vorher.",
           },
           {
             q: "Arbeiten Sie mit meinen bisherigen Anbietern weiter?",
@@ -85,12 +85,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             a: "Yes. Just say what costs you time or does not run smoothly. We work out the next step together.",
           },
           {
-            q: "Can you look after everything digital?",
-            a: "Yes. Depending on what we agree, I handle planning, delivery, coordination with your existing suppliers and the ongoing support.",
+            q: "Can you take a project from start to finish?",
+            a: "Yes. Depending on what we agree, I handle planning, delivery, coordination with your existing suppliers and the ongoing upkeep.",
           },
           {
-            q: "What is included in “Complete IT”?",
-            a: "Devices, accounts, network, security, backups, licences and support. Exactly what is included is agreed after an assessment.",
+            q: "What does web presence include?",
+            a: "The website, an online shop if you want one, and the marketing that brings customers to it — Google Ads, findability and newsletters. We agree up front which of those makes sense.",
           },
           {
             q: "Will you keep working with my current suppliers?",

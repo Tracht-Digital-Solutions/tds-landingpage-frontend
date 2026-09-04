@@ -3,12 +3,11 @@ import type { Lang } from "./i18n";
 import type { ServiceId } from "./services";
 
 /**
- * Pricing copy and the five numeric hourly rates.
+ * Pricing copy and the four numeric hourly rates.
  *
- * `pricing.test.ts` pins the rates and the fact that Complete IT has none —
- * it is quoted monthly after an assessment, and inventing a number here
- * would also put an invented `Offer` price into the pricing JSON-LD.
- * `customRateLabel` must therefore keep saying "Monatsangebot" in German.
+ * `pricing.test.ts` pins the rates. Every service has one, so the pricing
+ * JSON-LD carries an `Offer` for all four — there is no rate-less service
+ * left to omit, and none may be given an invented number.
  *
  * `*asterisks*` mark a word for emphasis (see `./emphasis`); a CMS override
  * without them renders as plain text.
@@ -25,14 +24,11 @@ export interface PricingContent {
   teaserCta: string;
   teaserFromLabel: string;
   hourSuffix: string;
-  customRateLabel: string;
   includesLabel: string;
   rateConsulting: number;
   rateProcess: number;
   rateSolutions: number;
-  rateCustomDevelopment: number;
   rateWebPresence: number;
-  rateMarketing: number;
   notesTitle: string;
   notes: string[];
   ctaTitle: string;
@@ -51,24 +47,21 @@ const defaults: Record<Lang, PricingContent> = {
     teaserHeadline: "Planbare Sätze,",
     teaserHeadlineAccent: "passende Modelle.",
     teaserSub:
-      "Ab 95 € netto pro Stunde. Für die komplette IT gibt es nach einer Bestandsaufnahme ein Monatsangebot.",
+      "Ab 95 € netto pro Stunde. Steht der Umfang vorher fest, rechne ich auch zum Festpreis ab.",
     teaserCta: "Preise ansehen",
     teaserFromLabel: "ab",
     hourSuffix: "/ Stunde",
-    customRateLabel: "Monatsangebot",
     includesLabel: "Enthalten:",
     rateConsulting: 120,
     rateProcess: 110,
     rateSolutions: 110,
-    rateCustomDevelopment: 105,
     rateWebPresence: 95,
-    rateMarketing: 95,
     notesTitle: "Gut zu wissen",
     notes: [
       "Alle Preise sind netto, zuzüglich Mehrwertsteuer.",
       "Festpreis, wenn Ziel und Umfang vorher klar sind.",
       "Für laufende Betreuung gibt es Monatsmodelle.",
-      "Bei kompletter IT bestimmen Arbeitsplätze, Geräte, Lizenzen, Sicherheit und Erreichbarkeit den Preis.",
+      "Bei Anzeigen kommt Ihr Mediabudget dazu; es geht direkt an Google.",
     ],
     ctaTitle: "Welcher Rahmen passt zu Ihnen?",
     ctaSub:
@@ -85,24 +78,21 @@ const defaults: Record<Lang, PricingContent> = {
     teaserHeadline: "Predictable rates,",
     teaserHeadlineAccent: "models that fit.",
     teaserSub:
-      "From €95 net per hour. Complete IT is quoted monthly after an assessment.",
+      "From €95 net per hour. When the scope is settled up front, I work to a fixed price too.",
     teaserCta: "View pricing",
     teaserFromLabel: "from",
     hourSuffix: "/ hour",
-    customRateLabel: "Monthly quote",
     includesLabel: "Included:",
     rateConsulting: 120,
     rateProcess: 110,
     rateSolutions: 110,
-    rateCustomDevelopment: 105,
     rateWebPresence: 95,
-    rateMarketing: 95,
     notesTitle: "Good to know",
     notes: [
       "All prices are net and exclude VAT.",
       "A fixed price works when the goal and scope are clear up front.",
       "Monthly arrangements are available for ongoing support.",
-      "For Complete IT the price depends on workstations, devices, licences, security and agreed availability.",
+      "Where ads are involved your media budget is extra; it goes to Google directly.",
     ],
     ctaTitle: "Which setup fits you?",
     ctaSub:
@@ -120,17 +110,25 @@ export async function getPricingContent(lang: Lang): Promise<PricingContent> {
   return cmsFor("pricing_services", lang, getPricingDefault(lang));
 }
 
+/**
+ * The hourly rate for a service.
+ *
+ * Total, not partial. Complete IT used to be absent from this map on purpose —
+ * that omission WAS the "no invented price" rule, and every caller carried an
+ * `undefined` branch for it. With that service gone the branch was dead code
+ * that still forced a null check at three call sites, so the map is now
+ * exhaustive and the return type says so. A new rate-less service would fail
+ * to compile here, which is the right place to notice it.
+ */
 export function getServiceRate(
   pricing: PricingContent,
   serviceId: ServiceId,
-): number | undefined {
-  const rates: Partial<Record<ServiceId, number>> = {
+): number {
+  const rates: Record<ServiceId, number> = {
     consulting: pricing.rateConsulting,
     process: pricing.rateProcess,
     solutions: pricing.rateSolutions,
-    "custom-development": pricing.rateCustomDevelopment,
     "web-presence": pricing.rateWebPresence,
-    marketing: pricing.rateMarketing,
   };
   return rates[serviceId];
 }

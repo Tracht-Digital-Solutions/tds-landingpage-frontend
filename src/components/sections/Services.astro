@@ -48,18 +48,34 @@ const services = await Promise.all(
       <Emphasis text={servicesContent.intro} />
     </p>
 
-    <div class="grid sm:grid-cols-2 gap-4 md:gap-6">
+    {/* One surface divided into four, not four cards floating on sand.
+
+        The separation is a 1px grid gap over a parent painted in
+        `--color-line`: the tiles paint their own fill, the gap lets the
+        parent show through, and what a visitor sees is a hairline seam. No
+        border per tile, so no doubled lines where two tiles meet, and no
+        gutter to make four services look like four unrelated offers.
+
+        `data-reveal` sits on the mosaic rather than on each tile on purpose.
+        Per-tile it would stagger — `reveal.ts` groups by parent, and these
+        finally share one — but four tiles sliding up independently would open
+        and close the seams while they travel. One picture, one entrance.
+
+        Full-bleed below `md` with the idiom Consulting and PricingTeaser
+        already use: the negative margin escapes the section's own gutter and
+        the radius comes back once there is room for it. */}
+    <div
+      data-reveal
+      class="-mx-6 md:mx-0 overflow-hidden rounded-none md:rounded-[6px] bg-[var(--color-line)] grid gap-px sm:grid-cols-2"
+    >
       {services.map(({ definition, content }) => (
-          <div class="h-full">
-            <ServiceCard
-              href={serviceHref(definition, lang)}
-              number={definition.number}
-              title={content.title}
-              description={content.summary}
-              keywords={definition.keywords[lang]}
-              image={definition.image}
-            />
-          </div>
+        <ServiceCard
+          href={serviceHref(definition, lang)}
+          title={content.title}
+          description={content.summary}
+          keywords={definition.keywords[lang]}
+          image={definition.image}
+        />
       ))}
     </div>
   </div>

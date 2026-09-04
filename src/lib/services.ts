@@ -9,19 +9,13 @@ export type ServiceId =
   | "consulting"
   | "process"
   | "solutions"
-  | "custom-development"
-  | "web-presence"
-  | "marketing"
-  | "complete-it";
+  | "web-presence";
 
 export type ServiceCmsKey =
   | "service_consulting"
   | "service_process"
   | "service_solutions"
-  | "service_custom_development"
-  | "service_web_presence"
-  | "service_marketing"
-  | "service_complete_it";
+  | "service_web_presence";
 
 export interface ServiceReference {
   title: string;
@@ -378,8 +372,8 @@ export const serviceDefinitions = [
     cmsKey: "service_solutions",
     slug: { de: "individuelle-loesungen", en: "tailored-solutions" },
     keywords: {
-      de: ["Systeme verbinden", "Schnittstellen", "Eigene Software"],
-      en: ["Connected systems", "Integrations", "Custom software"],
+      de: ["Systeme verbinden", "Schnittstellen", "Eigene Software", "Auftragsentwicklung"],
+      en: ["Connected systems", "Integrations", "Custom software", "Contract development"],
     },
     image: "/images/services/03-loesungen.webp",
     fallback: {
@@ -394,21 +388,22 @@ export const serviceDefinitions = [
         situations: [
           "Mehrere Programme arbeiten nicht zusammen.",
           "Die Standardsoftware kann eine Besonderheit Ihres Betriebs nicht.",
+          "Für eine klar beschriebene Aufgabe gibt es kein passendes Programm.",
           "Daten sollen zuverlässig von einem Werkzeug ins andere fließen.",
-          "Für ein neues Angebot fehlt der technische Unterbau.",
         ],
         responsibilitiesTitle: "Was ich übernehme",
         responsibilities: [
           "Anforderungen und vorhandene Technik zusammenbringen",
           "Abwägen: Standardprodukt, Schnittstelle oder Eigenbau",
           "Den Aufbau und die Einführung planen",
-          "Bausteine umsetzen, verbinden und dokumentieren",
+          "Nach klarer Aufgabe entwickeln, testen und dokumentieren",
+          "Bausteine verbinden, übergeben und weiter betreuen",
         ],
         outcomesTitle: "Das erreichen Sie",
         outcomes: [
           "Ihre Programme arbeiten zusammen",
-          "Daten stehen überall aktuell bereit",
-          "Was heute gut läuft, bleibt bestehen",
+          "Sie bekommen genau das Werkzeug, das fehlt",
+          "Der Quellcode ist lesbar und dokumentiert",
           "Einer verantwortet das Gesamtbild",
         ],
         boundariesTitle: "Was nicht dazugehört",
@@ -447,21 +442,22 @@ export const serviceDefinitions = [
         situations: [
           "Several programs do not work together.",
           "Standard software cannot handle a quirk of your business.",
+          "There is no program for a clearly described task.",
           "Data should move reliably from one tool to the next.",
-          "A new offer has no technical foundation yet.",
         ],
         responsibilitiesTitle: "What I take care of",
         responsibilities: [
           "Bring the requirements and the existing technology together",
           "Weigh it up: off-the-shelf, integration, or custom build",
           "Plan the structure and the rollout",
-          "Build, connect and document the pieces",
+          "Build, test and document against a clear brief",
+          "Connect the pieces, hand them over and keep supporting them",
         ],
         outcomesTitle: "What you achieve",
         outcomes: [
           "Your programs work together",
-          "Data is up to date everywhere",
-          "What works today stays",
+          "You get exactly the tool that is missing",
+          "The source code is readable and documented",
           "One person owns the whole picture",
         ],
         boundariesTitle: "What this does not cover",
@@ -492,167 +488,57 @@ export const serviceDefinitions = [
     },
   },
   {
-    id: "custom-development",
-    number: "04",
-    cmsKey: "service_custom_development",
-    slug: { de: "auftragsprogrammierung", en: "contract-development" },
-    keywords: {
-      de: ["Software", "Schnittstellen", "Erweiterungen"],
-      en: ["Software", "Interfaces", "Extensions"],
-    },
-    image: "/images/services/04-programmierung.webp",
-    fallback: {
-      de: {
-        label: "Alle Leistungen",
-        title: "Auftragsprogrammierung",
-        summary:
-          "Ich programmiere Software nach klarer Aufgabe: ein eigenes Werkzeug, eine Erweiterung oder eine Schnittstelle zwischen zwei Systemen.",
-        intro:
-          "Wenn Aufgabe und Einsatzzweck feststehen, setze ich sie verlässlich um. Sie bekommen genau den vereinbarten Funktionsumfang — keine Plattform drumherum, die niemand braucht.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
-        situations: [
-          "Für eine klar beschriebene Aufgabe gibt es kein passendes Programm.",
-          "Eine vorhandene Anwendung braucht eine bestimmte Erweiterung.",
-          "Zwei Systeme sollen miteinander sprechen.",
-          "Aus einem Prototyp soll etwas Belastbares werden.",
-        ],
-        responsibilitiesTitle: "Was ich übernehme",
-        responsibilities: [
-          "Die Aufgabe technisch prüfen und schärfen",
-          "Aufbau und Umsetzung für den vereinbarten Umfang planen",
-          "Entwickeln, testen und dokumentieren",
-          "Übergabe, Start und Wartung abstimmen",
-        ],
-        outcomesTitle: "Das erreichen Sie",
-        outcomes: [
-          "Sie bekommen genau das Werkzeug, das fehlt",
-          "Sie wissen vorher, woran die Abnahme hängt",
-          "Der Quellcode ist lesbar und dokumentiert",
-          "Erweitern geht später ohne Neubau",
-        ],
-        boundariesTitle: "Was nicht dazugehört",
-        boundaries: [
-          "Eine unklare Idee braucht zuerst Beratung, nicht Programmierung.",
-          "Neue Wünsche verändern Umfang, Preis und Termin — offen ausgewiesen.",
-          "Betrieb, Wartung und fremde Lizenzen werden getrennt vereinbart.",
-        ],
-        processTitle: "So gehen wir vor",
-        process: [
-          "Aufgabe und Abnahmekriterien festhalten",
-          "Technischen Weg und Etappen abstimmen",
-          "Entwickeln, testen und regelmäßig zeigen",
-          "Abnehmen, dokumentieren und geordnet übergeben",
-        ],
-        priceLabel: "Preis",
-        priceText:
-          "105 € netto pro Stunde. Ist die Aufgabe vollständig beschrieben, kann ein Festpreis vereinbart werden.",
-        referencesLabel:
-          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
-        referencesHeadline: "Einblicke aus der Praxis",
-        references: [],
-        ctaTitle: "Sie haben eine konkrete Aufgabe?",
-        ctaText:
-          "Senden Sie mir Ihre Beschreibung. Wir klären Umfang, Schnittstellen und den nächsten Schritt.",
-        ctaButton: "Erstgespräch vereinbaren",
-      },
-      en: {
-        label: "All services",
-        title: "Contract Development",
-        summary:
-          "I build software to a clear brief: a standalone tool, an extension, or an interface between two systems you already run.",
-        intro:
-          "When the task and its purpose are settled, I build it reliably. You get exactly the agreed functionality — not a platform around it that nobody needs.",
-        situationsTitle: "Does this sound familiar?",
-        situations: [
-          "There is no suitable program for a clearly described task.",
-          "An existing application needs one specific extension.",
-          "Two systems should talk to each other.",
-          "A prototype needs to become something dependable.",
-        ],
-        responsibilitiesTitle: "What I take care of",
-        responsibilities: [
-          "Review and sharpen the brief technically",
-          "Plan the structure and delivery for the agreed scope",
-          "Develop, test and document it",
-          "Agree handover, launch and maintenance",
-        ],
-        outcomesTitle: "What you achieve",
-        outcomes: [
-          "You get exactly the tool that was missing",
-          "You know upfront what acceptance depends on",
-          "The source code is readable and documented",
-          "Later extensions need no rebuild",
-        ],
-        boundariesTitle: "What this does not cover",
-        boundaries: [
-          "An unclear idea needs consulting first, not programming.",
-          "New wishes change scope, price and date — stated openly.",
-          "Hosting, maintenance and third-party licences are agreed separately.",
-        ],
-        processTitle: "How we proceed",
-        process: [
-          "Write down the brief and the acceptance criteria",
-          "Agree the technical route and the stages",
-          "Develop, test and show results regularly",
-          "Accept, document and hand over in good order",
-        ],
-        priceLabel: "Price",
-        priceText:
-          "€105 net per hour. When the task is fully described, a fixed price can be agreed.",
-        referencesLabel:
-          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
-        referencesHeadline: "Examples from practice",
-        references: [],
-        ctaTitle: "Have a concrete task?",
-        ctaText:
-          "Send me your description. We settle the scope, the interfaces and the next step.",
-        ctaButton: "Arrange an initial conversation",
-      },
-    },
-  },
-  {
+    // The broadest of the four, and deliberately so: a site, a shop and the
+    // marketing that brings people to them are one job, not three. Marketing
+    // was briefly its own service; splitting it made the visitor choose
+    // between building a presence and being found through it, which is not a
+    // choice a small business has. The media-budget sentence in `boundaries`
+    // came from that entry and has to stay — an hourly rate on its own
+    // understates what running ads actually costs.
     id: "web-presence",
-    number: "05",
+    number: "04",
     cmsKey: "service_web_presence",
     slug: { de: "webauftritt", en: "web-presence" },
     keywords: {
-      de: ["Webseiten", "Webshops", "SEO", "Backlinks"],
-      en: ["Websites", "Online shops", "SEO", "Backlinks"],
+      de: ["Webseiten", "Webshops", "Google Ads", "SEO"],
+      en: ["Websites", "Online shops", "Google Ads", "SEO"],
     },
-    image: "/images/services/05-webauftritt.webp",
+    image: "/images/services/04-webauftritt.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
         title: "Webauftritt",
         summary:
-          "Webseiten, Webshops, SEO und Backlinks: Ich baue einen Auftritt, der Ihr Angebot erklärt und den man dauerhaft pflegen kann.",
+          "Webseiten, Webshops und Marketing: Ich baue Ihren Auftritt, bringe ihn zu den Kunden – und pflege ihn dauerhaft.",
         intro:
-          "Eine gute Seite sagt in wenigen Sekunden, wofür Sie stehen, und führt den Besucher zum nächsten Schritt. Gestaltung, Texte und Technik werden dafür zusammen gedacht.",
+          "Ein Auftritt besteht aus drei Teilen: die Seite, der Verkauf darüber und der Weg, auf dem Kunden dorthin finden. Gestaltung, Technik und Sichtbarkeit werden deshalb zusammen gedacht.",
         situationsTitle: "Kommt Ihnen das bekannt vor?",
         situations: [
           "Die Seite ist alt und lässt sich kaum pflegen.",
-          "Ein neues Angebot braucht einen eigenen Auftritt.",
-          "Sie werden über Google zu selten gefunden.",
-          "Formulare, Buchungen oder ein Shop sollen dazukommen.",
+          "Der Laden läuft, online verkaufen Sie noch nicht.",
+          "Die Seite ist gut, aber es kommt kaum jemand.",
+          "Anzeigen laufen, doch niemand erklärt Ihnen die Zahlen.",
         ],
         responsibilitiesTitle: "Was ich übernehme",
         responsibilities: [
           "Ziele, Zielgruppe und Inhalte sortieren",
-          "Aufbau und Wegführung der Seite festlegen",
           "Seite bauen: für Handy und Bildschirm, barrierearm",
-          "Sichtbarkeit bei Google und die laufende Pflege regeln",
+          "Webshop einrichten, Artikel und Bestand in den Griff bekommen",
+          "Google Ads betreuen und das Unternehmensprofil in Ordnung bringen",
+          "Organische Auffindbarkeit, Newsletter und laufende Pflege regeln",
         ],
         outcomesTitle: "Das erreichen Sie",
         outcomes: [
           "Besucher verstehen sofort, was Sie anbieten",
-          "Sie werden bei Google besser gefunden",
-          "Anfragen kommen den kurzen Weg",
+          "Ihr Angebot erscheint, wenn jemand danach sucht",
+          "Sie wissen, was eine Anfrage kostet",
           "Die Seite ist auch in zwei Jahren noch pflegbar",
         ],
         boundariesTitle: "Was nicht dazugehört",
         boundaries: [
+          "Das Mediabudget zahlen Sie direkt an Google – es ist kein Teil meines Honorars.",
           "Texte, Fotos und Rechtstexte brauchen Ihre Zuarbeit.",
-          "Sichtbarkeit entsteht nicht allein dadurch, dass die Seite online geht.",
+          "Organische Platzierungen lassen sich nicht kaufen, sie brauchen Zeit.",
           "Pflege, Hosting und Dienste Dritter werden offen ausgewiesen.",
         ],
         processTitle: "So gehen wir vor",
@@ -660,52 +546,54 @@ export const serviceDefinitions = [
           "Ziele, Inhalte und gewünschte Funktionen klären",
           "Aufbau und gestalterische Richtung abstimmen",
           "Seite bauen, befüllen und gemeinsam durchgehen",
-          "Online stellen und die weitere Betreuung festlegen",
+          "Online stellen, Sichtbarkeit aufbauen und offen berichten",
         ],
         priceLabel: "Preis",
         priceText:
-          "95 € netto pro Stunde. Steht fest, wie viele Seiten und Funktionen es werden, ist ein Festpreis möglich.",
+          "95 € netto pro Stunde, bei Anzeigen zuzüglich Ihres Mediabudgets. Steht der Umfang fest, ist ein Festpreis möglich.",
         referencesLabel:
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
-        ctaTitle: "Soll Ihre Seite mehr für Sie arbeiten?",
+        ctaTitle: "Soll Ihr Auftritt mehr für Sie arbeiten?",
         ctaText:
-          "Erzählen Sie mir, was sie leisten soll. Wir sortieren Ziele, Inhalte und den sinnvollen Umfang.",
+          "Erzählen Sie mir, was er leisten soll und wen Sie erreichen wollen. Wir sortieren Inhalte, Kanäle und den sinnvollen Umfang.",
         ctaButton: "Erstgespräch vereinbaren",
       },
       en: {
         label: "All services",
         title: "Web Presence",
         summary:
-          "Websites, online shops, SEO and backlinks: I build a presence that explains what you offer and stays easy to maintain.",
+          "Websites, online shops and marketing: I build your presence, bring it to your customers – and keep it maintained.",
         intro:
-          "A good site says what you stand for within seconds and leads the visitor to the next step. Design, copy and technology are planned together for that.",
+          "A presence has three parts: the site, what you sell through it, and the route customers take to find it. Design, technology and visibility are planned together for that reason.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "The site is old and hard to keep up to date.",
-          "A new offer needs a presence of its own.",
-          "You are found too rarely through Google.",
-          "Forms, bookings or a shop should be added.",
+          "The shop runs well, but you do not sell online yet.",
+          "The site is fine, but hardly anyone comes.",
+          "Ads are running, yet nobody explains the numbers.",
         ],
         responsibilitiesTitle: "What I take care of",
         responsibilities: [
           "Sort out the goals, the audience and the content",
-          "Set the structure and the path through the site",
           "Build it: for phones and screens, accessibly",
-          "Sort out visibility on Google and ongoing upkeep",
+          "Set up the online shop and get products and stock under control",
+          "Run Google Ads and put the business profile in order",
+          "Sort out organic findability, newsletters and ongoing upkeep",
         ],
         outcomesTitle: "What you achieve",
         outcomes: [
           "Visitors immediately see what you offer",
-          "You are easier to find on Google",
-          "Enquiries take the short route",
+          "Your offer shows up when someone searches for it",
+          "You know what an enquiry costs",
           "The site is still maintainable in two years",
         ],
         boundariesTitle: "What this does not cover",
         boundaries: [
+          "The media budget goes to Google directly – it is not part of my fee.",
           "Copy, photos and legal texts need your input.",
-          "Visibility does not come from putting a site online alone.",
+          "Organic rankings cannot be bought; they take time.",
           "Upkeep, hosting and third-party services are stated openly.",
         ],
         processTitle: "How we proceed",
@@ -713,264 +601,18 @@ export const serviceDefinitions = [
           "Clarify goals, content and the functions you want",
           "Agree the structure and the visual direction",
           "Build it, fill it and walk through it together",
-          "Put it online and settle the ongoing support",
+          "Put it online, build visibility and report openly",
         ],
         priceLabel: "Price",
         priceText:
-          "€95 net per hour. Once the number of pages and functions is settled, a fixed price is possible.",
+          "€95 net per hour, plus your media budget where ads are involved. Once the scope is settled, a fixed price is possible.",
         referencesLabel:
           "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
         references: [],
-        ctaTitle: "Should your site work harder for you?",
+        ctaTitle: "Should your presence work harder for you?",
         ctaText:
-          "Tell me what it needs to do. We sort out the goals, the content and a sensible scope.",
-        ctaButton: "Arrange an initial conversation",
-      },
-    },
-  },
-  {
-    // Sits directly behind Web Presence: a site that nobody finds is the
-    // problem this one picks up. The media budget is named in `boundaries`
-    // because it goes to Google, not to me — quoting an hourly rate without
-    // that sentence would understate what a campaign actually costs.
-    id: "marketing",
-    number: "06",
-    cmsKey: "service_marketing",
-    slug: { de: "marketing", en: "marketing" },
-    keywords: {
-      de: ["Google Ads", "Lokale Sichtbarkeit", "SEO", "Newsletter"],
-      en: ["Google Ads", "Local visibility", "SEO", "Newsletter"],
-    },
-    image: null,
-    fallback: {
-      de: {
-        label: "Alle Leistungen",
-        title: "Marketing",
-        summary:
-          "Google Ads, lokale Sichtbarkeit, SEO und Newsletter: Ich bringe Ihr Angebot dorthin, wo Kunden suchen – und zeige Ihnen, was es bringt.",
-        intro:
-          "Eine gute Seite hilft wenig, wenn niemand sie findet. Marketing sorgt dafür, dass Ihr Angebot dort auftaucht, wo gesucht wird – und dass Sie sehen, was das gebracht hat.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
-        situations: [
-          "Die Seite ist gut, aber es kommt kaum jemand.",
-          "Anzeigen laufen, doch niemand erklärt Ihnen die Zahlen.",
-          "Bei Google steht der Wettbewerb weiter oben.",
-          "Ihre Kundenliste liegt brach, statt zu arbeiten.",
-        ],
-        responsibilitiesTitle: "Was ich übernehme",
-        responsibilities: [
-          "Suchbegriffe, Zielgebiet und Budgetrahmen festlegen",
-          "Google-Ads-Konto einrichten, Anzeigen schreiben und betreuen",
-          "Unternehmensprofil und lokale Auffindbarkeit in Ordnung bringen",
-          "Inhalte und Seitenaufbau für die organische Suche schärfen",
-          "Newsletter aufsetzen und rechtssicher versenden",
-        ],
-        outcomesTitle: "Das erreichen Sie",
-        outcomes: [
-          "Ihr Angebot erscheint, wenn jemand danach sucht",
-          "Sie wissen, was eine Anfrage kostet",
-          "Im Umkreis werden Sie zuverlässig gefunden",
-          "Bestandskunden hören regelmäßig von Ihnen",
-        ],
-        boundariesTitle: "Was nicht dazugehört",
-        boundaries: [
-          "Das Mediabudget zahlen Sie direkt an Google – es ist kein Teil meines Honorars.",
-          "Anzeigen tragen nur, wenn Angebot und Landeseite dahinter stimmen.",
-          "Organische Platzierungen lassen sich nicht kaufen, sie brauchen Zeit.",
-          "Texte, Bilder und Freigaben für den Newsletter kommen von Ihnen.",
-        ],
-        processTitle: "So gehen wir vor",
-        process: [
-          "Angebot, Zielgruppe und Umkreis klären",
-          "Kanäle auswählen und einen Budgetrahmen festlegen",
-          "Konten einrichten, Anzeigen und Inhalte aufsetzen",
-          "Zahlen auswerten, nachschärfen und offen berichten",
-        ],
-        priceLabel: "Preis",
-        priceText:
-          "95 € netto pro Stunde, dazu Ihr Mediabudget. Für die laufende Betreuung ist ein fester Monatsumfang möglich.",
-        referencesLabel:
-          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
-        referencesHeadline: "Einblicke aus der Praxis",
-        references: [],
-        ctaTitle: "Sollen mehr Menschen von Ihnen erfahren?",
-        ctaText:
-          "Erzählen Sie mir, wen Sie erreichen wollen. Wir sortieren Kanäle, Umkreis und einen Budgetrahmen, der zu Ihnen passt.",
-        ctaButton: "Erstgespräch vereinbaren",
-      },
-      en: {
-        label: "All services",
-        title: "Marketing",
-        summary:
-          "Google Ads, local visibility, SEO and newsletters: I put your offer where customers are looking – and show you what it returns.",
-        intro:
-          "A good site helps little if nobody finds it. Marketing puts your offer where people are searching – and shows you what that brought in.",
-        situationsTitle: "Does this sound familiar?",
-        situations: [
-          "The site is fine, but hardly anyone comes.",
-          "Ads are running, yet nobody explains the numbers.",
-          "Competitors rank above you on Google.",
-          "Your customer list sits idle instead of working.",
-        ],
-        responsibilitiesTitle: "What I take care of",
-        responsibilities: [
-          "Settle the search terms, the target area and a budget frame",
-          "Set up the Google Ads account, write the ads and look after them",
-          "Put the business profile and local findability in order",
-          "Sharpen content and site structure for organic search",
-          "Set up the newsletter and send it lawfully",
-        ],
-        outcomesTitle: "What you achieve",
-        outcomes: [
-          "Your offer shows up when someone searches for it",
-          "You know what an enquiry costs",
-          "You are reliably found in your area",
-          "Existing customers hear from you regularly",
-        ],
-        boundariesTitle: "What this does not cover",
-        boundaries: [
-          "The media budget goes to Google directly – it is not part of my fee.",
-          "Ads only work when the offer and the landing page behind them hold up.",
-          "Organic rankings cannot be bought; they take time.",
-          "Copy, images and newsletter approvals come from you.",
-        ],
-        processTitle: "How we proceed",
-        process: [
-          "Clarify the offer, the audience and the area",
-          "Pick the channels and settle a budget frame",
-          "Set up the accounts, the ads and the content",
-          "Review the numbers, adjust and report openly",
-        ],
-        priceLabel: "Price",
-        priceText:
-          "€95 net per hour, plus your media budget. For ongoing support a fixed monthly scope is possible.",
-        referencesLabel:
-          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
-        referencesHeadline: "Examples from practice",
-        references: [],
-        ctaTitle: "Should more people hear about you?",
-        ctaText:
-          "Tell me who you want to reach. We sort out the channels, the area and a budget frame that fits you.",
-        ctaButton: "Arrange an initial conversation",
-      },
-    },
-  },
-  {
-    id: "complete-it",
-    number: "07",
-    cmsKey: "service_complete_it",
-    slug: { de: "komplette-it", en: "complete-it" },
-    keywords: {
-      de: ["Geräte & Zugänge", "Netzwerk", "Backups", "Support"],
-      en: ["Devices & accounts", "Network", "Backups", "Support"],
-    },
-    image: "/images/services/07-komplette-it.webp",
-    fallback: {
-      de: {
-        label: "Alle Leistungen",
-        title: "Komplette IT",
-        summary:
-          "Auf Wunsch übernehme ich Ihre ganze IT: Geräte, Zugänge, Netzwerk, Sicherheit, Backups, Lizenzen und den Support im Alltag.",
-        intro:
-          "Sie haben einen festen Ansprechpartner, der Ihre IT als Ganzes sieht, Aufgaben koordiniert und die vereinbarten Bereiche dauerhaft betreut. Was genau dazugehört, richtet sich nach Ihrem Betrieb.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
-        situations: [
-          "Bei IT-Fragen ist intern niemand richtig zuständig.",
-          "Geräte, Zugänge und Lizenzen sind kreuz und quer gewachsen.",
-          "Sicherheit und Backups laufen mehr nebenher als geplant.",
-          "Mehrere Anbieter brauchen jemanden, der sie koordiniert.",
-        ],
-        responsibilitiesTitle: "Was ich übernehmen kann",
-        responsibilities: [
-          "Geräte, Benutzerzugänge und Lizenzen verwalten",
-          "Netzwerk, Sicherheit und Backups betreuen",
-          "Supportanfragen annehmen und nachvollziehbar festhalten",
-          "Andere Anbieter und nötige Anschaffungen abstimmen",
-        ],
-        outcomesTitle: "Das erreichen Sie",
-        outcomes: [
-          "Sie haben eine Nummer für alle IT-Fragen",
-          "Geräte, Zugänge und Verträge sind erfasst",
-          "Wartung ist geplant statt hektisch",
-          "Ausfälle und Datenverlust werden unwahrscheinlicher",
-        ],
-        boundariesTitle: "Was nicht dazugehört",
-        boundaries: [
-          "Umfang und Zuständigkeiten werden erst nach einer Bestandsaufnahme vereinbart.",
-          "Erreichbarkeit, Reaktionszeiten und Vor-Ort-Einsätze sind keine pauschale 24/7-Zusage.",
-          "Geräte, Lizenzen und Leistungen Dritter werden getrennt ausgewiesen.",
-        ],
-        processTitle: "So gehen wir vor",
-        process: [
-          "Bestand, Risiken, Verträge und offene Aufgaben aufnehmen",
-          "Zuständigkeit und Prioritäten gemeinsam festlegen",
-          "Übergabe und die nötigsten Verbesserungen umsetzen",
-          "Laufend betreuen — dokumentiert und wie vereinbart",
-        ],
-        priceLabel: "Preis",
-        priceText:
-          "Individuelles Monatsangebot nach einer Bestandsaufnahme. Arbeitsplätze, Geräte, Lizenzen, Sicherheit, Vor-Ort-Einsätze und die vereinbarte Erreichbarkeit bestimmen den Preis.",
-        referencesLabel:
-          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
-        referencesHeadline: "Einblicke aus der Praxis",
-        references: [],
-        ctaTitle: "Sie wollen einen Zuständigen für Ihre IT?",
-        ctaText:
-          "Im Erstgespräch schauen wir uns den Bestand an und klären, welche Verantwortung sinnvoll übergeht.",
-        ctaButton: "Erstgespräch vereinbaren",
-      },
-      en: {
-        label: "All services",
-        title: "Complete IT",
-        summary:
-          "If you want, I take on your whole IT: devices, accounts, network, security, backups, licences and day-to-day support.",
-        intro:
-          "You get one steady point of contact who sees your IT as a whole, coordinates the work and looks after the agreed areas over time. What exactly is included depends on your business.",
-        situationsTitle: "Does this sound familiar?",
-        situations: [
-          "Nobody inside the company really owns IT questions.",
-          "Devices, accounts and licences have grown in all directions.",
-          "Security and backups happen on the side rather than by plan.",
-          "Several providers need someone to coordinate them.",
-        ],
-        responsibilitiesTitle: "What I can take care of",
-        responsibilities: [
-          "Manage devices, user accounts and licences",
-          "Look after the network, security and backups",
-          "Take support requests and record them traceably",
-          "Coordinate other providers and necessary purchases",
-        ],
-        outcomesTitle: "What you achieve",
-        outcomes: [
-          "You have one number for every IT question",
-          "Devices, accounts and contracts are documented",
-          "Maintenance is planned, not panicked",
-          "Outages and data loss become less likely",
-        ],
-        boundariesTitle: "What this does not cover",
-        boundaries: [
-          "Scope and responsibilities are agreed only after an initial assessment.",
-          "Availability, response times and on-site work are not a blanket 24/7 promise.",
-          "Devices, licences and third-party services are itemised separately.",
-        ],
-        processTitle: "How we proceed",
-        process: [
-          "Review the estate, the risks, the contracts and the open tasks",
-          "Agree the ownership and the priorities together",
-          "Handle the transition and the most urgent improvements",
-          "Support it continuously — documented and as agreed",
-        ],
-        priceLabel: "Price",
-        priceText:
-          "An individual monthly proposal after an initial assessment. Workstations, devices, licences, security, on-site work and the agreed availability determine the price.",
-        referencesLabel:
-          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
-        referencesHeadline: "Examples from practice",
-        references: [],
-        ctaTitle: "Want one owner for your IT?",
-        ctaText:
-          "In the first conversation we look at what you have and settle which responsibilities can sensibly move across.",
+          "Tell me what it needs to do and who you want to reach. We sort out the content, the channels and a sensible scope.",
         ctaButton: "Arrange an initial conversation",
       },
     },
@@ -1043,6 +685,46 @@ export function serviceHref(service: ServiceDefinition, lang: Lang): string {
     ? `/leistungen/${service.slug.de}`
     : `/en/services/${service.slug.en}`;
 }
+
+/**
+ * Services that were published and then withdrawn, and where their visitors
+ * should land instead.
+ *
+ * These slugs were indexed and linked, so answering them with the 404 the
+ * route would otherwise produce throws that away — and for Marketing it would
+ * be wrong as well as wasteful: the content did not disappear, it moved into
+ * Web Presence. Contract development moved into Tailored Solutions the same
+ * way. Complete IT has no successor, so it points at the overview rather than
+ * at a service that would have to pretend to cover it.
+ *
+ * Keyed by the retired slug, per language, because the pair is what a visitor
+ * actually typed. `retiredServiceTarget` is called by both `[slug]` routes
+ * BEFORE they give up and 404 — the dynamic route still matches these paths,
+ * which is the only reason no new redirect mechanism is needed.
+ */
+const retiredServiceTargets: Record<Lang, Record<string, string>> = {
+  de: {
+    auftragsprogrammierung: "/leistungen/individuelle-loesungen",
+    marketing: "/leistungen/webauftritt",
+    "komplette-it": "/#services",
+  },
+  en: {
+    "contract-development": "/en/services/tailored-solutions",
+    marketing: "/en/services/web-presence",
+    "complete-it": "/en/#services",
+  },
+};
+
+export function retiredServiceTarget(
+  lang: Lang,
+  slug: string | undefined,
+): string | undefined {
+  if (!slug) return undefined;
+  return retiredServiceTargets[lang][slug];
+}
+
+/** Exported for the test that keeps the table honest as the catalog changes. */
+export { retiredServiceTargets };
 
 /**
  * Merge CMS reference text onto the committed cases, position by position.

@@ -10,13 +10,18 @@ describe("pricing defaults", () => {
         serviceDefinitions.map((service) =>
           getServiceRate(pricing, service.id),
         ),
-      ).toEqual([120, 110, 110, 105, 95, 95, undefined]);
+      ).toEqual([120, 110, 110, 95]);
     }
   });
 
-  it("never invents a numeric price for Complete IT", () => {
+  it("quotes every service it lists", () => {
+    // Complete IT used to be the one service without a rate, and the pricing
+    // JSON-LD skipped it so no invented price could reach a search result.
+    // It is gone, so the guard now runs the other way: a service that reaches
+    // the pricing grid without a number would render an empty card.
     const pricing = getPricingDefault("de");
-    expect(getServiceRate(pricing, "complete-it")).toBeUndefined();
-    expect(pricing.customRateLabel).toMatch(/Monatsangebot/);
+    for (const service of serviceDefinitions) {
+      expect(getServiceRate(pricing, service.id), service.id).toBeGreaterThan(0);
+    }
   });
 });

@@ -275,8 +275,8 @@ export default function Hero({
           {h.headline}
           {/* A real break, not a hope. The three fields ARE the two lines —
               `text-wrap: balance` (global.css) evens the line lengths, which
-              for "Ihre IT. Ein Ansprechpartner." means it breaks after "Ein"
-              and cuts the second sentence in half. */}
+              for "Alles Digitale. Ein Ansprechpartner." means it breaks after
+              "Ein" and cuts the second sentence in half. */}
           <br />
           {/* The accent word used to sit on a blurred pink/bordeaux
               ellipse. "Keine Dekoration direkt hinter Überschriften" —

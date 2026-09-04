@@ -8,6 +8,7 @@ import { breadcrumbSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import { getReferencePreviewsBySiteUrl } from "~/lib/referencePreviews";
 import {
   serviceHref,
   type ServiceContent,
@@ -31,6 +32,8 @@ const alternatePaths = {
   en: serviceHref(service, "en"),
 };
 const pricing = await getPricingContent(lang);
+// Keyed by site address: a rendered reference has no case id, by design.
+const previews = await getReferencePreviewsBySiteUrl();
 const serviceRate = getServiceRate(pricing, service.id);
 
 // UI chrome stays code-owned and localized; all editorial service and
@@ -39,10 +42,9 @@ const ui = lang === "de"
   ? {
       breadcrumb: "Brotkrümelnavigation",
       referenceContext: "Kontext",
-      referenceChallenge: "Ausgangslage",
-      referenceSolution: "Lösungsweg",
       referenceResult: "Ergebnis",
       referenceMetric: "Belegbare Kennzahl",
+      referencePreviewAlt: (title: string) => `Startseite der Webseite: ${title}`,
       referenceArticle: "Der Artikel dazu im Journal",
       referenceSite: "Die Webseite ansehen",
       referenceNewTab: "öffnet in neuem Tab",
@@ -50,17 +52,17 @@ const ui = lang === "de"
   : {
       breadcrumb: "Breadcrumb",
       referenceContext: "Context",
-      referenceChallenge: "Starting point",
-      referenceSolution: "Approach",
       referenceResult: "Outcome",
       referenceMetric: "Verifiable metric",
+      referencePreviewAlt: (title: string) => `Home page of the website: ${title}`,
       referenceArticle: "The article on this in the Journal",
       referenceSite: "View the website",
       referenceNewTab: "opens in a new tab",
     };
 
-const offer = serviceRate !== undefined
-  ? {
+// Every service carries a rate now — Complete IT was the one that did not,
+// and `getServiceRate` is total since it went. No conditional left to write.
+const offer = {
       "@type": "Offer",
       priceSpecification: {
         "@type": "UnitPriceSpecification",
@@ -74,8 +76,7 @@ const offer = serviceRate !== undefined
         },
         valueAddedTaxIncluded: false,
       },
-    }
-  : undefined;
+};
 
 const serviceSchema = {
   "@context": "https://schema.org",
@@ -92,7 +93,7 @@ const serviceSchema = {
   })),
   inLanguage: lang === "de" ? "de-DE" : "en-GB",
   serviceOutput: content.outcomes,
-  ...(offer ? { offers: offer } : {}),
+  offers: offer,
 };
 
 const jsonLd = [
@@ -176,11 +177,9 @@ const jsonLd = [
         </nav>
 
         {/* No chapter number above the title. `service.number` still orders
-            the catalog and keys the card decoration, but it is not a thing a
-            visitor is told: "05" says nothing about a service, and on a page
-            reached from a card or from search it names a position in a list
-            the reader never saw. The brandbar under the headline is the
-            punctuation now. Same removal as on the pricing cards. */}
+            the catalog, but it is not a thing a visitor is told: a numeral
+            names a position in a list the reader never saw. The brandbar
+            under the headline is the punctuation now. */}
         <div class="max-w-4xl">
           <h1
             id="service-title"
@@ -396,52 +395,46 @@ const jsonLd = [
             {content.referencesLabel}
           </p>
 
-          <div class="grid lg:grid-cols-2 gap-5 md:gap-6">
+          {/* See References.astro: cards size to their own content, because
+              only some of them carry a preview band. */}
+          <div class="grid lg:grid-cols-2 items-start gap-5 md:gap-6">
             {content.references.map((reference) => (
-              <article class="bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] p-7 md:p-10">
-                <p class="eyebrow text-[var(--color-accent)] mb-4">
+              <article class="reference-card bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] overflow-hidden flex flex-col">
+                {/* See References.astro: a committed screenshot, never an
+                    iframe. Keyed by the site address because a rendered
+                    reference carries no case id. */}
+                {reference.siteUrl && previews.get(reference.siteUrl) && (
+                  <div class="reference-card__shot">
+                    <img
+                      src={previews.get(reference.siteUrl)!.src}
+                      alt={ui.referencePreviewAlt(reference.title)}
+                      width={previews.get(reference.siteUrl)!.width}
+                      height={previews.get(reference.siteUrl)!.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                )}
+                <div class="flex flex-col flex-1 p-7 md:p-9">
+                <p class="eyebrow text-[var(--color-accent)] mb-3">
                   <span class="sr-only">{ui.referenceContext}: </span>
                   {reference.context}
                 </p>
-                <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-8">
+                <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-5">
                   {reference.title}
                 </h3>
-                <dl class="space-y-7">
-                  <div>
-                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
-                      {ui.referenceChallenge}
-                    </dt>
-                    <dd class="text-[var(--color-black)] leading-relaxed">
-                      {reference.challenge}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
-                      {ui.referenceSolution}
-                    </dt>
-                    <dd class="text-[var(--color-black)] leading-relaxed">
-                      {reference.solution}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-muted)] mb-2">
-                      {ui.referenceResult}
-                    </dt>
-                    <dd class="text-[var(--color-black)] leading-relaxed">
-                      {reference.result}
-                    </dd>
-                  </div>
-                  {reference.metric && (
-                    <div class="bg-[var(--color-card)] rounded-[6px] px-5 py-4">
-                      <dt class="text-xs font-medium tracking-widest uppercase text-[var(--color-accent)] mb-2">
-                        {ui.referenceMetric}
-                      </dt>
-                      <dd class="font-[var(--font-display)] text-xl text-[var(--color-black)]">
-                        {reference.metric}
-                      </dd>
-                    </div>
-                  )}
-                </dl>
+                {/* Result only — the starting point and the approach belong to
+                    the journal article this links to. */}
+                <p class="text-[var(--color-black)] leading-relaxed">
+                  <span class="sr-only">{ui.referenceResult}: </span>
+                  {reference.result}
+                </p>
+                {reference.metric && (
+                  <p class="mt-6 font-[var(--font-display)] text-xl text-[var(--color-black)]">
+                    <span class="sr-only">{ui.referenceMetric}: </span>
+                    {reference.metric}
+                  </p>
+                )}
 
                 {/* Both links are present only when the committed case carries
                     them — the CMS cannot put a destination here (see
@@ -449,7 +442,7 @@ const jsonLd = [
                     replaces the article link's own `mt-8`: two links needed a
                     wrapper that wraps rather than a second inline-block. */}
                 {(reference.articleUrl || reference.siteUrl) && (
-                  <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                  <div class="mt-auto pt-8 flex flex-wrap gap-x-8 gap-y-3">
                     {reference.articleUrl && (
                       <a
                         href={reference.articleUrl}
@@ -489,6 +482,7 @@ const jsonLd = [
                     )}
                   </div>
                 )}
+                </div>
               </article>
             ))}
           </div>
@@ -550,6 +544,24 @@ const jsonLd = [
 </Layout>
 
 <style>
+  /* Same treatment as the home page's reference cards: the screenshot is
+     content at full strength, and the ratio is reserved so two cards in a row
+     keep their headings aligned while the images arrive. */
+  .reference-card__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-soft);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .reference-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
   /* Hero band artwork — a ground, not an illustration. The headline sits
      on top of it, so it stays quiet enough that the scrim beside it does
      not have to fight for the text. */

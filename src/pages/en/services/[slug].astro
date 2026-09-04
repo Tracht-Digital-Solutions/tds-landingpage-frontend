@@ -2,9 +2,18 @@
 import ServiceDetailPage from "~/components/services/ServiceDetailPage.astro";
 import ErrorView from "~/components/ErrorView.astro";
 import Layout from "~/layouts/Layout.astro";
-import { getServiceBySlug, resolveServiceContent } from "~/lib/services";
+import {
+  getServiceBySlug,
+  resolveServiceContent,
+  retiredServiceTarget,
+} from "~/lib/services";
 
 const lang = "en" as const;
+
+// See the German twin: a withdrawn service answers with a 301, not a 404.
+const retired = retiredServiceTarget(lang, Astro.params.slug);
+if (retired) return Astro.redirect(retired, 301);
+
 const service = getServiceBySlug(lang, Astro.params.slug);
 const content = service ? await resolveServiceContent(service, lang) : undefined;
 if (!service) Astro.response.status = 404;

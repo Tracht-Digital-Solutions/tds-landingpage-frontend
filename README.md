@@ -41,15 +41,15 @@ references section is omitted.
 | `/`, `/en/` | German and English home pages |
 | `/leistungen/[slug]` | German service detail pages |
 | `/en/services/[slug]` | English service detail pages |
-| `/preise`, `/en/preise` | Hourly rates and the custom Complete IT pricing model |
+| `/preise`, `/en/preise` | Hourly rates for all four services |
 | `/legal/impressum`, `/legal/datenschutz` | German legal notice and privacy policy |
 | `/legal/agb`, `/en/legal/agb` | Terms pages backed by uploaded PDFs |
 | `/legal/agb.pdf`, `/en/legal/agb.pdf` | The corresponding PDF endpoints |
 | `/install` | Browser-assisted connection setup for a deployed site |
 
-The six stable service identities are Beratung & Konzeption,
-Prozessoptimierung, Individuelle Lösungen, Auftragsprogrammierung, Webauftritt
-and Komplette IT. Localized slugs are controlled by source code; editors cannot
+The four stable service identities are Beratung & Konzeption,
+Prozessoptimierung, Individuelle Lösungen and Webauftritt (websites, online
+shops and marketing). Localized slugs are controlled by source code; editors cannot
 change routing.
 
 | Service | German | English |
@@ -57,9 +57,7 @@ change routing.
 | Beratung & Konzeption | `/leistungen/beratung-konzeption` | `/en/services/consulting-planning` |
 | Prozessoptimierung | `/leistungen/prozessoptimierung` | `/en/services/process-optimization` |
 | Individuelle Lösungen | `/leistungen/individuelle-loesungen` | `/en/services/tailored-solutions` |
-| Auftragsprogrammierung | `/leistungen/auftragsprogrammierung` | `/en/services/contract-development` |
 | Webauftritt | `/leistungen/webauftritt` | `/en/services/web-presence` |
-| Komplette IT | `/leistungen/komplette-it` | `/en/services/complete-it` |
 
 ## Content model
 
@@ -111,8 +109,9 @@ canonical and hreflang links.
 SEO output includes per-page titles/descriptions, Open Graph/Twitter metadata,
 an explicit SSR-safe sitemap, `robots.txt`, `llms.txt` and Schema.org JSON-LD.
 Structured data is built from the same resolved content the visitor sees.
-Complete IT has an individually assessed monthly offer and is intentionally not
-published as a made-up numeric price.
+Retired service URLs (Auftragsprogrammierung, Marketing, Komplette IT) answer
+with a 301 to their successor rather than a 404 — the table lives in
+`src/lib/services.ts`.
 
 The navigation, service cards, FAQ and forms use native semantics and keyboard
 interaction. Visible focus, heading order, labels, both themes and

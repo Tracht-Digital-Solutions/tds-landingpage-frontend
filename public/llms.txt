@@ -13,16 +13,20 @@
 
 ## Leistungen
 
-- **Beratung & Konzeption** — Architektur-Workshops, technische Reviews,
-  schriftliche Konzepte und Entscheidungsgrundlagen.
-- **Web- & App-Entwicklung** — Frontend, Backend, mobile und Desktop-Apps;
-  React, Vue, Angular, Node.js, C#, SQL.
-- **Fullstack-Entwicklung** — Frontend + Backend + Datenbank + Deployment
-  aus einer Hand.
-- **Digitalisierung & Prozessautomatisierung** — Python, KNIME, SQL,
-  Datenpipelines.
-- **Wartung & technischer Support** für laufende Anwendungen.
-- **Schulungen** zu Web-Technologien und Tooling.
+Vier Leistungen, jede mit einer eigenen Detailseite:
+
+- **Beratung & Konzeption** (120 € netto/Std.) — Vorhaben einordnen,
+  Möglichkeiten und Kosten gegenüberstellen, Fahrplan schreiben.
+  https://tracht-digital.de/leistungen/beratung-konzeption
+- **Prozessoptimierung** (110 € netto/Std.) — Abläufe vereinfachen,
+  Handarbeit automatisieren, Auswertungen aufsetzen.
+  https://tracht-digital.de/leistungen/prozessoptimierung
+- **Individuelle Lösungen** (110 € netto/Std.) — vorhandene Programme
+  verbinden, Schnittstellen bauen, Software nach klarer Aufgabe entwickeln.
+  https://tracht-digital.de/leistungen/individuelle-loesungen
+- **Webauftritt** (95 € netto/Std.) — Webseiten, Webshops und Marketing:
+  Google Ads, lokale Sichtbarkeit, organische Suche und Newsletter.
+  https://tracht-digital.de/leistungen/webauftritt
 
 ## Wichtige Seiten
 
