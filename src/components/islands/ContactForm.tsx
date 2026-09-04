@@ -245,11 +245,19 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
 
             <motion.div variants={fieldItem}>
               <label className="flex items-center gap-3 cursor-pointer">
+                {/* The native checkbox stays the control — focusable, in the tab
+                    order, announced as a checkbox — and is only made invisible.
+                    The round box beside it is a <span>, and that split is not
+                    decoration: an `appearance: none` <input> painted its tick
+                    background as a dark hole on this page, reproducibly, while
+                    an identical element cloned next to it rendered correctly.
+                    A span has no native control paint to fight. */}
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded-[2px] accent-[var(--color-accent-pink)] flex-shrink-0"
+                  className="contact-consent-input"
                   {...register("consent")}
                 />
+                <span className="contact-consent-box" aria-hidden="true" />
                 <span className="text-xs text-white/60 leading-relaxed">
                   {t.contact.form.consent}{" "}
                   <a
