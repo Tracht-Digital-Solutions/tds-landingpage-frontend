@@ -464,6 +464,109 @@ const socials = {
     background-color: rgb(255 255 255 / 0.55);
   }
 
+  /* === Contact form: consent checkbox =============================== */
+
+  /* Round, which a native checkbox cannot be. MEASURED, not assumed: while the
+     control is `appearance: auto`, Chrome ignores `border-radius` outright —
+     even an inline `style="border-radius:9999px"` computes back to 0px, and
+     the same declaration lands as 3.3e7px the moment appearance is dropped. So
+     the `rounded-full` utility could never have worked here, and the
+     `rounded-[2px]` it replaced never did either.
+
+     Dropping appearance and painting the input itself was the next attempt and
+     it failed differently: the tick background rendered as a dark hole in the
+     fill, on this page, in headless AND headed Chrome — while an identical
+     input cloned into the same label a few pixels away painted correctly.
+     Identical computed styles, different pixels; not worth another hour.
+
+     So the picture is a <span> and the <input> is only the control. That is the
+     conventional split anyway, and it costs nothing here: this checkbox has no
+     indeterminate state and no disabled state to re-implement, which is the
+     objection tds-shared raises against `appearance: none` library-wide (see
+     the `accent-color` note in base.css). `accent-color` no longer applies to
+     anything, which also retires a dead utility: the unlayered
+     `input[type="checkbox"] { accent-color }` in tds-shared beat the island's
+     `accent-[var(--color-accent-pink)]` regardless — measured as rgb(5,15,104),
+     the brand navy, on a navy ground. */
+  .contact-consent-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    margin: 0;
+    pointer-events: none;
+  }
+
+  .contact-consent-box {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    border-radius: var(--tds-radius-pill);
+    border: 1.5px solid rgb(255 255 255 / 0.38);
+    background-color: transparent;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 66%;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease;
+  }
+  /* The whole row is the target: the label wraps both, so a click anywhere on
+     the sentence toggles the box, and the hover cue has to follow the label
+     rather than the 16px square. */
+  label:hover > .contact-consent-box {
+    border-color: rgb(255 255 255 / 0.65);
+  }
+
+  /* The focus ring has to be moved by hand. The shared `:focus-visible` rule
+     paints an outline on the focused element, and the focused element here is
+     the invisible one — an invisible outline on an invisible input is a
+     keyboard user with no visible focus at all.
+
+     Pink, not the shared `--color-accent`: on this dark section that token
+     resolves to the bordeaux rgb(130, 9, 51) (measured), which against navy is
+     a focus ring nobody can see. Pink is the colour this form already uses for
+     every other focus cue — the field underline right above it. */
+  .contact-consent-input:focus-visible + .contact-consent-box {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 4px;
+  }
+
+  /* The bounce fires on `:checked` alone — no JavaScript, and nothing for React
+     to keep in sync. The rule only matches while the box IS checked, so
+     unchecking removes the animation entirely and the next check replays it
+     from the start.
+
+     No `prefers-reduced-motion` block on purpose: the shared reduce block in
+     tds-shared/styles/base.css clamps every animation-duration to 0.01ms, and
+     this animation's end state IS the resting state — a clamped run lands
+     exactly where an unanimated box sits, so there is nothing to reset. Same
+     reasoning as `.tds-toast` in the library. */
+  @keyframes contact-consent-bounce {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    30% {
+      transform: translateY(-7px) scale(1.12);
+    }
+    55% {
+      transform: translateY(0) scale(0.94);
+    }
+    78% {
+      transform: translateY(-3px) scale(1.04);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .contact-consent-input:checked + .contact-consent-box {
+    background-color: var(--color-accent-pink);
+    border-color: var(--color-accent-pink);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4 10-10'/%3E%3C/svg%3E");
+    animation: contact-consent-bounce 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   /* === Contact form: send button ==================================== */
 
   /* Animated gradient pill. The gradient lives on a pseudo-element
