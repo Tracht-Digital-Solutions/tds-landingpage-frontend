@@ -21,14 +21,11 @@
  *
  * ### The QR code
  *
- * Rendered at BUILD time into inline SVG. `qrcode` never reaches the browser,
- * there is no canvas, no client island and no layout shift — the markup ships
- * with the code already drawn. It encodes this page's own URL rather than the
- * .vcf: a scan should land somewhere a human can read, with the save action
- * one tap away, and a phone camera that downloads a file unannounced is a
- * worse first impression than one that opens a page.
+ * Drawn at BUILD time by a prerendered endpoint and referenced as a plain
+ * image — see `lib/businessCardQr.ts` for why it is not generated here. The
+ * short version: encoding it in this frontmatter shipped `qrcode` into the
+ * server bundle and answered both card pages with a 500 on the host.
  */
-import QRCode from "qrcode";
 import { Image } from "astro:assets";
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
@@ -36,7 +33,7 @@ import Footer from "~/components/Footer.astro";
 import { personSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
-import { businessCardHref } from "~/lib/businessCard";
+import { BUSINESS_CARD_QR_PATH, businessCardHref } from "~/lib/businessCard";
 import portrait from "~/assets/portrait.webp";
 
 interface Props {
@@ -57,23 +54,6 @@ const { founder, email, telephone, socials, name } = siteConfig;
 // → E.164 for `tel:` and `wa.me`, exactly as the contact aside derives it.
 const phoneHref = telephone.replace(/\s/g, "");
 const whatsappHref = `https://wa.me/${phoneHref.replace(/^\+/, "")}`;
-
-const cardPath = businessCardHref(lang);
-const cardUrl = new URL(cardPath, Astro.site?.origin ?? siteConfig.url).toString();
-
-/**
- * `margin: 0` because the card draws its own padding, and `errorCorrectionLevel:
- * "M"` because the payload is a short URL — "H" would only make the modules
- * smaller for no gain at this length. Colours are literals, not CSS variables:
- * this SVG is generated as a string at build time, where no custom property
- * has resolved yet, so the theme handling happens in CSS below instead.
- */
-const qrSvg = await QRCode.toString(cardUrl, {
-  type: "svg",
-  margin: 0,
-  errorCorrectionLevel: "M",
-  color: { dark: "#000000", light: "#0000" },
-});
 
 const ui =
   lang === "de"
@@ -219,7 +199,18 @@ const webPresencePath =
         </a>
 
         <div class="vcard__qr">
-          <div class="vcard__qr-code" role="img" aria-label={ui.qrAlt} set:html={qrSvg} />
+          {/* A plain <img>, not an inlined SVG: the file is prerendered, so
+              inlining it would mean reading it back at request time — which
+              is the runtime dependency this whole route exists to avoid. It
+              is a picture with a meaning, so it carries a real alt. */}
+          <img
+            class="vcard__qr-code"
+            src={BUSINESS_CARD_QR_PATH[lang]}
+            alt={ui.qrAlt}
+            width="120"
+            height="120"
+            decoding="async"
+          />
           <div>
             <p class="vcard__qr-title">{ui.qrTitle}</p>
             <p class="vcard__qr-text">{ui.qrText}</p>
@@ -354,17 +345,18 @@ const webPresencePath =
      reach it — the fill is written into the markup — so the whole code is
      inverted instead, which is safe precisely BECAUSE it is two-tone. */
   .vcard__qr-code {
+    display: block;
     flex: none;
     width: 7.5rem;
     height: 7.5rem;
     padding: 0.625rem;
     border-radius: 6px;
+    /* White in BOTH themes, and hardcoded rather than a token: the code is
+       pure black on transparent, so it needs a light plate to stay
+       scannable on a dark card. `box-sizing: border-box` keeps the padding
+       inside the 7.5rem so the plate does not grow. */
+    box-sizing: border-box;
     background: #ffffff;
-  }
-  .vcard__qr-code :global(svg) {
-    display: block;
-    width: 100%;
-    height: 100%;
   }
   .vcard__qr-title {
     margin: 0 0 0.35rem;

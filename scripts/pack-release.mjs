@@ -201,8 +201,23 @@ function verify() {
   // add tens of megabytes to every deploy for code that cannot run there.
   // They are allowed to be absent, but only by NAME in `tds.release.browserOnly`,
   // so the exception is a recorded decision rather than a silent hole.
-  const staticRe = /\bfrom\s*["']([^"']+)["']/g;
-  const dynamicRe = /\b(?:import|require)\s*\(\s*["']([^"']+)["']\s*\)/g;
+  // `from "x"` AND a bare `import "x";`. The second form has no `from` and
+  // was invisible here, which is how a devDependency reached production a
+  // second time in one afternoon: Rolldown tree-shook the unused half of a
+  // module and kept its side effects as `import "qrcode";`, the release tree
+  // has no such package, and both card pages threw ERR_MODULE_NOT_FOUND.
+  // `import(` cannot match — a dynamic import has a paren where these have a
+  // quote — so the dynamic scan below still owns that form.
+  const staticRe = /\b(?:from|import)\s*["']([^"']+)["']/g;
+  // The leading `_{0,2}` is not decoration: it is the hole this check had.
+  // Rolldown does not inline a CJS package's own `require()` calls — it
+  // rewrites them to its interop shim, `__require("…")`. A `\b` before
+  // `require` never matches that (`_` and `r` are both word characters), so
+  // every such call was invisible here. `qrcode` shipped that way and took
+  // both business-card pages down with `Cannot find module 'dijkstrajs'` —
+  // a transitive dependency that was never in the release tree, on a host
+  // with no parent node_modules to walk up into. The build was green.
+  const dynamicRe = /(?:^|[^\w$])_{0,2}(?:import|require)\s*\(\s*["']([^"']+)["']\s*\)/g;
   const browserOnly = new Set(config.browserOnly ?? []);
   const forbidden = [
     { test: (s) => s.startsWith("@tracht-digital-solutions/"), why: "first-party package" },
