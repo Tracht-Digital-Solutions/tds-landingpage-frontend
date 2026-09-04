@@ -61,6 +61,8 @@ const MIN_USEFUL = 80;
 const DESCRIPTION_SOURCES: Record<string, string> = {
   "src/pages/preise.astro": "src/components/PricingPage.astro",
   "src/pages/en/preise.astro": "src/components/PricingPage.astro",
+  "src/pages/visitenkarte.astro": "src/components/BusinessCardPage.astro",
+  "src/pages/en/business-card.astro": "src/components/BusinessCardPage.astro",
 };
 
 function renderedDescriptions(rel: string): string[] {
@@ -81,6 +83,8 @@ function renderedDescriptions(rel: string): string[] {
 const INDEXABLE_PAGES = [
   "src/pages/preise.astro",
   "src/pages/en/preise.astro",
+  "src/pages/visitenkarte.astro",
+  "src/pages/en/business-card.astro",
   "src/pages/legal/impressum.astro",
   "src/pages/legal/datenschutz.astro",
 ] as const;

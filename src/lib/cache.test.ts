@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolveEvents } from "@tracht-digital-solutions/tds-shared/cache";
 
 import { alwaysPaths, cacheEvents } from "./cache";
+import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { serviceDefinitions, serviceHref } from "./services";
 import { SITEMAP_ENTRIES } from "./sitemap";
 
@@ -22,6 +23,10 @@ describe("cacheEvents", () => {
     [
       ...(lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"]),
       ...serviceDefinitions.map((service) => serviceHref(service, lang)),
+      // The business card writes none of its own copy, but it renders the
+      // CMS-driven footer, so a block save has to reach it like any other
+      // page.
+      BUSINESS_CARD_SLUG[lang],
     ].sort();
 
   it("rebuilds every content page of a language when a block is saved", async () => {

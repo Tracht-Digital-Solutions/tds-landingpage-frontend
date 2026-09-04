@@ -11,6 +11,7 @@
  */
 
 import { forLanguages, type EventMap } from "@tracht-digital-solutions/tds-shared/cache";
+import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { serviceDefinitions, serviceHref } from "./services";
 
 export { contentCache } from "./contentCache";
@@ -21,6 +22,10 @@ function contentPages(lang: "de" | "en"): string[] {
   return [
     ...base,
     ...serviceDefinitions.map((service) => serviceHref(service, lang)),
+    // The business card writes none of its own copy — every value comes
+    // from `siteConfig` — but it renders the CMS-driven footer like every
+    // other page, so a footer edit has to reach it too.
+    BUSINESS_CARD_SLUG[lang],
   ];
 }
 
@@ -111,6 +116,8 @@ export const alwaysPaths = [
     serviceHref(service, "de"),
     serviceHref(service, "en"),
   ]),
+  BUSINESS_CARD_SLUG.de,
+  BUSINESS_CARD_SLUG.en,
   "/sitemap-0.xml",
   "/sitemap-index.xml",
 ];

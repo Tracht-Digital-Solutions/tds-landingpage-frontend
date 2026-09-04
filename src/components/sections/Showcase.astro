@@ -47,6 +47,7 @@ import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import DemoCard from "~/components/ui/DemoCard.astro";
+import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
 import ReferenceCard from "~/components/ui/ReferenceCard.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -83,7 +84,11 @@ const cards = referenceCases.map((entry) => ({
   siteHref: entry.siteUrl,
 }));
 
-const slideCount = cards.length + demos.length;
+// The business-card tile always renders, so the shelf is never empty any more
+// — but the count still drives the arrows' overflow measurement, and writing
+// it as "+ 1" keeps the reason visible instead of hiding a constant in a
+// comparison.
+const slideCount = cards.length + demos.length + 1;
 
 /** Carousel chrome. This site's own words about its own control, so it follows
  *  the page's locale and is not editable copy — a mislabelled control is an
@@ -194,6 +199,14 @@ const ui =
                 <DemoCard demo={demo} lang={lang} />
               </div>
             ))}
+            {/* Last, and unconditional. The two lists above are gated on
+                availability — a customer's site has to still answer, a demo has
+                to still be presentable — while this one is a page of this very
+                deployment. There is no state in which the site is up and the
+                card is not, so there is nothing to check. */}
+            <div class="showcase__slide">
+              <BusinessCardTile />
+            </div>
           </div>
         </div>
       </div>

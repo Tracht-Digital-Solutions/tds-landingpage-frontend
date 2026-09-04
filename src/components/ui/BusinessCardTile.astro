@@ -1,0 +1,205 @@
+---
+/**
+ * The digital business card, as a card on a shelf.
+ *
+ * Rendered in two places, both of which already carry work worth looking at:
+ * the showcase carousel on the home page, after the demos, and the Webauftritt
+ * service page beside the demo grid. The argument it makes there is the reason
+ * it exists — a visitor sees that a card like this is something built here,
+ * not just a contact detail of ours.
+ *
+ * ### Why this is not a demo
+ *
+ * `getDemos()` was the obvious place to put it and it would have been wrong.
+ * That list decides the singular/plural of the demos heading through
+ * `demosCopy()`, and `demos-sync` reports it as "N of M demo sites
+ * presentable". A business card counted among them makes both statements
+ * false. It is a third family instead, and it is deliberately the only member.
+ *
+ * ### Shape
+ *
+ * Band, sand fill, 6px radius and `height: 100%` are taken from `DemoCard` on
+ * purpose: in the carousel this tile stands directly beside one, and the track
+ * stretches every slide to the tallest card. A tile that measured its own
+ * height differently would be the one visible seam in the row.
+ *
+ * Like `DemoCard` and unlike `ReferenceCard` this is ONE link — the card has a
+ * single destination — so the whole tile is the `<a>`.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { DEMO_PREVIEW } from "~/lib/demoCatalog";
+import {
+  BUSINESS_CARD_PREVIEW,
+  businessCardCopy,
+  businessCardHref,
+} from "~/lib/businessCard";
+
+const lang = resolveLang(Astro.currentLocale);
+const copy = businessCardCopy[lang];
+const href = businessCardHref(lang);
+---
+
+<article class="bc-tile-slot" data-reveal>
+  <a class="bc-tile" href={href}>
+    <div class="bc-tile__shot">
+      {/* Intrinsic size stated so the 16:10 box is reserved before the file
+          arrives — the same reason `DemoCard` states it. Captured by
+          `npm run businesscard:sync`; a missing file leaves an empty band
+          rather than a collapsed card. */}
+      <img
+        src={BUSINESS_CARD_PREVIEW}
+        alt={copy.previewAlt}
+        width={DEMO_PREVIEW.width}
+        height={DEMO_PREVIEW.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+
+    <div class="bc-tile__body">
+      <p class="bc-tile__eyebrow">{copy.eyebrow}</p>
+      <h3 class="bc-tile__title">{copy.title}</h3>
+      <p class="bc-tile__text">{copy.text}</p>
+
+      <div class="bc-tile__foot">
+        <span class="bc-tile__go">
+          {copy.cta}
+          <span aria-hidden="true"> →</span>
+        </span>
+      </div>
+    </div>
+  </a>
+</article>
+
+<style>
+  .bc-tile-slot {
+    /* Same containment as `.demo-card-slot`, same reason: the showcase slide is
+       a grid so this element's width is definite before containment is
+       consulted. See the note in `Showcase.astro`. */
+    container-type: inline-size;
+  }
+
+  .bc-tile {
+    --bc-tile-bg: var(--color-soft);
+    --bc-tile-bg-hover: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Without it a card in a shorter row stops at its content and the row's
+       cards end on different baselines. */
+    height: 100%;
+    background: var(--bc-tile-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .bc-tile:hover,
+  .bc-tile:focus-within {
+    background: var(--bc-tile-bg-hover);
+  }
+  .bc-tile:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .bc-tile__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+    /* A screenshot of a page has a page edge; without this it bleeds into the
+       card's fill and reads as a broken layout rather than a picture of one. */
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .bc-tile__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 700ms var(--lp-ease-soft);
+  }
+  .bc-tile:hover .bc-tile__shot img,
+  .bc-tile:focus-within .bc-tile__shot img {
+    transform: scale(1.03);
+  }
+
+  .bc-tile__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1.125rem 1.25rem 1rem;
+  }
+
+  /* The one thing this tile says that neither neighbour does: it is ours. A
+     visitor who reads it as a customer case would be misled about the
+     reference shelf it sits on. */
+  .bc-tile__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .bc-tile__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    margin: 0;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .bc-tile:hover .bc-tile__title,
+  .bc-tile:focus-within .bc-tile__title {
+    color: var(--color-primary);
+  }
+
+  .bc-tile__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bc-tile__foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    /* Pinned to the bottom so the call to action lines up with the demo
+       card's address row beside it. */
+    margin-top: auto;
+    padding-top: 0.75rem;
+  }
+  .bc-tile__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bc-tile__shot img {
+      transition: none;
+    }
+    .bc-tile:hover .bc-tile__shot img,
+    .bc-tile:focus-within .bc-tile__shot img {
+      transform: none;
+    }
+  }
+</style>

@@ -4,11 +4,13 @@ import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import WebsiteDemos from "~/components/sections/WebsiteDemos.astro";
+import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
 import { breadcrumbSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
 import { getReferencePreviewsBySiteUrl } from "~/lib/referencePreviews";
+import { businessCardCopy } from "~/lib/businessCard";
 import {
   serviceHref,
   type ServiceContent,
@@ -497,6 +499,24 @@ const jsonLd = [
         empty section. */}
     {service.id === "web-presence" && <WebsiteDemos variant="service" />}
 
+    {/* Same condition as the demos above, and for the same reason: a digital
+        business card IS web presence, and this is the page where a reader is
+        already asking what that includes. It is a single tile rather than a
+        section — the page has made its argument by here, and a second full
+        section with its own heading would repeat it. */}
+    {service.id === "web-presence" && (
+      <section class="section-spacing" aria-labelledby="service-business-card-title">
+        <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+          <h2 id="service-business-card-title" class="sr-only">
+            {businessCardCopy[lang].title}
+          </h2>
+          <div class="business-card-slot">
+            <BusinessCardTile />
+          </div>
+        </div>
+      </section>
+    )}
+
     <div class="pb-16 md:pb-24 px-6 md:px-8 lg:px-12">
       <section
         class="tds-tone-navy relative overflow-hidden max-w-7xl mx-auto rounded-[6px] px-7 py-12 md:px-12 md:py-16 text-center"
@@ -544,6 +564,13 @@ const jsonLd = [
 </Layout>
 
 <style>
+  /* One tile, not a stretched banner: it stands under the demo grid, whose
+     columns floor at 17rem, so it is capped near one column's width rather
+     than running the full 7xl container. */
+  .business-card-slot {
+    max-width: 24rem;
+  }
+
   /* Same treatment as the home page's reference cards: the screenshot is
      content at full strength, and the ratio is reserved so two cards in a row
      keep their headings aligned while the images arrive. */
