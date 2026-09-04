@@ -206,14 +206,27 @@ const ui =
 
   .showcase__track {
     display: flex;
-    /* Cards size to their own content instead of all taking the tallest
-       one's height. Carried over from the grid this replaced, where it was
-       `items-start` and argued for in the same words: one card may have a
-       website screenshot and its neighbour may not, and stretching the
-       shorter one opens ~240px of empty fill under its text that no content
-       will ever arrive to fill. A ragged bottom edge on a shelf you page
-       through reads as cards; a hole in the middle of one reads as a bug. */
-    align-items: start;
+    /* Slides STRETCH to the tallest card. This was `align-items: start`,
+       carried over from the grid this replaced, and the ragged bottom edge it
+       produced is exactly what the change undoes.
+
+       Both card families were already built for a stretched slot: `height:
+       100%` on the card root and `margin-top: auto` on the footer. So the
+       links of a reference case and the address of a demo now land on one
+       line across the whole shelf, and that shared baseline is what makes
+       three cards read as one shelf rather than as three loose boxes.
+
+       The price, knowingly paid: a card with no 16:10 screenshot band takes
+       the height difference as space above its links. Small today — both
+       reference cases are `previewAllowed: false` and text-rich, and only
+       `demo1` carries a band. It gets visible the day reference cards with
+       and without an approved screenshot stand side by side; the answer then
+       is a field of their own at the band's place, not a return to `start`.
+
+       Nothing stretches the CARD directly. `.showcase__slide` is a grid with
+       `grid-template-rows: 1fr` whose own height only becomes definite by
+       being stretched here; the cards' `height: 100%` resolves against that
+       row. */
     gap: 1rem;
     padding-inline: 1.5rem;
     /* MUST match `padding-inline`. `scroll-snap-align: start` aligns a slide
