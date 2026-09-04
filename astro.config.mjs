@@ -102,14 +102,6 @@ export default defineConfig({
         "lenis",
         "react-hook-form",
         /^@hookform\//,
-        // The business card's QR code. Bundled rather than added to
-        // `tds.release.runtimeDependencies`, which is reserved for what Rollup
-        // CANNOT take: a native addon (sharp) or a package Astro externalises
-        // for island SSR (react). `qrcode` is neither — it is pure JS, so it
-        // belongs in the bundle. `scripts/pack-release.mjs` refuses to ship a
-        // release tree that would fail this on the host, which is how the
-        // omission surfaced.
-        "qrcode",
       ],
       // Native addons cannot be bundled; sharp must resolve from node_modules.
       external: ["sharp"],

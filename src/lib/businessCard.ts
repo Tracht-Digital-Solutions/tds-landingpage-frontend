@@ -34,6 +34,23 @@ export function businessCardHref(lang: Lang): string {
  */
 export const BUSINESS_CARD_PREVIEW = "/images/business-card.webp";
 
+/**
+ * Where each language's prerendered QR code is served from.
+ *
+ * It lives HERE, next to the other constants, and not beside the function
+ * that draws it — that separation is load-bearing. `businessCardQr.ts`
+ * imports the `qrcode` encoder at module scope, so a page reaching in there
+ * for a string drags the encoder into the server bundle with it. It did:
+ * Rolldown tree-shook the unused renderer but kept the module's side effects
+ * as a bare `import "qrcode";`, the package is a devDependency and not in
+ * the release tree, and both card pages answered 500 on the host. Only the
+ * two prerendered endpoints may import that module.
+ */
+export const BUSINESS_CARD_QR_PATH: Record<Lang, string> = {
+  de: "/visitenkarte-qr.svg",
+  en: "/en/business-card-qr.svg",
+};
+
 export interface BusinessCardCopy {
   eyebrow: string;
   title: string;
