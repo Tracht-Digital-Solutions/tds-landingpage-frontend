@@ -151,6 +151,31 @@ html[data-reveal-active] [data-reveal]:not([data-revealed]) {
   transform: translateY(1.25rem);
 }
 
+/* …but NOT inside the showcase track: there the travel makes the shelf
+   scrollable up and down.
+
+   `.showcase__track` is a horizontal scroll container, and a card waiting to
+   reveal sits 20px lower than its slot. That is scrollable overflow like any
+   other, so the track grew a SECOND scroll axis — measured at 16px (the 20px
+   of travel less the 4px of padding-block), at every width, for as long as
+   one card was still off screen and unrevealed.
+
+   It cannot be fixed on the container, and that is worth writing down before
+   someone tries: `overflow-x: auto` makes `overflow-y` compute to `auto`
+   rather than `visible`, and neither `hidden` NOR `clip` gets it back —
+   `clip` is coerced to `hidden` as soon as the other axis scrolls, and
+   `hidden` still builds a scroll container. All three were measured on this
+   page and all three still moved 16px on a `scrollTop` write, which is also
+   how a focused card could shift the shelf for good. Only removing the
+   overflow removes the axis.
+
+   The fade stays; only the travel goes. Everywhere else — the service grid,
+   the sections — `[data-reveal]` keeps both, because nothing there is a
+   scroll container. */
+html[data-reveal-active] .showcase__track [data-reveal]:not([data-revealed]) {
+  transform: none;
+}
+
 /* END STATE, spelled out. The shared reduced-motion block
    (tds-shared/styles/base.css) clamps DURATION to 0.01ms — a clamped
    transition still travels, it just arrives instantly, and anything that
