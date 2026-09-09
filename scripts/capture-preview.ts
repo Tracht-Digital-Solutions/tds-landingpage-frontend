@@ -51,6 +51,12 @@ async function hideConsentOverlays(page: {
     "[class*='borlabs' i]",
     "[aria-label*='cookie' i]",
     "[role='dialog']",
+    // Astro's own dev toolbar. Not a consent overlay, but the same problem:
+    // it is a fixed bar across the bottom of the viewport that would be
+    // baked into the committed picture. It matches nothing on an external
+    // site, and it is what lets `businesscard:sync` shoot a local `astro
+    // dev` server when `astro preview` is not an option.
+    "astro-dev-toolbar",
   ].join(",");
 
   await page.addStyleTag({

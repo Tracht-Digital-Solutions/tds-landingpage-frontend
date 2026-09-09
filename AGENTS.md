@@ -34,6 +34,31 @@ Use current code, configuration and tests as the source of truth. Keep setup in
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
   accept a slug or href from CMS content.
+- **The digital business card is a STANDALONE page** — `/visitenkarte` and
+  `/en/business-card`, both five-line wrappers around
+  `components/BusinessCardPage.astro`. It is the one route that renders
+  `bare`: no Header, no Footer, no FloatingCta, no cursor, no scroll bar, no
+  live-chat widget. It is reached by a phone camera pointed at a printed code,
+  not by browsing, so the site's navigation chrome answers a question the
+  visitor did not ask and the floating CTA covers the first link. What the page
+  draws instead is a link hub — portrait, the vCard action, a stack of contact
+  and reference rows, the QR code — plus the three things a page with no chrome
+  still owes a visitor: a language switch, a theme switch and the legal links.
+  Those legal links are **not decoration**: with the site footer gone this page
+  is the only one that has to draw its own Impressum, and
+  `src/lib/businessCard.test.ts` fails if they disappear. Do not reintroduce
+  Header/Footer here, and do not fork more of them than that strip.
+  - The rows live in `businessCardLinks()` (`lib/businessCard.ts`), not in the
+    component: contact values come from `siteConfig`, like the vCard and the
+    JSON-LD, so the card cannot drift from the Impressum. The postal address
+    stays off it, matching `kontakt.vcf.ts`. Row ids key the icons and the
+    tests, so they carry no copy.
+  - It renders **no CMS block at all**, which is why it is not in
+    `cache.ts#contentPages` — only in `alwaysPaths`. A block save must not
+    rebuild it.
+  - `scripts/business-card-sync.ts` captures the screenshot the showcase tile
+    shows. Re-run it (`npm run businesscard:sync`) after changing how the page
+    looks, or the tile advertises the old design.
 - Pricing remains at `/preise` and `/en/preise`. Legal routes stay outside the
   public sitemap.
 

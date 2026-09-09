@@ -1,6 +1,6 @@
 /**
- * The digital business card's identity: its two routes, and the tile copy the
- * showcase and the Webauftritt page render.
+ * The digital business card's identity: its two routes, the rows the card
+ * stacks, and the tile copy the showcase and the Webauftritt page render.
  *
  * A module of its own rather than constants inside the page, for the same
  * reason `demoCatalog.ts` was split out of `demos.ts`: four places need the
@@ -14,6 +14,7 @@
  * on a page, never the address it lives at.
  */
 import type { Lang } from "./i18n";
+import { siteConfig } from "./seo";
 
 /** Localized route segments. Both trees really serve these — see `sitemap.ts`. */
 export const BUSINESS_CARD_SLUG: Record<Lang, string> = {
@@ -83,3 +84,147 @@ export const businessCardCopy: Record<Lang, BusinessCardCopy> = {
     previewAlt: "Preview of Julian Tracht's digital business card",
   },
 };
+
+/* ===================================================================
+   The link stack
+   =================================================================== */
+
+/**
+ * Which block of the card a row belongs to.
+ *
+ * Two, and deliberately not more: the card answers "how do I reach this
+ * person" first and "where else does he exist" second. A third group would
+ * turn a card into a menu, which is the failure mode of every link hub.
+ */
+export type BusinessCardLinkGroup = "contact" | "more";
+
+export interface BusinessCardLink {
+  /**
+   * Stable, language-independent id. It keys the icon in the page and is what
+   * `businessCard.test.ts` names a row by, so it must never carry copy.
+   */
+  id: string;
+  group: BusinessCardLinkGroup;
+  /** First line — what the row offers. */
+  label: string;
+  /** Second line — the number, the address, the handle. */
+  meta: string;
+  href: string;
+  /** Leaves this site: gets `target="_blank"`, `rel` and the ↗ mark. */
+  external?: boolean;
+}
+
+/**
+ * The site's own destinations, per language.
+ *
+ * Written out rather than resolved through `localizePath()`, for the reason
+ * this module exists at all: `sitemap.ts` and `cache.ts` import it, and a
+ * runtime import of `i18n.ts` would pull the whole shared translation table
+ * into both of them (and into their unit tests) to produce four constants.
+ * The slugs are code-owned anyway — the same rule as `BUSINESS_CARD_SLUG`.
+ */
+const SITE_LINKS: Record<Lang, { home: string; services: string; pricing: string }> = {
+  de: { home: "/", services: "/#services", pricing: "/preise" },
+  en: { home: "/en/", services: "/en/#services", pricing: "/en/preise" },
+};
+
+/**
+ * Every row the card stacks, in the order it stacks them.
+ *
+ * The order is the point of the list: dial, message, write — the three things
+ * someone who just scanned a code off a screen actually wants — before
+ * anything that leads back into the site. The reference shelf below it is
+ * where a link hub is allowed to be a link hub.
+ *
+ * Contact values come from `siteConfig`, like the vCard and the JSON-LD, so
+ * the card cannot drift from the Impressum. The postal address stays out, as
+ * it does in `kontakt.vcf.ts`: it is a private home address.
+ */
+export function businessCardLinks(lang: Lang): BusinessCardLink[] {
+  const { email, telephone, socials, blogUrl, name } = siteConfig;
+  // → E.164 for `tel:` and `wa.me`, exactly as the contact aside derives it.
+  const phoneHref = telephone.replace(/\s/g, "");
+  const site = SITE_LINKS[lang];
+  const de = lang === "de";
+
+  const links: BusinessCardLink[] = [
+    {
+      id: "phone",
+      group: "contact",
+      label: de ? "Anrufen" : "Call",
+      meta: telephone,
+      href: `tel:${phoneHref}`,
+    },
+    {
+      id: "whatsapp",
+      group: "contact",
+      label: "WhatsApp",
+      meta: de ? "Kurz schreiben, statt zu telefonieren" : "Message instead of calling",
+      href: `https://wa.me/${phoneHref.replace(/^\+/, "")}`,
+      external: true,
+    },
+    {
+      id: "mail",
+      group: "contact",
+      label: de ? "E-Mail" : "Email",
+      meta: email,
+      href: `mailto:${email}`,
+    },
+    {
+      id: "website",
+      group: "more",
+      label: de ? "Website" : "Website",
+      meta: name,
+      href: site.home,
+    },
+    {
+      id: "services",
+      group: "more",
+      label: de ? "Leistungen" : "Services",
+      meta: de
+        ? "Beratung, Prozesse, Software, Webauftritt"
+        : "Advice, processes, software, web presence",
+      href: site.services,
+    },
+    {
+      id: "pricing",
+      group: "more",
+      label: de ? "Preise" : "Pricing",
+      meta: de ? "Stundensatz und Pakete" : "Hourly rate and packages",
+      href: site.pricing,
+    },
+    {
+      id: "journal",
+      group: "more",
+      label: "Journal",
+      meta: de ? "Beiträge zur Digitalisierung" : "Notes on digitalization",
+      href: blogUrl,
+      external: true,
+    },
+  ];
+
+  // Both socials are optional in `siteConfig` and the card must survive one of
+  // them being emptied — the same guard the contact aside makes.
+  if (socials.linkedin) {
+    links.push({
+      id: "linkedin",
+      group: "more",
+      label: "LinkedIn",
+      meta: "/in/julian-tracht",
+      href: socials.linkedin,
+      external: true,
+    });
+  }
+  if (socials.github) {
+    links.push({
+      id: "github",
+      group: "more",
+      label: "GitHub",
+      meta: "Tracht-Digital-Solutions",
+      href: socials.github,
+      external: true,
+    });
+  }
+
+  return links;
+}

@@ -16,16 +16,21 @@ import { serviceDefinitions, serviceHref } from "./services";
 
 export { contentCache } from "./contentCache";
 
-/** Every page that shows editable landing content, per language. */
+/**
+ * Every page that shows editable landing content, per language.
+ *
+ * The business card is deliberately NOT in here. It used to be, because it
+ * rendered the CMS-driven site footer like every other page; since it became a
+ * standalone page (`BusinessCardPage.astro`) it renders no CMS block at all —
+ * every value on it comes from `siteConfig` and from committed copy, so a
+ * block save cannot date it. It stays in `alwaysPaths` below, so a full
+ * rebuild still renders it.
+ */
 function contentPages(lang: "de" | "en"): string[] {
   const base = lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"];
   return [
     ...base,
     ...serviceDefinitions.map((service) => serviceHref(service, lang)),
-    // The business card writes none of its own copy — every value comes
-    // from `siteConfig` — but it renders the CMS-driven footer like every
-    // other page, so a footer edit has to reach it too.
-    BUSINESS_CARD_SLUG[lang],
   ];
 }
 

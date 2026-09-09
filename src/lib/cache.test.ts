@@ -23,10 +23,9 @@ describe("cacheEvents", () => {
     [
       ...(lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"]),
       ...serviceDefinitions.map((service) => serviceHref(service, lang)),
-      // The business card writes none of its own copy, but it renders the
-      // CMS-driven footer, so a block save has to reach it like any other
-      // page.
-      BUSINESS_CARD_SLUG[lang],
+      // The business card is NOT in here. It is a standalone page rendering
+      // no CMS block, so a block save must not rebuild it — it is covered by
+      // `alwaysPaths` instead, asserted further down.
     ].sort();
 
   it("rebuilds every content page of a language when a block is saved", async () => {
@@ -97,6 +96,18 @@ describe("cacheEvents", () => {
       expect(alwaysPaths, `missing ${entry.de}`).toContain(entry.de);
       expect(alwaysPaths, `missing ${entry.en}`).toContain(entry.en);
     }
+  });
+
+  it("leaves the standalone business card out of the block rebuild", async () => {
+    // It renders no CMS block — it is a link hub built from `siteConfig` and
+    // committed copy, with the site footer deliberately gone. Rebuilding it on
+    // every block save would be work with no possible output difference; the
+    // full-rebuild path below is what keeps it renderable from a cold cache.
+    const result = await paths([{ type: "block", id: "footer" }]);
+    expect(result).not.toContain(BUSINESS_CARD_SLUG.de);
+    expect(result).not.toContain(BUSINESS_CARD_SLUG.en);
+    expect(alwaysPaths).toContain(BUSINESS_CARD_SLUG.de);
+    expect(alwaysPaths).toContain(BUSINESS_CARD_SLUG.en);
   });
 
   it("rebuilds every indexable page when the exclusion list changes", async () => {
