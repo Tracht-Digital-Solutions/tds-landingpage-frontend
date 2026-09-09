@@ -49,6 +49,7 @@ import Emphasis from "~/components/ui/Emphasis.astro";
 import DemoCard from "~/components/ui/DemoCard.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
 import ReferenceCard from "~/components/ui/ReferenceCard.astro";
+import PreviewLightbox from "~/components/ui/PreviewLightbox.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const content = await cmsFor("references_home", lang, getHomeContent(lang).referencesHome);
@@ -89,6 +90,73 @@ const cards = referenceCases.map((entry) => ({
 // it as "+ 1" keeps the reason visible instead of hiding a constant in a
 // comparison.
 const slideCount = cards.length + demos.length + 1;
+
+/**
+ * The shelf as ONE list, so the lead card can be chosen across both families.
+ *
+ * It used to be three `.map()` blocks in the markup, which was fine while the
+ * only question was what comes after what.
+ */
+type Slide =
+  | { kind: "reference"; key: string; card: (typeof cards)[number]; hasImage: boolean }
+  | { kind: "demo"; key: string; demo: (typeof demos)[number]; hasImage: true }
+  | { kind: "business-card"; key: string; hasImage: false };
+
+const ordered: Slide[] = [
+  ...cards.map(
+    (card): Slide => ({
+      kind: "reference",
+      key: `reference:${card.id}`,
+      card,
+      hasImage: card.preview !== null,
+    }),
+  ),
+  ...demos.map(
+    (demo): Slide => ({
+      kind: "demo",
+      key: `demo:${demo.definition.id}`,
+      demo,
+      hasImage: true,
+    }),
+  ),
+  { kind: "business-card", key: "business-card", hasImage: false },
+];
+
+/**
+ * THE LEAD CARD — the first slide that actually carries a picture, pulled to
+ * the front of the shelf and given two tracks.
+ *
+ * ### Why the order above is no longer simply "references, then demos"
+ *
+ * That order is still the order of everything else, and its reason still
+ * holds: a delivered project is the stronger claim, and a demo reads as a
+ * sample wherever it sits. What it did not anticipate is a shelf whose
+ * reference cases are all `previewAllowed: false`. Every reference card is
+ * then text, and the shelf opens with two paragraphs while the one card that
+ * shows a built page sits off to the right — half visible on a desktop, not
+ * visible at all on a phone.
+ *
+ * A visitor who came to see what this does should not have to scroll to find
+ * the first thing that shows it. So exactly one card is hoisted, and it is
+ * hoisted for a property it either has or does not have — never for being a
+ * demo. The day a named case ships with an approved screenshot, that case
+ * becomes the lead card and nothing here changes.
+ *
+ * ### Why "wide" and not "taller"
+ *
+ * Two tracks instead of one is the only change that makes the picture bigger
+ * without making the shelf taller: the slides stretch to the tallest card, so
+ * height spent here is height every other card pays for as padding under its
+ * links. The card itself answers the extra width through a container query —
+ * see the note in `ui/DemoCard.astro`.
+ */
+const leadIndex = ordered.findIndex((slide) => slide.hasImage);
+const slides =
+  leadIndex > 0
+    ? [ordered[leadIndex], ...ordered.filter((_, index) => index !== leadIndex)]
+    : ordered;
+/** Only a slide with a picture earns the width; a text card would just be wide. */
+const leadKey = leadIndex >= 0 ? slides[0].key : null;
 
 /** Carousel chrome. This site's own words about its own control, so it follows
  *  the page's locale and is not editable copy — a mislabelled control is an
@@ -142,24 +210,21 @@ const ui =
             role="group"
             aria-label={ui.carousel}
           >
-            {cards.map((card) => (
-              <div class="showcase__slide">
-                <ReferenceCard card={card} lang={lang} />
+            {/* One list, three card families. The business-card tile is in it
+                unconditionally: the other two are gated on availability — a
+                customer's site has to still answer, a demo has to still be
+                presentable — while that one is a page of this very deployment.
+                There is no state in which the site is up and the card is not,
+                so there is nothing to check. */}
+            {slides.map((slide) => (
+              <div
+                class:list={["showcase__slide", slide.key === leadKey && "showcase__slide--lead"]}
+              >
+                {slide.kind === "reference" && <ReferenceCard card={slide.card} lang={lang} />}
+                {slide.kind === "demo" && <DemoCard demo={slide.demo} lang={lang} />}
+                {slide.kind === "business-card" && <BusinessCardTile />}
               </div>
             ))}
-            {demos.map((demo) => (
-              <div class="showcase__slide">
-                <DemoCard demo={demo} lang={lang} />
-              </div>
-            ))}
-            {/* Last, and unconditional. The two lists above are gated on
-                availability — a customer's site has to still answer, a demo has
-                to still be presentable — while this one is a page of this very
-                deployment. There is no state in which the site is up and the
-                card is not, so there is nothing to check. */}
-            <div class="showcase__slide">
-              <BusinessCardTile />
-            </div>
           </div>
 
           {/* Flanking the track, vertically centred, half over the outermost
@@ -213,11 +278,45 @@ const ui =
           </div>
         </div>
       </div>
+
+      {/* Inside the section on purpose: the lightbox script binds each dialog
+          to the magnifiers of ITS OWN section, so a second shelf on a future
+          page gets its own dialog instead of driving this one. */}
+      <PreviewLightbox lang={lang} />
     </section>
   )
 }
 
 <style>
+  /* The shelf's horizontal overflow stops at this section.
+
+     Measured, not assumed: at 375px the deployed site reports a document
+     `scrollWidth` of 375 and this rebuilt section reported 616 — the shelf
+     wrapper's own `scrollWidth` grew with it while its box stayed 375 wide and
+     the track inside kept clipping its cards correctly. Nothing sticks out
+     that can be pointed at: reordering the cards does not change it, removing
+     the lead card's class does not change it, and neither does the nav, the
+     lightbox, nor forcing every card revealed.
+
+     It was never visible to a visitor — `body` already carries
+     `overflow-x: clip`, so neither version could be panned sideways — and that
+     is why it belongs HERE rather than left alone: a section that owns a
+     horizontal scroller should confine its own overflow instead of relying on
+     a rule three ancestors up to hide the evidence.
+
+     `clip`, never `hidden`. `hidden` would make this a scroll container, and
+     then a card taking keyboard focus would scroll THIS box instead of the
+     track — the shelf would look untouched while the page jumped. `clip` on
+     one axis also leaves the other `visible`, so the page still scrolls down;
+     it is the same rule, for the same reason, that `body` already uses.
+
+     On the SECTION and not on `.showcase`, because the arrows sit at that
+     element's edges with a 20px blurred shadow, and clipping there would shave
+     the shadow off the outer side of each button. */
+  #showcase {
+    overflow-x: clip;
+  }
+
   .showcase {
     position: relative;
     margin-top: 3rem;
@@ -339,6 +438,21 @@ const ui =
   @media (min-width: 1024px) {
     .showcase__slide {
       flex-basis: calc((100% - 3rem) / 3);
+    }
+
+    /* THE LEAD CARD, and only here.
+
+       Two of the three tracks plus the gap between them, so it lines up with
+       the grid the other cards sit on instead of being "a bit wider". The
+       third track still shows the next card, which is what keeps the shelf
+       reading as a shelf rather than as a banner with something behind it.
+
+       Deliberately NOT applied at `md`, where the row is two tracks wide: two
+       of two is the whole container, and a lone full-width card is the poster
+       the `auto-fit` note further up already warned about. Below `lg` the lead
+       card is simply the first card. */
+    .showcase__slide--lead {
+      flex-basis: calc((100% - 3rem) / 3 * 2 + 1.5rem);
     }
   }
 
@@ -469,9 +583,18 @@ const ui =
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    /** One slide plus one gap — how far a click travels. */
+    /**
+     * One slide plus one gap — how far a click travels.
+     *
+     * Measured from an ORDINARY slide, not from `firstElementChild`: the first
+     * one is the lead card and it is two tracks wide above `lg`, so measuring
+     * it would make every arrow click jump two cards and skip whatever sat
+     * between them. Falls back to the first child for a shelf that is nothing
+     * but a lead card, where two tracks is all there is to travel anyway.
+     */
     const step = () => {
-      const slide = track.firstElementChild as HTMLElement | null;
+      const slide = (track.querySelector(":scope > :not(.showcase__slide--lead)") ??
+        track.firstElementChild) as HTMLElement | null;
       if (!slide) return track.clientWidth;
       const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
       return slide.getBoundingClientRect().width + gap;

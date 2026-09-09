@@ -26,6 +26,7 @@ import { resolveLang, tFor } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
+import { getHeroSlides } from "~/lib/heroSlides";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -34,6 +35,9 @@ const lang = resolveLang(Astro.currentLocale);
 // redefining them.
 const t = tFor(Astro.currentLocale);
 const hero = await cmsFor("home_hero", lang, getHomeContent(lang).hero);
+// The hero's slider (cases + live demos) — same resolution as the German
+// twin; see `lib/heroSlides.ts`.
+const heroSlides = await getHeroSlides(lang);
 // Resolve FAQ here too so the FAQPage JSON-LD matches the rendered answers.
 const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
 const process = await cmsFor("process", lang, {
@@ -77,7 +81,7 @@ const titles = {
 >
   <Header />
   <main id="main">
-    <Hero client:load lang={lang} hero={hero} />
+    <Hero client:load lang={lang} hero={hero} slides={heroSlides} />
     <About />
     <Services />
     <Showcase />

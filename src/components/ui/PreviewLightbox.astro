@@ -1,0 +1,353 @@
+---
+/**
+ * One dialog per section, shared by every screenshot in it.
+ *
+ * A visitor looking at the shelf sees each capture at card size — a few
+ * hundred pixels wide, cropped to its top third. The file behind it is
+ * 1440 × 900. This is what closes that gap without sending anyone away: the
+ * magnifier on a card opens the whole picture over the page, and the card's
+ * own link still goes to the live site.
+ *
+ * ### Why a native `<dialog>`
+ *
+ * Escape, the focus trap, the inert background and the backdrop element are
+ * all free and all correct. A hand-built overlay has to re-implement each one
+ * and gets the focus trap wrong roughly every time. The only two things left
+ * to write are restoring focus to the button that opened it (the platform
+ * does not) and dismissing on a backdrop click (the platform gives us the
+ * element but not the behaviour).
+ *
+ * ### Why ONE dialog rather than one per card
+ *
+ * The content is three strings and an image source. Rendering a modal per
+ * card would put N copies of an identical shell in the document for a feature
+ * that can only ever show one at a time.
+ *
+ * ### Progressive enhancement
+ *
+ * The magnifiers ship `hidden` from `DemoCard.astro` and are revealed HERE,
+ * after this script has confirmed it has a working dialog. So a browser
+ * without `showModal`, or a page whose bundle failed, shows cards with no
+ * magnifier at all rather than a button that does nothing — the same contract
+ * as the shelf's arrows.
+ */
+import type { Lang } from "~/lib/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const ui =
+  lang === "de"
+    ? {
+        label: "Vergrößerte Vorschau",
+        close: "Vorschau schließen",
+        visit: "Zur Seite",
+        newTab: "öffnet in neuem Tab",
+      }
+    : {
+        label: "Enlarged preview",
+        close: "Close preview",
+        visit: "Open the site",
+        newTab: "opens in a new tab",
+      };
+---
+
+<dialog class="preview" data-preview-dialog aria-label={ui.label}>
+  <div class="preview__frame">
+    <button type="button" class="preview__close" data-preview-close>
+      <span class="sr-only">{ui.close}</span>
+      <svg
+        aria-hidden="true"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+      </svg>
+    </button>
+
+    {/* No `width`/`height`: the source varies and the frame already reserves
+        the box with an aspect ratio, so a stated intrinsic size would only be
+        a second, staler answer to the same question. */}
+    <img class="preview__img" data-preview-img src="" alt="" />
+
+    <div class="preview__bar">
+      <div class="preview__meta">
+        <p class="preview__title" data-preview-title></p>
+        <p class="preview__host" data-preview-host></p>
+      </div>
+      <a
+        class="preview__visit"
+        data-preview-visit
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {ui.visit}
+        <span class="sr-only"> ({ui.newTab})</span>
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="7" y1="17" x2="17" y2="7"></line>
+          <polyline points="7 7 17 7 17 17"></polyline>
+        </svg>
+      </a>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .preview {
+    /* A dialog is `position: fixed` and auto-sized by the UA; these three
+       reset it to "as big as it usefully gets, centred". */
+    width: min(96vw, 78rem);
+    max-width: none;
+    max-height: 92vh;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-card);
+    color: var(--color-black);
+    overflow: hidden;
+  }
+  .preview::backdrop {
+    /* Deliberately not `--color-black` at low alpha: in dark mode that is a
+       near-transparent film over an already dark page and the modal stops
+       reading as modal. A fixed dark wash works in both themes. */
+    background: rgb(8 10 24 / 0.72);
+  }
+
+  .preview__frame {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .preview__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 88%, transparent);
+    color: var(--color-black);
+    cursor: pointer;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .preview__close:hover {
+    background: var(--color-card);
+  }
+  .preview__close:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .preview__img {
+    display: block;
+    width: 100%;
+    /* `contain`, not `cover`: this is the one place the capture is shown
+       WHOLE. Cropping it here would defeat the only reason to open it. */
+    object-fit: contain;
+    /* The captures are 16:10; the cap keeps a tall window from stretching the
+       bar off the bottom of the screen. */
+    aspect-ratio: 16 / 10;
+    max-height: 78vh;
+    background: var(--color-paper);
+  }
+
+  .preview__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--color-soft);
+  }
+  .preview__meta {
+    min-width: 0;
+  }
+  .preview__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    line-height: 1.2;
+    color: var(--color-black);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .preview__host {
+    margin: 0.15rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+  .preview__visit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: none;
+    padding: 0.625rem 1.125rem;
+    border-radius: 100px;
+    background: var(--color-surface-navy);
+    color: #fff;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .preview__visit:hover {
+    background: var(--color-surface-accent);
+  }
+  .preview__visit:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 32rem) {
+    .preview__bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+    }
+    .preview__visit {
+      justify-content: center;
+    }
+    .preview__title {
+      white-space: normal;
+    }
+  }
+
+  /* Opening motion, and only on opening — a modal that fades OUT keeps the
+     page behind it under a film while the visitor is already trying to read
+     it again. */
+  @media (prefers-reduced-motion: no-preference) {
+    .preview[open] {
+      animation: previewIn 180ms var(--tds-ease-out);
+    }
+    .preview[open]::backdrop {
+      animation: previewBackdropIn 180ms var(--tds-ease-out);
+    }
+  }
+  @keyframes previewIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes previewBackdropIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Wire every magnifier in a section to that section's one dialog.
+   *
+   * Scoped per section rather than per document so a second shelf on a future
+   * page gets its own dialog instead of quietly driving the first one's.
+   */
+  const dialogs = document.querySelectorAll<HTMLDialogElement>("[data-preview-dialog]");
+
+  for (const dialog of dialogs) {
+    // No dialog support means no enlarging. The buttons stay `hidden`, which
+    // is the state they shipped in, so nothing has to be undone.
+    if (typeof dialog.showModal !== "function") continue;
+
+    const scope = dialog.closest("section") ?? document;
+    const buttons = scope.querySelectorAll<HTMLButtonElement>("[data-preview-open]");
+    if (buttons.length === 0) continue;
+
+    const img = dialog.querySelector<HTMLImageElement>("[data-preview-img]");
+    const title = dialog.querySelector<HTMLElement>("[data-preview-title]");
+    const host = dialog.querySelector<HTMLElement>("[data-preview-host]");
+    const visit = dialog.querySelector<HTMLAnchorElement>("[data-preview-visit]");
+    const close = dialog.querySelector<HTMLButtonElement>("[data-preview-close]");
+    if (!img || !title || !host || !visit || !close) continue;
+
+    /**
+     * The control that opened the dialog, so focus can go back to it.
+     *
+     * `showModal()` moves focus into the dialog but nothing returns it, and a
+     * keyboard user who lands back at the top of the document after closing an
+     * overlay has lost their place in a horizontally scrolling shelf — which
+     * is precisely the place that is hardest to find again.
+     */
+    let opener: HTMLElement | null = null;
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        const src = button.dataset.previewSrc;
+        if (!src) return;
+
+        img.src = src;
+        img.alt = button.dataset.previewAlt ?? "";
+        title.textContent = button.dataset.previewTitle ?? "";
+        host.textContent = button.dataset.previewHost ?? "";
+        visit.href = button.dataset.previewHref ?? "#";
+
+        opener = button;
+        dialog.showModal();
+      });
+
+      // Revealed only now that there is something behind it.
+      button.hidden = false;
+    }
+
+    close.addEventListener("click", () => dialog.close());
+
+    /**
+     * Backdrop dismissal.
+     *
+     * A click on the backdrop reports the DIALOG as its target, because the
+     * backdrop is a pseudo-element with no node of its own; a click on the
+     * content reports something inside `.preview__frame`. So "the target is
+     * the dialog itself" is exactly "the visitor clicked outside".
+     */
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+
+    dialog.addEventListener("close", () => {
+      opener?.focus();
+      opener = null;
+      // Drop the source so a closed dialog is not holding a decoded 1440×900
+      // bitmap for every screenshot the visitor happened to open.
+      img.removeAttribute("src");
+    });
+  }
+</script>
