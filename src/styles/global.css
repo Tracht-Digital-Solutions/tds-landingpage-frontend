@@ -299,6 +299,321 @@ html {
   );
 }
 
+/* ---- Hero service slider ----------------------------------------------
+   Styles for `components/islands/HeroServiceSlider.tsx`. They live here for
+   the same reason `.accent-letters` does: the component is a React island and
+   cannot carry an Astro `<style>` block.
+
+   The stage is a single-cell GRID with every panel in that one cell. Height is
+   therefore the tallest panel's height and does not jump between slides — the
+   thing that makes a hero slider feel broken is the page reflowing under it
+   every six seconds. `visibility` (not `display`) hides the inactive ones, so
+   they keep contributing that height. */
+.hero-slider {
+  --hero-slide-from: 0px;
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+.hero-slider__stage {
+  display: grid;
+  /* One cell. Every panel is placed into it below. */
+  grid-template-areas: "slide";
+  background: color-mix(in srgb, var(--color-card) 92%, transparent);
+  border-radius: 6px;
+  overflow: hidden;
+  /* A pointer drag over the card should move the slider, not select its text.
+     `user-select` here rather than on `:active`, because the gesture is
+     measured on pointerup and there is no reliable "dragging" class to hang
+     it on without re-rendering mid-gesture. */
+  touch-action: pan-y;
+}
+
+.hero-slider__panel {
+  grid-area: slide;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(var(--hero-slide-from));
+  transition:
+    opacity 320ms var(--tds-ease-out),
+    transform 320ms var(--tds-ease-out),
+    visibility 0s linear 320ms;
+}
+.hero-slider__panel[data-active] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 320ms var(--tds-ease-out),
+    transform 320ms var(--tds-ease-out),
+    visibility 0s;
+}
+
+.hero-slider__shot {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--color-paper);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+}
+.hero-slider__shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Every service ground composes its subject into the upper two thirds; a
+     crop from the bottom shows table. Same rule as the mosaic tiles. */
+  object-position: top;
+}
+
+.hero-slider__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.125rem 1.25rem 1.25rem;
+}
+
+/* The line above the title. A demo carries the genre etiquette from the
+   closed `DEMO_KINDS` vocabulary — one or two words, so it gets the same
+   uppercase mono treatment as `.demo-card__kind` on the shelf below and the
+   two read as one family. A reference carries the case's own `context`,
+   which is a sentence: uppercasing and letter-spacing that would make it
+   shout, so it stays sentence case and is held to one line instead. */
+.hero-slider__kind {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hero-slider__panel[data-kind="demo"] .hero-slider__kind {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hero-slider__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.375rem;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--color-black);
+}
+
+.hero-slider__text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  /* The summaries are 80–160 characters by contract (they double as a page
+     description), which is three lines here at most widths. Clamped so one
+     long one cannot push the stage taller than the rest. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-slider__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hero-slider__chips li {
+  padding: 0.2rem 0.55rem;
+  border-radius: 100px;
+  background: var(--color-soft);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.hero-slider__more {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.hero-slider__more span {
+  transition: transform 200ms var(--tds-ease-out);
+}
+.hero-slider__more:hover span {
+  transform: translateX(2px);
+}
+.hero-slider__more:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.hero-slider__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  /* Reserved, so the pause button appearing after hydration (it depends on a
+     media query the server cannot answer) does not shift the row. */
+  min-height: 2.75rem;
+  margin-top: 0.75rem;
+}
+
+.hero-slider__arrow,
+.hero-slider__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 100px;
+  background: color-mix(in srgb, var(--color-card) 80%, transparent);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--tds-ease-out),
+    color 200ms var(--tds-ease-out);
+}
+.hero-slider__arrow:hover,
+.hero-slider__toggle:hover {
+  background: var(--color-card);
+  color: var(--color-primary);
+}
+.hero-slider__arrow:focus-visible,
+.hero-slider__toggle:focus-visible,
+.hero-slider__dot:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.hero-slider__dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.hero-slider__dot {
+  /* The dot is 8px; the button around it is 44px of transparent padding, so
+     the target meets the minimum without the mark growing to match it. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 100px;
+}
+.hero-slider__dot::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 100px;
+  background: color-mix(in srgb, var(--color-muted) 45%, transparent);
+  transition:
+    background-color 200ms var(--tds-ease-out),
+    width 200ms var(--tds-ease-out);
+}
+.hero-slider__dot[aria-selected="true"]::before {
+  width: 1.25rem;
+  background: var(--color-accent);
+}
+
+/* PHONES AND SMALL TABLETS: the card lies down.
+
+   The hero is exactly one screen tall at every width on this site, and that is
+   not a coincidence — it is `min-h-svh` over a copy block that was tuned to
+   fit. Below `lg` the slider does not sit beside that block, it sits UNDER it,
+   and a full card (16:10 picture + title + three lines + chips + link +
+   controls) is about 500px. On a 375 × 812 phone that pushes the hero to
+   ~1190px: the visitor gets the headline, the buttons, and the top edge of a
+   photograph, with the slider's own controls a screen further down.
+
+   So on a phone the card turns on its side: the picture becomes a 7rem
+   thumbnail column, the summary is clamped to two lines and the chips drop
+   out. It still names the case or the demo, still shows a picture of it, and
+   still cycles — in about 110px instead of 460.
+
+   The chips are the right thing to lose, though no longer for the reason they
+   once were. They now carry a demo's host address or a case's metric, which
+   the title does NOT repeat — but neither is what the visitor is deciding on
+   at this size, both are one tap away at the destination, and a 22-character
+   mono host is exactly the part that wrapped to three rows here. The eyebrow
+   stays: one word of genre is what makes the shelf scannable. */
+@media (max-width: 63.9375rem) {
+  .hero-slider__panel {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .hero-slider__shot {
+    flex: none;
+    width: 7rem;
+    /* The row's height comes from the copy beside it, so the fixed ratio has
+       to go or the thumbnail would set the height instead. */
+    aspect-ratio: auto;
+    border-bottom: none;
+    border-right: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .hero-slider__body {
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.8rem 0.95rem;
+  }
+  .hero-slider__title {
+    font-size: 1.0625rem;
+  }
+  .hero-slider__text {
+    font-size: 0.8125rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .hero-slider__chips {
+    display: none;
+  }
+  .hero-slider__more {
+    margin-top: 0.1rem;
+    font-size: 0.75rem;
+  }
+  .hero-slider__controls {
+    min-height: 2.5rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* END STATE, spelled out — same reason as the reveal block further down. The
+   shared reduce block clamps duration to 0.01ms, and a clamped transition
+   still travels; a panel that never receives `data-active` would otherwise be
+   left mid-transform. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-slider__panel,
+  .hero-slider__panel[data-active],
+  .hero-slider__more span,
+  .hero-slider__dot::before {
+    transition: none;
+  }
+  .hero-slider__panel {
+    transform: none;
+  }
+  .hero-slider__more:hover span {
+    transform: none;
+  }
+}
+
 /* Hero — on short viewports (laptops, landscape phones) the stacked
    headline + straplines + sub + CTAs can exceed the screen height and
    spill past the scroll hint. Pull the type and rhythm in so the whole
@@ -317,6 +632,29 @@ html {
   #hero .hero-body {
     padding-top: 1.25rem;
     padding-bottom: 1.25rem;
+  }
+  /* The slider has to come in with everything else, or the hero grows by
+     exactly the height the rules above just saved. The picture is the part
+     that can afford it: the title, the sentence and the link are the content,
+     the ground is the decoration. */
+  #hero .hero-slider__shot {
+    aspect-ratio: 21 / 9;
+  }
+  #hero .hero-slider__text {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  #hero .hero-slider__body {
+    padding: 0.875rem 1.125rem 1rem;
+  }
+}
+
+/* Landscape phones: the hero releases its `min-height` below, and the slider's
+   picture is the first thing that has to go — there is no room for a 16:10
+   band beside a headline on a 640px-tall screen. */
+@media (max-height: 640px) and (orientation: landscape) {
+  #hero .hero-slider__shot {
+    display: none;
   }
 }
 

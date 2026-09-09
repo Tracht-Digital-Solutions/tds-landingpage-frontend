@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { DEMO_KINDS } from "./demoCatalog";
 import {
   demoDefinitions,
   demoSnapshot,
@@ -66,6 +67,41 @@ describe("the committed catalog", () => {
     for (const demo of demoDefinitions) {
       expect(Object.keys(demoSnapshot.demos)).toContain(demo.id);
     }
+  });
+
+  /**
+   * The genre etiquette is the ONE thing on a demo card this site says rather
+   * than quotes (see `DEMO_KINDS`), so it is the one that can drift. A closed
+   * key set is what stops "Onlineshop" from becoming "Streetwear-Shop für
+   * junge Marken" one well-meaning edit at a time: a new label has to be added
+   * to the vocabulary, in both languages, on purpose.
+   */
+  it("labels every demo with a kind from the closed vocabulary", () => {
+    for (const demo of demoDefinitions) {
+      expect(Object.keys(DEMO_KINDS), demo.id).toContain(demo.kind);
+    }
+  });
+
+  it("has both languages for every kind in the vocabulary", () => {
+    for (const [key, labels] of Object.entries(DEMO_KINDS)) {
+      expect(labels.de.length, key).toBeGreaterThan(0);
+      expect(labels.en.length, key).toBeGreaterThan(0);
+    }
+  });
+
+  /**
+   * The shop is in the catalog before it has anything to show, deliberately:
+   * while `shop.tracht-digital.de` serves the hosting panel's placeholder the
+   * sync records it as such and no card renders, and the day the shop is
+   * deployed a sync turns it into a card with no code change. This pins the
+   * entry so the arrangement is not "cleaned up" by someone who finds a
+   * catalog entry with no visible card and takes it for dead weight.
+   */
+  it("carries the shop, whether or not it is live yet", () => {
+    const shop = demoDefinitions.find((demo) => demo.id === "shop");
+    expect(shop).toBeDefined();
+    expect(shop!.host).toBe("shop.tracht-digital.de");
+    expect(shop!.kind).toBe("shop");
   });
 });
 

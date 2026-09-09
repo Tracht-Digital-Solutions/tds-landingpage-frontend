@@ -31,6 +31,44 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   section exists because a visitor who never opens a service page never saw a
   reference at all. It renders nothing when the catalog is empty, exactly like
   the demos section.
+- **The hero carries a showcase slider.** `islands/HeroShowcaseSlider.tsx`,
+  in the hero's right column from `md` upwards and under the CTAs below that.
+  Its slides are the published reference cases and the live website demos —
+  the work, not the offer. The services already own the section directly
+  below; repeating them in the hero put one claim on the screen twice and
+  still asked the visitor to take it on trust.
+  - Slides are resolved on the SERVER in `lib/heroSlides.ts` and handed to the
+    island as props. An island importing `demos.ts` or `references.ts` would
+    ship the case catalogue, the demo snapshot and the availability probes to
+    the browser to render a handful of titles.
+  - It reads the SAME two sources as `sections/Showcase.astro`, and their
+    probes are memoised per render generation — so the hero costs no extra
+    round of probes and cannot advertise a case the shelf dropped or a demo
+    that is unreachable. **The availability rules in `demos.ts` are not
+    softened here**: a dead link is worse in the hero than anywhere else on
+    the page, because it is the first thing a visitor touches.
+  - Cases come before demos, then `leadWithPicture()` hoists the first slide
+    that carries a picture. Same decision as the shelf's lead card and for the
+    same reason: every case is currently `previewAllowed: false`, so without it
+    the hero opens on a paragraph while the one slide that shows a built page
+    waits six seconds off-screen. The hoist is for HAVING a picture, never for
+    being a demo — the day a case ships with an approved screenshot it leads.
+  - A demo slide links OFF-SITE to the demo's own host (`target="_blank"`,
+    `rel`, and a new-tab hint for screen readers); a case slide links to its
+    primary service page. The only words this site contributes to a slide are
+    the genre etiquette from `DEMO_KINDS`, the link labels and the slider's
+    controls — a demo's title and description are the demo's own, a case's are
+    the customer's. Do not translate either; do not write one that is missing.
+  - An empty slide list is a REAL state, not a wiring failure: every demo can
+    fail its check at once. `Hero.tsx` then drops the second grid track
+    entirely rather than leaving an empty frame where a card would be.
+  - It advances every 6 s, carries a real pause button, stops on hover, on
+    focus and while the tab is backgrounded, and never starts at all under
+    `prefers-reduced-motion`. Two pieces of hero decoration moved out of its
+    way: the outlined rectangle at `top: 16% / right: 6%` was removed rather
+    than relocated — the slider is a real frame where that one was drawn — and
+    the conduit run went to the lower left, where the card no longer covers
+    half of it. Do not restore either while the slider stands there.
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
   accept a slug or href from CMS content.
@@ -211,13 +249,26 @@ configured site key must be surfaced by the existing guard.
 
 ## Website demos
 
-The demo sites (`demo1`…`demo5.tracht-digital.de`) render on the home page and
-on the Webauftritt service page through `sections/WebsiteDemos.astro`. Three
-files own them and the split is load-bearing:
+The demo sites (`demo1`…`demo5.tracht-digital.de`, plus `shop`) render on the
+home page and on the Webauftritt service page through
+`sections/WebsiteDemos.astro`. Three files own them and the split is
+load-bearing:
 
-- `src/lib/demoCatalog.ts` — id, order, host and URL. Code-owned like
+- `src/lib/demoCatalog.ts` — id, order, host, URL and genre. Code-owned like
   `ServiceDefinition.slug`; the CMS must never name a host this site sends a
-  visitor to. Imported by the sync script, so it has no other imports.
+  visitor to. Imported by the sync script, so it has no other imports — not
+  even a type-only one.
+  - **`shop.tracht-digital.de` went in before it had a site, and that worked.**
+    While the host served the panel's placeholder the sync recorded it as
+    `placeholder` and no card rendered; `tds-shop-frontend` is deployed now and
+    a sync turned it into a card — as TDShop — with no code change. Keep the
+    pattern for the next host: a catalog entry ahead of its site is not dead
+    weight, it is what the availability check is for.
+  - **A demo's URL is not always its bare host.** `demo2`'s root is a 330-byte
+    language gate — one link, no heading — which the sync rejects as a
+    placeholder, correctly, because that is what the root serves. Its entry
+    points at `/de/`. A demo that gates its own front door is linked past the
+    gate.
 - `src/lib/demoData.json` — the committed snapshot `npm run demos:sync` writes:
   each demo's own title, meta description, favicon and screenshot. Never edit
   it by hand.
@@ -239,11 +290,39 @@ Unknown status strings fail closed. There is no "show it anyway" path, and
 none should be added: a card leading to a certificate warning or to "Hier
 entsteht eine neue Webseite" costs more than an absent card.
 
-Everything a visitor reads on a demo card came from that demo. `homeContent.ts`
-owns only the section's own framing, overridable through the `website_demos`
-block; that block has no Website-CMS schema yet and falls back cleanly until it
-does. Never write a description for someone's site — a demo without a meta
-description simply shows none.
+Everything a visitor reads on a demo card came from that demo, with **one
+exception**: `DemoDefinition.kind`, the genre etiquette above the title.
+It is code-owned, its vocabulary is closed (`DEMO_KINDS`: Webseite ·
+Landingpage · Onlineshop) and `demos.test.ts` holds it shut. The exception is
+narrow on purpose — it applies to our OWN demos, it names the genre and never
+the subject ("Onlineshop", not "Streetwear-Shop"), and it exists because a
+visitor scanning the shelf wants to know which of these is a shop and which is
+a page. Adding a label means adding it to the vocabulary, in both languages,
+deliberately. Everything else still comes from the demo: `homeContent.ts` owns
+only the section's own framing, overridable through the `website_demos` block
+(no Website-CMS schema yet; falls back cleanly until there is one). Never write
+a description for someone's site — a demo without a meta description simply
+shows none.
+
+The card is **not a wrapper `<a>` any more**. It carries a magnifier that opens
+the full 1440 × 900 capture in `ui/PreviewLightbox.astro`, and a `<button>`
+inside an `<a>` is invalid, so the title holds the link and the link stretches
+over the card with a `::after`. The full-card hit area, the hover response and
+the focus ring are the invariant and all survive; the anchor was only how they
+used to be provided. The lightbox is one native `<dialog>` per section — Escape,
+the focus trap and the inert background come from the platform — and the
+magnifiers ship `hidden`, revealed only once the script has confirmed
+`showModal`. `previewLightbox.test.ts` guards the nesting, the stretched link,
+the focus ring, the hidden default and the focus restore.
+
+On the home page the shelf gives **two tracks to its lead card**, which is the
+first slide carrying a picture, hoisted to the front. Reference cases still
+come before demos everywhere else; the hoist exists because every reference
+case is currently `previewAllowed: false`, so without it the shelf opens with
+two text cards while the one card that shows a built page sits off-screen. The
+card answers the extra width through a container query, and the extra width is
+width, not height — the slides stretch to the tallest card, so a taller lead
+card would pad every other card's body with the difference.
 
 The framing exists **twice, for one card and for several** (`headlineSingle`,
 `introSingle`, `serviceIntroSingle`), and `demosCopy()` picks by the number

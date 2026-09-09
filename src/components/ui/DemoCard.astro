@@ -1,20 +1,50 @@
 ---
 /**
- * One website demo: screenshot, favicon, name, the site's own description and
- * its address.
+ * One website demo: genre, screenshot, favicon, name, the site's own
+ * description and its address.
  *
  * The picture here is CONTENT, not a ground. `ServiceCard` renders its photo
  * at 0.34 opacity behind a scrim with `alt=""` because there the image is
  * decoration under the copy; here the screenshot IS the point — it is what a
  * visitor came to look at — so it runs at full strength, in front, with a real
- * `alt`. That is the whole difference between the two card families, and it is
- * why this is a separate component rather than a variant.
+ * `alt`, and a magnifier opens the full 1440×900 capture without leaving the
+ * page.
  *
  * Everything textual on this card came from the demo itself via
- * `npm run demos:sync`. Nothing here is written about a site; a demo with no
- * meta description simply shows no description.
+ * `npm run demos:sync`, with ONE deliberate exception: the genre etiquette
+ * (`definition.kind`, see `DEMO_KINDS` in `lib/demoCatalog.ts`). Nothing else
+ * here is written about a site; a demo with no meta description simply shows
+ * no description.
+ *
+ * ### Why this is not one big `<a>` any more
+ *
+ * It was, and the magnifier is why it stopped being one: a `<button>` inside
+ * an `<a>` is invalid, and no amount of `preventDefault` makes it valid. The
+ * card is a plain element now, the TITLE carries the link, and the link
+ * stretches over the whole card with a `::after`. The full-card hit area, the
+ * hover response and the focus ring all survive that swap — they are the
+ * invariant, not the tag that used to provide them. The magnifier then sits
+ * above the stretched layer on `z-index`, which is exactly the layering the
+ * pattern exists for.
+ *
+ * ### Why the sizes are container queries, not a `featured` prop
+ *
+ * The shelf gives its lead card two tracks (see `sections/Showcase.astro`).
+ * A wide card wants a wider screenshot band and a bigger title, and it wants
+ * them BY BEING WIDE — on a phone the same card is one track wide and must
+ * look like every other card. The slot is already an inline-size container,
+ * so the card answers its own width and nobody has to thread a flag through
+ * two components and keep it in step with the CSS.
+ *
+ * The wide band is `32 / 10`, i.e. exactly twice `16 / 10`. That is not a
+ * taste decision: the slides stretch to the tallest card, so a lead card with
+ * a TALLER band would pad every other card's body with the difference. Twice
+ * the width at the same height doubles the picture and leaves the shelf's
+ * height alone. `object-position: top center` then crops to the demo's hero,
+ * which is the half worth showing.
  */
 import type { Lang } from "~/lib/i18n";
+import { DEMO_KINDS } from "~/lib/demoCatalog";
 import { demoUi, type ResolvedDemo } from "~/lib/demos";
 
 interface Props {
@@ -38,19 +68,16 @@ const previewAlt =
   lang === "de"
     ? `Startseite der Demo-Webseite ${title}`
     : `Home page of the demo website ${title}`;
+
+/** Genre, from the closed vocabulary. Never the demo's subject matter. */
+const kind = DEMO_KINDS[definition.kind][lang];
 ---
 
 <article class="demo-card-slot" data-reveal>
-  <a
-    class="demo-card"
-    href={definition.url}
-    target="_blank"
-    rel="noopener noreferrer"
-    hreflang={demo.siteLang ?? undefined}
-  >
+  <div class="demo-card">
     <div class="demo-card__shot">
-      {/* Intrinsic size stated so the 16:10 box is reserved before the file
-          arrives — five screenshots loading lazily into unsized boxes is a
+      {/* Intrinsic size stated so the box is reserved before the file
+          arrives — screenshots loading lazily into unsized boxes is a
           section that reflows under the reader. */}
       <img
         src={preview}
@@ -60,9 +87,45 @@ const previewAlt =
         loading="lazy"
         decoding="async"
       />
+
+      {/* Starts `hidden`; `PreviewLightbox.astro` reveals it once its dialog
+          is wired. Same fallback as the shelf's arrows — without JavaScript
+          the card is still a complete, working link, and there is no dead
+          control sitting on the picture. */}
+      <button
+        type="button"
+        class="demo-card__zoom"
+        hidden
+        data-preview-open
+        data-preview-src={preview}
+        data-preview-alt={previewAlt}
+        data-preview-title={title}
+        data-preview-host={definition.host}
+        data-preview-href={definition.url}
+      >
+        <span class="sr-only">{ui.zoom}</span>
+        <svg
+          aria-hidden="true"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+          <line x1="11" y1="8" x2="11" y2="14"></line>
+          <line x1="8" y1="11" x2="14" y2="11"></line>
+        </svg>
+      </button>
     </div>
 
     <div class="demo-card__body">
+      <p class="demo-card__kind">{kind}</p>
+
       <div class="demo-card__head">
         {favicon && (
           /* Decorative: the site's name is right beside it in text, so a
@@ -78,18 +141,33 @@ const previewAlt =
             decoding="async"
           />
         )}
-        <h3 class="demo-card__title">{title}</h3>
+        <h3 class="demo-card__title">
+          <a
+            class="demo-card__link"
+            href={definition.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            hreflang={demo.siteLang ?? undefined}
+          >
+            {title}
+            {/* The link's accessible name is the demo's title, which says
+                nothing about what following it does. The rest of the sentence
+                is added here rather than left to the visual label below: that
+                label is now decoration beside a link, not the link itself. */}
+            <span class="sr-only"> — {ui.visit} ({ui.newTab})</span>
+          </a>
+        </h3>
       </div>
 
       {description && <p class="demo-card__text">{description}</p>}
 
       <div class="demo-card__foot">
         <span class="demo-card__host">{definition.host}</span>
-        <span class="demo-card__go">
+        {/* Hidden from assistive tech: the link above already carries these
+            words in its accessible name, and announcing them twice would
+            offer a second thing to click that is not a thing at all. */}
+        <span class="demo-card__go" aria-hidden="true">
           {ui.visit}
-          {/* The link opens a new tab; saying so only in an icon leaves a
-              keyboard or screen-reader user to discover it by surprise. */}
-          <span class="sr-only"> ({ui.newTab})</span>
           <svg
             aria-hidden="true"
             width="16"
@@ -107,14 +185,16 @@ const previewAlt =
         </span>
       </div>
     </div>
-  </a>
+  </div>
 </article>
 
 <style>
   .demo-card-slot {
     /* A grid child, not a flex item: under size containment a flex item takes
        its base size from max-content and collapses. Same note as the journal
-       card, same reason. */
+       card, same reason.
+
+       It is also what the wide-card rules at the bottom of this file query. */
     container-type: inline-size;
   }
 
@@ -125,6 +205,8 @@ const previewAlt =
        matches its section is not a card. */
     --demo-card-bg: var(--color-soft);
     --demo-card-bg-hover: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+    /* Overridden by the wide-card container query at the bottom. */
+    --demo-shot-aspect: 16 / 10;
 
     position: relative;
     display: flex;
@@ -135,7 +217,6 @@ const previewAlt =
     background: var(--demo-card-bg);
     border-radius: 6px;
     overflow: hidden;
-    text-decoration: none;
     color: inherit;
     transition: background-color 200ms var(--tds-ease-out);
   }
@@ -143,14 +224,18 @@ const previewAlt =
   .demo-card:focus-within {
     background: var(--demo-card-bg-hover);
   }
-  .demo-card:focus-visible {
+  /* The ring used to come from the card being the focusable element. It is a
+     plain box now, so it is drawn for it when the link inside takes focus —
+     the ring belongs around the whole hit area, not around two lines of
+     heading in the middle of it. */
+  .demo-card:has(.demo-card__link:focus-visible) {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
   .demo-card__shot {
     position: relative;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: var(--demo-shot-aspect);
     overflow: hidden;
     /* Shows through while the screenshot is still loading, and behind a
        capture whose own background is transparent. */
@@ -175,12 +260,74 @@ const previewAlt =
     transform: scale(1.03);
   }
 
+  .demo-card__zoom {
+    position: absolute;
+    top: 0.625rem;
+    right: 0.625rem;
+    /* Above the stretched link, which is what makes this button clickable at
+       all — `.demo-card__link::after` covers the entire card underneath. */
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* The shared 44px minimum. */
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 88%, transparent);
+    color: var(--color-black);
+    cursor: pointer;
+    /* Off until the picture is worth a second look — a control permanently
+       parked on the screenshot competes with the screenshot. */
+    opacity: 0;
+    transition:
+      opacity 200ms var(--tds-ease-out),
+      background-color 200ms var(--tds-ease-out);
+  }
+  /* MUST stay, and must stay after the rule above: `display: inline-flex`
+     out-specifies the user agent's `[hidden] { display: none }`, so the
+     attribute the script removes would do nothing without this and the button
+     would sit there before its dialog exists. Same trap as the shelf's
+     arrows. */
+  .demo-card__zoom[hidden] {
+    display: none;
+  }
+  .demo-card:hover .demo-card__zoom,
+  .demo-card:focus-within .demo-card__zoom,
+  .demo-card__zoom:focus-visible {
+    opacity: 1;
+  }
+  .demo-card__zoom:hover {
+    background: var(--color-card);
+  }
+  .demo-card__zoom:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  /* No hover to reveal it on a touch screen, so it is simply always there. */
+  @media (hover: none) {
+    .demo-card__zoom {
+      opacity: 1;
+    }
+  }
+
   .demo-card__body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     flex: 1;
     padding: 1.125rem 1.25rem 1rem;
+  }
+
+  .demo-card__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
 
   .demo-card__head {
@@ -214,6 +361,24 @@ const previewAlt =
   .demo-card:hover .demo-card__title,
   .demo-card:focus-within .demo-card__title {
     color: var(--color-primary);
+  }
+
+  .demo-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* The whole card, made clickable from the title. `inset: 0` lands on the
+     CARD, not on the heading, because the card is the positioned ancestor. */
+  .demo-card__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  /* The ring is drawn around the card instead (see `:has` above); a second one
+     around the heading would put two rings on one control. */
+  .demo-card__link:focus-visible {
+    outline: none;
   }
 
   .demo-card__text {
@@ -271,9 +436,33 @@ const previewAlt =
     }
   }
 
+  /* THE LEAD CARD. Two tracks wide on desktop and nothing at all on a phone,
+     because the same card is one track wide there. See the header note for
+     why the band doubles in WIDTH rather than in height. */
+  @container (min-width: 30rem) {
+    .demo-card {
+      --demo-shot-aspect: 32 / 10;
+    }
+    .demo-card__body {
+      padding: 1.375rem 1.5rem 1.25rem;
+    }
+    .demo-card__title {
+      font-size: 1.625rem;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+    }
+    .demo-card__text {
+      font-size: 0.9375rem;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      max-width: 46ch;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .demo-card__shot img,
-    .demo-card__go svg {
+    .demo-card__go svg,
+    .demo-card__zoom {
       transition: none;
     }
     .demo-card:hover .demo-card__shot img,

@@ -2,6 +2,8 @@ import { motion } from "motion/react";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ease } from "@tracht-digital-solutions/tds-shared/motion";
 import { splitEmphasis } from "~/lib/emphasis";
+import HeroShowcaseSlider from "./HeroShowcaseSlider";
+import type { HeroSlide } from "~/lib/heroSlides";
 
 /**
  * Inline mirror of `src/components/ui/AccentLetters.astro` for use
@@ -154,9 +156,24 @@ export type HeroContent = Partial<{
 export default function Hero({
   lang = "de",
   hero,
+  slides = [],
 }: {
   lang?: Lang;
   hero?: HeroContent;
+  /**
+   * The reference cases and live demos, resolved on the server
+   * (`lib/heroSlides.ts`).
+   *
+   * Defaulted to empty rather than required: with no slides the hero renders
+   * exactly as it did before this existed — one column, no second grid track,
+   * no empty box where a card would be. That is also what a page that has not
+   * been taught to pass them gets, which is a better failure than a crash.
+   *
+   * Empty is a REAL state here, not just an un-wired page: every demo can fail
+   * its availability check at once, and a case can be withdrawn. The hero has
+   * to keep working on a day when there is nothing to show.
+   */
+  slides?: HeroSlide[];
 }) {
   const t = translations[lang];
   // Merge the edited block over the shared default so any missing field
@@ -225,13 +242,11 @@ export default function Hero({
             height: "30rem",
           }}
         />
-        {/* Stark gerundetes Rechteck als reine Kontur — a drawn frame
-            rather than a second filled mass. Hidden below `lg` because
-            at tablet width it lands in the copy column. */}
-        <span
-          className="tds-shape tds-shape--rect tds-shape--outline tds-shape--navy hidden lg:block"
-          style={{ top: "16%", right: "6%", width: "13rem", height: "22rem" }}
-        />
+        {/* Das stark gerundete Konturrechteck stand hier — `top: 16%, right:
+            6%, 13rem × 22rem`, also genau dort, wo jetzt der Slider steht. Es
+            war ein GEZEICHNETER Rahmen an der Stelle, an der die Seite nun
+            einen echten hat; beides übereinander wären zwei Rahmen um eine
+            Karte. Es kommt nicht zurück, solange der Slider dort steht. */}
         {/* Der eine diagonale Anschnitt — the logomark reference. One
             per screen, never across the content. */}
         <span
@@ -249,10 +264,25 @@ export default function Hero({
             opacity: 0.9,
           }}
         />
-        <CircuitRun className="hidden md:block bottom-[8%] right-[12%] w-[20rem] h-[10.6rem]" />
+        {/* Nach links unten gewandert. Rechts lief die Leitung ab `md` hinter
+            der Sliderkarte durch und war zur Hälfte verdeckt — eine Leitung,
+            die hinter einer Fläche verschwindet, liest sich als Fehler und
+            nicht als Anschnitt. Links steht sie unter der Copy-Spalte, wo der
+            Textblock oberhalb endet. */}
+        <CircuitRun className="hidden md:block bottom-[6%] left-[6%] w-[20rem] h-[10.6rem]" />
       </div>
 
       <div className="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 py-8 md:py-12 w-full text-center md:text-left">
+        {/* Zwei Spalten ab `lg`: links die Aussage, rechts der Beleg. Darunter
+            EINE Spalte, in der der Slider unter den CTAs steht — nebeneinander
+            wäre auf 375px keine Spalte mehr, sondern zwei Streifen.
+
+            `minmax(0, 1fr)` und nicht `1fr`: eine Grid-Spur hat `min-width:
+            auto`, und die Headline mit `opsz 144` ist breiter als ihr
+            Container, sobald das Fenster schmal wird — die Spur würde
+            mitwachsen und die Seite waagerecht überlaufen lassen. */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,26rem)] lg:items-center lg:gap-14">
+          <div>
         {/* Das Motto führt. Es stand vorher als DRITTE von vier Zeilen —
             zwischen einer Tagline und dem Untertext, die beide dasselbe
             noch einmal sagten. Die Tagline ist entfallen, das Motto ist
@@ -324,6 +354,17 @@ export default function Hero({
             {h.cta2}
           </button>
         </motion.div>
+          </div>
+
+          {/* Rendered only when the page passed slides. An empty second grid
+              track would still take its `minmax` minimum and pull the copy off
+              centre for a card that is not there. */}
+          {slides.length > 0 && (
+            <motion.div {...fadeUp(0.2)} className="mt-6 lg:mt-0">
+              <HeroShowcaseSlider lang={lang} slides={slides} />
+            </motion.div>
+          )}
+        </div>
       </div>
 
       <motion.button

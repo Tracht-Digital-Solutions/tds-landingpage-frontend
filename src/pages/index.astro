@@ -26,11 +26,20 @@ import { resolveLang, tFor } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
+import { getHeroSlides } from "~/lib/heroSlides";
 
 const lang = resolveLang(Astro.currentLocale);
 
 // Hero copy is editable over the API; the island gets the resolved block.
 const hero = await cmsFor("home_hero", lang, getHomeContent(lang).hero);
+
+// The hero's slider: reference cases and live demos. Resolved HERE rather
+// than inside the island so the case catalogue, the demo snapshot and their
+// availability probes stay on the server — see `lib/heroSlides.ts`. It
+// shares this render's memoised probes with `Showcase.astro` further down,
+// which is also what stops the hero from advertising a demo the shelf has
+// already dropped.
+const heroSlides = await getHeroSlides(lang);
 
 // Home gets the canonical entity graph — Organization, Person (founder),
 // and WebSite all live here. Subpages reference them by @id rather than
@@ -84,7 +93,7 @@ const titles = {
 >
   <Header />
   <main id="main">
-    <Hero client:load lang={lang} hero={hero} />
+    <Hero client:load lang={lang} hero={hero} slides={heroSlides} />
     <About />
     <Services />
     <Showcase />

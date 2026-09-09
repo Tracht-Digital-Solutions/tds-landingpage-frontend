@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-03T04:45:57.732Z",
+  "generatedAt": "2026-09-09T06:14:51.082Z",
   "demos": {
     "demo1": {
       "status": "ok",
@@ -10,29 +10,29 @@
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-03T04:45:54.014Z"
+      "checkedAt": "2026-09-09T06:14:39.047Z"
     },
     "demo2": {
-      "status": "tls-invalid",
-      "title": null,
-      "description": null,
-      "siteLang": null,
-      "favicon": null,
-      "preview": null,
-      "previewWidth": null,
-      "previewHeight": null,
-      "checkedAt": "2026-09-03T04:45:54.102Z"
+      "status": "ok",
+      "title": "Dein Rhythmus. Deine Regeln. — BLOCK/01",
+      "description": "Streetwear für deinen eigenen Rhythmus. Entdecke BLOCK/01, die interaktive Shop-Arbeitsprobe von Tracht Digital Solutions.",
+      "siteLang": "de",
+      "favicon": "/demos/demo2-favicon.svg",
+      "preview": "/demos/demo2.webp",
+      "previewWidth": 1440,
+      "previewHeight": 900,
+      "checkedAt": "2026-09-09T06:14:39.265Z"
     },
     "demo3": {
-      "status": "tls-invalid",
-      "title": null,
-      "description": null,
-      "siteLang": null,
-      "favicon": null,
-      "preview": null,
-      "previewWidth": null,
-      "previewHeight": null,
-      "checkedAt": "2026-09-03T04:45:54.210Z"
+      "status": "ok",
+      "title": "Immobilienverwaltung — Nordstern Immobilien",
+      "description": "Interaktives Immobilien-Verwaltungspanel mit Beispieldaten",
+      "siteLang": "de",
+      "favicon": "/demos/demo3-favicon.ico",
+      "preview": "/demos/demo3.webp",
+      "previewWidth": 1440,
+      "previewHeight": 900,
+      "checkedAt": "2026-09-09T06:14:39.495Z"
     },
     "demo4": {
       "status": "tls-invalid",
@@ -43,7 +43,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-03T04:45:54.314Z"
+      "checkedAt": "2026-09-09T06:14:39.582Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,18 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-03T04:45:54.405Z"
+      "checkedAt": "2026-09-09T06:14:39.656Z"
+    },
+    "shop": {
+      "status": "ok",
+      "title": "TDShop",
+      "description": "Kuratierte Technik für Digitalisierung im Betrieb: Hardware, Netzwerk und Software mit eigener Einschätzung statt Herstellertext.",
+      "siteLang": "de",
+      "favicon": null,
+      "preview": "/demos/shop.webp",
+      "previewWidth": 1440,
+      "previewHeight": 900,
+      "checkedAt": "2026-09-09T06:14:40.279Z"
     }
   }
 }
