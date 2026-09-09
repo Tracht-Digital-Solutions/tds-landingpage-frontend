@@ -5,6 +5,8 @@ import Footer from "~/components/Footer.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import WebsiteDemos from "~/components/sections/WebsiteDemos.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
+import CardActions from "~/components/ui/CardActions.astro";
+import type { CardAction } from "~/lib/cardActions";
 import { breadcrumbSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
@@ -47,9 +49,8 @@ const ui = lang === "de"
       referenceResult: "Ergebnis",
       referenceMetric: "Belegbare Kennzahl",
       referencePreviewAlt: (title: string) => `Startseite der Webseite: ${title}`,
-      referenceArticle: "Der Artikel dazu im Journal",
+      referenceArticle: "Mehr erfahren",
       referenceSite: "Die Webseite ansehen",
-      referenceNewTab: "öffnet in neuem Tab",
     }
   : {
       breadcrumb: "Breadcrumb",
@@ -57,10 +58,36 @@ const ui = lang === "de"
       referenceResult: "Outcome",
       referenceMetric: "Verifiable metric",
       referencePreviewAlt: (title: string) => `Home page of the website: ${title}`,
-      referenceArticle: "The article on this in the Journal",
+      referenceArticle: "Learn more",
       referenceSite: "View the website",
-      referenceNewTab: "opens in a new tab",
     };
+
+/**
+ * The one destination a reference card on this page offers, or none.
+ *
+ * Same order as `ui/ReferenceCard.astro`: the journal article is the fuller
+ * story and wins when there is one, otherwise the customer's own site. A case
+ * with neither renders a bar with nothing in it rather than a dead button —
+ * `ServiceReference` carries no service link here, because this IS that
+ * service's page.
+ */
+const referenceCta = (reference: {
+  title: string;
+  articleUrl?: string;
+  siteUrl?: string;
+}): CardAction | null =>
+  reference.articleUrl
+    ? { href: reference.articleUrl, label: ui.referenceArticle, detail: reference.title }
+    : reference.siteUrl
+      ? {
+          href: reference.siteUrl,
+          label: ui.referenceSite,
+          external: true,
+          // Hardcoded: the one named case today is a German-only site.
+          hreflang: "de",
+          detail: reference.title,
+        }
+      : null;
 
 // Every service carries a rate now — Complete IT was the one that did not,
 // and `getServiceRate` is total since it went. No conditional left to write.
@@ -400,8 +427,12 @@ const jsonLd = [
           {/* See References.astro: cards size to their own content, because
               only some of them carry a preview band. */}
           <div class="grid lg:grid-cols-2 items-start gap-5 md:gap-6">
+            {/* `relative` on the card is not decoration: the footer bar's call
+                to action stretches a `::after` over the whole card, and
+                without a positioned ancestor it would spread over the
+                section. */}
             {content.references.map((reference) => (
-              <article class="reference-card bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] overflow-hidden flex flex-col">
+              <article class="reference-card relative bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] overflow-hidden flex flex-col">
                 {/* See References.astro: a committed screenshot, never an
                     iframe. Keyed by the site address because a rendered
                     reference carries no case id. */}
@@ -438,53 +469,14 @@ const jsonLd = [
                   </p>
                 )}
 
-                {/* Both links are present only when the committed case carries
-                    them — the CMS cannot put a destination here (see
-                    `ServiceReference.articleUrl` and `.siteUrl`). The row
-                    replaces the article link's own `mt-8`: two links needed a
-                    wrapper that wraps rather than a second inline-block. */}
-                {(reference.articleUrl || reference.siteUrl) && (
-                  <div class="mt-auto pt-8 flex flex-wrap gap-x-8 gap-y-3">
-                    {reference.articleUrl && (
-                      <a
-                        href={reference.articleUrl}
-                        class="link-underline text-[var(--color-accent)]"
-                      >
-                        {ui.referenceArticle}
-                        <span aria-hidden="true"> →</span>
-                      </a>
-                    )}
-                    {/* Outward arrow, not "→": this one leaves the site.
-                        `hreflang` hardcoded — see `References.astro`. */}
-                    {reference.siteUrl && (
-                      <a
-                        href={reference.siteUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        hreflang="de"
-                        class="link-underline inline-flex items-center gap-1.5 text-[var(--color-accent)]"
-                      >
-                        {ui.referenceSite}
-                        <span class="sr-only"> ({ui.referenceNewTab})</span>
-                        <svg
-                          aria-hidden="true"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.75"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                          <line x1="7" y1="17" x2="17" y2="7"></line>
-                          <polyline points="7 7 17 7 17 17"></polyline>
-                        </svg>
-                      </a>
-                    )}
-                  </div>
-                )}
                 </div>
+
+                {/* The same footer bar as the shelf's cards, and it carries NO
+                    service link: this card is already on that service's page.
+                    The destination is present only when the committed case
+                    carries one — the CMS cannot put one here (see
+                    `ServiceReference.articleUrl` and `.siteUrl`). */}
+                <CardActions lang={lang} cta={referenceCta(reference)} />
               </article>
             ))}
           </div>

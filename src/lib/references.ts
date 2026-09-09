@@ -135,12 +135,14 @@ export const referenceCases: readonly ReferenceCase[] = [
     // The canonical origin. `www.` answers with a 301 to exactly this, and
     // linking at a redirect spends a round trip on every visitor who clicks.
     siteUrl: "https://hof-meerheck.de/",
-    // FALSE until the customer has been asked about the screenshot itself.
-    // They approved being named and linked; reproducing their site as a
-    // picture on this page is a second thing to approve, and deciding it
-    // from the first would decide it for them. Flip to true once asked —
-    // `npm run references:sync` then captures the shot.
-    previewAllowed: false,
+    // The customer was asked about the screenshot itself and approved it. It
+    // was a second question on purpose: being named and linked is one
+    // permission, having your site reproduced as a picture on someone else's
+    // page is another, and inferring the second from the first would have
+    // decided it for them. Withdrawing it is one boolean — set this back to
+    // `false` and the picture stops rendering immediately, before
+    // `npm run references:sync` has even deleted the asset.
+    previewAllowed: true,
     content: {
       de: {
         title: "Eine bestehende Webseite, wieder auf dem Stand",

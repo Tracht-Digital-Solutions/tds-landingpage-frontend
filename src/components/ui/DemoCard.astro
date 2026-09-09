@@ -20,12 +20,19 @@
  *
  * It was, and the magnifier is why it stopped being one: a `<button>` inside
  * an `<a>` is invalid, and no amount of `preventDefault` makes it valid. The
- * card is a plain element now, the TITLE carries the link, and the link
- * stretches over the whole card with a `::after`. The full-card hit area, the
- * hover response and the focus ring all survive that swap — they are the
- * invariant, not the tag that used to provide them. The magnifier then sits
- * above the stretched layer on `z-index`, which is exactly the layering the
- * pattern exists for.
+ * card is a plain element now, and the link lives in `ui/CardActions.astro` at
+ * the bottom, stretching over the whole card with a `::after`. The full-card
+ * hit area, the hover response and the focus ring all survive that swap — they
+ * are the invariant, not the tag that used to provide them. The magnifier then
+ * sits above the stretched layer on `z-index`, which is exactly the layering
+ * the pattern exists for.
+ *
+ * The link moved off the TITLE and into the bar when the card gained a second
+ * destination. A card with two links must not also have a third anchor saying
+ * the same thing as one of them: a screen reader would read the demo out twice
+ * and the visitor would be offered a choice that is not one. The title is
+ * plain text now and the bar holds exactly two links — the service this demo
+ * is evidence for, and the demo itself.
  *
  * ### Why the sizes are container queries, not a `featured` prop
  *
@@ -46,13 +53,25 @@
 import type { Lang } from "~/lib/i18n";
 import { DEMO_KINDS } from "~/lib/demoCatalog";
 import { demoUi, type ResolvedDemo } from "~/lib/demos";
+import type { CardAction } from "~/lib/cardActions";
+import CardActions from "~/components/ui/CardActions.astro";
 
 interface Props {
   demo: ResolvedDemo;
   lang: Lang;
+  /**
+   * The service page this demo is evidence for, handed in by the section.
+   *
+   * A prop rather than a field on `demoCatalog.ts`, which has no imports and
+   * must keep none — and rather than a lookup here, because the answer depends
+   * on WHERE the card is rendered: on the Webauftritt page the demos already
+   * sit on their service, and `null` is what stops a link back to the page the
+   * visitor is standing on.
+   */
+  serviceLink?: CardAction | null;
 }
 
-const { demo, lang } = Astro.props;
+const { demo, lang, serviceLink = null } = Astro.props;
 const ui = demoUi[lang];
 
 const { definition, title, description, favicon, preview, previewWidth, previewHeight } = demo;
@@ -141,50 +160,39 @@ const kind = DEMO_KINDS[definition.kind][lang];
             decoding="async"
           />
         )}
-        <h3 class="demo-card__title">
-          <a
-            class="demo-card__link"
-            href={definition.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            hreflang={demo.siteLang ?? undefined}
-          >
-            {title}
-            {/* The link's accessible name is the demo's title, which says
-                nothing about what following it does. The rest of the sentence
-                is added here rather than left to the visual label below: that
-                label is now decoration beside a link, not the link itself. */}
-            <span class="sr-only"> — {ui.visit} ({ui.newTab})</span>
-          </a>
-        </h3>
+        {/* PLAIN TEXT, not a link. The demo's one destination is the call to
+            action in the bar below, and its stretched layer already makes this
+            heading part of that hit area. A second anchor here would announce
+            the same demo twice. */}
+        <h3 class="demo-card__title">{title}</h3>
       </div>
 
       {description && <p class="demo-card__text">{description}</p>}
 
-      <div class="demo-card__foot">
-        <span class="demo-card__host">{definition.host}</span>
-        {/* Hidden from assistive tech: the link above already carries these
-            words in its accessible name, and announcing them twice would
-            offer a second thing to click that is not a thing at all. */}
-        <span class="demo-card__go" aria-hidden="true">
-          {ui.visit}
-          <svg
-            aria-hidden="true"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="7" y1="17" x2="17" y2="7"></line>
-            <polyline points="7 7 17 7 17 17"></polyline>
-          </svg>
-        </span>
-      </div>
+      {/* The address, as a caption. Pinned to the bottom of the BODY so it sits
+          directly on the bar across a row whose descriptions are different
+          lengths. It is not a link: it names the host the call to action leads
+          to, which is a fact about the card, not a second way to leave. */}
+      <p class="demo-card__host">
+        <span class="sr-only">{ui.hostLabel}: </span>
+        {definition.host}
+      </p>
     </div>
+
+    <CardActions
+      lang={lang}
+      service={serviceLink}
+      cta={{
+        href: definition.url,
+        label: ui.visit,
+        external: true,
+        hreflang: demo.siteLang ?? undefined,
+        // The bar's link is the card's link, so its accessible name has to say
+        // which demo it opens — "Demo ansehen" alone would read identically on
+        // every card in the shelf.
+        detail: title,
+      }}
+    />
   </div>
 </article>
 
@@ -225,13 +233,11 @@ const kind = DEMO_KINDS[definition.kind][lang];
     background: var(--demo-card-bg-hover);
   }
   /* The ring used to come from the card being the focusable element. It is a
-     plain box now, so it is drawn for it when the link inside takes focus —
-     the ring belongs around the whole hit area, not around two lines of
-     heading in the middle of it. */
-  .demo-card:has(.demo-card__link:focus-visible) {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
-  }
+     plain box now, and the ring is drawn for it when the bar's call to action
+     takes focus — that link's stretched layer IS this card's hit area. The
+     rule itself lives in `ui/CardActions.astro`, in the one global block that
+     file keeps: the selector needs both this card's class and another
+     component's, and an Astro scoped style can only ever name its own. */
 
   .demo-card__shot {
     position: relative;
@@ -265,7 +271,7 @@ const kind = DEMO_KINDS[definition.kind][lang];
     top: 0.625rem;
     right: 0.625rem;
     /* Above the stretched link, which is what makes this button clickable at
-       all — `.demo-card__link::after` covers the entire card underneath. */
+       all — the bar's stretched `::after` covers the entire card. */
     z-index: 1;
     display: inline-flex;
     align-items: center;
@@ -363,24 +369,6 @@ const kind = DEMO_KINDS[definition.kind][lang];
     color: var(--color-primary);
   }
 
-  .demo-card__link {
-    color: inherit;
-    text-decoration: none;
-  }
-  /* The whole card, made clickable from the title. `inset: 0` lands on the
-     CARD, not on the heading, because the card is the positioned ancestor. */
-  .demo-card__link::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  /* The ring is drawn around the card instead (see `:has` above); a second one
-     around the heading would put two rings on one control. */
-  .demo-card__link:focus-visible {
-    outline: none;
-  }
-
   .demo-card__text {
     margin: 0;
     font-size: 0.875rem;
@@ -393,47 +381,17 @@ const kind = DEMO_KINDS[definition.kind][lang];
     overflow: hidden;
   }
 
-  .demo-card__foot {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.75rem;
-    /* Pinned to the bottom so the addresses line up across a row whose
-       descriptions are different lengths. */
+  .demo-card__host {
+    margin: 0;
+    /* Pinned to the bottom of the body so the addresses line up across a row
+       whose descriptions are different lengths — the bar underneath then lands
+       on one line too. */
     margin-top: auto;
     padding-top: 0.75rem;
-  }
-  .demo-card__host {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--color-muted);
     overflow-wrap: anywhere;
-  }
-  .demo-card__go {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    flex: none;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    white-space: nowrap;
-  }
-  .demo-card__go svg {
-    transition: transform 200ms var(--tds-ease-out);
-  }
-  .demo-card:hover .demo-card__go svg,
-  .demo-card:focus-within .demo-card__go svg {
-    transform: translate(2px, -2px);
-  }
-
-  /* A narrow card cannot carry the address and the label side by side. */
-  @container (max-width: 20rem) {
-    .demo-card__foot {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.35rem;
-    }
   }
 
   /* THE LEAD CARD. Two tracks wide on desktop and nothing at all on a phone,
@@ -461,14 +419,11 @@ const kind = DEMO_KINDS[definition.kind][lang];
 
   @media (prefers-reduced-motion: reduce) {
     .demo-card__shot img,
-    .demo-card__go svg,
     .demo-card__zoom {
       transition: none;
     }
     .demo-card:hover .demo-card__shot img,
-    .demo-card:focus-within .demo-card__shot img,
-    .demo-card:hover .demo-card__go svg,
-    .demo-card:focus-within .demo-card__go svg {
+    .demo-card:focus-within .demo-card__shot img {
       transform: none;
     }
   }

@@ -154,15 +154,17 @@ export function toReferenceSlide(
  *
  * The same decision `Showcase.astro` makes about its lead card, for the same
  * reason and deliberately not a second ordering rule. Cases come before demos
- * because a delivered project is the stronger claim — but every case is
- * currently `previewAllowed: false`, so without this the hero opens on a
- * paragraph of text while the one slide that SHOWS a built page waits six
- * seconds off-screen. A visitor who came to see what this does should not have
- * to wait for it.
+ * because a delivered project is the stronger claim — but a case without an
+ * approved screenshot is a paragraph of text, and without this the hero would
+ * open on one while the slide that SHOWS a built page waits six seconds
+ * off-screen. A visitor who came to see what this does should not have to wait
+ * for it.
  *
  * The hoist is for a property a slide either has or does not have, never for
- * being a demo: the day a case ships with an approved screenshot, that case
- * leads and nothing here changes.
+ * being a demo. It was written when every case was `previewAllowed: false` and
+ * a demo was the only slide with a picture; `hof-meerheck` has since been
+ * cleared for a screenshot and now leads, without a line here changing. That
+ * is the rule working, not an exception to it.
  */
 export function leadWithPicture(slides: readonly HeroSlide[]): HeroSlide[] {
   const index = slides.findIndex((slide) => slide.image !== null);
