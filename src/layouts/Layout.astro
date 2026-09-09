@@ -16,11 +16,11 @@ import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import CustomCursor from "~/components/islands/CustomCursor.tsx";
 import FloatingCta from "~/components/FloatingCta.astro";
 import JsonLd from "~/components/JsonLd.astro";
-import { CookieNotice, LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
+import { LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
+import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
 import { themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
 import { siteConfig } from "~/lib/seo";
 import { isExcluded } from "~/lib/sitemap";
-import { cookieBannerEnabled } from "~/lib/cms";
 
 interface Props {
   title: string;
@@ -82,10 +82,26 @@ const enAltUrl = alternates
   ? absoluteUrl(alternates.en)
   : new URL(neutralPath === "/" ? "/en/" : `/en${neutralPath}`, site).toString();
 
-// Admin-toggleable cookie banner — the `cookie_banner` content block is
-// resolved at build time (baked, like every other CMS block; toggling it
-// in tds-admin fires a rebuild). Off when absent / demo / API down.
-const showCookieNotice = !bare && (await cookieBannerEnabled());
+/**
+ * The privacy notice, on every page that is not `bare`.
+ *
+ * It used to hang off `cookieBannerEnabled()` — a `cookie_banner` CMS block,
+ * baked at build time and **off when absent, in demo mode, or with the API
+ * down**. Three ways for the disclosure of what this site stores to be missing
+ * for reasons that have nothing to do with what it stores, and the default of
+ * the three was "missing".
+ *
+ * That gate is gone. Whether a visitor is told what is kept on their device is
+ * not a content decision, and it is not one an unreachable API should make. The
+ * same reasoning removed the equivalent gate on the journal and the tools site.
+ *
+ * No `categories`: this site sets nothing optional — no analytics, no
+ * advertising, no embeds — so the banner states that fact and offers one
+ * acknowledgement rather than soliciting a consent nobody needs. The day
+ * something optional ships, adding it here turns the same component into a real
+ * gate.
+ */
+const showCookieNotice = !bare;
 ---
 
 <!DOCTYPE html>
@@ -181,7 +197,12 @@ const showCookieNotice = !bare && (await cookieBannerEnabled());
     <slot />
     {!bare && <FloatingCta />}
     {showCookieNotice && (
-      <CookieNotice client:idle lang={lang} privacyUrl="/legal/datenschutz" />
+      <ConsentBanner
+        client:idle
+        lang={lang}
+        privacyUrl="/legal/datenschutz"
+        imprintUrl="/legal/impressum"
+      />
     )}
     {/* Floating support widget — self-hides unless the live-chat-cta extension
         enables the "landingpage" frontend in the admin.

@@ -1,4 +1,6 @@
 ---
+import { ConsentLink } from "@tracht-digital-solutions/tds-shared/consent";
+
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { legalCopy } from "~/lib/legal";
@@ -96,6 +98,12 @@ const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
         <a href="/legal/impressum" class="hover:text-white">{footer.impressum}</a>
         <a href="/legal/datenschutz" class="hover:text-white">{footer.datenschutz}</a>
         <a href={agbHref} class="hover:text-white">{legalCopy[lang].agbShort}</a>
+        {/* Not a page — it reopens the privacy settings on this one. Art. 7
+            Abs. 3 DSGVO wants withdrawing a consent to be as easy as giving
+            it, and a notice that appears once leaves no route back without
+            this. It belongs in this row because this row is where a reader
+            already looks for exactly that kind of thing. */}
+        <ConsentLink client:idle lang={lang} className="hover:text-white" />
       </div>
     </div>
   </div>
