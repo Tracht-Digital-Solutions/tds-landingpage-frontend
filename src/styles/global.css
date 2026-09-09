@@ -320,6 +320,11 @@ html {
   display: grid;
   /* One cell. Every panel is placed into it below. */
   grid-template-areas: "slide";
+  /* `minmax(0, 1fr)`, never a bare `1fr` or an implicit `auto`: the automatic
+     minimum of a grid track is min-content, so the track grew to whatever the
+     widest panel could not break below and the panels overhung the stage. See
+     the note on `.hero-slider__panel`. */
+  grid-template-columns: minmax(0, 1fr);
   background: color-mix(in srgb, var(--color-card) 92%, transparent);
   border-radius: 6px;
   overflow: hidden;
@@ -334,6 +339,24 @@ html {
   grid-area: slide;
   display: flex;
   flex-direction: column;
+  /* THE fix for the phone view, and it took two goes to find.
+
+     A grid item's automatic minimum size is its MIN-CONTENT size, exactly like
+     a flex item's. Below `lg` this panel is a row — a 7rem thumbnail plus a
+     copy column — and its min-content is therefore the thumbnail plus the
+     longest unbreakable word. At 320px that came to 340px inside a 272px
+     stage: the panel hung 68px over its own card, and at 360px 28px.
+
+     None of it was visible. `.hero-slider__stage` clips, so the copy was not
+     pushed out of the layout, it was cut off mid-word — which reads as a
+     sentence that simply ends. 320 and 360 are two of the commonest phone
+     widths in the wild.
+
+     Both floors have to go, and fixing only one changes nothing: this element
+     is a grid item (of the stage) AND a flex container whose own copy column
+     is a flex item. Hence `min-width: 0` here, `minmax(0, 1fr)` on the track
+     above, and `min-width: 0` on `.hero-slider__body`. */
+  min-width: 0;
   opacity: 0;
   visibility: hidden;
   transform: translateX(var(--hero-slide-from));
@@ -373,6 +396,11 @@ html {
   flex-direction: column;
   gap: 0.5rem;
   padding: 1.125rem 1.25rem 1.25rem;
+  /* The third of the three min-content floors between the stage and this text
+     — see the note on `.hero-slider__panel`. Below `lg` this is the flex item
+     beside the thumbnail, and a flex item will not go narrower than its own
+     min-content unless told to. */
+  min-width: 0;
 }
 
 /* The line above the title. A demo carries the genre etiquette from the
@@ -403,6 +431,12 @@ html {
   line-height: 1.15;
   letter-spacing: -0.015em;
   color: var(--color-black);
+  /* A demo's title is the demo's own and can be one long German compound
+     ("Immobilienverwaltung"). In a 160px column that word is wider than the
+     column, and without a break opportunity it sets the minimum the `min-width`
+     above exists to defeat. `anywhere` rather than `break-word` so it counts
+     during the min-content calculation, which is the whole point here. */
+  overflow-wrap: anywhere;
 }
 
 .hero-slider__text {
@@ -477,6 +511,14 @@ html {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* `flex: none` is the fix, not the decoration. These sit in a flex row with
+     one 44px dot per slide, and with six slides that row wants more width than
+     a phone has. A flex item shrinks by default, so the two arrows — the only
+     items in the row that could give — were squeezed to EIGHTEEN pixels wide
+     at 320, 360 and 390px, i.e. on every common phone. A round button rendered
+     as a half-width oval, under half the minimum touch target, and nothing
+     reported it because a squashed flex item is not an error. */
+  flex: none;
   width: 2.25rem;
   height: 2.25rem;
   border: none;
@@ -487,6 +529,27 @@ html {
   transition:
     background-color 200ms var(--tds-ease-out),
     color 200ms var(--tds-ease-out);
+}
+
+/* THE ARROWS ARE A POINTER AFFORDANCE, exactly as on the showcase shelf.
+
+   The stage handles a horizontal drag itself (see `onPointerUp` in
+   `HeroShowcaseSlider.tsx`), so on a touch screen the arrows offer a smaller,
+   slower version of the gesture the visitor is already making — while taking
+   the width that the dots need to stay at their full size. They are hidden
+   there and the dots remain, so the slider can still be navigated by tapping
+   as well as by swiping.
+
+   `hover: hover` AND `pointer: fine`, never a width query: the question is
+   whether there is a pointer at all, and a laptop with both a touchscreen and
+   a mouse must keep them. */
+.hero-slider__arrow {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero-slider__arrow {
+    display: inline-flex;
+  }
 }
 .hero-slider__arrow:hover,
 .hero-slider__toggle:hover {
@@ -504,6 +567,9 @@ html {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  /* The dots are what must survive a narrow row — they are the only navigation
+     left once the arrows step aside on touch. Never allowed to shrink. */
+  flex: none;
 }
 .hero-slider__dot {
   /* The dot is 8px; the button around it is 44px of transparent padding, so
@@ -511,6 +577,7 @@ html {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: 2.75rem;
   height: 2.75rem;
   padding: 0;
@@ -573,9 +640,29 @@ html {
     justify-content: center;
     gap: 0.3rem;
     padding: 0.8rem 0.95rem;
+    /* The hero body is `text-center md:text-left`, and below `md` that
+       centring reached in here — so a card that is a left-anchored ROW, with a
+       hard thumbnail edge down one side, had its eyebrow, title and summary
+       ragged on BOTH sides against it. Centred copy is right for the headline
+       above; it is wrong for a horizontal card, which reads along its edge.
+       `start`, not `left`, so it follows the writing direction. */
+    text-align: start;
   }
   .hero-slider__title {
     font-size: 1.0625rem;
+    /* Two lines, then it stops.
+     *
+     * Needed as soon as the copy column was allowed to be narrow enough to
+     * wrap properly: a demo's title is its own and can be a sentence, and in a
+     * 130px column at 320px it ran to four lines and took the whole hero with
+     * it. It was invisible before only because the panel was overhanging its
+     * card and the surplus was being clipped — the text was never short, it
+     * was cut. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .hero-slider__text {
     font-size: 0.8125rem;
@@ -592,6 +679,19 @@ html {
   .hero-slider__controls {
     min-height: 2.5rem;
     margin-top: 0.5rem;
+    /* A safety net, not a layout: with the arrows gone the row is dots plus
+       the pause button, which fits. It would stop fitting the day a seventh
+       slide is published, and now that nothing in the row shrinks any more the
+       overflow would be the DOCUMENT's. Wrapping is the graceful end of that
+       road; a squashed control is not. */
+    flex-wrap: wrap;
+  }
+  .hero-slider__dot {
+    /* Narrower, NOT shorter. The vertical target stays the full 2.75rem and
+       the 0.4rem gap adds spacing on either side, so the tap area stays well
+       clear of the 24px floor while six of them fit across a 320px phone.
+       Six 44px dots plus a pause button want 296px; the slider has 272. */
+    width: 2rem;
   }
 }
 
