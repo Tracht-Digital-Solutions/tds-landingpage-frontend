@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-09T06:14:51.082Z",
+  "generatedAt": "2026-09-09T18:29:18.209Z",
   "demos": {
     "demo1": {
       "status": "ok",
@@ -10,7 +10,7 @@
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T06:14:39.047Z"
+      "checkedAt": "2026-09-09T18:29:06.891Z"
     },
     "demo2": {
       "status": "ok",
@@ -21,7 +21,7 @@
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T06:14:39.265Z"
+      "checkedAt": "2026-09-09T18:29:07.128Z"
     },
     "demo3": {
       "status": "ok",
@@ -32,7 +32,7 @@
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T06:14:39.495Z"
+      "checkedAt": "2026-09-09T18:29:07.434Z"
     },
     "demo4": {
       "status": "tls-invalid",
@@ -43,7 +43,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-09T06:14:39.582Z"
+      "checkedAt": "2026-09-09T18:29:07.522Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,18 +54,18 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-09T06:14:39.656Z"
+      "checkedAt": "2026-09-09T18:29:07.637Z"
     },
     "shop": {
       "status": "ok",
       "title": "TDShop",
       "description": "Kuratierte Technik für Digitalisierung im Betrieb: Hardware, Netzwerk und Software mit eigener Einschätzung statt Herstellertext.",
       "siteLang": "de",
-      "favicon": null,
+      "favicon": "/demos/shop-favicon.png",
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T06:14:40.279Z"
+      "checkedAt": "2026-09-09T18:29:07.904Z"
     }
   }
 }

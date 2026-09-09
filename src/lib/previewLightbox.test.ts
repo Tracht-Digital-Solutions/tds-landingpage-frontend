@@ -20,6 +20,18 @@ const lightbox = readFileSync(
   resolve(process.cwd(), "src/components/ui/PreviewLightbox.astro"),
   "utf8",
 );
+/**
+ * The card's link lives here now, not on the card.
+ *
+ * It moved when the card gained a second destination: a footer bar with the
+ * service link beside the demo link. The two rules below followed it — what
+ * they guard is the full-card hit area and the ring around it, never the file
+ * one of them happens to be written in.
+ */
+const actions = readFileSync(
+  resolve(process.cwd(), "src/components/ui/CardActions.astro"),
+  "utf8",
+);
 
 describe("the demo card's markup", () => {
   /**
@@ -31,26 +43,49 @@ describe("the demo card's markup", () => {
    * simpler" would look right in the diff and break both controls.
    */
   it("does not nest the magnifier inside an anchor", () => {
-    const anchorStart = card.indexOf("<a\n");
     const zoomStart = card.indexOf('class="demo-card__zoom"');
-    expect(anchorStart, "an anchor").toBeGreaterThan(-1);
+    const actionsStart = card.indexOf("<CardActions");
+    expect(actionsStart, "the footer bar").toBeGreaterThan(-1);
     expect(zoomStart, "the magnifier").toBeGreaterThan(-1);
-    // The magnifier is in the screenshot band, which comes BEFORE the body
-    // that holds the link. Nothing can nest them in that order.
-    expect(zoomStart).toBeLessThan(anchorStart);
+    // The magnifier is in the screenshot band, which comes BEFORE the bar that
+    // holds the links. Nothing can nest them in that order.
+    expect(zoomStart).toBeLessThan(actionsStart);
+    // And the card's own template contributes no anchor to wrap either. Only
+    // the template: the frontmatter above it talks ABOUT `<a>` at length.
+    const template = card.slice(card.indexOf("---", 3) + 3);
+    expect(template).not.toMatch(/<a[\s>]/);
   });
 
   it("keeps the full-card hit area as a stretched link", () => {
-    // The invariant is the hit area, not the tag that used to provide it.
-    expect(card).toMatch(/\.demo-card__link::after\s*\{/);
-    expect(card).toMatch(/inset:\s*0/);
+    // The invariant is the hit area, not the tag or the file that provides it.
+    expect(actions).toMatch(/\.card-actions__cta::after\s*\{/);
+    expect(actions).toMatch(/inset:\s*0/);
+    // `inset: 0` only reaches the card while the card is what it resolves
+    // against. Without this the layer spreads over the whole carousel.
+    expect(card).toMatch(/\.demo-card\s*\{[^}]*position:\s*relative/s);
   });
 
   it("keeps a focus ring on the whole card", () => {
-    // Focus moved to the heading's link, so the ring has to be drawn for the
-    // card from there — without this the ring shrinks to two lines of text in
-    // the middle of a card-sized target.
-    expect(card).toMatch(/\.demo-card:has\(\.demo-card__link:focus-visible\)/);
+    // Focus sits on the bar's call to action, so the ring has to be drawn for
+    // the card from there — without this it shrinks to two words at the bottom
+    // of a card-sized target. The rule is global because it needs a class from
+    // each of the two components, and an Astro scoped style only ever gets its
+    // own appended.
+    expect(actions).toMatch(
+      /:where\([^)]*\.demo-card[^)]*\):has\(\.card-actions__cta:focus-visible\)/,
+    );
+  });
+
+  /**
+   * The service link is not decoration.
+   *
+   * The call to action stretches an absolutely positioned layer over the whole
+   * card. Anything meant to stay clickable underneath it has to be lifted out
+   * of that layer explicitly — and when it is not, nothing errors: the link
+   * renders, hovers, and silently opens the demo instead.
+   */
+  it("lifts the service link above the stretched layer", () => {
+    expect(actions).toMatch(/\.card-actions__service\s*\{[^}]*z-index:\s*1/s);
   });
 
   it("ships the magnifier hidden", () => {

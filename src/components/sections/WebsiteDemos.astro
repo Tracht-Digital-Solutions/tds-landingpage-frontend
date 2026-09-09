@@ -22,6 +22,7 @@ import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { demosCopy, getHomeContent } from "~/lib/homeContent";
 import { getDemos } from "~/lib/demos";
+import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import DemoCard from "~/components/ui/DemoCard.astro";
@@ -43,6 +44,22 @@ const copy = demosCopy(content, demos.length, variant);
 // on a given page today, but naming them apart costs nothing and stops a
 // duplicate id the day both are.
 const headingId = variant === "service" ? "service-demos-heading" : "website-demos-heading";
+
+/**
+ * The service link in each card's footer bar — and `null` in the `service`
+ * variant, deliberately.
+ *
+ * That variant renders on the Webauftritt detail page itself. A card there
+ * pointing at the page it is already on is a dead end, not a shortcut, and it
+ * would be the only link on the page that leads nowhere new.
+ */
+const serviceLink =
+  variant === "service"
+    ? null
+    : (() => {
+        const service = getServiceById("web-presence");
+        return { label: service.fallback[lang].title, href: serviceHref(service, lang) };
+      })();
 ---
 
 {
@@ -69,7 +86,7 @@ const headingId = variant === "service" ? "service-demos-heading" : "website-dem
             empty. */}
         <div class="demo-grid" style={`--demo-count: ${demos.length}`}>
           {demos.map((demo) => (
-            <DemoCard demo={demo} lang={lang} />
+            <DemoCard demo={demo} lang={lang} serviceLink={serviceLink} />
           ))}
         </div>
       </div>

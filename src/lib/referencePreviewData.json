@@ -1,4 +1,12 @@
 {
-  "generatedAt": null,
-  "previews": {}
+  "generatedAt": "2026-09-09T18:28:55.290Z",
+  "previews": {
+    "hof-meerheck": {
+      "status": "ok",
+      "preview": "/references/hof-meerheck.webp",
+      "width": 1440,
+      "height": 900,
+      "capturedAt": "2026-09-09T18:28:55.231Z"
+    }
+  }
 }

@@ -9,26 +9,31 @@
  * same track, and two card families that sit next to each other have to be
  * tuned against each other in one place rather than inside a section body.
  *
- * ### What this card shares with `DemoCard`, and what it does not
+ * ### What this card shares with `DemoCard`
  *
- * Shared, because they are neighbours in the same carousel: the sand fill on
- * the paper ground, the 16:10 screenshot band with its page edge, `height:
- * 100%` so a row of slides ends on one baseline, and the 6px radius.
+ * They are neighbours in the same carousel, so: the sand fill on the paper
+ * ground, the 16:10 screenshot band with its page edge, `height: 100%` so a
+ * row of slides ends on one baseline, the 6px radius, the footer bar from
+ * `ui/CardActions.astro`, and — since a case with an approved screenshot can
+ * now be the shelf's lead card — the container query that widens the band
+ * instead of heightening it.
  *
- * NOT shared: this card is not one big link. A demo card has exactly one
- * destination and can be an `<a>`; a reference case has up to three (the
- * service, the journal article, the customer's own site) and wrapping it would
- * nest links. That is why the picture here does not zoom on hover either —
- * there is no single thing being hovered.
+ * ### The links
+ *
+ * Two, in the bar, like every other card on the shelf: the service this case
+ * belongs to first, and one way to read more about it. A case can name several
+ * services, and the ones the bar does not carry stay above it as badges — see
+ * the note at that markup.
  *
  * Every destination is code-owned (`lib/references.ts`); none of them can come
- * from the CMS, and since the service badges replaced the "Zur passenden
- * Leistung" link, no LABEL on this card is editable either — the two remaining
- * link labels follow the page's locale, the badges name pages this site owns.
+ * from the CMS, and no LABEL on this card is editable either — the link labels
+ * follow the page's locale, the badges name pages this site owns.
  * `references_home.serviceCta` is therefore unrendered; it stays in the CMS
  * schema so an existing panel block keeps loading.
  */
 import type { Lang } from "~/lib/i18n";
+import type { CardAction } from "~/lib/cardActions";
+import CardActions from "~/components/ui/CardActions.astro";
 
 export interface ReferenceCardData {
   id: string;
@@ -52,136 +57,154 @@ interface Props {
 
 const { card, lang } = Astro.props;
 
-// `newTab` duplicates a word `demoUi` already has, deliberately: importing the
-// demo cards' vocabulary here would couple two card families that are kept
-// apart on purpose, for one string.
 const ui =
   lang === "de"
     ? {
         context: "Kontext",
         result: "Ergebnis",
         metric: "Belegbare Kennzahl",
-        article: "Artikel im Journal",
+        article: "Mehr erfahren",
         site: "Webseite ansehen",
-        newTab: "öffnet in neuem Tab",
         previewAlt: (title: string) => `Startseite der Webseite: ${title}`,
       }
     : {
         context: "Context",
         result: "Outcome",
         metric: "Verifiable metric",
-        article: "Article in the Journal",
+        article: "Learn more",
         site: "View the website",
-        newTab: "opens in a new tab",
         previewAlt: (title: string) => `Home page of the website: ${title}`,
       };
+
+/**
+ * The service the bar leads with, and the ones the badges keep.
+ *
+ * The first service is the primary one — the same choice `toReferenceSlide()`
+ * makes for the hero. The rest stay as badges, MINUS the primary: naming it
+ * twice on one card would make the badge row look like the complete answer
+ * while it repeats the link directly under it. A single-service case therefore
+ * has no badge row at all, which is the common case and the quietest card.
+ */
+const [primaryService, ...furtherServices] = card.services;
+
+/**
+ * The one way to read more, in order of how much it actually adds.
+ *
+ * A journal article is the fuller story and wins when there is one. Otherwise
+ * the customer's own site is the thing to look at — and a case with neither
+ * gets no call to action, so its bar carries the service link alone rather
+ * than a button that goes nowhere.
+ */
+const cta: CardAction | null = card.articleHref
+  ? { href: card.articleHref, label: ui.article, detail: card.reference.title }
+  : card.siteHref
+    ? {
+        href: card.siteHref,
+        label: ui.site,
+        external: true,
+        // Hardcoded: the one named case today is a German-only site. A customer
+        // site in another language needs a field on the case, not a guess here.
+        hreflang: "de",
+        detail: card.reference.title,
+      }
+    : null;
 ---
 
-<article class="reference-card" data-reveal>
-  {/* The picture, where the customer allowed one. A screenshot, captured
-      offline by `npm run references:sync` — never an iframe: a live embed of
-      somebody else's site fails on their `X-Frame-Options` with no way to know
-      in advance, and the page cache would then freeze the broken state. */}
-  {card.preview && (
-    <div class="reference-card__shot">
-      <img
-        src={card.preview.src}
-        alt={ui.previewAlt(card.reference.title)}
-        width={card.preview.width}
-        height={card.preview.height}
-        loading="lazy"
-        decoding="async"
-      />
-    </div>
-  )}
-
-  <div class="reference-card__body">
-    <p class="eyebrow text-[var(--color-accent)] mb-3">
-      <span class="sr-only">{ui.context}: </span>
-      {card.reference.context}
-    </p>
-    <h3 class="reference-card__title">{card.reference.title}</h3>
-    {/* Result only. The starting point and the approach are the article's job
-        — repeating them here made every card three labelled paragraphs long,
-        which is not a card. In the carousel it is clamped as well: slides in a
-        flex track all take the height of the tallest one, so a single long
-        outcome would set the height of every demo card beside it. */}
-    <p class="reference-card__result">
-      <span class="sr-only">{ui.result}: </span>
-      {card.reference.result}
-    </p>
-    {card.reference.metric && (
-      <p class="reference-card__metric">
-        <span class="sr-only">{ui.metric}: </span>
-        {card.reference.metric}
-      </p>
+{/* The slot exists for the container query at the bottom of this file — the
+    card asks its own width whether it is the shelf's lead card. `data-reveal`
+    stays on the outer element, which is the one the observer watches. */}
+<article class="reference-card-slot" data-reveal>
+  <div class="reference-card">
+    {/* The picture, where the customer allowed one. A screenshot, captured
+        offline by `npm run references:sync` — never an iframe: a live embed of
+        somebody else's site fails on their `X-Frame-Options` with no way to know
+        in advance, and the page cache would then freeze the broken state. */}
+    {card.preview && (
+      <div class="reference-card__shot">
+        <img
+          src={card.preview.src}
+          alt={ui.previewAlt(card.reference.title)}
+          width={card.preview.width}
+          height={card.preview.height}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
     )}
 
-    {/* The services this case used, as links. They replaced a single
-        "Zur passenden Leistung →" built from the FIRST service, which on the
-        three-service case spoke for two others without naming them.
-
-        `.status-pill` is the shared badge from tds-shared/styles/primitives.css
-        rather than a fourth local pill. It carries `white-space: nowrap`, so
-        the row it sits in MUST wrap — "Individuelle Lösungen" set in caps is
-        wider than a phone column, and `body { overflow-x: hidden }` would clip
-        the overflow rather than show it. */}
-    <ul class="reference-card__services">
-      {card.services.map((service) => (
-        <li>
-          <a href={service.href} class="status-pill status-pill--accent reference-card__service">
-            {service.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    <div class="reference-card__links">
-      {card.articleHref && (
-        <a href={card.articleHref} class="link-underline text-[var(--color-accent)]">
-          {ui.article}
-          <span aria-hidden="true"> →</span>
-        </a>
+    <div class="reference-card__body">
+      <p class="eyebrow text-[var(--color-accent)] mb-3">
+        <span class="sr-only">{ui.context}: </span>
+        {card.reference.context}
+      </p>
+      <h3 class="reference-card__title">{card.reference.title}</h3>
+      {/* Result only. The starting point and the approach are the article's job
+          — repeating them here made every card three labelled paragraphs long,
+          which is not a card. In the carousel it is clamped as well: slides in a
+          flex track all take the height of the tallest one, so a single long
+          outcome would set the height of every demo card beside it. */}
+      <p class="reference-card__result">
+        <span class="sr-only">{ui.result}: </span>
+        {card.reference.result}
+      </p>
+      {card.reference.metric && (
+        <p class="reference-card__metric">
+          <span class="sr-only">{ui.metric}: </span>
+          {card.reference.metric}
+        </p>
       )}
-      {/* Present only on a named case, and only from the committed catalog —
-          the CMS cannot put a customer link here. The outward arrow rather
-          than the internal "→": DemoCard established that mark for a
-          destination that leaves this site, and reusing the internal glyph
-          would disguise it. `hreflang` is hardcoded: the one named case today
-          is a German-only site. A customer site in another language needs a
-          field on the case, not a guess here. */}
-      {card.siteHref && (
-        <a
-          href={card.siteHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          hreflang="de"
-          class="link-underline inline-flex items-center gap-1.5 text-[var(--color-accent)]"
-        >
-          {ui.site}
-          <span class="sr-only"> ({ui.newTab})</span>
-          <svg
-            aria-hidden="true"
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="7" y1="17" x2="17" y2="7"></line>
-            <polyline points="7 7 17 7 17 17"></polyline>
-          </svg>
-        </a>
+
+      {/* The services this case used BEYOND the one the bar already links. A
+          case that used three of them is a stronger statement than the primary
+          service alone, and dropping the extras to fit two links in a bar would
+          quietly narrow what the case says it did.
+
+          `.status-pill` is the shared badge from tds-shared/styles/primitives.css
+          rather than a fourth local pill. It carries `white-space: nowrap`, so
+          the row it sits in MUST wrap — "Individuelle Lösungen" set in caps is
+          wider than a phone column, and `body { overflow-x: hidden }` would clip
+          the overflow rather than show it.
+
+          No Tailwind utility belongs on these: unlayered CSS out of tds-shared
+          beats a utility class, so it would simply do nothing here. */}
+      {furtherServices.length > 0 && (
+        <ul class="reference-card__services">
+          {furtherServices.map((service) => (
+            <li>
+              <a href={service.href} class="status-pill status-pill--accent reference-card__service">
+                {service.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
+
+    <CardActions
+      lang={lang}
+      service={primaryService ? { href: primaryService.href, label: primaryService.label } : null}
+      cta={cta}
+    />
   </div>
 </article>
 
 <style>
+  .reference-card-slot {
+    /* A grid child, not a flex item: under size containment a flex item takes
+       its base size from max-content and collapses to 0px. `.showcase__slide`
+       is a grid for exactly this reason — see the note there. Same containment
+       and same trap as `.demo-card-slot`. */
+    container-type: inline-size;
+  }
+
   .reference-card {
+    /* Overridden by the wide-card container query at the bottom. */
+    --reference-shot-aspect: 16 / 10;
+
+    /* The positioning context for the footer bar's stretched link. Without it
+       that `::after` would spread over whatever ancestor happens to be
+       positioned, which on the shelf is the whole carousel. */
+    position: relative;
     display: flex;
     flex-direction: column;
     /* Without it a card in a shorter row stops at its content and the row's
@@ -206,7 +229,7 @@ const ui =
      their headings aligned while the shot arrives. */
   .reference-card__shot {
     position: relative;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: var(--reference-shot-aspect);
     overflow: hidden;
     background: var(--color-paper);
     /* A screenshot of a page has a page edge. Without this it bleeds into the
@@ -258,10 +281,10 @@ const ui =
     color: var(--color-black);
   }
 
-  /* Pinned to the bottom together with the links below: the badges are the
-     card's footer now, and both have to sit on one line across cards whose
-     outcomes are different lengths. `margin-top: auto` therefore belongs
-     HERE, on the first of the two, not on the links. */
+  /* Pinned to the bottom of the BODY, so the badges sit directly on the bar
+     across cards whose outcomes are different lengths. The bar itself is a
+     sibling of the body and needs no help staying at the bottom; this is what
+     keeps the last line of the body on one level too. */
   .reference-card__services {
     display: flex;
     flex-wrap: wrap;
@@ -281,23 +304,33 @@ const ui =
     border-color: var(--color-accent);
   }
 
-  .reference-card__links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
-    padding-top: 0.875rem;
-    font-size: 0.9375rem;
-  }
-  /* A case with neither an article nor a customer site renders an empty
-     <div> here; without this its padding would push the badges off the
-     baseline the other cards keep. */
-  .reference-card__links:empty {
-    display: none;
-  }
-
   @media (min-width: 768px) {
     .reference-card__body {
-      padding: 1.75rem 1.75rem 1.625rem;
+      padding: 1.75rem 1.75rem 1.5rem;
+    }
+  }
+
+  /* THE LEAD CARD, on the home page's shelf and only there. Two tracks wide on
+     desktop and nothing at all on a phone, where the same card is one track
+     wide. Identical treatment to `DemoCard`, and it has to be: whichever of
+     the two families leads, the shelf must not change height.
+
+     The band doubles in WIDTH, not in height. The slides stretch to the
+     tallest card, so height spent here is height every other card in the row
+     pays for as padding — `32 / 10` is exactly twice `16 / 10` at the same
+     height, and `object-position: top center` then crops to the top of the
+     captured page, which is the half worth showing. */
+  @container (min-width: 30rem) {
+    .reference-card {
+      --reference-shot-aspect: 32 / 10;
+    }
+    .reference-card__title {
+      font-size: 1.75rem;
+    }
+    .reference-card__result {
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      max-width: 60ch;
     }
   }
 </style>

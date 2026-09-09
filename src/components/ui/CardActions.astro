@@ -1,0 +1,238 @@
+---
+/**
+ * The footer bar every card on the showcase shelf ends in.
+ *
+ * ### Why one component and not three footers
+ *
+ * `DemoCard`, `ReferenceCard`, `BusinessCardTile` and the reference card built
+ * inline in `services/ServiceDetailPage.astro` all had their own bottom row,
+ * and the four had already drifted: one was a decorative `aria-hidden` label
+ * beside an address, one a wrapping row of underlined links, one a lone call to
+ * action. They sit in the same track, stretched to the same height by
+ * `.showcase__track`, so their last line is the one line a visitor reads
+ * across. That line is a component now.
+ *
+ * ### Exactly two links, and what each of them is
+ *
+ * LEFT is the service this card is evidence for — the page on this site the
+ * visitor should walk into next. RIGHT is the card's own destination: "Demo
+ * ansehen" for a demo, "Mehr erfahren" for a case with a journal article,
+ * "Webseite ansehen" for one that only has the customer's site. The hero
+ * slider has resolved its slides this way since it was built
+ * (`lib/heroSlides.ts`); the cards simply never caught up.
+ *
+ * The service link is OPTIONAL, and its absence is a real state rather than a
+ * missing value: on the Webauftritt detail page every demo card already sits
+ * on the service it belongs to, and a link back to the page you are standing
+ * on is a dead end.
+ *
+ * ### The layering, which is the whole trick
+ *
+ * The CTA carries a stretched `::after` over the entire card, so the card keeps
+ * the full-area hit target it has always had. The service link is lifted above
+ * that layer with `z-index`, so it is clickable rather than buried — the same
+ * arrangement `DemoCard`'s magnifier already uses, for the same reason.
+ *
+ * Two consequences the host card owes this component:
+ *
+ * 1. The card root must be `position: relative`, or the `::after` will stretch
+ *    over whatever ancestor is.
+ * 2. Nothing on the card may be an `<a>` wrapping the bar. A second anchor
+ *    around this one is invalid and browsers recover by closing the outer one
+ *    early — silently dropping everything after it out of the link.
+ *
+ * The focus ring is drawn around the whole card, which is another component's
+ * element, so that one rule is deliberately global; see the note on it below.
+ */
+import type { Lang } from "~/lib/i18n";
+import { cardActionUi, type CardAction } from "~/lib/cardActions";
+
+interface Props {
+  /** The service page this card is evidence for, or `null` when already on it. */
+  service?: CardAction | null;
+  /**
+   * The card's own destination, or `null` when it has none.
+   *
+   * A reference case with no journal article and an anonymous customer has
+   * nothing to link to but its service — it keeps the bar and a card-wide hit
+   * area is simply not available to it. Better than a call to action that
+   * repeats the link beside it.
+   */
+  cta?: CardAction | null;
+  lang: Lang;
+}
+
+const { service = null, cta = null, lang } = Astro.props;
+const ui = cardActionUi[lang];
+---
+
+<div class="card-actions">
+  {
+    service && (
+      <a class="card-actions__service" href={service.href}>
+        {/* The label is the service's own name, which on its own reads as a
+            category rather than as a destination. */}
+        <span class="sr-only">{ui.service}: </span>
+        {service.label}
+        <span aria-hidden="true"> →</span>
+      </a>
+    )
+  }
+
+  {
+    cta && (
+      <a
+        class="card-actions__cta"
+        href={cta.href}
+        target={cta.external ? "_blank" : undefined}
+        rel={cta.external ? "noopener noreferrer" : undefined}
+        hreflang={cta.hreflang}
+      >
+        {cta.label}
+        {cta.detail && <span class="sr-only"> — {cta.detail}</span>}
+        {cta.external && <span class="sr-only"> ({ui.newTab})</span>}
+        {cta.external ? (
+          /* The outward mark, never the internal "→": this one leaves the
+             site, and reusing the internal glyph would disguise that. */
+          <svg
+            aria-hidden="true"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="7" y1="17" x2="17" y2="7" />
+            <polyline points="7 7 17 7 17 17" />
+          </svg>
+        ) : (
+          <span aria-hidden="true">→</span>
+        )}
+      </a>
+    )
+  }
+</div>
+
+<style>
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    /* One link left, one right. With only a CTA it sits on the right on its
+       own, which is where the eye already is at the end of a card. */
+    justify-content: space-between;
+    gap: 0.35rem 1rem;
+    /* Bound to the bottom of the card. The body beside it carries `flex: 1`,
+       so this is belt and braces — and it is what keeps the bar in place if a
+       card ever drops that. */
+    margin-top: auto;
+    /* NO horizontal inset of its own beyond the card's own rhythm: the bar
+       runs edge to edge and the card's `overflow: hidden` rounds its bottom
+       corners for it. That is what "bound to the card" means here — it is a
+       part of the card, not a row of text inside the body's padding. */
+    padding: 0.8rem 1.25rem;
+    /* The same seam as under a screenshot band, so a card with a picture has
+       one visual language top and bottom. */
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    /* Its own fill over the card's. Deliberately a tint of the card's own
+       ground rather than a named colour, so the bar works on the sand cards of
+       the shelf and on the pink-tinted reference card of a service page
+       without a second variable. */
+    background: color-mix(in srgb, var(--color-black) 4%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .card-actions__service {
+    /* ABOVE the CTA's stretched layer. Without these two lines the click lands
+       on the card's own destination and this link is decoration. */
+    position: relative;
+    z-index: 1;
+    color: var(--color-black);
+    text-decoration: none;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .card-actions__service:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .card-actions__service:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+
+  .card-actions__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    /* Never wraps mid-label: the service link beside it is the one that gives
+       way on a narrow card. */
+    flex: none;
+    margin-left: auto;
+    color: var(--color-accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  /* The whole card, made clickable from the bar. `inset: 0` lands on the CARD
+     because the card is the positioned ancestor — see the header note. */
+  .card-actions__cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  /* The ring is drawn around the card instead (see the global block below); a
+     second one here would put two rings on one control. */
+  .card-actions__cta:focus-visible {
+    outline: none;
+  }
+  .card-actions__cta svg,
+  .card-actions__cta span[aria-hidden] {
+    transition: transform 200ms var(--tds-ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-actions__service,
+    .card-actions__cta svg,
+    .card-actions__cta span[aria-hidden] {
+      transition: none;
+    }
+  }
+</style>
+
+<style is:global>
+  /**
+   * The one rule that has to leave this component's scope.
+   *
+   * The ring belongs around the whole card — the CTA's hit area IS the card —
+   * and the card root is rendered by another component. An Astro scoped style
+   * appends this component's id to its selectors, so `.demo-card:has(…)`
+   * written here would match nothing at all and fail silently, which is the
+   * same trap `sections/Showcase.astro` documents for `.showcase__slide > *`.
+   *
+   * The card roots are named explicitly rather than matched by shape: a
+   * wildcard would draw a ring around whatever box happened to contain a bar.
+   */
+  :where(.demo-card, .reference-card, .bc-tile):has(.card-actions__cta:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  :where(.demo-card, .reference-card, .bc-tile):hover .card-actions__cta svg,
+  :where(.demo-card, .reference-card, .bc-tile):focus-within .card-actions__cta svg {
+    transform: translate(2px, -2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.demo-card, .reference-card, .bc-tile):hover .card-actions__cta svg,
+    :where(.demo-card, .reference-card, .bc-tile):focus-within .card-actions__cta svg {
+      transform: none;
+    }
+  }
+</style>

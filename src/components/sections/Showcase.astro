@@ -56,6 +56,24 @@ const content = await cmsFor("references_home", lang, getHomeContent(lang).refer
 
 const demos = await getDemos();
 
+/**
+ * The service every demo and the business-card tile is evidence for.
+ *
+ * Resolved once here and handed down, rather than looked up inside the cards:
+ * the answer depends on WHERE the card is rendered. On the Webauftritt detail
+ * page the same cards get `null`, because a link back to the page the visitor
+ * is standing on is a dead end. `demoCatalog.ts` deliberately has no imports,
+ * so this is also not a field a demo could carry.
+ *
+ * The label comes from the committed catalog and not through `cmsFor` — the
+ * same trade the reference badges below make, and for the same reason.
+ */
+const webPresence = getServiceById("web-presence");
+const webPresenceLink = {
+  label: webPresence.fallback[lang].title,
+  href: serviceHref(webPresence, lang),
+};
+
 // Consent, a live site and a captured screenshot — a case missing any one of
 // the three is simply absent from this map and its card renders without a band.
 const previews = await getReferencePreviews();
@@ -131,24 +149,26 @@ const ordered: Slide[] = [
  * That order is still the order of everything else, and its reason still
  * holds: a delivered project is the stronger claim, and a demo reads as a
  * sample wherever it sits. What it did not anticipate is a shelf whose
- * reference cases are all `previewAllowed: false`. Every reference card is
- * then text, and the shelf opens with two paragraphs while the one card that
- * shows a built page sits off to the right — half visible on a desktop, not
- * visible at all on a phone.
+ * reference cases carry no approved screenshot. Every reference card is then
+ * text, and the shelf opens with two paragraphs while the one card that shows
+ * a built page sits off to the right — half visible on a desktop, not visible
+ * at all on a phone.
  *
  * A visitor who came to see what this does should not have to scroll to find
  * the first thing that shows it. So exactly one card is hoisted, and it is
  * hoisted for a property it either has or does not have — never for being a
- * demo. The day a named case ships with an approved screenshot, that case
- * becomes the lead card and nothing here changes.
+ * demo. `hof-meerheck` has since been cleared for a screenshot and is the lead
+ * card because of it; not a line here changed for that to happen.
  *
  * ### Why "wide" and not "taller"
  *
  * Two tracks instead of one is the only change that makes the picture bigger
  * without making the shelf taller: the slides stretch to the tallest card, so
- * height spent here is height every other card pays for as padding under its
- * links. The card itself answers the extra width through a container query —
- * see the note in `ui/DemoCard.astro`.
+ * height spent here is height every other card pays for as padding above its
+ * footer bar. Both card families answer the extra width through a container
+ * query of their own — see the notes in `ui/DemoCard.astro` and
+ * `ui/ReferenceCard.astro`. They have to agree: whichever family leads, the
+ * shelf must not change height.
  */
 const leadIndex = ordered.findIndex((slide) => slide.hasImage);
 const slides =
@@ -221,8 +241,10 @@ const ui =
                 class:list={["showcase__slide", slide.key === leadKey && "showcase__slide--lead"]}
               >
                 {slide.kind === "reference" && <ReferenceCard card={slide.card} lang={lang} />}
-                {slide.kind === "demo" && <DemoCard demo={slide.demo} lang={lang} />}
-                {slide.kind === "business-card" && <BusinessCardTile />}
+                {slide.kind === "demo" && (
+                  <DemoCard demo={slide.demo} lang={lang} serviceLink={webPresenceLink} />
+                )}
+                {slide.kind === "business-card" && <BusinessCardTile serviceLink={webPresenceLink} />}
               </div>
             ))}
           </div>
@@ -343,17 +365,21 @@ const ui =
        produced is exactly what the change undoes.
 
        Both card families were already built for a stretched slot: `height:
-       100%` on the card root and `margin-top: auto` on the footer. So the
-       links of a reference case and the address of a demo now land on one
-       line across the whole shelf, and that shared baseline is what makes
-       three cards read as one shelf rather than as three loose boxes.
+       100%` on the card root, and a footer bar that is the last child of the
+       card. So the links of a reference case and of a demo land on one line
+       across the whole shelf, and that shared baseline is what makes the
+       cards read as one shelf rather than as loose boxes. It is also why the
+       bar is `ui/CardActions.astro` and not three footers: one strip, one
+       height, one line.
 
        The price, knowingly paid: a card with no 16:10 screenshot band takes
-       the height difference as space above its links. Small today — both
-       reference cases are `previewAllowed: false` and text-rich, and only
-       `demo1` carries a band. It gets visible the day reference cards with
-       and without an approved screenshot stand side by side; the answer then
-       is a field of their own at the band's place, not a return to `start`.
+       the height difference as space above its bar. That day has arrived —
+       `hof-meerheck` carries a band and `office-supplies-shop`, which is
+       anonymous and can never have one, does not. The extra room reads as
+       breathing space above the bar rather than as a hole, because the bar
+       is bound to the bottom edge and holds the line by itself. If it ever
+       stops reading that way the answer is a field of its own at the band's
+       place, not a return to `start`.
 
        Nothing stretches the CARD directly. `.showcase__slide` is a grid with
        `grid-template-rows: 1fr` whose own height only becomes definite by

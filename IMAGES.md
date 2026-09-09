@@ -87,7 +87,7 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 | `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.50, no dark variant |
 | `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
 | `demos/*.webp` | `ui/DemoCard.astro` — `.demo-card__shot img` | **1.0 — content, not a ground** |
-| `references/*.webp` | `sections/References.astro`, `services/ServiceDetailPage.astro` — `.reference-card__shot img` | **1.0 — content, not a ground** |
+| `references/*.webp` | `ui/ReferenceCard.astro`, `services/ServiceDetailPage.astro` — `.reference-card__shot img` | **1.0 — content, not a ground** |
 
 The last three rows are the odd ones out on purpose. A section ground is
 decoration under copy, which is why it runs at a third of its strength behind a

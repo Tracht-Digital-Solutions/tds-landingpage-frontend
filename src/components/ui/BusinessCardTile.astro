@@ -23,8 +23,19 @@
  * stretches every slide to the tallest card. A tile that measured its own
  * height differently would be the one visible seam in the row.
  *
- * Like `DemoCard` and unlike `ReferenceCard` this is ONE link — the card has a
- * single destination — so the whole tile is the `<a>`.
+ * ### Why this stopped being one wrapping `<a>`
+ *
+ * It was one, because the tile has one destination. It gained a second when
+ * every card on the shelf gained a footer bar with a link to the service it is
+ * evidence for — and a second anchor inside the first is invalid markup that
+ * browsers recover from by closing the outer one early, silently dropping
+ * everything after it out of the link.
+ *
+ * So the tile follows `DemoCard` exactly: a plain element, the call to action
+ * in `ui/CardActions.astro` carrying a stretched `::after` over the whole
+ * tile, the service link lifted above that layer. The full-tile hit area, the
+ * hover response and the focus ring all survive; the anchor was only how they
+ * used to be provided.
  */
 import { resolveLang } from "~/lib/i18n";
 import { DEMO_PREVIEW } from "~/lib/demoCatalog";
@@ -33,14 +44,27 @@ import {
   businessCardCopy,
   businessCardHref,
 } from "~/lib/businessCard";
+import type { CardAction } from "~/lib/cardActions";
+import CardActions from "~/components/ui/CardActions.astro";
 
+interface Props {
+  /**
+   * The service page this tile is evidence for, or `null`.
+   *
+   * `null` on the Webauftritt detail page, where the tile already sits on that
+   * service and a link back to it is a dead end. See `DemoCard`, same rule.
+   */
+  serviceLink?: CardAction | null;
+}
+
+const { serviceLink = null } = Astro.props;
 const lang = resolveLang(Astro.currentLocale);
 const copy = businessCardCopy[lang];
 const href = businessCardHref(lang);
 ---
 
 <article class="bc-tile-slot" data-reveal>
-  <a class="bc-tile" href={href}>
+  <div class="bc-tile">
     <div class="bc-tile__shot">
       {/* Intrinsic size stated so the 16:10 box is reserved before the file
           arrives — the same reason `DemoCard` states it. Captured by
@@ -60,15 +84,14 @@ const href = businessCardHref(lang);
       <p class="bc-tile__eyebrow">{copy.eyebrow}</p>
       <h3 class="bc-tile__title">{copy.title}</h3>
       <p class="bc-tile__text">{copy.text}</p>
-
-      <div class="bc-tile__foot">
-        <span class="bc-tile__go">
-          {copy.cta}
-          <span aria-hidden="true"> →</span>
-        </span>
-      </div>
     </div>
-  </a>
+
+    <CardActions
+      lang={lang}
+      service={serviceLink}
+      cta={{ href, label: copy.cta, detail: copy.title }}
+    />
+  </div>
 </article>
 
 <style>
@@ -92,7 +115,6 @@ const href = businessCardHref(lang);
     background: var(--bc-tile-bg);
     border-radius: 6px;
     overflow: hidden;
-    text-decoration: none;
     color: inherit;
     transition: background-color 200ms var(--tds-ease-out);
   }
@@ -100,10 +122,10 @@ const href = businessCardHref(lang);
   .bc-tile:focus-within {
     background: var(--bc-tile-bg-hover);
   }
-  .bc-tile:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
-  }
+  /* The focus ring is drawn for this tile from the bar's call to action — that
+     link's stretched layer IS the tile's hit area. The rule lives in the one
+     global block in `ui/CardActions.astro`, because it needs a class from each
+     of the two components and an Astro scoped style can only name its own. */
 
   .bc-tile__shot {
     position: relative;
@@ -172,25 +194,6 @@ const href = businessCardHref(lang);
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-
-  .bc-tile__foot {
-    display: flex;
-    align-items: baseline;
-    justify-content: flex-end;
-    /* Pinned to the bottom so the call to action lines up with the demo
-       card's address row beside it. */
-    margin-top: auto;
-    padding-top: 0.75rem;
-  }
-  .bc-tile__go {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    white-space: nowrap;
   }
 
   @media (prefers-reduced-motion: reduce) {

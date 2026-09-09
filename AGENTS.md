@@ -49,10 +49,12 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     the page, because it is the first thing a visitor touches.
   - Cases come before demos, then `leadWithPicture()` hoists the first slide
     that carries a picture. Same decision as the shelf's lead card and for the
-    same reason: every case is currently `previewAllowed: false`, so without it
-    the hero opens on a paragraph while the one slide that shows a built page
-    waits six seconds off-screen. The hoist is for HAVING a picture, never for
-    being a demo — the day a case ships with an approved screenshot it leads.
+    same reason: without it the hero can open on a paragraph while the slide
+    that shows a built page waits six seconds off-screen. The hoist is for
+    HAVING a picture, never for being a demo — it was written while every case
+    was `previewAllowed: false` and a demo was the only slide with artwork, and
+    since `hof-meerheck` was cleared for a screenshot that case leads. Nothing
+    changed for it to; that is what the rule was for.
   - A demo slide links OFF-SITE to the demo's own host (`target="_blank"`,
     `rel`, and a new-tab hint for screen readers); a case slide links to its
     primary service page. The only words this site contributes to a slide are
@@ -306,23 +308,47 @@ shows none.
 
 The card is **not a wrapper `<a>` any more**. It carries a magnifier that opens
 the full 1440 × 900 capture in `ui/PreviewLightbox.astro`, and a `<button>`
-inside an `<a>` is invalid, so the title holds the link and the link stretches
-over the card with a `::after`. The full-card hit area, the hover response and
-the focus ring are the invariant and all survive; the anchor was only how they
-used to be provided. The lightbox is one native `<dialog>` per section — Escape,
-the focus trap and the inert background come from the platform — and the
-magnifiers ship `hidden`, revealed only once the script has confirmed
-`showModal`. `previewLightbox.test.ts` guards the nesting, the stretched link,
-the focus ring, the hidden default and the focus restore.
+inside an `<a>` is invalid. The full-card hit area, the hover response and the
+focus ring are the invariant and all survive; the anchor was only how they used
+to be provided. The lightbox is one native `<dialog>` per section — Escape, the
+focus trap and the inert background come from the platform — and the magnifiers
+ship `hidden`, revealed only once the script has confirmed `showModal`.
+`previewLightbox.test.ts` guards the nesting, the stretched link, the focus
+ring, the hidden default and the focus restore.
+
+**Every card on the shelf ends in the same footer bar**, `ui/CardActions.astro`
+— a tinted strip bound edge to edge across the bottom of the card, with the
+same 1px seam a screenshot band has. It carries exactly **two links**: the
+service the card is evidence for, and the card's own destination ("Demo
+ansehen", "Mehr erfahren", "Webseite ansehen"). The hero slider resolved its
+slides that way from the start (`lib/heroSlides.ts`); the cards caught up.
+
+Three rules hold it together, and each is silent when broken:
+
+- The bar is a **sibling of the card body**, never inside it — inside, it
+  inherits the body's padding and stops being bound to the card.
+- The **call to action carries the stretched `::after`**, so the card keeps its
+  full-area hit target; the card root must therefore be `position: relative`.
+  The service link is lifted above that layer with `z-index`, exactly as the
+  magnifier is. Without that lift it renders, hovers, and silently opens the
+  card's other destination.
+- No card may wrap the bar in an `<a>`. `BusinessCardTile` was one wrapping
+  anchor until it gained a second link; a nested anchor is invalid and browsers
+  recover by closing the outer one early.
+
+The service link is a **prop, not a lookup**: on the Webauftritt detail page the
+demos and the business card already sit on their service, and there it is
+`null`. `cardActions.test.ts` guards the geometry, that absence, and that a
+reference card never repeats its primary service as a badge.
 
 On the home page the shelf gives **two tracks to its lead card**, which is the
 first slide carrying a picture, hoisted to the front. Reference cases still
-come before demos everywhere else; the hoist exists because every reference
-case is currently `previewAllowed: false`, so without it the shelf opens with
-two text cards while the one card that shows a built page sits off-screen. The
-card answers the extra width through a container query, and the extra width is
-width, not height — the slides stretch to the tallest card, so a taller lead
-card would pad every other card's body with the difference.
+come before demos everywhere else; the hoist exists so the shelf never opens
+with text cards while the one card that shows a built page sits off-screen.
+Both card families answer the extra width through a container query, and the
+extra width is width, not height — the slides stretch to the tallest card, so a
+taller lead card would pad every other card's body with the difference. The
+band goes to `32 / 10`, exactly twice `16 / 10` at the same height.
 
 The framing exists **twice, for one card and for several** (`headlineSingle`,
 `introSingle`, `serviceIntroSingle`), and `demosCopy()` picks by the number
