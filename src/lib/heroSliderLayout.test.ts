@@ -61,6 +61,44 @@ describe("the hero slider's min-content floors", () => {
   });
 });
 
+describe("the hero slider's thumbnail on a phone", () => {
+  /**
+   * A DEFINITE ratio, never `auto`.
+   *
+   * `auto` let the box stretch to the row's full height, and a 1440 × 900
+   * screenshot forced into a 112 × 157 portrait box is not a small picture of
+   * a page — it is a vertical slice through one. `cover` scaled it to 17 % and
+   * showed the middle 45 % of the width: no logo, no header, no structure.
+   *
+   * Nothing errors when this regresses. The image loads, the card sits at
+   * exactly the same height, and only the content of the picture is useless.
+   */
+  it("gives the picture the source's own ratio so nothing is cropped", () => {
+    const mobile = css.slice(css.indexOf("@media (max-width: 63.9375rem)"));
+    const shot = mobile.slice(mobile.indexOf(".hero-slider__shot {"));
+    expect(shot.slice(0, 1400)).toMatch(/aspect-ratio:\s*16\s*\/\s*10/);
+    expect(shot.slice(0, 1400)).not.toMatch(/aspect-ratio:\s*auto/);
+  });
+
+  /**
+   * The short-viewport squeeze is for the COLUMN layout only.
+   *
+   * `#hero .hero-slider__shot { aspect-ratio: 21 / 9 }` buys hero height back
+   * where the picture is a full-width band above the copy. In the row layout
+   * the height comes from the copy beside it, so the squeeze saves nothing and
+   * only crops — it made an 88px-wide thumbnail 38px tall. `#hero` gives that
+   * rule (1,1,0), so it silently beats anything the mobile block says.
+   */
+  it("keeps the 21/9 squeeze away from the row layout", () => {
+    expect(css).toMatch(/@media \(max-height: 800px\) and \(min-width: 64rem\)/);
+    const shared = css.slice(
+      css.indexOf("@media (max-height: 800px) {"),
+      css.indexOf("@media (max-height: 800px) and (min-width: 64rem)"),
+    );
+    expect(shared).not.toMatch(/aspect-ratio:\s*21\s*\/\s*9/);
+  });
+});
+
 describe("the hero slider's controls", () => {
   /**
    * The row holds one 44px dot per slide plus the arrows. With six slides it
