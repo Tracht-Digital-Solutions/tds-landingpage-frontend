@@ -51,16 +51,14 @@ const MIN_USEFUL = 80;
 /**
  * Where a page's description literal actually lives.
  *
- * `/preise` and `/en/preise` are five-line wrappers around one shared
- * component, so the literal sits there rather than in the page file. The
+ * The business card is a five-line wrapper around one shared component, so
+ * its literal sits there rather than in the page file. The
  * mapping is written out rather than derived: an explicit entry per wrapper
  * is easier to audit than a parser that follows imports, and a page whose
  * description silently moved out of reach should fail this suite rather than
  * be quietly resolved by it.
  */
 const DESCRIPTION_SOURCES: Record<string, string> = {
-  "src/pages/preise.astro": "src/components/PricingPage.astro",
-  "src/pages/en/preise.astro": "src/components/PricingPage.astro",
   "src/pages/visitenkarte.astro": "src/components/BusinessCardPage.astro",
   "src/pages/en/business-card.astro": "src/components/BusinessCardPage.astro",
 };
@@ -81,8 +79,8 @@ function renderedDescriptions(rel: string): string[] {
 }
 
 const INDEXABLE_PAGES = [
-  "src/pages/preise.astro",
-  "src/pages/en/preise.astro",
+  // `/preise` is gone: the price list is a drawer on the home page and that
+  // URL is a 301 now. A redirect has no description to budget.
   "src/pages/visitenkarte.astro",
   "src/pages/en/business-card.astro",
   "src/pages/legal/impressum.astro",

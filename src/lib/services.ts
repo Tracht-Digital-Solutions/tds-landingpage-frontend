@@ -182,7 +182,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "90 € netto pro Stunde. Für ein klar abgegrenztes Konzept ist nach der Bestandsaufnahme auch ein Festpreis möglich.",
+          "75 € netto pro Stunde. Für ein klar abgegrenztes Konzept ist nach der Bestandsaufnahme auch ein Festpreis möglich.",
         referencesLabel:
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
@@ -235,7 +235,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "€90 net per hour. For a clearly bounded concept, a fixed price is possible after the initial assessment.",
+          "€75 net per hour. For a clearly bounded concept, a fixed price is possible after the initial assessment.",
         referencesLabel:
           "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
@@ -301,7 +301,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "80 € netto pro Stunde. Ein Festpreis ist möglich, sobald Ablauf, Datenquellen und Ziel klar sind.",
+          "70 € netto pro Stunde. Ein Festpreis ist möglich, sobald Ablauf, Datenquellen und Ziel klar sind.",
         referencesLabel:
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
@@ -354,7 +354,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "€80 net per hour. A fixed price is possible once the workflow, the data sources and the goal are clear.",
+          "€70 net per hour. A fixed price is possible once the workflow, the data sources and the goal are clear.",
         referencesLabel:
           "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",
@@ -421,7 +421,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "80 € netto pro Stunde. Steht der Umfang fest, sind Festpreise für einzelne Etappen oder das ganze Paket möglich.",
+          "70 € netto pro Stunde. Steht der Umfang fest, sind Festpreise für einzelne Etappen oder das ganze Paket möglich.",
         referencesLabel:
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
@@ -475,7 +475,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "€80 net per hour. Once the scope is set, fixed prices are possible for single stages or the whole package.",
+          "€70 net per hour. Once the scope is set, fixed prices are possible for single stages or the whole package.",
         referencesLabel:
           "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
         referencesHeadline: "Examples from practice",

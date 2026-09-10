@@ -47,13 +47,31 @@ describe("SITEMAP_ENTRIES", () => {
     }
   });
 
-  it("covers the home page, pricing and every service", () => {
+  it("covers the home page and every service", () => {
     const de = SITEMAP_ENTRIES.map((e) => e.de);
     expect(de).toContain("/");
-    expect(de).toContain("/preise");
     for (const service of serviceDefinitions) {
       expect(de).toContain(serviceHref(service, "de"));
     }
+  });
+
+  /**
+   * `/preise` is retired and must STAY out.
+   *
+   * The price list is a drawer on the home page now and that URL answers with
+   * a 301 (`pages/preise.astro`). A redirect listed in a sitemap is a crawl
+   * error rather than a hint — it asks a crawler to fetch a URL whose only
+   * answer is "go somewhere else", and the somewhere else is already listed.
+   *
+   * Written as its own case rather than by deleting the old assertion: the
+   * line that used to require this entry was correct for as long as the page
+   * existed, and without a note in its place the next person to read the list
+   * sees an odd gap between "/" and the business card.
+   */
+  it("keeps the retired /preise out", () => {
+    const all = SITEMAP_ENTRIES.flatMap((e) => [e.de, e.en]);
+    expect(all).not.toContain("/preise");
+    expect(all).not.toContain("/en/preise");
   });
 
   it("keeps the legal pages, /install and the error pages out", () => {

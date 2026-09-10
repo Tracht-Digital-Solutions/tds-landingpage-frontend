@@ -12,12 +12,15 @@ import Journal from "~/components/sections/Journal.astro";
 import Consulting from "~/components/sections/Consulting.astro";
 import FAQ from "~/components/sections/FAQ.astro";
 import Contact from "~/components/sections/Contact.astro";
+import PricingDrawer from "~/components/islands/PricingDrawer.tsx";
+import PricingList from "~/components/PricingList.astro";
 import {
   asGraph,
   faqPageSchema,
   howToSchema,
   organizationSchema,
   personSchema,
+  pricingSchema,
   speakableSchema,
   websiteSchema,
 } from "~/lib/jsonld";
@@ -27,6 +30,8 @@ import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import { getHeroSlides } from "~/lib/heroSlides";
+import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import { resolveServiceContent, serviceDefinitions } from "~/lib/services";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -45,7 +50,23 @@ const process = await cmsFor("process", lang, {
   headlineAccent: t.process.headlineAccent,
   steps: t.process.steps,
 });
+/** See the note on the German home page: the offers moved here with the list. */
+const pricing = await getPricingContent(lang);
+const pricedServices = await Promise.all(
+  serviceDefinitions.map(async (definition) => ({
+    definition,
+    content: await resolveServiceContent(definition, lang),
+  })),
+);
+
 const jsonLd = asGraph(
+  pricingSchema(
+    pricedServices.map(({ definition, content }) => ({
+      name: content.title,
+      description: content.summary,
+      rate: getServiceRate(pricing, definition.id),
+    })),
+  ),
   organizationSchema(),
   personSchema(),
   websiteSchema(),
@@ -93,4 +114,9 @@ const titles = {
     <Contact />
   </main>
   <Footer />
+
+  {/* See the German home page for why this sits outside <main> and the footer. */}
+  <PricingDrawer client:idle lang={lang}>
+    <PricingList lang={lang} headingLevel={3} />
+  </PricingDrawer>
 </Layout>

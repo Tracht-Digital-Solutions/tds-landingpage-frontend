@@ -962,3 +962,203 @@ html {
     display: none;
   }
 }
+
+/* ── Preisliste als Schublade ─────────────────────────────────────────────
+   Slides in from the right; the page slides left by the same amount.
+
+   ### The shift is a variable, not a wrapper
+
+   Wrapping the document in a transformed element would have been one line and
+   would have broken the site: a `transform` makes its element the containing
+   block for every `position: fixed` DESCENDANT, so the fixed header would stop
+   being fixed to the viewport and start scrolling with the page. The cookie
+   notice and the floating CTA would go with it.
+
+   So nothing is wrapped. `--pricing-shift` is published on the root and the
+   three elements that ARE the page answer for themselves. A transform on a
+   fixed element itself is fine — that is not the case that breaks.
+
+   ### Only these three move
+
+   The header, the content and the footer are the website. The floating
+   widgets (CTA, live chat, cookie notice) are not part of that surface and
+   would land on top of the panel, so they step back while it is open instead
+   of riding along.
+*/
+:root {
+  /* The panel's width, and therefore the distance the page travels. `min()`
+     rather than a media query so it is one number the JS never has to know. */
+  --pricing-width: min(34rem, 100vw);
+  --pricing-shift: 0px;
+  /* A gentle overshoot, the same character as the section jumps in
+     `lib/scrollJump.ts` — it settles a few percent past and eases back. The
+     panel "springs" open rather than sliding to a stop. */
+  --pricing-ease: cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+/* Only the desktop push actually shifts the page. On a phone the panel is the
+   full width of the screen, so shifting would move the page entirely
+   off-screen to reveal a panel that already covers it — there the drawer
+   simply lies over the page. */
+@media (min-width: 48rem) {
+  :root.pricing-open {
+    --pricing-shift: var(--pricing-width);
+  }
+}
+
+/* `translate`, NOT `transform` — and that is not a stylistic preference.
+   `Header.astro` sets `transform: none` on `.site-header` inside its own
+   `@media (min-width: 1024px)` block. Astro scopes that rule, which appends
+   the component's id attribute and makes it (0,2,0) against this file's
+   (0,1,0): the header simply ignored a `transform` written here and stayed
+   put while the rest of the page slid away. Nothing errors, and it looks like
+   the shift "doesn't work on the header".
+
+   `translate` is an independent property. The header's `transform: none`
+   leaves it alone, and where both are set the browser composes them — so the
+   header keeps whatever transform it wants for its own docked/floating states
+   and still travels with the page. */
+.site-header,
+main,
+footer {
+  translate: calc(-1 * var(--pricing-shift));
+  transition: translate 560ms var(--pricing-ease);
+}
+
+.pricing-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: var(--pricing-width);
+  max-width: 100vw;
+  height: 100svh;
+  background: var(--color-paper);
+  border-left: 1px solid color-mix(in srgb, var(--color-black) 10%, transparent);
+  /* Fully off-canvas, and `visibility` on top of it: a panel parked at 100%
+     is still in the layout, and without this a stray focus or a find-in-page
+     would scroll the viewport sideways to reach it. */
+  transform: translateX(100%);
+  visibility: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition:
+    transform 560ms var(--pricing-ease),
+    visibility 0s linear 560ms;
+}
+.pricing-drawer[data-open] {
+  transform: none;
+  visibility: visible;
+  transition:
+    transform 560ms var(--pricing-ease),
+    visibility 0s;
+}
+
+.pricing-drawer__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  background: var(--color-paper);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+}
+.pricing-drawer__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  letter-spacing: -0.015em;
+  color: var(--color-black);
+}
+.pricing-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  /* The shared 44px minimum. */
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: var(--tds-radius-pill, 100px);
+  background: var(--color-soft);
+  color: var(--color-black);
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--tds-ease-out),
+    color 200ms var(--tds-ease-out);
+}
+.pricing-drawer__close:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-soft));
+  color: var(--color-primary);
+}
+.pricing-drawer__close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.pricing-drawer__body {
+  padding: 1.5rem;
+  /* The list inside asks THIS element how wide it is, not the window — the
+     panel is 34rem on a 90rem screen and a viewport query would answer for
+     the screen. Named, so `@container pricing-list (…)` in `PricingList.astro`
+     cannot accidentally resolve against some other ancestor.
+
+     `inline-size`, never `size`: the panel's height is its content's, and
+     `contain: size` on a scrolling column collapses it to nothing. */
+  container: pricing-list / inline-size;
+}
+
+/* Dims the page and is the second way out — a click anywhere off the panel.
+   Never covers the panel itself: it stops at the panel's edge on desktop
+   because the page has moved, and sits under it on `z-index` regardless. */
+.pricing-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: color-mix(in srgb, var(--color-black) 34%, transparent);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 360ms var(--tds-ease-out),
+    visibility 0s linear 360ms;
+}
+.pricing-scrim[data-open] {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 360ms var(--tds-ease-out),
+    visibility 0s;
+}
+
+/* The floating chrome steps back rather than riding along: it is not part of
+   the page surface and would otherwise sit on top of the panel. */
+:root.pricing-open .floating-cta,
+:root.pricing-open .cookie-notice,
+:root.pricing-open .tds-live-chat-cta {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--tds-ease-out);
+}
+
+/* The page must not scroll behind an open panel. `position: fixed` on the body
+   would lose the scroll position; hiding the overflow keeps it. */
+:root.pricing-open body {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  main,
+  footer,
+  .pricing-drawer,
+  .pricing-drawer[data-open],
+  .pricing-scrim,
+  .pricing-scrim[data-open] {
+    transition-duration: 0.01ms;
+  }
+}
