@@ -629,12 +629,37 @@ html {
   }
   .hero-slider__shot {
     flex: none;
-    width: 7rem;
-    /* The row's height comes from the copy beside it, so the fixed ratio has
-       to go or the thumbnail would set the height instead. */
-    aspect-ratio: auto;
+    /* Scales with the card so the picture keeps the same relationship to the
+       copy from a 320px phone up to the breakpoint, with the old fixed value
+       as the ceiling. */
+    width: clamp(5.5rem, 30%, 7rem);
+    /* THE SOURCE'S OWN RATIO, so `cover` crops nothing at all.
+     *
+     * This was `auto`, which let the box stretch to the row's full height —
+     * and a 1440 × 900 screenshot forced into a 112 × 157 portrait box is not
+     * a small picture of a page, it is a vertical slice through one. `cover`
+     * scaled it to 17 % and showed the middle 45 % of the width: no logo, no
+     * header, no structure. Nothing was broken, so nothing complained; the
+     * thumbnail was simply useless.
+     *
+     * Three things cannot hold at once here — flush over the full row height,
+     * uncropped, and enough width left for the copy. A 16:10 picture 157px
+     * tall would be 251px wide, 73 % of the card, leaving 91px for text. The
+     * full height is the one to give up: it was the cause of the crop and
+     * bought nothing else. */
+    aspect-ratio: 16 / 10;
+    /* Not stretched any more, so the row's height still comes from the copy
+       and the card does not grow. Measured: panel 161px at 320/360 and 157px
+       at 390+, unchanged by this block. */
+    align-self: center;
+    margin: 0.7rem 0 0.7rem 0.7rem;
+    border-radius: 4px;
+    /* Both edges go with the stretch. The right-hand rule was a divider
+       between the two halves and only reads as one while the picture fills
+       the height — against a centred thumbnail it would be a stub. An inset
+       picture with its own corners needs no rule; it already has an edge. */
     border-bottom: none;
-    border-right: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    border-right: none;
   }
   .hero-slider__body {
     justify-content: center;
@@ -733,19 +758,34 @@ html {
     padding-top: 1.25rem;
     padding-bottom: 1.25rem;
   }
-  /* The slider has to come in with everything else, or the hero grows by
-     exactly the height the rules above just saved. The picture is the part
-     that can afford it: the title, the sentence and the link are the content,
-     the ground is the decoration. */
-  #hero .hero-slider__shot {
-    aspect-ratio: 21 / 9;
-  }
   #hero .hero-slider__text {
     -webkit-line-clamp: 2;
     line-clamp: 2;
   }
   #hero .hero-slider__body {
     padding: 0.875rem 1.125rem 1rem;
+  }
+}
+
+/* The squeezed picture belongs to the COLUMN layout only.
+ *
+ * On a short viewport the slider has to come in with everything else, or the
+ * hero grows by exactly the height the rules above just saved — and the
+ * picture is the part that can afford it: the title, the sentence and the link
+ * are the content, the ground is decoration.
+ *
+ * That reasoning holds where the picture is a full-width band above the copy,
+ * and only there. Below `lg` the card is a ROW: its height comes from the copy
+ * beside the picture, so squeezing the picture saves nothing at all — it just
+ * made an 88px-wide thumbnail 38px tall and cut two thirds of the screenshot
+ * away for no gain. This used to sit in the block above and applied to both.
+ *
+ * `#hero` is load-bearing in the selector: it out-specifies the Tailwind
+ * responsive utilities, which is why the whole short-viewport block is written
+ * this way. */
+@media (max-height: 800px) and (min-width: 64rem) {
+  #hero .hero-slider__shot {
+    aspect-ratio: 21 / 9;
   }
 }
 
