@@ -12,12 +12,15 @@ import Journal from "~/components/sections/Journal.astro";
 import Consulting from "~/components/sections/Consulting.astro";
 import FAQ from "~/components/sections/FAQ.astro";
 import Contact from "~/components/sections/Contact.astro";
+import PricingDrawer from "~/components/islands/PricingDrawer.tsx";
+import PricingList from "~/components/PricingList.astro";
 import {
   asGraph,
   faqPageSchema,
   howToSchema,
   organizationSchema,
   personSchema,
+  pricingSchema,
   speakableSchema,
   websiteSchema,
 } from "~/lib/jsonld";
@@ -27,6 +30,8 @@ import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import { getHeroSlides } from "~/lib/heroSlides";
+import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import { resolveServiceContent, serviceDefinitions } from "~/lib/services";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -57,10 +62,34 @@ const process = await cmsFor("process", lang, {
   headlineAccent: t.process.headlineAccent,
   steps: t.process.steps,
 });
+/**
+ * The four rates as an `OfferCatalog`, moved here with the price list.
+ *
+ * They used to be emitted by `/preise`. That page is gone — the list is a
+ * drawer on this page now — and structured data has to live on the page whose
+ * content it describes. Dropping it with the page would have quietly removed
+ * the four `Offer` entries from everything that reads them; this is the same
+ * data on the URL that now carries the prices.
+ */
+const pricing = await getPricingContent(lang);
+const pricedServices = await Promise.all(
+  serviceDefinitions.map(async (definition) => ({
+    definition,
+    content: await resolveServiceContent(definition, lang),
+  })),
+);
+
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
   websiteSchema(),
+  pricingSchema(
+    pricedServices.map(({ definition, content }) => ({
+      name: content.title,
+      description: content.summary,
+      rate: getServiceRate(pricing, definition.id),
+    })),
+  ),
   faqPageSchema(faq.items),
   howToSchema(`${process.headline} ${process.headlineAccent}`, process.steps),
   {
@@ -105,4 +134,18 @@ const titles = {
     <Contact />
   </main>
   <Footer />
+
+  {/* OUTSIDE `<main>` and outside the footer, and that is load-bearing: both
+      of those carry the push transform, and a fixed panel inside a transformed
+      element is positioned against that element instead of the viewport — it
+      would slide away with the very page it is pushing.
+
+      The list inside is server-rendered, so the prices are in the HTML for a
+      crawler and for a visitor without JavaScript whether or not the drawer is
+      ever opened. `client:idle`: nothing here is needed for the first paint,
+      and the island only has to be listening by the time somebody reaches for
+      a price. */}
+  <PricingDrawer client:idle lang={lang}>
+    <PricingList lang={lang} headingLevel={3} />
+  </PricingDrawer>
 </Layout>

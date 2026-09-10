@@ -43,7 +43,10 @@ export interface SitemapEntry {
  */
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
   { de: "/", en: "/en/", changefreq: "weekly", priority: 1.0 },
-  { de: "/preise", en: "/en/preise", changefreq: "monthly", priority: 0.8 },
+  // `/preise` is deliberately absent: the price list became a drawer on the
+  // home page, and that URL now answers with a 301 to it (see
+  // `pages/preise.astro`). A redirect in a sitemap is a crawl error, not a
+  // hint — the destination is already listed above.
   // Lower than a service page on purpose: it is one person's contact card, so
   // it earns a place in the index but should not compete with the pages that
   // describe what is for sale.

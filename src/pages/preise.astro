@@ -1,6 +1,22 @@
 ---
-import PricingPage from "~/components/PricingPage.astro";
+/**
+ * `/preise` is retired — the price list is a drawer on the home page now.
+ *
+ * A 301 rather than a deletion, and rather than a 404. This URL was indexed
+ * (priority 0.8 in the sitemap), it is in the footer of every page that has
+ * been crawled, and it is the address anyone who bookmarked the prices holds.
+ * Answering it with "not found" throws that away; answering it with a
+ * permanent redirect passes it to the page that now carries the content.
+ *
+ * The target is the pricing band's own anchor, so a visitor arriving from an
+ * old link lands where the prices are rather than at the top of a long home
+ * page. The drawer itself needs a click — a redirect that also sprang a panel
+ * open would be a surprise, and the band it lands on says plainly what it is.
+ *
+ * Same treatment as a withdrawn service (`pages/leistungen/[slug].astro`); see
+ * `lib/retiredServices.ts` for that precedent.
+ */
+export const prerender = false;
+
+return Astro.redirect("/#pricing-teaser", 301);
 ---
-
-<PricingPage lang="de" />
-

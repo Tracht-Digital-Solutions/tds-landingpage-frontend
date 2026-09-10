@@ -68,6 +68,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         ))}
         <a
           href={pricingHref}
+          data-pricing-open
           class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
         >
           {t.nav.pricing}
@@ -139,6 +140,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     <li>
       <a
         href={pricingHref}
+        data-pricing-open
         data-menu-link
         class="tds-mobile-menu__link"
       >
@@ -231,7 +233,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     backdrop-filter: blur(22px) saturate(150%);
     transition:
       background-color 250ms ease,
-      box-shadow 250ms ease;
+      box-shadow 250ms ease,
+      /* See the note in the `lg` block: this scoped list out-specifies the
+         global one, so the drawer's shift has to be named here too or the bar
+         snaps while the page glides. Below `md` the page does not shift at
+         all — the panel covers instead — and then this simply never runs. */
+      translate 560ms var(--pricing-ease);
   }
 
   /* Dark mode — same glass, a slightly denser tint. There is no rim to
@@ -309,7 +316,15 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         max-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
         top 320ms cubic-bezier(0.4, 0, 0.2, 1),
         background-color 250ms ease,
-        box-shadow 250ms ease;
+        box-shadow 250ms ease,
+        /* The pricing drawer pushes the whole page left, this bar included
+           (`--pricing-shift` in global.css). Named HERE because this list is
+           an Astro-scoped rule and therefore out-specifies the global one:
+           without the entry the header would arrive at its shifted position
+           in a single frame while the page beside it glides, which reads as
+           the header being broken rather than as a transition that was
+           simply not declared. */
+        translate 560ms var(--pricing-ease);
     }
 
     /* Scrolled away from the top — the bar lifts off the edge and shrinks
