@@ -55,10 +55,17 @@ export default defineConfig({
   trailingSlash: "ignore",
   build: {
     format: "directory",
-    // Inline small stylesheets into <head> so the critical CSS
-    // ships in the initial HTML and the browser doesn't have to
-    // round-trip for a separate .css file before paint.
-    inlineStylesheets: "auto",
+    // Every stylesheet ships inside the HTML, so the browser never waits on a
+    // round trip for a .css file before the first paint.
+    //
+    // `"always"`, not `"auto"`: auto inlines only files under Vite's 4 KB
+    // limit, and every stylesheet of this site is larger — auto inlined
+    // nothing. Measured 2026-09-12 (Lighthouse, mobile): the home page waited
+    // on three render-blocking CSS requests, estimated at 1.2 s of its LCP.
+    // The price is that CSS is no longer cached across pages (about 40 KB
+    // brotli per document), and a cached page can no longer point at a hashed
+    // stylesheet that a deploy has removed.
+    inlineStylesheets: "always",
   },
   // Astro's default image service is `sharp`. Pinning it
   // explicitly + raising the quality default so future `<Image />`

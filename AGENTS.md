@@ -70,6 +70,13 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   - The photo is a `<picture>` whose source applies from `48rem`; phones get a
     1×1 inline GIF and download nothing (the old `<img class="hidden md:block">`
     cost every phone 60 KB it never showed).
+- **Stylesheets are inlined** (`build.inlineStylesheets: "always"`). With
+  `"auto"` every stylesheet was larger than Vite's 4 KB limit, so nothing was
+  inlined and the home page waited on three render-blocking CSS requests.
+  Measured 2026-09-12 with Lighthouse on mobile: LCP 3.6 s → 2.6 s, performance
+  84 → 95. Each document now carries its CSS (about 40 KB brotli); do not
+  switch back without measuring. Measure through compression: `astro preview`
+  sends none, and an uncompressed run charges seconds the host never pays.
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
   accept a slug or href from CMS content.
