@@ -3,12 +3,15 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { resolveSnapshotDemos } from "./demos";
 import {
+  LOGO,
   PORTRAIT_WIDTHS,
   PREVIEW_VARIANT_WIDTHS,
   SERVICE_PHOTO_VARIANT_WIDTHS,
+  logoSrc,
   portraitSrc,
   srcsetFor,
   variantSrc,
+  type LogoPart,
 } from "./imageVariants";
 import { resolveSnapshotPreviews } from "./referencePreviews";
 import { serviceDefinitions } from "./services";
@@ -65,6 +68,14 @@ describe("every srcset candidate is committed", () => {
   it("for the portrait", async () => {
     for (const width of PORTRAIT_WIDTHS) {
       await expect(onDisk(portraitSrc(width)), portraitSrc(width)).resolves.toBeUndefined();
+    }
+  });
+
+  it("for the header logo", async () => {
+    for (const part of Object.keys(LOGO) as LogoPart[]) {
+      for (const width of LOGO[part].widths) {
+        await expect(onDisk(logoSrc(part, width)), logoSrc(part, width)).resolves.toBeUndefined();
+      }
     }
   });
 });

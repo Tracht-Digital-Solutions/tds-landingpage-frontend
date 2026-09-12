@@ -77,6 +77,13 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   84 → 95. Each document now carries its CSS (about 40 KB brotli); do not
   switch back without measuring. Measure through compression: `astro preview`
   sends none, and an uncompressed run charges seconds the host never pays.
+- **Nothing in the shared chrome hydrates at `client:load`.** `ThemeToggle` and
+  `SmoothScroll` were the only two, and they alone pulled React and Lenis into
+  the requests a phone waits on before the headline; the header logo was a
+  1289px PNG. With both at `client:idle` and the logo served as pre-sized
+  lossless WebP (`LOGO` in `lib/imageVariants.ts`), mobile LCP went
+  2.6 s → 2.3 s and performance 95 → 98. An island above the fold needs a
+  measured reason to be `client:load`.
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
   accept a slug or href from CMS content.

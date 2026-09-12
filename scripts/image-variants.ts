@@ -17,10 +17,13 @@ import path from "node:path";
 import sharp from "sharp";
 import { writePreviewVariants } from "./capture-preview";
 import {
+  LOGO,
   PORTRAIT_WIDTHS,
   SERVICE_PHOTO_VARIANT_WIDTHS,
+  logoSrc,
   portraitSrc,
   variantSrc,
+  type LogoPart,
 } from "../src/lib/imageVariants";
 
 const root = process.cwd();
@@ -43,6 +46,23 @@ async function main(): Promise<void> {
   console.log(`portrait ${meta.width}×${meta.height}`);
   for (const width of PORTRAIT_WIDTHS) {
     await resize(portrait, fromPublic(portraitSrc(width)), width);
+  }
+
+  // The header logo. Both originals stay where they are; the served copies are
+  // LOSSLESS WebP, because a wordmark with hard edges and an alpha channel is
+  // exactly what lossy compression smears.
+  for (const part of Object.keys(LOGO) as LogoPart[]) {
+    const logo = LOGO[part];
+    for (const width of logo.widths) {
+      const target = fromPublic(logoSrc(part, width));
+      await fs.mkdir(path.dirname(target), { recursive: true });
+      await sharp(fromPublic(logo.original))
+        .resize({ width, withoutEnlargement: true })
+        .webp({ lossless: true, effort: 6 })
+        .toFile(target);
+      // eslint-disable-next-line no-console
+      console.log(`  ${path.relative(root, target)}`);
+    }
   }
 
   // Service photos: originals are `NN-slug.webp`; anything with a width suffix

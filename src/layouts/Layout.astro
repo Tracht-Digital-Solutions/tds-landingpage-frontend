@@ -193,8 +193,11 @@ const showCookieNotice = !bare;
     >
       {tFor(lang).a11y.skipToContent}
     </a>
-    {!bare && <SmoothScroll client:load />}
-    {/* Non-critical chrome — defer to idle so it never blocks first paint. */}
+    {/* Non-critical chrome — deferred to idle so it never competes with the
+        first paint. SmoothScroll as well: until it hydrates, an anchor jump is
+        the browser's own smooth scroll, and `client:load` put its chunk (Lenis
+        and React) among the requests a phone waited on before the headline. */}
+    {!bare && <SmoothScroll client:idle />}
     {!bare && <ScrollProgress client:idle />}
     {!bare && <CustomCursor client:idle />}
     <slot />

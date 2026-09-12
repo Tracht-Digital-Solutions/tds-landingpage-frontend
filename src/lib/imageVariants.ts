@@ -63,3 +63,28 @@ export function portraitSrc(width: (typeof PORTRAIT_WIDTHS)[number]): string {
 export function portraitSrcset(): string {
   return PORTRAIT_WIDTHS.map((width) => `${portraitSrc(width)} ${width}w`).join(", ");
 }
+
+/**
+ * The header logo — the mark and the wordmark — each served as lossless WebP
+ * copies of its committed original (`scripts/image-variants.ts`).
+ *
+ * The header draws both 24–48px tall: the mark at most 71px wide, the wordmark
+ * at most 97px. The wordmark's original is a 1289px PNG of 35 KB, and it was
+ * fetched before the headline on every phone. `width`/`height` are the
+ * originals' own, so the tags reserve the true ratio before the file arrives.
+ */
+export const LOGO = {
+  mark: { original: "/images/logo.webp", width: 713, height: 483, widths: [120, 240] },
+  letters: { original: "/images/logo-letters.png", width: 1289, height: 639, widths: [200, 400] },
+} as const;
+
+export type LogoPart = keyof typeof LOGO;
+
+/** `/images/logo/<part>-<width>.webp`. */
+export function logoSrc(part: LogoPart, width: number): string {
+  return `/images/logo/${part}-${width}.webp`;
+}
+
+export function logoSrcset(part: LogoPart): string {
+  return LOGO[part].widths.map((width) => `${logoSrc(part, width)} ${width}w`).join(", ");
+}
