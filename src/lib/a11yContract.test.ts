@@ -203,3 +203,45 @@ describe("the rest of the home page", () => {
     );
   });
 });
+
+describe("the service finder", () => {
+  const island = code(read("src/components/islands/ServiceFinder.tsx"));
+  const section = read("src/components/sections/ServiceFinder.astro");
+
+  it("asks every question as a fieldset whose legend is the question", () => {
+    expect(island).toMatch(/<fieldset/);
+    expect(island).toMatch(/<legend[^>]*className="finder__question"/);
+  });
+
+  it("answers with native checkboxes and radios inside their labels", () => {
+    expect(island).toMatch(/type="checkbox"/);
+    expect(island).toMatch(/type="radio"/);
+    expect(island).not.toMatch(/role="(checkbox|radio|option|listbox)"/);
+  });
+
+  it("moves focus to the next question and to the result, but not on hydration", () => {
+    expect(island).toMatch(/tabIndex=\{-1\}/);
+    expect(island).toMatch(/firstRender\.current/);
+    expect(island).toMatch(/\.focus\(\)/);
+  });
+
+  it("says a missing answer in words", () => {
+    expect(island).toMatch(/role="alert"/);
+    expect(island).not.toMatch(/disabled=\{/);
+  });
+
+  it("hydrates when visible, so it never joins the first paint", () => {
+    expect(section).toMatch(/<ServiceFinderIsland[^>]*client:visible/);
+  });
+
+  it("sends nothing itself and hands its result to the contact form", () => {
+    expect(island).not.toMatch(/fetch\(/);
+    expect(island).toMatch(/handOffContactDraft\(/);
+    expect(read("src/components/islands/ContactForm.tsx")).toMatch(/CONTACT_DRAFT_EVENT/);
+  });
+
+  it("sits on the home page right after the services", () => {
+    expect(read("src/components/HomePage.astro")).toMatch(/<Services \/>\s*<ServiceFinder \/>/);
+    expect(read("src/components/sections/Services.astro")).toMatch(/href="#leistungsfinder"/);
+  });
+});

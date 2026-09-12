@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
 import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
+import { CONTACT_DRAFT_EVENT, CONTACT_DRAFT_KEY } from "~/lib/contactDraft";
 
 /**
  * Where this form posts if the host has not been configured.
@@ -64,6 +65,8 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const {
     register,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(ContactSchema),
@@ -73,6 +76,39 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   useEffect(() => {
     if (submitState === "success") successHeadingRef.current?.focus();
   }, [submitState]);
+
+  // A draft from the service finder (`lib/contactDraft.ts`): read from storage
+  // when this form hydrates after the jump down here, or taken from the event
+  // when it is already live. Text in the field, nothing else — the visitor
+  // still reads, edits and sends. What they typed themselves is never replaced;
+  // the draft goes underneath it.
+  useEffect(() => {
+    const apply = (draft: unknown) => {
+      if (typeof draft !== "string" || draft.trim() === "") return;
+      const current = String(getValues("message") ?? "");
+      if (current.includes(draft.trim())) return;
+      setValue("message", current.trim() ? `${current.trimEnd()}\n\n${draft}` : draft, { shouldDirty: true });
+    };
+    try {
+      const stored = window.sessionStorage.getItem(CONTACT_DRAFT_KEY);
+      if (stored) {
+        apply(stored);
+        window.sessionStorage.removeItem(CONTACT_DRAFT_KEY);
+      }
+    } catch {
+      // Storage blocked: the event below still delivers to a live form.
+    }
+    const onDraft = (event: Event) => {
+      apply((event as CustomEvent<unknown>).detail);
+      try {
+        window.sessionStorage.removeItem(CONTACT_DRAFT_KEY);
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener(CONTACT_DRAFT_EVENT, onDraft);
+    return () => window.removeEventListener(CONTACT_DRAFT_EVENT, onDraft);
+  }, [getValues, setValue]);
 
   useEffect(
     () => () => {

@@ -162,6 +162,12 @@ function layoutAudit() {
       const card = el.offsetParent.getBoundingClientRect();
       if (card.width * card.height > r.width * r.height) r = card;
     }
+    // A checkbox or radio is hit through its <label> as well, so the label's
+    // box is the target (WCAG 2.5.8) — not the 18px control inside it.
+    for (const label of el.labels ?? []) {
+      const box = label.getBoundingClientRect();
+      if (box.width * box.height > r.width * r.height) r = box;
+    }
     if (r.width < 44 || r.height < 44) small.push(`${text(el.getAttribute("aria-label") || el.textContent).slice(0, 28)} ${Math.round(r.width)}×${Math.round(r.height)}`);
   }
 

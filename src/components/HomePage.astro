@@ -9,7 +9,8 @@
  *
  * ### The order (redesign, 2026-09)
  *
- * Benefit → trust → services → client results → process → example sites →
+ * Benefit → trust → services → the service finder (for "which one is mine?")
+ * → client results → process → example sites →
  * journal → prices → questions → contact. Each section answers the question a
  * visitor has at that point, and the page's primary action — the first
  * conversation — is offered once per section at most: in the hero, beside the
@@ -24,6 +25,7 @@ import Footer from "~/components/Footer.astro";
 import Hero from "~/components/sections/Hero.astro";
 import About from "~/components/sections/About.astro";
 import Services from "~/components/sections/Services.astro";
+import ServiceFinder from "~/components/sections/ServiceFinder.astro";
 import CustomerCases from "~/components/sections/CustomerCases.astro";
 import Process from "~/components/sections/Process.astro";
 import Showcase from "~/components/sections/Showcase.astro";
@@ -128,6 +130,7 @@ const titles = {
     <Hero lang={lang} hero={hero} trust={trust} />
     <About />
     <Services />
+    <ServiceFinder />
     <CustomerCases />
     <Process />
     <Showcase />

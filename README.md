@@ -24,14 +24,16 @@ organizing the content around one clear responsibility:
    three verifiable facts
 2. Wieso ich? / Why me?
 3. Four service areas, each with a typical starting point, result and scope
-4. Client projects (approved reference cases only)
-5. Process, with what to expect from the first conversation
-6. Sample sites: our own demos (fictional companies) and own projects, labelled
+4. Service finder: three questions that point to one or more services and hand
+   the result to the contact form as a draft
+5. Client projects (approved reference cases only)
+6. Process, with what to expect from the first conversation
+7. Sample sites: our own demos (fictional companies) and own projects, labelled
    as such
-7. Compact journal teaser
-8. Prices: every rate and how a price comes about
-9. FAQ
-10. Contact
+8. Compact journal teaser
+9. Prices: every rate and how a price comes about
+10. FAQ
+11. Contact
 
 The former tech-stack and current-topics sections, the positioning callout, the
 hero slider and the pricing drawer are no longer part of the home-page story.

@@ -10,6 +10,7 @@ import {
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceCard from "~/components/ui/ServiceCard.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
+import { FINDER_SECTION } from "~/lib/serviceFinder";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -42,8 +43,19 @@ const services = await Promise.all(
       headingClass="mb-6"
       bar
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12 text-center md:text-left mx-auto md:mx-0">
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-3 text-center md:text-left mx-auto md:mx-0">
       <Emphasis text={servicesContent.intro} />
+    </p>
+    {/* For the visitor who reads four tiles and still cannot say which one is
+        theirs: the finder right below asks instead. */}
+    <p class="mb-10 text-center md:text-left">
+      <a
+        href="#leistungsfinder"
+        class="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors"
+      >
+        {FINDER_SECTION[lang].servicesLink}
+        <span aria-hidden="true">↓</span>
+      </a>
     </p>
 
     {/* One surface divided into four, not four cards floating on sand.
