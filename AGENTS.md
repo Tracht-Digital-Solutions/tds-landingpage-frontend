@@ -22,7 +22,8 @@ Use current code, configuration and tests as the source of truth. Keep setup in
 - **The home page is `components/HomePage.astro`**, for both language trees;
   `pages/index.astro` and `pages/en/index.astro` are wrappers. Since the 2026-09
   redesign its order follows the questions a visitor has, in sequence:
-  Hero (benefit + trust card) → Wieso ich? → Leistungen → Kundenprojekte
+  Hero (benefit + trust card) → Wieso ich? → Leistungen → Leistungs-Finder
+  (`sections/ServiceFinder.astro`) → Kundenprojekte
   (`sections/CustomerCases.astro`) → Vorgehen (with the first-conversation card)
   → Beispielseiten (`sections/Showcase.astro`) → compact Journal → Preise
   (`sections/Pricing.astro`) → FAQ → Kontakt. The positioning band, the pricing
@@ -43,6 +44,18 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   down while `#hero` or `#contact` is on screen, and on short viewports while
   the cookie notice is open; it publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
+- **The service finder** (`sections/ServiceFinder.astro` → `islands/ServiceFinder.tsx`,
+  questions, weights and copy in `lib/serviceFinder.ts`) asks three things —
+  topic, recognised starting points, stage — and recommends one or more
+  services, each with the visitor's own answers as the reason; it never comes
+  back empty. Its starting points are the services' `situations`, resolved on
+  the server like everywhere else, so a panel edit changes the finder too; the
+  island never imports the catalogue. It sends nothing: the result becomes a
+  draft in the contact form's message field (`lib/contactDraft.ts` —
+  sessionStorage for a form that hydrates later, an event for a live one), and
+  text the visitor typed is never replaced. `client:visible`. Its copy is
+  code-owned (no CMS block) and follows the same rules as the rest: Sie-Form,
+  no free and no timed first conversation.
 - **The hero is `sections/Hero.astro` — server-rendered, no island.**
   - The eyebrow names the audience, the H1 the benefit, the sub (`#hero-sub`)
     the problems and the outcome, followed by two real anchors, one of them

@@ -1,0 +1,338 @@
+---
+/**
+ * Leistungs-Finder — the section right below the services.
+ *
+ * The four tiles above describe the offers; this section asks the visitor
+ * instead (`lib/serviceFinder.ts` has the questions and the reasoning). The
+ * services' starting points and titles are resolved HERE, on the server, from
+ * the same content the service pages render, and handed to the island as
+ * props — the island never imports the catalogue.
+ *
+ * `client:visible`: the finder sits a screen or more below the fold, and
+ * nothing of it may compete with the first paint (see AGENTS.md on
+ * `client:load`). Its server-rendered markup already shows the first question.
+ *
+ * The island renders its own markup, which carries no Astro scope — so every
+ * rule below is `:global`, anchored on the `.finder` root to stay contained.
+ */
+import { localizePath, resolveLang } from "~/lib/i18n";
+import { resolveServiceContent, serviceDefinitions, serviceHref } from "~/lib/services";
+import { FINDER_SECTION } from "~/lib/serviceFinder";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import ServiceFinderIsland from "~/components/islands/ServiceFinder";
+
+const lang = resolveLang(Astro.currentLocale);
+const section = FINDER_SECTION[lang];
+const services = await Promise.all(
+  serviceDefinitions.map(async (definition) => {
+    const content = await resolveServiceContent(definition, lang);
+    return {
+      id: definition.id,
+      title: content.title,
+      summary: content.summary,
+      href: serviceHref(definition, lang),
+      situations: content.situations.slice(0, 4),
+    };
+  }),
+);
+const contactHref = `${localizePath("/", lang)}#contact`;
+---
+
+<section id="leistungsfinder" class="section-spacing tds-tone-sand" aria-labelledby="finder-heading">
+  <div class="max-w-5xl mx-auto px-6 md:px-8 lg:px-12">
+    <SectionHeader
+      headline={section.headline}
+      headlineAccent={section.headlineAccent}
+      id="finder-heading"
+      headingClass="mb-6"
+    />
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-10 text-center md:text-left mx-auto md:mx-0">
+      {section.intro}
+    </p>
+    <ServiceFinderIsland client:visible lang={lang} services={services} contactHref={contactHref} />
+  </div>
+</section>
+
+<style>
+  :global(.finder) {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border-radius: 6px;
+    background: var(--lp-surface-card, var(--color-card));
+  }
+
+  /* Progress: the words carry it; the bar only repeats it for the eye. */
+  :global(.finder__progress) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    font: 500 0.75rem/1.2 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  :global(.finder__bar) {
+    flex: 1;
+    max-width: 10rem;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--color-line);
+  }
+  :global(.finder__bar i) {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent);
+  }
+
+  :global(.finder__fieldset) {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  /* Takes focus on a step change (tabIndex -1): a target for the screen
+     reader and the scroll, not a keyboard stop, so no ring. */
+  :global(.finder__question) {
+    padding: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+    line-height: 1.2;
+    color: var(--color-black);
+    outline: none;
+    text-wrap: balance;
+  }
+  :global(.finder__help) {
+    margin: 0.35rem 0 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+  }
+
+  :global(.finder__options) {
+    display: grid;
+    gap: 0.625rem;
+  }
+  @media (min-width: 40rem) {
+    :global(.finder__options) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  :global(.finder__option) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-paper);
+    cursor: pointer;
+    transition:
+      border-color 150ms var(--tds-ease-out),
+      background-color 150ms var(--tds-ease-out);
+  }
+  :global(.finder__option:hover) {
+    border-color: var(--color-primary);
+  }
+  :global(.finder__option:has(:checked)) {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 7%, var(--color-paper));
+  }
+  /* The ring goes around the whole answer, the control itself draws none. */
+  :global(.finder__option:has(:focus-visible)) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  :global(.finder__input) {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0.15rem 0 0;
+    accent-color: var(--color-primary);
+  }
+  :global(.finder__input:focus-visible) {
+    outline: none;
+  }
+  :global(.finder__option-body) {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  :global(.finder__option-label) {
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-black);
+  }
+  :global(.finder__option-hint) {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+
+  :global(.finder__hint) {
+    margin: 1rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--tds-eyebrow-color, var(--color-accent));
+  }
+
+  :global(.finder__nav),
+  :global(.finder__actions) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  :global(.finder__nav) {
+    justify-content: flex-end;
+  }
+  :global(.finder__cta) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border: 0;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: var(--color-surface-navy);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  :global(.finder__cta:hover) {
+    background: var(--color-surface-accent);
+  }
+  :global(.finder__secondary) {
+    min-height: 3rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--tds-radius-pill, 100px);
+    background: transparent;
+    color: var(--color-black);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  :global(.finder__secondary:hover) {
+    border-color: var(--color-primary);
+  }
+
+  :global(.finder__result-title) {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    line-height: 1.2;
+    color: var(--color-black);
+    outline: none;
+  }
+  :global(.finder__matches) {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Side by side where there is room: a result is compared, not read top to
+     bottom — and a full-width card ran its summary to 110 characters a line. */
+  @media (min-width: 48rem) {
+    :global(.finder__matches) {
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    }
+  }
+  :global(.finder__match) {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-paper);
+  }
+  :global(.finder__match:first-child) {
+    border-color: var(--color-primary);
+  }
+  :global(.finder__rank) {
+    margin: 0 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tds-eyebrow-color, var(--color-accent));
+  }
+  :global(.finder__match-title) {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.25;
+    color: var(--color-black);
+  }
+  :global(.finder__summary) {
+    max-width: 65ch;
+    margin: 0 0 0.875rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  :global(.finder__why-label) {
+    margin: 0 0 0.35rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-black);
+  }
+  :global(.finder__why) {
+    display: grid;
+    gap: 0.3rem;
+    max-width: 65ch;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--color-black);
+  }
+  :global(.finder__why li) {
+    display: flex;
+    gap: 0.5rem;
+  }
+  :global(.finder__tick) {
+    flex: none;
+    color: var(--color-accent);
+  }
+  /* Pinned to the card's foot, so the links line up across cards of different length. */
+  :global(.finder__detail) {
+    align-self: flex-start;
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+  :global(.finder__detail:hover) {
+    color: var(--color-accent);
+  }
+  :global(.finder__note) {
+    margin: 1.25rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+  }
+  :global(.finder__handoff) {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.finder__option),
+    :global(.finder__cta) {
+      transition: none;
+    }
+  }
+</style>
