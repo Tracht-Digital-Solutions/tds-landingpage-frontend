@@ -1,0 +1,16 @@
+---
+/**
+ * `/kontakt` answers with a 301 to the contact section of the home page.
+ *
+ * There is no contact page and there does not need to be one: the form, the
+ * direct channels and what happens after a message all sit in `#contact`. But
+ * `/kontakt` is the address people type, print and link to, and it answered
+ * with a 404 until 2026-09. A redirect is the whole fix.
+ *
+ * Distinct from `kontakt.vcf.ts`, which is the vCard at `/kontakt.vcf`.
+ * Not in the sitemap: a redirect listed there is a crawl error.
+ */
+export const prerender = false;
+
+return Astro.redirect("/#contact", 301);
+---

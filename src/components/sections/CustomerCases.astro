@@ -1,0 +1,107 @@
+---
+/**
+ * Kundenprojekte — delivered work for real clients, and ONLY that.
+ *
+ * ### Why this is its own section again
+ *
+ * The cases shared one carousel with the example sites for a while (and the
+ * hero's slider mixed them too). Nothing on a card said which was a client's
+ * project and which was a demo about a company that does not exist — and that
+ * is the one distinction a visitor judging this business by its work needs
+ * most. So: client cases here, labelled "Kundenprojekt"; the example sites in
+ * `Showcase.astro`, labelled by origin.
+ *
+ * A grid, not a carousel. There are two cases; a scroller for two cards hides
+ * half of the evidence behind a gesture.
+ *
+ * ### Rules this inherits
+ *
+ * - It reads `referenceCases` directly, not `resolveServiceContent`. The
+ *   documented empty-array off-switch on a service block therefore does NOT
+ *   reach the home page: removing a named customer from here is a code change.
+ * - A screenshot renders only for a `named` case with `previewAllowed` whose
+ *   site still answers (`getReferencePreviews`). A case WITH a picture leads,
+ *   because the first card should show a built page.
+ * - Renders nothing at all without a case — no heading, no "coming soon".
+ */
+import { resolveLang } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+import { referenceCases, articleUrl } from "~/lib/references";
+import { getReferencePreviews } from "~/lib/referencePreviews";
+import { getServiceById, serviceHref } from "~/lib/services";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
+import ReferenceCard from "~/components/ui/ReferenceCard.astro";
+
+const lang = resolveLang(Astro.currentLocale);
+const content = await cmsFor("references_home", lang, getHomeContent(lang).referencesHome);
+
+// Consent, a live site and a captured screenshot — a case missing any one of
+// the three is absent from this map and its card renders without a band.
+const previews = await getReferencePreviews();
+
+const cards = referenceCases
+  .map((entry) => ({
+    id: entry.id,
+    preview: previews.get(entry.id) ?? null,
+    reference: entry.content[lang],
+    // EVERY service the case used. The label comes from the committed catalog,
+    // not through `cmsFor`: a badge names a page this site owns.
+    services: entry.services.map((id) => {
+      const service = getServiceById(id);
+      return { label: service.fallback[lang].title, href: serviceHref(service, lang) };
+    }),
+    articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
+    siteHref: entry.siteUrl,
+  }))
+  // Stable sort: a case that shows its work leads, the catalog order holds
+  // otherwise.
+  .sort((a, b) => Number(b.preview !== null) - Number(a.preview !== null));
+
+const badge = lang === "de" ? "Kundenprojekt" : "Client project";
+---
+
+{
+  cards.length > 0 && (
+    <section id="cases" class="section-spacing" aria-labelledby="cases-heading">
+      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+        <div class="max-w-2xl mx-auto md:mx-0">
+          <SectionHeader
+            headline={content.headline}
+            headlineAccent={content.headlineAccent}
+            id="cases-heading"
+            headingClass="mb-6"
+          />
+          <p class="text-[var(--color-muted)] leading-relaxed mb-3 text-center md:text-left">
+            <Emphasis text={content.intro} />
+          </p>
+          <p class="text-sm text-[var(--color-muted)] text-center md:text-left">{content.label}</p>
+        </div>
+
+        <div class="cases-grid">
+          {cards.map((card) => (
+            <ReferenceCard card={card} lang={lang} badge={badge} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  /* `start`, not stretch: only one of the cards carries a screenshot band, and
+     stretching the other to its height would open a hole under its text. */
+  .cases-grid {
+    display: grid;
+    gap: 1rem;
+    align-items: start;
+    margin-top: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  }
+  @media (min-width: 768px) {
+    .cases-grid {
+      gap: 1.5rem;
+    }
+  }
+</style>

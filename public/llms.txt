@@ -31,7 +31,7 @@ Vier Leistungen, jede mit einer eigenen Detailseite:
 ## Wichtige Seiten
 
 - Homepage: https://tracht-digital.de/
-- Preise (Stundensätze): https://tracht-digital.de/preise
+- Preise (Stundensätze): https://tracht-digital.de/#preise
 - Journal / Blog: https://blog.tracht-digital.de/
 - Englisches Journal: https://blog.tracht-digital.de/en/
 - Kontaktformular: https://tracht-digital.de/#contact

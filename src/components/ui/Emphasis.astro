@@ -3,12 +3,6 @@
  * Renders a plain copy string, turning `*marked*` runs into an accented
  * `<strong>`. See `~/lib/emphasis` for why the marker is an asterisk and
  * why an unpaired one is left alone.
- *
- * There is a React twin of this markup inside `islands/Hero.tsx` — the hero
- * is an island and cannot render an `.astro` component. Both call
- * `splitEmphasis`, so the PARSING has one source; only the four lines of
- * markup are stated twice, which is the same arrangement `AccentLetters`
- * already uses for the same reason.
  */
 import { splitEmphasis } from "~/lib/emphasis";
 

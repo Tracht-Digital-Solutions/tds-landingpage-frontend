@@ -83,22 +83,19 @@ export default defineConfig({
       // pass fails in ways whose message points nowhere near the cause.
       //
       // The island libraries are bundled too, and not only to shrink the
-      // shipped tree: left external, `motion` resolved `react` by walking UP
-      // out of the release directory into the development checkout's
-      // node_modules, so island SSR ran against a SECOND React instance and
-      // every hook threw "Cannot read properties of null (reading 'useState')".
-      // On the host, where there is no parent node_modules, the same setup
-      // fails with a bare ERR_MODULE_NOT_FOUND instead. Bundling them leaves
-      // exactly one React — the shipped one.
+      // shipped tree: left external, an island library that imports `react`
+      // (it was `motion`, removed in the 2026-09 redesign) resolved it by
+      // walking UP out of the release directory into the development
+      // checkout's node_modules, so island SSR ran against a SECOND React
+      // instance and every hook threw "Cannot read properties of null
+      // (reading 'useState')". On the host, where there is no parent
+      // node_modules, the same setup fails with a bare ERR_MODULE_NOT_FOUND
+      // instead. Bundling them leaves exactly one React — the shipped one, so
+      // a new island library that imports `react` belongs in this list.
       noExternal: [
         /^@tracht-digital-solutions\//,
         "marked",
         "zod",
-        // The whole motion family in one pattern: `motion` re-exports
-        // `framer-motion`, which in turn imports `motion-dom` and
-        // `motion-utils`. Listing them one at a time meant three rebuilds,
-        // each revealing the next name.
-        /^(framer-)?motion(-dom|-utils)?$/,
         "lenis",
         "react-hook-form",
         /^@hookform\//,

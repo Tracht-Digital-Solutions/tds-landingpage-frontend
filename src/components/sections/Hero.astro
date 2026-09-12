@@ -1,0 +1,439 @@
+---
+/**
+ * Hero — the page's first answer to "is this for me, and what do I get?"
+ *
+ * Left: who it is for (eyebrow), the benefit (H1), the problems and the
+ * outcome (sub), and two actions — one primary. Right from `lg`, below the
+ * actions on smaller screens: three facts a visitor can check, each linking to
+ * the section that proves it.
+ *
+ * ### What replaced what, so nobody restores it
+ *
+ * - **It is `.astro`, not a React island.** The island rendered its eyebrow,
+ *   headline, sub and buttons as motion elements, and their server-rendered
+ *   markup carried the entrance's start state: `style="opacity:0"`. Until React
+ *   hydrated, the most important screen of the site was blank — and on a phone
+ *   the largest thing to paint first was the cookie notice, which became the
+ *   page's LCP element at 4.1 s. The copy is plain HTML now and paints with the
+ *   first frame; the entrance is a transform-only CSS rise, off under reduced
+ *   motion. No `motion` import, no island, no hydration cost.
+ * - **No showcase slider.** It rotated every 6 s through six slides, put a demo
+ *   site's name in the page's first `<h2>`, and gave a real customer case and a
+ *   fictional demo the identical card. Customer cases and example sites have
+ *   their own, clearly labelled sections now (`CustomerCases`, `Showcase`).
+ * - **No brand motto above the H1.** "Digitale Lösungen, die wirklich passen."
+ *   said nothing a visitor could check; the eyebrow names the audience instead.
+ * - **No scroll hint.** The trust card is the reason to look further.
+ *
+ * ### Decoration
+ *
+ * Only in the hero's true negative space: below the actions on the left and in
+ * the lower right corner, both cut by the section's edge. Nothing sits behind
+ * the eyebrow, the headline, the sub, the buttons, the trust card or the fixed
+ * navigation — the diagonal that crossed the header and the capsule behind the
+ * eyebrow were removed for that reason, and `scripts/ux-audit.mjs` measures the
+ * overlap. The capsule, the quarter circle and the conduit start at `xl`: at
+ * 768 and 1024 px the actions and the trust card reach down into exactly that
+ * space (measured). Below `lg` there is no decoration at all.
+ *
+ * The photo is a `<picture>` whose source applies from `48rem`; below that the
+ * `<img>` holds a 1×1 inline GIF. It used to be a plain `<img class="hidden
+ * md:block">`, which every phone downloaded (60 KB) and never showed.
+ */
+import type { Lang } from "~/lib/i18n";
+import type { HomeHeroContent, ResolvedTrustFact } from "~/lib/homeContent";
+import Emphasis from "~/components/ui/Emphasis.astro";
+import CircuitRun from "~/components/ui/CircuitRun.astro";
+
+interface Props {
+  lang: Lang;
+  hero: HomeHeroContent;
+  trust: { title: string; facts: ResolvedTrustFact[] };
+}
+
+const { lang, hero, trust } = Astro.props;
+---
+
+<section
+  id="hero"
+  class="hero tds-wash relative min-h-svh flex flex-col justify-center overflow-hidden"
+  aria-labelledby="hero-heading"
+  lang={lang === "en" ? "en" : undefined}
+>
+  <div class="tds-decor" aria-hidden="true">
+    <picture>
+      <source media="(min-width: 48rem)" srcset="/images/sections/hero.webp" type="image/webp" />
+      <img
+        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        alt=""
+        width="1642"
+        height="958"
+        decoding="async"
+        class="hero-photo absolute inset-0 h-full w-full object-cover object-right"
+      />
+    </picture>
+    <span class="hero-photo-scrim hidden md:block absolute inset-0"></span>
+
+    {/* Große Kapsel, links unten angeschnitten — below the actions, never
+        behind the copy. */}
+    <span
+      class="tds-shape tds-shape--capsule tds-shape--navy hidden xl:block"
+      style="bottom: -7rem; left: -16rem; width: 32rem; height: 13rem;"
+    ></span>
+    {/* Viertelkreis unten rechts, über beide Ränder hinaus — under the trust
+        card's lower edge, not behind it. */}
+    <span
+      class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux hidden xl:block"
+      style="bottom: -15rem; right: -11rem; width: 26rem; height: 26rem;"
+    ></span>
+    {/* Ein einzelner Ocker-Knoten als kleiner Akzent. */}
+    <span
+      class="tds-shape tds-shape--capsule tds-shape--gold hidden lg:block"
+      style="bottom: 7%; left: 44%; width: 0.5rem; height: 0.5rem; opacity: 0.9;"
+    ></span>
+    <CircuitRun class="hidden xl:block bottom-[3%] left-[20%] w-[15rem] h-[8rem]" />
+  </div>
+
+  <div class="hero-body relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12 w-full">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="hero-eyebrow hero-rise">{hero.eyebrow}</p>
+
+        <h1 id="hero-heading" class="hero-title hero-rise">
+          {hero.headline}
+          {/* A real break, not a hope: `text-wrap: balance` would otherwise
+              pull the accent word up onto line one. */}
+          <br />
+          <span class="hero-accent">{hero.headlineAccent}</span>{" "}{hero.headlineSuffix}
+        </h1>
+
+        <p id="hero-sub" class="hero-sub hero-rise">
+          <Emphasis text={hero.sub} />
+        </p>
+
+        {/* Real anchors: they work before JavaScript, open in a new tab, and
+            `SmoothScroll` gives them the site's jump when it is there. */}
+        <div class="hero-actions hero-rise">
+          <a href="#contact" class="hero-cta hero-cta--primary">{hero.cta1}</a>
+          <a href="#services" class="hero-cta hero-cta--secondary">{hero.cta2}</a>
+        </div>
+      </div>
+
+      {
+        trust.facts.length > 0 && (
+          <div class="hero-trust hero-rise">
+            <h2 class="hero-trust__title">{trust.title}</h2>
+            <ul class="hero-trust__list">
+              {trust.facts.map((fact) => (
+                <li class="hero-trust__fact">
+                  <span class="hero-trust__mark" aria-hidden="true">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <div>
+                    <p class="hero-trust__name">{fact.title}</p>
+                    <p class="hero-trust__text">{fact.text}</p>
+                    <a class="hero-trust__link" href={fact.href}>
+                      {fact.linkLabel}
+                      <span aria-hidden="true">→</span>
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-top: 6.25rem;
+    padding-bottom: 3.5rem;
+  }
+  @media (min-width: 768px) {
+    .hero {
+      padding-top: 7rem;
+      padding-bottom: 5rem;
+    }
+  }
+  /* Landscape phones: the viewport is too short to hold the hero, so it
+     releases its minimum height rather than pushing everything below it. */
+  @media (max-height: 40rem) and (orientation: landscape) {
+    .hero {
+      min-height: auto;
+    }
+  }
+
+  /* Hero-Fotogrund. Ein GRUND, keine Abbildung: niedrige Deckkraft, und im
+     Dark Mode noch einmal tiefer. Der Scrim ist die PAPIERFARBE, die nach
+     rechts ausläuft — die linke Bildhälfte bleibt so ruhig wie die Fläche. */
+  .hero-photo {
+    opacity: 0.32;
+  }
+  :global(:root[data-theme="dark"]) .hero-photo {
+    opacity: 0.2;
+  }
+  .hero-photo-scrim {
+    background: linear-gradient(
+      to right,
+      var(--color-paper) 20%,
+      color-mix(in srgb, var(--color-paper) 72%, transparent) 62%,
+      color-mix(in srgb, var(--color-paper) 42%, transparent) 100%
+    );
+  }
+
+  .hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  /* `minmax(0, 1fr)`, not `1fr`: a grid track's automatic minimum is its
+     min-content, and a large headline would widen the track past the viewport. */
+  @media (min-width: 64rem) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(19rem, 25rem);
+      gap: 3.5rem;
+    }
+  }
+
+  .hero-copy {
+    min-width: 0;
+    text-align: center;
+  }
+  @media (min-width: 768px) {
+    .hero-copy {
+      text-align: left;
+    }
+  }
+
+  .hero-eyebrow {
+    max-width: 40rem;
+    margin: 0 auto 1.25rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.0625rem, 0.95rem + 0.55vw, 1.5rem);
+    line-height: 1.35;
+    color: var(--color-accent);
+  }
+
+  .hero-title {
+    max-width: 50rem;
+    margin: 0 auto 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.125rem, 1.35rem + 3.4vw, 4.25rem);
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+    color: var(--color-black);
+    font-variation-settings: "opsz" 144;
+    /* "Ansprechpartner" is one 15-letter word at 34px on a 320px phone. It
+       fits today; a longer CMS word must break at a syllable, not overflow. */
+    hyphens: auto;
+    overflow-wrap: break-word;
+  }
+  .hero-accent {
+    font-style: italic;
+    color: var(--color-accent);
+  }
+
+  .hero-sub {
+    max-width: 40rem;
+    margin: 0 auto 2rem;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+  @media (min-width: 768px) {
+    .hero-eyebrow,
+    .hero-title,
+    .hero-sub {
+      margin-inline: 0;
+    }
+    .hero-sub {
+      font-size: 1.125rem;
+    }
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  @media (min-width: 640px) {
+    .hero-actions {
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .hero-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out),
+      transform 200ms var(--tds-ease-out);
+  }
+  /* The primary action is the one filled, dark shape in the hero — clear
+     without a glow, a pulse or a countdown. */
+  .hero-cta--primary {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  .hero-cta--primary:hover {
+    background: var(--color-surface-accent);
+    transform: translateY(-2px);
+  }
+  .hero-cta--secondary {
+    background: color-mix(in srgb, var(--color-card) 88%, transparent);
+    color: var(--color-black);
+  }
+  .hero-cta--secondary:hover {
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-card));
+    color: var(--color-primary);
+  }
+
+  .hero-trust {
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+    padding: 1.5rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    text-align: left;
+  }
+  /* The copy turns left-aligned at 768px, so the card follows it there — a
+     centred card under a left-aligned column sat 112px off its edge. */
+  @media (min-width: 48rem) {
+    .hero-trust {
+      margin-inline: 0;
+    }
+  }
+  .hero-trust__title {
+    margin: 0 0 1.125rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.25;
+    color: var(--color-black);
+  }
+  .hero-trust__list {
+    display: grid;
+    gap: 1.125rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .hero-trust__fact {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+  }
+  .hero-trust__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 0.05rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 16%, var(--color-card));
+    color: var(--color-accent);
+  }
+  .hero-trust__name {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-black);
+  }
+  .hero-trust__text {
+    margin: 0.2rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  .hero-trust__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .hero-trust__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  @media (pointer: coarse) {
+    .hero-trust__link {
+      min-height: 2.75rem;
+    }
+  }
+
+  /* The entrance: a short rise, TRANSFORM ONLY. An opacity fade would hide the
+     headline for its first frames — exactly the late paint this component
+     stopped doing — and a transform shifts nothing around it. Opt-in, so the
+     reduced-motion default is the resting state. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-rise {
+      animation: hero-rise 560ms var(--lp-ease-soft) both;
+    }
+    .hero-title.hero-rise {
+      animation-delay: 40ms;
+    }
+    .hero-sub.hero-rise {
+      animation-delay: 80ms;
+    }
+    .hero-actions.hero-rise {
+      animation-delay: 120ms;
+    }
+    .hero-trust.hero-rise {
+      animation-delay: 160ms;
+    }
+    .hero-cta--primary:hover {
+      transform: translateY(-2px);
+    }
+  }
+  @keyframes hero-rise {
+    from {
+      transform: translateY(0.75rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cta,
+    .hero-cta--primary:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

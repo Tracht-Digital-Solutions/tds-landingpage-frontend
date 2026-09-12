@@ -10,15 +10,42 @@ import type { Lang } from "./i18n";
  *
  * `*asterisks*` in a string mark a word for emphasis (see `./emphasis`).
  * They are optional: a CMS override without them renders as plain text.
+ *
+ * ### The standing copy rules (see `homeContent.test.ts`)
+ *
+ * - No free and no time-boxed first conversation: never "kostenlos",
+ *   "kostenfrei", "gratis" or a minute count. The one sentence about cost is
+ *   "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren." (decided
+ *   2026-08, confirmed 2026-09-12).
+ * - No project price ranges — the cost LOGIC is explained, nothing estimated.
+ * - Every sentence states something the site can back: a fact from
+ *   `siteConfig`, the reference catalog, the pricing block, or a promise the
+ *   site already made elsewhere. No invented numbers, clients or outcomes.
+ *
+ * The blocks added in the 2026-09 redesign (`home_trust`, `first_call`,
+ * `pricing_logic`) have no Website-CMS schema yet. Like `references_home` and
+ * `website_demos` before them they fall back cleanly to what is written here
+ * until the panel declares them.
  */
 
 export interface HomeHeroContent {
+  /**
+   * The line above the H1: WHO the page is for.
+   *
+   * It replaced the brand motto ("Digitale Lösungen, die wirklich passen."),
+   * which led the hero for a while and said nothing a visitor could check. A
+   * business decides in seconds whether a page is meant for it; the target
+   * group belongs in the first line it reads.
+   */
+  eyebrow: string;
   headline: string;
   headlineAccent: string;
   headlineSuffix: string;
+  /** The benefit claim under the H1: the problems, and what the visitor ends up with. */
   sub: string;
   cta1: string;
   cta2: string;
+  /** Not rendered since the 2026-09 redesign; kept so a stored `home_hero` block still loads. */
   scrollHint: string;
 }
 
@@ -28,6 +55,12 @@ export interface WhyMeContent {
   lead: string;
   p1: string;
   p2: string;
+  /**
+   * Not rendered since the 2026-09 redesign. Four claims ("Verständlich
+   * erklärt", …) sat under the portrait; the hero's trust card carries three
+   * facts that can be checked instead. Kept in the shape so a stored `why_me`
+   * block stays readable in the editor.
+   */
   reasons: Array<{
     title: string;
     description: string;
@@ -41,7 +74,8 @@ export interface ServicesOverviewContent {
 }
 
 /**
- * Section copy for the website demos.
+ * Section copy for the example sites (`sections/Showcase.astro` on the home
+ * page, `sections/WebsiteDemos.astro` on the Webauftritt page).
  *
  * Only the framing lives here. Every word ON a demo card — its name, its
  * description — comes from the demo site itself through
@@ -49,17 +83,17 @@ export interface ServicesOverviewContent {
  * there is deliberately no list here to override: the CMS can retitle the
  * section, never repopulate it.
  *
- * `serviceIntro` is the shorter lead used on the Webauftritt service page,
- * where the surrounding page has already made the argument.
+ * Since the 2026-09 redesign the framing says plainly that these are NOT
+ * client work — they used to share one carousel with the customer cases, and
+ * nothing told the two apart.
  *
  * ### Why there is a second, singular set
  *
  * How many demos render is decided by `getDemos()`, not by an editor — a host
- * with an expired certificate simply drops out. The plural copy ("Fertige
- * Beispielseiten", "Klicken Sie sich durch") then stands over a single card
- * and promises a shelf that is not there. So the section carries both counts
- * and `demosCopy()` picks; the accent word is shared because it does not
- * inflect in either language.
+ * with an expired certificate simply drops out. The plural copy then stands
+ * over a single card and promises a shelf that is not there. So the section
+ * carries both counts and `demosCopy()` picks; the accent word is shared
+ * because it does not inflect in either language.
  */
 export interface WebsiteDemosContent {
   headline: string;
@@ -73,43 +107,32 @@ export interface WebsiteDemosContent {
 }
 
 /**
- * Framing for the home page's SHOWCASE — the merged carousel of reference
- * cases and website demos (`sections/Showcase.astro`).
+ * Framing for the home page's CUSTOMER CASES (`sections/CustomerCases.astro`).
  *
- * The home page used to carry two adjacent sections: the demos, then the
- * references. They were two headings, two intros and two grids saying the same
- * thing in sequence — "here is work you can look at" — and a visitor scrolled
- * past the second assuming they had already read it. They are one section and
- * one horizontally navigable shelf now, which is why this block's headline and
- * intro have to cover BOTH kinds of card and no longer mention only practice.
+ * The CMS key stays `references_home`. The block framed a merged shelf of
+ * cases and demos for a while; it frames the cases alone again now, which is
+ * what it was created for — renaming the key would orphan whatever is stored
+ * under it in the panel.
  *
- * The CMS key stays `references_home`. Renaming it would orphan whatever is
- * already stored under it in the panel and silently drop back to these
- * defaults; the demos keep their own `website_demos` block, which still frames
- * the Webauftritt service page.
- *
- * `label` repeats the publication promise the service pages already make. It
- * belongs next to the cards, not only on the detail pages: the home page is
- * where most people meet a reference first, and the question the section has
- * to answer before it is asked is "why does one card name a company and the
- * other does not" — so the sentence leads with approval, and treats anonymity
- * as the default it actually is. It also has to draw the line between the two
- * card families now: a demo is this studio's own example site and was never
- * anybody's project to approve.
- *
- * `references.test.ts` checks this string against the catalog: while a case is
- * published under a customer's name, no surface may claim that references are
- * anonymous without exception.
+ * `label` repeats the publication promise the service pages make. While a case
+ * is published under a customer's name, no surface may claim that references
+ * are anonymous without exception — `references.test.ts` checks this string
+ * against the catalog.
  */
 export interface ReferencesHomeContent {
   headline: string;
   headlineAccent: string;
   intro: string;
   label: string;
-  /** Link text on each card, pointing at the service the case belongs to. */
+  /** Not rendered any more (the card's service badges replaced it); kept for stored blocks. */
   serviceCta: string;
 }
 
+/**
+ * The navy positioning band. Not rendered since the 2026-09 redesign — it
+ * repeated the hero's claim and the hero's two buttons one screen further
+ * down. Kept so a stored `digital_responsibility` block still loads.
+ */
 export interface DigitalResponsibilityContent {
   headline: string;
   headlineAccent: string;
@@ -125,14 +148,67 @@ export interface DigitalResponsibilityContent {
  * Der Rest des `contact`-Blocks (Label, Untertitel, E-Mail, Telefon, Ort)
  * kommt weiterhin aus tds-shared, weil der Footer dieselben Felder liest.
  * Die Überschrift ist dagegen reine Startseiten-Copy: sie steht in genau
- * einem `<h2>` in `sections/Contact.astro` und nirgends sonst — deshalb
- * liegt sie hier bei den anderen Startseiten-Texten statt im geteilten
- * Paket, wo eine Textänderung eine Minor-Release samt Nachziehen der Pins
- * in allen Konsumenten bedeuten würde.
+ * einem `<h2>` in `sections/Contact.astro` und nirgends sonst.
  */
 export interface ContactHeadingContent {
   headline: string;
   headlineAccent: string;
+}
+
+/**
+ * One fact on the hero's trust card.
+ *
+ * `text` may carry `{name}`, `{town}` and `{rate}`. They are filled from
+ * `siteConfig` and the pricing block by `resolveTrustFacts`, never typed into
+ * the copy: the Impressum and the price list are where those values are true,
+ * and a sentence that repeats them by hand drifts the first time either moves.
+ */
+export interface TrustFact {
+  title: string;
+  text: string;
+  /** The link's words. Where it points is code-owned: {@link TRUST_TARGETS}. */
+  linkLabel: string;
+}
+
+/**
+ * The hero's trust card: THREE facts a visitor can check, each linking to the
+ * part of the page that proves it. Not four, not a row of logos — a trust
+ * signal that cannot be checked is decoration, and three is what the brief
+ * allowed.
+ */
+export interface HomeTrustContent {
+  title: string;
+  facts: TrustFact[];
+}
+
+export interface FirstCallItem {
+  label: string;
+  text: string;
+}
+
+/**
+ * What the first conversation is: goal, preparation, outcome, cost.
+ * Rendered by `ui/FirstCall.astro` in the process section, the contact block
+ * and above each service page's closing call to action.
+ */
+export interface FirstCallContent {
+  title: string;
+  /** The contact block's title for the same list: "So geht es weiter". */
+  nextStepsTitle: string;
+  items: FirstCallItem[];
+  cta: string;
+}
+
+export interface PricingLogicStep {
+  title: string;
+  text: string;
+}
+
+/** "So entsteht Ihr Preis" — how a price comes about, without estimating one. */
+export interface PricingLogicContent {
+  title: string;
+  steps: PricingLogicStep[];
+  note: string;
 }
 
 interface HomeContent {
@@ -143,22 +219,26 @@ interface HomeContent {
   referencesHome: ReferencesHomeContent;
   digitalResponsibility: DigitalResponsibilityContent;
   contactHeading: ContactHeadingContent;
+  trust: HomeTrustContent;
+  firstCall: FirstCallContent;
+  pricingLogic: PricingLogicContent;
 }
 
 const content: Record<Lang, HomeContent> = {
   de: {
     hero: {
-      // Three parts, and the split is the line break: the headline is set
-      // on one line, the accent word starts the second. `text-wrap: balance`
+      eyebrow: "Für Selbstständige, lokale Betriebe und kleine Unternehmen",
+      // Three parts, and the split is the line break: the headline is set on
+      // one line, the accent word starts the second. `text-wrap: balance`
       // would otherwise pull "Ein" up onto line one, which reads as a
       // sentence cut in half.
-      headline: "Alles Digitale.",
+      headline: "Weniger Handarbeit.",
       headlineAccent: "Ein",
-      headlineSuffix: "Ansprechpartner.",
+      headlineSuffix: "Ansprechpartner für alles Digitale.",
       sub:
-        "Ich plane und baue, was Ihr Betrieb wirklich braucht. *Sie haben einen Ansprechpartner* — nicht fünf Firmen, die aufeinander zeigen.",
+        "Doppelt getippte Daten, Programme ohne Verbindung, eine veraltete Webseite: Ich plane die Lösung, setze sie selbst um und bleibe *Ihr fester Ansprechpartner*.",
       cta1: "Erstgespräch vereinbaren",
-      cta2: "zu den Leistungen",
+      cta2: "Leistungen entdecken",
       scrollHint: "Wieso ich?",
     },
     whyMe: {
@@ -196,25 +276,25 @@ const content: Record<Lang, HomeContent> = {
         "Vier Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
     },
     websiteDemos: {
-      headline: "Webseiten zum",
-      headlineAccent: "Anschauen.",
+      headline: "Beispielseiten zum",
+      headlineAccent: "Ausprobieren.",
       intro:
-        "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch* — so sehen Sie vorher, was Sie bekommen, statt es sich vorstellen zu müssen.",
+        "Eigene Demos mit fiktiven Firmen und eigene Projekte – *keine Kundenaufträge*. Klicken Sie sich durch, bevor wir über Ihre Seite sprechen.",
       serviceIntro:
-        "Fertige Beispielseiten, live im Netz. *Klicken Sie sich durch*, bevor wir über Ihre sprechen.",
-      headlineSingle: "Eine Webseite zum",
+        "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*. Klicken Sie sich durch, bevor wir über Ihre sprechen.",
+      headlineSingle: "Eine Beispielseite zum",
       introSingle:
-        "Eine fertige Beispielseite, live im Netz. *Sehen Sie sich um* — so sehen Sie vorher, was Sie bekommen, statt es sich vorstellen zu müssen.",
+        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Sehen Sie sich um, bevor wir über Ihre Seite sprechen.",
       serviceIntroSingle:
-        "Eine fertige Beispielseite, live im Netz. *Sehen Sie sich um*, bevor wir über Ihre sprechen.",
+        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Sehen Sie sich um, bevor wir über Ihre sprechen.",
     },
     referencesHome: {
-      headline: "Gebaut und",
-      headlineAccent: "gezeigt.",
+      headline: "Umgesetzt für",
+      headlineAccent: "Kunden.",
       intro:
-        "Umgesetzte Projekte und fertige Beispielseiten in einer Ansicht — *blättern Sie durch*, statt sich vorstellen zu müssen, was Sie bekommen.",
+        "Projekte aus meiner Arbeit – mit dem, was *dabei herausgekommen ist*, und den Leistungen dahinter.",
       label:
-        "Projekte werden nur nach ausdrücklicher Freigabe veröffentlicht — anonymisiert, sofern nicht anders vereinbart. Die Beispielseiten sind eigene Demos und stehen frei im Netz.",
+        "Veröffentlicht nur mit ausdrücklicher Freigabe der Kunden – anonymisiert, sofern nicht anders vereinbart.",
       serviceCta: "Zur passenden Leistung",
     },
     digitalResponsibility: {
@@ -235,16 +315,78 @@ const content: Record<Lang, HomeContent> = {
       headline: "Womit fangen",
       headlineAccent: "wir an?",
     },
+    trust: {
+      title: "Worauf Sie sich verlassen können",
+      facts: [
+        {
+          title: "Ein fester Ansprechpartner",
+          text: "Sie sprechen immer mit mir: {name}, Inhaber, aus {town} bei Hamburg.",
+          linkLabel: "Wer ich bin",
+        },
+        {
+          title: "Echte Kundenprojekte",
+          text: "Umgesetzte Arbeit, veröffentlicht nur mit Freigabe der Kunden.",
+          linkLabel: "Projekte ansehen",
+        },
+        {
+          title: "Offene Preise",
+          text: "Stundensätze ab {rate} € netto, Festpreis bei klarem Umfang.",
+          linkLabel: "Preise ansehen",
+        },
+      ],
+    },
+    firstCall: {
+      title: "Das Erstgespräch",
+      nextStepsTitle: "So geht es weiter",
+      items: [
+        {
+          label: "Ziel",
+          text: "Sie schildern, wo es hakt. Ich frage nach und sage ehrlich, ob und wie ich helfen kann.",
+        },
+        {
+          label: "Vorbereitung",
+          text: "Zwei, drei Sätze zu Ihrer Lage genügen.",
+        },
+        {
+          label: "Ergebnis",
+          text: "Sie wissen danach, was zuerst dran ist und was es ungefähr kostet.",
+        },
+        {
+          label: "Kosten",
+          text: "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
+        },
+      ],
+      cta: "Erstgespräch vereinbaren",
+    },
+    pricingLogic: {
+      title: "So entsteht Ihr Preis",
+      steps: [
+        {
+          title: "Einordnen",
+          text: "Im Erstgespräch klären wir Ziel und Umfang. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
+        },
+        {
+          title: "Abrechnen",
+          text: "Nach Aufwand zum Stundensatz – oder zum Festpreis, wenn Ziel und Umfang vorher klar sind.",
+        },
+        {
+          title: "Weiter betreuen",
+          text: "Für die laufende Betreuung gibt es auf Wunsch Monatsmodelle.",
+        },
+      ],
+      note: "Wovon der Aufwand abhängt: vom Bereich, vom Umfang und davon, wie klar die Aufgabe ist.",
+    },
   },
   en: {
     hero: {
-      headline: "Everything digital.",
+      eyebrow: "For the self-employed, local businesses and small companies",
+      headline: "Less manual work.",
       headlineAccent: "One",
-      headlineSuffix: "point of contact.",
+      headlineSuffix: "point of contact for everything digital.",
       sub:
-        "I plan and build what your business actually needs. *You get one contact* — not five suppliers pointing at each other.",
+        "Data typed in twice, programs that don't talk to each other, an outdated website: I plan the fix, build it myself and stay *your single point of contact*.",
       cta1: "Arrange an initial consultation",
-      cta2: "View services",
+      cta2: "Explore services",
       scrollHint: "Why me?",
     },
     whyMe: {
@@ -282,25 +424,25 @@ const content: Record<Lang, HomeContent> = {
         "Four areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
     },
     websiteDemos: {
-      headline: "Websites to",
-      headlineAccent: "look at.",
+      headline: "Example sites to",
+      headlineAccent: "try out.",
       intro:
-        "Finished example sites, live on the web. *Click through them* — so you can see beforehand what you get instead of having to imagine it.",
+        "My own demos with fictional companies, plus projects of my own – *not client work*. Click through them before we talk about yours.",
       serviceIntro:
-        "Finished example sites, live on the web. *Click through them* before we talk about yours.",
-      headlineSingle: "A website to",
+        "My own demos and projects, live on the web – *not client work*. Click through them before we talk about yours.",
+      headlineSingle: "An example site to",
       introSingle:
-        "A finished example site, live on the web. *Take a look around* — so you can see beforehand what you get instead of having to imagine it.",
+        "One of my own example sites, live on the web – *not client work*. Take a look around before we talk about yours.",
       serviceIntroSingle:
-        "A finished example site, live on the web. *Take a look around* before we talk about yours.",
+        "One of my own example sites, live on the web – *not client work*. Have a look before we talk about yours.",
     },
     referencesHome: {
-      headline: "Built and",
-      headlineAccent: "shown.",
+      headline: "Delivered for",
+      headlineAccent: "clients.",
       intro:
-        "Delivered projects and finished example sites in one place — *page through them* instead of having to imagine what you get.",
+        "Projects from my work – with *what came out of them* and the services behind them.",
       label:
-        "Projects are published only with the client's explicit approval — anonymised unless agreed otherwise. The example sites are our own demos and are openly on the web.",
+        "Published only with the client's explicit approval – anonymised unless agreed otherwise.",
       serviceCta: "See the matching service",
     },
     digitalResponsibility: {
@@ -321,11 +463,117 @@ const content: Record<Lang, HomeContent> = {
       headline: "Where shall we",
       headlineAccent: "start?",
     },
+    trust: {
+      title: "What you can rely on",
+      facts: [
+        {
+          title: "One steady contact",
+          text: "You always talk to me: {name}, owner, based in {town} near Hamburg.",
+          linkLabel: "Who I am",
+        },
+        {
+          title: "Real client projects",
+          text: "Delivered work, published only with the client's approval.",
+          linkLabel: "View projects",
+        },
+        {
+          title: "Open pricing",
+          text: "Hourly rates from €{rate} net, a fixed price when the scope is clear.",
+          linkLabel: "View pricing",
+        },
+      ],
+    },
+    firstCall: {
+      title: "The first conversation",
+      nextStepsTitle: "What happens next",
+      items: [
+        {
+          label: "Goal",
+          text: "You describe where things get stuck. I ask questions and tell you honestly whether and how I can help.",
+        },
+        {
+          label: "Preparation",
+          text: "Two or three sentences about your situation are enough.",
+        },
+        {
+          label: "Outcome",
+          text: "Afterwards you know what comes first and roughly what it costs.",
+        },
+        {
+          label: "Costs",
+          text: "Costs only arise once we agree on an assignment.",
+        },
+      ],
+      cta: "Arrange an initial consultation",
+    },
+    pricingLogic: {
+      title: "How your price comes about",
+      steps: [
+        {
+          title: "Assess",
+          text: "In the first conversation we clarify goal and scope. Costs only arise once we agree on an assignment.",
+        },
+        {
+          title: "Invoice",
+          text: "By effort at the hourly rate – or at a fixed price when goal and scope are clear up front.",
+        },
+        {
+          title: "Look after it",
+          text: "Monthly arrangements are available for ongoing support, if you want them.",
+        },
+      ],
+      note: "What the effort depends on: the area, the scope and how clearly the task is defined.",
+    },
   },
 };
 
 export function getHomeContent(lang: Lang): HomeContent {
   return content[lang];
+}
+
+/**
+ * Where each trust fact points, by position. Code-owned like every other
+ * destination on this site: an editor may reword a fact, never redirect it.
+ */
+export const TRUST_TARGETS = ["about", "cases", "preise"] as const;
+
+export interface ResolvedTrustFact {
+  title: string;
+  text: string;
+  href: string;
+  linkLabel: string;
+}
+
+/**
+ * The trust card, ready to render: placeholders filled, destinations attached.
+ *
+ * The "cases" fact is dropped when no case is published — a fact about client
+ * projects that links to a section which renders nothing would be the one
+ * unverifiable claim on a card that exists to be verifiable.
+ */
+export function resolveTrustFacts(
+  trust: HomeTrustContent,
+  values: { name: string; town: string; rate: number; hasCases: boolean },
+): { title: string; facts: ResolvedTrustFact[] } {
+  const fill = (text: string) =>
+    text
+      .replaceAll("{name}", values.name)
+      .replaceAll("{town}", values.town)
+      .replaceAll("{rate}", String(values.rate));
+
+  const facts: ResolvedTrustFact[] = [];
+  trust.facts.slice(0, TRUST_TARGETS.length).forEach((fact, index) => {
+    const target = TRUST_TARGETS[index]!;
+    if (target === "cases" && !values.hasCases) return;
+    facts.push({
+      title: fact.title,
+      text: fill(fact.text),
+      href: `#${target}`,
+      linkLabel: fact.linkLabel,
+    });
+  });
+
+  return { title: trust.title, facts };
 }
 
 /** The three strings the demos section renders, for one count and one surface. */

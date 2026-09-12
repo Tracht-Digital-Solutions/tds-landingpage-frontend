@@ -51,7 +51,8 @@
  * which is the half worth showing.
  */
 import type { Lang } from "~/lib/i18n";
-import { DEMO_KINDS } from "~/lib/demoCatalog";
+import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
+import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
 import { demoUi, type ResolvedDemo } from "~/lib/demos";
 import type { CardAction } from "~/lib/cardActions";
 import CardActions from "~/components/ui/CardActions.astro";
@@ -90,6 +91,14 @@ const previewAlt =
 
 /** Genre, from the closed vocabulary. Never the demo's subject matter. */
 const kind = DEMO_KINDS[definition.kind][lang];
+
+/**
+ * Whose site this is — a fictional sample or a real project of our own. Shown
+ * on the screenshot, before anything else, because it is the first thing a
+ * visitor judging this business by its work needs to know: this is NOT a
+ * client's site. Closed vocabulary, see `DEMO_ORIGINS`.
+ */
+const origin = DEMO_ORIGINS[definition.origin][lang];
 ---
 
 <article class="demo-card-slot" data-reveal>
@@ -100,12 +109,16 @@ const kind = DEMO_KINDS[definition.kind][lang];
           section that reflows under the reader. */}
       <img
         src={preview}
+        srcset={srcsetFor(preview, PREVIEW_VARIANT_WIDTHS, previewWidth)}
+        sizes="(min-width: 64rem) 34vw, (min-width: 48rem) 48vw, 85vw"
         alt={previewAlt}
         width={previewWidth}
         height={previewHeight}
         loading="lazy"
         decoding="async"
       />
+
+      <span class="demo-card__origin">{origin}</span>
 
       {/* Starts `hidden`; `PreviewLightbox.astro` reveals it once its dialog
           is wired. Same fallback as the shelf's arrows — without JavaScript
@@ -264,6 +277,25 @@ const kind = DEMO_KINDS[definition.kind][lang];
   .demo-card:hover .demo-card__shot img,
   .demo-card:focus-within .demo-card__shot img {
     transform: scale(1.03);
+  }
+
+  /* The origin label, pinned to the picture's top left — the magnifier owns
+     the top right. Click-through, so the card's stretched link still takes
+     the tap. Ink on a near-opaque card fill, so it reads over any screenshot. */
+  .demo-card__origin {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    max-width: calc(100% - 4.5rem);
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    color: var(--color-black);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    pointer-events: none;
   }
 
   .demo-card__zoom {

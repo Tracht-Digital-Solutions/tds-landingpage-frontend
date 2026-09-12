@@ -55,7 +55,9 @@ async function pruneAssets(keep: Set<string>): Promise<void> {
     return;
   }
   for (const file of entries) {
-    const id = file.replace(/\.webp$/, "");
+    // `-480` / `-960` are pre-sized copies of the same capture
+    // (`capture-preview.ts`); they belong to the case whose id precedes them.
+    const id = file.replace(/(-\d+)?\.webp$/, "");
     if (keep.has(id)) continue;
     await fs.rm(path.join(assetDir, file), { force: true });
     // eslint-disable-next-line no-console

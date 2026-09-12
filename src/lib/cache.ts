@@ -25,11 +25,15 @@ export { contentCache } from "./contentCache";
  * every value on it comes from `siteConfig` and from committed copy, so a
  * block save cannot date it. It stays in `alwaysPaths` below, so a full
  * rebuild still renders it.
+ *
+ * `/preise` and `/en/preise` are not in here either. Since 2026-09 the prices
+ * are a section of the home page and both addresses answer with a 301; a
+ * redirect is never stored, so listing them dated nothing and made every
+ * rebuild render two responses only to throw them away.
  */
 function contentPages(lang: "de" | "en"): string[] {
-  const base = lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"];
   return [
-    ...base,
+    ...homePages(lang),
     ...serviceDefinitions.map((service) => serviceHref(service, lang)),
   ];
 }
@@ -111,12 +115,13 @@ export const cacheEvents: EventMap = {
  * The sitemap is in the list now that it renders on demand: it used to be
  * prerendered, so there was nothing to invalidate, and the panel's exclusion
  * list is exactly the thing that made that untrue.
+ *
+ * Redirects (`/preise`, `/kontakt` and their English twins) never belong here:
+ * the cache stores only complete 200 responses.
  */
 export const alwaysPaths = [
   "/",
   "/en/",
-  "/preise",
-  "/en/preise",
   ...serviceDefinitions.flatMap((service) => [
     serviceHref(service, "de"),
     serviceHref(service, "en"),

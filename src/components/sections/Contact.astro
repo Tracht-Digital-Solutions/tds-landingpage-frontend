@@ -5,6 +5,7 @@ import { businessCardHref } from "~/lib/businessCard";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
+import FirstCall from "~/components/ui/FirstCall.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -95,7 +96,14 @@ const socials = {
       aria-hidden="true"
       class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-6"
     ></span>
-    <p class="text-white/60 max-w-lg mb-10 md:mb-16 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
+    <p class="text-white/75 max-w-lg mb-8 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
+
+    {/* What happens after the message — at the one moment a visitor decides
+        whether to send it. Goal, preparation, outcome, and the one sentence
+        about cost; see `ui/FirstCall.astro` for the rules it keeps. */}
+    <div class="mb-10 md:mb-14">
+      <FirstCall variant="contact" />
+    </div>
 
     <div class="grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">
       <ContactForm client:visible lang={lang} />
@@ -107,7 +115,7 @@ const socials = {
           </p>
           <a
             href={`mailto:${contact.email}`}
-            class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors"
+            class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             <svg
               width="18"
@@ -134,7 +142,7 @@ const socials = {
           </p>
           <a
             href={`tel:${phoneHref}`}
-            class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors"
+            class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             <svg
               width="18"
@@ -190,7 +198,7 @@ const socials = {
               aria-label="LinkedIn"
               rel="noopener noreferrer"
               target="_blank"
-              class="group p-2.5 rounded-full bg-white/10 text-white/70 hover:bg-white hover:text-[#0A66C2] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
+              class="group flex items-center justify-center p-2.5 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:min-w-11 rounded-full bg-white/10 text-white/70 hover:bg-white hover:text-[#0A66C2] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -201,7 +209,7 @@ const socials = {
               aria-label="GitHub"
               rel="noopener noreferrer"
               target="_blank"
-              class="group p-2.5 rounded-full bg-white/10 text-white/70 hover:bg-white hover:text-[#181717] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
+              class="group flex items-center justify-center p-2.5 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:min-w-11 rounded-full bg-white/10 text-white/70 hover:bg-white hover:text-[#181717] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
@@ -212,7 +220,7 @@ const socials = {
               aria-label="WhatsApp"
               rel="noopener noreferrer"
               target="_blank"
-              class="group p-2.5 rounded-full bg-white/10 text-white/70 hover:bg-white hover:text-[#25D366] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
+              class="group flex items-center justify-center p-2.5 [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:min-w-11 rounded-full bg-white/10 text-white/70 hover:bg-white hover:text-[#25D366] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
@@ -258,7 +266,7 @@ const socials = {
               the download. */}
           <a
             href={businessCardHref(lang)}
-            class="mt-3 inline-flex items-center gap-2 text-sm text-white/70 hover:text-[var(--color-accent-pink)] transition-colors"
+            class="mt-3 inline-flex items-center gap-2 text-sm text-white/70 hover:text-[var(--color-accent-pink)] transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             <svg
               width="18"
@@ -598,6 +606,37 @@ const socials = {
     border-color: var(--color-accent-pink);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4 10-10'/%3E%3C/svg%3E");
     animation: contact-consent-bounce 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* === Contact form: messages ======================================= */
+
+  /* Field and submit errors. Pink, the colour this form already uses for
+     every other state cue on the navy ground (measured ≥ 6:1 there). */
+  #contact .contact-field-error {
+    color: var(--color-accent-pink);
+  }
+
+  /* The success state's tick. It sprang in on a JavaScript spring; it is a CSS
+     keyframe now, and opt-in, so the reduced-motion default is the resting
+     state. */
+  .contact-success__mark {
+    display: inline-block;
+    color: var(--color-accent-pink);
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .contact-success__mark {
+      animation: contact-success-pop 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+  @keyframes contact-success-pop {
+    from {
+      transform: scale(0) rotate(-25deg);
+    }
+    to {
+      transform: none;
+    }
   }
 
   /* === Contact form: send button ==================================== */

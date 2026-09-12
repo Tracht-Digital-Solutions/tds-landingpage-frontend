@@ -1,0 +1,12 @@
+---
+/**
+ * `/en/pricing` — the address an English-speaking visitor actually types.
+ *
+ * There never was a page here; `/en/preise` was the published English URL. It
+ * costs nothing to answer the obvious guess with the same 301 instead of a
+ * 404. Not in the sitemap: a redirect listed there is a crawl error.
+ */
+export const prerender = false;
+
+return Astro.redirect("/en/#preise", 301);
+---

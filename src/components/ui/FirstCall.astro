@@ -1,0 +1,194 @@
+---
+/**
+ * What happens in the first conversation — goal, preparation, outcome, cost —
+ * in the three places a visitor weighs whether to write at all.
+ *
+ * ### Why this exists
+ *
+ * The site asked for an "Erstgespräch" in six places and never said what one
+ * is. Not knowing what you are signing up for is the commonest reason not to
+ * ask: what do I need to prepare, what do I get out of it, what does it cost.
+ * This card answers exactly that, and nothing more.
+ *
+ * ### The standing rule on cost (decided 2026-08, confirmed 2026-09-12)
+ *
+ * The site does NOT call the conversation free and does NOT give it a
+ * duration — the classified ads do, the website deliberately does not. The one
+ * sentence about cost is "Kosten entstehen erst, wenn wir einen Auftrag
+ * vereinbaren." `homeContent.test.ts` fails on "kostenlos", "kostenfrei",
+ * "gratis" or a minute count anywhere in this block.
+ *
+ * ### Variants
+ *
+ * - `process` — the full card beside the process steps: picture, list, and the
+ *   section's one primary call to action.
+ * - `contact` — inside the navy contact block, titled "So geht es weiter", with
+ *   no button: the form below it IS the action. No reply-time line either — the
+ *   contact block's own sub already gives one, and the card repeated it.
+ * - `service` — above a service page's closing call to action, list only.
+ *
+ * On the navy grounds `.tds-tone-navy` re-maps the page tokens, which is why
+ * every colour below is a token and the labels read `--tds-eyebrow-color`
+ * (cranberry on paper, coral on navy) instead of the bordeaux accent, which
+ * would sink into the navy.
+ */
+import { resolveLang, localizePath } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+
+interface Props {
+  variant?: "process" | "contact" | "service";
+}
+
+const { variant = "process" } = Astro.props;
+const lang = resolveLang(Astro.currentLocale);
+const content = await cmsFor("first_call", lang, getHomeContent(lang).firstCall);
+const title = variant === "contact" ? content.nextStepsTitle : content.title;
+const contactHref = `${localizePath("/", lang)}#contact`;
+---
+
+<div class:list={["first-call", `first-call--${variant}`]}>
+  {
+    variant === "process" && (
+      <div class="first-call__shot" aria-hidden="true">
+        {/* The process photo of step one — the conversation itself. It lived in
+            the hover-only detail panel beside the steps, which is gone. */}
+        <img src="/images/process/step-01.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+    )
+  }
+  <div class="first-call__body">
+    <h3 class="first-call__title">{title}</h3>
+    <dl class="first-call__list">
+      {content.items.map((item) => (
+        <div class="first-call__item">
+          <dt>{item.label}</dt>
+          <dd>{item.text}</dd>
+        </div>
+      ))}
+    </dl>
+    {
+      variant === "process" && (
+        <a href={contactHref} class="first-call__cta">
+          {content.cta}
+          <span aria-hidden="true">→</span>
+        </a>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .first-call {
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--lp-surface-card);
+  }
+  .first-call--contact,
+  .first-call--service {
+    background: var(--color-card);
+    text-align: left;
+  }
+
+  .first-call__shot {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--color-surface-navy);
+  }
+  .first-call__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* On a phone the picture is a screen of scrolling between the steps and the
+     answers it illustrates. `display: none` also keeps the lazy image from
+     loading at all. */
+  @media (max-width: 47.99rem) {
+    .first-call__shot {
+      display: none;
+    }
+  }
+
+  .first-call__body {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .first-call__body {
+      padding: 1.75rem;
+    }
+  }
+
+  .first-call__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: var(--color-black);
+  }
+
+  .first-call__list {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  /* Beside a form or under a closing call to action the card is wide and
+     short-lived: the four answers sit side by side where they fit. */
+  .first-call--contact .first-call__list,
+  .first-call--service .first-call__list {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr));
+    gap: 1rem 1.5rem;
+  }
+
+  .first-call__item dt {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tds-eyebrow-color, var(--color-accent));
+  }
+  .first-call__item dd {
+    margin: 0.3rem 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--color-black);
+  }
+
+  .first-call__cta {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: var(--color-surface-navy);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .first-call__cta:hover {
+    background: var(--color-surface-accent);
+  }
+
+  /* Above a form on a phone, every line pushes the form further down. */
+  @media (max-width: 47.99rem) {
+    .first-call--contact .first-call__body {
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+    .first-call--contact .first-call__list {
+      gap: 0.75rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .first-call__cta {
+      transition: none;
+    }
+  }
+</style>

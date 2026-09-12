@@ -4,6 +4,7 @@ import { ConsentLink } from "@tracht-digital-solutions/tds-shared/consent";
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { legalCopy } from "~/lib/legal";
+import { sectionLinks } from "~/lib/navigation";
 import { siteConfig } from "~/lib/seo";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -22,22 +23,37 @@ const contact = await cmsFor("contact", lang, {
   location: t.contact.info.location,
 });
 
-const pricingHref = localizePath("/preise", lang);
 // The AGB link goes to the PAGE, not straight to the PDF — the page carries
 // the inline viewer and the download button, and works on a phone where an
 // embedded PDF does not.
 const agbHref = localizePath("/legal/agb", lang);
-// Section links resolve against the homepage so they work from subpages
-// like /preise, where these sections don't exist.
+// Section links resolve against the homepage so they work from subpages,
+// where these sections don't exist.
 const homeHref = localizePath("/", lang);
 // Strip spaces for the dialer href; keep the spaced version for display.
 const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
+
+// The same sections the header lists (`lib/navigation.ts`), plus Kontakt —
+// the footer is where a reader who scrolled past the form looks for it. The
+// pricing label stays the editable `footer.pricing`.
+const navItems = [
+  ...sectionLinks(lang).map((item) => ({
+    href: `${homeHref}#${item.id}`,
+    label: item.id === "preise" ? footer.pricing : item.label,
+  })),
+  { href: `${homeHref}#contact`, label: lang === "de" ? "Kontakt" : "Contact" },
+];
 ---
 
 {/* Fast Schwarz / sehr dunkles Navy, with the page tokens re-mapped by
     `.tds-tone-ink` so the hairlines inside read as low-opacity white
-    rather than as the light ground's warm line. */}
-<footer class="tds-tone-ink pt-16 pb-10">
+    rather than as the light ground's warm line.
+
+    CONTRAST, measured rather than judged: the legal row used to be
+    `text-white/40` at 12px, which is 3.77:1 on this ground — below the 4.5:1
+    AA needs for small text, and flagged by axe on every page. It is `/70`
+    now; the column labels moved from `/50` to `/60` with it. */}
+<footer class="site-footer tds-tone-ink pt-16">
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <div class="grid md:grid-cols-3 gap-12 mb-12">
       <div>
@@ -50,61 +66,93 @@ const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
         <p class="font-[var(--font-display)] italic text-[var(--color-accent-pink)] text-base mb-4">
           {footer.slogan}
         </p>
-        <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+        <p class="text-white/70 text-sm leading-relaxed max-w-xs">
           {footer.tagline}
         </p>
       </div>
 
-      <div>
-        <p class="eyebrow text-white/50 mb-4">
+      <nav aria-labelledby="footer-nav-title">
+        <p id="footer-nav-title" class="eyebrow text-white/60 mb-4">
           {footer.nav}
         </p>
         <ul class="space-y-2 text-sm">
-          <li><a href={`${homeHref}#about`} class="text-white/70 hover:text-white">{lang === "de" ? "Wieso ich?" : "Why me?"}</a></li>
-          <li><a href={`${homeHref}#services`} class="text-white/70 hover:text-white">{lang === "de" ? "Was ich anbiete?" : "What I offer?"}</a></li>
-          <li><a href={pricingHref} data-pricing-open class="text-white/70 hover:text-white">{footer.pricing}</a></li>
-          <li><a href="https://blog.tracht-digital.de" class="text-white/70 hover:text-white">{t.nav.blog}</a></li>
+          {navItems.map((item) => (
+            <li>
+              <a href={item.href} class="footer-link text-white/80 hover:text-white">
+                {item.label}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a href={siteConfig.blogUrl} class="footer-link text-white/80 hover:text-white">
+              {t.nav.blog}
+            </a>
+          </li>
         </ul>
-      </div>
+      </nav>
 
       <div>
-        <p class="eyebrow text-white/50 mb-4">
+        <p class="eyebrow text-white/60 mb-4">
           {footer.contactTitle}
         </p>
         <ul class="space-y-2 text-sm">
           <li>
-            <a href={`mailto:${contact.email}`} class="text-white/70 hover:text-white">
+            <a href={`mailto:${contact.email}`} class="footer-link text-white/80 hover:text-white">
               {contact.email}
             </a>
           </li>
           <li>
-            <a href={telHref} class="text-white/70 hover:text-white">
+            <a href={telHref} class="footer-link text-white/80 hover:text-white">
               {contact.phone}
             </a>
           </li>
           {/* Visible NAP for local SEO: postal code + locality from siteConfig
               (not the CMS string) so it always matches the Impressum and the
               PostalAddress in JSON-LD. Street stays Impressum-only. */}
-          <li class="text-white/50">
+          <li class="text-white/70">
             {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="pt-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-white/40">
+    <div class="pt-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-white/70">
       <p>{footer.copyright}</p>
-      <div class="flex flex-wrap gap-6">
-        <a href="/legal/impressum" class="hover:text-white">{footer.impressum}</a>
-        <a href="/legal/datenschutz" class="hover:text-white">{footer.datenschutz}</a>
-        <a href={agbHref} class="hover:text-white">{legalCopy[lang].agbShort}</a>
+      <div class="flex flex-wrap gap-x-6 gap-y-1">
+        <a href="/legal/impressum" class="footer-link hover:text-white">{footer.impressum}</a>
+        <a href="/legal/datenschutz" class="footer-link hover:text-white">{footer.datenschutz}</a>
+        <a href={agbHref} class="footer-link hover:text-white">{legalCopy[lang].agbShort}</a>
         {/* Not a page — it reopens the privacy settings on this one. Art. 7
             Abs. 3 DSGVO wants withdrawing a consent to be as easy as giving
             it, and a notice that appears once leaves no route back without
             this. It belongs in this row because this row is where a reader
             already looks for exactly that kind of thing. */}
-        <ConsentLink client:idle lang={lang} className="hover:text-white" />
+        <ConsentLink client:idle lang={lang} className="footer-link hover:text-white" />
       </div>
     </div>
   </div>
 </footer>
+
+<style>
+  /* The legal row is the last thing on every page, and the cookie notice and
+     the floating call to action are fixed over the bottom of the viewport. A
+     page cannot scroll past its own end, so `scroll-padding-bottom` alone left
+     these links under the notice when they took keyboard focus (WCAG 2.4.11 —
+     measured at 720×450 and 390×844). Both lanes are 0px while their element
+     is absent, so the clearance goes away with the notice. */
+  .site-footer {
+    padding-bottom: calc(2.5rem + var(--tds-bottom-lane, 0px) + var(--lp-floating-lane, 0px));
+  }
+
+  /* Finger-sized links. The footer's rows were 20px tall on a phone, and
+     "AGB"/"Terms" are narrower than a fingertip. Global, because `ConsentLink`
+     is a React island and never receives this component's scoping attribute. */
+  @media (pointer: coarse) {
+    :global(.footer-link) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+  }
+</style>

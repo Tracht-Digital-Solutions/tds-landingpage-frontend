@@ -26,16 +26,16 @@
    any chapter marks; the class stays in the library for the blog + the
    legacy customer portal.)
 
+   `prose.css` is NOT here any more. Its only consumers are the two legal
+   pages, which import `styles/prose.css` themselves — every other page was
+   downloading long-form typography it never used, inside the one stylesheet
+   that blocks rendering.
+
    Nothing about the visual result is authored locally any more: no font
    token, no `.display` weight, no radius. To change how this surface
    looks, edit surfaces/marketing.css in tds-shared-pkg and bump. */
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
-/* Long-form typography. This site has exactly two consumers — the legal pages,
-   whose text became panel-editable markdown in 2026-08. Without it the rendered
-   markdown would arrive as unstyled runs of text: not an error, not a warning,
-   just a legal page that looks broken. */
-@import "@tracht-digital-solutions/tds-shared/styles/prose.css";
 @import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
 
 /* Tailwind ignores node_modules by default, and the shared React islands
@@ -221,17 +221,31 @@ body {
   overflow-x: clip;
 }
 
-/* Clearance for the fixed floating header on ANY kind of section jump —
-   one value, four consumers. `islands/SmoothScroll.tsx` reads it back off
+/* Clearance for the fixed chrome on ANY kind of scroll the browser performs
+   by itself — one value per edge.
+
+   TOP: the floating header. `islands/SmoothScroll.tsx` reads it back off
    <html> rather than carrying its own constant, and the browser applies it
-   by itself to the jumps JS never sees: the fragment landing on a
-   cross-page `/#about` (the nav links are `/#about`, so every jump from
-   /preise is one), back/forward scroll restoration, find-in-page, and
-   keyboard focus. Without it those all land with the heading tucked under
-   the bar. Responsive because the bar is: the nav collapses to the burger
-   below `lg`, where the pill is ~24px shorter. */
+   to the jumps JS never sees: the fragment landing on a cross-page `/#preise`
+   (every redirect and every nav link from a subpage is one), back/forward
+   restoration, find-in-page, and keyboard focus. Responsive because the bar
+   is: the nav collapses to the burger below `lg`, where the pill is ~24px
+   shorter.
+
+   BOTTOM: the cookie notice and the floating call to action, both fixed to
+   the lower edge. Without it, tabbing through the page scrolled each focused
+   link only just into view — i.e. directly behind whichever of the two was
+   lying there: measured on the live site, 11 of the first 80 focus stops on
+   a phone were completely hidden (WCAG 2.4.11). `scroll-padding-bottom` is
+   the documented fix (technique C43); both lanes are MEASURED values the
+   components publish themselves, so the clearance follows the notice from
+   one line on a desktop to three on a phone, and drops to zero once it is
+   dismissed. */
 html {
   scroll-padding-top: 5rem;
+  scroll-padding-bottom: calc(
+    var(--tds-bottom-lane, 0px) + var(--lp-floating-lane, 0px) + 1rem
+  );
 }
 @media (min-width: 64rem) {
   html {
@@ -268,568 +282,31 @@ html {
    now dissolve on one baseline instead of one cutting across the other.
 
    Bottom-only — the left/right/top overhang is the frame and stays. */
-.portrait-shape {
+.portrait-shape.tds-shape {
+  /* On a phone the portrait is as wide as the column, and the column's gutter
+     is 1.5rem: a 2rem offset put the rectangle 8px past a 320px screen. */
+  inset: -1rem -1rem 0 -1rem;
   -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
   mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
 }
-
-/* Hero-Fotogrund. Dieselbe Rolle wie `.service-card__photo`: ein GRUND,
-   keine Abbildung. Die Deckkraft liegt tiefer als dort, weil hier keine
-   Karte drumherum abgrenzt und das Bild über die volle Breite unter
-   Motto, Headline und CTAs läuft — und im Dark Mode noch einmal tiefer,
-   wie die geteilten Decor-Tokens es auch tun.
-
-   Der Scrim ist die PAPIERFARBE der Seite, die nach rechts ausläuft,
-   nicht ein grauer Schleier: die linke Bildhälfte bleibt damit exakt so
-   ruhig wie die reine CSS-Geometrie vorher, und die Fläche behält ihren
-   Farbton statt schmutzig zu werden. Beide Regeln greifen erst ab `md`,
-   weil das Bild darunter gar nicht gerendert wird. */
-.hero-photo {
-  opacity: 0.32;
-}
-:root[data-theme="dark"] .hero-photo {
-  opacity: 0.2;
-}
-.hero-photo-scrim {
-  background: linear-gradient(
-    to right,
-    var(--color-paper) 20%,
-    color-mix(in srgb, var(--color-paper) 72%, transparent) 62%,
-    color-mix(in srgb, var(--color-paper) 42%, transparent) 100%
-  );
-}
-
-/* ---- Hero service slider ----------------------------------------------
-   Styles for `components/islands/HeroServiceSlider.tsx`. They live here for
-   the same reason `.accent-letters` does: the component is a React island and
-   cannot carry an Astro `<style>` block.
-
-   The stage is a single-cell GRID with every panel in that one cell. Height is
-   therefore the tallest panel's height and does not jump between slides — the
-   thing that makes a hero slider feel broken is the page reflowing under it
-   every six seconds. `visibility` (not `display`) hides the inactive ones, so
-   they keep contributing that height. */
-.hero-slider {
-  --hero-slide-from: 0px;
-  width: 100%;
-  max-width: 30rem;
-  margin-inline: auto;
-}
-
-.hero-slider__stage {
-  display: grid;
-  /* One cell. Every panel is placed into it below. */
-  grid-template-areas: "slide";
-  /* `minmax(0, 1fr)`, never a bare `1fr` or an implicit `auto`: the automatic
-     minimum of a grid track is min-content, so the track grew to whatever the
-     widest panel could not break below and the panels overhung the stage. See
-     the note on `.hero-slider__panel`. */
-  grid-template-columns: minmax(0, 1fr);
-  background: color-mix(in srgb, var(--color-card) 92%, transparent);
-  border-radius: 6px;
-  overflow: hidden;
-  /* A pointer drag over the card should move the slider, not select its text.
-     `user-select` here rather than on `:active`, because the gesture is
-     measured on pointerup and there is no reliable "dragging" class to hang
-     it on without re-rendering mid-gesture. */
-  touch-action: pan-y;
-}
-
-.hero-slider__panel {
-  grid-area: slide;
-  display: flex;
-  flex-direction: column;
-  /* THE fix for the phone view, and it took two goes to find.
-
-     A grid item's automatic minimum size is its MIN-CONTENT size, exactly like
-     a flex item's. Below `lg` this panel is a row — a 7rem thumbnail plus a
-     copy column — and its min-content is therefore the thumbnail plus the
-     longest unbreakable word. At 320px that came to 340px inside a 272px
-     stage: the panel hung 68px over its own card, and at 360px 28px.
-
-     None of it was visible. `.hero-slider__stage` clips, so the copy was not
-     pushed out of the layout, it was cut off mid-word — which reads as a
-     sentence that simply ends. 320 and 360 are two of the commonest phone
-     widths in the wild.
-
-     Both floors have to go, and fixing only one changes nothing: this element
-     is a grid item (of the stage) AND a flex container whose own copy column
-     is a flex item. Hence `min-width: 0` here, `minmax(0, 1fr)` on the track
-     above, and `min-width: 0` on `.hero-slider__body`. */
-  min-width: 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(var(--hero-slide-from));
-  transition:
-    opacity 320ms var(--tds-ease-out),
-    transform 320ms var(--tds-ease-out),
-    visibility 0s linear 320ms;
-}
-.hero-slider__panel[data-active] {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition:
-    opacity 320ms var(--tds-ease-out),
-    transform 320ms var(--tds-ease-out),
-    visibility 0s;
-}
-
-.hero-slider__shot {
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--color-paper);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-}
-.hero-slider__shot img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Every service ground composes its subject into the upper two thirds; a
-     crop from the bottom shows table. Same rule as the mosaic tiles. */
-  object-position: top;
-}
-
-.hero-slider__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1.125rem 1.25rem 1.25rem;
-  /* The third of the three min-content floors between the stage and this text
-     — see the note on `.hero-slider__panel`. Below `lg` this is the flex item
-     beside the thumbnail, and a flex item will not go narrower than its own
-     min-content unless told to. */
-  min-width: 0;
-}
-
-/* The line above the title. A demo carries the genre etiquette from the
-   closed `DEMO_KINDS` vocabulary — one or two words, so it gets the same
-   uppercase mono treatment as `.demo-card__kind` on the shelf below and the
-   two read as one family. A reference carries the case's own `context`,
-   which is a sentence: uppercasing and letter-spacing that would make it
-   shout, so it stays sentence case and is held to one line instead. */
-.hero-slider__kind {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--color-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hero-slider__panel[data-kind="demo"] .hero-slider__kind {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.hero-slider__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 1.375rem;
-  line-height: 1.15;
-  letter-spacing: -0.015em;
-  color: var(--color-black);
-  /* A demo's title is the demo's own and can be one long German compound
-     ("Immobilienverwaltung"). In a 160px column that word is wider than the
-     column, and without a break opportunity it sets the minimum the `min-width`
-     above exists to defeat. `anywhere` rather than `break-word` so it counts
-     during the min-content calculation, which is the whole point here. */
-  overflow-wrap: anywhere;
-}
-
-.hero-slider__text {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--color-muted);
-  /* The summaries are 80–160 characters by contract (they double as a page
-     description), which is three lines here at most widths. Clamped so one
-     long one cannot push the stage taller than the rest. */
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.hero-slider__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin: 0.15rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.hero-slider__chips li {
-  padding: 0.2rem 0.55rem;
-  border-radius: 100px;
-  background: var(--color-soft);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--color-muted);
-  white-space: nowrap;
-}
-
-.hero-slider__more {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 0.35rem;
-  margin-top: 0.35rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  text-decoration: none;
-}
-.hero-slider__more span {
-  transition: transform 200ms var(--tds-ease-out);
-}
-.hero-slider__more:hover span {
-  transform: translateX(2px);
-}
-.hero-slider__more:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-.hero-slider__controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  /* Reserved, so the pause button appearing after hydration (it depends on a
-     media query the server cannot answer) does not shift the row. */
-  min-height: 2.75rem;
-  margin-top: 0.75rem;
-}
-
-.hero-slider__arrow,
-.hero-slider__toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* `flex: none` is the fix, not the decoration. These sit in a flex row with
-     one 44px dot per slide, and with six slides that row wants more width than
-     a phone has. A flex item shrinks by default, so the two arrows — the only
-     items in the row that could give — were squeezed to EIGHTEEN pixels wide
-     at 320, 360 and 390px, i.e. on every common phone. A round button rendered
-     as a half-width oval, under half the minimum touch target, and nothing
-     reported it because a squashed flex item is not an error. */
-  flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: none;
-  border-radius: 100px;
-  background: color-mix(in srgb, var(--color-card) 80%, transparent);
-  color: var(--color-muted);
-  cursor: pointer;
-  transition:
-    background-color 200ms var(--tds-ease-out),
-    color 200ms var(--tds-ease-out);
-}
-
-/* THE ARROWS ARE A POINTER AFFORDANCE, exactly as on the showcase shelf.
-
-   The stage handles a horizontal drag itself (see `onPointerUp` in
-   `HeroShowcaseSlider.tsx`), so on a touch screen the arrows offer a smaller,
-   slower version of the gesture the visitor is already making — while taking
-   the width that the dots need to stay at their full size. They are hidden
-   there and the dots remain, so the slider can still be navigated by tapping
-   as well as by swiping.
-
-   `hover: hover` AND `pointer: fine`, never a width query: the question is
-   whether there is a pointer at all, and a laptop with both a touchscreen and
-   a mouse must keep them. */
-.hero-slider__arrow {
-  display: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .hero-slider__arrow {
-    display: inline-flex;
-  }
-}
-.hero-slider__arrow:hover,
-.hero-slider__toggle:hover {
-  background: var(--color-card);
-  color: var(--color-primary);
-}
-.hero-slider__arrow:focus-visible,
-.hero-slider__toggle:focus-visible,
-.hero-slider__dot:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.hero-slider__dots {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  /* The dots are what must survive a narrow row — they are the only navigation
-     left once the arrows step aside on touch. Never allowed to shrink. */
-  flex: none;
-}
-.hero-slider__dot {
-  /* The dot is 8px; the button around it is 44px of transparent padding, so
-     the target meets the minimum without the mark growing to match it. */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 100px;
-}
-.hero-slider__dot::before {
-  content: "";
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 100px;
-  background: color-mix(in srgb, var(--color-muted) 45%, transparent);
-  transition:
-    background-color 200ms var(--tds-ease-out),
-    width 200ms var(--tds-ease-out);
-}
-.hero-slider__dot[aria-selected="true"]::before {
-  width: 1.25rem;
-  background: var(--color-accent);
-}
-
-/* PHONES AND SMALL TABLETS: the card lies down.
-
-   The hero is exactly one screen tall at every width on this site, and that is
-   not a coincidence — it is `min-h-svh` over a copy block that was tuned to
-   fit. Below `lg` the slider does not sit beside that block, it sits UNDER it,
-   and a full card (16:10 picture + title + three lines + chips + link +
-   controls) is about 500px. On a 375 × 812 phone that pushes the hero to
-   ~1190px: the visitor gets the headline, the buttons, and the top edge of a
-   photograph, with the slider's own controls a screen further down.
-
-   So on a phone the card turns on its side: the picture becomes a 7rem
-   thumbnail column, the summary is clamped to two lines and the chips drop
-   out. It still names the case or the demo, still shows a picture of it, and
-   still cycles — in about 110px instead of 460.
-
-   The chips are the right thing to lose, though no longer for the reason they
-   once were. They now carry a demo's host address or a case's metric, which
-   the title does NOT repeat — but neither is what the visitor is deciding on
-   at this size, both are one tap away at the destination, and a 22-character
-   mono host is exactly the part that wrapped to three rows here. The eyebrow
-   stays: one word of genre is what makes the shelf scannable. */
-@media (max-width: 63.9375rem) {
-  .hero-slider__panel {
-    flex-direction: row;
-    align-items: stretch;
-  }
-  .hero-slider__shot {
-    flex: none;
-    /* Scales with the card so the picture keeps the same relationship to the
-       copy from a 320px phone up to the breakpoint, with the old fixed value
-       as the ceiling. */
-    width: clamp(5.5rem, 30%, 7rem);
-    /* THE SOURCE'S OWN RATIO, so `cover` crops nothing at all.
-     *
-     * This was `auto`, which let the box stretch to the row's full height —
-     * and a 1440 × 900 screenshot forced into a 112 × 157 portrait box is not
-     * a small picture of a page, it is a vertical slice through one. `cover`
-     * scaled it to 17 % and showed the middle 45 % of the width: no logo, no
-     * header, no structure. Nothing was broken, so nothing complained; the
-     * thumbnail was simply useless.
-     *
-     * Three things cannot hold at once here — flush over the full row height,
-     * uncropped, and enough width left for the copy. A 16:10 picture 157px
-     * tall would be 251px wide, 73 % of the card, leaving 91px for text. The
-     * full height is the one to give up: it was the cause of the crop and
-     * bought nothing else. */
-    aspect-ratio: 16 / 10;
-    /* Not stretched any more, so the row's height still comes from the copy
-       and the card does not grow. Measured: panel 161px at 320/360 and 157px
-       at 390+, unchanged by this block. */
-    align-self: center;
-    margin: 0.7rem 0 0.7rem 0.7rem;
-    border-radius: 4px;
-    /* Both edges go with the stretch. The right-hand rule was a divider
-       between the two halves and only reads as one while the picture fills
-       the height — against a centred thumbnail it would be a stub. An inset
-       picture with its own corners needs no rule; it already has an edge. */
-    border-bottom: none;
-    border-right: none;
-  }
-  .hero-slider__body {
-    justify-content: center;
-    gap: 0.3rem;
-    padding: 0.8rem 0.95rem;
-    /* The hero body is `text-center md:text-left`, and below `md` that
-       centring reached in here — so a card that is a left-anchored ROW, with a
-       hard thumbnail edge down one side, had its eyebrow, title and summary
-       ragged on BOTH sides against it. Centred copy is right for the headline
-       above; it is wrong for a horizontal card, which reads along its edge.
-       `start`, not `left`, so it follows the writing direction. */
-    text-align: start;
-  }
-  .hero-slider__title {
-    font-size: 1.0625rem;
-    /* Two lines, then it stops.
-     *
-     * Needed as soon as the copy column was allowed to be narrow enough to
-     * wrap properly: a demo's title is its own and can be a sentence, and in a
-     * 130px column at 320px it ran to four lines and took the whole hero with
-     * it. It was invisible before only because the panel was overhanging its
-     * card and the surplus was being clipped — the text was never short, it
-     * was cut. */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .hero-slider__text {
-    font-size: 0.8125rem;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-  .hero-slider__chips {
-    display: none;
-  }
-  .hero-slider__more {
-    margin-top: 0.1rem;
-    font-size: 0.75rem;
-  }
-  .hero-slider__controls {
-    min-height: 2.5rem;
-    margin-top: 0.5rem;
-    /* A safety net, not a layout: with the arrows gone the row is dots plus
-       the pause button, which fits. It would stop fitting the day a seventh
-       slide is published, and now that nothing in the row shrinks any more the
-       overflow would be the DOCUMENT's. Wrapping is the graceful end of that
-       road; a squashed control is not. */
-    flex-wrap: wrap;
-  }
-  .hero-slider__dot {
-    /* Narrower, NOT shorter. The vertical target stays the full 2.75rem and
-       the 0.4rem gap adds spacing on either side, so the tap area stays well
-       clear of the 24px floor while six of them fit across a 320px phone.
-       Six 44px dots plus a pause button want 296px; the slider has 272. */
-    width: 2rem;
+@media (min-width: 48rem) {
+  .portrait-shape.tds-shape {
+    inset: -1.25rem -2rem 0 -1.25rem;
   }
 }
 
-/* END STATE, spelled out — same reason as the reveal block further down. The
-   shared reduce block clamps duration to 0.01ms, and a clamped transition
-   still travels; a panel that never receives `data-active` would otherwise be
-   left mid-transform. */
-@media (prefers-reduced-motion: reduce) {
-  .hero-slider__panel,
-  .hero-slider__panel[data-active],
-  .hero-slider__more span,
-  .hero-slider__dot::before {
-    transition: none;
-  }
-  .hero-slider__panel {
-    transform: none;
-  }
-  .hero-slider__more:hover span {
-    transform: none;
-  }
-}
-
-/* Hero — on short viewports (laptops, landscape phones) the stacked
-   headline + straplines + sub + CTAs can exceed the screen height and
-   spill past the scroll hint. Pull the type and rhythm in so the whole
-   hero stays within one screen. ID selectors out-specify the Tailwind
-   responsive size utilities, so these win without !important. */
-@media (max-height: 800px) {
-  #hero h1 {
-    font-size: clamp(2rem, 4.5vw, 3rem);
-    line-height: 1.04;
-    margin-bottom: 0.75rem;
-  }
-  #hero .hero-slogan {
-    font-size: clamp(1.25rem, 3vw, 1.75rem);
-    margin-bottom: 1rem;
-  }
-  #hero .hero-body {
-    padding-top: 1.25rem;
-    padding-bottom: 1.25rem;
-  }
-  #hero .hero-slider__text {
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-  #hero .hero-slider__body {
-    padding: 0.875rem 1.125rem 1rem;
-  }
-}
-
-/* The squeezed picture belongs to the COLUMN layout only.
- *
- * On a short viewport the slider has to come in with everything else, or the
- * hero grows by exactly the height the rules above just saved — and the
- * picture is the part that can afford it: the title, the sentence and the link
- * are the content, the ground is decoration.
- *
- * That reasoning holds where the picture is a full-width band above the copy,
- * and only there. Below `lg` the card is a ROW: its height comes from the copy
- * beside the picture, so squeezing the picture saves nothing at all — it just
- * made an 88px-wide thumbnail 38px tall and cut two thirds of the screenshot
- * away for no gain. This used to sit in the block above and applied to both.
- *
- * `#hero` is load-bearing in the selector: it out-specifies the Tailwind
- * responsive utilities, which is why the whole short-viewport block is written
- * this way. */
-@media (max-height: 800px) and (min-width: 64rem) {
-  #hero .hero-slider__shot {
-    aspect-ratio: 21 / 9;
-  }
-}
-
-/* Landscape phones: the hero releases its `min-height` below, and the slider's
-   picture is the first thing that has to go — there is no room for a 16:10
-   band beside a headline on a 640px-tall screen. */
-@media (max-height: 640px) and (orientation: landscape) {
-  #hero .hero-slider__shot {
-    display: none;
-  }
-}
-
-/* Releasing `min-height` is for LANDSCAPE phones, where the viewport is
-   genuinely too short to hold the hero. It used to fire on height alone,
-   which also caught tall narrow phones in portrait — and there it did the
-   opposite of what it exists for: the section collapsed to its content
-   height, so `justify-center` had nothing left to centre against and the
-   hero sat under the header instead of in the middle of the screen. */
-@media (max-height: 640px) and (orientation: landscape) {
-  #hero {
-    min-height: auto;
-  }
-}
-
-/* Optical centring on phones. The section is `min-h-svh` + `justify-center`,
-   but the padding was 5rem top against 7rem bottom — asymmetric to leave
-   room for the scroll hint, which is `hidden md:flex` and therefore does
-   not exist at this width at all. The hero measurably sat above centre.
-
-   The top padding still has to clear the fixed header (~4.5rem including
-   its 0.75rem offset); the bottom gets the same value, so the leftover
-   space is split evenly and the block lands where the eye expects it. */
-@media (max-width: 767px) {
-  #hero {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
-  }
-}
+/* (The hero's styles lived here while the hero was a React island, which
+   cannot carry an Astro `<style>`. It is `sections/Hero.astro` now and owns
+   them — and the showcase slider's ~440 lines went with the slider.) */
 
 /* Interactive accent letters — splits the headline-accent word into
    per-character spans so each letter can react to pointer hover.
    Per-letter: jumps + tilts + cycles through the brand palette.
    Group-hover: idle letters tilt opposite + fade slightly so the
-   word as a whole feels alive when one letter is being touched. */
+   word as a whole feels alive when one letter is being touched.
+   The letters sit inside `.accent-letters__glyphs`, which is aria-hidden;
+   the word itself is read from a visually hidden copy beside it (see
+   `ui/AccentLetters.astro`). `:nth-child` therefore counts letters only. */
 .accent-letters {
   display: inline-block;
   font-style: italic;
@@ -903,12 +380,6 @@ html {
   }
 }
 
-/* Hero scroll-hint arrow */
-@keyframes scrollHint {
-  0%, 100% { transform: translateY(0); opacity: 1; }
-  50% { transform: translateY(6px); opacity: 0.4; }
-}
-
 /* Hero availability dot */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
@@ -918,11 +389,9 @@ html {
   animation: pulse-dot 2.5s ease-in-out infinite;
 }
 
-/* (`@keyframes marquee` / `.marquee-track` lived here until this pass, with
-   their own reduced-motion override. The TechMarquee section was removed
-   from the home page — see AGENTS.md, "the old TechMarquee and Currently
-   sections do not belong on the home page" — so the rules had no element
-   left to style and the override had nothing left to override.) */
+/* (`@keyframes marquee` / `.marquee-track` lived here until the TechMarquee
+   section was removed from the home page — see AGENTS.md. `scrollHint` went
+   with the hero's scroll hint.) */
 
 /* Contact form error shake */
 @keyframes shake {
@@ -1003,202 +472,6 @@ html {
   }
 }
 
-/* ── Preisliste als Schublade ─────────────────────────────────────────────
-   Slides in from the right; the page slides left by the same amount.
-
-   ### The shift is a variable, not a wrapper
-
-   Wrapping the document in a transformed element would have been one line and
-   would have broken the site: a `transform` makes its element the containing
-   block for every `position: fixed` DESCENDANT, so the fixed header would stop
-   being fixed to the viewport and start scrolling with the page. The cookie
-   notice and the floating CTA would go with it.
-
-   So nothing is wrapped. `--pricing-shift` is published on the root and the
-   three elements that ARE the page answer for themselves. A transform on a
-   fixed element itself is fine — that is not the case that breaks.
-
-   ### Only these three move
-
-   The header, the content and the footer are the website. The floating
-   widgets (CTA, live chat, cookie notice) are not part of that surface and
-   would land on top of the panel, so they step back while it is open instead
-   of riding along.
-*/
-:root {
-  /* The panel's width, and therefore the distance the page travels. `min()`
-     rather than a media query so it is one number the JS never has to know. */
-  --pricing-width: min(34rem, 100vw);
-  --pricing-shift: 0px;
-  /* A gentle overshoot, the same character as the section jumps in
-     `lib/scrollJump.ts` — it settles a few percent past and eases back. The
-     panel "springs" open rather than sliding to a stop. */
-  --pricing-ease: cubic-bezier(0.22, 1.2, 0.36, 1);
-}
-
-/* Only the desktop push actually shifts the page. On a phone the panel is the
-   full width of the screen, so shifting would move the page entirely
-   off-screen to reveal a panel that already covers it — there the drawer
-   simply lies over the page. */
-@media (min-width: 48rem) {
-  :root.pricing-open {
-    --pricing-shift: var(--pricing-width);
-  }
-}
-
-/* `translate`, NOT `transform` — and that is not a stylistic preference.
-   `Header.astro` sets `transform: none` on `.site-header` inside its own
-   `@media (min-width: 1024px)` block. Astro scopes that rule, which appends
-   the component's id attribute and makes it (0,2,0) against this file's
-   (0,1,0): the header simply ignored a `transform` written here and stayed
-   put while the rest of the page slid away. Nothing errors, and it looks like
-   the shift "doesn't work on the header".
-
-   `translate` is an independent property. The header's `transform: none`
-   leaves it alone, and where both are set the browser composes them — so the
-   header keeps whatever transform it wants for its own docked/floating states
-   and still travels with the page. */
-.site-header,
-main,
-footer {
-  translate: calc(-1 * var(--pricing-shift));
-  transition: translate 560ms var(--pricing-ease);
-}
-
-.pricing-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  width: var(--pricing-width);
-  max-width: 100vw;
-  height: 100svh;
-  background: var(--color-paper);
-  border-left: 1px solid color-mix(in srgb, var(--color-black) 10%, transparent);
-  /* Fully off-canvas, and `visibility` on top of it: a panel parked at 100%
-     is still in the layout, and without this a stray focus or a find-in-page
-     would scroll the viewport sideways to reach it. */
-  transform: translateX(100%);
-  visibility: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  transition:
-    transform 560ms var(--pricing-ease),
-    visibility 0s linear 560ms;
-}
-.pricing-drawer[data-open] {
-  transform: none;
-  visibility: visible;
-  transition:
-    transform 560ms var(--pricing-ease),
-    visibility 0s;
-}
-
-.pricing-drawer__head {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem 1rem;
-  background: var(--color-paper);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-}
-.pricing-drawer__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  letter-spacing: -0.015em;
-  color: var(--color-black);
-}
-.pricing-drawer__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  /* The shared 44px minimum. */
-  width: 2.75rem;
-  height: 2.75rem;
-  border: none;
-  border-radius: var(--tds-radius-pill, 100px);
-  background: var(--color-soft);
-  color: var(--color-black);
-  cursor: pointer;
-  transition:
-    background-color 200ms var(--tds-ease-out),
-    color 200ms var(--tds-ease-out);
-}
-.pricing-drawer__close:hover {
-  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-soft));
-  color: var(--color-primary);
-}
-.pricing-drawer__close:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.pricing-drawer__body {
-  padding: 1.5rem;
-  /* The list inside asks THIS element how wide it is, not the window — the
-     panel is 34rem on a 90rem screen and a viewport query would answer for
-     the screen. Named, so `@container pricing-list (…)` in `PricingList.astro`
-     cannot accidentally resolve against some other ancestor.
-
-     `inline-size`, never `size`: the panel's height is its content's, and
-     `contain: size` on a scrolling column collapses it to nothing. */
-  container: pricing-list / inline-size;
-}
-
-/* Dims the page and is the second way out — a click anywhere off the panel.
-   Never covers the panel itself: it stops at the panel's edge on desktop
-   because the page has moved, and sits under it on `z-index` regardless. */
-.pricing-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 55;
-  background: color-mix(in srgb, var(--color-black) 34%, transparent);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 360ms var(--tds-ease-out),
-    visibility 0s linear 360ms;
-}
-.pricing-scrim[data-open] {
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity 360ms var(--tds-ease-out),
-    visibility 0s;
-}
-
-/* The floating chrome steps back rather than riding along: it is not part of
-   the page surface and would otherwise sit on top of the panel. */
-:root.pricing-open .floating-cta,
-:root.pricing-open .cookie-notice,
-:root.pricing-open .tds-live-chat-cta {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms var(--tds-ease-out);
-}
-
-/* The page must not scroll behind an open panel. `position: fixed` on the body
-   would lose the scroll position; hiding the overflow keeps it. */
-:root.pricing-open body {
-  overflow: hidden;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .site-header,
-  main,
-  footer,
-  .pricing-drawer,
-  .pricing-drawer[data-open],
-  .pricing-scrim,
-  .pricing-scrim[data-open] {
-    transition-duration: 0.01ms;
-  }
-}
+/* (The price drawer's push, panel and scrim lived here. The prices are an
+   ordinary section since the 2026-09 redesign — `sections/Pricing.astro` —
+   so there is no overlay left to position, trap focus in or undo on Back.) */

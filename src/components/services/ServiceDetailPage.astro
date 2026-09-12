@@ -6,6 +6,7 @@ import Emphasis from "~/components/ui/Emphasis.astro";
 import WebsiteDemos from "~/components/sections/WebsiteDemos.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
 import CardActions from "~/components/ui/CardActions.astro";
+import FirstCall from "~/components/ui/FirstCall.astro";
 import type { CardAction } from "~/lib/cardActions";
 import { breadcrumbSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
@@ -184,7 +185,7 @@ const jsonLd = [
         <nav aria-label={ui.breadcrumb} class="mb-10">
           <a
             href={servicesHref}
-            class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors group"
+            class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors group [@media(pointer:coarse)]:min-h-11"
           >
             <svg
               aria-hidden="true"
@@ -526,6 +527,11 @@ const jsonLd = [
           <p class="text-white/75 leading-relaxed max-w-2xl mx-auto mb-8">
             {content.ctaText}
           </p>
+          {/* What the first conversation is, directly above the button that
+              asks for one — goal, preparation, outcome, cost. */}
+          <div class="mb-8">
+            <FirstCall variant="service" />
+          </div>
           <a
             href={contactHref}
             class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"

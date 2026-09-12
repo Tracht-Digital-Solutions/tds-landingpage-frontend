@@ -124,8 +124,8 @@ export interface BusinessCardLink {
  * The slugs are code-owned anyway — the same rule as `BUSINESS_CARD_SLUG`.
  */
 const SITE_LINKS: Record<Lang, { home: string; services: string; pricing: string }> = {
-  de: { home: "/", services: "/#services", pricing: "/preise" },
-  en: { home: "/en/", services: "/en/#services", pricing: "/en/preise" },
+  de: { home: "/", services: "/#services", pricing: "/#preise" },
+  en: { home: "/en/", services: "/en/#services", pricing: "/en/#preise" },
 };
 
 /**

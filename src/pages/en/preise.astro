@@ -1,14 +1,13 @@
 ---
 /**
- * Retired with its German twin — see `pages/preise.astro` for why this is a
- * 301 and not a deletion.
+ * The English twin of `pages/preise.astro` — see there for why this is a 301.
  *
  * The path keeps its German spelling because that is the URL that was
- * published and indexed; `localizePath("/preise", "en")` produced `/en/preise`
- * rather than `/en/pricing`, and renaming a retired URL on the way out helps
- * nobody.
+ * published and indexed. The target is `/en/` WITH its trailing slash: the
+ * redirect used to point at `/en#…`, a second spelling of the English home page
+ * next to the canonical `/en/`.
  */
 export const prerender = false;
 
-return Astro.redirect("/en#pricing-teaser", 301);
+return Astro.redirect("/en/#preise", 301);
 ---

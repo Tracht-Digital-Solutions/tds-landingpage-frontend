@@ -85,7 +85,7 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
       </h2>
       <a
         href="https://blog.tracht-digital.de"
-        class="hidden sm:flex items-center gap-2 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors group"
+        class="hidden sm:flex items-center gap-2 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors group [@media(pointer:coarse)]:min-h-11"
       >
         {t.blog.allPosts}
         <span aria-hidden="true" class="group-hover:translate-x-1 transition-transform duration-200">→</span>
@@ -111,7 +111,7 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
 
     <a
       href="https://blog.tracht-digital.de"
-      class="sm:hidden mt-8 inline-flex items-center gap-2 rounded-full bg-[var(--color-paper)] px-5 py-2.5 text-sm font-medium text-[var(--color-primary)]"
+      class="sm:hidden mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-paper)] px-5 py-2.5 text-sm font-medium text-[var(--color-primary)]"
     >
       {t.blog.allPosts}
       <span aria-hidden="true">↗</span>

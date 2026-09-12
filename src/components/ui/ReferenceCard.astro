@@ -33,6 +33,7 @@
  */
 import type { Lang } from "~/lib/i18n";
 import type { CardAction } from "~/lib/cardActions";
+import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
 import CardActions from "~/components/ui/CardActions.astro";
 
 export interface ReferenceCardData {
@@ -53,9 +54,16 @@ export interface ReferenceCardData {
 interface Props {
   card: ReferenceCardData;
   lang: Lang;
+  /**
+   * What KIND of work this card shows — "Kundenprojekt" on the home page.
+   * A prop, not a constant: the label is the answer to "is this real client
+   * work or a sample?", and only the section placing the card knows it is
+   * asked there.
+   */
+  badge?: string;
 }
 
-const { card, lang } = Astro.props;
+const { card, lang, badge } = Astro.props;
 
 const ui =
   lang === "de"
@@ -123,6 +131,8 @@ const cta: CardAction | null = card.articleHref
       <div class="reference-card__shot">
         <img
           src={card.preview.src}
+          srcset={srcsetFor(card.preview.src, PREVIEW_VARIANT_WIDTHS, card.preview.width)}
+          sizes="(min-width: 80rem) 40rem, (min-width: 48rem) 50vw, 100vw"
           alt={ui.previewAlt(card.reference.title)}
           width={card.preview.width}
           height={card.preview.height}
@@ -133,6 +143,7 @@ const cta: CardAction | null = card.articleHref
     )}
 
     <div class="reference-card__body">
+      {badge && <p class="reference-card__badge">{badge}</p>}
       <p class="eyebrow text-[var(--color-accent)] mb-3">
         <span class="sr-only">{ui.context}: </span>
         {card.reference.context}
@@ -251,6 +262,20 @@ const cta: CardAction | null = card.articleHref
     padding: 1.5rem 1.5rem 1.375rem;
   }
 
+  /* The card's kind, before anything else on it. Ink on a light accent tint,
+     so it reads as a label and not as a link. */
+  .reference-card__badge {
+    align-self: flex-start;
+    margin: 0 0 0.875rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-paper));
+    color: var(--color-black);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
   .reference-card__title {
     font-family: var(--font-display);
     font-size: 1.5rem;
@@ -294,10 +319,22 @@ const cta: CardAction | null = card.articleHref
     list-style: none;
   }
   .reference-card__service {
+    /* ABOVE the bar CTA's stretched layer (`CardActions.astro`), exactly like
+       the bar's own service link. Without it every tap on a badge landed on
+       the card's destination — measured: "Prozessoptimierung" opened the
+       journal article — and the badges were links for the keyboard only. */
+    position: relative;
+    z-index: 1;
     text-decoration: none;
     transition:
       background-color 200ms var(--tds-ease-out),
       border-color 200ms var(--tds-ease-out);
+  }
+  /* A 19px badge is hit by luck on a phone. */
+  @media (pointer: coarse) {
+    .reference-card__service {
+      min-height: 2.75rem;
+    }
   }
   .reference-card__service:hover {
     background: color-mix(in srgb, var(--color-accent) 16%, transparent);

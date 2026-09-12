@@ -1,0 +1,9 @@
+---
+/**
+ * `/en/contact` — the English twin of `pages/kontakt.astro`. See there for why
+ * this is a 301 and not a page.
+ */
+export const prerender = false;
+
+return Astro.redirect("/en/#contact", 301);
+---

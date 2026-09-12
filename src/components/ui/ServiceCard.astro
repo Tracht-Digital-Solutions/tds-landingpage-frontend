@@ -1,73 +1,111 @@
 ---
+import type { Lang } from "~/lib/i18n";
+import { SERVICE_PHOTO_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
+
 interface Props {
   href: string;
   title: string;
-  description: string;
+  /** The first "Kommt Ihnen das bekannt vor?" line — the problem the service starts from. */
+  problem: string;
+  /** The first "Das erreichen Sie" line — what the visitor ends up with. */
+  result: string;
   keywords: readonly string[];
   /** Photo under `/images/services/`; null renders the tile without a band. */
   image?: string | null;
+  lang: Lang;
 }
 
-const { href, title, description, keywords, image = null } = Astro.props;
+const { href, title, problem, result, keywords, image = null, lang } = Astro.props;
+
+// This site's own labels for its own tiles — code-owned, not CMS copy.
+const ui =
+  lang === "de"
+    ? { problem: "Typische Ausgangslage", result: "Ergebnis", scope: "Umfang", more: "Details & Ablauf" }
+    : { problem: "Typical starting point", result: "Outcome", scope: "Scope", more: "Details & process" };
+
+/** Every service photo is committed at 1586 × 992 (IMAGES.md). */
+const PHOTO = { width: 1586, height: 992 };
 ---
 
 {/*
   One tile of the services mosaic.
 
-  This used to be a floating card: a rounded box on sand, told apart from its
-  neighbours by the gutter between them and by a decorative `.tds-shape` behind
-  the copy. Both of those existed for the same reason, stated in the old
-  comment here — photography for the services "does not exist yet", so geometry
-  had to do the distinguishing.
+  WHAT IT SAYS. The tile used to carry the title, the one-sentence summary and
+  four keyword chips — which told a visitor what the service is called, not
+  whether it is for them. It now answers the four questions a visitor scanning
+  services actually has: the typical starting point (problem), what they end up
+  with (result), what it covers (scope), and where to go next. The summary is
+  still the detail page's meta description; it is simply not repeated here.
 
-  The photographs exist now, so they do the work instead. The shape is gone
-  (one accessory removed, not repainted), the gutter is gone with it, and the
-  picture is CONTENT in its own band rather than a 34%-opacity ground behind
-  eight lines of text. Separation comes from the 1px seam the parent grid
-  shows through, which is why this element paints its own fill and must not
-  add a margin of its own.
+  WHY THE LINK IS ON THE TITLE. The tile used to be one wrapping `<a>` around
+  the heading, three paragraphs and a list — so the link's accessible name was
+  the entire card read aloud. The title is the link now, with a stretched
+  `::after` over the tile, so the hit area is still the whole tile and the name
+  is still just the service. The focus ring is drawn around the tile.
 
   `object-position: top` is not a taste call: IMAGES.md composes every service
-  photo with the subject in the upper two thirds and the lower third empty, so
-  a band cropped from the bottom shows table.
+  photo with the subject in the upper two thirds.
 */}
-<a
-  href={href}
-  class="service-tile group relative flex flex-col bg-[var(--lp-surface-card)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--color-accent-pink)_10%,var(--color-card))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-accent)]"
->
+<article class="service-tile group relative flex flex-col bg-[var(--lp-surface-card)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--color-accent-pink)_10%,var(--color-card))]">
   {image && (
     <div class="service-tile__shot" aria-hidden="true">
-      <img src={image} alt="" loading="lazy" decoding="async" />
+      <img
+        src={image}
+        srcset={srcsetFor(image, SERVICE_PHOTO_VARIANT_WIDTHS, PHOTO.width)}
+        sizes="(min-width: 80rem) 40rem, (min-width: 40rem) 50vw, 100vw"
+        alt=""
+        width={PHOTO.width}
+        height={PHOTO.height}
+        loading="lazy"
+        decoding="async"
+      />
     </div>
   )}
 
   <div class="flex flex-col flex-1 p-6 sm:p-7 md:p-8">
-    <h3 class="font-[var(--font-display)] text-xl md:text-2xl text-[var(--color-black)] mb-3">
-      {title}
+    <h3 class="font-[var(--font-display)] text-xl md:text-2xl text-[var(--color-black)] mb-5">
+      <a href={href} class="service-tile__link">{title}</a>
     </h3>
-    <p class="text-sm leading-relaxed text-[var(--color-muted)] mb-6">
-      {description}
-    </p>
 
-    <ul class="flex flex-wrap gap-2 mt-auto">
-      {keywords.map((keyword) => (
-        <li class="px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] transition-colors duration-200 group-hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))]">
-          {keyword}
-        </li>
-      ))}
-    </ul>
+    <dl class="service-tile__facts">
+      {problem && (
+        <div>
+          <dt>{ui.problem}</dt>
+          <dd>{problem}</dd>
+        </div>
+      )}
+      {result && (
+        <div>
+          <dt>{ui.result}</dt>
+          <dd>{result}</dd>
+        </div>
+      )}
+      <div>
+        <dt>{ui.scope}</dt>
+        <dd>
+          <ul class="flex flex-wrap gap-2 mt-1.5">
+            {keywords.map((keyword) => (
+              <li class="px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] transition-colors duration-200 group-hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))]">
+                {keyword}
+              </li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+    </dl>
 
-    <span
-      aria-hidden="true"
-      class="mt-6 text-[var(--color-accent)] transition-transform duration-200 group-hover:text-[var(--color-primary)] group-hover:translate-x-1 group-hover:-translate-y-1"
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-        <line x1="7" y1="17" x2="17" y2="7"></line>
-        <polyline points="7 7 17 7 17 17"></polyline>
+    {/* The visible "next step". Decorative for assistive tech: the title link
+        already names the destination, and a second link to the same page
+        would be read twice. */}
+    <span aria-hidden="true" class="service-tile__more">
+      {ui.more}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
       </svg>
     </span>
   </div>
-</a>
+</article>
 
 <style>
   /* The band reserves its ratio before the image loads, so the mosaic does
@@ -87,8 +125,70 @@ const { href, title, description, keywords, image = null } = Astro.props;
     transition: transform 700ms var(--lp-ease-soft);
   }
   .service-tile:hover .service-tile__shot img,
-  .service-tile:focus-visible .service-tile__shot img {
+  .service-tile:focus-within .service-tile__shot img {
     transform: scale(1.04);
+  }
+
+  .service-tile__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* The whole tile, made clickable from the title. `inset: 0` lands on the
+     TILE because the tile is the positioned ancestor. */
+  .service-tile__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  /* The ring goes around the tile — its hit area — not around two words. The
+     tiles sit edge to edge on 1px seams, so it is drawn inside. */
+  .service-tile:has(.service-tile__link:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+  .service-tile__link:focus-visible {
+    outline: none;
+  }
+
+  .service-tile__facts {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  .service-tile__facts dt {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .service-tile__facts dd {
+    margin: 0.3rem 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-black);
+  }
+
+  .service-tile__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .service-tile:hover .service-tile__more {
+    color: var(--color-primary);
+  }
+  .service-tile__more svg {
+    transition: transform 200ms var(--tds-ease-out);
+  }
+  .service-tile:hover .service-tile__more svg {
+    transform: translateX(3px);
   }
 
   /* Duration alone is not a reduced-motion implementation — the shared block
@@ -96,7 +196,8 @@ const { href, title, description, keywords, image = null } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     .service-tile__shot img,
     .service-tile:hover .service-tile__shot img,
-    .service-tile:focus-visible .service-tile__shot img {
+    .service-tile:focus-within .service-tile__shot img,
+    .service-tile:hover .service-tile__more svg {
       transition: none;
       transform: none;
     }

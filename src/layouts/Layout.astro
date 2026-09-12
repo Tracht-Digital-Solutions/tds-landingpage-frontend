@@ -21,6 +21,7 @@ import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
 import { themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
 import { siteConfig } from "~/lib/seo";
 import { isExcluded } from "~/lib/sitemap";
+import { tFor } from "~/lib/i18n";
 
 interface Props {
   title: string;
@@ -184,11 +185,13 @@ const showCookieNotice = !bare;
     <slot name="head" />
   </head>
   <body>
+    {/* In the page's language: it said "Skip to content" on every German page.
+        z-50 lifts it over the fixed header (z-40) when it takes focus. */}
     <a
       href="#main"
-      class="absolute -top-full left-0 z-50 px-6 py-3 bg-[var(--color-surface-navy)] text-white text-sm font-semibold focus:top-0 transition-all"
+      class="absolute -top-full left-3 z-50 rounded-full px-6 py-3 bg-[var(--color-surface-navy)] text-white text-sm font-semibold focus:top-3 transition-all"
     >
-      Skip to content
+      {tFor(lang).a11y.skipToContent}
     </a>
     {!bare && <SmoothScroll client:load />}
     {/* Non-critical chrome — defer to idle so it never blocks first paint. */}
@@ -250,20 +253,22 @@ const showCookieNotice = !bare;
         de: {
           about: "Wieso ich?",
           services: "Leistungen",
-          "digital-responsibility": "Eine Ansprechperson",
+          cases: "Kundenprojekte",
           process: "Vorgehen",
-          "pricing-teaser": "Preise",
+          showcase: "Beispielseiten",
           blog: "Journal",
+          preise: "Preise",
           faq: "Häufige Fragen",
           contact: "Kontakt",
         },
         en: {
           about: "Why me?",
           services: "Services",
-          "digital-responsibility": "One point of contact",
+          cases: "Client projects",
           process: "Process",
-          "pricing-teaser": "Pricing",
+          showcase: "Example sites",
           blog: "Journal",
+          preise: "Pricing",
           faq: "FAQ",
           contact: "Contact",
         },

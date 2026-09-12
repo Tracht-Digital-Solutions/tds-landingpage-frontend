@@ -54,7 +54,6 @@
  * short version: encoding it in this frontmatter shipped `qrcode` into the
  * server bundle and answered both card pages with a 500 on the host.
  */
-import { Image } from "astro:assets";
 import Layout from "~/layouts/Layout.astro";
 import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/components";
 import { asGraph, personSchema } from "~/lib/jsonld";
@@ -66,7 +65,7 @@ import {
   businessCardHref,
   businessCardLinks,
 } from "~/lib/businessCard";
-import portrait from "~/assets/portrait.webp";
+import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
 
 interface Props {
   lang: Lang;
@@ -232,16 +231,22 @@ const profileSchema = {
       </nav>
 
       <header class="card__id">
-        {/* The same source `About.astro` uses, through the same pipeline.
-            NOT `assets/portrait-vcard.jpg` — that one is a 400×400 crop the
-            vCard endpoint reads at build time and embeds as base64; it has
-            no business being fetched over HTTP. */}
-        <Image
-          src={portrait}
-          alt={founder.name}
-          widths={[176, 288]}
+        {/* The same pre-sized copies `About.astro` uses (`lib/imageVariants.ts`):
+            committed static files, not the on-request `/_image` resize this
+            used to go through in the Node process. It is this page's largest
+            element, hence eager and high priority. NOT
+            `assets/portrait-vcard.jpg` — that one is a 400×400 crop the vCard
+            endpoint embeds as base64. */}
+        <img
+          src={portraitSrc(360)}
+          srcset={portraitSrcset()}
           sizes="(min-width: 768px) 9rem, 7.5rem"
+          width={PORTRAIT_SIZE.width}
+          height={PORTRAIT_SIZE.height}
+          alt={founder.name}
           loading="eager"
+          fetchpriority="high"
+          decoding="async"
           class="card__portrait"
         />
         <p class="eyebrow card__eyebrow">{ui.eyebrow}</p>

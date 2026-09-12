@@ -57,10 +57,11 @@ const defaults: Record<Lang, PricingContent> = {
     rateSolutions: 70,
     rateWebPresence: 65,
     notesTitle: "Gut zu wissen",
+    // Festpreis and Monatsmodelle are steps of `pricing_logic`
+    // (homeContent.ts), rendered in the same box as these notes — listing them
+    // here as well printed each of them twice.
     notes: [
       "Alle Preise sind netto, zuzüglich Mehrwertsteuer.",
-      "Festpreis, wenn Ziel und Umfang vorher klar sind.",
-      "Für laufende Betreuung gibt es Monatsmodelle.",
       "Bei Anzeigen kommt Ihr Mediabudget dazu; es geht direkt an Google.",
     ],
     ctaTitle: "Welcher Rahmen passt zu Ihnen?",
@@ -90,8 +91,6 @@ const defaults: Record<Lang, PricingContent> = {
     notesTitle: "Good to know",
     notes: [
       "All prices are net and exclude VAT.",
-      "A fixed price works when the goal and scope are clear up front.",
-      "Monthly arrangements are available for ongoing support.",
       "Where ads are involved your media budget is extra; it goes to Google directly.",
     ],
     ctaTitle: "Which setup fits you?",
@@ -131,4 +130,20 @@ export function getServiceRate(
     "web-presence": pricing.rateWebPresence,
   };
   return rates[serviceId];
+}
+
+/**
+ * The lowest of the four rates — "ab …" wherever the site quotes a floor.
+ *
+ * Computed from the resolved block, never typed into copy: the hero's trust
+ * card says "Stundensätze ab {rate} €", and a rate edited in the panel has to
+ * move that sentence too.
+ */
+export function lowestRate(pricing: PricingContent): number {
+  return Math.min(
+    pricing.rateConsulting,
+    pricing.rateProcess,
+    pricing.rateSolutions,
+    pricing.rateWebPresence,
+  );
 }

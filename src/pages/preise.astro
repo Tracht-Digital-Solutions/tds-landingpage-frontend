@@ -1,22 +1,21 @@
 ---
 /**
- * `/preise` is retired — the price list is a drawer on the home page now.
+ * `/preise` answers with a 301 to the pricing SECTION of the home page.
  *
- * A 301 rather than a deletion, and rather than a 404. This URL was indexed
- * (priority 0.8 in the sitemap), it is in the footer of every page that has
- * been crawled, and it is the address anyone who bookmarked the prices holds.
- * Answering it with "not found" throws that away; answering it with a
- * permanent redirect passes it to the page that now carries the content.
+ * The prices have lived in three places: on this URL, then in a drawer on the
+ * home page, and since the 2026-09 redesign in an ordinary section (`#preise`)
+ * that shows every rate without a click. The address stays alive because it was
+ * indexed, sits in old footers and bookmarks — a 404 would throw that away.
  *
- * The target is the pricing band's own anchor, so a visitor arriving from an
- * old link lands where the prices are rather than at the top of a long home
- * page. The drawer itself needs a click — a redirect that also sprang a panel
- * open would be a surprise, and the band it lands on says plainly what it is.
+ * The target is the section's own anchor, so a visitor from an old link lands
+ * on the prices rather than at the top of a long page. The section also keeps
+ * an alias anchor under the old id `pricing-teaser` for links that still carry
+ * it.
  *
- * Same treatment as a withdrawn service (`pages/leistungen/[slug].astro`); see
- * `lib/retiredServices.ts` for that precedent.
+ * Same treatment as a withdrawn service (`pages/leistungen/[slug].astro`) and
+ * as `/kontakt`.
  */
 export const prerender = false;
 
-return Astro.redirect("/#pricing-teaser", 301);
+return Astro.redirect("/#preise", 301);
 ---

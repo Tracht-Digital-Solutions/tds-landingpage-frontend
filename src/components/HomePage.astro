@@ -1,0 +1,140 @@
+---
+/**
+ * The home page, for both language trees.
+ *
+ * `pages/index.astro` and `pages/en/index.astro` were two copies of the same
+ * 150 lines, and they had already drifted (the JSON-LD graph listed its nodes
+ * in a different order in each). They are three-line wrappers now, like the
+ * business card routes, and everything a home page is lives here.
+ *
+ * ### The order (redesign, 2026-09)
+ *
+ * Benefit → trust → services → client results → process → example sites →
+ * journal → prices → questions → contact. Each section answers the question a
+ * visitor has at that point, and the page's primary action — the first
+ * conversation — is offered once per section at most: in the hero, beside the
+ * process, under the prices, and as the contact form itself.
+ *
+ * The positioning band, the price drawer and the hero slider are gone; see the
+ * notes in `sections/Hero.astro` and `sections/Pricing.astro`.
+ */
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import Hero from "~/components/sections/Hero.astro";
+import About from "~/components/sections/About.astro";
+import Services from "~/components/sections/Services.astro";
+import CustomerCases from "~/components/sections/CustomerCases.astro";
+import Process from "~/components/sections/Process.astro";
+import Showcase from "~/components/sections/Showcase.astro";
+import Journal from "~/components/sections/Journal.astro";
+import Pricing from "~/components/sections/Pricing.astro";
+import FAQ from "~/components/sections/FAQ.astro";
+import Contact from "~/components/sections/Contact.astro";
+import {
+  asGraph,
+  faqPageSchema,
+  organizationSchema,
+  personSchema,
+  pricingSchema,
+  speakableSchema,
+  websiteSchema,
+} from "~/lib/jsonld";
+import { siteConfig } from "~/lib/seo";
+import type { Lang } from "~/lib/i18n";
+import { getFaqContent } from "~/lib/faq";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent, resolveTrustFacts } from "~/lib/homeContent";
+import { getPricingContent, getServiceRate, lowestRate } from "~/lib/pricing";
+import { referenceCases } from "~/lib/references";
+import { resolveServiceContent, serviceDefinitions } from "~/lib/services";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const home = getHomeContent(lang);
+
+// Hero copy is editable over the API; the trust card's facts are filled from
+// the values they state, so they cannot disagree with the Impressum or the
+// price list.
+const hero = await cmsFor("home_hero", lang, home.hero);
+const trustContent = await cmsFor("home_trust", lang, home.trust);
+const pricing = await getPricingContent(lang);
+const trust = resolveTrustFacts(trustContent, {
+  name: siteConfig.founder.name,
+  town: siteConfig.address.addressLocality,
+  rate: lowestRate(pricing),
+  hasCases: referenceCases.length > 0,
+});
+
+// Resolved here too so the FAQPage JSON-LD stays 1:1 with the (possibly
+// admin-edited) answers FAQ.astro renders. cms.ts memoises the fetch.
+const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
+
+const pricedServices = await Promise.all(
+  serviceDefinitions.map(async (definition) => ({
+    definition,
+    content: await resolveServiceContent(definition, lang),
+  })),
+);
+
+// The home page carries the canonical entity graph — Organization, Person and
+// WebSite live here; subpages reference them by @id. The four rates are an
+// `OfferCatalog` on the page that shows them. No `HowTo` any more: Google
+// retired those rich results, and the process is not a set of instructions.
+const jsonLd = asGraph(
+  organizationSchema(),
+  personSchema(),
+  websiteSchema(),
+  pricingSchema(
+    pricedServices.map(({ definition, content }) => ({
+      name: content.title,
+      description: content.summary,
+      rate: getServiceRate(pricing, definition.id),
+    })),
+  ),
+  faqPageSchema(faq.items),
+  {
+    "@type": "WebPage",
+    "@id": `${siteConfig.url}/#webpage-${lang}`,
+    url: lang === "de" ? `${siteConfig.url}/` : `${siteConfig.url}/en/`,
+    inLanguage: lang === "de" ? "de-DE" : "en-GB",
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+    primaryImageOfPage: `${siteConfig.url}/og/default.png`,
+    // The headline and the benefit claim under it — what a voice assistant
+    // should read if it reads anything.
+    speakable: speakableSchema(["#hero-heading", "#hero-sub"]),
+  },
+);
+
+// Keyword-first (primary Germany-wide keyword leads, brand follows, ≤60 chars).
+// The local qualifier lives in the description, schema geo/NAP and footer.
+const titles = {
+  de: "Digitalisierung für Unternehmen — Tracht Digital Solutions",
+  en: "Digitalization for Businesses — Tracht Digital Solutions",
+};
+---
+
+<Layout
+  title={titles[lang]}
+  description={siteConfig.description[lang]}
+  lang={lang}
+  jsonLd={jsonLd}
+>
+  <Header />
+  <main id="main">
+    <Hero lang={lang} hero={hero} trust={trust} />
+    <About />
+    <Services />
+    <CustomerCases />
+    <Process />
+    <Showcase />
+    <Journal />
+    <Pricing />
+    <FAQ />
+    <Contact />
+  </main>
+  <Footer />
+</Layout>
