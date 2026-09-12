@@ -62,7 +62,7 @@ Never hand-place a picture into either folder.
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
 | Section grounds | `public/images/sections/<name>.webp`, **1870 × 841** (≈2.22:1); hero **1642 × 958** (≈1.71:1) |
 | Format | WebP, quality 82 (AVIF 55 if a second source is ever added) |
-| Served sizes | Committed copies beside each original, named `<name>-<width>.webp`: screenshots `-480`/`-960` (written by `capture-preview.ts`), service photos `-800`, portrait `public/images/portrait/portrait-{360,720,1080}.webp`. Regenerate with `npm run images:variants`; `imageVariants.test.ts` fails when a `srcset` candidate is missing — a missing candidate breaks the image instead of falling back |
+| Served sizes | Committed copies beside each original, named `<name>-<width>.webp`: screenshots `-480`/`-960` (written by `capture-preview.ts`), service photos `-800`, portrait `public/images/portrait/portrait-{360,720,1080}.webp`, header logo `public/images/logo/{mark,letters}-{width}.webp` (lossless, from `logo.webp` and `logo-letters.png`). Regenerate with `npm run images:variants`; `imageVariants.test.ts` fails when a `srcset` candidate is missing — a missing candidate breaks the image instead of falling back |
 | Alt text | none — these are decorative grounds and render `alt=""` + `aria-hidden` |
 | Weight | 41–86 KB each; ~350 KB for all eight |
 

@@ -4,6 +4,7 @@ import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/components";
 import { resolveLang, localizePath } from "~/lib/i18n";
 import { sectionLinks } from "~/lib/navigation";
 import { siteConfig } from "~/lib/seo";
+import { LOGO, logoSrc, logoSrcset } from "~/lib/imageVariants";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -36,18 +37,25 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       class="flex items-center gap-2 px-2 lg:px-2.5 py-1 lg:py-1 text-[var(--color-primary)] hover:opacity-90 transition-opacity rounded-full [@media(pointer:coarse)]:min-h-11"
       aria-label={homeLabel}
     >
+      {/* Pre-sized lossless WebP copies (`LOGO` in lib/imageVariants.ts). The
+          wordmark used to be the 1289 px PNG: 35 KB for an image at most 97 px
+          wide, fetched before the headline on every phone. */}
       <img
-        src="/images/logo.webp"
+        src={logoSrc("mark", LOGO.mark.widths[1])}
+        srcset={logoSrcset("mark")}
+        sizes="(min-width: 1024px) 72px, 48px"
         alt=""
-        width="40"
-        height="28"
+        width={LOGO.mark.width}
+        height={LOGO.mark.height}
         class="site-logo h-6 lg:h-7 w-auto"
       />
       <img
-        src="/images/logo-letters.png"
+        src={logoSrc("letters", LOGO.letters.widths[1])}
+        srcset={logoSrcset("letters")}
+        sizes="(min-width: 1024px) 100px, 66px"
         alt=""
-        width="1289"
-        height="639"
+        width={LOGO.letters.width}
+        height={LOGO.letters.height}
         class="site-logo h-6 lg:h-7 w-auto"
       />
     </a>
@@ -61,7 +69,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         {items.map((item) => (
           <a
             href={sectionHref(item.id)}
-            class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
+            class="inline-flex items-center px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             {item.label}
           </a>
@@ -69,15 +77,18 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         <a
           href={siteConfig.blogUrl}
           rel="me noopener"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
         >
           Journal
           <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
         </a>
       </div>
 
+      {/* `client:idle`, not `client:load`: this one button was what loaded the
+          React runtime among the requests a phone waits on before the
+          headline. Until it hydrates it carries its server-rendered label. */}
       <ThemeToggle
-        client:load
+        client:idle
         labelToDark={lang === "en" ? "Switch to dark mode" : "Auf Dunkel umschalten"}
         labelToLight={lang === "en" ? "Switch to light mode" : "Auf Hell umschalten"}
       />
