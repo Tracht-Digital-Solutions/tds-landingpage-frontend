@@ -1,43 +1,45 @@
 ---
-import { Image } from "astro:assets";
+/**
+ * Wieso ich? — the person behind the page: portrait, and in plain words what
+ * working with one person means.
+ *
+ * The four claim tiles that used to sit under the text ("Verständlich erklärt",
+ * "Auch nach dem Start da", …) are not rendered any more. They were assertions
+ * a visitor could not check, a screen below a hero that now carries three
+ * facts they can. `why_me.reasons` stays in the content shape so a stored block
+ * keeps loading.
+ *
+ * The portrait is a pre-sized static copy (`lib/imageVariants.ts`), loaded
+ * lazily — it sits below the fold. It used to be `<Image loading="eager">`,
+ * i.e. an on-request resize in the Node process for every uncached view, with a
+ * 1500 × 2100 fallback source.
+ */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
+import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
+import { siteConfig } from "~/lib/seo";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
-import portrait from "~/assets/portrait.webp";
 
 const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
-
-// The list is a list of GAINS, so the marker says so. It is decorative —
-// each item's own heading carries the meaning — hence `aria-hidden`.
-const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
 ---
 
 {/* Warmweiß mit weichen Markenfeldern an den Außenrändern — the first
-    paper section after the hero, so it sets the ground for everything
-    that follows. The fields come from the shared `.tds-wash`; they are
-    dialled down on phones and in dark mode by the decor tokens. Seit dem
-    Bild-Pass liegt darunter zusätzlich ein sehr leiser Fotogrund (siehe
-    IMAGES.md). Gestapelt wird Fläche → Wash-Felder (z -1) → Foto
-    (`.tds-decor`, z 0) → Inhalt (z 1). */}
+    paper section after the hero. The fields come from the shared `.tds-wash`;
+    they are dialled down on phones and in dark mode by the decor tokens.
+    Darunter liegt ein sehr leiser Fotogrund (siehe IMAGES.md). Gestapelt wird
+    Fläche → Wash-Felder (z -1) → Foto (`.tds-decor`, z 0) → Inhalt (z 1). */}
 <section
   id="about"
   class="tds-wash section-spacing"
   aria-labelledby="about-heading"
 >
-  {/* Fotogrund unter dem Wash. Er kommt in die geteilte `.tds-decor`-
-      Ebene, weil deren Regel `.tds-decor ~ *` jedes folgende Geschwister
-      automatisch auf z-index 1 hebt — der Inhalt liegt darüber, ohne dass
-      hier ein einziges `relative z-10` von Hand gesetzt werden muss.
-
-      `object-left`, weil das Motiv seine Gegenstände unten links hat und
-      die rechten zwei Drittel bewusst leerer Tisch sind: bei `object-cover`
-      in einem hohen Abschnitt wird waagerecht beschnitten, zentriert bliebe
-      genau die leere Fläche übrig. Der Scrim läuft von rechts, wo die
-      Textspalte steht; links darf der Grund unter dem Portrait stehen
-      bleiben, das ihn ohnehin überdeckt. */}
+  {/* Fotogrund unter dem Wash, in der geteilten `.tds-decor`-Ebene, weil deren
+      Regel `.tds-decor ~ *` jedes folgende Geschwister automatisch auf
+      z-index 1 hebt. `object-left`, weil das Motiv seine Gegenstände unten
+      links hat; der Scrim läuft von rechts, wo die Textspalte steht. */}
   <span class="tds-decor" aria-hidden="true">
     <img
       src="/images/sections/why-me.webp"
@@ -50,35 +52,26 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
     <span class="about-photo-scrim absolute inset-0"></span>
   </span>
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
-    <div class="grid md:grid-cols-2 gap-16 lg:gap-24 items-start">
-      <div class="md:sticky md:top-28 max-w-sm mx-auto md:mx-0">
+    <div class="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24 items-center">
+      <div class="max-w-sm mx-auto md:mx-0 w-full">
         <div class="relative">
-          {/* The portrait is framed by CONSTRUCTED geometry, not by a
-              glow: one strongly-rounded rectangle, offset behind the
-              cut-out. The blurred pink radial that used to sit here read
-              as the same soft haze the hero has now dropped — "keine
-              starken Glow-Effekte" — and it framed nothing, because a
-              blur has no edge to frame with.
-
-              ONE shape, not two. A second quarter-circle catching the
-              lower left was tried and removed: at this size it read as a
-              stray grey block behind the shoulder rather than as a cut
-              corner, which is the failure mode of small geometry — it
-              needs enough length for the arc to be legible as an arc.
-
-              It now runs down to the image's own bottom edge and fades
-              there (`.portrait-shape`, global.css) instead of stopping
-              short and showing through the portrait's faded torso. */}
+          {/* The portrait is framed by CONSTRUCTED geometry, not by a glow:
+              one strongly-rounded rectangle, offset behind the cut-out. It
+              runs down to the image's own bottom edge and fades there. Its
+              offsets live in `.portrait-shape` (global.css) because they
+              change with the width. */}
           <span
             aria-hidden="true"
-            class="portrait-shape tds-shape tds-shape--rect tds-shape--coral -z-10"
-            style="inset: -1.25rem -2rem 0 -1.25rem;"></span>
-          <Image
-            src={portrait}
-            alt="Julian Tracht"
-            widths={[300, 450, 600, 900]}
+            class="portrait-shape tds-shape tds-shape--rect tds-shape--coral -z-10"></span>
+          <img
+            src={portraitSrc(720)}
+            srcset={portraitSrcset()}
             sizes="(min-width: 768px) 24rem, 60vw"
-            loading="eager"
+            width={PORTRAIT_SIZE.width}
+            height={PORTRAIT_SIZE.height}
+            alt={siteConfig.founder.name}
+            loading="lazy"
+            decoding="async"
             class="portrait-fade rounded-[2px] aspect-[3/4] object-cover object-top w-full"
           />
         </div>
@@ -97,68 +90,16 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
           <Emphasis text={about.lead} />
         </p>
         <p class="text-[var(--color-muted)] mb-4 leading-relaxed">{about.p1}</p>
-        <p class="text-[var(--color-muted)] mb-12 leading-relaxed">{about.p2}</p>
-
-        {/* Each tile used to open with a counter — 01, 02, 03, 04 — which
-            says "there are four of these" and nothing else. These are the
-            reasons to hire someone, so the marker is a PLUS in a filled
-            accent disc: the same chip geometry the service pages use for
-            their checkmarks, read as a gain rather than as an index. */}
-        <ul class="grid sm:grid-cols-2 gap-4 pt-8">
-          {about.reasons.map((reason) => (
-            <li
-              class="rounded-[6px] bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] p-5 text-left"
-              data-reveal
-            >
-              <span
-                aria-hidden="true"
-                title={gainLabel}
-                class="mb-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_20%,var(--color-paper))] text-[var(--color-accent)]"
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </span>
-              <h3 class="font-[var(--font-display)] text-lg text-[var(--color-black)] mb-2 leading-tight">
-                {reason.title}
-              </h3>
-              <p class="text-sm text-[var(--color-muted)] leading-relaxed">
-                {reason.description}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <p class="text-[var(--color-muted)] leading-relaxed">{about.p2}</p>
       </div>
     </div>
   </div>
 </section>
 
 <style>
-  /* Ein GRUND, keine Abbildung — dieselbe Regel wie bei
-     `.service-card__photo`, nur noch leiser: dieser Abschnitt ist der
-     ruhigste der Seite und trägt vier Textkacheln plus das Portrait.
-     Dark Mode geht weiter herunter, wie die geteilten Decor-Tokens. */
-  /* Spiegelverkehrt, per CSS statt durch ein zweites WebP: die Datei bleibt
-     damit identisch mit dem Prompt, den IMAGES.md dokumentiert.
-
-     `scaleX(-1)` greift NACH `object-fit`/`object-position` — erst waehlt
-     `object-left` den Ausschnitt aus der Quelle, dann wird das Ergebnis als
-     Ganzes umgeklappt. `object-position` mitzudrehen bringt deshalb nichts:
-     die Gegenstaende liegen in der Quelle links, und KEIN Ausschnitt kann sie
-     nach dem Spiegeln wieder auf die linke Seite bringen. Das ist die Folge,
-     die man vorher wissen sollte: der Scrim deckt rechts (dort steht die
-     Textspalte), also wandert das Motiv unter die gedeckte Haelfte und der
-     Grund liest sich als ruhiger Lichtverlauf statt als Stillleben. Genau so
-     gewollt — nicht ein Versehen, das man durch Verschieben "repariert". */
+  /* Ein GRUND, keine Abbildung — dieser Abschnitt ist der ruhigste der Seite.
+     Spiegelverkehrt per CSS statt durch ein zweites WebP. `scaleX(-1)` greift
+     NACH `object-fit`/`object-position`; das ist gewollt, nicht ein Versehen. */
   .about-photo {
     opacity: 0.35;
     transform: scaleX(-1);
@@ -167,8 +108,7 @@ const gainLabel = lang === "de" ? "Vorteil" : "Benefit";
     opacity: 0.22;
   }
   /* Die PAPIERFARBE des Abschnitts, von rechts auslaufend — kein grauer
-     Schleier, damit die Fläche ihren Farbton behält. Rechts steht die
-     Textspalte, dort deckt er fast ganz. */
+     Schleier, damit die Fläche ihren Farbton behält. */
   .about-photo-scrim {
     background: linear-gradient(
       to left,

@@ -17,9 +17,7 @@
  * LEFT is the service this card is evidence for — the page on this site the
  * visitor should walk into next. RIGHT is the card's own destination: "Demo
  * ansehen" for a demo, "Mehr erfahren" for a case with a journal article,
- * "Webseite ansehen" for one that only has the customer's site. The hero
- * slider has resolved its slides this way since it was built
- * (`lib/heroSlides.ts`); the cards simply never caught up.
+ * "Webseite ansehen" for one that only has the customer's site.
  *
  * The service link is OPTIONAL, and its absence is a real state rather than a
  * missing value: on the Webauftritt detail page every demo card already sits
@@ -195,6 +193,22 @@ const ui = cardActionUi[lang];
   .card-actions__cta svg,
   .card-actions__cta span[aria-hidden] {
     transition: transform 200ms var(--tds-ease-out);
+  }
+
+  /* Finger-sized targets. Both links in the bar measured 17px tall on a phone,
+     which a thumb hits by luck. The CTA's stretched `::after` already makes the
+     whole card its target, but the SERVICE link has only its own box — so the
+     bar grows with the links rather than the links shrinking into the bar. */
+  @media (pointer: coarse) {
+    .card-actions {
+      padding-block: 0.25rem;
+    }
+    .card-actions__service,
+    .card-actions__cta {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

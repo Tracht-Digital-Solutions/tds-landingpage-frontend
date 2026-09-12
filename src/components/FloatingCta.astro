@@ -24,10 +24,17 @@ const home = localizePath("/", lang);
 const href = `${home === "/" ? "" : home.replace(/\/$/, "")}/#contact`;
 const label = lang === "de" ? "Erstgespräch vereinbaren" : "Arrange an initial consultation";
 const topLabel = lang === "en" ? "Back to top" : "Nach oben";
+// A landmark of its own: it floats outside `<main>` and the footer, and axe
+// reported it as content outside every region (`region`).
+const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 ---
 
-<div
+{/* No `data-suppressed` in the markup on purpose — see the rules below: on a
+    page with a hero the control starts hidden until the script has measured
+    that the hero is gone, so it never flashes over the hero's own button. */}
+<aside
   class="floating-cta-group"
+  aria-label={regionLabel}
   data-scrolled-down="false"
   data-near="false"
   data-on-dark="false"
@@ -71,7 +78,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     <span class="floating-cta__label">{label}</span>
     <span aria-hidden="true" class="floating-cta__arrow">→</span>
   </a>
-</div>
+</aside>
 
 <style>
   /* Positioning wrapper only — no background of its own. The arrow nub is
@@ -103,8 +110,12 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Lifts as one unit when the CTA is hovered (see :has rule below). */
-    transition: transform 220ms var(--lp-ease-soft);
+    /* Lifts as one unit when the CTA is hovered (see :has rule below), and
+       fades out of the way where the page already offers the same action. */
+    transition:
+      transform 220ms var(--lp-ease-soft),
+      opacity 200ms var(--tds-ease-out),
+      visibility var(--tds-dur-none, 0s) linear 200ms;
   }
   @media (min-width: 768px) {
     .floating-cta-group {
@@ -113,6 +124,71 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
         var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 1.5rem +
           env(safe-area-inset-bottom, 0px)
       );
+    }
+  }
+
+  /* --- Out of the way ------------------------------------------------- */
+
+  /* ONE primary call to action per view. The floating control repeats the
+     hero's button and the contact form's purpose, so it stands down while
+     either of them is on screen (the script below writes `data-suppressed`).
+
+     Two states needed CSS on top of that:
+
+     - BEFORE the script has run. On a page with a hero the control starts
+       hidden, rather than appearing over the hero's own button and vanishing
+       a moment later. A page without a hero (a service page) has nothing to
+       wait for and shows it straight away.
+     - SHORT screens with the cookie notice open. Header, notice and this
+       button together covered 58 % of a 320×568 phone and 94 % of a 400 %
+       zoomed window, with the hero's button underneath them. Until the notice
+       is dismissed, this one waits. */
+  .floating-cta-group[data-suppressed="true"],
+  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  @media (max-height: 44rem) {
+    :global(:root:has(.cookie-notice)) .floating-cta-group {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+  .floating-cta-group[data-suppressed="false"] {
+    transition:
+      transform 220ms var(--lp-ease-soft),
+      opacity 200ms var(--tds-ease-out),
+      visibility var(--tds-dur-none, 0s) linear 0s;
+  }
+
+  /* The height this control reserves at the bottom edge, for
+     `scroll-padding-bottom` in global.css: a focused link must scroll above
+     it, not behind it. Published here because only this component knows its
+     own geometry — the pill on a pointer, the full-width bar on touch — and
+     cleared while the control is out of the way. */
+  :global(:root) {
+    --lp-floating-lane: 4rem;
+  }
+  @media (min-width: 768px) {
+    :global(:root) {
+      --lp-floating-lane: 4.5rem;
+    }
+  }
+  @media (hover: none) {
+    :global(:root) {
+      --lp-floating-lane: 4.75rem;
+    }
+  }
+  :global(:root:has(.floating-cta-group[data-suppressed="true"])) {
+    --lp-floating-lane: 0px;
+  }
+  /* Short screens hide the group while the cookie notice is open (below), so
+     nothing may reserve its lane either. */
+  @media (max-height: 44rem) {
+    :global(:root:has(.cookie-notice)) {
+      --lp-floating-lane: 0px;
     }
   }
 
@@ -445,7 +521,7 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     // `:has()` and attribute selectors, for the pieces inside it — sixty
     // times a second, to arrive at the markup that was already there.
     // Comparing first is free.
-    const setFlag = (key: "scrolledDown" | "onDark", on: boolean) => {
+    const setFlag = (key: "scrolledDown" | "onDark" | "suppressed", on: boolean) => {
       const value = on ? "true" : "false";
       if (group.dataset[key] !== value) group.dataset[key] = value;
     };
@@ -475,6 +551,39 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", remeasure);
+
+    /**
+     * Stand down while the page already shows the same action.
+     *
+     * The hero counts as "on screen" while it still reaches into the upper
+     * half of the viewport — by the time only its bottom edge is left, its
+     * button has long scrolled away and the visitor would otherwise be without
+     * any call to action. The contact section counts as soon as any of it is
+     * visible: the form IS the destination.
+     *
+     * No IntersectionObserver (or no hero and no contact section on this page)
+     * means nothing to wait for, so the control simply shows.
+     */
+    const hero = document.getElementById("hero");
+    const contact = document.getElementById("contact");
+    if ((hero || contact) && "IntersectionObserver" in window) {
+      const onScreen = new Set<Element>();
+      const record = (entries: IntersectionObserverEntry[]) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) onScreen.add(entry.target);
+          else onScreen.delete(entry.target);
+        }
+        setFlag("suppressed", onScreen.size > 0);
+      };
+      if (hero) {
+        new IntersectionObserver(record, { rootMargin: "0px 0px -50% 0px" }).observe(hero);
+      }
+      if (contact) {
+        new IntersectionObserver(record).observe(contact);
+      }
+    } else {
+      setFlag("suppressed", false);
+    }
 
     // Anything that changes the page's height moves every range below it:
     // late-loading images and web fonts, an opened FAQ row, the cookie

@@ -182,34 +182,13 @@ export function faqPageSchema(items: readonly FaqItem[]): object {
   };
 }
 
-interface HowToStep {
-  number: string;
-  title: string;
-  duration: string;
-  description: string;
-}
-
-/**
- * HowTo schema — describes the four-step Process section as a
- * structured workflow. Each step becomes a HowToStep with a
- * `position` (parsed from the visible "01" / "02" number) and the
- * duration in ISO-8601 where possible. Helps both Google's "how to"
- * rich snippet and AI agents that try to understand the service
- * delivery flow.
+/*
+ * `howToSchema` lived here until 2026-09 and is gone on purpose. Google retired
+ * HowTo rich results in 2023, and the markup never fit anyway: the Process
+ * section describes how a working relationship runs, not a set of instructions
+ * a reader follows — and it put "Je nach Umfang" into `performTime`, a field
+ * that expects an ISO-8601 duration.
  */
-export function howToSchema(name: string, steps: readonly HowToStep[]): object {
-  return {
-    "@type": "HowTo",
-    name,
-    step: steps.map((step) => ({
-      "@type": "HowToStep",
-      position: Number(step.number) || undefined,
-      name: step.title,
-      text: step.description,
-      ...(step.duration ? { performTime: step.duration } : {}),
-    })),
-  };
-}
 
 /**
  * Speakable schema — points voice assistants / AI summarisers at the

@@ -21,7 +21,7 @@ describe("cacheEvents", () => {
   /** Every page of one language tree that renders editable landing content. */
   const contentPaths = (lang: "de" | "en") =>
     [
-      ...(lang === "de" ? ["/", "/preise"] : ["/en/", "/en/preise"]),
+      ...(lang === "de" ? ["/"] : ["/en/"]),
       ...serviceDefinitions.map((service) => serviceHref(service, lang)),
       // The business card is NOT in here. It is a standalone page rendering
       // no CMS block, so a block save must not rebuild it — it is covered by
@@ -29,8 +29,8 @@ describe("cacheEvents", () => {
     ].sort();
 
   it("rebuilds every content page of a language when a block is saved", async () => {
-    // All of them, deliberately: `pricing` renders on /preise, in the home
-    // page's teaser AND on each service page; `footer` and `contact` appear
+    // All of them, deliberately: `pricing` renders in the home page's pricing
+    // section AND on each service page; `footer` and `contact` appear
     // everywhere. A service block additionally owns its own detail page, so
     // narrowing this would leave an edited service stale.
     expect(await paths([{ type: "block", id: "hero", lang: "de" }])).toEqual(contentPaths("de"));
@@ -120,8 +120,19 @@ describe("cacheEvents", () => {
     expect(result).toContain("/sitemap-index.xml");
     expect(result).toContain("/");
     expect(result).toContain("/en/");
-    expect(result).toContain("/preise");
     expect(result).toContain(serviceHref(serviceDefinitions[0], "de"));
+  });
+
+  it("keeps redirects out of every rebuild", async () => {
+    // Since 2026-09 these answer with a 301 to a section of the home page. The
+    // cache stores only complete 200 responses, so a listed redirect is a
+    // render that is thrown away on every rebuild.
+    const redirects = ["/preise", "/en/preise", "/en/pricing", "/kontakt", "/en/contact"];
+    const rebuilt = await paths([{ type: "sitemap" }, { type: "block", id: "pricing_services" }]);
+    for (const path of redirects) {
+      expect(alwaysPaths).not.toContain(path);
+      expect(rebuilt).not.toContain(path);
+    }
   });
 
   it("includes the sitemap in alwaysPaths now that it renders on demand", () => {

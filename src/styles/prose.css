@@ -1,0 +1,11 @@
+/* Long-form typography for the two legal pages — their only consumers.
+
+   It used to be imported by `global.css`, i.e. shipped inside the one
+   render-blocking stylesheet of EVERY page, for text that renders on two.
+   The legal pages import this file from their frontmatter instead, so Vite
+   emits it with them and nowhere else.
+
+   Without it the panel-editable markdown on those pages would arrive as
+   unstyled runs of text: not an error, not a warning, just a legal page that
+   looks broken. */
+@import "@tracht-digital-solutions/tds-shared/styles/prose.css";

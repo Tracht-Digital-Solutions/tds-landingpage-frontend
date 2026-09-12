@@ -1,60 +1,49 @@
 ---
 /**
- * The showcase — reference cases and website demos on ONE horizontally
- * navigable shelf.
+ * Beispielseiten — my own example sites and projects on ONE horizontally
+ * navigable shelf. NOT client work: that is `sections/CustomerCases.astro`.
  *
- * ### Why these two are one section
+ * ### Why the reference cases left this shelf
  *
- * The home page used to carry them back to back: `WebsiteDemos` (paper ground,
- * sand cards) and then `References` (sand ground, paper cards). Two headings,
- * two intros, two grids, in sequence, both answering "here is work you can
- * look at" — and the second one read as a repeat of the first. They are one
- * shelf now, with one masthead, and the visitor pages through it left/right
- * instead of scrolling past the same argument twice.
+ * Until the 2026-09 redesign the customer cases and the demos shared this
+ * carousel, cases first. Nothing on a card said which was a client's project and
+ * which a sample about a company that does not exist — and "is this real?" is
+ * the first question a visitor judging this business by its work asks. The
+ * cases have their own section with a "Kundenprojekt" label now; every card
+ * here carries its origin ("Demo · fiktives Beispiel", "Eigenes Projekt", see
+ * `DEMO_ORIGINS`), and the framing says "keine Kundenaufträge" in words.
  *
- * `WebsiteDemos.astro` still exists and is still used with `variant="service"`
- * on the Webauftritt detail page, where the demos ARE the argument and stand
- * on their own. Only the home page's copy of it moved here.
- *
- * ### Order
- *
- * Reference cases first, demos after. A delivered project is the stronger
- * claim and it is the one a stranger will not assume — a demo is understood as
- * a sample either way, so it reads correctly wherever it sits.
+ * `WebsiteDemos.astro` still renders the same demo cards as a grid on the
+ * Webauftritt detail page, where the demos ARE the argument.
  *
  * ### The gate
  *
- * **Renders nothing at all when both lists are empty** — no `<section>`, no
- * heading, no "coming soon" box. Inherited unchanged from both sections it
- * replaces, and for their reason: an empty shelf advertises the emptiness.
- * `getDemos()` is strict about what counts as a live demo (see `lib/demos.ts`)
- * and `getReferencePreviews()` about what counts as a showable screenshot.
+ * The business-card tile always renders — it is a page of this very deployment
+ * — so the shelf is never empty. The demo cards are strict about availability
+ * (`lib/demos.ts`), and the framing picks its singular or plural copy from the
+ * number of demos that survived (`demosCopy`).
  *
  * ### Ground
  *
- * PLAIN PAPER, no `tds-tone-*`. `Services.astro` immediately above is
- * `tds-tone-sand`, and two sand grounds in a row read as one long section; the
- * cards take the sand fill instead — both families, so the shelf is one shelf.
- * The references half used to be the other way round; see `ReferenceCard`.
+ * PLAIN PAPER, no `tds-tone-*`: the process section above and the journal
+ * below are sand, so the cards take the sand fill instead.
  */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
-import { getHomeContent } from "~/lib/homeContent";
+import { demosCopy, getHomeContent } from "~/lib/homeContent";
 import { getDemos } from "~/lib/demos";
-import { referenceCases, articleUrl } from "~/lib/references";
-import { getReferencePreviews } from "~/lib/referencePreviews";
 import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import DemoCard from "~/components/ui/DemoCard.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
-import ReferenceCard from "~/components/ui/ReferenceCard.astro";
 import PreviewLightbox from "~/components/ui/PreviewLightbox.astro";
 
 const lang = resolveLang(Astro.currentLocale);
-const content = await cmsFor("references_home", lang, getHomeContent(lang).referencesHome);
+const content = await cmsFor("website_demos", lang, getHomeContent(lang).websiteDemos);
 
 const demos = await getDemos();
+const copy = demosCopy(content, demos.length, "home");
 
 /**
  * The service every demo and the business-card tile is evidence for.
@@ -64,9 +53,6 @@ const demos = await getDemos();
  * page the same cards get `null`, because a link back to the page the visitor
  * is standing on is a dead end. `demoCatalog.ts` deliberately has no imports,
  * so this is also not a field a demo could carry.
- *
- * The label comes from the committed catalog and not through `cmsFor` — the
- * same trade the reference badges below make, and for the same reason.
  */
 const webPresence = getServiceById("web-presence");
 const webPresenceLink = {
@@ -74,109 +60,23 @@ const webPresenceLink = {
   href: serviceHref(webPresence, lang),
 };
 
-// Consent, a live site and a captured screenshot — a case missing any one of
-// the three is simply absent from this map and its card renders without a band.
-const previews = await getReferencePreviews();
-
-// This reads `referenceCases` directly, NOT `resolveServiceContent`. So the
-// documented way to pull a case off a service page without a deploy — an
-// explicitly empty `references` array in the CMS — does not reach the home
-// page. Removing a named customer from here is a code change.
-const cards = referenceCases.map((entry) => ({
-  id: entry.id,
-  preview: previews.get(entry.id) ?? null,
-  reference: entry.content[lang],
-  // EVERY service the case used, not just the first. The card used to carry
-  // one "Zur passenden Leistung" link built from `entry.services[0]`, which
-  // on a three-service case silently spoke for the other two.
-  //
-  // The label comes from the committed catalog, NOT through `cmsFor`. A badge
-  // is a category etiquette — the name of a page this site owns — and pulling
-  // four CMS blocks per render to spell four words would trade a request for
-  // nothing. The trade it does make: an editor who renames a service in the
-  // panel renames it everywhere except here.
-  services: entry.services.map((id) => {
-    const service = getServiceById(id);
-    return { label: service.fallback[lang].title, href: serviceHref(service, lang) };
-  }),
-  articleHref: entry.articleSlug ? articleUrl(entry.articleSlug, lang) : null,
-  siteHref: entry.siteUrl,
-}));
-
-// The business-card tile always renders, so the shelf is never empty any more
-// — but the count still drives the arrows' overflow measurement, and writing
-// it as "+ 1" keeps the reason visible instead of hiding a constant in a
-// comparison.
-const slideCount = cards.length + demos.length + 1;
-
-/**
- * The shelf as ONE list, so the lead card can be chosen across both families.
- *
- * It used to be three `.map()` blocks in the markup, which was fine while the
- * only question was what comes after what.
- */
 type Slide =
-  | { kind: "reference"; key: string; card: (typeof cards)[number]; hasImage: boolean }
-  | { kind: "demo"; key: string; demo: (typeof demos)[number]; hasImage: true }
-  | { kind: "business-card"; key: string; hasImage: false };
-
-const ordered: Slide[] = [
-  ...cards.map(
-    (card): Slide => ({
-      kind: "reference",
-      key: `reference:${card.id}`,
-      card,
-      hasImage: card.preview !== null,
-    }),
-  ),
-  ...demos.map(
-    (demo): Slide => ({
-      kind: "demo",
-      key: `demo:${demo.definition.id}`,
-      demo,
-      hasImage: true,
-    }),
-  ),
-  { kind: "business-card", key: "business-card", hasImage: false },
-];
+  | { kind: "demo"; key: string; demo: (typeof demos)[number] }
+  | { kind: "business-card"; key: string };
 
 /**
- * THE LEAD CARD — the first slide that actually carries a picture, pulled to
- * the front of the shelf and given two tracks.
+ * The shelf as one list: the demos in catalog order, then the business card.
  *
- * ### Why the order above is no longer simply "references, then demos"
- *
- * That order is still the order of everything else, and its reason still
- * holds: a delivered project is the stronger claim, and a demo reads as a
- * sample wherever it sits. What it did not anticipate is a shelf whose
- * reference cases carry no approved screenshot. Every reference card is then
- * text, and the shelf opens with two paragraphs while the one card that shows
- * a built page sits off to the right — half visible on a desktop, not visible
- * at all on a phone.
- *
- * A visitor who came to see what this does should not have to scroll to find
- * the first thing that shows it. So exactly one card is hoisted, and it is
- * hoisted for a property it either has or does not have — never for being a
- * demo. `hof-meerheck` has since been cleared for a screenshot and is the lead
- * card because of it; not a line here changed for that to happen.
- *
- * ### Why "wide" and not "taller"
- *
- * Two tracks instead of one is the only change that makes the picture bigger
- * without making the shelf taller: the slides stretch to the tallest card, so
- * height spent here is height every other card pays for as padding above its
- * footer bar. Both card families answer the extra width through a container
- * query of their own — see the notes in `ui/DemoCard.astro` and
- * `ui/ReferenceCard.astro`. They have to agree: whichever family leads, the
- * shelf must not change height.
+ * THE LEAD CARD — two tracks wide from `lg` — is the first demo, i.e. the first
+ * slide that carries a picture. Wider rather than taller: the slides stretch to
+ * the tallest card, so height spent on the lead card would pad every other
+ * card. Both card families answer the width through their own container query.
  */
-const leadIndex = ordered.findIndex((slide) => slide.hasImage);
-const slides =
-  leadIndex > 0
-    ? [ordered[leadIndex], ...ordered.filter((_, index) => index !== leadIndex)]
-    : ordered;
-/** Only a slide with a picture earns the width; a text card would just be wide. */
-const leadKey = leadIndex >= 0 ? slides[0].key : null;
+const slides: Slide[] = [
+  ...demos.map((demo): Slide => ({ kind: "demo", key: `demo:${demo.definition.id}`, demo })),
+  { kind: "business-card", key: "business-card" },
+];
+const leadKey = demos.length > 0 ? slides[0]!.key : null;
 
 /** Carousel chrome. This site's own words about its own control, so it follows
  *  the page's locale and is not editable copy — a mislabelled control is an
@@ -184,157 +84,128 @@ const leadKey = leadIndex >= 0 ? slides[0].key : null;
 const ui =
   lang === "de"
     ? {
-        carousel: "Referenzen und Beispielseiten",
+        carousel: "Beispielseiten und eigene Projekte",
         prev: "Vorherige Karten",
         next: "Weitere Karten",
       }
     : {
-        carousel: "References and example sites",
+        carousel: "Example sites and own projects",
         prev: "Previous cards",
         next: "More cards",
       };
 ---
 
-{
-  slideCount > 0 && (
-    <section id="showcase" class="section-spacing" aria-labelledby="showcase-heading">
-      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
-        {/* Masthead only. The arrows used to share this row and sit at its
-            top-right; they flank the track itself now, which is where a
-            visitor looks when they want the row to move. */}
-        <div class="max-w-2xl">
-          <SectionHeader
-            headline={content.headline}
-            headlineAccent={content.headlineAccent}
-            id="showcase-heading"
-            headingClass="mb-6"
-          />
-          <p class="text-[var(--color-muted)] leading-relaxed mb-4">
-            <Emphasis text={content.intro} />
-          </p>
-          <p class="text-sm text-[var(--color-muted)]">{content.label}</p>
-        </div>
+<section id="showcase" class="section-spacing" aria-labelledby="showcase-heading">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    {/* Masthead only. The arrows flank the track itself, which is where a
+        visitor looks when they want the row to move. */}
+    <div class="max-w-2xl mx-auto md:mx-0">
+      <SectionHeader
+        headline={copy.headline}
+        headlineAccent={copy.headlineAccent}
+        id="showcase-heading"
+        headingClass="mb-6"
+      />
+      <p class="text-[var(--color-muted)] leading-relaxed text-center md:text-left">
+        <Emphasis text={copy.intro} />
+      </p>
+    </div>
 
-        {/* The track is a real scroll container, not a transformed strip. That
-            is the whole design: a trackpad swipe, a touch drag, a shift-wheel
-            and the arrow buttons all move the same thing, and a card that
-            receives focus is scrolled into view by the browser rather than by
-            code we would have to write. `data-carousel` is what the script
-            binds to; with no JavaScript the row still scrolls, just without
-            the buttons — which is why they start `hidden`. */}
-        <div class="showcase" data-carousel>
+    {/* The track is a real scroll container, not a transformed strip. That
+        is the whole design: a trackpad swipe, a touch drag, a shift-wheel
+        and the arrow buttons all move the same thing, and a card that
+        receives focus is scrolled into view by the browser rather than by
+        code we would have to write. `data-carousel` is what the script
+        binds to; with no JavaScript the row still scrolls, just without
+        the buttons — which is why they start `hidden`. */}
+    <div class="showcase" data-carousel>
+      <div
+        class="showcase__track"
+        data-carousel-track
+        tabindex="0"
+        role="group"
+        aria-label={ui.carousel}
+      >
+        {slides.map((slide) => (
           <div
-            class="showcase__track"
-            data-carousel-track
-            tabindex="0"
-            role="group"
-            aria-label={ui.carousel}
+            class:list={["showcase__slide", slide.key === leadKey && "showcase__slide--lead"]}
           >
-            {/* One list, three card families. The business-card tile is in it
-                unconditionally: the other two are gated on availability — a
-                customer's site has to still answer, a demo has to still be
-                presentable — while that one is a page of this very deployment.
-                There is no state in which the site is up and the card is not,
-                so there is nothing to check. */}
-            {slides.map((slide) => (
-              <div
-                class:list={["showcase__slide", slide.key === leadKey && "showcase__slide--lead"]}
-              >
-                {slide.kind === "reference" && <ReferenceCard card={slide.card} lang={lang} />}
-                {slide.kind === "demo" && (
-                  <DemoCard demo={slide.demo} lang={lang} serviceLink={webPresenceLink} />
-                )}
-                {slide.kind === "business-card" && <BusinessCardTile serviceLink={webPresenceLink} />}
-              </div>
-            ))}
+            {slide.kind === "demo" && (
+              <DemoCard demo={slide.demo} lang={lang} serviceLink={webPresenceLink} />
+            )}
+            {slide.kind === "business-card" && <BusinessCardTile serviceLink={webPresenceLink} />}
           </div>
-
-          {/* Flanking the track, vertically centred, half over the outermost
-              card — one arrangement at every width. Beside the track would
-              have needed a second one: on a phone the shelf bleeds to both
-              window edges and there is nothing free next to it.
-
-              Hidden from assistive tech, and that is the point rather than an
-              oversight: the track is a plain scroll container that a screen
-              reader already walks card by card, and a keyboard user reaches
-              every card in DOM order. These buttons add nothing there — they
-              are a pointer affordance. Announcing them would offer a second,
-              worse way to do what Tab already does.
-
-              Two conditions gate them, and only one is in this file: the CSS
-              shows them on pointer devices alone, and the script keeps them
-              `hidden` until it measures a real overflow. */}
-          <div class="showcase-nav" aria-hidden="true" data-carousel-nav hidden>
-            <button type="button" class="showcase-nav__btn" data-carousel-prev tabindex="-1">
-              <span class="sr-only">{ui.prev}</span>
-              <svg
-                aria-hidden="true"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M15 5 8 12l7 7" />
-              </svg>
-            </button>
-            <button type="button" class="showcase-nav__btn" data-carousel-next tabindex="-1">
-              <span class="sr-only">{ui.next}</span>
-              <svg
-                aria-hidden="true"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="m9 5 7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Inside the section on purpose: the lightbox script binds each dialog
-          to the magnifiers of ITS OWN section, so a second shelf on a future
-          page gets its own dialog instead of driving this one. */}
-      <PreviewLightbox lang={lang} />
-    </section>
-  )
-}
+      {/* Flanking the track, vertically centred, half over the outermost
+          card — one arrangement at every width.
+
+          Hidden from assistive tech, and that is the point rather than an
+          oversight: the track is a plain scroll container that a screen
+          reader already walks card by card, and a keyboard user reaches
+          every card in DOM order. These buttons add nothing there — they
+          are a pointer affordance.
+
+          Two conditions gate them, and only one is in this file: the CSS
+          shows them on pointer devices alone, and the script keeps them
+          `hidden` until it measures a real overflow. */}
+      <div class="showcase-nav" aria-hidden="true" data-carousel-nav hidden>
+        <button type="button" class="showcase-nav__btn" data-carousel-prev tabindex="-1">
+          <span class="sr-only">{ui.prev}</span>
+          <svg
+            aria-hidden="true"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M15 5 8 12l7 7" />
+          </svg>
+        </button>
+        <button type="button" class="showcase-nav__btn" data-carousel-next tabindex="-1">
+          <span class="sr-only">{ui.next}</span>
+          <svg
+            aria-hidden="true"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m9 5 7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* Inside the section on purpose: the lightbox script binds each dialog
+      to the magnifiers of ITS OWN section, so a second shelf on a future
+      page gets its own dialog instead of driving this one. */}
+  <PreviewLightbox lang={lang} />
+</section>
 
 <style>
   /* The shelf's horizontal overflow stops at this section.
 
-     Measured, not assumed: at 375px the deployed site reports a document
-     `scrollWidth` of 375 and this rebuilt section reported 616 — the shelf
-     wrapper's own `scrollWidth` grew with it while its box stayed 375 wide and
-     the track inside kept clipping its cards correctly. Nothing sticks out
-     that can be pointed at: reordering the cards does not change it, removing
-     the lead card's class does not change it, and neither does the nav, the
-     lightbox, nor forcing every card revealed.
-
-     It was never visible to a visitor — `body` already carries
-     `overflow-x: clip`, so neither version could be panned sideways — and that
-     is why it belongs HERE rather than left alone: a section that owns a
-     horizontal scroller should confine its own overflow instead of relying on
-     a rule three ancestors up to hide the evidence.
+     Measured, not assumed: at 375px the section's own `scrollWidth` grew with
+     the bleeding track while its box stayed 375 wide. It was never visible to
+     a visitor — `body` already carries `overflow-x: clip` — and that is why it
+     belongs HERE rather than left alone: a section that owns a horizontal
+     scroller should confine its own overflow instead of relying on a rule
+     three ancestors up to hide the evidence.
 
      `clip`, never `hidden`. `hidden` would make this a scroll container, and
      then a card taking keyboard focus would scroll THIS box instead of the
-     track — the shelf would look untouched while the page jumped. `clip` on
-     one axis also leaves the other `visible`, so the page still scrolls down;
-     it is the same rule, for the same reason, that `body` already uses.
-
-     On the SECTION and not on `.showcase`, because the arrows sit at that
-     element's edges with a 20px blurred shadow, and clipping there would shave
-     the shadow off the outer side of each button. */
+     track — the shelf would look untouched while the page jumped. */
   #showcase {
     overflow-x: clip;
   }
@@ -360,41 +231,18 @@ const ui =
 
   .showcase__track {
     display: flex;
-    /* Slides STRETCH to the tallest card. This was `align-items: start`,
-       carried over from the grid this replaced, and the ragged bottom edge it
-       produced is exactly what the change undoes.
-
-       Both card families were already built for a stretched slot: `height:
-       100%` on the card root, and a footer bar that is the last child of the
-       card. So the links of a reference case and of a demo land on one line
-       across the whole shelf, and that shared baseline is what makes the
-       cards read as one shelf rather than as loose boxes. It is also why the
-       bar is `ui/CardActions.astro` and not three footers: one strip, one
-       height, one line.
-
-       The price, knowingly paid: a card with no 16:10 screenshot band takes
-       the height difference as space above its bar. That day has arrived —
-       `hof-meerheck` carries a band and `office-supplies-shop`, which is
-       anonymous and can never have one, does not. The extra room reads as
-       breathing space above the bar rather than as a hole, because the bar
-       is bound to the bottom edge and holds the line by itself. If it ever
-       stops reading that way the answer is a field of its own at the band's
-       place, not a return to `start`.
-
-       Nothing stretches the CARD directly. `.showcase__slide` is a grid with
-       `grid-template-rows: 1fr` whose own height only becomes definite by
-       being stretched here; the cards' `height: 100%` resolves against that
-       row. */
+    /* Slides STRETCH to the tallest card, so the footer bars of all cards
+       land on one line across the shelf. Nothing stretches the CARD directly:
+       `.showcase__slide` is a grid with `grid-template-rows: 1fr` whose own
+       height only becomes definite by being stretched here; the cards'
+       `height: 100%` resolves against that row. */
     gap: 1rem;
     padding-inline: 1.5rem;
     /* MUST match `padding-inline`. `scroll-snap-align: start` aligns a slide
        to the scrollport's start edge, and without a matching scroll-padding
        that edge is INSIDE the padding: the track's resting position is then
-       `scrollLeft = 24`, not 0, and the first card sits flush against the
-       bleeding edge instead of on the page's text edge. It also broke the
-       "prev" button, which disables on `scrollLeft <= 2` and so never
-       disabled at all — a control that is always live on a shelf that cannot
-       go further left. */
+       `scrollLeft = 24`, not 0, and the "prev" button (which disables on
+       `scrollLeft <= 2`) never disables at all. */
     scroll-padding-inline: 1.5rem;
     /* A little vertical room: the cards' focus ring is drawn with a 3px
        offset and would be clipped by the scroll container without it. */
@@ -402,9 +250,8 @@ const ui =
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    /* The scrollbar is chrome the arrows already replace, and on the desktop
-       widths where it is drawn permanently it cuts a grey line under the
-       shelf. Hidden, never the scrolling itself. */
+    /* The scrollbar is chrome the arrows already replace. Hidden, never the
+       scrolling itself. */
     scrollbar-width: none;
   }
   .showcase__track::-webkit-scrollbar {
@@ -427,21 +274,11 @@ const ui =
     scroll-snap-align: start;
 
     /* GRID, and it has to be — this slot was `display: flex` first and the
-       demo card rendered exactly 0 pixels wide.
-
-       `DemoCard`'s root carries `container-type: inline-size`, which brings
-       inline-size containment with it, which makes the element's max-content
-       contribution zero. As a FLEX item that is its base size, so it
-       collapses; the reference cards next to it were unaffected and the bug
-       looked like one missing card rather than like a layout rule. The
-       obvious patch — `.showcase__slide > * { flex: 1 }` — does not work
-       either: Astro scopes that selector to THIS component's elements, and
-       the card is another component's root, so the rule never matches it.
-
-       A grid item is stretched to its track instead of measured from its
-       content, so the width is definite before containment is consulted.
-       Same for the row, which is what lets the cards' own `height: 100%`
-       resolve. */
+       demo card rendered exactly 0 pixels wide: `DemoCard`'s root carries
+       `container-type: inline-size`, whose inline-size containment makes a
+       FLEX item's base size zero. A grid item is stretched to its track
+       instead of measured from its content, so the width is definite before
+       containment is consulted. Same for the row. */
     display: grid;
     grid-template-rows: 1fr;
   }
@@ -466,17 +303,10 @@ const ui =
       flex-basis: calc((100% - 3rem) / 3);
     }
 
-    /* THE LEAD CARD, and only here.
-
-       Two of the three tracks plus the gap between them, so it lines up with
-       the grid the other cards sit on instead of being "a bit wider". The
-       third track still shows the next card, which is what keeps the shelf
-       reading as a shelf rather than as a banner with something behind it.
-
-       Deliberately NOT applied at `md`, where the row is two tracks wide: two
-       of two is the whole container, and a lone full-width card is the poster
-       the `auto-fit` note further up already warned about. Below `lg` the lead
-       card is simply the first card. */
+    /* THE LEAD CARD, and only here: two of the three tracks plus the gap
+       between them, so it lines up with the grid the other cards sit on.
+       Deliberately NOT applied at `md`, where two of two is the whole
+       container — a lone full-width card is a poster, not a shelf. */
     .showcase__slide--lead {
       flex-basis: calc((100% - 3rem) / 3 * 2 + 1.5rem);
     }
@@ -485,12 +315,8 @@ const ui =
   /* POINTER DEVICES ONLY, and hidden by default so that is the fallback.
      On a phone the shelf is swiped, and a 44px button parked over the card
      would cover content to offer a slower version of the gesture the
-     visitor is already making. The peek of the next card carries the
-     message there.
-
-     `hover: hover` AND `pointer: fine`, not `not (pointer: coarse)`: the
-     question is whether there is a pointer at all, and a laptop with both a
-     touchscreen and a mouse must keep the arrows. */
+     visitor is already making. `hover: hover` AND `pointer: fine`: a laptop
+     with both a touchscreen and a mouse must keep the arrows. */
   .showcase-nav {
     display: none;
   }
@@ -500,14 +326,10 @@ const ui =
       display: block;
     }
 
-    /* Still needed, and for the reason it was written: `.showcase-nav
-       { display: block }` beats the user agent's low-specificity
-       `[hidden] { display: none }`, so the attribute the script writes would
-       do nothing without this — the buttons would sit there, enabled-looking,
-       on a shelf with nothing left to scroll. Same trap as an `lg:hidden`
-       utility losing to an unlayered `.btn { display }`. It has to live
-       INSIDE this query now: outside it the two rules would race by source
-       order rather than by condition. */
+    /* `.showcase-nav { display: block }` beats the user agent's
+       low-specificity `[hidden] { display: none }`, so the attribute the
+       script writes would do nothing without this. It has to live INSIDE this
+       query: outside it the two rules would race by source order. */
     .showcase-nav[hidden] {
       display: none;
     }
@@ -515,19 +337,13 @@ const ui =
     .showcase__track {
       cursor: grab;
     }
-    /* Set by the script for the length of a real drag only. Permanently on
-       the track it would forbid selecting card text for no reason, and the
-       grabbing cursor would lie during an ordinary click. */
+    /* Set by the script for the length of a real drag only. */
     .showcase__track.is-dragging {
       cursor: grabbing;
       user-select: none;
     }
   }
 
-  /* Each button is placed on its own edge rather than the pair being laid
-     out as a row — they sit on opposite sides of the track, so there is no
-     row to lay out. The wrapper stays because the script toggles ONE
-     `hidden` for both. */
   .showcase-nav__btn {
     position: absolute;
     top: 50%;
@@ -540,11 +356,9 @@ const ui =
     width: 2.75rem;
     height: 2.75rem;
     border-radius: var(--tds-radius-pill);
-    /* PAPER, not the sand the buttons used to take. Half of each button now
-       lies over a card, whose fill is that same sand — a sand button on a
-       sand card is a shape with one edge missing. The shadow does the rest
-       of the separating; it is the only place on this shelf with one, which
-       is what says these float above the row rather than sit in it. */
+    /* PAPER, not sand: half of each button lies over a card whose fill is
+       sand. The shadow is the only one on this shelf, which is what says the
+       buttons float above the row rather than sit in it. */
     background: var(--color-paper);
     color: var(--color-black);
     box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--color-black) 55%, transparent);

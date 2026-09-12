@@ -19,58 +19,57 @@ Use current code, configuration and tests as the source of truth. Keep setup in
 - German is the default locale at `/`; English pages live under `/en/`.
   Resolve copy with `resolveLang()`/`tFor()` and generate internal links with
   `localizePath()` from `src/lib/i18n.ts`.
-- The home-page order is Hero → Wieso ich? → Was ich anbiete? → Webseiten-Demos
-  → positioning callout → Process → PricingTeaser → compact Journal → FAQ →
-  Contact. The demos section renders nothing at all when no demo is available,
-  so the order above describes a full house, not a guaranteed one. The old
-  TechMarquee and Currently sections do not belong on the home page. Portfolio
-  stays hidden — the placeholder grid was removed, not merely unmounted, and
-  must not come back. **Approved references now appear in two places**: on the
-  detail page of each service they belong to, and in `sections/References.astro`
-  on the home page (between the demos and the positioning callout). The home
-  section exists because a visitor who never opens a service page never saw a
-  reference at all. It renders nothing when the catalog is empty, exactly like
-  the demos section.
-- **The hero carries a showcase slider.** `islands/HeroShowcaseSlider.tsx`,
-  in the hero's right column from `md` upwards and under the CTAs below that.
-  Its slides are the published reference cases and the live website demos —
-  the work, not the offer. The services already own the section directly
-  below; repeating them in the hero put one claim on the screen twice and
-  still asked the visitor to take it on trust.
-  - Slides are resolved on the SERVER in `lib/heroSlides.ts` and handed to the
-    island as props. An island importing `demos.ts` or `references.ts` would
-    ship the case catalogue, the demo snapshot and the availability probes to
-    the browser to render a handful of titles.
-  - It reads the SAME two sources as `sections/Showcase.astro`, and their
-    probes are memoised per render generation — so the hero costs no extra
-    round of probes and cannot advertise a case the shelf dropped or a demo
-    that is unreachable. **The availability rules in `demos.ts` are not
-    softened here**: a dead link is worse in the hero than anywhere else on
-    the page, because it is the first thing a visitor touches.
-  - Cases come before demos, then `leadWithPicture()` hoists the first slide
-    that carries a picture. Same decision as the shelf's lead card and for the
-    same reason: without it the hero can open on a paragraph while the slide
-    that shows a built page waits six seconds off-screen. The hoist is for
-    HAVING a picture, never for being a demo — it was written while every case
-    was `previewAllowed: false` and a demo was the only slide with artwork, and
-    since `hof-meerheck` was cleared for a screenshot that case leads. Nothing
-    changed for it to; that is what the rule was for.
-  - A demo slide links OFF-SITE to the demo's own host (`target="_blank"`,
-    `rel`, and a new-tab hint for screen readers); a case slide links to its
-    primary service page. The only words this site contributes to a slide are
-    the genre etiquette from `DEMO_KINDS`, the link labels and the slider's
-    controls — a demo's title and description are the demo's own, a case's are
-    the customer's. Do not translate either; do not write one that is missing.
-  - An empty slide list is a REAL state, not a wiring failure: every demo can
-    fail its check at once. `Hero.tsx` then drops the second grid track
-    entirely rather than leaving an empty frame where a card would be.
-  - It advances every 6 s, carries a real pause button, stops on hover, on
-    focus and while the tab is backgrounded, and never starts at all under
-    `prefers-reduced-motion`. Two pieces of hero decoration moved out of its
-    way: the outlined rectangle at `top: 16% / right: 6%` was removed rather
-    than relocated — the slider is a real frame where that one was drawn — and
-    the conduit run went to the lower left, where the card no longer covers
-    half of it. Do not restore either while the slider stands there.
+- **The home page is `components/HomePage.astro`**, for both language trees;
+  `pages/index.astro` and `pages/en/index.astro` are wrappers. Since the 2026-09
+  redesign its order follows the questions a visitor has, in sequence:
+  Hero (benefit + trust card) → Wieso ich? → Leistungen → Kundenprojekte
+  (`sections/CustomerCases.astro`) → Vorgehen (with the first-conversation card)
+  → Beispielseiten (`sections/Showcase.astro`) → compact Journal → Preise
+  (`sections/Pricing.astro`) → FAQ → Kontakt. The positioning band, the pricing
+  teaser with its drawer and the hero slider were removed, not unmounted; do not
+  bring them back. The old TechMarquee and Currently sections do not belong on
+  the home page, and Portfolio stays hidden.
+- **Client work and samples are separate sections.** Approved reference cases
+  render on the detail page of each service they belong to and in
+  `CustomerCases` (badge "Kundenprojekt"); the demos and the business card
+  render in `Showcase`, each with an origin badge (`DEMO_ORIGINS`: "Demo ·
+  fiktives Beispiel" / "Eigenes Projekt"). They shared one carousel until
+  2026-09 and nothing on a card told a client's project from a fictional demo
+  — do not merge them again. `CustomerCases` renders nothing without a case;
+  `Showcase` always has at least the business card.
+- **One primary call to action per section**, "Erstgespräch vereinbaren": in
+  the hero, beside the process steps (`ui/FirstCall.astro`), under the prices,
+  and the contact form itself. The floating CTA (`FloatingCta.astro`) stands
+  down while `#hero` or `#contact` is on screen, and on short viewports while
+  the cookie notice is open; it publishes `--lp-floating-lane` so
+  `scroll-padding-bottom` keeps focused elements above it.
+- **The hero is `sections/Hero.astro` — server-rendered, no island.**
+  - The eyebrow names the audience, the H1 the benefit, the sub (`#hero-sub`)
+    the problems and the outcome, followed by two real anchors, one of them
+    primary. The brand motto no longer leads the hero; it said nothing a
+    visitor could check.
+  - The right column is a trust card with at most THREE checkable facts
+    (`home_trust`, `resolveTrustFacts` in `lib/homeContent.ts`): name and town
+    from `siteConfig`, the lowest rate from the pricing block, each linking to
+    the section that proves it. The cases fact drops out when no case is
+    published. No unverifiable claims, logos or counters there.
+  - Nothing in the hero may ship at `opacity: 0`. The former React island
+    rendered its copy with motion's start state in the SSR markup, so the most
+    important screen was blank until hydration and the cookie notice became the
+    mobile LCP element (4.1 s on the live site). The entrance is a
+    transform-only CSS rise, opt-in under `prefers-reduced-motion:
+    no-preference`.
+  - There is no showcase slider any more: it auto-rotated, put a demo's title
+    in the page's first `<h2>` and gave real cases and fictional demos the same
+    card.
+  - Decoration lives only in the hero's negative space (lower left, lower
+    right), never behind the copy, the trust card or the fixed header;
+    `npm run audit:ux` measures the overlap. The navy capsule, the bordeaux
+    quarter and the conduit start at `xl`: at 768 and 1024 px the actions and
+    the trust card reach down into exactly that space (measured).
+  - The photo is a `<picture>` whose source applies from `48rem`; phones get a
+    1×1 inline GIF and download nothing (the old `<img class="hidden md:block">`
+    cost every phone 60 KB it never showed).
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
   accept a slug or href from CMS content.
@@ -99,7 +98,13 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   - `scripts/business-card-sync.ts` captures the screenshot the showcase tile
     shows. Re-run it (`npm run businesscard:sync`) after changing how the page
     looks, or the tile advertises the old design.
-- Pricing remains at `/preise` and `/en/preise`. Legal routes stay outside the
+- **Prices are the home section `#preise`** (`sections/Pricing.astro`): all
+  four rates, what each includes, and "So entsteht Ihr Preis" — visible without
+  a click. `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to it;
+  `/kontakt` and `/en/contact` with a 301 to `#contact`. The section keeps an
+  alias anchor `pricing-teaser` for old deep links. Redirects stay out of the
+  sitemap and out of `alwaysPaths` (the page cache only stores 200 responses).
+  `src/lib/routes.test.ts` holds the targets. Legal routes stay outside the
   public sitemap.
 
 ## Design invariants
@@ -154,13 +159,27 @@ content fetch importing `cache.ts` closes the cycle
 `services.ts` → `cms.ts` → `cache.ts` → `services.ts`, which throws at module
 evaluation and is invisible to `astro check`.
 
-A service `summary` is rendered twice: as the card text on the home page and as
-the `<meta name="description">` of that service's detail page. Keep overrides
-between 80 and 160 characters — a shorter one silently degrades an indexable
-page's description, and only the committed defaults are covered by tests.
+A service `summary` is the detail page's lead, its `<meta name="description">`
+and the price card's text. Keep overrides between 80 and 160 characters — a
+shorter one silently degrades an indexable page's description, and only the
+committed defaults are covered by tests. The home page's service tile does not
+show it: it shows `situations[0]` (typical starting point), `outcomes[0]`
+(result), the keywords (scope) and a next step, and its link is the title,
+stretched over the tile.
 
 The redesigned page-level blocks are `home_hero`, `why_me`,
 `services_overview`, `digital_responsibility`, `pricing_services` and `faq_v2`.
+Since the 2026-09 redesign `digital_responsibility`, `why_me.reasons` and
+`home_hero.scrollHint` have no renderer (kept so stored blocks keep loading),
+and three blocks were added with no Website-CMS schema yet — `home_trust`,
+`first_call`, `pricing_logic` — which fall back to `lib/homeContent.ts` the way
+`references_home` and `website_demos` do.
+
+**Copy rules held by `homeContent.test.ts`** — Julian's decisions, not style:
+no free and no time-boxed first conversation ("kostenlos", "kostenfrei",
+"gratis", minutes); the one sentence about its cost is "Kosten entstehen erst,
+wenn wir einen Auftrag vereinbaren."; no project price ranges, only the cost
+logic.
 The flat pricing block owns the page/teaser copy, four numeric hourly rates,
 notes and CTA. Every service has a rate, so there is no custom-rate label and
 no highlighted card any more. Legacy `hero`, `about`, `services`,
@@ -252,8 +271,8 @@ configured site key must be surfaced by the existing guard.
 ## Website demos
 
 The demo sites (`demo1`…`demo5.tracht-digital.de`, plus `shop`) render on the
-home page and on the Webauftritt service page through
-`sections/WebsiteDemos.astro`. Three files own them and the split is
+home page through `sections/Showcase.astro` and on the Webauftritt service page
+through `sections/WebsiteDemos.astro`. Three files own them and the split is
 load-bearing:
 
 - `src/lib/demoCatalog.ts` — id, order, host, URL and genre. Code-owned like
@@ -292,8 +311,12 @@ Unknown status strings fail closed. There is no "show it anyway" path, and
 none should be added: a card leading to a certificate warning or to "Hier
 entsteht eine neue Webseite" costs more than an absent card.
 
-Everything a visitor reads on a demo card came from that demo, with **one
-exception**: `DemoDefinition.kind`, the genre etiquette above the title.
+Everything a visitor reads on a demo card came from that demo, with **two
+exceptions**. `DemoDefinition.origin` is the badge on the screenshot that says
+whose site it is — "Demo · fiktives Beispiel", or "Eigenes Projekt" for the
+shop, which is a real site of ours and not a fiction; its vocabulary is closed
+too and may never say "Kunde"/"client". And `DemoDefinition.kind`, the genre
+etiquette above the title.
 It is code-owned, its vocabulary is closed (`DEMO_KINDS`: Webseite ·
 Landingpage · Onlineshop) and `demos.test.ts` holds it shut. The exception is
 narrow on purpose — it applies to our OWN demos, it names the genre and never
@@ -320,8 +343,7 @@ ring, the hidden default and the focus restore.
 — a tinted strip bound edge to edge across the bottom of the card, with the
 same 1px seam a screenshot band has. It carries exactly **two links**: the
 service the card is evidence for, and the card's own destination ("Demo
-ansehen", "Mehr erfahren", "Webseite ansehen"). The hero slider resolved its
-slides that way from the start (`lib/heroSlides.ts`); the cards caught up.
+ansehen", "Mehr erfahren", "Webseite ansehen").
 
 Three rules hold it together, and each is silent when broken:
 
@@ -341,11 +363,8 @@ demos and the business card already sit on their service, and there it is
 `null`. `cardActions.test.ts` guards the geometry, that absence, and that a
 reference card never repeats its primary service as a badge.
 
-On the home page the shelf gives **two tracks to its lead card**, which is the
-first slide carrying a picture, hoisted to the front. Reference cases still
-come before demos everywhere else; the hoist exists so the shelf never opens
-with text cards while the one card that shows a built page sits off-screen.
-Both card families answer the extra width through a container query, and the
+On the home page the shelf gives **two tracks to its lead card**, the first
+demo. Both card families answer the extra width through a container query, and the
 extra width is width, not height — the slides stretch to the tallest card, so a
 taller lead card would pad every other card's body with the difference. The
 band goes to `32 / 10`, exactly twice `16 / 10` at the same height.
@@ -417,17 +436,43 @@ process; cache fingerprinting does not replace the restart.
 - Keep page titles and descriptions distinct, truthful and within the limits
   enforced by `src/lib/seo.test.ts`. `Layout.astro` must use the route's actual
   title rather than a hard-coded tab title.
-- JSON-LD must match visible content after CMS resolution. FAQ answers and
-  process steps must use the same resolved values as their rendered sections.
-  Pricing structured data may include numeric hourly offers only.
+- JSON-LD must match visible content after CMS resolution. FAQ answers must use
+  the same resolved values as the rendered section. Pricing structured data may
+  include numeric hourly offers only. There is no `HowTo` node any more: Google
+  retired those rich results, and the process is not a set of instructions.
 - Service cards are semantic links with a full-card hit area, a visible
   keyboard focus and meaningful accessible text. Prefer native links,
   headings, lists, `<details>/<summary>` and form controls over scripted
   substitutes.
-- Keep the skip link, logical heading order, labelled controls, keyboard mobile
-  navigation, theme no-flash bootstrap and `prefers-reduced-motion` behavior.
-  Entrance-motion visible states must explicitly restore opacity/position even
-  when transition duration becomes zero.
+- Keep the skip link (in the page's language), logical heading order, labelled
+  controls, keyboard mobile navigation, theme no-flash bootstrap and
+  `prefers-reduced-motion` behavior. Entrance-motion visible states must
+  explicitly restore opacity/position even when transition duration becomes
+  zero.
+- The accessibility contract of the 2026-09 redesign is pinned by
+  `src/lib/a11yContract.test.ts`; every rule in it was broken on the live site
+  once, and none of them produced an error:
+  - `AccentLetters` reads its word from an `sr-only` copy. Never `aria-label`
+    on a span or div (axe `aria-prohibited-attr`).
+  - The FAQ is ONE native `<details name="faq">` accordion at every width — not
+    a tablist (a `ul[role=tablist]` with `li` children was axe-critical) and not
+    a second hidden copy for phones.
+  - Fixed bottom chrome never hides focus: `scroll-padding-bottom` in
+    `global.css` adds `--tds-bottom-lane` (cookie notice) and
+    `--lp-floating-lane` (floating CTA). Scroll padding cannot scroll past the
+    end of a page, so the footer adds both lanes to its own bottom padding —
+    without it the legal row stayed under the notice. The header stops being
+    fixed below `max-height: 30rem` (400 % zoom, landscape phones).
+  - Any link inside a card whose bar CTA stretches over it (the service badges
+    of `ReferenceCard`) needs `position: relative; z-index: 1`. Without it the
+    link renders and reacts to hover, and a tap opens the card's destination.
+  - The language switch (`LanguageSwitch.astro`) is one link, rendered only
+    when `alternatePath()` finds the page's twin in the route inventory. The old
+    dropdown glued `/en` onto the path whenever alternates were missing.
+  - Touch targets are at least 44px on `pointer: coarse` (footer links, card
+    bars, breadcrumb, language link, trust links); process steps are not focus
+    stops; the contact form ties each error to its field and never renders its
+    fields invisible before hydration.
 
 ## Verification
 
@@ -438,8 +483,10 @@ npm run type-check   # Astro/TypeScript correctness
 npm run test:run     # Vitest unit and contract tests
 npm run og:smoke     # render the default social card for inspection
 npm run demos:sync   # re-harvest the demo sites; prints why each one is hidden
+npm run images:variants  # regenerate the committed pre-sized image copies
 npm run build        # SSR build plus deployable release assembly/verification
 npm run preview      # production-style local inspection
+npm run audit:ux -- <url>  # overflow, targets, fixed chrome, focus, axe, deep links
 ```
 
 The Vitest default environment is Node; opt a DOM-dependent test into jsdom in

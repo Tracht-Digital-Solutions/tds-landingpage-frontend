@@ -1,0 +1,136 @@
+---
+/**
+ * Preise — every rate, what it includes, and how a price comes about, visible
+ * without a single click.
+ *
+ * ### What it replaced
+ *
+ * A navy teaser band ("ab 65 €") that opened a drawer. The drawer scrolled the
+ * page to the band first and then slid in, trapped focus correctly but did not
+ * give it back after Escape, and did not close on the Back button — Back left
+ * the page instead. More fundamentally it put the one thing a visitor weighing
+ * a decision wants to compare behind an extra step. Decided 2026-09-12: prices
+ * are a section.
+ *
+ * `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to `#preise`. The
+ * old anchor `#pricing-teaser` keeps working through the alias at the top.
+ *
+ * ### Order
+ *
+ * The numbers first, then how a price comes about ("So entsteht Ihr Preis",
+ * together with the notes in one box), then the one call to action. The
+ * explanation used to stand above the cards in boxes of its own and repeated
+ * two of the notes below them.
+ *
+ * ### No project price ranges
+ *
+ * Deliberately. The rates are real numbers from the pricing block; a "typical
+ * website: 1,500–4,000 €" would be an estimate the site cannot stand behind.
+ * What is explained instead is how a price is formed, which is true for every
+ * project.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { cmsFor } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
+import { getPricingContent } from "~/lib/pricing";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import Emphasis from "~/components/ui/Emphasis.astro";
+import PricingList from "~/components/PricingList.astro";
+
+const lang = resolveLang(Astro.currentLocale);
+const pricing = await getPricingContent(lang);
+const logic = await cmsFor("pricing_logic", lang, getHomeContent(lang).pricingLogic);
+---
+
+<section id="preise" class="section-spacing" aria-labelledby="pricing-heading">
+  {/* Old deep links (`/#pricing-teaser`) land here too. */}
+  <span id="pricing-teaser" class="block" aria-hidden="true"></span>
+
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <div class="max-w-2xl mx-auto md:mx-0">
+      <SectionHeader
+        headline={pricing.headline}
+        headlineAccent={pricing.headlineAccent}
+        id="pricing-heading"
+        headingClass="mb-6"
+      />
+      <p class="text-[var(--color-muted)] leading-relaxed text-center md:text-left">
+        <Emphasis text={pricing.sub} />
+      </p>
+    </div>
+
+    <div class="pricing-host">
+      <PricingList lang={lang} headingLevel={3} factsTitle={logic.title}>
+        {/* Markers are dots, not numerals — see AGENTS.md: only the home page's
+            process section numbers its steps. The order lives in the `<ol>`. */}
+        <ol class="pricing-logic__steps">
+          {logic.steps.map((step) => (
+            <li class="pricing-logic__step">
+              <span class="pricing-logic__marker" aria-hidden="true"></span>
+              <p class="pricing-logic__name">{step.title}</p>
+              <p class="pricing-logic__text">{step.text}</p>
+            </li>
+          ))}
+        </ol>
+        <p class="pricing-logic__note">{logic.note}</p>
+      </PricingList>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* The steps are passed into the price list's notes box, which already has a
+     ground of its own — so they are rows with a marker, not boxes. Scoped here
+     because slotted markup keeps the scope of the component that wrote it. */
+  .pricing-logic__steps {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .pricing-logic__steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+  .pricing-logic__step {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .pricing-logic__marker {
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: var(--color-accent);
+  }
+  .pricing-logic__name {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+    color: var(--color-black);
+  }
+  .pricing-logic__text {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  .pricing-logic__note {
+    margin: 1.25rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+
+  /* The price list sizes its columns against THIS box (a container query in
+     `PricingList.astro`), named so it cannot resolve against another
+     ancestor. `inline-size`, never `size`: the height is the content's. */
+  .pricing-host {
+    container: pricing-list / inline-size;
+    margin-top: 2.5rem;
+  }
+</style>

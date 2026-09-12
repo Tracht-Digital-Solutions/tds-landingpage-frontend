@@ -28,9 +28,7 @@ const services = await Promise.all(
 
 {/* Sand — the quiet alternate ground, with the single-field variant of
     the wash so two consecutive decorated sections do not read as the
-    same picture twice. `.tds-tone-sand` replaces the hand-written
-    `bg-[var(--color-soft)]`: the tone is a named decision now, not a
-    utility each section re-guesses. */}
+    same picture twice. */}
 <section
   id="services"
   class="tds-wash tds-wash--calm section-spacing tds-tone-sand"
@@ -44,7 +42,7 @@ const services = await Promise.all(
       headingClass="mb-6"
       bar
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12 text-center md:text-left mx-auto md:mx-0">
       <Emphasis text={servicesContent.intro} />
     </p>
 
@@ -52,18 +50,16 @@ const services = await Promise.all(
 
         The separation is a 1px grid gap over a parent painted in
         `--color-line`: the tiles paint their own fill, the gap lets the
-        parent show through, and what a visitor sees is a hairline seam. No
-        border per tile, so no doubled lines where two tiles meet, and no
-        gutter to make four services look like four unrelated offers.
+        parent show through, and what a visitor sees is a hairline seam.
 
-        `data-reveal` sits on the mosaic rather than on each tile on purpose.
-        Per-tile it would stagger — `reveal.ts` groups by parent, and these
-        finally share one — but four tiles sliding up independently would open
-        and close the seams while they travel. One picture, one entrance.
+        `data-reveal` sits on the mosaic rather than on each tile on purpose:
+        four tiles sliding up independently would open and close the seams
+        while they travel. One picture, one entrance.
 
-        Full-bleed below `md` with the idiom Consulting and PricingTeaser
-        already use: the negative margin escapes the section's own gutter and
-        the radius comes back once there is room for it. */}
+        Each tile answers the four questions a visitor scanning services has —
+        what problem does it start from, what do I end up with, what does it
+        cover, where do I go next — from the SAME resolved content the detail
+        page renders, so an edit in the panel moves both. */}
     <div
       data-reveal
       class="-mx-6 md:mx-0 overflow-hidden rounded-none md:rounded-[6px] bg-[var(--color-line)] grid gap-px sm:grid-cols-2"
@@ -72,9 +68,11 @@ const services = await Promise.all(
         <ServiceCard
           href={serviceHref(definition, lang)}
           title={content.title}
-          description={content.summary}
+          problem={content.situations[0] ?? ""}
+          result={content.outcomes[0] ?? ""}
           keywords={definition.keywords[lang]}
           image={definition.image}
+          lang={lang}
         />
       ))}
     </div>

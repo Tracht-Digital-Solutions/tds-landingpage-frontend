@@ -13,12 +13,6 @@
  * rounded corners into ellipses, which is the "organic blob" look the whole
  * geometry exists to avoid. Give it a `class` with the position and a size in
  * that ratio (e.g. `w-[20rem] h-[10.6rem]`).
- *
- * INTENTIONAL TWIN: `components/islands/Hero.tsx` carries the same run as a
- * React function. An `.astro` component cannot be imported into a React
- * island, and the alternative — making the hero's decoration a second island
- * purely to share nine lines of SVG — costs more than the duplication. If the
- * path data changes here, change it there too.
  */
 interface Props {
   /** Position + size utilities. `.tds-circuit` supplies `position: absolute`. */

@@ -2,23 +2,29 @@
 /**
  * The price list itself: one card per service, the notes, the closing CTA.
  *
- * Extracted out of `PricingPage.astro` when the list stopped being a page of
- * its own and became a drawer on the home page. It is a component so there is
- * ONE definition of what a price card says — the rates, the included keywords
- * and the "Gut zu wissen" notes were the kind of thing that gets copied for a
- * second surface and then updated on one of them.
+ * It has been a page, a drawer on the home page, and since the 2026-09
+ * redesign it is part of the home page's pricing section
+ * (`sections/Pricing.astro`). It is a component so there is ONE definition of
+ * what a price card says — the rates, the included keywords and the "Gut zu
+ * wissen" notes were the kind of thing that gets copied for a second surface
+ * and then updated on one of them.
  *
  * Renders no `<main>`, no header and no footer: it is a fragment, placed by
  * whoever shows it.
  *
  * ### Heading levels are a prop, not a guess
  *
- * On a page of its own the cards sat under an `<h1>` and were `<h2>`. In the
- * drawer they sit under the drawer's own title, which is itself inside a
- * document that already has an `<h1>`. A component that hardcoded `h2` would
- * produce a document outline with a level skipped or repeated depending on
- * where it was dropped, which is exactly the sort of thing nobody sees and a
- * screen reader announces.
+ * The titles sit under whatever heading the caller placed above the list —
+ * `<h2>` on a page of its own, `<h3>` inside the home page's pricing section. A
+ * component that hardcoded one level would skip or repeat a level depending on
+ * where it was dropped, which nobody sees and a screen reader announces.
+ *
+ * ### The facts box
+ *
+ * The notes box is also where the caller explains how a price comes about:
+ * pass `factsTitle` and put the explanation in the default slot, and it renders
+ * above the notes, in the same box. The home section first came out as two
+ * boxes, one under the other, that both said "Festpreis".
  */
 import { localizePath, type Lang } from "~/lib/i18n";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
@@ -32,11 +38,14 @@ interface Props {
   lang: Lang;
   /** The level for a card's title. The caller knows what sits above it. */
   headingLevel?: 2 | 3;
+  /** Title of the notes box when the default slot adds an explanation to it. */
+  factsTitle?: string;
 }
 
-const { lang, headingLevel = 2 } = Astro.props;
+const { lang, headingLevel = 2, factsTitle } = Astro.props;
 const CardHeading = `h${headingLevel}` as "h2" | "h3";
 const SectionHeading = `h${headingLevel}` as "h2" | "h3";
+const hasFacts = Astro.slots.has("default");
 
 const pricing = await getPricingContent(lang);
 const services = await Promise.all(
@@ -93,7 +102,7 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
                   four full sentences per card turned this grid into a wall of
                   prose. The detail page behind each card is where the
                   sentences belong. */}
-              <ul class="space-y-2 mb-7">
+              <ul class="pricing-list__includes">
                 {definition.keywords[lang].map((keyword) => (
                   <li class="text-sm leading-snug flex gap-2 text-[var(--color-black)]">
                     <span aria-hidden="true" class="text-[var(--color-accent)]">
@@ -105,7 +114,7 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
               </ul>
               <a
                 href={serviceHref(definition, lang)}
-                class="inline-flex items-center gap-2 text-sm font-medium transition-colors text-[var(--color-primary)] hover:text-[var(--color-accent)]"
+                class="inline-flex items-center gap-2 text-sm font-medium transition-colors text-[var(--color-primary)] hover:text-[var(--color-accent)] [@media(pointer:coarse)]:min-h-11"
               >
                 {detailsLabel}
                 <span aria-hidden="true">→</span>
@@ -125,9 +134,10 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
       id="pricing-notes-heading"
       class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
     >
-      {pricing.notesTitle}
+      {factsTitle ?? pricing.notesTitle}
     </SectionHeading>
-    <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+    <slot />
+    <ul class:list={["grid sm:grid-cols-2 gap-x-8 gap-y-4", hasFacts && "pricing-list__notes--after"]}>
       {
         pricing.notes.map((note) => (
           <li class="text-sm text-[var(--color-black)] leading-relaxed flex gap-3">
@@ -169,15 +179,15 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
 <style>
   /* A CONTAINER query, not a media query.
    *
-   * This list lives in a drawer that is 34rem wide on a 90rem screen. A
-   * `@media (min-width: 60rem)` asks the VIEWPORT how much room there is and
-   * gets the answer for the window, not for the panel — so two columns opened
-   * inside a 544px drawer and each card had ~250px for a heading like
-   * "Prozessoptimierung". It is the mistake this repo has already paid for
-   * once; see the note on container queries in the blog's layout.
+   * The list has lived in a 34rem drawer and lives in a full-width section
+   * now. A `@media (min-width: 60rem)` asks the VIEWPORT how much room there
+   * is and got the answer for the window, not for the panel — two columns
+   * opened inside a 544px drawer and each card had ~250px for a heading like
+   * "Prozessoptimierung". The column count belongs to the box the list sits
+   * in, wherever that is.
    *
-   * The parent (`.pricing-drawer__body`) declares the containment, because a
-   * container cannot query itself. */
+   * The caller declares the containment (`.pricing-host` in
+   * `sections/Pricing.astro`), because a container cannot query itself. */
   .pricing-list__grid {
     display: grid;
     gap: 1rem;
@@ -187,5 +197,38 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
     .pricing-list__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+  }
+  /* The full-width home section (`sections/Pricing.astro`) has room for all
+     four side by side — the one arrangement in which every rate is visible at
+     once, which is the point of showing prices at all. */
+  @container pricing-list (min-width: 64rem) {
+    .pricing-list__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* Cards stacked on a phone: the keywords run as one wrapping line of ticks
+     instead of a column, which took a quarter of every card's height. Side by
+     side a column is quicker to scan, so it comes back there. */
+  .pricing-list__includes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 1rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  @container pricing-list (min-width: 42rem) {
+    .pricing-list__includes {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+  }
+
+  .pricing-list__notes--after {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
   }
 </style>

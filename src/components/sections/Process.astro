@@ -1,8 +1,25 @@
 ---
+/**
+ * Vorgehen — how a working relationship runs, and what the first step is.
+ *
+ * Two columns from `lg`: the four steps on the left, and beside them the card
+ * that answers what the FIRST of them actually is (`ui/FirstCall.astro`),
+ * carrying the section's one primary call to action. Stacked below `lg`.
+ *
+ * What it replaced: a sticky detail panel that swapped its content as the
+ * pointer hovered a step, or when a step's `<li>` took keyboard focus — each
+ * one carried `tabindex="0"` with no role, i.e. a focus stop that announced
+ * nothing — and the panel itself was `aria-hidden`, so its text never reached
+ * a screen reader. Its one piece of real content, each step's outcome, is part
+ * of the step now (`ui/ProcessStep.astro`).
+ *
+ * The home page's process is the one place on the site that still numbers its
+ * steps, deliberately (see AGENTS.md).
+ */
 import { tFor, resolveLang } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ProcessStep from "~/components/ui/ProcessStep.astro";
-import ProcessIcon from "~/components/ui/ProcessIcon.astro";
+import FirstCall from "~/components/ui/FirstCall.astro";
 import { getProcessDetails } from "~/lib/processDetails";
 import { cmsFor } from "~/lib/cms";
 
@@ -11,8 +28,8 @@ const lang = resolveLang(Astro.currentLocale);
 const pd = getProcessDetails(lang);
 
 // Default = the shared steps merged with the local detail copy. An
-// admin-edited "process" block overrides this at build time (cmsFor);
-// shape stays identical so the rendering below is source-agnostic.
+// admin-edited "process" block overrides this (cmsFor); the shape stays
+// identical so the rendering below is source-agnostic.
 const defaultProcess = {
   label: t.process.label,
   headline: t.process.headline,
@@ -45,16 +62,11 @@ const steps = process.steps;
       headingClass="mb-6"
       bar
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12">
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12 text-center md:text-left mx-auto md:mx-0">
       {process.body}
     </p>
 
-    {/* Two columns on desktop: the vertical-timeline steps on the left,
-        a sticky detail panel on the right that reveals the hovered (or
-        keyboard-focused) step's longer narrative + a branded visual.
-        On smaller screens the right panel is dropped — each step already
-        carries its short description inline, so nothing is lost. */}
-    <div class="grid lg:grid-cols-[minmax(0,34rem)_minmax(0,1fr)] lg:gap-x-12 lg:items-start">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-14 lg:items-start">
       <div class="relative">
         <span
           aria-hidden="true"
@@ -69,18 +81,14 @@ const steps = process.steps;
 
         <ol class="relative pt-6 pb-6">
           {
-            steps.map((step, i) => (
-              <li
-                class="process-step-item rounded-xl transition-colors duration-200"
-                data-step={i}
-                tabindex="0"
-              >
+            steps.map((step) => (
+              <li>
                 <ProcessStep
                   number={step.number}
                   title={step.title}
                   duration={step.duration}
                   description={step.description}
-                  isLast={i === steps.length - 1}
+                  outcome={step.outcome}
                 />
               </li>
             ))
@@ -94,116 +102,9 @@ const steps = process.steps;
         ></span>
       </div>
 
-      {/* Detail panel — desktop only, sticky beside the list. */}
-      <aside class="hidden lg:block lg:sticky lg:top-28 self-start" aria-hidden="true">
-        {
-          steps.map((step, i) => {
-            return (
-              <div class="process-detail" data-detail={i} hidden={i !== 0}>
-                <div class="rounded-2xl overflow-hidden bg-[var(--lp-surface-card)] shadow-[0_8px_24px_-20px_rgba(5,15,104,0.3)]">
-                  {/* Per-step photo over a flat brand-navy fallback: if the
-                      image is missing it simply doesn't render and the navy
-                      shows through, so the build never breaks. (It was the
-                      same 135° navy→bordeaux gradient as the two callouts
-                      until the "Digitale Maßarbeit" pass; a focus surface
-                      is one colour now.) The scrim keeps the icon + number
-                      legible over any photo. */}
-                  <div class="relative flex items-end justify-between aspect-[4/3] p-6 bg-[var(--color-surface-navy)] text-white overflow-hidden">
-                    <img
-                      src={`/images/process/step-${step.number}.webp`}
-                      alt=""
-                      aria-hidden="true"
-                      loading="lazy"
-                      decoding="async"
-                      class="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <span
-                      aria-hidden="true"
-                      class="absolute inset-0 bg-[linear-gradient(to_top,rgba(5,15,104,0.7)_0%,rgba(5,15,104,0.15)_55%,transparent_100%)]"
-                    />
-                    <span class="relative inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm text-white">
-                      <ProcessIcon number={step.number} class="w-7 h-7" />
-                    </span>
-                    <span class="relative font-[var(--font-display)] text-5xl leading-none text-white/80 tabular-nums">
-                      {step.number}
-                    </span>
-                  </div>
-                  <div class="p-6">
-                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3">
-                      <h3 class="text-xl font-[var(--font-display)] font-medium text-[var(--color-black)]">
-                        {step.title}
-                      </h3>
-                      <span class="text-xs text-[var(--color-muted)] bg-[var(--color-card)] px-2.5 py-1 rounded-[100px]">
-                        {step.duration}
-                      </span>
-                    </div>
-                    <p class="text-sm text-[var(--color-muted)] leading-relaxed mb-4">
-                      {step.detail}
-                    </p>
-                    <p class="text-sm font-medium text-[var(--color-accent)]">
-                      {step.outcome}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        }
-      </aside>
+      <div class="lg:sticky lg:top-28">
+        <FirstCall variant="process" />
+      </div>
     </div>
   </div>
 </section>
-
-<style>
-  /* No background change on hover/active — the marker scale, the text
-     nudge and the right-hand detail panel carry the feedback. The focus
-     ring stays for keyboard a11y. */
-  .process-step-item {
-    outline: none;
-  }
-  .process-step-item:focus-visible {
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 55%, transparent);
-  }
-
-  .process-detail {
-    animation: process-detail-fade 240ms ease both;
-  }
-  @keyframes process-detail-fade {
-    from {
-      opacity: 0;
-      transform: translateY(0.5rem);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .process-detail {
-      animation: none;
-    }
-  }
-</style>
-
-<script>
-  // Reveal the matching detail panel as the visitor hovers or
-  // keyboard-focuses a step. The first panel is shown server-side.
-  const root = document.getElementById("process");
-  if (root) {
-    const details = Array.from(
-      root.querySelectorAll<HTMLElement>(".process-detail"),
-    );
-
-    const show = (idx: number) => {
-      for (const detail of details) {
-        detail.hidden = Number(detail.dataset.detail) !== idx;
-      }
-    };
-
-    for (const item of root.querySelectorAll<HTMLElement>(".process-step-item")) {
-      const idx = Number(item.dataset.step);
-      item.addEventListener("mouseenter", () => show(idx));
-      item.addEventListener("focusin", () => show(idx));
-    }
-  }
-</script>

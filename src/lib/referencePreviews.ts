@@ -73,8 +73,19 @@ export function resolveSnapshotPreviews(
   return resolved;
 }
 
-/** How long one site gets to answer before its preview is withheld. */
-const PROBE_TIMEOUT_MS = 3_000;
+/**
+ * How long one site gets to answer before its preview is withheld.
+ *
+ * Eight seconds, not three. A customer's site is not ours: it sits on a foreign
+ * host, and the FIRST request of a render pays for DNS and a TLS handshake. On
+ * 2026-09-11 a cold `HEAD https://hof-meerheck.de/` from Node took 3.24 s — just
+ * over the old limit — so the named case lost its screenshot on the live site
+ * while the asset and the customer's site were both perfectly fine.
+ *
+ * The cost of the longer wait is paid once per cache generation (the result is
+ * memoised below), never per visitor.
+ */
+const PROBE_TIMEOUT_MS = 8_000;
 
 export type PreviewProbe = (url: string) => Promise<boolean>;
 

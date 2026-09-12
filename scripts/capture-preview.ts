@@ -12,6 +12,29 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import type { Browser } from "playwright-core";
+// No-import module, shared with the components that build `srcset` from it.
+import { PREVIEW_VARIANT_WIDTHS, variantSrc } from "../src/lib/imageVariants";
+
+/**
+ * Write the smaller copies of a committed screenshot beside it.
+ *
+ * Called for every capture, so a sync never leaves a card with a `srcset`
+ * pointing at a file that is not there — a missing candidate breaks the image
+ * rather than falling back to `src`. `scripts/image-variants.ts` calls it for
+ * captures that predate this function.
+ */
+export async function writePreviewVariants(file: string): Promise<string[]> {
+  const written: string[] = [];
+  for (const width of PREVIEW_VARIANT_WIDTHS) {
+    const target = variantSrc(file, width);
+    await sharp(file)
+      .resize({ width, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toFile(target);
+    written.push(target);
+  }
+  return written;
+}
 
 /**
  * The capture box: viewport for the shot, intrinsic size of the WebP, and the
@@ -112,6 +135,7 @@ export async function capturePreview(
     const file = `${target.id}.webp`;
     await fs.mkdir(outDir, { recursive: true });
     await sharp(png).webp({ quality: 82 }).toFile(path.join(outDir, file));
+    await writePreviewVariants(path.join(outDir, file));
     return `/${publicDir}/${file}`;
   } finally {
     await context.close();

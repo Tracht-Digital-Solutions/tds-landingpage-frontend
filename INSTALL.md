@@ -173,9 +173,11 @@ fallback is to update `tmp/restart.txt`. Without a restart, cached routes can
 still answer while an uncached route returns 500 because the live process
 references server chunks removed by the deploy.
 
-After restart, request at least `/`, `/en/`, `/preise`, `/en/preise` and one
-service page in each locale. Confirm a cache miss renders, the next request is
-served as a cache hit, and no hashed asset returns 404.
+After restart, request at least `/`, `/en/` and one service page in each
+locale. Confirm a cache miss renders, the next request is served as a cache hit,
+and no hashed asset returns 404. `/preise`, `/en/preise`, `/kontakt` and
+`/en/contact` answer with a 301 to a section of the home page; a redirect is
+never stored in the page cache, so they report no hit.
 
 ## 8. Pair the deployed site through `/install`
 

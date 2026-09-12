@@ -20,28 +20,33 @@ For a fresh checkout, production configuration or deployment, use
 The home page keeps the existing Tracht Digital Solutions visual system while
 organizing the content around one clear responsibility:
 
-1. Hero and initial-consultation CTA
+1. Hero: audience, problem and result, the first-conversation CTA and a card of
+   three verifiable facts
 2. Wieso ich? / Why me?
-3. Six linked service areas
-4. Digitalization-responsibility callout
-5. Process
-6. Pricing teaser
+3. Four service areas, each with a typical starting point, result and scope
+4. Client projects (approved reference cases only)
+5. Process, with what to expect from the first conversation
+6. Sample sites: our own demos (fictional companies) and own projects, labelled
+   as such
 7. Compact journal teaser
-8. FAQ
-9. Contact
+8. Prices: every rate and how a price comes about
+9. FAQ
+10. Contact
 
-The former tech-stack and current-topics sections are no longer part of the
-home-page story. The placeholder portfolio remains hidden. Approved references
-appear within the relevant service page and on the home page — anonymized
-unless that customer agreed to be named; when none are available, the complete
-references section is omitted.
+The former tech-stack and current-topics sections, the positioning callout, the
+hero slider and the pricing drawer are no longer part of the home-page story.
+The placeholder portfolio remains hidden. Approved references appear within the
+relevant service page and in the client-projects section — anonymized unless
+that customer agreed to be named; when none are available, that section is
+omitted. A demo is never presented as client work.
 
 | Path | Purpose |
 |---|---|
 | `/`, `/en/` | German and English home pages |
 | `/leistungen/[slug]` | German service detail pages |
 | `/en/services/[slug]` | English service detail pages |
-| `/preise`, `/en/preise` | Hourly rates for all four services |
+| `/preise`, `/en/preise`, `/en/pricing` | 301 to the home page's pricing section (`#preise`) |
+| `/kontakt`, `/en/contact` | 301 to the home page's contact section (`#contact`) |
 | `/legal/impressum`, `/legal/datenschutz` | German legal notice and privacy policy |
 | `/legal/agb`, `/en/legal/agb` | Terms pages backed by uploaded PDFs |
 | `/legal/agb.pdf`, `/en/legal/agb.pdf` | The corresponding PDF endpoints |
@@ -129,8 +134,10 @@ npm run type-check   # Astro/TypeScript checks
 npm run test:run     # Vitest suite
 npm run og:smoke     # render the default social card
 npm run demos:sync   # re-harvest the demo sites (see AGENTS.md, "Website demos")
+npm run images:variants  # regenerate the committed pre-sized image copies
 npm run build        # SSR build + verified self-contained release tree
 npm run preview      # inspect the production build locally
+npm run audit:ux -- <url>  # overflow, touch targets, fixed chrome, focus, axe
 ```
 
 Tailwind runs through `@tailwindcss/postcss` in `postcss.config.mjs`. A

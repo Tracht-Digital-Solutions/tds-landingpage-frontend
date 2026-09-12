@@ -62,6 +62,7 @@ Never hand-place a picture into either folder.
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
 | Section grounds | `public/images/sections/<name>.webp`, **1870 × 841** (≈2.22:1); hero **1642 × 958** (≈1.71:1) |
 | Format | WebP, quality 82 (AVIF 55 if a second source is ever added) |
+| Served sizes | Committed copies beside each original, named `<name>-<width>.webp`: screenshots `-480`/`-960` (written by `capture-preview.ts`), service photos `-800`, portrait `public/images/portrait/portrait-{360,720,1080}.webp`. Regenerate with `npm run images:variants`; `imageVariants.test.ts` fails when a `srcset` candidate is missing — a missing candidate breaks the image instead of falling back |
 | Alt text | none — these are decorative grounds and render `alt=""` + `aria-hidden` |
 | Weight | 41–86 KB each; ~350 KB for all eight |
 
@@ -82,7 +83,7 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 |---|---|---|
 | `services/*.webp` | `ui/ServiceCard.astro` — `.service-tile__shot img` | **1.0 — content, not a ground** |
 | `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.36 / 0.23 |
-| `sections/hero.webp` | `islands/Hero.tsx` — `.hero-photo`, CSS in `styles/global.css` | 0.32 / 0.20 |
+| `sections/hero.webp` | `sections/Hero.astro` — `.hero-photo` in a `<picture>` whose source applies from 48rem | 0.32 / 0.20 |
 | `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.35 / 0.22 |
 | `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.50, no dark variant |
 | `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
@@ -268,8 +269,10 @@ Formular" still holds.
 
 Full-bleed behind the hero, under the constructed geometry. **The left half is
 empty because the headline sits there** — that is the whole composition, and it
-is the reason the image is `hidden md:block`: in portrait, `object-cover` keeps
-only a middle strip in which that empty half no longer exists.
+is the reason the image only applies from `48rem`: in portrait, `object-cover`
+keeps only a middle strip in which that empty half no longer exists. It is a
+`<picture>` with a media-gated `<source>` and a 1×1 inline GIF as the `<img>`,
+so a phone downloads nothing — a `hidden md:block` image is still fetched.
 
 > Wide interior view of a small German craft workshop early in the morning,
 > before work starts. Empty workbench in the middle distance, tools hanging in

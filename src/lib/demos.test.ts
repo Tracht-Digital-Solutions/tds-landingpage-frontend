@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { DEMO_KINDS } from "./demoCatalog";
+import { DEMO_KINDS, DEMO_ORIGINS } from "./demoCatalog";
 import {
   demoDefinitions,
   demoSnapshot,
@@ -87,6 +87,29 @@ describe("the committed catalog", () => {
       expect(labels.de.length, key).toBeGreaterThan(0);
       expect(labels.en.length, key).toBeGreaterThan(0);
     }
+  });
+
+  /**
+   * The ORIGIN is the label that keeps samples apart from client work. A demo
+   * shared a carousel with the customer cases until 2026-09 and nothing on the
+   * card told them apart. Closed like the kinds, and never allowed to say
+   * "client" — client work lives in `references.ts`, under its own consent
+   * rules.
+   */
+  it("labels every demo with an origin from the closed vocabulary", () => {
+    for (const demo of demoDefinitions) {
+      expect(Object.keys(DEMO_ORIGINS), demo.id).toContain(demo.origin);
+    }
+    for (const [key, labels] of Object.entries(DEMO_ORIGINS)) {
+      expect(labels.de.length, key).toBeGreaterThan(0);
+      expect(labels.en.length, key).toBeGreaterThan(0);
+      expect(labels.de, key).not.toMatch(/kunde/i);
+      expect(labels.en, key).not.toMatch(/client|customer/i);
+    }
+  });
+
+  it("calls the shop what it is: a real site of our own, not a fiction", () => {
+    expect(demoDefinitions.find((demo) => demo.id === "shop")!.origin).toBe("own");
   });
 
   /**

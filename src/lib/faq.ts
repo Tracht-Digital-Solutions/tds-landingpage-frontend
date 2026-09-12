@@ -64,6 +64,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             a: "Ein Erstgespräch. Danach wissen Sie, was zuerst dran ist und was es ungefähr kostet.",
           },
           {
+            // The one sentence about cost the site makes (decided 2026-09-12).
+            // No "kostenlos", no duration — `homeContent.test.ts` holds both out.
+            q: "Was kostet das Erstgespräch?",
+            a: "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
+          },
+          {
             q: "Wovon hängt der Preis ab?",
             a: "Vom Bereich, vom Umfang und davon, wie klar die Aufgabe ist. Abgegrenzte Vorhaben gehen auch zum Festpreis.",
           },
@@ -99,6 +105,10 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           {
             q: "What is the first step?",
             a: "A first conversation. After it you know what comes first and roughly what it costs.",
+          },
+          {
+            q: "What does the first conversation cost?",
+            a: "Costs only arise once we agree on an assignment.",
           },
           {
             q: "What does the price depend on?",

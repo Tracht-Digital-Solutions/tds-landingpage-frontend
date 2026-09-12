@@ -77,8 +77,17 @@ const ui =
 
     {/* No `width`/`height`: the source varies and the frame already reserves
         the box with an aspect ratio, so a stated intrinsic size would only be
-        a second, staler answer to the same question. */}
-    <img class="preview__img" data-preview-img src="" alt="" />
+        a second, staler answer to the same question.
+
+        The resting source is a 1×1 transparent GIF, not `src=""`: an empty
+        `src` is invalid markup, and older engines answered it by requesting
+        the page itself as an image. */}
+    <img
+      class="preview__img"
+      data-preview-img
+      src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      alt=""
+    />
 
     <div class="preview__bar">
       <div class="preview__meta">
@@ -342,12 +351,15 @@ const ui =
       if (event.target === dialog) dialog.close();
     });
 
+    // The resting source from the markup, restored on close.
+    const blank = img.getAttribute("src") ?? "";
+
     dialog.addEventListener("close", () => {
       opener?.focus();
       opener = null;
       // Drop the source so a closed dialog is not holding a decoded 1440×900
       // bitmap for every screenshot the visitor happened to open.
-      img.removeAttribute("src");
+      img.src = blank;
     });
   }
 </script>

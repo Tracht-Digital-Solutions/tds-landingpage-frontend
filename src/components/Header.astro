@@ -1,26 +1,26 @@
 ---
-import LanguageToggle from "~/components/islands/LanguageToggle.tsx";
+import LanguageSwitch from "~/components/LanguageSwitch.astro";
 import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/components";
-import { tFor, resolveLang, localizePath } from "~/lib/i18n";
+import { resolveLang, localizePath } from "~/lib/i18n";
+import { sectionLinks } from "~/lib/navigation";
 import { siteConfig } from "~/lib/seo";
 
 const lang = resolveLang(Astro.currentLocale);
-const t = tFor(Astro.currentLocale);
 
-const items = [
-  { id: "about", label: lang === "de" ? "Wieso ich?" : "Why me?" },
-  { id: "services", label: lang === "de" ? "Leistungen" : "Services" },
-  { id: "process", label: lang === "de" ? "Vorgehen" : "Process" },
-];
+// One list for the desktop bar, the mobile menu and the footer — see
+// `lib/navigation.ts` for why there is no second copy of it here any more.
+const items = sectionLinks(lang);
 
 const homeHref = localizePath("/", lang);
-const pricingHref = localizePath("/preise", lang);
 const menuLabel = lang === "en" ? "Menu" : "Menü";
+const navLabel = lang === "en" ? "Main navigation" : "Hauptnavigation";
+const homeLabel =
+  lang === "en" ? "Tracht Digital Solutions – home" : "Tracht Digital Solutions – Startseite";
 
 // Section links must resolve against the homepage — the sections only
-// exist there, so a bare `#about` does nothing on subpages like /preise.
-// Anchoring to homeHref (`/#about`, or `/en/#about`) scrolls on the home
-// page and navigates home-then-scrolls from anywhere else.
+// exist there, so a bare `#services` does nothing on a service page.
+// Anchoring to homeHref (`/#services`, or `/en/#services`) scrolls on the
+// home page and navigates home-then-scrolls from anywhere else.
 const sectionHref = (id: string) => `${homeHref}#${id}`;
 ---
 
@@ -29,12 +29,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
   class="site-header fixed top-3 left-3 right-3 z-40 px-3 py-2.5 lg:px-5"
   data-scrolled="false"
 >
-  <nav class="flex items-center justify-between gap-2 text-sm lg:gap-5">
+  <nav aria-label={navLabel} class="flex items-center justify-between gap-2 text-sm lg:gap-5">
     <a
       id="logo-link"
       href={homeHref}
-      class="flex items-center gap-2 px-2 lg:px-2.5 py-1 lg:py-1 text-[var(--color-primary)] hover:opacity-90 transition-opacity"
-      aria-label="Tracht Digital Solutions"
+      class="flex items-center gap-2 px-2 lg:px-2.5 py-1 lg:py-1 text-[var(--color-primary)] hover:opacity-90 transition-opacity rounded-full [@media(pointer:coarse)]:min-h-11"
+      aria-label={homeLabel}
     >
       <img
         src="/images/logo.webp"
@@ -67,18 +67,11 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
           </a>
         ))}
         <a
-          href={pricingHref}
-          data-pricing-open
-          class="px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
-        >
-          {t.nav.pricing}
-        </a>
-        <a
           href={siteConfig.blogUrl}
           rel="me noopener"
           class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors"
         >
-          {t.nav.blog}
+          Journal
           <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
         </a>
       </div>
@@ -88,7 +81,8 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         labelToDark={lang === "en" ? "Switch to dark mode" : "Auf Dunkel umschalten"}
         labelToLight={lang === "en" ? "Switch to light mode" : "Auf Hell umschalten"}
       />
-      <LanguageToggle client:load lang={lang} />
+      {/* Renders nothing on a page without a twin in the other language. */}
+      <LanguageSwitch />
 
       {/* Geometry, colour and the 44px target come from the shared classes;
           the breakpoint comes from `.tds-menu-toggle` itself, NOT from an
@@ -120,45 +114,37 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
   style="--tds-mobile-menu-inset: 5.25rem"
   aria-hidden="true"
 >
-  <ul class="space-y-0.5">
-    {items.map((item) => (
+  <nav aria-label={navLabel}>
+    <ul class="space-y-0.5">
+      {items.map((item) => (
+        <li>
+          <a
+            href={sectionHref(item.id)}
+            data-menu-link
+            class="tds-mobile-menu__link"
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div class="h-4" aria-hidden="true"></div>
+
+    <ul class="space-y-0.5">
       <li>
         <a
-          href={sectionHref(item.id)}
+          href={siteConfig.blogUrl}
+          rel="me noopener"
           data-menu-link
-          class="tds-mobile-menu__link"
+          class="tds-mobile-menu__link justify-between"
         >
-          {item.label}
+          <span>Journal</span>
+          <span aria-hidden="true" class="text-sm text-[var(--color-muted)]">↗</span>
         </a>
       </li>
-    ))}
-  </ul>
-
-  <div class="h-4" aria-hidden="true"></div>
-
-  <ul class="space-y-0.5">
-    <li>
-      <a
-        href={pricingHref}
-        data-pricing-open
-        data-menu-link
-        class="tds-mobile-menu__link"
-      >
-        {t.nav.pricing}
-      </a>
-    </li>
-    <li>
-      <a
-        href={siteConfig.blogUrl}
-        rel="me noopener"
-        data-menu-link
-        class="tds-mobile-menu__link justify-between"
-      >
-        <span>{t.nav.blog}</span>
-        <span aria-hidden="true" class="text-sm text-[var(--color-muted)]">↗</span>
-      </a>
-    </li>
-  </ul>
+    </ul>
+  </nav>
 </div>
 
 <style>
@@ -233,12 +219,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     backdrop-filter: blur(22px) saturate(150%);
     transition:
       background-color 250ms ease,
-      box-shadow 250ms ease,
-      /* See the note in the `lg` block: this scoped list out-specifies the
-         global one, so the drawer's shift has to be named here too or the bar
-         snaps while the page glides. Below `md` the page does not shift at
-         all — the panel covers instead — and then this simply never runs. */
-      translate 560ms var(--pricing-ease);
+      box-shadow 250ms ease;
   }
 
   /* Dark mode — same glass, a slightly denser tint. There is no rim to
@@ -316,15 +297,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         max-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
         top 320ms cubic-bezier(0.4, 0, 0.2, 1),
         background-color 250ms ease,
-        box-shadow 250ms ease,
-        /* The pricing drawer pushes the whole page left, this bar included
-           (`--pricing-shift` in global.css). Named HERE because this list is
-           an Astro-scoped rule and therefore out-specifies the global one:
-           without the entry the header would arrive at its shifted position
-           in a single frame while the page beside it glides, which reads as
-           the header being broken rather than as a transition that was
-           simply not declared. */
-        translate 560ms var(--pricing-ease);
+        box-shadow 250ms ease;
     }
 
     /* Scrolled away from the top — the bar lifts off the edge and shrinks
@@ -344,6 +317,18 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       max-width: 56rem;
       background-color: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
       box-shadow: 0 8px 22px -16px rgba(5, 15, 104, 0.28);
+    }
+  }
+
+  /* SHORT viewports — a landscape phone, or a desktop window zoomed to 400 %
+     (1280×1024 → 320×256 CSS px). There a fixed bar is a permanent quarter of
+     the screen: measured on the live site, header + cookie notice + floating
+     button covered 94 % of a 320×256 viewport. The bar scrolls away with the
+     page instead (WCAG 1.4.10). The menu toggle is still the first thing on
+     the page, which is where a reader who zoomed that far starts anyway. */
+  @media (max-height: 30rem) {
+    .site-header {
+      position: absolute;
     }
   }
 
