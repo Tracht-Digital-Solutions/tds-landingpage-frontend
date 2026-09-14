@@ -1,0 +1,152 @@
+---
+/**
+ * The site's FAQ accordion: native `<details>` rows sharing one `name`, the
+ * first one open. Used by the home page's FAQ section and by the platform
+ * pages, so every question list on the site behaves the same way.
+ *
+ * The question is the `<summary>`, which browsers expose as a disclosure
+ * control with its expanded/collapsed state — the `aria-expanded` a hand-built
+ * accordion would have to keep in sync, for free and without JavaScript. The
+ * shared `name` makes it exclusive where supported; where it is not, several
+ * rows simply stay open.
+ *
+ * What it replaced, so nobody restores it: a desktop master–detail "tablist"
+ * (`ul[role=tablist]` with `li` children, axe-critical) plus a second, hidden
+ * copy of every question for phones.
+ *
+ * A collapsed answer is still in the document, which is what the FAQPage
+ * JSON-LD comparison — and any crawler that does not click — reads.
+ */
+interface Props {
+  items: readonly { q: string; a: string }[];
+  /** The `name` that groups the rows; unique per list on a page. */
+  name?: string;
+}
+
+const { items, name = "faq" } = Astro.props;
+---
+
+{items.map((item, i) => (
+  <details name={name} open={i === 0} class="faq-item" data-reveal>
+    <summary class="faq-summary">
+      <span class="faq-q">{item.q}</span>
+      <span aria-hidden="true" class="faq-chevron">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="9 6 15 12 9 18" />
+        </svg>
+      </span>
+    </summary>
+    <p class="faq-a">{item.a}</p>
+  </details>
+))}
+
+<style>
+  .faq-summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    border-radius: 6px;
+  }
+  .faq-summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-q {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    line-height: 1.375;
+    color: var(--color-black);
+    transition: color 200ms var(--tds-ease-out);
+  }
+  @media (min-width: 768px) {
+    .faq-q {
+      font-size: 1.25rem;
+    }
+  }
+
+  /* Open row: a filled summary + accent colour. The state never rests on
+     colour alone — the fill and the rotated chevron carry it with it. */
+  .faq-item[open] > .faq-summary {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  }
+  .faq-item[open] > .faq-summary .faq-q,
+  .faq-summary:hover .faq-q {
+    color: var(--color-accent);
+  }
+
+  .faq-chevron {
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+    color: var(--color-muted);
+    /* The rotation springs; the colour beside it eases, because a colour that
+       overshoots lands outside the palette. */
+    transition:
+      transform 320ms var(--lp-ease-bounce),
+      color 200ms var(--tds-ease-out);
+  }
+  .faq-item[open] > .faq-summary .faq-chevron {
+    color: var(--color-accent);
+    transform: rotate(90deg);
+  }
+
+  .faq-a {
+    margin: 0;
+    max-width: 44rem;
+    padding: 0.5rem 1rem 1.25rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--color-muted);
+  }
+
+  /* `::details-content` is the element the browser wraps the answer in, and
+     with `interpolate-size: allow-keywords` (set on :root in global.css) a
+     transition to `auto` height is animatable. Without either feature the
+     whole block is skipped and the row opens instantly. */
+  @supports selector(::details-content) {
+    .faq-item::details-content {
+      block-size: 0;
+      overflow: clip;
+      opacity: 0;
+      transition:
+        block-size 320ms var(--lp-ease-soft),
+        opacity 220ms var(--tds-ease-out),
+        content-visibility 320ms allow-discrete;
+      transition-behavior: allow-discrete;
+    }
+    .faq-item[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-chevron {
+      transition: none;
+    }
+    /* END STATE. The shared reduced-motion block clamps duration, which for a
+       discrete `content-visibility` step is not enough — without this an
+       opened row could sit at height 0. */
+    @supports selector(::details-content) {
+      .faq-item::details-content,
+      .faq-item[open]::details-content {
+        transition: none;
+      }
+      .faq-item[open]::details-content {
+        block-size: auto;
+        opacity: 1;
+      }
+    }
+  }
+</style>

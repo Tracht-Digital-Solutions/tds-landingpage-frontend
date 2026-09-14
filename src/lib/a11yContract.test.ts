@@ -70,21 +70,26 @@ describe("names come from text, not from labels on generic elements", () => {
 
 describe("the FAQ", () => {
   const faq = template(read("src/components/sections/FAQ.astro"));
+  // The accordion is shared with the platform pages since 2026-09-15.
+  const accordion = template(read("src/components/ui/FaqAccordion.astro"));
 
   it("is one native accordion", () => {
-    expect(faq).toMatch(/<details[^>]*name="faq"/);
-    expect(faq).toMatch(/<summary/);
+    expect(faq).toMatch(/<FaqAccordion[^>]*name="faq"/);
+    expect(accordion).toMatch(/<details[^>]*name=\{name\}/);
+    expect(accordion).toMatch(/<summary/);
   });
 
   it("carries no tab roles", () => {
     // A `ul[role=tablist]` with `li` children was reported CRITICAL
     // (aria-required-children / aria-required-parent) on every desktop view.
     expect(faq).not.toMatch(/role="tab(list|panel)?"/);
+    expect(accordion).not.toMatch(/role="tab(list|panel)?"/);
   });
 
   it("renders every question exactly once", () => {
     // The previous version kept a second, hidden copy for phones.
-    expect(faq.match(/content\.items\.map/g)?.length).toBe(1);
+    expect(faq.match(/<FaqAccordion/g)?.length).toBe(1);
+    expect(accordion.match(/items\.map/g)?.length).toBe(1);
   });
 });
 
