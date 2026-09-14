@@ -1,0 +1,137 @@
+---
+/**
+ * The opening band of a detail page — back link, headline, brandbar, lead and
+ * the page's primary action.
+ *
+ * Shared by the service pages (`services/ServiceDetailPage.astro`) and the
+ * platform pages (`platforms/PlatformDetailPage.astro`). The markup moved here
+ * verbatim from the service page, so the two page families have one definition
+ * of the band's geometry and decoration instead of two that drift.
+ *
+ * The default slot sits under the action: what a page adds to its opening,
+ * such as the "Stand" and author line.
+ */
+interface Props {
+  /** Where the back link goes — the services overview, or the parent service. */
+  backHref: string;
+  backLabel: string;
+  /** Accessible name of the navigation around the back link. */
+  navLabel: string;
+  title: string;
+  lead: string;
+  ctaHref: string;
+  ctaLabel: string;
+  /** Artwork for the band's ground; `null` renders none at all. */
+  image?: string | null;
+}
+
+const { backHref, backLabel, navLabel, title, lead, ctaHref, ctaLabel, image = null } = Astro.props;
+---
+
+<section
+  class="tds-wash tds-wash--calm relative overflow-hidden pt-36 pb-20 md:pt-44 md:pb-28"
+  aria-labelledby="service-title"
+>
+  <div class="tds-decor" aria-hidden="true">
+    {/* When artwork exists it becomes the band's ground; the constructed
+        geometry stays on top of it either way, so the page looks composed
+        with or without the file. `null` renders nothing at all — no broken
+        image, no empty box. See IMAGES.md for the open assets. */}
+    {image && (
+      <>
+        <img
+          src={image}
+          alt=""
+          aria-hidden="true"
+          fetchpriority="low"
+          decoding="async"
+          class="service-hero__photo absolute inset-0 h-full w-full object-cover"
+        />
+        <span
+          class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-paper)_20%,color-mix(in_srgb,var(--color-paper)_82%,transparent)_60%,color-mix(in_srgb,var(--color-paper)_58%,transparent)_100%)]"
+        ></span>
+      </>
+    )}
+    <span
+      class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
+      style="right: -8rem; bottom: -11rem; width: 29rem; height: 29rem; --tds-decor-shape-alpha: 0.13;"
+    ></span>
+    <span
+      class="tds-shape tds-shape--rect tds-shape--outline tds-shape--navy hidden lg:block"
+      style="right: 8%; top: 8rem; width: 12rem; height: 18rem; --tds-decor-shape-alpha: 0.2;"
+    ></span>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <nav aria-label={navLabel} class="mb-10">
+      <a
+        href={backHref}
+        class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors group [@media(pointer:coarse)]:min-h-11"
+      >
+        <svg
+          aria-hidden="true"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="transition-transform group-hover:-translate-x-0.5"
+        >
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        {backLabel}
+      </a>
+    </nav>
+
+    {/* No chapter number above the title. A numeral names a position in a
+        list the reader never saw; the brandbar under the headline is the
+        punctuation now. */}
+    <div class="max-w-4xl">
+      <h1
+        id="service-title"
+        class="display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[var(--color-black)] leading-[1.04] break-words mb-6"
+      >
+        {title}
+      </h1>
+      <span aria-hidden="true" class="tds-brandbar mb-8"></span>
+      <p class="lead max-w-3xl text-[var(--color-muted)] mb-9">
+        {lead}
+      </p>
+      <a href={ctaHref} class="btn btn-primary group">
+        {ctaLabel}
+        <svg
+          aria-hidden="true"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="transition-transform group-hover:translate-x-0.5"
+        >
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Hero band artwork — a ground, not an illustration. The headline sits
+     on top of it, so it stays quiet enough that the scrim beside it does
+     not have to fight for the text. */
+  .service-hero__photo {
+    opacity: 0.36;
+  }
+  :global(:root[data-theme="dark"]) .service-hero__photo {
+    opacity: 0.23;
+  }
+</style>

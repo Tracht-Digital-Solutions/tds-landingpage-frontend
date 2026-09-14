@@ -1,0 +1,82 @@
+---
+/**
+ * Two cards on sand: the starting points a reader recognises, and what is taken
+ * off their hands. Moved verbatim from `services/ServiceDetailPage.astro`.
+ *
+ * A responsibility may carry an `href`. The platform pages use that to turn the
+ * card into the page's table of contents — each offer links to its own section
+ * further down — while the service pages keep plain sentences.
+ */
+export interface DetailListItem {
+  text: string;
+  href?: string;
+}
+
+interface Props {
+  situationsTitle: string;
+  situations: readonly string[];
+  responsibilitiesTitle: string;
+  responsibilities: readonly (string | DetailListItem)[];
+}
+
+const { situationsTitle, situations, responsibilitiesTitle, responsibilities } = Astro.props;
+const items = responsibilities.map((item) => (typeof item === "string" ? { text: item } : item));
+---
+
+<div class="section-spacing tds-tone-sand">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-2 gap-5 md:gap-6">
+    <section
+      class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
+      aria-labelledby="service-situations-title"
+    >
+      <h2
+        id="service-situations-title"
+        class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+      >
+        {situationsTitle}
+      </h2>
+      <ul class="space-y-5">
+        {situations.map((item) => (
+          <li class="flex gap-4 text-[var(--color-muted)] leading-relaxed">
+            <span aria-hidden="true" class="text-[var(--color-accent)] mt-0.5">→</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section
+      class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
+      aria-labelledby="service-responsibilities-title"
+    >
+      <h2
+        id="service-responsibilities-title"
+        class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+      >
+        {responsibilitiesTitle}
+      </h2>
+      <ul class="space-y-5">
+        {items.map((item) => (
+          <li class="flex gap-4 text-[var(--color-black)] leading-relaxed">
+            <span
+              aria-hidden="true"
+              class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_20%,var(--lp-surface-card))] text-[var(--color-accent)] text-xs"
+            >
+              ✓
+            </span>
+            {item.href ? (
+              <a
+                href={item.href}
+                class="underline decoration-[color-mix(in_srgb,var(--color-accent)_40%,transparent)] underline-offset-4 hover:text-[var(--color-primary)] transition-colors"
+              >
+                {item.text}
+              </a>
+            ) : (
+              <span>{item.text}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</div>

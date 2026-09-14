@@ -1,18 +1,25 @@
 ---
+/**
+ * A service's detail page, composed from the shared detail bands in
+ * `components/detail/` — the same bands the platform pages use, so a service
+ * page and a platform page cannot drift apart in geometry.
+ */
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
-import Emphasis from "~/components/ui/Emphasis.astro";
 import WebsiteDemos from "~/components/sections/WebsiteDemos.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
-import CardActions from "~/components/ui/CardActions.astro";
-import FirstCall from "~/components/ui/FirstCall.astro";
-import type { CardAction } from "~/lib/cardActions";
+import DetailHero from "~/components/detail/DetailHero.astro";
+import DetailIntro from "~/components/detail/DetailIntro.astro";
+import DetailLists from "~/components/detail/DetailLists.astro";
+import DetailOutcomes from "~/components/detail/DetailOutcomes.astro";
+import DetailProcess from "~/components/detail/DetailProcess.astro";
+import DetailReferences from "~/components/detail/DetailReferences.astro";
+import DetailCta from "~/components/detail/DetailCta.astro";
 import { breadcrumbSchema } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
-import { getReferencePreviewsBySiteUrl } from "~/lib/referencePreviews";
 import { businessCardCopy } from "~/lib/businessCard";
 import {
   serviceHref,
@@ -37,58 +44,8 @@ const alternatePaths = {
   en: serviceHref(service, "en"),
 };
 const pricing = await getPricingContent(lang);
-// Keyed by site address: a rendered reference has no case id, by design.
-const previews = await getReferencePreviewsBySiteUrl();
 const serviceRate = getServiceRate(pricing, service.id);
-
-// UI chrome stays code-owned and localized; all editorial service and
-// reference content is resolved from the service's CMS block.
-const ui = lang === "de"
-  ? {
-      breadcrumb: "Brotkrümelnavigation",
-      referenceContext: "Kontext",
-      referenceResult: "Ergebnis",
-      referenceMetric: "Belegbare Kennzahl",
-      referencePreviewAlt: (title: string) => `Startseite der Webseite: ${title}`,
-      referenceArticle: "Mehr erfahren",
-      referenceSite: "Die Webseite ansehen",
-    }
-  : {
-      breadcrumb: "Breadcrumb",
-      referenceContext: "Context",
-      referenceResult: "Outcome",
-      referenceMetric: "Verifiable metric",
-      referencePreviewAlt: (title: string) => `Home page of the website: ${title}`,
-      referenceArticle: "Learn more",
-      referenceSite: "View the website",
-    };
-
-/**
- * The one destination a reference card on this page offers, or none.
- *
- * Same order as `ui/ReferenceCard.astro`: the journal article is the fuller
- * story and wins when there is one, otherwise the customer's own site. A case
- * with neither renders a bar with nothing in it rather than a dead button —
- * `ServiceReference` carries no service link here, because this IS that
- * service's page.
- */
-const referenceCta = (reference: {
-  title: string;
-  articleUrl?: string;
-  siteUrl?: string;
-}): CardAction | null =>
-  reference.articleUrl
-    ? { href: reference.articleUrl, label: ui.referenceArticle, detail: reference.title }
-    : reference.siteUrl
-      ? {
-          href: reference.siteUrl,
-          label: ui.referenceSite,
-          external: true,
-          // Hardcoded: the one named case today is a German-only site.
-          hreflang: "de",
-          detail: reference.title,
-        }
-      : null;
+const breadcrumbLabel = lang === "de" ? "Brotkrümelnavigation" : "Breadcrumb";
 
 // Every service carries a rate now — Complete IT was the one that did not,
 // and `getServiceRate` is total since it went. No conditional left to write.
@@ -146,357 +103,57 @@ const jsonLd = [
   <Header />
 
   <main id="main" class="bg-[var(--color-paper)]">
-    <section
-      class="tds-wash tds-wash--calm relative overflow-hidden pt-36 pb-20 md:pt-44 md:pb-28"
-      aria-labelledby="service-title"
-    >
-      <div class="tds-decor" aria-hidden="true">
-        {/* When artwork exists for this service it becomes the band's
-            ground; the constructed geometry stays on top of it either way,
-            so the page looks composed with or without the file. `null`
-            renders nothing at all — no broken image, no empty box. See
-            IMAGES.md for the open assets. */}
-        {service.image && (
-          <>
-            <img
-              src={service.image}
-              alt=""
-              aria-hidden="true"
-              fetchpriority="low"
-              decoding="async"
-              class="service-hero__photo absolute inset-0 h-full w-full object-cover"
-            />
-            <span
-              class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-paper)_20%,color-mix(in_srgb,var(--color-paper)_82%,transparent)_60%,color-mix(in_srgb,var(--color-paper)_58%,transparent)_100%)]"
-            ></span>
-          </>
-        )}
-        <span
-          class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
-          style="right: -8rem; bottom: -11rem; width: 29rem; height: 29rem; --tds-decor-shape-alpha: 0.13;"
-        ></span>
-        <span
-          class="tds-shape tds-shape--rect tds-shape--outline tds-shape--navy hidden lg:block"
-          style="right: 8%; top: 8rem; width: 12rem; height: 18rem; --tds-decor-shape-alpha: 0.2;"
-        ></span>
-      </div>
+    <DetailHero
+      backHref={servicesHref}
+      backLabel={content.label}
+      navLabel={breadcrumbLabel}
+      title={content.title}
+      lead={content.summary}
+      ctaHref={contactHref}
+      ctaLabel={content.ctaButton}
+      image={service.image}
+    />
 
-      <div class="relative max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
-        <nav aria-label={ui.breadcrumb} class="mb-10">
-          <a
-            href={servicesHref}
-            class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors group [@media(pointer:coarse)]:min-h-11"
-          >
-            <svg
-              aria-hidden="true"
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="transition-transform group-hover:-translate-x-0.5"
-            >
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            {content.label}
-          </a>
-        </nav>
+    <DetailIntro text={content.intro} />
 
-        {/* No chapter number above the title. `service.number` still orders
-            the catalog, but it is not a thing a visitor is told: a numeral
-            names a position in a list the reader never saw. The brandbar
-            under the headline is the punctuation now. */}
-        <div class="max-w-4xl">
-          <h1
-            id="service-title"
-            class="display text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[var(--color-black)] leading-[1.04] break-words mb-6"
-          >
-            {content.title}
-          </h1>
-          <span aria-hidden="true" class="tds-brandbar mb-8"></span>
-          <p class="lead max-w-3xl text-[var(--color-muted)] mb-9">
-            {content.summary}
-          </p>
-          <a href={contactHref} class="btn btn-primary group">
-            {content.ctaButton}
-            <svg
-              aria-hidden="true"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="transition-transform group-hover:translate-x-0.5"
-            >
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </section>
+    <DetailLists
+      situationsTitle={content.situationsTitle}
+      situations={content.situations}
+      responsibilitiesTitle={content.responsibilitiesTitle}
+      responsibilities={content.responsibilities}
+    />
 
-    <div class="max-w-5xl mx-auto px-6 md:px-8 lg:px-12 py-12 md:py-16">
-      <p class="font-[var(--font-display)] text-2xl md:text-3xl leading-snug text-[var(--color-black)]">
-        <Emphasis text={content.intro} />
-      </p>
-    </div>
+    <DetailOutcomes
+      outcomesTitle={content.outcomesTitle}
+      outcomes={content.outcomes}
+      boundariesTitle={content.boundariesTitle}
+      boundaries={content.boundaries}
+    />
 
-    <div class="section-spacing tds-tone-sand">
-      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-2 gap-5 md:gap-6">
-        <section
-          class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
-          aria-labelledby="service-situations-title"
-        >
-          <h2
-            id="service-situations-title"
-            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
-          >
-            {content.situationsTitle}
-          </h2>
-          <ul class="space-y-5">
-            {content.situations.map((item) => (
-              <li class="flex gap-4 text-[var(--color-muted)] leading-relaxed">
-                <span aria-hidden="true" class="text-[var(--color-accent)] mt-0.5">→</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section
-          class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
-          aria-labelledby="service-responsibilities-title"
-        >
-          <h2
-            id="service-responsibilities-title"
-            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
-          >
-            {content.responsibilitiesTitle}
-          </h2>
-          <ul class="space-y-5">
-            {content.responsibilities.map((item) => (
-              <li class="flex gap-4 text-[var(--color-black)] leading-relaxed">
-                <span
-                  aria-hidden="true"
-                  class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_20%,var(--lp-surface-card))] text-[var(--color-accent)] text-xs"
-                >
-                  ✓
-                </span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </div>
-
-    <div class="section-spacing">
-      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-2 gap-12 lg:gap-20">
-        <section aria-labelledby="service-outcomes-title">
-          <h2
-            id="service-outcomes-title"
-            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
-          >
-            {content.outcomesTitle}
-          </h2>
-          {/* Goals, not by-products. The heading is "Das erreichen Sie" and
-              each line is written as something the reader ends up with, so
-              the marker is a target rather than a bullet. Decorative — the
-              text carries the meaning. */}
-          <ul class="grid sm:grid-cols-2 lg:grid-cols-1 gap-4">
-            {content.outcomes.map((item) => (
-              <li
-                class="flex items-start gap-3 bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] px-5 py-4 text-[var(--color-black)] leading-snug"
-                data-reveal
-              >
-                <svg
-                  aria-hidden="true"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  class="mt-0.5 shrink-0 text-[var(--color-accent)]"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <circle cx="12" cy="12" r="4.5" />
-                  <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
-                </svg>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section aria-labelledby="service-boundaries-title">
-          <h2
-            id="service-boundaries-title"
-            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
-          >
-            {content.boundariesTitle}
-          </h2>
-          <ul class="space-y-6">
-            {content.boundaries.map((item) => (
-              <li class="flex gap-4 text-[var(--color-muted)] leading-relaxed">
-                <span aria-hidden="true" class="font-mono text-[var(--color-accent)]">—</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </div>
-
-    <div class="section-spacing tds-tone-sand">
-      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-[1.35fr_0.65fr] gap-6">
-        <section
-          class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
-          aria-labelledby="service-process-title"
-        >
-          <h2
-            id="service-process-title"
-            class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
-          >
-            {content.processTitle}
-          </h2>
-          {/* A STEPPER, not a two-column list. The steps are a sequence and
-              the old grid actively hid that: read left-to-right it went
-              1, 2 / 3, 4, and nothing connected one step to the next. The
-              markers now sit on a continuous line — stacked on a phone,
-              laid out along the row from `sm` up — so the order is the
-              first thing the eye gets. Still an `<ol>`; the order is the
-              content, not decoration. */}
-          <ol class="stepper">
-            {content.process.map((step, index) => (
-              <li class="stepper__step" data-reveal data-reveal-index={index}>
-                {index < content.process.length - 1 && (
-                  <span class="stepper__line" aria-hidden="true"></span>
-                )}
-                {/* A dot, not a numeral. The marker still has to exist — it
-                    is what the connector line starts and ends at, and it is
-                    what makes the row read as a sequence — but the step's
-                    position is already carried by the `<ol>` and by the line
-                    itself, so printing "01" only restated it. */}
-                <span aria-hidden="true" class="stepper__marker"></span>
-                <span class="stepper__text">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <aside class="tds-tone-navy relative overflow-hidden rounded-[6px] p-7 md:p-10">
-          <span
-            aria-hidden="true"
-            class="tds-shape tds-shape--quarter-bl tds-shape--coral"
-            style="top: -3rem; right: -3rem; width: 12rem; height: 12rem; --tds-decor-shape-alpha: 0.18;"
-          ></span>
-          <div class="relative">
-            <p class="eyebrow text-white/60 mb-5">{content.priceLabel}</p>
-            <p class="font-[var(--font-display)] text-xl md:text-2xl leading-snug text-white">
-              {content.priceText}
-            </p>
-          </div>
-        </aside>
-      </div>
-    </div>
+    <DetailProcess
+      processTitle={content.processTitle}
+      process={content.process}
+      priceLabel={content.priceLabel}
+      priceText={content.priceText}
+    />
 
     {content.references.length > 0 && (
-      <section
-        class="section-spacing"
-        aria-labelledby="service-references-title"
-      >
-        <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
-          <h2
-            id="service-references-title"
-            class="display text-4xl md:text-5xl text-[var(--color-black)] mb-5"
-          >
-            {content.referencesHeadline}
-          </h2>
-          <p class="text-[var(--color-muted)] max-w-2xl mb-12">
-            {content.referencesLabel}
-          </p>
-
-          {/* See References.astro: cards size to their own content, because
-              only some of them carry a preview band. */}
-          <div class="grid lg:grid-cols-2 items-start gap-5 md:gap-6">
-            {/* `relative` on the card is not decoration: the footer bar's call
-                to action stretches a `::after` over the whole card, and
-                without a positioned ancestor it would spread over the
-                section. */}
-            {content.references.map((reference) => (
-              <article class="reference-card relative bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] overflow-hidden flex flex-col">
-                {/* See References.astro: a committed screenshot, never an
-                    iframe. Keyed by the site address because a rendered
-                    reference carries no case id. */}
-                {reference.siteUrl && previews.get(reference.siteUrl) && (
-                  <div class="reference-card__shot">
-                    <img
-                      src={previews.get(reference.siteUrl)!.src}
-                      alt={ui.referencePreviewAlt(reference.title)}
-                      width={previews.get(reference.siteUrl)!.width}
-                      height={previews.get(reference.siteUrl)!.height}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                )}
-                <div class="flex flex-col flex-1 p-7 md:p-9">
-                <p class="eyebrow text-[var(--color-accent)] mb-3">
-                  <span class="sr-only">{ui.referenceContext}: </span>
-                  {reference.context}
-                </p>
-                <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-5">
-                  {reference.title}
-                </h3>
-                {/* Result only — the starting point and the approach belong to
-                    the journal article this links to. */}
-                <p class="text-[var(--color-black)] leading-relaxed">
-                  <span class="sr-only">{ui.referenceResult}: </span>
-                  {reference.result}
-                </p>
-                {reference.metric && (
-                  <p class="mt-6 font-[var(--font-display)] text-xl text-[var(--color-black)]">
-                    <span class="sr-only">{ui.referenceMetric}: </span>
-                    {reference.metric}
-                  </p>
-                )}
-
-                </div>
-
-                {/* The same footer bar as the shelf's cards, and it carries NO
-                    service link: this card is already on that service's page.
-                    The destination is present only when the committed case
-                    carries one — the CMS cannot put one here (see
-                    `ServiceReference.articleUrl` and `.siteUrl`). */}
-                <CardActions lang={lang} cta={referenceCta(reference)} />
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+      <DetailReferences
+        headline={content.referencesHeadline}
+        label={content.referencesLabel}
+        references={content.references}
+        lang={lang}
+      />
     )}
 
     {/* Demo websites belong to exactly one service. The home page shows them
-        to everyone; here they sit with the service they are evidence for,
-        which is where AGENTS.md says approved examples go. The component
-        renders nothing when no demo is available, so this is not a gate on an
-        empty section. */}
+        to everyone; here they sit with the service they are evidence for. The
+        component renders nothing when no demo is available. */}
     {service.id === "web-presence" && <WebsiteDemos variant="service" />}
 
-    {/* Same condition as the demos above, and for the same reason: a digital
-        business card IS web presence, and this is the page where a reader is
-        already asking what that includes. It is a single tile rather than a
-        section — the page has made its argument by here, and a second full
-        section with its own heading would repeat it. */}
+    {/* A digital business card IS web presence, and this is the page where a
+        reader is already asking what that includes. A single tile rather than
+        a section: the page has made its argument by here. */}
     {service.id === "web-presence" && (
       <section class="section-spacing" aria-labelledby="service-business-card-title">
         <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
@@ -510,52 +167,12 @@ const jsonLd = [
       </section>
     )}
 
-    <div class="pb-16 md:pb-24 px-6 md:px-8 lg:px-12">
-      <section
-        class="tds-tone-navy relative overflow-hidden max-w-7xl mx-auto rounded-[6px] px-7 py-12 md:px-12 md:py-16 text-center"
-        aria-labelledby="service-cta-title"
-      >
-        <span
-          aria-hidden="true"
-          class="tds-shape tds-shape--quarter-tr tds-shape--coral"
-          style="left: -5rem; bottom: -6rem; width: 18rem; height: 18rem; --tds-decor-shape-alpha: 0.18;"
-        ></span>
-        <div class="relative max-w-3xl mx-auto">
-          <h2 id="service-cta-title" class="display text-3xl md:text-5xl text-white mb-5">
-            {content.ctaTitle}
-          </h2>
-          <p class="text-white/75 leading-relaxed max-w-2xl mx-auto mb-8">
-            {content.ctaText}
-          </p>
-          {/* What the first conversation is, directly above the button that
-              asks for one — goal, preparation, outcome, cost. */}
-          <div class="mb-8">
-            <FirstCall variant="service" />
-          </div>
-          <a
-            href={contactHref}
-            class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
-          >
-            {content.ctaButton}
-            <svg
-              aria-hidden="true"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="transition-transform group-hover:translate-x-0.5"
-            >
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
-        </div>
-      </section>
-    </div>
+    <DetailCta
+      title={content.ctaTitle}
+      text={content.ctaText}
+      buttonLabel={content.ctaButton}
+      href={contactHref}
+    />
   </main>
 
   <Footer />
@@ -567,139 +184,5 @@ const jsonLd = [
      than running the full 7xl container. */
   .business-card-slot {
     max-width: 24rem;
-  }
-
-  /* Same treatment as the home page's reference cards: the screenshot is
-     content at full strength, and the ratio is reserved so two cards in a row
-     keep their headings aligned while the images arrive. */
-  .reference-card__shot {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
-    background: var(--color-soft);
-    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-  }
-  .reference-card__shot img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-  }
-
-  /* Hero band artwork — a ground, not an illustration. The headline sits
-     on top of it, so it stays quiet enough that the scrim beside it does
-     not have to fight for the text. */
-  .service-hero__photo {
-    opacity: 0.36;
-  }
-  :global(:root[data-theme="dark"]) .service-hero__photo {
-    opacity: 0.23;
-  }
-
-  /* ── Stepper ──────────────────────────────────────────────────────
-     Stacked on a phone, laid along the row from 40rem up. Both layouts
-     are the same three parts — a marker, its text, and a connector to the
-     next step — so only the geometry is restated, never the markup. */
-  .stepper {
-    /* Every offset below is derived from the marker rather than restated as
-       a magic number, because the line has to meet it in four places (two
-       orientations × the hidden state). Resizing the dot used to mean
-       editing all four by hand and finding the one that was missed in the
-       browser. */
-    --stepper-marker: 0.875rem;
-
-    display: grid;
-    gap: 1.75rem;
-  }
-
-  .stepper__step {
-    position: relative;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-    gap: 0.875rem;
-  }
-
-  .stepper__marker {
-    position: relative;
-    z-index: 1;
-    /* Sat above the text's first line once the numeral left; nudged down so
-       the dot reads as centred on it. */
-    margin-top: 0.35rem;
-    width: var(--stepper-marker);
-    height: var(--stepper-marker);
-    border-radius: 9999px;
-    background: var(--color-accent);
-  }
-
-  .stepper__text {
-    color: var(--color-black);
-    line-height: 1.55;
-  }
-
-  /* The connector is its own element rather than a `::before` on the step,
-     because it carries a transform of its own (the draw-in below) and the
-     two orientations need different origins. Sharing one pseudo-element
-     with the step's own state would mean composing those transforms by
-     hand in four places. */
-  .stepper__line {
-    position: absolute;
-    left: calc(var(--stepper-marker) / 2);
-    top: calc(var(--stepper-marker) + 0.35rem);
-    bottom: -1.75rem;
-    width: 2px;
-    transform: translateX(-1px);
-    background: color-mix(in srgb, var(--color-accent) 22%, transparent);
-    transform-origin: top;
-    transition: transform 480ms var(--tds-ease-out) var(--lp-reveal-delay, 0ms);
-  }
-
-  /* Drawn once, as its step arrives. Hooked onto the same `[data-revealed]`
-     flag `src/lib/reveal.ts` writes, so the line and the step it belongs to
-     cannot get out of step with each other. The hidden state is gated
-     behind `[data-reveal-active]`, which only that script sets — with no
-     JavaScript, or under reduced motion, every line is simply drawn. */
-  :global(html[data-reveal-active]) .stepper__step:not([data-revealed]) .stepper__line {
-    transform: translateX(-1px) scaleY(0);
-  }
-
-  @media (min-width: 40rem) {
-    .stepper {
-      grid-auto-flow: column;
-      grid-auto-columns: minmax(0, 1fr);
-      gap: 1.25rem;
-    }
-    .stepper__step {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.875rem;
-    }
-    .stepper__marker {
-      /* Its own row now, not beside the text — nothing to optically centre
-         against, so the nudge comes back off. */
-      margin-top: 0;
-    }
-    .stepper__text {
-      font-size: 0.9375rem;
-    }
-    .stepper__line {
-      left: var(--stepper-marker);
-      right: -1.25rem;
-      top: calc(var(--stepper-marker) / 2);
-      bottom: auto;
-      width: auto;
-      height: 2px;
-      transform: translateY(-1px);
-      transform-origin: left;
-    }
-    :global(html[data-reveal-active]) .stepper__step:not([data-revealed]) .stepper__line {
-      transform: translateY(-1px) scaleX(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .stepper__line {
-      transition: none;
-    }
   }
 </style>

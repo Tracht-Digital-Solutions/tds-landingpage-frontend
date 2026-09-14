@@ -1,0 +1,152 @@
+---
+/**
+ * Published reference cases on a detail page. Moved verbatim from
+ * `services/ServiceDetailPage.astro`; the platform pages render the same cards
+ * for the cases that name their platform.
+ *
+ * Every destination on a card is code-owned (`lib/references.ts`): the journal
+ * article wins when there is one, otherwise the customer's own site, otherwise
+ * the bar stays empty rather than showing a dead button.
+ */
+import CardActions from "~/components/ui/CardActions.astro";
+import type { CardAction } from "~/lib/cardActions";
+import type { Lang } from "~/lib/i18n";
+import { getReferencePreviewsBySiteUrl } from "~/lib/referencePreviews";
+import type { ServiceReference } from "~/lib/services";
+
+interface Props {
+  headline: string;
+  label: string;
+  references: readonly ServiceReference[];
+  lang: Lang;
+}
+
+const { headline, label, references, lang } = Astro.props;
+
+// Keyed by site address: a rendered reference has no case id, by design.
+const previews = await getReferencePreviewsBySiteUrl();
+
+const ui =
+  lang === "de"
+    ? {
+        referenceContext: "Kontext",
+        referenceResult: "Ergebnis",
+        referenceMetric: "Belegbare Kennzahl",
+        referencePreviewAlt: (title: string) => `Startseite der Webseite: ${title}`,
+        referenceArticle: "Mehr erfahren",
+        referenceSite: "Die Webseite ansehen",
+      }
+    : {
+        referenceContext: "Context",
+        referenceResult: "Outcome",
+        referenceMetric: "Verifiable metric",
+        referencePreviewAlt: (title: string) => `Home page of the website: ${title}`,
+        referenceArticle: "Learn more",
+        referenceSite: "View the website",
+      };
+
+const referenceCta = (reference: {
+  title: string;
+  articleUrl?: string;
+  siteUrl?: string;
+}): CardAction | null =>
+  reference.articleUrl
+    ? { href: reference.articleUrl, label: ui.referenceArticle, detail: reference.title }
+    : reference.siteUrl
+      ? {
+          href: reference.siteUrl,
+          label: ui.referenceSite,
+          external: true,
+          // Hardcoded: the one named case today is a German-only site.
+          hreflang: "de",
+          detail: reference.title,
+        }
+      : null;
+---
+
+<section
+  class="section-spacing"
+  aria-labelledby="service-references-title"
+>
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <h2
+      id="service-references-title"
+      class="display text-4xl md:text-5xl text-[var(--color-black)] mb-5"
+    >
+      {headline}
+    </h2>
+    <p class="text-[var(--color-muted)] max-w-2xl mb-12">
+      {label}
+    </p>
+
+    {/* Cards size to their own content, because only some of them carry a
+        preview band. */}
+    <div class="grid lg:grid-cols-2 items-start gap-5 md:gap-6">
+      {/* `relative` on the card is not decoration: the footer bar's call to
+          action stretches a `::after` over the whole card. */}
+      {references.map((reference) => (
+        <article class="reference-card relative bg-[color-mix(in_srgb,var(--color-accent-pink)_12%,var(--color-paper))] rounded-[6px] overflow-hidden flex flex-col">
+          {/* A committed screenshot, never an iframe. */}
+          {reference.siteUrl && previews.get(reference.siteUrl) && (
+            <div class="reference-card__shot">
+              <img
+                src={previews.get(reference.siteUrl)!.src}
+                alt={ui.referencePreviewAlt(reference.title)}
+                width={previews.get(reference.siteUrl)!.width}
+                height={previews.get(reference.siteUrl)!.height}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          )}
+          <div class="flex flex-col flex-1 p-7 md:p-9">
+          <p class="eyebrow text-[var(--color-accent)] mb-3">
+            <span class="sr-only">{ui.referenceContext}: </span>
+            {reference.context}
+          </p>
+          <h3 class="display text-2xl md:text-3xl text-[var(--color-black)] mb-5">
+            {reference.title}
+          </h3>
+          {/* Result only — the starting point and the approach belong to the
+              journal article this links to. */}
+          <p class="text-[var(--color-black)] leading-relaxed">
+            <span class="sr-only">{ui.referenceResult}: </span>
+            {reference.result}
+          </p>
+          {reference.metric && (
+            <p class="mt-6 font-[var(--font-display)] text-xl text-[var(--color-black)]">
+              <span class="sr-only">{ui.referenceMetric}: </span>
+              {reference.metric}
+            </p>
+          )}
+
+          </div>
+
+          {/* The same footer bar as the shelf's cards, with NO service link:
+              the card already sits on the page it would point to. */}
+          <CardActions lang={lang} cta={referenceCta(reference)} />
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Same treatment as the home page's reference cards: the screenshot is
+     content at full strength, and the ratio is reserved so two cards in a row
+     keep their headings aligned while the images arrive. */
+  .reference-card__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-soft);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .reference-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+</style>

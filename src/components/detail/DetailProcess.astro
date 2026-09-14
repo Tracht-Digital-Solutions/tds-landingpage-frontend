@@ -1,0 +1,174 @@
+---
+/**
+ * The process stepper beside the navy price box. Moved verbatim from
+ * `services/ServiceDetailPage.astro`, stepper styles included.
+ *
+ * `priceLink` is for the platform pages, which state no amount of their own
+ * (decided 2026-09-15) and point at the published rates instead.
+ */
+interface Props {
+  processTitle: string;
+  process: readonly string[];
+  priceLabel: string;
+  priceText: string;
+  priceLink?: { href: string; label: string } | null;
+}
+
+const { processTitle, process, priceLabel, priceText, priceLink = null } = Astro.props;
+---
+
+<div class="section-spacing tds-tone-sand">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid lg:grid-cols-[1.35fr_0.65fr] gap-6">
+    <section
+      class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
+      aria-labelledby="service-process-title"
+    >
+      <h2
+        id="service-process-title"
+        class="display text-3xl md:text-4xl text-[var(--color-black)] mb-8"
+      >
+        {processTitle}
+      </h2>
+      {/* A STEPPER, not a two-column list: the steps are a sequence, stacked on
+          a phone and laid out along the row from `sm` up, joined by one line.
+          Still an `<ol>`; the order is the content, not decoration. */}
+      <ol class="stepper">
+        {process.map((step, index) => (
+          <li class="stepper__step" data-reveal data-reveal-index={index}>
+            {index < process.length - 1 && (
+              <span class="stepper__line" aria-hidden="true"></span>
+            )}
+            {/* A dot, not a numeral — the position is carried by the `<ol>` and
+                by the line. */}
+            <span aria-hidden="true" class="stepper__marker"></span>
+            <span class="stepper__text">{step}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <aside class="tds-tone-navy relative overflow-hidden rounded-[6px] p-7 md:p-10">
+      <span
+        aria-hidden="true"
+        class="tds-shape tds-shape--quarter-bl tds-shape--coral"
+        style="top: -3rem; right: -3rem; width: 12rem; height: 12rem; --tds-decor-shape-alpha: 0.18;"
+      ></span>
+      <div class="relative">
+        <p class="eyebrow text-white/60 mb-5">{priceLabel}</p>
+        <p class="font-[var(--font-display)] text-xl md:text-2xl leading-snug text-white">
+          {priceText}
+        </p>
+        {priceLink && (
+          <a
+            href={priceLink.href}
+            class="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white underline underline-offset-4 decoration-white/40 hover:decoration-white [@media(pointer:coarse)]:min-h-11"
+          >
+            {priceLink.label}
+            <span aria-hidden="true">→</span>
+          </a>
+        )}
+      </div>
+    </aside>
+  </div>
+</div>
+
+<style>
+  /* ── Stepper ──────────────────────────────────────────────────────
+     Stacked on a phone, laid along the row from 40rem up. Both layouts
+     are the same three parts — a marker, its text, and a connector to the
+     next step — so only the geometry is restated, never the markup. */
+  .stepper {
+    /* Every offset below is derived from the marker rather than restated as
+       a magic number, because the line has to meet it in four places (two
+       orientations × the hidden state). */
+    --stepper-marker: 0.875rem;
+
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .stepper__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.875rem;
+  }
+
+  .stepper__marker {
+    position: relative;
+    z-index: 1;
+    /* Sat above the text's first line once the numeral left; nudged down so
+       the dot reads as centred on it. */
+    margin-top: 0.35rem;
+    width: var(--stepper-marker);
+    height: var(--stepper-marker);
+    border-radius: 9999px;
+    background: var(--color-accent);
+  }
+
+  .stepper__text {
+    color: var(--color-black);
+    line-height: 1.55;
+  }
+
+  /* The connector is its own element rather than a `::before` on the step,
+     because it carries a transform of its own (the draw-in below) and the
+     two orientations need different origins. */
+  .stepper__line {
+    position: absolute;
+    left: calc(var(--stepper-marker) / 2);
+    top: calc(var(--stepper-marker) + 0.35rem);
+    bottom: -1.75rem;
+    width: 2px;
+    transform: translateX(-1px);
+    background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+    transform-origin: top;
+    transition: transform 480ms var(--tds-ease-out) var(--lp-reveal-delay, 0ms);
+  }
+
+  /* Drawn once, as its step arrives — hooked onto the `[data-revealed]` flag
+     `src/lib/reveal.ts` writes. The hidden state is gated behind
+     `[data-reveal-active]`, which only that script sets: with no JavaScript,
+     or under reduced motion, every line is simply drawn. */
+  :global(html[data-reveal-active]) .stepper__step:not([data-revealed]) .stepper__line {
+    transform: translateX(-1px) scaleY(0);
+  }
+
+  @media (min-width: 40rem) {
+    .stepper {
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+    .stepper__step {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.875rem;
+    }
+    .stepper__marker {
+      margin-top: 0;
+    }
+    .stepper__text {
+      font-size: 0.9375rem;
+    }
+    .stepper__line {
+      left: var(--stepper-marker);
+      right: -1.25rem;
+      top: calc(var(--stepper-marker) / 2);
+      bottom: auto;
+      width: auto;
+      height: 2px;
+      transform: translateY(-1px);
+      transform-origin: left;
+    }
+    :global(html[data-reveal-active]) .stepper__step:not([data-revealed]) .stepper__line {
+      transform: translateY(-1px) scaleX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stepper__line {
+      transition: none;
+    }
+  }
+</style>
