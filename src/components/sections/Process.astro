@@ -16,36 +16,20 @@
  * The home page's process is the one place on the site that still numbers its
  * steps, deliberately (see AGENTS.md).
  */
-import { tFor, resolveLang } from "~/lib/i18n";
+import { resolveLang } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ProcessStep from "~/components/ui/ProcessStep.astro";
 import FirstCall from "~/components/ui/FirstCall.astro";
-import { getProcessDetails } from "~/lib/processDetails";
+import { getProcessContent } from "~/lib/processContent";
 import { cmsFor } from "~/lib/cms";
 
-const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
-const pd = getProcessDetails(lang);
 
-// Default = the shared steps merged with the local detail copy. An
-// admin-edited "process" block overrides this (cmsFor); the shape stays
-// identical so the rendering below is source-agnostic.
-const defaultProcess = {
-  label: t.process.label,
-  headline: t.process.headline,
-  headlineAccent: t.process.headlineAccent,
-  body: t.process.body,
-  steps: t.process.steps.map((s) => ({
-    number: s.number,
-    title: s.title,
-    duration: s.duration,
-    description: s.description,
-    detail: pd[s.number]?.detail ?? "",
-    outcome: pd[s.number]?.outcome ?? "",
-  })),
-};
-
-const process = await cmsFor("process", lang, defaultProcess);
+// Default = the local process copy (`lib/processContent.ts`; it came from
+// tds-shared's `translations.process` until the site switched to "du"). An
+// admin-edited "process" block overrides it (cmsFor); the shape is unchanged,
+// so the rendering below is source-agnostic.
+const process = await cmsFor("process", lang, getProcessContent(lang));
 const steps = process.steps;
 ---
 

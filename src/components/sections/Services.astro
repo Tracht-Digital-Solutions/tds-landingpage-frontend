@@ -2,6 +2,7 @@
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
+import { platformDefinitions, platformHref } from "~/lib/platforms";
 import {
   resolveServiceContent,
   serviceDefinitions,
@@ -25,6 +26,7 @@ const services = await Promise.all(
     content: await resolveServiceContent(definition, lang),
   })),
 );
+const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your system:";
 ---
 
 {/* Sand — the quiet alternate ground, with the single-field variant of
@@ -47,15 +49,19 @@ const services = await Promise.all(
       <Emphasis text={servicesContent.intro} />
     </p>
     {/* For the visitor who reads four tiles and still cannot say which one is
-        theirs: the finder right below asks instead. */}
+        theirs — or what it costs: the assistant asks instead. It opens as a
+        dialog (`components/ServiceAssistant.astro`), which also reveals this
+        button once it can open anything. */}
     <p class="mb-10 text-center md:text-left">
-      <a
-        href="#leistungsfinder"
-        class="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors"
+      <button
+        type="button"
+        data-assistant-open
+        hidden
+        class="inline-flex min-h-11 items-center gap-2 text-left text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer"
       >
         {FINDER_SECTION[lang].servicesLink}
-        <span aria-hidden="true">↓</span>
-      </a>
+        <span aria-hidden="true">→</span>
+      </button>
     </p>
 
     {/* One surface divided into four, not four cards floating on sand.
@@ -87,6 +93,24 @@ const services = await Promise.all(
           lang={lang}
         />
       ))}
+    </div>
+
+    {/* The systems people search for by name, one chip each, in the chips'
+        own style — the way from "Webauftritt" to "my WooCommerce shop". */}
+    <div class="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-3">
+      <p class="text-sm font-medium text-[var(--color-muted)]">{systemsLabel}</p>
+      <ul class="flex flex-wrap justify-center md:justify-start gap-2">
+        {platformDefinitions.map((platform) => (
+          <li>
+            <a
+              href={platformHref(platform, lang)}
+              class="inline-flex items-center px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))] transition-colors [@media(pointer:coarse)]:min-h-11"
+            >
+              {platform.name}
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
 </section>

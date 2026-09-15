@@ -2,11 +2,14 @@
 import { tFor, resolveLang } from "~/lib/i18n";
 import { fetchTopics, fetchPostsBySlug, type ContentPost } from "~/lib/content";
 import { fetchBlocks } from "~/lib/cms";
+import { getHomeContent } from "~/lib/homeContent";
 import BlogPostCard from "~/components/ui/BlogPostCard.astro";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
+// The heading is this page's own words (the blog shares `t.blog.headline`).
+const heading = getHomeContent(lang).journalHeading;
 
 /**
  * Build-time fetch of the posts shown in the Journal row. The admin can
@@ -80,8 +83,8 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
         id="journal-heading"
         class="display text-4xl md:text-5xl lg:text-6xl text-[var(--color-black)]"
       >
-        {t.blog.headline}{" "}
-        <AccentLetters text={t.blog.headlineAccent} />
+        {heading.headline}{" "}
+        <AccentLetters text={heading.headlineAccent} />
       </h2>
       <a
         href="https://blog.tracht-digital.de"

@@ -20,10 +20,13 @@ interface Props {
   services: FinderService[];
   /** The contact section on the home page of this language. */
   contactHref: string;
+  /** The pricing section, where "how your price comes about" is explained. */
+  pricesHref: string;
 }
 
 /**
- * Leistungs-Finder — see `lib/serviceFinder.ts` for what it asks and why.
+ * Leistungsassistent — see `lib/serviceFinder.ts` for what it asks and why, and
+ * `components/ServiceAssistant.astro` for the dialog it lives in.
  *
  * ### Built as a form, not as a quiz widget
  *
@@ -36,9 +39,10 @@ interface Props {
  *   pull focus out of the page.
  * - A missing answer is said in words (`role="alert"`, tied to the group), not
  *   by a disabled button nobody can explain.
- * - It sends nothing: the result's link hands a draft to the contact form.
+ * - It sends nothing: the result's link hands a draft to the contact form, and
+ *   the dialog closes on that hand-off.
  */
-export default function ServiceFinder({ lang = "de", services, contactHref }: Props) {
+export default function ServiceFinder({ lang = "de", services, contactHref, pricesHref }: Props) {
   const copy = FINDER_COPY[lang];
   const uid = useId();
   // 0 topics · 1 starting points · 2 stage · STEP_COUNT result
@@ -132,6 +136,10 @@ export default function ServiceFinder({ lang = "de", services, contactHref }: Pr
                 <p className="finder__rank">{index === 0 ? copy.rankBest : copy.rankAlso}</p>
                 <h4 className="finder__match-title">{service.title}</h4>
                 <p className="finder__summary">{service.summary}</p>
+                <p className="finder__rate">
+                  <span className="finder__rate-label">{copy.rateLabel}</span>{" "}
+                  <span className="finder__rate-value">{copy.rateValue(service.rate)}</span>
+                </p>
                 {match.reasons.length > 0 && (
                   <>
                     <p className="finder__why-label">{copy.whyLabel}</p>
@@ -147,6 +155,18 @@ export default function ServiceFinder({ lang = "de", services, contactHref }: Pr
                     </ul>
                   </>
                 )}
+                {service.platforms && service.platforms.length > 0 && (
+                  <>
+                    <p className="finder__why-label">{copy.platformsLabel}</p>
+                    <ul className="finder__platforms">
+                      {service.platforms.map((platform) => (
+                        <li key={platform.href}>
+                          <a href={platform.href}>{platform.label}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
                 <a className="finder__detail" href={service.href}>
                   {copy.detailLink}
                   <span aria-hidden="true">→</span>
@@ -155,7 +175,12 @@ export default function ServiceFinder({ lang = "de", services, contactHref }: Pr
             );
           })}
         </ol>
-        <p className="finder__note">{copy.note}</p>
+        <p className="finder__note">
+          {copy.note}{" "}
+          <a className="finder__price-link" href={pricesHref}>
+            {copy.priceLink}
+          </a>
+        </p>
         <div className="finder__actions">
           <a className="finder__cta" href={contactHref} onClick={handOff}>
             {copy.cta}

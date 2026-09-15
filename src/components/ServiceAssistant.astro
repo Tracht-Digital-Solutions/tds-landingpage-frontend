@@ -1,0 +1,608 @@
+---
+/**
+ * Leistungsassistent — the service finder behind a button, in ONE native
+ * `<dialog>` on the home page.
+ *
+ * ### Why a button and a dialog
+ *
+ * Decided 2026-09-15: the assistant is for visitors who do not know what they
+ * need or what it costs — not a section everybody has to scroll past. It waits
+ * behind a button in the services section and one in the pricing section
+ * (`[data-assistant-open]`), and `/#leistungsassistent` (or the old
+ * `/#leistungsfinder`) opens it directly.
+ *
+ * The dialog is the platform's, like `ui/PreviewLightbox.astro`: Escape, the
+ * focus trap, the inert page behind it and the backdrop come for free. What is
+ * written here is what the platform does not do — giving focus back to the
+ * button that opened it, closing on a backdrop click, and closing WITHOUT
+ * giving focus back when the visitor follows a link to a section of this page
+ * (the hand-off to the contact form, "So entsteht dein Preis"): focusing the
+ * opener there would scroll the page back up to it.
+ *
+ * ### Hydration
+ *
+ * `client:idle`, not `client:visible`. A closed dialog is never "visible", and
+ * the server-rendered first question is a real `<form>`: a click on "Weiter"
+ * before hydration would submit it natively and reload the page. Idle
+ * hydration has finished long before anybody finds the button.
+ *
+ * The buttons ship `hidden` and are revealed by the script below once
+ * `showModal` exists — a button that cannot open anything is never shown.
+ *
+ * The island renders its own markup, which carries no Astro scope — so every
+ * `.finder` rule below is `:global`, anchored on the `.finder` root.
+ */
+import { localizePath, resolveLang } from "~/lib/i18n";
+import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import { platformDefinitions, platformHref } from "~/lib/platforms";
+import { resolveServiceContent, serviceDefinitions, serviceHref } from "~/lib/services";
+import { FINDER_SECTION } from "~/lib/serviceFinder";
+import ServiceFinderIsland from "~/components/islands/ServiceFinder";
+
+const lang = resolveLang(Astro.currentLocale);
+const section = FINDER_SECTION[lang];
+const pricing = await getPricingContent(lang);
+const services = await Promise.all(
+  serviceDefinitions.map(async (definition) => {
+    const content = await resolveServiceContent(definition, lang);
+    return {
+      id: definition.id,
+      title: content.title,
+      summary: content.summary,
+      href: serviceHref(definition, lang),
+      situations: content.situations.slice(0, 4),
+      rate: getServiceRate(pricing, definition.id),
+      ...(definition.id === "web-presence"
+        ? {
+            platforms: platformDefinitions.map((platform) => ({
+              label: platform.name,
+              href: platformHref(platform, lang),
+            })),
+          }
+        : {}),
+    };
+  }),
+);
+const home = localizePath("/", lang);
+const contactHref = `${home}#contact`;
+const pricesHref = `${home}#preise`;
+---
+
+<dialog
+  id="leistungsassistent"
+  class="assistant"
+  data-assistant-dialog
+  data-lenis-prevent
+  aria-labelledby="assistant-title"
+>
+  <div class="assistant__frame">
+    <div class="assistant__head">
+      <div>
+        <h2 id="assistant-title" class="assistant__title">{section.title}</h2>
+        <p class="assistant__intro">{section.intro}</p>
+      </div>
+      <button type="button" class="assistant__close" data-assistant-close>
+        <span class="sr-only">{section.close}</span>
+        <svg
+          aria-hidden="true"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <ServiceFinderIsland
+      client:idle
+      lang={lang}
+      services={services}
+      contactHref={contactHref}
+      pricesHref={pricesHref}
+    />
+  </div>
+</dialog>
+
+<style>
+  /* The triggers carry a display utility of their own, which beats the UA's
+     `[hidden]` rule — so hidden has to be said again, unlayered. */
+  :global([data-assistant-open][hidden]) {
+    display: none;
+  }
+
+  .assistant {
+    width: min(96vw, 56rem);
+    max-width: none;
+    max-height: 92vh;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-paper);
+    color: var(--color-black);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .assistant::backdrop {
+    /* Same wash as the preview lightbox: a fixed dark film reads as modal in
+       both themes. */
+    background: rgb(8 10 24 / 0.72);
+  }
+  .assistant__frame {
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+  .assistant__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .assistant__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    line-height: 1.2;
+    color: var(--color-black);
+  }
+  .assistant__intro {
+    margin: 0.5rem 0 0;
+    max-width: 40rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  .assistant__close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 100px;
+    background: var(--color-soft);
+    color: var(--color-black);
+    cursor: pointer;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .assistant__close:hover {
+    background: var(--color-card);
+  }
+  .assistant__close:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Opening motion only — see the preview lightbox for why a modal never fades out. */
+  @media (prefers-reduced-motion: no-preference) {
+    .assistant[open] {
+      animation: assistantIn 180ms var(--tds-ease-out);
+    }
+    .assistant[open]::backdrop {
+      animation: assistantBackdropIn 180ms var(--tds-ease-out);
+    }
+  }
+  @keyframes assistantIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes assistantBackdropIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  :global(.finder) {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border-radius: 6px;
+    background: var(--lp-surface-card, var(--color-card));
+  }
+
+  /* Progress: the words carry it; the bar only repeats it for the eye. */
+  :global(.finder__progress) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 1rem;
+    font: 500 0.75rem/1.2 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  :global(.finder__bar) {
+    flex: 1;
+    max-width: 10rem;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--color-line);
+  }
+  :global(.finder__bar i) {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent);
+  }
+
+  :global(.finder__fieldset) {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  /* Takes focus on a step change (tabIndex -1): a target for the screen
+     reader and the scroll, not a keyboard stop, so no ring. */
+  :global(.finder__question) {
+    padding: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+    line-height: 1.2;
+    color: var(--color-black);
+    outline: none;
+    text-wrap: balance;
+  }
+  :global(.finder__help) {
+    margin: 0.35rem 0 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+  }
+
+  :global(.finder__options) {
+    display: grid;
+    gap: 0.625rem;
+  }
+  @media (min-width: 40rem) {
+    :global(.finder__options) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  :global(.finder__option) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-paper);
+    cursor: pointer;
+    transition:
+      border-color 150ms var(--tds-ease-out),
+      background-color 150ms var(--tds-ease-out);
+  }
+  :global(.finder__option:hover) {
+    border-color: var(--color-primary);
+  }
+  :global(.finder__option:has(:checked)) {
+    border-color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 7%, var(--color-paper));
+  }
+  /* The ring goes around the whole answer, the control itself draws none. */
+  :global(.finder__option:has(:focus-visible)) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  :global(.finder__input) {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0.15rem 0 0;
+    accent-color: var(--color-primary);
+  }
+  :global(.finder__input:focus-visible) {
+    outline: none;
+  }
+  :global(.finder__option-body) {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  :global(.finder__option-label) {
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-black);
+  }
+  :global(.finder__option-hint) {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+
+  :global(.finder__hint) {
+    margin: 1rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--tds-eyebrow-color, var(--color-accent));
+  }
+
+  :global(.finder__nav),
+  :global(.finder__actions) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  :global(.finder__nav) {
+    justify-content: flex-end;
+  }
+  :global(.finder__cta) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0.75rem 1.5rem;
+    border: 0;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: var(--color-surface-navy);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  :global(.finder__cta:hover) {
+    background: var(--color-surface-accent);
+  }
+  :global(.finder__secondary) {
+    min-height: 3rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: var(--tds-radius-pill, 100px);
+    background: transparent;
+    color: var(--color-black);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  :global(.finder__secondary:hover) {
+    border-color: var(--color-primary);
+  }
+
+  :global(.finder__result-title) {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    line-height: 1.2;
+    color: var(--color-black);
+    outline: none;
+  }
+  :global(.finder__matches) {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Side by side where there is room: a result is compared, not read top to
+     bottom. */
+  @media (min-width: 48rem) {
+    :global(.finder__matches) {
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    }
+  }
+  :global(.finder__match) {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-paper);
+  }
+  :global(.finder__match:first-child) {
+    border-color: var(--color-primary);
+  }
+  :global(.finder__rank) {
+    margin: 0 0 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tds-eyebrow-color, var(--color-accent));
+  }
+  :global(.finder__match-title) {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.25;
+    color: var(--color-black);
+  }
+  :global(.finder__summary) {
+    max-width: 65ch;
+    margin: 0 0 0.75rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  /* The rate is the answer to "what does it cost?" — set apart from the
+     summary, in the price list's own colour. */
+  :global(.finder__rate) {
+    margin: 0 0 0.875rem;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--color-black);
+  }
+  :global(.finder__rate-label) {
+    font-weight: 600;
+  }
+  :global(.finder__rate-value) {
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  :global(.finder__why-label) {
+    margin: 0 0 0.35rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-black);
+  }
+  :global(.finder__why) {
+    display: grid;
+    gap: 0.3rem;
+    max-width: 65ch;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--color-black);
+  }
+  :global(.finder__why li) {
+    display: flex;
+    gap: 0.5rem;
+  }
+  :global(.finder__tick) {
+    flex: none;
+    color: var(--color-accent);
+  }
+  :global(.finder__platforms) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0 0 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+  :global(.finder__platforms a) {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-paper));
+    color: var(--color-accent);
+    font-size: 0.8125rem;
+    text-decoration: none;
+  }
+  :global(.finder__platforms a:hover) {
+    background: color-mix(in srgb, var(--color-accent) 18%, var(--color-paper));
+  }
+  @media (pointer: coarse) {
+    :global(.finder__platforms a) {
+      min-height: 2.75rem;
+    }
+  }
+  /* Pinned to the card's foot, so the links line up across cards of different length. */
+  :global(.finder__detail) {
+    align-self: flex-start;
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+  :global(.finder__detail:hover) {
+    color: var(--color-accent);
+  }
+  :global(.finder__note) {
+    margin: 1.25rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+  }
+  :global(.finder__price-link) {
+    color: var(--color-primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  :global(.finder__handoff) {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.finder__option),
+    :global(.finder__cta),
+    .assistant__close {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // NOT `is:inline` — an inline script is not bundled, so this import would
+  // reach the browser as a bare specifier.
+  import { CONTACT_DRAFT_EVENT } from "~/lib/contactDraft";
+
+  const dialog = document.querySelector<HTMLDialogElement>("[data-assistant-dialog]");
+  /** Addresses that open the assistant: its own, and the old section anchor. */
+  const HASHES = new Set(["#leistungsassistent", "#leistungsfinder"]);
+
+  // No dialog support means no assistant. The buttons stay `hidden`, the state
+  // they shipped in, so nothing has to be undone.
+  if (dialog && typeof dialog.showModal === "function") {
+    let opener: HTMLElement | null = null;
+    let restoreFocus = true;
+
+    const open = (trigger: HTMLElement | null) => {
+      if (dialog.open) return;
+      opener = trigger;
+      restoreFocus = true;
+      dialog.showModal();
+    };
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-assistant-open]")) {
+      button.addEventListener("click", () => open(button));
+      // Revealed only now that there is something behind it.
+      button.hidden = false;
+    }
+
+    dialog.querySelector<HTMLButtonElement>("[data-assistant-close]")?.addEventListener("click", () => {
+      dialog.close();
+    });
+
+    dialog.addEventListener("click", (event) => {
+      // A click on the backdrop reports the dialog itself as its target.
+      if (event.target === dialog) {
+        dialog.close();
+        return;
+      }
+      // A link to a section of THIS page (the contact form, the prices):
+      // close, and let the page scroll there instead of back to the opener.
+      const link = (event.target as Element | null)?.closest?.("a[href]");
+      if (link instanceof HTMLAnchorElement && link.hash && link.pathname === location.pathname) {
+        restoreFocus = false;
+        dialog.close();
+      }
+    });
+
+    // The result's call to action hands its draft to the contact form first.
+    window.addEventListener(CONTACT_DRAFT_EVENT, () => {
+      if (!dialog.open) return;
+      restoreFocus = false;
+      dialog.close();
+    });
+
+    dialog.addEventListener("close", () => {
+      if (restoreFocus) opener?.focus();
+      opener = null;
+      if (HASHES.has(location.hash)) {
+        history.replaceState(null, "", `${location.pathname}${location.search}`);
+      }
+    });
+
+    const openFromHash = () => {
+      if (HASHES.has(location.hash)) open(null);
+    };
+    openFromHash();
+    window.addEventListener("hashchange", openFromHash);
+  }
+</script>

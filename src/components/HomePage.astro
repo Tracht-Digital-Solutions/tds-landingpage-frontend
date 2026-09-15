@@ -2,22 +2,26 @@
 /**
  * The home page, for both language trees.
  *
- * `pages/index.astro` and `pages/en/index.astro` were two copies of the same
- * 150 lines, and they had already drifted (the JSON-LD graph listed its nodes
- * in a different order in each). They are three-line wrappers now, like the
- * business card routes, and everything a home page is lives here.
+ * `pages/index.astro` and `pages/en/index.astro` are three-line wrappers, like
+ * the business card routes, and everything a home page is lives here.
  *
- * ### The order (redesign, 2026-09)
+ * ### The order (2026-09-15)
  *
- * Benefit → trust → services → the service finder (for "which one is mine?")
- * → client results → process → example sites →
- * journal → prices → questions → contact. Each section answers the question a
- * visitor has at that point, and the page's primary action — the first
- * conversation — is offered once per section at most: in the hero, beside the
- * process, under the prices, and as the contact form itself.
+ * Promise → offer → proof → how it works → examples → knowledge → the person →
+ * cost → objections → action:
  *
- * The positioning band, the price drawer and the hero slider are gone; see the
- * notes in `sections/Hero.astro` and `sections/Pricing.astro`.
+ * Hero → Leistungen (Webauftritt first, the systems, the assistant's button) →
+ * Kundenprojekte → Vorgehen → Beispielseiten → Journal → Wieso ich? → Preise
+ * (with the assistant's second button) → FAQ → Kontakt.
+ *
+ * Each section answers the question a visitor has at that point. Paper and
+ * sand alternate down the page (the showcase keeps sand on both sides, the FAQ
+ * stays directly above the navy contact block); the one paper-on-paper seam is
+ * "Wieso ich?" — photo and wash — above the prices.
+ *
+ * The service finder is no longer a section: it waits behind two buttons and
+ * opens as a dialog (`ServiceAssistant.astro`). The positioning band, the price
+ * drawer and the hero slider are gone for good.
  */
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
@@ -25,7 +29,6 @@ import Footer from "~/components/Footer.astro";
 import Hero from "~/components/sections/Hero.astro";
 import About from "~/components/sections/About.astro";
 import Services from "~/components/sections/Services.astro";
-import ServiceFinder from "~/components/sections/ServiceFinder.astro";
 import CustomerCases from "~/components/sections/CustomerCases.astro";
 import Process from "~/components/sections/Process.astro";
 import Showcase from "~/components/sections/Showcase.astro";
@@ -33,6 +36,7 @@ import Journal from "~/components/sections/Journal.astro";
 import Pricing from "~/components/sections/Pricing.astro";
 import FAQ from "~/components/sections/FAQ.astro";
 import Contact from "~/components/sections/Contact.astro";
+import ServiceAssistant from "~/components/ServiceAssistant.astro";
 import {
   asGraph,
   faqPageSchema,
@@ -84,8 +88,8 @@ const pricedServices = await Promise.all(
 
 // The home page carries the canonical entity graph — Organization, Person and
 // WebSite live here; subpages reference them by @id. The four rates are an
-// `OfferCatalog` on the page that shows them. No `HowTo` any more: Google
-// retired those rich results, and the process is not a set of instructions.
+// `OfferCatalog` on the page that shows them. No `HowTo`: Google retired those
+// rich results, and the process is not a set of instructions.
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
@@ -104,6 +108,8 @@ const jsonLd = asGraph(
     url: lang === "de" ? `${siteConfig.url}/` : `${siteConfig.url}/en/`,
     inLanguage: lang === "de" ? "de-DE" : "en-GB",
     isPartOf: { "@id": `${siteConfig.url}/#website` },
+    publisher: { "@id": `${siteConfig.url}/#organization` },
+    author: { "@id": `${siteConfig.url}/#person` },
     primaryImageOfPage: `${siteConfig.url}/og/default.png`,
     // The headline and the benefit claim under it — what a voice assistant
     // should read if it reads anything.
@@ -111,11 +117,12 @@ const jsonLd = asGraph(
   },
 );
 
-// Keyword-first (primary Germany-wide keyword leads, brand follows, ≤60 chars).
-// The local qualifier lives in the description, schema geo/NAP and footer.
+// What people search for first — websites and digitalization for businesses —
+// then the brand. At most 60 characters; the local qualifier lives in the
+// description, the schema's address and the footer.
 const titles = {
-  de: "Digitalisierung für Unternehmen — Tracht Digital Solutions",
-  en: "Digitalization for Businesses — Tracht Digital Solutions",
+  de: "Webseiten & Digitalisierung für Unternehmen — Tracht Digital",
+  en: "Websites & Digitalization for Businesses — Tracht Digital",
 };
 ---
 
@@ -128,16 +135,16 @@ const titles = {
   <Header />
   <main id="main">
     <Hero lang={lang} hero={hero} trust={trust} />
-    <About />
     <Services />
-    <ServiceFinder />
     <CustomerCases />
     <Process />
     <Showcase />
     <Journal />
+    <About />
     <Pricing />
     <FAQ />
     <Contact />
+    <ServiceAssistant />
   </main>
   <Footer />
 </Layout>

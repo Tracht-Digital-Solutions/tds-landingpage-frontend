@@ -145,7 +145,7 @@ export const legalCopy = {
     viewerLabel: "AGB als PDF",
     // Shown where the browser will not render an embedded PDF (most phones).
     viewerFallback:
-      "Ihr Browser kann das PDF nicht direkt anzeigen. Über die Schaltfläche oben öffnen bzw. laden Sie das Dokument herunter.",
+      "Dein Browser kann das PDF nicht direkt anzeigen. Über die Schaltfläche oben öffnest du das Dokument oder lädst es herunter.",
     openInNewTab: "In neuem Tab öffnen",
   },
   en: {

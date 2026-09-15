@@ -19,6 +19,7 @@ const services: FinderService[] = SERVICE_ORDER.map((id) => ({
   summary: `Zusammenfassung ${id}`,
   href: `/leistungen/${id}`,
   situations: [1, 2, 3, 4, 5].map((n) => `${id} Ausgangslage ${n}.`),
+  rate: 70,
 }));
 
 const answers = (over: Partial<FinderAnswers> = {}): FinderAnswers => ({
@@ -47,9 +48,10 @@ describe("recommend", () => {
   });
 
   it("keeps the catalogue order between equally strong matches", () => {
-    expect(ids(recommend(answers({ topics: ["web-presence", "consulting"] }), "de"))).toEqual([
-      "consulting",
+    // Webauftritt leads the catalogue since 2026-09-15, so it wins a tie.
+    expect(ids(recommend(answers({ topics: ["consulting", "web-presence"] }), "de"))).toEqual([
       "web-presence",
+      "consulting",
     ]);
   });
 
@@ -140,8 +142,10 @@ describe("buildDraft", () => {
 });
 
 describe("the finder's copy", () => {
-  it("covers the whole service catalogue", () => {
-    expect([...SERVICE_ORDER].sort()).toEqual(serviceDefinitions.map((service) => service.id).sort());
+  it("follows the service catalogue, in the catalogue's order", () => {
+    // SERVICE_ORDER is the tie-breaker, so it has to BE the catalogue order —
+    // otherwise the assistant and the services section disagree on a tie.
+    expect([...SERVICE_ORDER]).toEqual(serviceDefinitions.map((service) => service.id));
   });
 
   it("has every answer in both languages", () => {
@@ -156,10 +160,20 @@ describe("the finder's copy", () => {
     expect(Object.keys(FINDER_COPY.de).sort()).toEqual(Object.keys(FINDER_COPY.en).sort());
   });
 
-  it("keeps the site's rules: formal address, nothing free, no durations", () => {
+  it("keeps the site's rules: du, nothing free, no durations", () => {
     const german = JSON.stringify([FINDER_COPY.de, FINDER_SECTION.de]);
     expect(german).not.toMatch(/kostenlos|kostenfrei|gratis|Minute/i);
-    expect(german).not.toMatch(/\b(du|dich|dir|dein|deine)\b/i);
+    expect(german).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre|Ihren|Ihrem|Ihrer|Ihres)\b/);
+    expect(german).toMatch(/\bdu\b/);
     expect(JSON.stringify([FINDER_COPY.en, FINDER_SECTION.en])).not.toMatch(/\bfree\b|minute/i);
+  });
+
+  it("names no amount of its own — only the published rate it is handed", () => {
+    // JSON.stringify drops the two functions; the rate one is checked below.
+    const words = JSON.stringify([FINDER_COPY, FINDER_SECTION]);
+    expect(words).not.toMatch(/€|\bEUR\b|\bEuro\b/);
+    expect(words).not.toMatch(/\d+\s*[–-]\s*\d+/);
+    expect(FINDER_COPY.de.rateValue(65)).toBe("65 € netto pro Stunde");
+    expect(FINDER_COPY.en.rateValue(65)).toBe("€65 net per hour");
   });
 });

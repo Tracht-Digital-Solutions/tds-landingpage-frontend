@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
 import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
 import { CONTACT_DRAFT_EVENT, CONTACT_DRAFT_KEY } from "~/lib/contactDraft";
+import { contactFormCopy } from "~/lib/contactCopy";
 
 /**
  * Where this form posts if the host has not been configured.
@@ -46,16 +46,12 @@ type FieldName = "name" | "email" | "message" | "consent";
  *   form, which asks a screen reader to announce every change inside it.
  * - **Success takes focus.** The form is replaced by the confirmation; focus
  *   would otherwise fall back to `<body>` and the confirmation go unheard.
- * - **Sie-Form in the failure message.** It said "Probiere es später … schreib
- *   mir" on a site that addresses its visitors formally everywhere else.
+ * - **The words come from `lib/contactCopy.ts`** (2026-09-15): the site says
+ *   "du", the shared bundle says "Sie", and the sentences that address the
+ *   visitor — errors, success, the failure message — are overridden there.
  */
 export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
-  const t = translations[lang];
-
-  const errorCopy =
-    lang === "de"
-      ? "Die Nachricht konnte gerade nicht gesendet werden. Bitte versuchen Sie es später noch einmal oder schreiben Sie mir direkt: "
-      : "The message could not be sent just now. Please try again later or email me directly: ";
+  const copy = contactFormCopy(lang);
 
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [shake, setShake] = useState(false);
@@ -77,11 +73,11 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
     if (submitState === "success") successHeadingRef.current?.focus();
   }, [submitState]);
 
-  // A draft from the service finder (`lib/contactDraft.ts`): read from storage
-  // when this form hydrates after the jump down here, or taken from the event
-  // when it is already live. Text in the field, nothing else — the visitor
-  // still reads, edits and sends. What they typed themselves is never replaced;
-  // the draft goes underneath it.
+  // A draft from the service assistant (`lib/contactDraft.ts`): read from
+  // storage when this form hydrates after the jump down here, or taken from the
+  // event when it is already live. Text in the field, nothing else — the
+  // visitor still reads, edits and sends. What they typed themselves is never
+  // replaced; the draft goes underneath it.
   useEffect(() => {
     const apply = (draft: unknown) => {
       if (typeof draft !== "string" || draft.trim() === "") return;
@@ -179,9 +175,9 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           className="text-2xl font-[var(--font-display)] font-medium text-white outline-none"
           style={{ fontVariationSettings: '"opsz" 144' }}
         >
-          {t.contact.form.successTitle}
+          {copy.form.successTitle}
         </h3>
-        <p className="text-white/75">{t.contact.form.successMessage}</p>
+        <p className="text-white/75">{copy.form.successMessage}</p>
       </div>
     );
   }
@@ -201,14 +197,14 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
 
         <div className={rowClass("name")}>
           <label htmlFor="name" className="contact-field-label">
-            {t.contact.form.name}
+            {copy.form.name}
           </label>
           <input
             id="name"
             type="text"
             autoComplete="name"
             required
-            placeholder={t.contact.form.namePlaceholder}
+            placeholder={copy.form.namePlaceholder}
             className={fieldClass}
             {...a11yFor("name")}
             {...register("name")}
@@ -216,21 +212,21 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           <span className="contact-field-line" aria-hidden="true" />
           {errors.name && (
             <p id={errorId("name")} className="contact-field-error text-xs mt-2">
-              {t.errors.name}
+              {copy.errors.name}
             </p>
           )}
         </div>
 
         <div className={rowClass("email")}>
           <label htmlFor="email" className="contact-field-label">
-            {t.contact.form.email}
+            {copy.form.email}
           </label>
           <input
             id="email"
             type="email"
             autoComplete="email"
             required
-            placeholder={t.contact.form.emailPlaceholder}
+            placeholder={copy.form.emailPlaceholder}
             className={fieldClass}
             {...a11yFor("email")}
             {...register("email")}
@@ -238,20 +234,20 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           <span className="contact-field-line" aria-hidden="true" />
           {errors.email && (
             <p id={errorId("email")} className="contact-field-error text-xs mt-2">
-              {t.errors.email}
+              {copy.errors.email}
             </p>
           )}
         </div>
 
         <div className={rowClass()}>
           <label htmlFor="company" className="contact-field-label">
-            {t.contact.form.company}
+            {copy.form.company}
           </label>
           <input
             id="company"
             type="text"
             autoComplete="organization"
-            placeholder={t.contact.form.companyPlaceholder}
+            placeholder={copy.form.companyPlaceholder}
             className={fieldClass}
             {...register("company")}
           />
@@ -260,13 +256,13 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
 
         <div className={rowClass("message")}>
           <label htmlFor="message" className="contact-field-label">
-            {t.contact.form.message}
+            {copy.form.message}
           </label>
           <textarea
             id="message"
             rows={4}
             required
-            placeholder={t.contact.form.messagePlaceholder}
+            placeholder={copy.form.messagePlaceholder}
             className={`${fieldClass} resize-none`}
             {...a11yFor("message")}
             {...register("message")}
@@ -274,7 +270,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           <span className="contact-field-line" aria-hidden="true" />
           {errors.message && (
             <p id={errorId("message")} className="contact-field-error text-xs mt-2">
-              {t.errors.message}
+              {copy.errors.message}
             </p>
           )}
         </div>
@@ -295,29 +291,29 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             />
             <span className="contact-consent-box" aria-hidden="true" />
             <span className="text-xs text-white/75 leading-relaxed">
-              {t.contact.form.consent}{" "}
+              {copy.form.consent}{" "}
               <a
                 href="/legal/datenschutz"
                 className="underline underline-offset-2 hover:no-underline"
                 style={{ color: "var(--color-accent-pink)" }}
               >
-                {t.contact.form.consentLink}
+                {copy.form.consentLink}
               </a>{" "}
-              {t.contact.form.consentSuffix}
+              {copy.form.consentSuffix}
             </span>
           </label>
           {errors.consent && (
             <p id={errorId("consent")} className="contact-field-error text-xs mt-2">
-              {t.errors.consent}
+              {copy.errors.consent}
             </p>
           )}
         </div>
 
         {submitState === "error" && (
           <p id="contact-form-error" className="contact-field-error text-sm" role="alert">
-            {errorCopy}
-            <a href={`mailto:${t.contact.info.email}`} className="underline">
-              {t.contact.info.email}
+            {copy.failure}
+            <a href={`mailto:${copy.email}`} className="underline">
+              {copy.email}
             </a>
           </p>
         )}
@@ -328,7 +324,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           className="submit-button group relative w-full min-h-[3.25rem] py-4 text-sm font-medium rounded-full overflow-hidden flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           <span className="relative z-10 inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-0.5">
-            {submitting ? t.contact.form.submitting : t.contact.form.submit}
+            {submitting ? copy.form.submitting : copy.form.submit}
             {submitting ? (
               <span className="tds-spinner tds-spinner--sm" aria-hidden="true" />
             ) : (
@@ -353,7 +349,7 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
 
         {/* Status only — the error above is its own `role="alert"`. */}
         <p className="sr-only" aria-live="polite">
-          {submitting ? t.contact.form.submitting : ""}
+          {submitting ? copy.form.submitting : ""}
         </p>
       </form>
     </div>
