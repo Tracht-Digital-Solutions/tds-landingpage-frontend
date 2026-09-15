@@ -11,6 +11,7 @@
  * what AI search engines parse), so keeping the renderers next to the
  * data lets us iterate the shape without touching the source of truth.
  */
+import { portraitSrc } from "./imageVariants";
 import { siteConfig } from "./seo";
 
 type WithContext<T extends Record<string, unknown> = Record<string, unknown>> =
@@ -19,6 +20,10 @@ type WithContext<T extends Record<string, unknown> = Record<string, unknown>> =
 /**
  * Person schema for the founder. Reused as `author` (Article),
  * `founder` (Organization), and standalone on the about page.
+ *
+ * The author every detail page names in its byline, so the entity carries what
+ * a reader — or an answer engine — would check: a face (the portrait "Wieso
+ * ich?" shows) and the topics the pages are written about.
  */
 export function personSchema() {
   return {
@@ -29,6 +34,8 @@ export function personSchema() {
     worksFor: { "@id": `${siteConfig.url}/#organization` },
     url: siteConfig.url,
     email: `mailto:${siteConfig.email}`,
+    image: `${siteConfig.url}${portraitSrc(720)}`,
+    knowsAbout: [...siteConfig.knowsAbout],
     sameAs: Object.values(siteConfig.socials).filter(Boolean) as string[],
   };
 }

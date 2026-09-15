@@ -7,7 +7,12 @@ User-agent: *
 Allow: /
 Disallow: /install/
 
-# AI search crawlers are welcome — content is meant to be cited.
+# AI search and answer engines are welcome — the content is meant to be found
+# and cited. Per vendor there is a training crawler, a search index and an agent
+# that fetches a page when someone asks about it. Blocking the search or the
+# fetch agent takes the site out of that engine's answers (robotsTxt.test.ts).
+
+# OpenAI
 User-agent: GPTBot
 Allow: /
 Disallow: /install/
@@ -20,23 +25,41 @@ User-agent: ChatGPT-User
 Allow: /
 Disallow: /install/
 
-User-agent: PerplexityBot
-Allow: /
-Disallow: /install/
-
+# Anthropic
 User-agent: ClaudeBot
 Allow: /
 Disallow: /install/
 
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /install/
+
+User-agent: Claude-User
+Allow: /
+Disallow: /install/
+
+# Retired Anthropic names, kept so an old crawler still reads the same rules.
 User-agent: Claude-Web
 Allow: /
 Disallow: /install/
 
-User-agent: Google-Extended
+User-agent: anthropic-ai
 Allow: /
 Disallow: /install/
 
-User-agent: anthropic-ai
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+Disallow: /install/
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /install/
+
+# Google-Extended covers Gemini; Search and AI Overviews crawl as Googlebot,
+# which the "*" group already allows. Applebot-Extended covers Apple
+# Intelligence.
+User-agent: Google-Extended
 Allow: /
 Disallow: /install/
 

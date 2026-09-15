@@ -1,51 +1,90 @@
 # Tracht Digital Solutions
 
-> Digitalisierung für Unternehmen — Beratung, Web- und App-Entwicklung,
-> Automatisierung, Wartung und Schulungen. Persönlich entwickelt in
-> Schwarzenbek bei Hamburg, für Unternehmen in ganz Deutschland.
+> Webseiten, Onlineshops und Digitalisierung für Unternehmen. Julian Tracht
+> plant, baut und pflegt Websites und Shops – auch mit WordPress, WooCommerce,
+> Shopware 6, TYPO3 und STRATO – und vereinfacht Abläufe. Ein fester
+> Ansprechpartner aus Schwarzenbek bei Hamburg, für Unternehmen in ganz
+> Deutschland.
 
 ## Über
 
-- Inhaber & Entwickler: Julian Tracht
-- Standort: Schwarzenbek (Schleswig-Holstein), bei Hamburg
-- Kontakt: kontakt@tracht-digital.de
-- Sprachen: Deutsch (Standard), English
+- Inhaber: Julian Tracht, Webentwickler & Digitalisierungsberater
+- Adresse: Elbinger Straße 19, 21493 Schwarzenbek (Schleswig-Holstein), bei Hamburg
+- Kontakt: kontakt@tracht-digital.de, +49 178 8224022
+- Sprachen: Deutsch (Standard), Englisch
 
 ## Leistungen
 
-Vier Leistungen, jede mit einer eigenen Detailseite:
+Vier Leistungen, jede mit einer eigenen Seite. Alle Stundensätze sind netto,
+zuzüglich Mehrwertsteuer; steht der Umfang vorher fest, ist auch ein Festpreis
+möglich. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.
 
-- **Beratung & Konzeption** (90 € netto/Std.) — Vorhaben einordnen,
-  Möglichkeiten und Kosten gegenüberstellen, Fahrplan schreiben.
-  https://tracht-digital.de/leistungen/beratung-konzeption
-- **Prozessoptimierung** (80 € netto/Std.) — Abläufe vereinfachen,
-  Handarbeit automatisieren, Auswertungen aufsetzen.
-  https://tracht-digital.de/leistungen/prozessoptimierung
-- **Individuelle Lösungen** (80 € netto/Std.) — vorhandene Programme
-  verbinden, Schnittstellen bauen, Software nach klarer Aufgabe entwickeln.
-  https://tracht-digital.de/leistungen/individuelle-loesungen
-- **Webauftritt** (65 € netto/Std.) — Webseiten, Webshops und Marketing:
-  Google Ads, lokale Sichtbarkeit, organische Suche und Newsletter.
+- **Webauftritt** (65 € netto/Std.) — Website, Onlineshop und Marketing aus
+  einer Hand: bauen, zu den Kunden bringen, dauerhaft pflegen.
   https://tracht-digital.de/leistungen/webauftritt
+  (English: https://tracht-digital.de/en/services/web-presence)
+- **Beratung & Konzeption** (75 € netto/Std.) — digitale Vorhaben sortieren,
+  Möglichkeiten mit Kosten und Folgen zeigen, daraus einen klaren Fahrplan
+  machen.
+  https://tracht-digital.de/leistungen/beratung-konzeption
+  (English: https://tracht-digital.de/en/services/consulting-planning)
+- **Prozessoptimierung** (70 € netto/Std.) — tägliche Abläufe ansehen,
+  unnötige Schritte streichen, automatisieren, was wirklich Zeit spart.
+  https://tracht-digital.de/leistungen/prozessoptimierung
+  (English: https://tracht-digital.de/en/services/process-optimization)
+- **Individuelle Lösungen** (70 € netto/Std.) — vorhandene Programme
+  verbinden, passende Werkzeuge ergänzen, eigene Software nur dort bauen, wo
+  sie wirklich hilft.
+  https://tracht-digital.de/leistungen/individuelle-loesungen
+  (English: https://tracht-digital.de/en/services/tailored-solutions)
 
-## Wichtige Seiten
+## Shopsysteme und CMS
 
-- Homepage: https://tracht-digital.de/
-- Preise (Stundensätze): https://tracht-digital.de/#preise
-- Journal / Blog: https://blog.tracht-digital.de/
-- Englisches Journal: https://blog.tracht-digital.de/en/
+Eine eigene Seite je System: typische Probleme, was übernommen wird,
+Entscheidungshilfen mit Quellen und häufige Fragen. Unabhängig – kein
+offizieller Partner der Hersteller. Abgerechnet wird nach Aufwand zum
+Stundensatz des Webauftritts oder zum Festpreis, sobald der Umfang klar ist.
+
+- **WooCommerce** — Fehler beheben, Shop erstellen, Theme anpassen.
+  https://tracht-digital.de/leistungen/woocommerce
+  (English: https://tracht-digital.de/en/services/woocommerce)
+- **Shopware 6** — Fehler beheben, Shop erstellen, Theme anpassen – auch beim
+  Umstieg von Shopware 5.
+  https://tracht-digital.de/leistungen/shopware
+  (English: https://tracht-digital.de/en/services/shopware)
+- **WordPress** — Fehler beheben und Wartung, neue Website oder Relaunch,
+  Themes und Templates, Umzug und Upgrades.
+  https://tracht-digital.de/leistungen/wordpress
+  (English: https://tracht-digital.de/en/services/wordpress)
+- **TYPO3** — Fehler beheben und Wartung, neue Website oder Relaunch,
+  Templates und Extensions, Upgrades und Umzug.
+  https://tracht-digital.de/leistungen/typo3
+  (English: https://tracht-digital.de/en/services/typo3)
+- **STRATO** — Hilfe für Websites mit dem STRATO Homepage-Baukasten oder
+  WordPress: Fehler beheben und Pflege, neue Website oder Relaunch, Vorlagen
+  und Gestaltung, Umzug zu WordPress.
+  https://tracht-digital.de/leistungen/strato
+  (English: https://tracht-digital.de/en/services/strato)
+
+## Weitere Seiten
+
+- Startseite: https://tracht-digital.de/ (English: https://tracht-digital.de/en/)
+- Stundensätze: https://tracht-digital.de/#preise
 - Kontaktformular: https://tracht-digital.de/#contact
+- Digitale Visitenkarte: https://tracht-digital.de/visitenkarte
+  (English: https://tracht-digital.de/en/business-card)
+- Journal: https://blog.tracht-digital.de/ (English: https://blog.tracht-digital.de/en/)
 
 ## Maschinenlesbare Quellen
 
 - Sitemap: https://tracht-digital.de/sitemap-index.xml
-- Blog-RSS: https://blog.tracht-digital.de/rss.xml
+- Journal-RSS: https://blog.tracht-digital.de/rss.xml
 
-## Hinweise für KI-Crawler
+## Hinweise für KI-Systeme
 
-- Alle Inhalte stammen vom Inhaber und sind zur Zitation freigegeben,
-  solange die Quelle (Tracht Digital Solutions / tracht-digital.de)
-  genannt wird.
-- Die Seite ist statisch generiert (Astro) — JSON-LD-Strukturdaten
-  liegen im `<head>` jeder Seite.
-- Für Preisangaben gilt: alle Stundensätze sind Netto, zzgl. MwSt.
+- Alle Inhalte stammen vom Inhaber und dürfen mit Quellenangabe
+  (Tracht Digital Solutions, tracht-digital.de) zitiert werden.
+- Die Seiten werden serverseitig gerendert; JSON-LD-Strukturdaten stehen im
+  `<head>` jeder Seite. Leistungs- und Systemseiten nennen ihr Stand-Datum.
+- Die einzigen genannten Preise sind die Stundensätze oben. Projektpreise
+  hängen vom Umfang ab.
