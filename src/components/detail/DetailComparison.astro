@@ -18,7 +18,10 @@ interface Props {
 }
 
 const { comparison, sources, lang, updatedLabel } = Astro.props;
-const ui = lang === "de" ? { sources: "Quellen" } : { sources: "Sources" };
+const ui =
+  lang === "de"
+    ? { sources: "Quellen", table: "Vergleichstabelle" }
+    : { sources: "Sources", table: "Comparison table" };
 ---
 
 <div class="section-spacing tds-tone-sand">
@@ -35,7 +38,10 @@ const ui = lang === "de" ? { sources: "Quellen" } : { sources: "Sources" };
       </h2>
       <p class="max-w-3xl text-[var(--color-muted)] leading-relaxed mb-8">{comparison.intro}</p>
 
-      <div class="comparison__scroll" tabindex="0" role="region" aria-labelledby="platform-comparison-title">
+      {/* The scroll box is a region of its own and needs a name of its own:
+          labelled by the section's heading, the page had two landmarks with
+          one name (axe landmark-unique). */}
+      <div class="comparison__scroll" tabindex="0" role="region" aria-label={`${ui.table}: ${comparison.title}`}>
         <table class="comparison">
           <thead>
             <tr>

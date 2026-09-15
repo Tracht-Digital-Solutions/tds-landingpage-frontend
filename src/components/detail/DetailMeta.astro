@@ -35,6 +35,6 @@ const ui =
 <p class="mt-8 text-sm leading-relaxed text-[var(--color-muted)]">
   {ui.updated}: <time datetime={updatedAt}>{month}</time>
   <span aria-hidden="true"> · </span>
-  {ui.by}
+  {ui.by}{" "}
   <a href={aboutHref} class="underline underline-offset-4 decoration-[var(--color-line)] hover:text-[var(--color-primary)] transition-colors [@media(pointer:coarse)]:inline-flex [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:items-center">{siteConfig.founder.name}</a>, {ui.role}
 </p>

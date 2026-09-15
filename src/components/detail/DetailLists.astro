@@ -5,7 +5,9 @@
  *
  * A responsibility may carry an `href`. The platform pages use that to turn the
  * card into the page's table of contents — each offer links to its own section
- * further down — while the service pages keep plain sentences.
+ * further down — while the service pages keep plain sentences. On touch screens
+ * such a link gets vertical padding, which lifts its hit area to 44px without
+ * moving a line: padding on an inline box leaves the line height alone.
  */
 export interface DetailListItem {
   text: string;
@@ -67,7 +69,7 @@ const items = responsibilities.map((item) => (typeof item === "string" ? { text:
             {item.href ? (
               <a
                 href={item.href}
-                class="underline decoration-[color-mix(in_srgb,var(--color-accent)_40%,transparent)] underline-offset-4 hover:text-[var(--color-primary)] transition-colors"
+                class="underline decoration-[color-mix(in_srgb,var(--color-accent)_40%,transparent)] underline-offset-4 hover:text-[var(--color-primary)] transition-colors [@media(pointer:coarse)]:py-2.5"
               >
                 {item.text}
               </a>
