@@ -42,8 +42,7 @@ const defaults: Record<Lang, PricingContent> = {
     label: "— Preise",
     headline: "Preise ohne",
     headlineAccent: "Überraschungen.",
-    sub:
-      "Du siehst vorher, was welche Leistung kostet. Steht der Umfang fest, geht es auch zum *Festpreis*.",
+    sub: "Du siehst vorher, was jede Leistung pro Stunde kostet. Bei klarem Umfang geht auch ein *Festpreis*.",
     teaserHeadline: "Planbare Sätze,",
     teaserHeadlineAccent: "passende Modelle.",
     teaserSub:
@@ -61,12 +60,11 @@ const defaults: Record<Lang, PricingContent> = {
     // (homeContent.ts), rendered in the same box as these notes — listing them
     // here as well printed each of them twice.
     notes: [
-      "Alle Preise sind netto, zuzüglich Mehrwertsteuer.",
-      "Bei Anzeigen kommt dein Mediabudget dazu; es geht direkt an Google.",
+      "Alle Preise netto, zuzüglich Mehrwertsteuer.",
+      "Bei Anzeigen kommt dein Werbebudget dazu. Es geht direkt an Google.",
     ],
     ctaTitle: "Welcher Rahmen passt zu dir?",
-    ctaSub:
-      "Im Erstgespräch ordnen wir dein Vorhaben ein. Danach weißt du, welches Modell passt.",
+    ctaSub: "Das klären wir im Erstgespräch.",
     ctaButton: "Erstgespräch vereinbaren",
     back: "Zurück zur Startseite",
   },
@@ -74,8 +72,7 @@ const defaults: Record<Lang, PricingContent> = {
     label: "— Pricing",
     headline: "Pricing without",
     headlineAccent: "surprises.",
-    sub:
-      "You can see what each service costs. When the scope is settled up front, a *fixed price* works too.",
+    sub: "You can see up front what each service costs per hour. When the scope is clear, a *fixed price* works too.",
     teaserHeadline: "Predictable rates,",
     teaserHeadlineAccent: "models that fit.",
     teaserSub:
@@ -90,12 +87,11 @@ const defaults: Record<Lang, PricingContent> = {
     rateWebPresence: 65,
     notesTitle: "Good to know",
     notes: [
-      "All prices are net and exclude VAT.",
-      "Where ads are involved your media budget is extra; it goes to Google directly.",
+      "All prices are net, plus VAT.",
+      "Ads come with your own media budget. It goes to Google directly.",
     ],
     ctaTitle: "Which setup fits you?",
-    ctaSub:
-      "In the first conversation we place your project. After that you know which model fits.",
+    ctaSub: "We work that out in the first conversation.",
     ctaButton: "Arrange an initial consultation",
     back: "Back to the homepage",
   },

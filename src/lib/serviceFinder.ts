@@ -25,7 +25,7 @@
  *   estimate, no range, no duration (`serviceFinder.test.ts`).
  * - It sends nothing. The result becomes a draft in the contact form's message
  *   field (`contactDraft.ts`); the visitor reads it, edits it, and submits.
- * - It says "du", like the rest of the site.
+ * - It says "du", like the rest of the site, and keeps every line short.
  *
  * **No runtime imports.** The island bundles this file; type imports only.
  */
@@ -136,13 +136,13 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
       unsure: { label: "Ich weiß es noch nicht", hint: "Dann sortieren wir zuerst gemeinsam." },
     },
     situationsQuestion: "Was davon kennst du aus deinem Betrieb?",
-    situationsHelp: "Mehrfachauswahl möglich – oder ohne Auswahl weiter.",
+    situationsHelp: "Mehrfachauswahl möglich – oder einfach weiter.",
     stageQuestion: "Wie weit ist dein Vorhaben?",
     stageHelp: "Eine Antwort.",
     stages: {
-      clear: { label: "Klar umrissen", hint: "Ziel und Umfang stehen, es soll umgesetzt werden." },
-      rough: { label: "Eine grobe Idee", hint: "Die Richtung ist klar, die Details noch nicht." },
-      open: { label: "Noch ganz offen", hint: "Erst einmal sortieren, was überhaupt dran ist." },
+      clear: { label: "Klar umrissen", hint: "Ziel und Umfang stehen fest." },
+      rough: { label: "Eine grobe Idee", hint: "Die Richtung steht, die Details noch nicht." },
+      open: { label: "Noch ganz offen", hint: "Erst sortieren, was dran ist." },
     },
     pickOne: "Bitte wähle mindestens eine Antwort.",
     pickStage: "Bitte wähle eine Antwort.",
@@ -158,11 +158,10 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rateLabel: "Stundensatz:",
     rateValue: (rate) => `${rate} € netto pro Stunde`,
     platformsLabel: "Seiten zu deinem System:",
-    note: "Eine erste Orientierung, keine Festlegung – im Erstgespräch klären wir, was wirklich passt. Steht der Umfang fest, ist auch ein Festpreis möglich.",
+    note: "Eine erste Orientierung. Was wirklich passt, klären wir im Erstgespräch.",
     priceLink: "So entsteht dein Preis",
     cta: "Mit dieser Auswahl Erstgespräch vereinbaren",
-    handoffNote:
-      "Deine Auswahl steht dann im Nachrichtenfeld des Kontaktformulars. Gesendet wird erst, wenn du das Formular selbst abschickst.",
+    handoffNote: "Deine Auswahl landet im Kontaktformular. Gesendet wird erst, wenn du es abschickst.",
     draft: {
       intro: "Aus dem Leistungsassistenten:",
       services: "Passende Leistungen",
@@ -182,13 +181,13 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
       unsure: { label: "I do not know yet", hint: "Then we sort things out together first." },
     },
     situationsQuestion: "Which of these do you recognise from your business?",
-    situationsHelp: "Choose as many as apply – or continue without.",
+    situationsHelp: "Choose as many as apply – or just continue.",
     stageQuestion: "How far along is your project?",
     stageHelp: "One answer.",
     stages: {
-      clear: { label: "Clearly defined", hint: "Goal and scope are set, and it needs to be built." },
-      rough: { label: "A rough idea", hint: "The direction is clear, the details are not." },
-      open: { label: "Still completely open", hint: "First work out what actually needs doing." },
+      clear: { label: "Clearly defined", hint: "Goal and scope are settled." },
+      rough: { label: "A rough idea", hint: "The direction is set, the details are not." },
+      open: { label: "Still completely open", hint: "First work out what needs doing." },
     },
     pickOne: "Please choose at least one answer.",
     pickStage: "Please choose one answer.",
@@ -204,11 +203,10 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rateLabel: "Hourly rate:",
     rateValue: (rate) => `€${rate} net per hour`,
     platformsLabel: "Pages for your system:",
-    note: "A first sense of direction, not a commitment – in the first conversation we work out what really fits. Once the scope is clear, a fixed price is possible too.",
+    note: "A first sense of direction. We work out what really fits in the first conversation.",
     priceLink: "How your price comes about",
     cta: "Arrange an initial consultation with this selection",
-    handoffNote:
-      "Your selection then appears in the message field of the contact form. Nothing is sent until you submit the form yourself.",
+    handoffNote: "Your selection goes into the contact form. Nothing is sent until you submit it.",
     draft: {
       intro: "From the service assistant:",
       services: "Matching services",
@@ -225,19 +223,17 @@ export const FINDER_SECTION: Record<
 > = {
   de: {
     title: "Welche Leistung passt zu dir?",
-    intro:
-      "Drei kurze Fragen, eine erste Orientierung – mit dem passenden Stundensatz. Das Ergebnis kannst du direkt ins Kontaktformular übernehmen; gesendet wird erst, wenn du es selbst abschickst.",
+    intro: "Drei kurze Fragen. Danach weißt du, welche Leistung passt und was eine Stunde kostet.",
     close: "Leistungsassistent schließen",
-    servicesLink: "Du weißt nicht genau, was du brauchst – oder was es kostet? Leistungsassistent starten",
-    pricingLink: "Unsicher, welche Leistung und welcher Satz zu dir passen? Leistungsassistent starten",
+    servicesLink: "Unsicher, was du brauchst oder was es kostet? Leistungsassistent starten",
+    pricingLink: "Unsicher, welcher Satz zu dir passt? Leistungsassistent starten",
   },
   en: {
     title: "Which service fits you?",
-    intro:
-      "Three short questions, a first sense of direction – with the matching hourly rate. You can take the result straight into the contact form; nothing is sent until you submit it yourself.",
+    intro: "Three short questions. Then you know which service fits and what an hour costs.",
     close: "Close the service assistant",
-    servicesLink: "Not sure what you need – or what it costs? Start the service assistant",
-    pricingLink: "Not sure which service and rate fit you? Start the service assistant",
+    servicesLink: "Not sure what you need or what it costs? Start the service assistant",
+    pricingLink: "Not sure which rate fits you? Start the service assistant",
   },
 };
 
