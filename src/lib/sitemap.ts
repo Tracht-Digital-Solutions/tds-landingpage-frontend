@@ -16,6 +16,7 @@
  */
 
 import { BUSINESS_CARD_SLUG } from "./businessCard";
+import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
 import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
@@ -61,6 +62,14 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     en: serviceHref(service, "en"),
     changefreq: "monthly" as const,
     priority: 0.8,
+  })),
+  // The shop system and CMS pages sit below the service they belong to
+  // (Webauftritt), which is what the lower priority says.
+  ...platformDefinitions.map((platform) => ({
+    de: platformHref(platform, "de"),
+    en: platformHref(platform, "en"),
+    changefreq: "monthly" as const,
+    priority: 0.7,
   })),
 ];
 

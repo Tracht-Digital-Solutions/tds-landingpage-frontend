@@ -1,0 +1,226 @@
+---
+/**
+ * The page of one shop system or CMS (`lib/platforms.ts`), composed from the
+ * same detail bands as a service page, plus the parts a platform page needs:
+ * its offers as anchored sections, a decision table with sources, questions,
+ * and the way to related pages.
+ *
+ * ### Order, and why
+ *
+ * Answer first (hero + the quotable statement), then "is this my problem?",
+ * what is done about it, how to choose, what the reader ends up with and what is
+ * not included, how it runs and what it costs, proof where a named case exists,
+ * the remaining questions, where to go next, and the call to action.
+ *
+ * Paper and sand alternate down the page. The optional references band is
+ * paper, so the two bands after it swap tone when it is absent — otherwise two
+ * sand bands would meet.
+ *
+ * No amount anywhere (decided 2026-09-15): the process band's box explains how
+ * a price comes about and links to the published rates.
+ */
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import DetailHero from "~/components/detail/DetailHero.astro";
+import DetailMeta from "~/components/detail/DetailMeta.astro";
+import DetailIntro from "~/components/detail/DetailIntro.astro";
+import DetailLists from "~/components/detail/DetailLists.astro";
+import DetailOffers from "~/components/detail/DetailOffers.astro";
+import DetailComparison from "~/components/detail/DetailComparison.astro";
+import DetailOutcomes from "~/components/detail/DetailOutcomes.astro";
+import DetailProcess from "~/components/detail/DetailProcess.astro";
+import DetailReferences from "~/components/detail/DetailReferences.astro";
+import DetailFaq from "~/components/detail/DetailFaq.astro";
+import DetailRelated from "~/components/detail/DetailRelated.astro";
+import DetailCta from "~/components/detail/DetailCta.astro";
+import { asGraph, breadcrumbNode, faqPageSchema, serviceNode, webPageNode } from "~/lib/jsonld";
+import { localizePath, type Lang } from "~/lib/i18n";
+import { stripEmphasis } from "~/lib/emphasis";
+import { siteConfig } from "~/lib/seo";
+import { getServiceById, serviceHref } from "~/lib/services";
+import { articleUrl, referencesForPlatform } from "~/lib/references";
+import {
+  JOURNAL_ARTICLES,
+  platformDefinitions,
+  platformHref,
+  type PlatformDefinition,
+} from "~/lib/platforms";
+
+interface Props {
+  platform: PlatformDefinition;
+  lang: Lang;
+}
+
+const { platform, lang } = Astro.props;
+const content = platform.content[lang];
+const path = platformHref(platform, lang);
+const canonical = `${siteConfig.url}${path}`;
+const homeHref = localizePath("/", lang);
+const contactHref = `${homeHref}#contact`;
+const pricesHref = `${homeHref}#preise`;
+
+const webPresence = getServiceById("web-presence");
+const parentHref = serviceHref(webPresence, lang);
+const parentTitle = webPresence.fallback[lang].title;
+
+// Only cases published under the client's name, and only those that list this
+// platform — see `referencesForPlatform`.
+const references = referencesForPlatform(platform.id, lang);
+
+const month = new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-GB", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+}).format(new Date(`${platform.updatedAt}T12:00:00Z`));
+
+const ui =
+  lang === "de"
+    ? {
+        breadcrumb: "Brotkrümelnavigation",
+        home: "Startseite",
+        prices: "Stundensätze ansehen",
+        updated: `Stand: ${month}`,
+        relatedTitle: "Wie geht es weiter?",
+        parentTitle: "Die Leistung dahinter",
+        platformsTitle: "Andere Systeme",
+        articlesTitle: "Aus dem Journal",
+      }
+    : {
+        breadcrumb: "Breadcrumb",
+        home: "Home",
+        prices: "View hourly rates",
+        updated: `as of ${month}`,
+        relatedTitle: "Where to next?",
+        parentTitle: "The service behind it",
+        platformsTitle: "Other systems",
+        articlesTitle: "From the journal",
+      };
+
+const siblings = platformDefinitions
+  .filter((candidate) => candidate.id !== platform.id)
+  .map((candidate) => ({ href: platformHref(candidate, lang), label: candidate.name }));
+const articles = platform.articleSlugs.map((slug) => ({
+  href: articleUrl(slug, lang),
+  label: JOURNAL_ARTICLES[slug][lang],
+}));
+
+const hasReferences = references.length > 0;
+
+const breadcrumbId = `${canonical}#breadcrumb`;
+const jsonLd = asGraph(
+  webPageNode({
+    url: canonical,
+    name: platform.seoTitle[lang],
+    description: content.summary,
+    lang,
+    dateModified: platform.updatedAt,
+    about: { name: platform.name, sameAs: platform.wikipedia[lang] },
+    breadcrumbId,
+  }),
+  serviceNode({
+    url: canonical,
+    name: content.title,
+    description: stripEmphasis(content.answer),
+    lang,
+    serviceType: platform.name,
+    outputs: content.outcomes,
+  }),
+  breadcrumbNode(breadcrumbId, [
+    { name: ui.home, url: `${siteConfig.url}${homeHref}` },
+    { name: parentTitle, url: `${siteConfig.url}${parentHref}` },
+    { name: platform.name, url: canonical },
+  ]),
+  faqPageSchema(content.faq),
+);
+---
+
+<Layout
+  title={platform.seoTitle[lang]}
+  description={content.summary}
+  lang={lang}
+  canonical={canonical}
+  alternates={{ de: platformHref(platform, "de"), en: platformHref(platform, "en") }}
+  ogImage={`/og/${lang}/${platform.slug}.png`}
+  jsonLd={jsonLd}
+>
+  <Header />
+
+  <main id="main" class="bg-[var(--color-paper)]">
+    <DetailHero
+      backHref={parentHref}
+      backLabel={content.label}
+      navLabel={ui.breadcrumb}
+      title={content.title}
+      lead={content.summary}
+      ctaHref={contactHref}
+      ctaLabel={content.ctaButton}
+    >
+      <DetailMeta lang={lang} updatedAt={platform.updatedAt} />
+    </DetailHero>
+
+    <DetailIntro text={content.answer} />
+
+    <DetailLists
+      situationsTitle={content.situationsTitle}
+      situations={content.situations}
+      responsibilitiesTitle={content.offersTitle}
+      responsibilities={content.offers.map((offer) => ({ text: offer.title, href: `#${offer.id}` }))}
+    />
+
+    <DetailOffers offers={content.offers} />
+
+    <DetailComparison
+      comparison={content.comparison}
+      sources={platform.sources}
+      lang={lang}
+      updatedLabel={ui.updated}
+    />
+
+    <DetailOutcomes
+      outcomesTitle={content.outcomesTitle}
+      outcomes={content.outcomes}
+      boundariesTitle={content.boundariesTitle}
+      boundaries={content.boundaries}
+    />
+
+    <DetailProcess
+      processTitle={content.processTitle}
+      process={content.process}
+      priceLabel={content.costTitle}
+      priceText={content.costText}
+      priceLink={{ href: pricesHref, label: ui.prices }}
+    />
+
+    {hasReferences && (
+      <DetailReferences
+        headline={content.referencesHeadline}
+        label={content.referencesLabel}
+        references={references}
+        lang={lang}
+      />
+    )}
+
+    <DetailFaq title={content.faqTitle} items={content.faq} tone={hasReferences ? "sand" : "paper"} />
+
+    <DetailRelated
+      title={ui.relatedTitle}
+      parentTitle={ui.parentTitle}
+      parent={{ href: parentHref, label: parentTitle }}
+      platformsTitle={ui.platformsTitle}
+      platforms={siblings}
+      articlesTitle={ui.articlesTitle}
+      articles={articles}
+      tone={hasReferences ? "paper" : "sand"}
+    />
+
+    <DetailCta
+      title={content.ctaTitle}
+      text={content.ctaText}
+      buttonLabel={content.ctaButton}
+      href={contactHref}
+    />
+  </main>
+
+  <Footer />
+</Layout>

@@ -9,6 +9,7 @@ import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
 import WebsiteDemos from "~/components/sections/WebsiteDemos.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
+import ServiceCard from "~/components/ui/ServiceCard.astro";
 import DetailHero from "~/components/detail/DetailHero.astro";
 import DetailIntro from "~/components/detail/DetailIntro.astro";
 import DetailLists from "~/components/detail/DetailLists.astro";
@@ -21,6 +22,7 @@ import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
 import { businessCardCopy } from "~/lib/businessCard";
+import { platformDefinitions, platformHref } from "~/lib/platforms";
 import {
   serviceHref,
   type ServiceContent,
@@ -46,6 +48,33 @@ const alternatePaths = {
 const pricing = await getPricingContent(lang);
 const serviceRate = getServiceRate(pricing, service.id);
 const breadcrumbLabel = lang === "de" ? "Brotkrümelnavigation" : "Breadcrumb";
+
+/**
+ * The Webauftritt page is the hub of the shop system and CMS pages: one tile
+ * per system, plus a sixth for everyone whose system is not among them — it
+ * also keeps the 1px-seam mosaic free of an empty cell at two and three
+ * columns. Code-owned chrome, like the tiles' own labels.
+ */
+const platformHub =
+  lang === "de"
+    ? {
+        title: "Shopsysteme und CMS",
+        intro:
+          "Du nutzt schon ein System? Für diese gibt es eine eigene Seite – mit typischen Problemen, dem, was ich übernehme, und Antworten auf häufige Fragen.",
+        otherTitle: "Anderes System?",
+        otherProblem: "Du nutzt Jimdo, Wix, IONOS, Shopify oder eine eigene Lösung.",
+        otherResult: "Ich schaue es mir an und sage dir ehrlich, ob ich helfen kann.",
+        otherMore: "Kurz schreiben",
+      }
+    : {
+        title: "Shop systems and CMS",
+        intro:
+          "Already running a system? Each of these has its own page – with typical problems, what I take care of and answers to common questions.",
+        otherTitle: "Another system?",
+        otherProblem: "You use Jimdo, Wix, IONOS, Shopify or something custom.",
+        otherResult: "I take a look and tell you honestly whether I can help.",
+        otherMore: "Send a short note",
+      };
 
 // Every service carries a rate now — Complete IT was the one that did not,
 // and `getServiceRate` is total since it went. No conditional left to write.
@@ -144,6 +173,41 @@ const jsonLd = [
         references={content.references}
         lang={lang}
       />
+    )}
+
+    {service.id === "web-presence" && (
+      <section class="section-spacing tds-tone-sand" aria-labelledby="service-platforms-title">
+        <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+          <h2
+            id="service-platforms-title"
+            class="display text-4xl md:text-5xl text-[var(--color-black)] mb-5"
+          >
+            {platformHub.title}
+          </h2>
+          <p class="text-[var(--color-muted)] max-w-2xl mb-12">{platformHub.intro}</p>
+          <div class="-mx-6 md:mx-0 overflow-hidden rounded-none md:rounded-[6px] bg-[var(--color-line)] grid gap-px sm:grid-cols-2 lg:grid-cols-3">
+            {platformDefinitions.map((platform) => (
+              <ServiceCard
+                href={platformHref(platform, lang)}
+                title={platform.name}
+                problem={platform.content[lang].situations[0] ?? ""}
+                result={platform.content[lang].outcomes[0] ?? ""}
+                keywords={platform.keywords[lang]}
+                lang={lang}
+              />
+            ))}
+            <ServiceCard
+              href={contactHref}
+              title={platformHub.otherTitle}
+              problem={platformHub.otherProblem}
+              result={platformHub.otherResult}
+              keywords={[]}
+              lang={lang}
+              moreLabel={platformHub.otherMore}
+            />
+          </div>
+        </div>
+      </section>
     )}
 
     {/* Demo websites belong to exactly one service. The home page shows them

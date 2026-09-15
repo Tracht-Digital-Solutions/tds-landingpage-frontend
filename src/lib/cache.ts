@@ -12,6 +12,7 @@
 
 import { forLanguages, type EventMap } from "@tracht-digital-solutions/tds-shared/cache";
 import { BUSINESS_CARD_SLUG } from "./businessCard";
+import { platformDefinitions, platformHref } from "./platforms";
 import { serviceDefinitions, serviceHref } from "./services";
 
 export { contentCache } from "./contentCache";
@@ -35,6 +36,10 @@ function contentPages(lang: "de" | "en"): string[] {
   return [
     ...homePages(lang),
     ...serviceDefinitions.map((service) => serviceHref(service, lang)),
+    // Their copy is code-owned, but they render the first-call, footer and
+    // contact blocks and name the Webauftritt service's title — a block save
+    // can date them like any other page.
+    ...platformDefinitions.map((platform) => platformHref(platform, lang)),
   ];
 }
 
@@ -125,6 +130,10 @@ export const alwaysPaths = [
   ...serviceDefinitions.flatMap((service) => [
     serviceHref(service, "de"),
     serviceHref(service, "en"),
+  ]),
+  ...platformDefinitions.flatMap((platform) => [
+    platformHref(platform, "de"),
+    platformHref(platform, "en"),
   ]),
   BUSINESS_CARD_SLUG.de,
   BUSINESS_CARD_SLUG.en,

@@ -36,6 +36,7 @@
  */
 
 import type { Lang } from "./i18n";
+import type { PlatformId } from "./platforms";
 import { siteConfig } from "./seo";
 import type { ServiceId, ServiceReference } from "./services";
 
@@ -81,6 +82,15 @@ export interface ReferenceCase {
    * `references.test.ts` enforces.
    */
   previewAllowed: boolean;
+  /**
+   * The shop system or CMS pages (`lib/platforms.ts`) that show this case.
+   *
+   * Only ever set on a `named` case, and `referencesForPlatform` enforces that
+   * too: putting an ANONYMOUS case on the page of the system it ran on names
+   * the system, and the system plus the story is enough to identify the client.
+   * `references.test.ts` holds both.
+   */
+  platforms?: readonly PlatformId[];
   content: Record<Lang, ServiceReference>;
 }
 
@@ -143,6 +153,9 @@ export const referenceCases: readonly ReferenceCase[] = [
     // `false` and the picture stops rendering immediately, before
     // `npm run references:sync` has even deleted the asset.
     previewAllowed: true,
+    // The site runs on WordPress (visible in its own markup), and the work
+    // described below is exactly what the WordPress page offers.
+    platforms: ["wordpress"],
     content: {
       de: {
         title: "Eine bestehende Webseite, wieder auf dem Stand",
@@ -183,13 +196,29 @@ export function referencesForService(
 ): ServiceReference[] {
   return referenceCases
     .filter((entry) => entry.services.includes(service))
-    .map((entry) => ({
-      ...entry.content[lang],
-      ...(entry.articleSlug
-        ? { articleUrl: articleUrl(entry.articleSlug, lang) }
-        : {}),
-      // Language-invariant, unlike the article link: a customer site has no
-      // localized twin to point at.
-      ...(entry.siteUrl ? { siteUrl: entry.siteUrl } : {}),
-    }));
+    .map((entry) => resolveCase(entry, lang));
+}
+
+/**
+ * The cases shown on one platform page — named cases only.
+ *
+ * The `disclosure` check is not redundant with the test: it is the rule itself,
+ * applied where the page asks, so a future anonymous case that is given a
+ * `platforms` list by mistake still cannot appear (see
+ * `ReferenceCase.platforms`).
+ */
+export function referencesForPlatform(platform: PlatformId, lang: Lang): ServiceReference[] {
+  return referenceCases
+    .filter((entry) => entry.disclosure === "named" && entry.platforms?.includes(platform))
+    .map((entry) => resolveCase(entry, lang));
+}
+
+function resolveCase(entry: ReferenceCase, lang: Lang): ServiceReference {
+  return {
+    ...entry.content[lang],
+    ...(entry.articleSlug ? { articleUrl: articleUrl(entry.articleSlug, lang) } : {}),
+    // Language-invariant, unlike the article link: a customer site has no
+    // localized twin to point at.
+    ...(entry.siteUrl ? { siteUrl: entry.siteUrl } : {}),
+  };
 }

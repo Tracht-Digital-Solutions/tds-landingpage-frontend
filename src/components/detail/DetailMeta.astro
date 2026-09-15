@@ -1,0 +1,40 @@
+---
+/**
+ * "Stand" and author under a detail page's opening action.
+ *
+ * Answer engines weigh freshness and a named author, and so does a reader
+ * deciding whether a page about software versions is still true. Both values
+ * are real: the date is the page's code-owned `updatedAt`, raised only when its
+ * content changes, and the author is the person the Impressum names. The
+ * `<time>` carries the machine date that the page's `dateModified` repeats.
+ */
+import type { Lang } from "~/lib/i18n";
+import { localizePath } from "~/lib/i18n";
+import { siteConfig } from "~/lib/seo";
+
+interface Props {
+  lang: Lang;
+  /** ISO date, `YYYY-MM-DD`. */
+  updatedAt: string;
+}
+
+const { lang, updatedAt } = Astro.props;
+const date = new Date(`${updatedAt}T12:00:00Z`);
+const month = new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-GB", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+}).format(date);
+const aboutHref = `${localizePath("/", lang)}#about`;
+const ui =
+  lang === "de"
+    ? { updated: "Stand", by: "Von", role: `Inhaber von ${siteConfig.name}, ${siteConfig.address.addressLocality} bei Hamburg` }
+    : { updated: "Updated", by: "By", role: `owner of ${siteConfig.name}, ${siteConfig.address.addressLocality} near Hamburg` };
+---
+
+<p class="mt-8 text-sm leading-relaxed text-[var(--color-muted)]">
+  {ui.updated}: <time datetime={updatedAt}>{month}</time>
+  <span aria-hidden="true"> · </span>
+  {ui.by}
+  <a href={aboutHref} class="underline underline-offset-4 decoration-[var(--color-line)] hover:text-[var(--color-primary)] transition-colors [@media(pointer:coarse)]:inline-flex [@media(pointer:coarse)]:min-h-11 [@media(pointer:coarse)]:items-center">{siteConfig.founder.name}</a>, {ui.role}
+</p>
