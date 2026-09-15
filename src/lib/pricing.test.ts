@@ -6,11 +6,13 @@ describe("pricing defaults", () => {
   it("keeps the agreed net hourly rates in both languages", () => {
     for (const lang of ["de", "en"] as const) {
       const pricing = getPricingDefault(lang);
+      // Catalogue order since 2026-09-15: Webauftritt, Beratung & Konzeption,
+      // Prozessoptimierung, Individuelle Lösungen.
       expect(
         serviceDefinitions.map((service) =>
           getServiceRate(pricing, service.id),
         ),
-      ).toEqual([75, 70, 70, 65]);
+      ).toEqual([65, 75, 70, 70]);
     }
   });
 

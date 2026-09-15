@@ -3,6 +3,11 @@
  * A service's detail page, composed from the shared detail bands in
  * `components/detail/` — the same bands the platform pages use, so a service
  * page and a platform page cannot drift apart in geometry.
+ *
+ * The `<title>` and the "Stand" date are code-owned (`seoTitle`, `updatedAt` in
+ * `lib/services.ts`), everything the page says is the resolved CMS content. The
+ * JSON-LD is one graph: the page (dated, authored, published), the service with
+ * its real hourly rate, and the breadcrumb.
  */
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
@@ -11,13 +16,14 @@ import WebsiteDemos from "~/components/sections/WebsiteDemos.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
 import ServiceCard from "~/components/ui/ServiceCard.astro";
 import DetailHero from "~/components/detail/DetailHero.astro";
+import DetailMeta from "~/components/detail/DetailMeta.astro";
 import DetailIntro from "~/components/detail/DetailIntro.astro";
 import DetailLists from "~/components/detail/DetailLists.astro";
 import DetailOutcomes from "~/components/detail/DetailOutcomes.astro";
 import DetailProcess from "~/components/detail/DetailProcess.astro";
 import DetailReferences from "~/components/detail/DetailReferences.astro";
 import DetailCta from "~/components/detail/DetailCta.astro";
-import { breadcrumbSchema } from "~/lib/jsonld";
+import { asGraph, breadcrumbNode, serviceNode, webPageNode } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 import { getPricingContent, getServiceRate } from "~/lib/pricing";
@@ -47,7 +53,10 @@ const alternatePaths = {
 };
 const pricing = await getPricingContent(lang);
 const serviceRate = getServiceRate(pricing, service.id);
-const breadcrumbLabel = lang === "de" ? "Brotkrümelnavigation" : "Breadcrumb";
+const ui =
+  lang === "de"
+    ? { breadcrumb: "Brotkrümelnavigation", home: "Startseite" }
+    : { breadcrumb: "Breadcrumb", home: "Home" };
 
 /**
  * The Webauftritt page is the hub of the shop system and CMS pages: one tile
@@ -76,57 +85,41 @@ const platformHub =
         otherMore: "Send a short note",
       };
 
-// Every service carries a rate now — Complete IT was the one that did not,
-// and `getServiceRate` is total since it went. No conditional left to write.
-const offer = {
-      "@type": "Offer",
-      priceSpecification: {
-        "@type": "UnitPriceSpecification",
-        price: serviceRate,
-        priceCurrency: "EUR",
-        unitCode: "HUR",
-        referenceQuantity: {
-          "@type": "QuantitativeValue",
-          value: 1,
-          unitCode: "HUR",
-        },
-        valueAddedTaxIncluded: false,
-      },
-};
-
-const serviceSchema = {
-  "@context": "https://schema.org",
-  "@type": "Service",
-  "@id": `${canonical}#service`,
-  url: canonical,
-  name: content.title,
-  description: content.summary,
-  serviceType: content.title,
-  provider: { "@id": `${siteConfig.url}/#organization` },
-  areaServed: siteConfig.areaServed.map((name) => ({
-    "@type": "Place",
-    name,
-  })),
-  inLanguage: lang === "de" ? "de-DE" : "en-GB",
-  serviceOutput: content.outcomes,
-  offers: offer,
-};
-
-const jsonLd = [
-  serviceSchema,
-  breadcrumbSchema([
-    { name: "Home", url: `${siteConfig.url}${homeHref}` },
+// Every service carries a rate — `getServiceRate` is total — so every service
+// page states an `Offer`. The platform pages name no amount and carry none.
+const breadcrumbId = `${canonical}#breadcrumb`;
+const jsonLd = asGraph(
+  webPageNode({
+    url: canonical,
+    name: service.seoTitle[lang],
+    description: content.summary,
+    lang,
+    dateModified: service.updatedAt,
+    breadcrumbId,
+  }),
+  serviceNode({
+    url: canonical,
+    name: content.title,
+    description: content.summary,
+    lang,
+    serviceType: content.title,
+    outputs: content.outcomes,
+    rate: serviceRate,
+  }),
+  breadcrumbNode(breadcrumbId, [
+    { name: ui.home, url: `${siteConfig.url}${homeHref}` },
     { name: content.title, url: canonical },
   ]),
-];
+);
 ---
 
 <Layout
-  title={`${content.title} — Tracht Digital Solutions`}
+  title={service.seoTitle[lang]}
   description={content.summary}
   lang={lang}
   canonical={canonical}
   alternates={alternatePaths}
+  ogImage={`/og/${lang}/${service.slug[lang]}.png`}
   jsonLd={jsonLd}
 >
   <Header />
@@ -135,13 +128,15 @@ const jsonLd = [
     <DetailHero
       backHref={servicesHref}
       backLabel={content.label}
-      navLabel={breadcrumbLabel}
+      navLabel={ui.breadcrumb}
       title={content.title}
       lead={content.summary}
       ctaHref={contactHref}
       ctaLabel={content.ctaButton}
       image={service.image}
-    />
+    >
+      <DetailMeta lang={lang} updatedAt={service.updatedAt} />
+    </DetailHero>
 
     <DetailIntro text={content.intro} />
 
