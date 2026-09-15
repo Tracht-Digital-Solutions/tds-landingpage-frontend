@@ -551,11 +551,14 @@ const pricesHref = `${home}#preise`;
   if (dialog && typeof dialog.showModal === "function") {
     let opener: HTMLElement | null = null;
     let restoreFocus = true;
+    /** Where a link inside the dialog moved the page — focus follows it on close. */
+    let destination: HTMLElement | null = null;
 
     const open = (trigger: HTMLElement | null) => {
       if (dialog.open) return;
       opener = trigger;
       restoreFocus = true;
+      destination = null;
       dialog.showModal();
     };
 
@@ -580,6 +583,7 @@ const pricesHref = `${home}#preise`;
       const link = (event.target as Element | null)?.closest?.("a[href]");
       if (link instanceof HTMLAnchorElement && link.hash && link.pathname === location.pathname) {
         restoreFocus = false;
+        destination = document.getElementById(decodeURIComponent(link.hash.slice(1)));
         dialog.close();
       }
     });
@@ -588,12 +592,28 @@ const pricesHref = `${home}#preise`;
     window.addEventListener(CONTACT_DRAFT_EVENT, () => {
       if (!dialog.open) return;
       restoreFocus = false;
+      destination = document.getElementById("contact");
       dialog.close();
     });
 
     dialog.addEventListener("close", () => {
-      if (restoreFocus) opener?.focus();
+      // `close` fires after the click that caused it, so a link's jump has
+      // already happened. The platform has meanwhile handed focus back to
+      // whatever had it before `showModal` — also after a link moved the page
+      // on, which left a keyboard user on the services button while looking at
+      // the contact form. Focus follows the page instead, without scrolling.
+      if (restoreFocus) {
+        opener?.focus();
+      } else if (destination) {
+        if (!destination.hasAttribute("tabindex")) {
+          destination.setAttribute("tabindex", "-1");
+          // A section is a destination, not a control: no ring around a block.
+          destination.style.outline = "none";
+        }
+        destination.focus({ preventScroll: true });
+      }
       opener = null;
+      destination = null;
       if (HASHES.has(location.hash)) {
         history.replaceState(null, "", `${location.pathname}${location.search}`);
       }

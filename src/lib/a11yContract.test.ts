@@ -259,10 +259,13 @@ describe("the service assistant", () => {
     expect(script).toMatch(/\.showModal\(\)/);
   });
 
-  it("gives focus back to the button that opened it, unless a link moves on", () => {
-    // Focusing the opener after the hand-off to the contact form would scroll
-    // the page back up to the services.
-    expect(script).toMatch(/if \(restoreFocus\) opener\?\.focus\(\)/);
+  it("gives focus back to the button that opened it, or to where a link moved the page", () => {
+    // On close the platform returns focus to whatever had it before
+    // `showModal` — also after a link inside the dialog moved the page on, so
+    // a keyboard user sat on the services button while looking at the contact
+    // form (measured in Chrome). Focus follows the page instead.
+    expect(script).toMatch(/if \(restoreFocus\) \{\s*opener\?\.focus\(\);/);
+    expect(script).toMatch(/destination\.focus\(\{ preventScroll: true \}\)/);
     expect(script).toMatch(/CONTACT_DRAFT_EVENT/);
     expect(script.match(/restoreFocus = false/g)?.length).toBeGreaterThanOrEqual(2);
   });
