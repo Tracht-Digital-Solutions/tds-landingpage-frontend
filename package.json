@@ -17,7 +17,9 @@
     "references:sync": "tsx scripts/references-sync.ts",
     "businesscard:sync": "tsx scripts/business-card-sync.ts",
     "images:variants": "tsx scripts/image-variants.ts",
-    "audit:ux": "node scripts/ux-audit.mjs"
+    "audit:ux": "node scripts/ux-audit.mjs",
+    "audit:seo": "node scripts/seo-audit.mjs",
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
