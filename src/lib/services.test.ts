@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { platformDefinitions } from "./platforms";
 import {
+  getServiceById,
   getServiceBySlug,
   serviceDefinitions,
   serviceHref,
@@ -8,17 +10,20 @@ import {
 
 describe("service catalog", () => {
   it("pins the four services in the agreed display order", () => {
+    // Webauftritt first since 2026-09-15 — the site leads with websites and
+    // shops. Only the order moved: ids, CMS keys and slugs are unchanged, so
+    // no URL and no saved panel block changed with it.
     expect(serviceDefinitions.map((service) => service.id)).toEqual([
+      "web-presence",
       "consulting",
       "process",
       "solutions",
-      "web-presence",
     ]);
     expect(serviceDefinitions.map((service) => service.cmsKey)).toEqual([
+      "service_web_presence",
       "service_consulting",
       "service_process",
       "service_solutions",
-      "service_web_presence",
     ]);
   });
 
@@ -47,7 +52,7 @@ describe("service catalog", () => {
   });
 
   it("resolves only the slug committed for the requested language", () => {
-    const consulting = serviceDefinitions[0];
+    const consulting = getServiceById("consulting");
 
     expect(serviceHref(consulting, "de")).toBe(
       "/leistungen/beratung-konzeption",
@@ -62,6 +67,48 @@ describe("service catalog", () => {
       "consulting",
     );
     expect(getServiceBySlug("en", "beratung-konzeption")).toBeUndefined();
+  });
+});
+
+/**
+ * The `<title>` and the "Stand" date are code-owned, like ids and slugs.
+ *
+ * The title is what a search result shows, so it names what people search for
+ * first and the brand last; the platform pages follow the same pattern, and a
+ * title shared by two indexable pages makes them compete with each other. The
+ * date is printed on the page AND repeated as `dateModified` in its JSON-LD —
+ * a malformed or future date would be a claim the page cannot back up.
+ */
+describe("service titles and dates", () => {
+  const TITLE_MAX = 65;
+
+  for (const lang of ["de", "en"] as const) {
+    it(`gives every ${lang} service a short title with the brand at the end`, () => {
+      for (const service of serviceDefinitions) {
+        const title = service.seoTitle[lang];
+        expect(title.length, `${service.id} (${lang}): ${title}`).toBeLessThanOrEqual(TITLE_MAX);
+        expect(title, `${service.id} (${lang})`).toMatch(/\S — Tracht Digital$/);
+        expect(title.trim(), `${service.id} (${lang})`).toBe(title);
+      }
+    });
+
+    it(`keeps every ${lang} title distinct across service and platform pages`, () => {
+      const titles = [
+        ...serviceDefinitions.map((service) => service.seoTitle[lang]),
+        ...platformDefinitions.map((platform) => platform.seoTitle[lang]),
+      ];
+      expect(new Set(titles).size).toBe(titles.length);
+    });
+  }
+
+  it("dates every service with a real day that is not in the future", () => {
+    for (const service of serviceDefinitions) {
+      expect(service.updatedAt, service.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      const date = new Date(`${service.updatedAt}T00:00:00Z`);
+      // Round-tripping rejects days that do not exist, like 2026-02-30.
+      expect(date.toISOString().slice(0, 10), service.id).toBe(service.updatedAt);
+      expect(date.getTime(), service.id).toBeLessThanOrEqual(Date.now());
+    }
   });
 });
 

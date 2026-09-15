@@ -75,11 +75,10 @@ export interface ServiceDefinition {
   /** Stable, code-owned identity. Never sourced from the CMS. */
   id: ServiceId;
   /**
-   * Stable display ORDER shared by overview, sitemap and navigation — and by
-   * `ServiceCard`, which keys each card's decorative shape off it.
+   * Stable display ORDER shared by overview, sitemap and navigation.
    *
    * It is never rendered as text. A visitor reaching a service from a card or
-   * from search is told "05" about a list they never saw, so the numerals came
+   * from search is told "04" about a list they never saw, so the numerals came
    * off the detail hero and the pricing cards; only the sequence survives.
    */
   number: string;
@@ -88,13 +87,27 @@ export interface ServiceDefinition {
   /** Stable, localized route segments. Never editable in the CMS. */
   slug: Record<Lang, string>;
   /**
+   * The detail page's `<title>`: what a searcher types first, the brand last.
+   *
+   * Code-owned like `slug` and `keywords`. The H1 stays the service's short
+   * name ("Webauftritt"), which is what the rest of the site calls it; the
+   * title is where the search words go ("Website & Onlineshop erstellen
+   * lassen") — a bare "Webauftritt — Tracht Digital Solutions" matched no
+   * query anybody makes.
+   */
+  seoTitle: Record<Lang, string>;
+  /**
+   * ISO date of the last change to this service's committed copy. Rendered as
+   * "Stand" on the detail page and published as its `dateModified`. Raise it
+   * only when the content changes; a panel override does not move it.
+   */
+  updatedAt: string;
+  /**
    * Plain everyday words for the overview card's chips.
    *
-   * These used to be `responsibilities.slice(0, 3)`, which put sentences
-   * like "Ziele, Abläufe und bestehende Systeme aufnehmen" into a pill
-   * three words wide. A visitor scanning six cards wants to know what a
-   * service IS — "Webseiten · Webshops · SEO · Backlinks" — not how it is
-   * carried out; the detail page answers that.
+   * A visitor scanning the cards wants to know what a service IS — "Websites ·
+   * Onlineshops · Google Ads & SEO" — not how it is carried out; the detail
+   * page answers that.
    *
    * Code-owned like `number` and `slug`, deliberately: keeping them out of
    * the CMS means the Website-CMS structured schema (another repository)
@@ -106,9 +119,7 @@ export interface ServiceDefinition {
    * under `/images/services/`.
    *
    * `null` renders no image at all — not a broken `<img>`, not an empty
-   * box — so this can ship before the artwork exists. The card always has
-   * its own geometry layer underneath either way. See IMAGES.md for the
-   * open asset tasks and the generation prompts.
+   * box — so this can ship before the artwork exists.
    */
   image: string | null;
   fallback: Record<Lang, ServiceContent>;
@@ -117,22 +128,170 @@ export interface ServiceDefinition {
 /**
  * Single source of truth for service identity, order, routes and local content.
  * The CMS may override every content field, but never ids, slugs, keywords,
- * images or prices used in structured data. References intentionally default
- * to an empty list: no customer story is published until a real, approved
- * entry exists in the CMS.
+ * images or prices used in structured data. References come from
+ * `references.ts`; no customer story is published until a real, approved case
+ * exists there.
  *
- * COPY RULE — `summary` is rendered twice: as the card text on the home page
- * and as the `<meta name="description">` of that service's detail page. It
- * must stay between 81 and 160 characters in BOTH languages, which
- * `services.test.ts` measures. Short, plain wording is the goal; a short
- * KEYWORD list belongs in `keywords`, not here.
+ * ### The order (since 2026-09-15)
+ *
+ * Webauftritt first: the site's focus is web presence and digitalization, and
+ * the web presence is what most visitors arrive asking about — it is also the
+ * service the shop system and CMS pages belong to. The other three are the
+ * digitalization half, in the order a project runs: sort, simplify, build.
+ *
+ * ### Copy rules
+ *
+ * - **du**, lowercase, like the rest of the site (decided 2026-09-15).
+ * - `summary` is rendered twice: as the card text on the pricing grid and as
+ *   the `<meta name="description">` of the detail page. It must stay between
+ *   81 and 160 characters in BOTH languages, which `services.test.ts` measures.
  */
 export const serviceDefinitions = [
   {
-    id: "consulting",
+    // The broadest of the four, and deliberately so: a site, a shop and the
+    // marketing that brings people to them are one job, not three. Marketing
+    // was briefly its own service; splitting it made the visitor choose
+    // between building a presence and being found through it, which is not a
+    // choice a small business has. The media-budget sentence in `boundaries`
+    // came from that entry and has to stay — an hourly rate on its own
+    // understates what running ads actually costs.
+    id: "web-presence",
     number: "01",
+    cmsKey: "service_web_presence",
+    slug: { de: "webauftritt", en: "web-presence" },
+    seoTitle: {
+      de: "Website & Onlineshop erstellen lassen — Tracht Digital",
+      en: "Websites and Online Shops, Built and Maintained — Tracht Digital",
+    },
+    updatedAt: "2026-09-15",
+    keywords: {
+      de: ["Websites", "Onlineshops", "Shopsysteme & CMS", "Google Ads & SEO"],
+      en: ["Websites", "Online shops", "Shop systems & CMS", "Google Ads & SEO"],
+    },
+    image: "/images/services/04-webauftritt.webp",
+    fallback: {
+      de: {
+        label: "Alle Leistungen",
+        title: "Webauftritt",
+        summary:
+          "Website, Onlineshop und Marketing aus einer Hand: Ich baue deinen Auftritt, bringe ihn zu deinen Kunden und halte ihn dauerhaft in Schuss.",
+        intro:
+          "Deine Website ist oft der erste Eindruck – und entscheidet, ob jemand anfragt. Deshalb denke ich *Gestaltung, Technik und Sichtbarkeit zusammen*: von der ersten Seite über den Shop bis zu Google.",
+        situationsTitle: "Kommt dir das bekannt vor?",
+        situations: [
+          "Deine Website ist veraltet und lässt sich kaum pflegen.",
+          "Dein Shop auf WooCommerce, Shopware oder einem Baukasten macht Probleme.",
+          "Die Seite sieht gut aus, aber kaum jemand fragt an.",
+          "Du willst online verkaufen, weißt aber nicht, wie du anfangen sollst.",
+        ],
+        responsibilitiesTitle: "Das übernehme ich",
+        responsibilities: [
+          "Ziele, Zielgruppe und Inhalte sortieren",
+          "Website bauen – für Handy und Bildschirm, barrierearm",
+          "Onlineshop einrichten oder reparieren, z. B. mit WooCommerce oder Shopware 6",
+          "Bestehende Seiten auf WordPress, TYPO3 oder bei STRATO übernehmen und pflegen",
+          "Google Ads, Unternehmensprofil und Auffindbarkeit in Ordnung bringen",
+        ],
+        outcomesTitle: "Das erreichst du",
+        outcomes: [
+          "Besucher verstehen sofort, was du anbietest",
+          "Du wirst gefunden, wenn jemand nach deinem Angebot sucht",
+          "Du weißt, was eine Anfrage kostet",
+          "Deine Seite bleibt auch in zwei Jahren pflegbar",
+        ],
+        boundariesTitle: "Was nicht dazugehört",
+        boundaries: [
+          "Das Mediabudget für Anzeigen zahlst du direkt an Google – es ist kein Teil meines Honorars.",
+          "Texte, Fotos und Rechtstexte brauchen deine Zuarbeit.",
+          "Platzierungen bei Google lassen sich nicht kaufen, sie brauchen Zeit.",
+          "Hosting, Lizenzen und Dienste Dritter werden offen ausgewiesen.",
+        ],
+        processTitle: "So gehen wir vor",
+        process: [
+          "Ziele, Inhalte und gewünschte Funktionen klären",
+          "Aufbau und gestalterische Richtung abstimmen",
+          "Seite oder Shop bauen, befüllen und gemeinsam durchgehen",
+          "Online stellen, Sichtbarkeit aufbauen und offen berichten",
+        ],
+        priceLabel: "Preis",
+        priceText:
+          "65 € netto pro Stunde, bei Anzeigen zuzüglich deines Mediabudgets. Steht der Umfang fest, ist ein Festpreis möglich.",
+        referencesLabel:
+          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
+        referencesHeadline: "Einblicke aus der Praxis",
+        references: [],
+        ctaTitle: "Soll deine Website mehr für dich tun?",
+        ctaText:
+          "Erzähl mir, was sie leisten soll und wen du erreichen willst. Wir sortieren Inhalte, Kanäle und den sinnvollen Umfang.",
+        ctaButton: "Erstgespräch vereinbaren",
+      },
+      en: {
+        label: "All services",
+        title: "Web Presence",
+        summary:
+          "Website, online shop and marketing from one source: I build your presence, bring it to your customers and keep it in good shape.",
+        intro:
+          "Your website is often the first impression – and it decides whether someone gets in touch. That is why I plan *design, technology and visibility together*: from the first page to the shop to Google.",
+        situationsTitle: "Does this sound familiar?",
+        situations: [
+          "Your website is outdated and hard to keep up to date.",
+          "Your shop on WooCommerce, Shopware or a site builder is causing problems.",
+          "The site looks good, but hardly anyone gets in touch.",
+          "You want to sell online but do not know where to start.",
+        ],
+        responsibilitiesTitle: "What I take care of",
+        responsibilities: [
+          "Sort out goals, audience and content",
+          "Build the website – for phones and screens, accessibly",
+          "Set up or repair an online shop, e.g. with WooCommerce or Shopware 6",
+          "Take over and maintain existing sites on WordPress, TYPO3 or at STRATO",
+          "Put Google Ads, the business profile and findability in order",
+        ],
+        outcomesTitle: "What you achieve",
+        outcomes: [
+          "Visitors immediately see what you offer",
+          "You are found when someone searches for what you offer",
+          "You know what an enquiry costs",
+          "Your site is still maintainable in two years",
+        ],
+        boundariesTitle: "What this does not cover",
+        boundaries: [
+          "The media budget for ads goes to Google directly – it is not part of my fee.",
+          "Copy, photos and legal texts need your input.",
+          "Google rankings cannot be bought; they take time.",
+          "Hosting, licences and third-party services are stated openly.",
+        ],
+        processTitle: "How we proceed",
+        process: [
+          "Clarify goals, content and the features you want",
+          "Agree the structure and the visual direction",
+          "Build the site or shop, fill it and walk through it together",
+          "Put it online, build visibility and report openly",
+        ],
+        priceLabel: "Price",
+        priceText:
+          "€65 net per hour, plus your media budget where ads are involved. Once the scope is settled, a fixed price is possible.",
+        referencesLabel:
+          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
+        referencesHeadline: "Examples from practice",
+        references: [],
+        ctaTitle: "Should your website do more for you?",
+        ctaText:
+          "Tell me what it needs to do and who you want to reach. We sort out the content, the channels and a sensible scope.",
+        ctaButton: "Arrange an initial consultation",
+      },
+    },
+  },
+  {
+    id: "consulting",
+    number: "02",
     cmsKey: "service_consulting",
     slug: { de: "beratung-konzeption", en: "consulting-planning" },
+    seoTitle: {
+      de: "Digitalisierungsberatung & Konzept — Tracht Digital",
+      en: "Digital Consulting & Planning — Tracht Digital",
+    },
+    updatedAt: "2026-09-15",
     keywords: {
       de: ["Einordnung", "Optionen & Kosten", "Konzept", "Fahrplan"],
       en: ["Assessment", "Options & costs", "Concept", "Roadmap"],
@@ -143,29 +302,29 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Beratung & Konzeption",
         summary:
-          "Ich sortiere Ihre digitalen Vorhaben, zeige Ihnen die Möglichkeiten mit Kosten und Folgen und mache daraus einen klaren Fahrplan.",
+          "Ich sortiere deine digitalen Vorhaben, zeige dir die Möglichkeiten mit Kosten und Folgen und mache daraus einen klaren Fahrplan.",
         intro:
-          "Nicht alles, was technisch geht, lohnt sich für Ihren Betrieb. Wir klären erst, was Sie erreichen wollen und in welcher Reihenfolge — bevor Zeit und Geld in eine Lösung fließen.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
+          "Nicht alles, was technisch geht, lohnt sich für deinen Betrieb. Wir klären zuerst, *was du erreichen willst* und in welcher Reihenfolge – bevor Zeit und Geld in eine Lösung fließen.",
+        situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Es gibt viele Ideen, aber keine Reihenfolge.",
           "Eine größere Anschaffung soll erst geprüft werden.",
           "Mehrere Systeme oder Firmen müssen zusammenarbeiten.",
-          "Sie wissen nicht, worauf Sie Ihre Entscheidung stützen sollen.",
+          "Du weißt nicht, worauf du deine Entscheidung stützen sollst.",
         ],
-        responsibilitiesTitle: "Was ich übernehme",
+        responsibilitiesTitle: "Das übernehme ich",
         responsibilities: [
           "Ziele, Abläufe und vorhandene Technik aufnehmen",
           "Möglichkeiten, Risiken und Kosten verständlich gegenüberstellen",
           "Ein Konzept schreiben, das man umsetzen kann",
           "Reihenfolge, Etappen und nächste Schritte festlegen",
         ],
-        outcomesTitle: "Das erreichen Sie",
+        outcomesTitle: "Das erreichst du",
         outcomes: [
-          "Sie wissen, was zuerst dran ist",
-          "Sie kennen die Kosten, bevor Sie entscheiden",
-          "Sie haben einen Plan mit klaren Etappen",
-          "Sie sparen sich teure Fehlentscheidungen",
+          "Du weißt, was zuerst dran ist",
+          "Du kennst die Kosten, bevor du entscheidest",
+          "Du hast einen Plan mit klaren Etappen",
+          "Du sparst dir teure Fehlentscheidungen",
         ],
         boundariesTitle: "Was nicht dazugehört",
         boundaries: [
@@ -187,9 +346,9 @@ export const serviceDefinitions = [
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
-        ctaTitle: "Sie möchten zuerst Klarheit?",
+        ctaTitle: "Du willst zuerst Klarheit?",
         ctaText:
-          "Schildern Sie kurz Ihre Lage. Im Erstgespräch klären wir, welche Frage zuerst beantwortet gehört.",
+          "Schildere kurz deine Lage. Im Erstgespräch klären wir, welche Frage zuerst beantwortet werden sollte.",
         ctaButton: "Erstgespräch vereinbaren",
       },
       en: {
@@ -198,7 +357,7 @@ export const serviceDefinitions = [
         summary:
           "I sort out your digital plans, show you the options with their costs and consequences, and turn that into a clear roadmap.",
         intro:
-          "Not everything that is technically possible is worth it for your business. We first work out what you want to achieve and in what order — before time and money go into a solution.",
+          "Not everything that is technically possible is worth it for your business. We first work out *what you want to achieve* and in what order — before time and money go into a solution.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "There are plenty of ideas, but no order to them.",
@@ -243,15 +402,20 @@ export const serviceDefinitions = [
         ctaTitle: "Want clarity first?",
         ctaText:
           "Briefly describe your situation. In the first conversation we work out which question deserves an answer first.",
-        ctaButton: "Arrange an initial conversation",
+        ctaButton: "Arrange an initial consultation",
       },
     },
   },
   {
     id: "process",
-    number: "02",
+    number: "03",
     cmsKey: "service_process",
     slug: { de: "prozessoptimierung", en: "process-optimization" },
+    seoTitle: {
+      de: "Prozessoptimierung & Automatisierung — Tracht Digital",
+      en: "Process Optimization & Automation — Tracht Digital",
+    },
+    updatedAt: "2026-09-15",
     keywords: {
       de: ["Abläufe", "Automatisierung", "Weniger Handarbeit"],
       en: ["Workflows", "Automation", "Less manual work"],
@@ -262,34 +426,34 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Prozessoptimierung",
         summary:
-          "Ich schaue mir Ihre täglichen Abläufe an, streiche unnötige Schritte und automatisiere das, was wirklich Zeit spart.",
+          "Ich schaue mir deine täglichen Abläufe an, streiche unnötige Schritte und automatisiere das, was wirklich Zeit spart.",
         intro:
-          "Gute Digitalisierung fängt nicht mit einem neuen Programm an, sondern mit einem ehrlichen Blick auf die tägliche Arbeit. Erst verstehen, dann vereinfachen.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
+          "Gute Digitalisierung beginnt nicht mit einem neuen Programm, sondern mit einem ehrlichen Blick auf deinen Arbeitsalltag. *Erst verstehen, dann vereinfachen.*",
+        situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Dieselben Daten werden mehrfach eingetippt.",
           "Freigaben und Rückfragen kosten jedes Mal Zeit.",
           "Bei Routinearbeiten schleichen sich Fehler ein.",
-          "Ein Ablauf ist über Jahre gewachsen und kennt kaum noch jemand ganz.",
+          "Ein Ablauf ist über Jahre gewachsen, und kaum jemand kennt ihn noch ganz.",
         ],
-        responsibilitiesTitle: "Was ich übernehme",
+        responsibilitiesTitle: "Das übernehme ich",
         responsibilities: [
-          "Den heutigen Ablauf mit Ihren Leuten durchgehen",
+          "Den heutigen Ablauf mit deinem Team durchgehen",
           "Zeitfresser und Fehlerquellen sichtbar machen",
           "Einen einfacheren Weg entwerfen",
           "Passende Automatisierung auswählen und einrichten",
         ],
-        outcomesTitle: "Das erreichen Sie",
+        outcomesTitle: "Das erreichst du",
         outcomes: [
-          "Sie tippen dieselben Daten nicht mehr doppelt",
+          "Du tippst dieselben Daten nicht mehr doppelt",
           "Jeder weiß, wer was übernimmt",
           "Weniger Fehler durch Handarbeit",
-          "Mehr Zeit für die eigentliche Arbeit",
+          "Mehr Zeit für deine eigentliche Arbeit",
         ],
         boundariesTitle: "Was nicht dazugehört",
         boundaries: [
           "Nicht jeder seltene Sonderfall gehört automatisiert.",
-          "Änderungen werden mit den betroffenen Mitarbeitenden abgestimmt.",
+          "Änderungen stimmen wir mit den Menschen ab, die damit arbeiten.",
           "Das Ergebnis hängt auch davon ab, wie sauber die Daten gepflegt werden.",
         ],
         processTitle: "So gehen wir vor",
@@ -306,9 +470,9 @@ export const serviceDefinitions = [
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
-        ctaTitle: "Welcher Ablauf kostet Sie jede Woche Zeit?",
+        ctaTitle: "Welcher Ablauf kostet dich jede Woche Zeit?",
         ctaText:
-          "Beschreiben Sie ihn kurz. Wir prüfen gemeinsam, wo Vereinfachung oder Automatisierung wirklich lohnt.",
+          "Beschreib ihn kurz. Wir prüfen gemeinsam, wo Vereinfachung oder Automatisierung wirklich lohnt.",
         ctaButton: "Erstgespräch vereinbaren",
       },
       en: {
@@ -317,7 +481,7 @@ export const serviceDefinitions = [
         summary:
           "I look at your day-to-day workflows, remove the steps nobody needs and automate the ones that really save time.",
         intro:
-          "Good digital work does not start with a new program, it starts with an honest look at the daily routine. Understand first, then simplify.",
+          "Good digital work does not start with a new program, it starts with an honest look at the daily routine. *Understand first, then simplify.*",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "The same data gets typed in more than once.",
@@ -327,7 +491,7 @@ export const serviceDefinitions = [
         ],
         responsibilitiesTitle: "What I take care of",
         responsibilities: [
-          "Walk through the current workflow with your people",
+          "Walk through the current workflow with your team",
           "Make the time sinks and error sources visible",
           "Design a simpler way through it",
           "Choose and set up the right automation",
@@ -362,15 +526,20 @@ export const serviceDefinitions = [
         ctaTitle: "Which routine costs you time every week?",
         ctaText:
           "Describe it briefly. Together we check where simplifying or automating is genuinely worth it.",
-        ctaButton: "Arrange an initial conversation",
+        ctaButton: "Arrange an initial consultation",
       },
     },
   },
   {
     id: "solutions",
-    number: "03",
+    number: "04",
     cmsKey: "service_solutions",
     slug: { de: "individuelle-loesungen", en: "tailored-solutions" },
+    seoTitle: {
+      de: "Individuelle Software & Schnittstellen — Tracht Digital",
+      en: "Custom Software & Integrations — Tracht Digital",
+    },
+    updatedAt: "2026-09-15",
     keywords: {
       de: ["Systeme verbinden", "Schnittstellen", "Eigene Software", "Auftragsentwicklung"],
       en: ["Connected systems", "Integrations", "Custom software", "Contract development"],
@@ -381,17 +550,17 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Individuelle Lösungen",
         summary:
-          "Ich bringe Ihre vorhandenen Programme zusammen, ergänze passende Werkzeuge und baue eigene Software nur dort, wo sie wirklich hilft.",
+          "Ich verbinde deine vorhandenen Programme, ergänze passende Werkzeuge und baue eigene Software nur dort, wo sie wirklich hilft.",
         intro:
-          "Manchmal reicht ein einzelnes Programm nicht. Dann entsteht ein Paket, das die vorhandene Technik weiter nutzt und nur dort etwas Eigenes ergänzt, wo es einen echten Vorteil bringt.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
+          "Manchmal reicht ein einzelnes Programm nicht. Dann entsteht ein Paket, das deine vorhandene Technik weiter nutzt und *nur dort Eigenes ergänzt*, wo es einen echten Vorteil bringt.",
+        situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Mehrere Programme arbeiten nicht zusammen.",
-          "Die Standardsoftware kann eine Besonderheit Ihres Betriebs nicht.",
+          "Die Standardsoftware kann eine Besonderheit deines Betriebs nicht.",
           "Für eine klar beschriebene Aufgabe gibt es kein passendes Programm.",
           "Daten sollen zuverlässig von einem Werkzeug ins andere fließen.",
         ],
-        responsibilitiesTitle: "Was ich übernehme",
+        responsibilitiesTitle: "Das übernehme ich",
         responsibilities: [
           "Anforderungen und vorhandene Technik zusammenbringen",
           "Abwägen: Standardprodukt, Schnittstelle oder Eigenbau",
@@ -399,10 +568,10 @@ export const serviceDefinitions = [
           "Nach klarer Aufgabe entwickeln, testen und dokumentieren",
           "Bausteine verbinden, übergeben und weiter betreuen",
         ],
-        outcomesTitle: "Das erreichen Sie",
+        outcomesTitle: "Das erreichst du",
         outcomes: [
-          "Ihre Programme arbeiten zusammen",
-          "Sie bekommen genau das Werkzeug, das fehlt",
+          "Deine Programme arbeiten zusammen",
+          "Du bekommst genau das Werkzeug, das fehlt",
           "Der Quellcode ist lesbar und dokumentiert",
           "Einer verantwortet das Gesamtbild",
         ],
@@ -426,9 +595,9 @@ export const serviceDefinitions = [
           "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
-        ctaTitle: "Ihre Werkzeuge passen nicht zusammen?",
+        ctaTitle: "Deine Werkzeuge passen nicht zusammen?",
         ctaText:
-          "Zeigen Sie mir, wie es heute läuft. Wir klären, was bleiben kann und wo eine Ergänzung sinnvoll ist.",
+          "Zeig mir, wie es heute läuft. Wir klären, was bleiben kann und wo eine Ergänzung sinnvoll ist.",
         ctaButton: "Erstgespräch vereinbaren",
       },
       en: {
@@ -437,7 +606,7 @@ export const serviceDefinitions = [
         summary:
           "I connect the programs you already use, add the right tools and build custom software only where it genuinely helps.",
         intro:
-          "Sometimes one program is not enough. Then it becomes a package that keeps using the technology you have and only adds something custom where it brings a real advantage.",
+          "Sometimes one program is not enough. Then it becomes a package that keeps using the technology you have and *only adds something custom* where it brings a real advantage.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "Several programs do not work together.",
@@ -483,137 +652,7 @@ export const serviceDefinitions = [
         ctaTitle: "Your tools do not fit together?",
         ctaText:
           "Show me how it works today. We work out what can stay and where an addition makes sense.",
-        ctaButton: "Arrange an initial conversation",
-      },
-    },
-  },
-  {
-    // The broadest of the four, and deliberately so: a site, a shop and the
-    // marketing that brings people to them are one job, not three. Marketing
-    // was briefly its own service; splitting it made the visitor choose
-    // between building a presence and being found through it, which is not a
-    // choice a small business has. The media-budget sentence in `boundaries`
-    // came from that entry and has to stay — an hourly rate on its own
-    // understates what running ads actually costs.
-    id: "web-presence",
-    number: "04",
-    cmsKey: "service_web_presence",
-    slug: { de: "webauftritt", en: "web-presence" },
-    keywords: {
-      de: ["Webseiten", "Webshops", "Google Ads", "SEO"],
-      en: ["Websites", "Online shops", "Google Ads", "SEO"],
-    },
-    image: "/images/services/04-webauftritt.webp",
-    fallback: {
-      de: {
-        label: "Alle Leistungen",
-        title: "Webauftritt",
-        summary:
-          "Webseiten, Webshops und Marketing: Ich baue Ihren Auftritt, bringe ihn zu den Kunden – und pflege ihn dauerhaft.",
-        intro:
-          "Ein Auftritt besteht aus drei Teilen: die Seite, der Verkauf darüber und der Weg, auf dem Kunden dorthin finden. Gestaltung, Technik und Sichtbarkeit werden deshalb zusammen gedacht.",
-        situationsTitle: "Kommt Ihnen das bekannt vor?",
-        situations: [
-          "Die Seite ist alt und lässt sich kaum pflegen.",
-          "Der Laden läuft, online verkaufen Sie noch nicht.",
-          "Die Seite ist gut, aber es kommt kaum jemand.",
-          "Anzeigen laufen, doch niemand erklärt Ihnen die Zahlen.",
-        ],
-        responsibilitiesTitle: "Was ich übernehme",
-        responsibilities: [
-          "Ziele, Zielgruppe und Inhalte sortieren",
-          "Seite bauen: für Handy und Bildschirm, barrierearm",
-          "Webshop einrichten, Artikel und Bestand in den Griff bekommen",
-          "Google Ads betreuen und das Unternehmensprofil in Ordnung bringen",
-          "Organische Auffindbarkeit, Newsletter und laufende Pflege regeln",
-        ],
-        outcomesTitle: "Das erreichen Sie",
-        outcomes: [
-          "Besucher verstehen sofort, was Sie anbieten",
-          "Ihr Angebot erscheint, wenn jemand danach sucht",
-          "Sie wissen, was eine Anfrage kostet",
-          "Die Seite ist auch in zwei Jahren noch pflegbar",
-        ],
-        boundariesTitle: "Was nicht dazugehört",
-        boundaries: [
-          "Das Mediabudget zahlen Sie direkt an Google – es ist kein Teil meines Honorars.",
-          "Texte, Fotos und Rechtstexte brauchen Ihre Zuarbeit.",
-          "Organische Platzierungen lassen sich nicht kaufen, sie brauchen Zeit.",
-          "Pflege, Hosting und Dienste Dritter werden offen ausgewiesen.",
-        ],
-        processTitle: "So gehen wir vor",
-        process: [
-          "Ziele, Inhalte und gewünschte Funktionen klären",
-          "Aufbau und gestalterische Richtung abstimmen",
-          "Seite bauen, befüllen und gemeinsam durchgehen",
-          "Online stellen, Sichtbarkeit aufbauen und offen berichten",
-        ],
-        priceLabel: "Preis",
-        priceText:
-          "65 € netto pro Stunde, bei Anzeigen zuzüglich Ihres Mediabudgets. Steht der Umfang fest, ist ein Festpreis möglich.",
-        referencesLabel:
-          "Veröffentlicht wird nur nach ausdrücklicher Freigabe — anonymisiert, sofern nicht anders vereinbart.",
-        referencesHeadline: "Einblicke aus der Praxis",
-        references: [],
-        ctaTitle: "Soll Ihr Auftritt mehr für Sie arbeiten?",
-        ctaText:
-          "Erzählen Sie mir, was er leisten soll und wen Sie erreichen wollen. Wir sortieren Inhalte, Kanäle und den sinnvollen Umfang.",
-        ctaButton: "Erstgespräch vereinbaren",
-      },
-      en: {
-        label: "All services",
-        title: "Web Presence",
-        summary:
-          "Websites, online shops and marketing: I build your presence, bring it to your customers – and keep it maintained.",
-        intro:
-          "A presence has three parts: the site, what you sell through it, and the route customers take to find it. Design, technology and visibility are planned together for that reason.",
-        situationsTitle: "Does this sound familiar?",
-        situations: [
-          "The site is old and hard to keep up to date.",
-          "The shop runs well, but you do not sell online yet.",
-          "The site is fine, but hardly anyone comes.",
-          "Ads are running, yet nobody explains the numbers.",
-        ],
-        responsibilitiesTitle: "What I take care of",
-        responsibilities: [
-          "Sort out the goals, the audience and the content",
-          "Build it: for phones and screens, accessibly",
-          "Set up the online shop and get products and stock under control",
-          "Run Google Ads and put the business profile in order",
-          "Sort out organic findability, newsletters and ongoing upkeep",
-        ],
-        outcomesTitle: "What you achieve",
-        outcomes: [
-          "Visitors immediately see what you offer",
-          "Your offer shows up when someone searches for it",
-          "You know what an enquiry costs",
-          "The site is still maintainable in two years",
-        ],
-        boundariesTitle: "What this does not cover",
-        boundaries: [
-          "The media budget goes to Google directly – it is not part of my fee.",
-          "Copy, photos and legal texts need your input.",
-          "Organic rankings cannot be bought; they take time.",
-          "Upkeep, hosting and third-party services are stated openly.",
-        ],
-        processTitle: "How we proceed",
-        process: [
-          "Clarify goals, content and the functions you want",
-          "Agree the structure and the visual direction",
-          "Build it, fill it and walk through it together",
-          "Put it online, build visibility and report openly",
-        ],
-        priceLabel: "Price",
-        priceText:
-          "€65 net per hour, plus your media budget where ads are involved. Once the scope is settled, a fixed price is possible.",
-        referencesLabel:
-          "Published only with the client's explicit approval — anonymised unless agreed otherwise.",
-        referencesHeadline: "Examples from practice",
-        references: [],
-        ctaTitle: "Should your presence work harder for you?",
-        ctaText:
-          "Tell me what it needs to do and who you want to reach. We sort out the content, the channels and a sensible scope.",
-        ctaButton: "Arrange an initial conversation",
+        ctaButton: "Arrange an initial consultation",
       },
     },
   },
@@ -739,9 +778,7 @@ export { retiredServiceTargets };
  * rather than only overwritten where a committed one exists. `validateService
  * References` already drops them upstream, so this is belt and braces — but
  * the old form leaned entirely on that: at any position whose committed case
- * lacks a link, a CMS-supplied one passed straight through. That was
- * unreachable while every committed case had an article; it stopped being
- * unreachable the moment a case without one was published.
+ * lacks a link, a CMS-supplied one passed straight through.
  */
 export function mergeReferences(
   committed: readonly ServiceReference[],
