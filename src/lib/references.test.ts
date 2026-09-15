@@ -14,7 +14,8 @@
  * customer under a sentence swearing anonymity is not a bug any type can catch.
  */
 import { describe, expect, it } from "vitest";
-import { articleUrl, referenceCases, referencesForService } from "./references";
+import { articleUrl, referenceCases, referencesForPlatform, referencesForService } from "./references";
+import { platformDefinitions } from "./platforms";
 import {
   getServiceById,
   mergeReferences,
@@ -128,6 +129,28 @@ describe("reference catalog", () => {
           getServiceById(service).fallback[lang].referencesLabel,
           `${service}.${lang}`,
         ).not.toMatch(claimsAnonymity);
+      }
+    }
+  });
+
+  it("puts only named cases on a shop system or CMS page", () => {
+    // An anonymous case on the page of the system it ran on names that system,
+    // and the system plus the story is enough to identify the client.
+    const platformIds = new Set(platformDefinitions.map((platform) => platform.id));
+    for (const entry of referenceCases) {
+      if (!entry.platforms || entry.platforms.length === 0) continue;
+      expect(entry.disclosure, entry.id).toBe("named");
+      expect(new Set(entry.platforms).size, entry.id).toBe(entry.platforms.length);
+      for (const platform of entry.platforms) {
+        expect(platformIds, `${entry.id} → ${platform}`).toContain(platform);
+      }
+    }
+    for (const platform of platformDefinitions) {
+      for (const lang of LANGS) {
+        for (const reference of referencesForPlatform(platform.id, lang)) {
+          const entry = referenceCases.find((candidate) => candidate.content[lang].title === reference.title);
+          expect(entry?.disclosure, `${platform.id}: ${reference.title}`).toBe("named");
+        }
       }
     }
   });

@@ -156,6 +156,117 @@ export function pricingSchema(items: ServiceOffering[]): WithContext {
   };
 }
 
+/**
+ * BreadcrumbList as a node of an `@graph` — no `@context` of its own, and an
+ * `@id` the page's `WebPage` can point at.
+ */
+export function breadcrumbNode(
+  id: string,
+  items: { name: string; url: string }[],
+): object {
+  return {
+    "@type": "BreadcrumbList",
+    "@id": id,
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
+interface WebPageInput {
+  url: string;
+  name: string;
+  description: string;
+  lang: "de" | "en";
+  /** ISO date of the last content change — the same date the page shows. */
+  dateModified?: string;
+  /** What the page is about, tied to a public entry so the entity is unambiguous. */
+  about?: { name: string; sameAs?: string };
+  breadcrumbId?: string;
+}
+
+/**
+ * The page itself as an entity: part of the site, published by the
+ * organisation, written by the person the Impressum names, dated.
+ *
+ * Every value here must be visible on the page too — the date is the "Stand"
+ * line, the author the byline beside it. Structured data that says more than
+ * the page is exactly what search engines are told to distrust.
+ */
+export function webPageNode(input: WebPageInput): object {
+  return {
+    "@type": "WebPage",
+    "@id": `${input.url}#webpage`,
+    url: input.url,
+    name: input.name,
+    description: input.description,
+    inLanguage: input.lang === "de" ? "de-DE" : "en-GB",
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+    publisher: { "@id": `${siteConfig.url}/#organization` },
+    author: { "@id": `${siteConfig.url}/#person` },
+    ...(input.dateModified ? { dateModified: input.dateModified } : {}),
+    ...(input.about
+      ? {
+          about: {
+            "@type": "Thing",
+            name: input.about.name,
+            ...(input.about.sameAs ? { sameAs: input.about.sameAs } : {}),
+          },
+        }
+      : {}),
+    ...(input.breadcrumbId ? { breadcrumb: { "@id": input.breadcrumbId } } : {}),
+  };
+}
+
+interface ServiceInput {
+  url: string;
+  name: string;
+  description: string;
+  lang: "de" | "en";
+  serviceType: string;
+  outputs?: readonly string[];
+  /** Net hourly rate in EUR. Omitted where the page names no amount. */
+  rate?: number;
+}
+
+/**
+ * A service offered on a page, provided by the organisation. `offers` appears
+ * only with a real hourly rate — the platform pages state none, so they carry
+ * none (see `lib/platforms.ts`).
+ */
+export function serviceNode(input: ServiceInput): object {
+  return {
+    "@type": "Service",
+    "@id": `${input.url}#service`,
+    url: input.url,
+    name: input.name,
+    description: input.description,
+    serviceType: input.serviceType,
+    provider: { "@id": `${siteConfig.url}/#organization` },
+    areaServed: siteConfig.areaServed.map((name) => ({ "@type": "Place", name })),
+    inLanguage: input.lang === "de" ? "de-DE" : "en-GB",
+    ...(input.outputs ? { serviceOutput: [...input.outputs] } : {}),
+    ...(input.rate !== undefined
+      ? {
+          offers: {
+            "@type": "Offer",
+            priceSpecification: {
+              "@type": "UnitPriceSpecification",
+              price: input.rate,
+              priceCurrency: "EUR",
+              unitCode: "HUR",
+              referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "HUR" },
+              valueAddedTaxIncluded: false,
+            },
+          },
+        }
+      : {}),
+  };
+}
+
 interface FaqItem {
   q: string;
   a: string;

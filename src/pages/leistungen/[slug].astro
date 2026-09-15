@@ -1,7 +1,9 @@
 ---
 import ServiceDetailPage from "~/components/services/ServiceDetailPage.astro";
+import PlatformDetailPage from "~/components/platforms/PlatformDetailPage.astro";
 import ErrorView from "~/components/ErrorView.astro";
 import Layout from "~/layouts/Layout.astro";
+import { getPlatformBySlug } from "~/lib/platforms";
 import {
   getServiceBySlug,
   resolveServiceContent,
@@ -16,14 +18,19 @@ const lang = "de" as const;
 const retired = retiredServiceTarget(lang, Astro.params.slug);
 if (retired) return Astro.redirect(retired, 301);
 
+// A service first, then a shop system or CMS page (`lib/platforms.ts`). The two
+// catalogues never share a slug — `platforms.test.ts` holds that.
 const service = getServiceBySlug(lang, Astro.params.slug);
+const platform = service ? undefined : getPlatformBySlug(Astro.params.slug);
 const content = service ? await resolveServiceContent(service, lang) : undefined;
-if (!service) Astro.response.status = 404;
+if (!service && !platform) Astro.response.status = 404;
 ---
 
 {
   service && content ? (
     <ServiceDetailPage service={service} content={content} lang={lang} />
+  ) : platform ? (
+    <PlatformDetailPage platform={platform} lang={lang} />
   ) : (
     <Layout title="404 · Seite nicht gefunden" lang={lang} bare noindex>
       <ErrorView code="404" />

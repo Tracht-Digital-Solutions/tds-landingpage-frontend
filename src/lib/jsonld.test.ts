@@ -1,11 +1,59 @@
 import { describe, expect, it } from "vitest";
 import {
   asGraph,
+  breadcrumbNode,
   breadcrumbSchema,
   faqPageSchema,
   organizationSchema,
   personSchema,
+  serviceNode,
+  webPageNode,
 } from "./jsonld";
+import { siteConfig } from "./seo";
+
+describe("graph nodes for detail pages", () => {
+  const url = "https://tracht-digital.de/leistungen/woocommerce";
+
+  it("dates the page, names its author and publisher, and ties it to its topic", () => {
+    const node = webPageNode({
+      url,
+      name: "WooCommerce",
+      description: "d",
+      lang: "de",
+      dateModified: "2026-09-15",
+      about: { name: "WooCommerce", sameAs: "https://de.wikipedia.org/wiki/WooCommerce" },
+      breadcrumbId: `${url}#breadcrumb`,
+    }) as Record<string, any>;
+    expect(node["@type"]).toBe("WebPage");
+    expect(node["@id"]).toBe(`${url}#webpage`);
+    expect(node.author["@id"]).toBe(personSchema()["@id"]);
+    expect(node.publisher["@id"]).toBe(organizationSchema()["@id"]);
+    expect(node.isPartOf["@id"]).toBe(`${siteConfig.url}/#website`);
+    expect(node.dateModified).toBe("2026-09-15");
+    expect(node.about.sameAs).toBe("https://de.wikipedia.org/wiki/WooCommerce");
+    expect(node.breadcrumb["@id"]).toBe(`${url}#breadcrumb`);
+    expect(node.inLanguage).toBe("de-DE");
+  });
+
+  it("offers a price only where the page names one", () => {
+    const base = { url, name: "n", description: "d", lang: "en" as const, serviceType: "t" };
+    expect((serviceNode(base) as Record<string, unknown>).offers).toBeUndefined();
+    const priced = serviceNode({ ...base, rate: 65 }) as Record<string, any>;
+    expect(priced.offers.priceSpecification.price).toBe(65);
+    expect(priced.offers.priceSpecification.valueAddedTaxIncluded).toBe(false);
+    expect(priced.provider["@id"]).toBe(organizationSchema()["@id"]);
+  });
+
+  it("builds a breadcrumb node with an id and no context of its own", () => {
+    const node = breadcrumbNode(`${url}#breadcrumb`, [
+      { name: "Start", url: "https://tracht-digital.de/" },
+      { name: "WooCommerce", url },
+    ]) as Record<string, any>;
+    expect(node["@context"]).toBeUndefined();
+    expect(node["@id"]).toBe(`${url}#breadcrumb`);
+    expect(node.itemListElement.map((item: { position: number }) => item.position)).toEqual([1, 2]);
+  });
+});
 
 /**
  * The JSON-LD generators feed Google rich results + AI search parsers.

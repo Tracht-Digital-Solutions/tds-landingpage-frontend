@@ -8,6 +8,7 @@ import {
   renderUrlset,
   type SitemapEntry,
 } from "./sitemap";
+import { platformDefinitions, platformHref } from "./platforms";
 import { serviceDefinitions, serviceHref } from "./services";
 
 /**
@@ -55,6 +56,14 @@ describe("SITEMAP_ENTRIES", () => {
     }
   });
 
+  it("covers every shop system and CMS page in both trees", () => {
+    for (const platform of platformDefinitions) {
+      const entry = SITEMAP_ENTRIES.find((e) => e.de === platformHref(platform, "de"));
+      expect(entry, platform.id).toBeDefined();
+      expect(entry?.en, platform.id).toBe(platformHref(platform, "en"));
+    }
+  });
+
   /**
    * `/preise` is retired and must STAY out.
    *
@@ -94,6 +103,14 @@ describe("hreflangGroup", () => {
     const service = serviceDefinitions[0];
     const de = serviceHref(service, "de");
     const en = serviceHref(service, "en");
+    expect(hreflangGroup(de)).toEqual([de, en]);
+    expect(hreflangGroup(en)).toEqual([de, en]);
+  });
+
+  it("pairs a platform page across the two trees", () => {
+    const platform = platformDefinitions[0];
+    const de = platformHref(platform, "de");
+    const en = platformHref(platform, "en");
     expect(hreflangGroup(de)).toEqual([de, en]);
     expect(hreflangGroup(en)).toEqual([de, en]);
   });

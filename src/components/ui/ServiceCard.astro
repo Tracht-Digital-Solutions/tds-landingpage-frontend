@@ -9,13 +9,16 @@ interface Props {
   problem: string;
   /** The first "Das erreichen Sie" line — what the visitor ends up with. */
   result: string;
+  /** Scope words. An empty list renders no scope row at all. */
   keywords: readonly string[];
   /** Photo under `/images/services/`; null renders the tile without a band. */
   image?: string | null;
   lang: Lang;
+  /** The visible next step, when the tile leads somewhere other than a detail page. */
+  moreLabel?: string;
 }
 
-const { href, title, problem, result, keywords, image = null, lang } = Astro.props;
+const { href, title, problem, result, keywords, image = null, lang, moreLabel } = Astro.props;
 
 // This site's own labels for its own tiles — code-owned, not CMS copy.
 const ui =
@@ -80,25 +83,27 @@ const PHOTO = { width: 1586, height: 992 };
           <dd>{result}</dd>
         </div>
       )}
-      <div>
-        <dt>{ui.scope}</dt>
-        <dd>
-          <ul class="flex flex-wrap gap-2 mt-1.5">
-            {keywords.map((keyword) => (
-              <li class="px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] transition-colors duration-200 group-hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))]">
-                {keyword}
-              </li>
-            ))}
-          </ul>
-        </dd>
-      </div>
+      {keywords.length > 0 && (
+        <div>
+          <dt>{ui.scope}</dt>
+          <dd>
+            <ul class="flex flex-wrap gap-2 mt-1.5">
+              {keywords.map((keyword) => (
+                <li class="px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] transition-colors duration-200 group-hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))]">
+                  {keyword}
+                </li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      )}
     </dl>
 
     {/* The visible "next step". Decorative for assistive tech: the title link
         already names the destination, and a second link to the same page
         would be read twice. */}
     <span aria-hidden="true" class="service-tile__more">
-      {ui.more}
+      {moreLabel ?? ui.more}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="5" y1="12" x2="19" y2="12"></line>
         <polyline points="12 5 19 12 12 19"></polyline>

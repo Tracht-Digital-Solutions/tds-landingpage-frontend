@@ -20,7 +20,9 @@ const cards = {
 };
 const showcase = read("src/components/sections/Showcase.astro");
 const websiteDemos = read("src/components/sections/WebsiteDemos.astro");
-const serviceDetail = read("src/components/services/ServiceDetailPage.astro");
+// The reference cards of a detail page live in the shared detail band since
+// the service page was split into `components/detail/`.
+const serviceDetail = read("src/components/detail/DetailReferences.astro");
 
 /** Leading spaces of the first line matching `needle`, or -1. */
 function indentOf(source: string, needle: string | RegExp): number {

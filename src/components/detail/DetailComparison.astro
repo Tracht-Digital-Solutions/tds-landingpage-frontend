@@ -1,0 +1,144 @@
+---
+/**
+ * A decision table with its one-sentence answer above it and its sources
+ * below — the kind of block a reader compares and an answer engine can cite.
+ *
+ * A real `<table>` with row and column headers, inside a scroll box that
+ * takes focus (a phone scrolls it sideways, a keyboard needs to reach it). Only
+ * checkable criteria belong in it; every fact it rests on is in `sources`.
+ */
+import type { Lang } from "~/lib/i18n";
+import type { PlatformComparison, PlatformSource } from "~/lib/platforms";
+
+interface Props {
+  comparison: PlatformComparison;
+  sources: readonly PlatformSource[];
+  lang: Lang;
+  updatedLabel: string;
+}
+
+const { comparison, sources, lang, updatedLabel } = Astro.props;
+const ui = lang === "de" ? { sources: "Quellen" } : { sources: "Sources" };
+---
+
+<div class="section-spacing tds-tone-sand">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+    <section
+      class="bg-[var(--lp-surface-card)] rounded-[6px] p-7 md:p-10"
+      aria-labelledby="platform-comparison-title"
+    >
+      <h2
+        id="platform-comparison-title"
+        class="display text-3xl md:text-4xl text-[var(--color-black)] mb-5"
+      >
+        {comparison.title}
+      </h2>
+      <p class="max-w-3xl text-[var(--color-muted)] leading-relaxed mb-8">{comparison.intro}</p>
+
+      <div class="comparison__scroll" tabindex="0" role="region" aria-labelledby="platform-comparison-title">
+        <table class="comparison">
+          <thead>
+            <tr>
+              {comparison.columns.map((column) => (
+                <th scope="col">{column}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {comparison.rows.map((row) => (
+              <tr>
+                <th scope="row">{row[0]}</th>
+                {row.slice(1).map((cell) => (
+                  <td>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {sources.length > 0 && (
+        <div class="mt-8 text-sm leading-relaxed text-[var(--color-muted)]">
+          <p class="font-medium text-[var(--color-black)] mb-2">
+            {ui.sources} <span class="font-normal text-[var(--color-muted)]">({updatedLabel})</span>
+          </p>
+          <ul class="comparison__sources">
+            {sources.map((source) => (
+              <li>
+                <a
+                  href={source.url[lang]}
+                  rel="noopener"
+                  class="underline underline-offset-4 decoration-[var(--color-line)] hover:text-[var(--color-primary)] transition-colors"
+                >
+                  {source.label[lang]}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  </div>
+</div>
+
+<style>
+  /* Wider than a phone on purpose: three columns of sentences squeezed into
+     375px become one word per line. The box scrolls instead, and the page
+     itself never does. */
+  .comparison__scroll {
+    overflow-x: auto;
+    border-radius: 6px;
+  }
+  .comparison__scroll:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .comparison {
+    width: 100%;
+    min-width: 40rem;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .comparison th,
+  .comparison td {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .comparison thead th {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--color-black);
+  }
+  .comparison tbody th {
+    width: 22%;
+    font-weight: 600;
+    color: var(--color-black);
+  }
+  .comparison td {
+    color: var(--color-muted);
+  }
+  .comparison tbody tr:last-child th,
+  .comparison tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .comparison__sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (pointer: coarse) {
+    .comparison__sources a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+    }
+  }
+</style>

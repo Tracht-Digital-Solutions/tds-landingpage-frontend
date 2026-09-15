@@ -1,0 +1,46 @@
+---
+/**
+ * A platform page's offers, one card each, each a section of its own with an
+ * anchor — the targets of the table of contents in `DetailLists`.
+ *
+ * Every card opens with the sentence that answers "what do I get", then the
+ * concrete points. Soft cards on paper, the same fill the price cards use.
+ */
+import type { PlatformOffer } from "~/lib/platforms";
+
+interface Props {
+  offers: readonly PlatformOffer[];
+}
+
+const { offers } = Astro.props;
+// Three offers share a row on a wide screen; four sit two by two.
+const columns = offers.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2";
+---
+
+<div class="section-spacing">
+  <div class:list={["max-w-7xl mx-auto px-6 md:px-8 lg:px-12 grid gap-5 md:gap-6", columns]}>
+    {offers.map((offer) => (
+      <section
+        id={offer.id}
+        class="rounded-[6px] bg-[var(--color-soft)] p-7 md:p-10"
+        aria-labelledby={`${offer.id}-title`}
+      >
+        <h2
+          id={`${offer.id}-title`}
+          class="display text-3xl md:text-4xl text-[var(--color-black)] mb-5"
+        >
+          {offer.title}
+        </h2>
+        <p class="text-[var(--color-muted)] leading-relaxed mb-6">{offer.text}</p>
+        <ul class="space-y-3">
+          {offer.points.map((point) => (
+            <li class="flex gap-3 text-[var(--color-black)] leading-relaxed">
+              <span aria-hidden="true" class="text-[var(--color-accent)]">✓</span>
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</div>
