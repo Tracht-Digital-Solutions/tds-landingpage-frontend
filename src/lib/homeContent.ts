@@ -11,8 +11,9 @@ import type { Lang } from "./i18n";
  * `*asterisks*` in a string mark a word for emphasis (see `./emphasis`).
  * They are optional: a CMS override without them renders as plain text.
  *
- * ### The standing copy rules (see `homeContent.test.ts`)
+ * ### The standing copy rules (see `homeContent.test.ts`, `addressForm.test.ts`)
  *
+ * - **du**, lowercase (decided 2026-09-15). Only the legal texts stay formal.
  * - No free and no time-boxed first conversation: never "kostenlos",
  *   "kostenfrei", "gratis" or a minute count. The one sentence about cost is
  *   "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren." (decided
@@ -23,18 +24,17 @@ import type { Lang } from "./i18n";
  *   site already made elsewhere. No invented numbers, clients or outcomes.
  *
  * The blocks added in the 2026-09 redesign (`home_trust`, `first_call`,
- * `pricing_logic`) have no Website-CMS schema yet. Like `references_home` and
- * `website_demos` before them they fall back cleanly to what is written here
- * until the panel declares them.
+ * `pricing_logic`) and the fields added on 2026-09-15 (`home_hero.ctaNote`,
+ * `contact.sub`'s local default, `journalHeading`) have no Website-CMS schema
+ * yet. Like `references_home` and `website_demos` before them they fall back
+ * cleanly to what is written here until the panel declares them.
  */
 
 export interface HomeHeroContent {
   /**
    * The line above the H1: WHO the page is for.
    *
-   * It replaced the brand motto ("Digitale Lösungen, die wirklich passen."),
-   * which led the hero for a while and said nothing a visitor could check. A
-   * business decides in seconds whether a page is meant for it; the target
+   * A business decides in seconds whether a page is meant for it; the target
    * group belongs in the first line it reads.
    */
   eyebrow: string;
@@ -45,6 +45,12 @@ export interface HomeHeroContent {
   sub: string;
   cta1: string;
   cta2: string;
+  /**
+   * One line under the actions that takes the risk out of the primary one:
+   * when costs arise and how soon an answer comes — the two statements the site
+   * already makes elsewhere, nothing new.
+   */
+  ctaNote: string;
   /** Not rendered since the 2026-09 redesign; kept so a stored `home_hero` block still loads. */
   scrollHint: string;
 }
@@ -56,10 +62,9 @@ export interface WhyMeContent {
   p1: string;
   p2: string;
   /**
-   * Not rendered since the 2026-09 redesign. Four claims ("Verständlich
-   * erklärt", …) sat under the portrait; the hero's trust card carries three
-   * facts that can be checked instead. Kept in the shape so a stored `why_me`
-   * block stays readable in the editor.
+   * Not rendered since the 2026-09 redesign — the hero's trust card carries
+   * three facts that can be checked instead. Kept in the shape so a stored
+   * `why_me` block stays readable in the editor.
    */
   reasons: Array<{
     title: string;
@@ -83,9 +88,7 @@ export interface ServicesOverviewContent {
  * there is deliberately no list here to override: the CMS can retitle the
  * section, never repopulate it.
  *
- * Since the 2026-09 redesign the framing says plainly that these are NOT
- * client work — they used to share one carousel with the customer cases, and
- * nothing told the two apart.
+ * The framing says plainly that these are NOT client work.
  *
  * ### Why there is a second, singular set
  *
@@ -109,10 +112,8 @@ export interface WebsiteDemosContent {
 /**
  * Framing for the home page's CUSTOMER CASES (`sections/CustomerCases.astro`).
  *
- * The CMS key stays `references_home`. The block framed a merged shelf of
- * cases and demos for a while; it frames the cases alone again now, which is
- * what it was created for — renaming the key would orphan whatever is stored
- * under it in the panel.
+ * The CMS key stays `references_home` — renaming the key would orphan whatever
+ * is stored under it in the panel.
  *
  * `label` repeats the publication promise the service pages make. While a case
  * is published under a customer's name, no surface may claim that references
@@ -143,14 +144,21 @@ export interface DigitalResponsibilityContent {
 }
 
 /**
- * Nur die Überschrift des Kontaktabschnitts.
+ * The contact section's heading and the sentence under it.
  *
- * Der Rest des `contact`-Blocks (Label, Untertitel, E-Mail, Telefon, Ort)
- * kommt weiterhin aus tds-shared, weil der Footer dieselben Felder liest.
- * Die Überschrift ist dagegen reine Startseiten-Copy: sie steht in genau
- * einem `<h2>` in `sections/Contact.astro` und nirgends sonst.
+ * The rest of the `contact` block (label, email, phone, location) still comes
+ * from tds-shared, because the footer reads the same fields. The heading and
+ * the sub are home-page copy — and since 2026-09-15 the sub says "du", which
+ * the shared bundle does not.
  */
 export interface ContactHeadingContent {
+  headline: string;
+  headlineAccent: string;
+  sub: string;
+}
+
+/** The journal teaser's heading — formerly tds-shared's `blog.headline`, shared with the blog. */
+export interface JournalHeadingContent {
   headline: string;
   headlineAccent: string;
 }
@@ -173,8 +181,7 @@ export interface TrustFact {
 /**
  * The hero's trust card: THREE facts a visitor can check, each linking to the
  * part of the page that proves it. Not four, not a row of logos — a trust
- * signal that cannot be checked is decoration, and three is what the brief
- * allowed.
+ * signal that cannot be checked is decoration.
  */
 export interface HomeTrustContent {
   title: string;
@@ -204,7 +211,7 @@ export interface PricingLogicStep {
   text: string;
 }
 
-/** "So entsteht Ihr Preis" — how a price comes about, without estimating one. */
+/** "So entsteht dein Preis" — how a price comes about, without estimating one. */
 export interface PricingLogicContent {
   title: string;
   steps: PricingLogicStep[];
@@ -219,6 +226,7 @@ interface HomeContent {
   referencesHome: ReferencesHomeContent;
   digitalResponsibility: DigitalResponsibilityContent;
   contactHeading: ContactHeadingContent;
+  journalHeading: JournalHeadingContent;
   trust: HomeTrustContent;
   firstCall: FirstCallContent;
   pricingLogic: PricingLogicContent;
@@ -228,32 +236,34 @@ const content: Record<Lang, HomeContent> = {
   de: {
     hero: {
       eyebrow: "Für Selbstständige, lokale Betriebe und kleine Unternehmen",
-      // Three parts, and the split is the line break: the headline is set on
-      // one line, the accent word starts the second. `text-wrap: balance`
-      // would otherwise pull "Ein" up onto line one, which reads as a
-      // sentence cut in half.
-      headline: "Weniger Handarbeit.",
-      headlineAccent: "Ein",
-      headlineSuffix: "Ansprechpartner für alles Digitale.",
+      // Two benefits for the site's two halves — the web presence and the
+      // digitalization — and the split is the line break: the headline is one
+      // line, the accent word starts the second. `text-wrap: balance` would
+      // otherwise pull the accent word up onto line one.
+      headline: "Websites, die Kunden bringen.",
+      headlineAccent: "Digitalisierung,",
+      headlineSuffix: "die entlastet.",
       sub:
-        "Doppelt getippte Daten, Programme ohne Verbindung, eine veraltete Webseite: Ich plane die Lösung, setze sie selbst um und bleibe *Ihr fester Ansprechpartner*.",
+        "Veraltete Website, Ärger mit dem Shop, doppelte Handarbeit? Ich plane die Lösung, setze sie selbst um und bleibe *dein fester Ansprechpartner*.",
       cta1: "Erstgespräch vereinbaren",
-      cta2: "Leistungen entdecken",
+      cta2: "Leistungen ansehen",
+      ctaNote:
+        "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren. Antwort in der Regel innerhalb von 24 Stunden.",
       scrollHint: "Wieso ich?",
     },
     whyMe: {
       headline: "Wieso",
       headlineAccent: "ich?",
       lead:
-        "Sie brauchen jemanden, der den *Überblick behält* — nicht jemanden, der einzelne Aufträge abarbeitet.",
+        "Du brauchst jemanden, der *den Überblick behält* – nicht fünf Anbieter, die sich gegenseitig die Verantwortung zuschieben.",
       p1:
-        "Ich berate und setze selbst um. Sie müssen nichts zwischen mehreren Firmen übersetzen, und es gibt immer jemanden, der das ganze Bild kennt.",
+        "Ich berate und setze selbst um: Website, Shop und Abläufe aus einer Hand. Du musst nichts zwischen Agentur, Programmierer und Hoster übersetzen.",
       p2:
-        "Ich erkläre Ihnen die Möglichkeiten in normaler Sprache und bleibe auf Wunsch auch nach dem Start zuständig.",
+        "Ich erkläre dir die Möglichkeiten in normaler Sprache und bleibe auf Wunsch auch nach dem Start dein Ansprechpartner – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
       reasons: [
         {
           title: "Ein fester Ansprechpartner",
-          description: "Sie wissen immer, wer sich kümmert.",
+          description: "Du weißt immer, wer sich kümmert.",
         },
         {
           title: "Verständlich erklärt",
@@ -261,7 +271,7 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "Beratung und Umsetzung",
-          description: "Ich plane es nicht nur — ich baue es auch.",
+          description: "Ich plane es nicht nur – ich baue es auch.",
         },
         {
           title: "Auch nach dem Start da",
@@ -270,29 +280,29 @@ const content: Record<Lang, HomeContent> = {
       ],
     },
     servicesOverview: {
-      headline: "Was ich",
-      headlineAccent: "anbiete?",
+      headline: "Wobei ich dir",
+      headlineAccent: "helfe.",
       intro:
-        "Vier Bereiche, *ein Ansprechpartner*. Wählen Sie einen Einstieg — oder wir klären zuerst gemeinsam, was Sie wirklich brauchen.",
+        "Vier Leistungen, *ein Ansprechpartner*: vom Webauftritt bis zur Digitalisierung deiner Abläufe. Such dir den passenden Einstieg aus.",
     },
     websiteDemos: {
       headline: "Beispielseiten zum",
       headlineAccent: "Ausprobieren.",
       intro:
-        "Eigene Demos mit fiktiven Firmen und eigene Projekte – *keine Kundenaufträge*. Klicken Sie sich durch, bevor wir über Ihre Seite sprechen.",
+        "Eigene Demos mit fiktiven Firmen und eigene Projekte – *keine Kundenaufträge*. Klick dich durch, bevor wir über deine Seite sprechen.",
       serviceIntro:
-        "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*. Klicken Sie sich durch, bevor wir über Ihre sprechen.",
+        "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*. Klick dich durch, bevor wir über deine sprechen.",
       headlineSingle: "Eine Beispielseite zum",
       introSingle:
-        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Sehen Sie sich um, bevor wir über Ihre Seite sprechen.",
+        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Schau dich um, bevor wir über deine Seite sprechen.",
       serviceIntroSingle:
-        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Sehen Sie sich um, bevor wir über Ihre sprechen.",
+        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Schau sie dir an, bevor wir über deine sprechen.",
     },
     referencesHome: {
       headline: "Umgesetzt für",
       headlineAccent: "Kunden.",
       intro:
-        "Projekte aus meiner Arbeit – mit dem, was *dabei herausgekommen ist*, und den Leistungen dahinter.",
+        "Echte Projekte – mit dem, was *dabei herausgekommen ist*, und den Leistungen dahinter.",
       label:
         "Veröffentlicht nur mit ausdrücklicher Freigabe der Kunden – anonymisiert, sofern nicht anders vereinbart.",
       serviceCta: "Zur passenden Leistung",
@@ -303,7 +313,7 @@ const content: Record<Lang, HomeContent> = {
       body:
         "Digitale Themen bleiben oft liegen: zwischen Projekten, Anbietern und der Frage, wer eigentlich zuständig ist. Ich behalte den Überblick und sorge dafür, dass alles zusammenpasst.",
       points: [
-        "Sagen, was zuerst dran ist — verständlich",
+        "Sagen, was zuerst dran ist – verständlich",
         "Projekte selbst umsetzen oder Beteiligte steuern",
         "Vorhandene Systeme und neue Lösungen zusammenbringen",
         "Den Auftritt sichtbar machen und dort pflegen, wo er wirkt",
@@ -314,13 +324,18 @@ const content: Record<Lang, HomeContent> = {
     contactHeading: {
       headline: "Womit fangen",
       headlineAccent: "wir an?",
+      sub: "Schreib mir in zwei, drei Sätzen, wo es hakt. Ich antworte in der Regel innerhalb von 24 Stunden.",
+    },
+    journalHeading: {
+      headline: "Wissen für",
+      headlineAccent: "deinen Betrieb.",
     },
     trust: {
-      title: "Worauf Sie sich verlassen können",
+      title: "Darauf kannst du dich verlassen",
       facts: [
         {
           title: "Ein fester Ansprechpartner",
-          text: "Sie sprechen immer mit mir: {name}, Inhaber, aus {town} bei Hamburg.",
+          text: "Du sprichst immer mit mir: {name}, Inhaber, aus {town} bei Hamburg.",
           linkLabel: "Wer ich bin",
         },
         {
@@ -341,15 +356,15 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Ziel",
-          text: "Sie schildern, wo es hakt. Ich frage nach und sage ehrlich, ob und wie ich helfen kann.",
+          text: "Du schilderst, wo es hakt. Ich frage nach und sage dir ehrlich, ob und wie ich helfen kann.",
         },
         {
           label: "Vorbereitung",
-          text: "Zwei, drei Sätze zu Ihrer Lage genügen.",
+          text: "Zwei, drei Sätze zu deiner Lage genügen – ein Link hilft.",
         },
         {
           label: "Ergebnis",
-          text: "Sie wissen danach, was zuerst dran ist und was es ungefähr kostet.",
+          text: "Du weißt danach, was zuerst dran ist und was es ungefähr kostet.",
         },
         {
           label: "Kosten",
@@ -359,7 +374,7 @@ const content: Record<Lang, HomeContent> = {
       cta: "Erstgespräch vereinbaren",
     },
     pricingLogic: {
-      title: "So entsteht Ihr Preis",
+      title: "So entsteht dein Preis",
       steps: [
         {
           title: "Einordnen",
@@ -380,24 +395,25 @@ const content: Record<Lang, HomeContent> = {
   en: {
     hero: {
       eyebrow: "For the self-employed, local businesses and small companies",
-      headline: "Less manual work.",
-      headlineAccent: "One",
-      headlineSuffix: "point of contact for everything digital.",
+      headline: "Websites that bring in customers.",
+      headlineAccent: "Digitalization",
+      headlineSuffix: "that saves you time.",
       sub:
-        "Data typed in twice, programs that don't talk to each other, an outdated website: I plan the fix, build it myself and stay *your single point of contact*.",
+        "An outdated website, trouble with your shop, data typed in twice? I plan the fix, build it myself and stay *your single point of contact*.",
       cta1: "Arrange an initial consultation",
-      cta2: "Explore services",
+      cta2: "View services",
+      ctaNote: "Costs only arise once we agree on an assignment. I usually reply within 24 hours.",
       scrollHint: "Why me?",
     },
     whyMe: {
       headline: "Why",
       headlineAccent: "me?",
       lead:
-        "You need someone who *keeps the whole picture* in view — not someone who works through isolated tasks.",
+        "You need someone who *keeps the whole picture* in view – not five suppliers passing responsibility back and forth.",
       p1:
-        "I advise and build. You never have to translate a decision between suppliers, and someone always knows how the whole setup fits together.",
+        "I advise and build: website, shop and workflows from one source. You never have to translate between an agency, a developer and a host.",
       p2:
-        "I explain the options in plain language and, if you want, stay responsible after launch.",
+        "I explain the options in plain language and, if you like, stay your point of contact after launch – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
       reasons: [
         {
           title: "One steady contact",
@@ -418,10 +434,10 @@ const content: Record<Lang, HomeContent> = {
       ],
     },
     servicesOverview: {
-      headline: "What I",
-      headlineAccent: "offer?",
+      headline: "How I can",
+      headlineAccent: "help.",
       intro:
-        "Four areas, *one point of contact*. Pick a starting point — or let us work out first what you actually need.",
+        "Four services, *one point of contact*: from your web presence to digitalizing your workflows. Pick the starting point that fits.",
     },
     websiteDemos: {
       headline: "Example sites to",
@@ -440,7 +456,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Delivered for",
       headlineAccent: "clients.",
       intro:
-        "Projects from my work – with *what came out of them* and the services behind them.",
+        "Real projects – with *what came out of them* and the services behind them.",
       label:
         "Published only with the client's explicit approval – anonymised unless agreed otherwise.",
       serviceCta: "See the matching service",
@@ -462,6 +478,11 @@ const content: Record<Lang, HomeContent> = {
     contactHeading: {
       headline: "Where shall we",
       headlineAccent: "start?",
+      sub: "Tell me in two or three sentences where things get stuck. I usually reply within 24 hours.",
+    },
+    journalHeading: {
+      headline: "Know-how for",
+      headlineAccent: "your business.",
     },
     trust: {
       title: "What you can rely on",
@@ -493,7 +514,7 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           label: "Preparation",
-          text: "Two or three sentences about your situation are enough.",
+          text: "Two or three sentences about your situation are enough – a link helps.",
         },
         {
           label: "Outcome",

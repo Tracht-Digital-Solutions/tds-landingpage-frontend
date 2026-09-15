@@ -29,8 +29,8 @@ export const siteConfig = {
    * those.
    */
   description: {
-    de: "Digitalisierung für Unternehmen mit fester Ansprechperson: Beratung, Prozesse, eigene Lösungen und Webauftritt — aus Schwarzenbek bei Hamburg.",
-    en: "Your dedicated contact for business digitalization: advice, processes, tailored software and web presence — from Schwarzenbek near Hamburg.",
+    de: "Webseiten, Onlineshops und Digitalisierung für Unternehmen: ein fester Ansprechpartner für Planung, Umsetzung und Pflege – aus Schwarzenbek bei Hamburg.",
+    en: "Websites, online shops and digitalization for businesses: one steady contact for planning, building and upkeep – from Schwarzenbek near Hamburg.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
@@ -42,7 +42,9 @@ export const siteConfig = {
   vatID: "DE450639725",
   founder: {
     name: "Julian Tracht",
-    jobTitle: "Digitalisierungsberater & Inhaber",
+    // Websites first, like the site since 2026-09-15. Shown on the business
+    // card and in the vCard as well.
+    jobTitle: "Webentwickler & Digitalisierungsberater",
     sameAs: [] as string[], // populated from socials below post-launch
   },
   /** Verified business address (matches the Impressum). */
@@ -58,18 +60,30 @@ export const siteConfig = {
   geo: { latitude: 53.504, longitude: 10.48 },
   /** Service-area for ProfessionalService schema. */
   areaServed: ["Hamburg", "Schwarzenbek", "Norddeutschland", "Deutschland"],
-  /** Topics for schema `knowsAbout` — the keyword set the site targets. */
+  /**
+   * Topics for schema `knowsAbout` — the keyword set the site targets, in the
+   * words people search with. Every system named here has a page of its own
+   * (`lib/platforms.ts`); a topic without one would be a claim the site does
+   * not back up.
+   */
   knowsAbout: [
     "Digitalisierung für Unternehmen",
-    "Prozessautomatisierung",
+    "Website erstellen",
+    "Webdesign",
     "Webentwicklung",
-    "Webshop",
+    "Onlineshop erstellen",
+    "Website-Wartung",
+    "WordPress",
+    "WooCommerce",
+    "Shopware 6",
+    "TYPO3",
     "Onlineshop für lokale Geschäfte",
     "Google Ads",
     "Suchmaschinenwerbung",
     "Lokale Sichtbarkeit",
+    "Prozessautomatisierung",
     "Individualsoftware",
-    "Auftragsentwicklung",
+    "Schnittstellen",
     "IT-Beratung",
   ],
   /** Public social URLs — surface in JSON-LD `sameAs` and the

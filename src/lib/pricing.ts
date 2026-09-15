@@ -43,7 +43,7 @@ const defaults: Record<Lang, PricingContent> = {
     headline: "Preise ohne",
     headlineAccent: "Überraschungen.",
     sub:
-      "Sie sehen, was welche Leistung kostet. Steht der Umfang vorher fest, geht es auch zum *Festpreis*.",
+      "Du siehst vorher, was welche Leistung kostet. Steht der Umfang fest, geht es auch zum *Festpreis*.",
     teaserHeadline: "Planbare Sätze,",
     teaserHeadlineAccent: "passende Modelle.",
     teaserSub:
@@ -62,11 +62,11 @@ const defaults: Record<Lang, PricingContent> = {
     // here as well printed each of them twice.
     notes: [
       "Alle Preise sind netto, zuzüglich Mehrwertsteuer.",
-      "Bei Anzeigen kommt Ihr Mediabudget dazu; es geht direkt an Google.",
+      "Bei Anzeigen kommt dein Mediabudget dazu; es geht direkt an Google.",
     ],
-    ctaTitle: "Welcher Rahmen passt zu Ihnen?",
+    ctaTitle: "Welcher Rahmen passt zu dir?",
     ctaSub:
-      "Im Erstgespräch ordnen wir Ihr Vorhaben ein. Danach wissen Sie, welches Modell passt.",
+      "Im Erstgespräch ordnen wir dein Vorhaben ein. Danach weißt du, welches Modell passt.",
     ctaButton: "Erstgespräch vereinbaren",
     back: "Zurück zur Startseite",
   },

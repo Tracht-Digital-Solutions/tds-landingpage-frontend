@@ -117,6 +117,10 @@ const { lang, hero, trust } = Astro.props;
           <a href="#contact" class="hero-cta hero-cta--primary">{hero.cta1}</a>
           <a href="#services" class="hero-cta hero-cta--secondary">{hero.cta2}</a>
         </div>
+        {/* The risk taken off the primary action, in the two sentences the site
+            is allowed to say about it: when costs arise, and how soon an answer
+            comes. No "free", no minutes (homeContent.test.ts). */}
+        {hero.ctaNote && <p class="hero-note hero-rise">{hero.ctaNote}</p>}
       </div>
 
       {
@@ -287,6 +291,19 @@ const { lang, hero, trust } = Astro.props;
     }
   }
 
+  .hero-note {
+    max-width: 40rem;
+    margin: 1rem auto 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  @media (min-width: 768px) {
+    .hero-note {
+      margin-inline: 0;
+    }
+  }
+
   .hero-cta {
     display: inline-flex;
     align-items: center;
@@ -416,6 +433,9 @@ const { lang, hero, trust } = Astro.props;
     }
     .hero-actions.hero-rise {
       animation-delay: 120ms;
+    }
+    .hero-note.hero-rise {
+      animation-delay: 140ms;
     }
     .hero-trust.hero-rise {
       animation-delay: 160ms;

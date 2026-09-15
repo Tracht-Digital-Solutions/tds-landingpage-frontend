@@ -1,23 +1,25 @@
 /**
  * Source of truth for the FAQ section content. Lives here so both
  * the visible `<details>` accordions and the FAQPage JSON-LD on the
- * homepage can read the same items — Google's rich-result eligibility
- * check rejects FAQ schema where the answer text doesn't match the
+ * homepage can read the same items — structured data has to match the
  * visible answer 1:1, so we render from one place.
  *
  * Copy stays inline (not promoted to tds-shared) — FAQ answers drift
  * faster than the rest of the bundle.
  *
- * Antworten bleiben bei höchstens zwei Sätzen. Elf Fragen mit je vier
- * Sätzen liest niemand; eine FAQ, die gelesen wird, nimmt der Anfrage
- * die Hürde, eine ungelesene ist nur Seitenlänge.
+ * ### How the questions are written (2026-09-15)
  *
- * `intro` IS STILL PART OF THE SHAPE but is no longer rendered: a heading
- * reading "Häufige Fragen" followed by a sentence saying these are the
- * frequent questions earned nothing. It stays in the type and therefore in
- * the `faq_v2` block schema so text an admin already saved keeps showing
- * up in the editor instead of vanishing from the field list. Do not delete
- * it to "clean up" — that is what would drop it from the CMS.
+ * - As a visitor or a search asks them ("Was kostet eine Website?"), and
+ *   answered in the first sentence — a question an answer engine lifts has to
+ *   stand on its own.
+ * - At most two or three sentences. A FAQ that is read takes the hurdle out of
+ *   the enquiry; an unread one is only page length.
+ * - "du", no free and no timed first conversation, no price range — the one
+ *   sentence about the first conversation's cost is fixed (`homeContent.test.ts`).
+ *
+ * `intro` IS STILL PART OF THE SHAPE but is no longer rendered. It stays in the
+ * type and therefore in the `faq_v2` block schema so text an admin already
+ * saved keeps showing up in the editor. Do not delete it to "clean up".
  */
 
 export interface FaqItem {
@@ -41,27 +43,31 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Häufige",
         headlineAccent: "Fragen.",
         intro:
-          "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten — kurz beantwortet.",
+          "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten – kurz beantwortet.",
         items: [
           {
-            q: "Ich weiß noch nicht, was ich brauche. Können wir trotzdem reden?",
-            a: "Ja. Sagen Sie einfach, was im Alltag Zeit kostet oder nicht rundläuft. Den nächsten Schritt finden wir gemeinsam.",
+            q: "Was kostet eine Website oder ein Onlineshop?",
+            a: "Das hängt vom Umfang ab. Abgerechnet wird nach Aufwand zum Stundensatz – oder zum Festpreis, wenn Ziel und Umfang vorher klar sind. Alle Stundensätze findest du bei den Preisen.",
           },
           {
-            q: "Können Sie ein Vorhaben von Anfang bis Ende übernehmen?",
-            a: "Ja. Je nach Absprache übernehme ich Planung, Umsetzung, die Abstimmung mit Ihren bisherigen Anbietern und die laufende Pflege.",
+            q: "Ich weiß noch nicht, was ich brauche. Können wir trotzdem reden?",
+            a: "Ja. Erzähl mir, was im Alltag Zeit kostet oder nicht rundläuft – oder probier den Leistungsassistenten aus. Den nächsten Schritt finden wir gemeinsam.",
+          },
+          {
+            q: "Kannst du meine bestehende Website oder meinen Shop übernehmen?",
+            a: "Ja – auch wenn sie mit WordPress, WooCommerce, Shopware, TYPO3 oder bei STRATO läuft. Ich verschaffe mir einen Überblick, behebe Fehler und kümmere mich um die Pflege.",
           },
           {
             q: "Was gehört zum Webauftritt dazu?",
-            a: "Die Webseite, auf Wunsch ein Webshop und das Marketing, über das Kunden Sie finden — Google Ads, Auffindbarkeit und Newsletter. Was davon sinnvoll ist, klären wir vorher.",
+            a: "Die Website, auf Wunsch ein Onlineshop und das Marketing, über das Kunden dich finden – Google Ads, Auffindbarkeit und Newsletter. Was davon sinnvoll ist, klären wir vorher.",
           },
           {
-            q: "Arbeiten Sie mit meinen bisherigen Anbietern weiter?",
-            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt — ich schließe die Lücken und koordiniere die Beteiligten.",
+            q: "Arbeitest du mit meinen bisherigen Anbietern weiter?",
+            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt – ich schließe die Lücken und koordiniere die Beteiligten.",
           },
           {
             q: "Was ist der erste Schritt?",
-            a: "Ein Erstgespräch. Danach wissen Sie, was zuerst dran ist und was es ungefähr kostet.",
+            a: "Ein Erstgespräch. Danach weißt du, was zuerst dran ist und was es ungefähr kostet.",
           },
           {
             // The one sentence about cost the site makes (decided 2026-09-12).
@@ -70,12 +76,8 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             a: "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
           },
           {
-            q: "Wovon hängt der Preis ab?",
-            a: "Vom Bereich, vom Umfang und davon, wie klar die Aufgabe ist. Abgegrenzte Vorhaben gehen auch zum Festpreis.",
-          },
-          {
-            q: "Bleiben Sie nach der Umsetzung dabei?",
-            a: "Auf Wunsch ja — nach Bedarf oder als festes Monatsmodell.",
+            q: "Bleibst du nach dem Start dabei?",
+            a: "Auf Wunsch ja – nach Bedarf oder als festes Monatsmodell.",
           },
         ],
       }
@@ -87,12 +89,16 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           "The key questions about working together, ownership and pricing — answered briefly.",
         items: [
           {
-            q: "I don't know what I need yet. Can we still talk?",
-            a: "Yes. Just say what costs you time or does not run smoothly. We work out the next step together.",
+            q: "What does a website or an online shop cost?",
+            a: "That depends on the scope. Work is billed by effort at the hourly rate – or at a fixed price when goal and scope are clear up front. You will find every hourly rate under Pricing.",
           },
           {
-            q: "Can you take a project from start to finish?",
-            a: "Yes. Depending on what we agree, I handle planning, delivery, coordination with your existing suppliers and the ongoing upkeep.",
+            q: "I don't know what I need yet. Can we still talk?",
+            a: "Yes. Tell me what costs you time or does not run smoothly – or try the service assistant. We work out the next step together.",
+          },
+          {
+            q: "Can you take over my existing website or shop?",
+            a: "Yes – including sites running on WordPress, WooCommerce, Shopware, TYPO3 or at STRATO. I get an overview, fix errors and take care of the upkeep.",
           },
           {
             q: "What does web presence include?",
@@ -109,10 +115,6 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           {
             q: "What does the first conversation cost?",
             a: "Costs only arise once we agree on an assignment.",
-          },
-          {
-            q: "What does the price depend on?",
-            a: "The area, the scope, and how clearly the task is defined. Bounded projects can be done at a fixed price.",
           },
           {
             q: "Do you stay involved after launch?",

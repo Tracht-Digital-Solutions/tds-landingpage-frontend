@@ -1,27 +1,31 @@
 /**
- * Leistungs-Finder — three questions that point a visitor at one or more of the
- * four services, and the copy for them.
+ * Leistungsassistent — three questions that point a visitor at one or more of
+ * the four services, with the published rate of each, and the copy for them.
  *
  * ### Why it exists
  *
  * The services section describes four offers from the provider's side. A
  * visitor arrives with a problem, not with a service name, and "which of these
- * is mine?" is exactly the question that makes people leave instead of writing.
- * The finder asks from the visitor's side — what bothers you, what do you
- * recognise, how far along are you — and answers with services, reasons and the
- * way to the first conversation.
+ * is mine — and what does it cost?" is exactly the question that makes people
+ * leave instead of writing. The assistant asks from the visitor's side — what
+ * bothers you, what do you recognise, how far along are you — and answers with
+ * services, reasons, the hourly rate and the way to the first conversation.
+ *
+ * Since 2026-09-15 it is not a section of its own any more: it waits behind a
+ * button ("Leistungsassistent starten") in the services and the pricing section
+ * and opens as a dialog (`components/ServiceAssistant.astro`).
  *
  * ### What it may and may not claim
  *
  * - The starting points it offers are the services' own `situations`, resolved
  *   on the server exactly like on the service pages (the island receives them as
- *   props). An edit in the panel therefore changes the finder too, and the finder
- *   never states a problem the service pages do not.
- * - The result is an orientation, and says so. It names no price and no
- *   duration (`serviceFinder.test.ts` holds the same copy rules as
- *   `homeContent.test.ts`).
+ *   props). An edit in the panel therefore changes the assistant too.
+ * - The only amount it names is each service's published hourly rate, taken
+ *   from the pricing block on the server — the number the price list shows. No
+ *   estimate, no range, no duration (`serviceFinder.test.ts`).
  * - It sends nothing. The result becomes a draft in the contact form's message
  *   field (`contactDraft.ts`); the visitor reads it, edits it, and submits.
+ * - It says "du", like the rest of the site.
  *
  * **No runtime imports.** The island bundles this file; type imports only.
  */
@@ -29,7 +33,7 @@ import type { Lang } from "./i18n";
 import type { ServiceId } from "./services";
 
 /** The catalogue order — also the tie-breaker between equally strong matches. */
-export const SERVICE_ORDER: readonly ServiceId[] = ["consulting", "process", "solutions", "web-presence"];
+export const SERVICE_ORDER: readonly ServiceId[] = ["web-presence", "consulting", "process", "solutions"];
 
 export type TopicId = ServiceId | "unsure";
 export type StageId = "clear" | "rough" | "open";
@@ -47,6 +51,10 @@ export interface FinderService {
   summary: string;
   href: string;
   situations: string[];
+  /** The published net hourly rate from the pricing block. */
+  rate: number;
+  /** The shop system and CMS pages that belong to this service, if any. */
+  platforms?: { label: string; href: string }[];
 }
 
 export interface SituationChoice {
@@ -104,7 +112,12 @@ interface FinderCopy {
   rankAlso: string;
   whyLabel: string;
   detailLink: string;
+  rateLabel: string;
+  /** The published rate in words. The number comes from the pricing block, never from here. */
+  rateValue: (rate: number) => string;
+  platformsLabel: string;
   note: string;
+  priceLink: string;
   cta: string;
   handoffNote: string;
   draft: { intro: string; services: string; situations: string; stage: string };
@@ -113,41 +126,45 @@ interface FinderCopy {
 export const FINDER_COPY: Record<Lang, FinderCopy> = {
   de: {
     progress: (step, total) => `Schritt ${step} von ${total}`,
-    topicsQuestion: "Worum geht es Ihnen vor allem?",
+    topicsQuestion: "Worum geht es dir vor allem?",
     topicsHelp: "Mehrfachauswahl möglich.",
     topics: {
+      "web-presence": { label: "Website, Shop oder Sichtbarkeit" },
       consulting: { label: "Erst klären, was sinnvoll ist" },
       process: { label: "Abläufe kosten zu viel Zeit" },
       solutions: { label: "Programme arbeiten nicht zusammen" },
-      "web-presence": { label: "Webseite, Webshop oder Sichtbarkeit" },
       unsure: { label: "Ich weiß es noch nicht", hint: "Dann sortieren wir zuerst gemeinsam." },
     },
-    situationsQuestion: "Was davon kennen Sie aus Ihrem Betrieb?",
+    situationsQuestion: "Was davon kennst du aus deinem Betrieb?",
     situationsHelp: "Mehrfachauswahl möglich – oder ohne Auswahl weiter.",
-    stageQuestion: "Wie weit ist Ihr Vorhaben?",
+    stageQuestion: "Wie weit ist dein Vorhaben?",
     stageHelp: "Eine Antwort.",
     stages: {
       clear: { label: "Klar umrissen", hint: "Ziel und Umfang stehen, es soll umgesetzt werden." },
       rough: { label: "Eine grobe Idee", hint: "Die Richtung ist klar, die Details noch nicht." },
       open: { label: "Noch ganz offen", hint: "Erst einmal sortieren, was überhaupt dran ist." },
     },
-    pickOne: "Bitte wählen Sie mindestens eine Antwort.",
-    pickStage: "Bitte wählen Sie eine Antwort.",
+    pickOne: "Bitte wähle mindestens eine Antwort.",
+    pickStage: "Bitte wähle eine Antwort.",
     next: "Weiter",
     back: "Zurück",
     showResult: "Ergebnis anzeigen",
     restart: "Neu starten",
-    resultTitle: "Das passt zu Ihrem Anliegen",
+    resultTitle: "Das passt zu deinem Anliegen",
     rankBest: "Passt am besten",
     rankAlso: "Passt ebenfalls",
-    whyLabel: "Ihre Angaben dazu:",
+    whyLabel: "Deine Angaben dazu:",
     detailLink: "Leistung im Detail",
-    note: "Eine erste Orientierung, keine Festlegung – im Erstgespräch klären wir, was wirklich passt.",
+    rateLabel: "Stundensatz:",
+    rateValue: (rate) => `${rate} € netto pro Stunde`,
+    platformsLabel: "Seiten zu deinem System:",
+    note: "Eine erste Orientierung, keine Festlegung – im Erstgespräch klären wir, was wirklich passt. Steht der Umfang fest, ist auch ein Festpreis möglich.",
+    priceLink: "So entsteht dein Preis",
     cta: "Mit dieser Auswahl Erstgespräch vereinbaren",
     handoffNote:
-      "Ihre Auswahl steht dann im Nachrichtenfeld des Kontaktformulars. Gesendet wird erst, wenn Sie das Formular selbst abschicken.",
+      "Deine Auswahl steht dann im Nachrichtenfeld des Kontaktformulars. Gesendet wird erst, wenn du das Formular selbst abschickst.",
     draft: {
-      intro: "Aus dem Leistungs-Finder:",
+      intro: "Aus dem Leistungsassistenten:",
       services: "Passende Leistungen",
       situations: "Ausgangslage",
       stage: "Stand",
@@ -158,10 +175,10 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     topicsQuestion: "What matters most to you?",
     topicsHelp: "Choose as many as apply.",
     topics: {
+      "web-presence": { label: "Website, online shop or visibility" },
       consulting: { label: "Work out first what makes sense" },
       process: { label: "Workflows take too much time" },
       solutions: { label: "Programs do not work together" },
-      "web-presence": { label: "Website, online shop or visibility" },
       unsure: { label: "I do not know yet", hint: "Then we sort things out together first." },
     },
     situationsQuestion: "Which of these do you recognise from your business?",
@@ -184,12 +201,16 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rankAlso: "Also fits",
     whyLabel: "Your answers:",
     detailLink: "Service details",
-    note: "A first sense of direction, not a commitment – in the first conversation we work out what really fits.",
+    rateLabel: "Hourly rate:",
+    rateValue: (rate) => `€${rate} net per hour`,
+    platformsLabel: "Pages for your system:",
+    note: "A first sense of direction, not a commitment – in the first conversation we work out what really fits. Once the scope is clear, a fixed price is possible too.",
+    priceLink: "How your price comes about",
     cta: "Arrange an initial consultation with this selection",
     handoffNote:
       "Your selection then appears in the message field of the contact form. Nothing is sent until you submit the form yourself.",
     draft: {
-      intro: "From the service finder:",
+      intro: "From the service assistant:",
       services: "Matching services",
       situations: "Starting point",
       stage: "Stage",
@@ -197,24 +218,26 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
   },
 };
 
-/** The section around the finder, and the pointer to it from the services. */
+/** The dialog around the assistant, and the buttons that open it. */
 export const FINDER_SECTION: Record<
   Lang,
-  { headline: string; headlineAccent: string; intro: string; servicesLink: string }
+  { title: string; intro: string; close: string; servicesLink: string; pricingLink: string }
 > = {
   de: {
-    headline: "Welche Leistung passt zu",
-    headlineAccent: "Ihnen?",
+    title: "Welche Leistung passt zu dir?",
     intro:
-      "Drei kurze Fragen, eine erste Orientierung. Das Ergebnis können Sie direkt ins Kontaktformular übernehmen – gesendet wird erst, wenn Sie es selbst abschicken.",
-    servicesLink: "Unsicher, was passt? Zum Leistungs-Finder",
+      "Drei kurze Fragen, eine erste Orientierung – mit dem passenden Stundensatz. Das Ergebnis kannst du direkt ins Kontaktformular übernehmen; gesendet wird erst, wenn du es selbst abschickst.",
+    close: "Leistungsassistent schließen",
+    servicesLink: "Du weißt nicht genau, was du brauchst – oder was es kostet? Leistungsassistent starten",
+    pricingLink: "Unsicher, welche Leistung und welcher Satz zu dir passen? Leistungsassistent starten",
   },
   en: {
-    headline: "Which service fits",
-    headlineAccent: "you?",
+    title: "Which service fits you?",
     intro:
-      "Three short questions, a first sense of direction. You can take the result straight into the contact form – nothing is sent until you submit it yourself.",
-    servicesLink: "Not sure which fits? Try the service finder",
+      "Three short questions, a first sense of direction – with the matching hourly rate. You can take the result straight into the contact form; nothing is sent until you submit it yourself.",
+    close: "Close the service assistant",
+    servicesLink: "Not sure what you need – or what it costs? Start the service assistant",
+    pricingLink: "Not sure which service and rate fit you? Start the service assistant",
   },
 };
 

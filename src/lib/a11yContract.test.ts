@@ -187,8 +187,14 @@ describe("the rest of the home page", () => {
     expect(form).toMatch(/role="alert"/);
   });
 
-  it("addresses the visitor formally, also when something fails", () => {
-    expect(code(read("src/components/islands/ContactForm.tsx"))).not.toMatch(/Probiere|schreib mir/);
+  it("addresses the visitor with du, also when something fails", () => {
+    // The shared bundle still says "Sie" for every other site, so the sentences
+    // that address the visitor come from this site's own copy module.
+    const form = code(read("src/components/islands/ContactForm.tsx"));
+    expect(form).toMatch(/contactFormCopy\(lang\)/);
+    const copy = code(read("src/lib/contactCopy.ts"));
+    expect(copy).toMatch(/Bitte versuch es später noch einmal oder schreib mir direkt/);
+    expect(copy).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre)\b/);
   });
 
   it("gives the service tiles a name, not a paragraph", () => {
@@ -209,9 +215,11 @@ describe("the rest of the home page", () => {
   });
 });
 
-describe("the service finder", () => {
+describe("the service assistant", () => {
   const island = code(read("src/components/islands/ServiceFinder.tsx"));
-  const section = read("src/components/sections/ServiceFinder.astro");
+  const assistant = read("src/components/ServiceAssistant.astro");
+  const markup = template(assistant.slice(0, assistant.indexOf("<style")));
+  const script = code(assistant.slice(assistant.lastIndexOf("<script")));
 
   it("asks every question as a fieldset whose legend is the question", () => {
     expect(island).toMatch(/<fieldset/);
@@ -235,8 +243,44 @@ describe("the service finder", () => {
     expect(island).not.toMatch(/disabled=\{/);
   });
 
-  it("hydrates when visible, so it never joins the first paint", () => {
-    expect(section).toMatch(/<ServiceFinderIsland[^>]*client:visible/);
+  it("hydrates when the browser is idle — a closed dialog never becomes visible", () => {
+    // `client:visible` inside a closed <dialog> never fires, and the
+    // server-rendered first question is a real form: "Weiter" before
+    // hydration would submit it natively and reload the page.
+    expect(markup).toMatch(/<ServiceFinderIsland[^>]*client:idle/);
+    expect(markup).not.toMatch(/client:(load|visible)/);
+  });
+
+  it("is one native, labelled dialog", () => {
+    expect(markup.match(/<dialog\b/g)?.length).toBe(1);
+    expect(markup).toMatch(/<dialog[^>]*id="leistungsassistent"[^>]*aria-labelledby="assistant-title"/);
+    expect(markup).toMatch(/id="assistant-title"/);
+    expect(markup).not.toMatch(/role="dialog"|aria-modal/);
+    expect(script).toMatch(/\.showModal\(\)/);
+  });
+
+  it("gives focus back to the button that opened it, unless a link moves on", () => {
+    // Focusing the opener after the hand-off to the contact form would scroll
+    // the page back up to the services.
+    expect(script).toMatch(/if \(restoreFocus\) opener\?\.focus\(\)/);
+    expect(script).toMatch(/CONTACT_DRAFT_EVENT/);
+    expect(script.match(/restoreFocus = false/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps its buttons hidden until the dialog can open", () => {
+    // A button that cannot open anything is never shown. The display utility
+    // on the button beats the UA's `[hidden]` rule, hence the unlayered rule.
+    for (const file of ["src/components/sections/Services.astro", "src/components/sections/Pricing.astro"]) {
+      expect(template(read(file)), file).toMatch(/<button\s+type="button"\s+data-assistant-open\s+hidden/);
+    }
+    expect(script).toMatch(/typeof dialog\.showModal === "function"/);
+    expect(script).toMatch(/button\.hidden = false/);
+    expect(assistant).toMatch(/:global\(\[data-assistant-open\]\[hidden\]\)\s*\{\s*display:\s*none;/);
+  });
+
+  it("opens from its own address and from the old section anchor", () => {
+    expect(script).toMatch(/"#leistungsassistent"/);
+    expect(script).toMatch(/"#leistungsfinder"/);
   });
 
   it("sends nothing itself and hands its result to the contact form", () => {
@@ -245,8 +289,9 @@ describe("the service finder", () => {
     expect(read("src/components/islands/ContactForm.tsx")).toMatch(/CONTACT_DRAFT_EVENT/);
   });
 
-  it("sits on the home page right after the services", () => {
-    expect(read("src/components/HomePage.astro")).toMatch(/<Services \/>\s*<ServiceFinder \/>/);
-    expect(read("src/components/sections/Services.astro")).toMatch(/href="#leistungsfinder"/);
+  it("is on the home page exactly once, and no longer a section", () => {
+    const home = template(read("src/components/HomePage.astro"));
+    expect(home.match(/<ServiceAssistant \/>/g)?.length).toBe(1);
+    expect(home).not.toMatch(/<ServiceFinder \/>/);
   });
 });
