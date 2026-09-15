@@ -17,23 +17,29 @@ For a fresh checkout, production configuration or deployment, use
 
 ## Experience and pages
 
-The home page keeps the existing Tracht Digital Solutions visual system while
-organizing the content around one clear responsibility:
+The home page keeps the existing Tracht Digital Solutions visual system. Since
+2026-09-15 it leads with websites and online shops, frames the other services
+as digitalization, and addresses the visitor with "du" (the legal texts stay
+formal). The sections follow the questions a visitor has:
 
-1. Hero: audience, problem and result, the first-conversation CTA and a card of
+1. Hero: audience, problems and result, the first-conversation CTA and a card of
    three verifiable facts
-2. Wieso ich? / Why me?
-3. Four service areas, each with a typical starting point, result and scope
-4. Service finder: three questions that point to one or more services and hand
-   the result to the contact form as a draft
-5. Client projects (approved reference cases only)
-6. Process, with what to expect from the first conversation
-7. Sample sites: our own demos (fictional companies) and own projects, labelled
+2. Four service areas — Webauftritt first — each with a typical starting point,
+   result and scope, plus links to the shop system and CMS pages
+3. Client projects (approved reference cases only)
+4. Process, with what to expect from the first conversation
+5. Sample sites: our own demos (fictional companies) and own projects, labelled
    as such
-8. Compact journal teaser
-9. Prices: every rate and how a price comes about
-10. FAQ
-11. Contact
+6. Compact journal teaser
+7. Wieso ich? / Why me?
+8. Prices: every rate and how a price comes about
+9. FAQ
+10. Contact
+
+The **Leistungsassistent** is not a section: a button in the services and in
+the pricing section opens it as a dialog. Three questions point to one or more
+services with their hourly rate and hand the result to the contact form as a
+draft.
 
 The former tech-stack and current-topics sections, the positioning callout, the
 hero slider and the pricing drawer are no longer part of the home-page story.
@@ -45,26 +51,40 @@ omitted. A demo is never presented as client work.
 | Path | Purpose |
 |---|---|
 | `/`, `/en/` | German and English home pages |
-| `/leistungen/[slug]` | German service detail pages |
-| `/en/services/[slug]` | English service detail pages |
+| `/leistungen/[slug]` | German service and platform pages |
+| `/en/services/[slug]` | English service and platform pages |
+| `/visitenkarte`, `/en/business-card` | Digital business card |
 | `/preise`, `/en/preise`, `/en/pricing` | 301 to the home page's pricing section (`#preise`) |
 | `/kontakt`, `/en/contact` | 301 to the home page's contact section (`#contact`) |
 | `/legal/impressum`, `/legal/datenschutz` | German legal notice and privacy policy |
 | `/legal/agb`, `/en/legal/agb` | Terms pages backed by uploaded PDFs |
 | `/legal/agb.pdf`, `/en/legal/agb.pdf` | The corresponding PDF endpoints |
+| `/og/[lang]/[slug].png` | Prerendered social card per service and platform page |
 | `/install` | Browser-assisted connection setup for a deployed site |
 
-The four stable service identities are Beratung & Konzeption,
-Prozessoptimierung, Individuelle Lösungen and Webauftritt (websites, online
-shops and marketing). Localized slugs are controlled by source code; editors cannot
-change routing.
+The four stable service identities, in display order, are Webauftritt
+(websites, online shops and marketing), Beratung & Konzeption,
+Prozessoptimierung and Individuelle Lösungen. Localized slugs are controlled by
+source code; editors cannot change routing.
 
 | Service | German | English |
 |---|---|---|
+| Webauftritt | `/leistungen/webauftritt` | `/en/services/web-presence` |
 | Beratung & Konzeption | `/leistungen/beratung-konzeption` | `/en/services/consulting-planning` |
 | Prozessoptimierung | `/leistungen/prozessoptimierung` | `/en/services/process-optimization` |
 | Individuelle Lösungen | `/leistungen/individuelle-loesungen` | `/en/services/tailored-solutions` |
-| Webauftritt | `/leistungen/webauftritt` | `/en/services/web-presence` |
+
+The shop system and CMS pages belong to Webauftritt. Their content is
+code-owned in `src/lib/platforms.ts` (no CMS block) and names no amount: each
+page explains how a price comes about and links to the published rates.
+
+| System | German | English |
+|---|---|---|
+| WooCommerce | `/leistungen/woocommerce` | `/en/services/woocommerce` |
+| Shopware 6 | `/leistungen/shopware` | `/en/services/shopware` |
+| WordPress | `/leistungen/wordpress` | `/en/services/wordpress` |
+| TYPO3 | `/leistungen/typo3` | `/en/services/typo3` |
+| STRATO | `/leistungen/strato` | `/en/services/strato` |
 
 ## Content model
 
@@ -140,6 +160,8 @@ npm run images:variants  # regenerate the committed pre-sized image copies
 npm run build        # SSR build + verified self-contained release tree
 npm run preview      # inspect the production build locally
 npm run audit:ux -- <url>  # overflow, touch targets, fixed chrome, focus, axe
+npm run audit:seo -- <url> # titles, descriptions, canonical/hreflang, JSON-LD, robots/llms
+npm run indexnow -- --dry-run  # URLs IndexNow would be told about (manual, after a deploy)
 ```
 
 Tailwind runs through `@tailwindcss/postcss` in `postcss.config.mjs`. A

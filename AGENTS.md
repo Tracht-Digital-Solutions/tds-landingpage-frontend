@@ -20,16 +20,27 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   Resolve copy with `resolveLang()`/`tFor()` and generate internal links with
   `localizePath()` from `src/lib/i18n.ts`.
 - **The home page is `components/HomePage.astro`**, for both language trees;
-  `pages/index.astro` and `pages/en/index.astro` are wrappers. Since the 2026-09
-  redesign its order follows the questions a visitor has, in sequence:
-  Hero (benefit + trust card) → Wieso ich? → Leistungen → Leistungs-Finder
-  (`sections/ServiceFinder.astro`) → Kundenprojekte
+  `pages/index.astro` and `pages/en/index.astro` are wrappers. Its order follows
+  the questions a visitor has, in sequence — reordered 2026-09-15, websites
+  first: Hero (benefit + trust card) → Leistungen (Webauftritt first, the
+  systems strip, the assistant's button) → Kundenprojekte
   (`sections/CustomerCases.astro`) → Vorgehen (with the first-conversation card)
-  → Beispielseiten (`sections/Showcase.astro`) → compact Journal → Preise
-  (`sections/Pricing.astro`) → FAQ → Kontakt. The positioning band, the pricing
-  teaser with its drawer and the hero slider were removed, not unmounted; do not
-  bring them back. The old TechMarquee and Currently sections do not belong on
-  the home page, and Portfolio stays hidden.
+  → Beispielseiten (`sections/Showcase.astro`) → compact Journal → Wieso ich? →
+  Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ →
+  Kontakt. The showcase keeps sand on both sides and the FAQ stays directly
+  above the navy contact block; the one paper-on-paper seam is Wieso ich? above
+  the prices. The positioning band, the pricing teaser with its drawer and the
+  hero slider were removed, not unmounted; do not bring them back. The old
+  TechMarquee and Currently sections do not belong on the home page, and
+  Portfolio stays hidden.
+- **The site says "du"** (decided 2026-09-15), lowercase, in every text that
+  addresses the visitor — copy modules, components, islands, error messages.
+  Only the legal register stays formal: Impressum, Datenschutzerklärung, the
+  AGB and tds-shared's consent dialog. Sentences that tds-shared still ships in
+  the formal register are overridden locally (`lib/contactCopy.ts`,
+  `lib/processContent.ts`), not changed for every site. `addressForm.test.ts`
+  fails on "Sie/Ihnen/Ihr…" in any source outside `pages/legal/`. Panel blocks
+  saved before the switch still override the defaults until they are cleared.
 - **Client work and samples are separate sections.** Approved reference cases
   render on the detail page of each service they belong to and in
   `CustomerCases` (badge "Kundenprojekt"); the demos and the business card
@@ -44,18 +55,34 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   down while `#hero` or `#contact` is on screen, and on short viewports while
   the cookie notice is open; it publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
-- **The service finder** (`sections/ServiceFinder.astro` → `islands/ServiceFinder.tsx`,
-  questions, weights and copy in `lib/serviceFinder.ts`) asks three things —
-  topic, recognised starting points, stage — and recommends one or more
-  services, each with the visitor's own answers as the reason; it never comes
-  back empty. Its starting points are the services' `situations`, resolved on
-  the server like everywhere else, so a panel edit changes the finder too; the
-  island never imports the catalogue. It sends nothing: the result becomes a
-  draft in the contact form's message field (`lib/contactDraft.ts` —
-  sessionStorage for a form that hydrates later, an event for a live one), and
-  text the visitor typed is never replaced. `client:visible`. Its copy is
-  code-owned (no CMS block) and follows the same rules as the rest: Sie-Form,
-  no free and no timed first conversation.
+- **The Leistungsassistent is a button, not a section** (decided 2026-09-15) —
+  for the visitor who does not know what they need or what it costs.
+  `components/ServiceAssistant.astro` renders ONE native
+  `<dialog id="leistungsassistent">` on the home page around
+  `islands/ServiceFinder.tsx`; questions, weights and copy live in
+  `lib/serviceFinder.ts`. The buttons in the services and the pricing section
+  (`[data-assistant-open]`) ship `hidden` and are revealed only once
+  `showModal` exists; `/#leistungsassistent` and the old `/#leistungsfinder`
+  open the dialog directly. The script gives focus back to the button that
+  opened it — except after a same-page link or the hand-off to the contact
+  form, where focusing the opener would scroll the page back up. The island is
+  `client:idle`: a closed dialog never becomes visible, so `client:visible`
+  would never hydrate, and "Weiter" before hydration would submit the form
+  natively.
+  - It asks three things — topic, recognised starting points, stage — and
+    recommends one or more services, each with the visitor's own answers as
+    the reason, the published hourly rate (resolved from the pricing block on
+    the server) and, for Webauftritt, the platform pages. It never comes back
+    empty and never names an estimate or a range. `SERVICE_ORDER` is the
+    catalogue order and breaks ties.
+  - Its starting points are the services' `situations`, resolved on the server
+    like everywhere else, so a panel edit changes the assistant too; the island
+    never imports the catalogue.
+  - It sends nothing: the result becomes a draft in the contact form's message
+    field (`lib/contactDraft.ts` — sessionStorage for a form that hydrates
+    later, an event for a live one), and text the visitor typed is never
+    replaced. Its copy is code-owned (no CMS block) and follows the same rules
+    as the rest: du, no free and no timed first conversation.
 - **The hero is `sections/Hero.astro` — server-rendered, no island.**
   - The eyebrow names the audience, the H1 the benefit, the sub (`#hero-sub`)
     the problems and the outcome, followed by two real anchors, one of them
@@ -99,7 +126,33 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   measured reason to be `client:load`.
 - Public service detail routes are `/leistungen/[slug]` and
   `/en/services/[slug]`. Route IDs and localized slugs are code-owned; never
-  accept a slug or href from CMS content.
+  accept a slug or href from CMS content. The same two dynamic routes resolve,
+  in this order, a service, a platform page, a retired slug (301), else 404.
+  Each service carries a code-owned `seoTitle` — the `<title>`: search term
+  first, "— Tracht Digital" last, at most 65 characters, distinct site-wide —
+  and `updatedAt`, the visible "Stand" and the JSON-LD `dateModified`. Raise
+  the date only when the content changes.
+- **Shop system and CMS pages** — WooCommerce, Shopware 6, WordPress, TYPO3 and
+  STRATO at `/leistungen/<system>` and `/en/services/<system>` — are code-owned
+  in `lib/platforms.ts` and rendered by
+  `components/platforms/PlatformDetailPage.astro` from the same
+  `components/detail/` bands as a service page. One page per system with its
+  offers as anchored sections; a page per offer would split authority into thin
+  pages. The Webauftritt page links all five as tiles, the footer in its own
+  column. Rules held by `platforms.test.ts`:
+  - **No amount** (decided 2026-09-15). The cost box explains how a price comes
+    about and links to `/#preise`; the JSON-LD `Service` carries no `offers`.
+  - An answer-first paragraph (`answer`) that names Tracht Digital Solutions,
+    Julian Tracht and Schwarzenbek and still makes sense when quoted on its
+    own; headings that are real questions; a comparison table whose facts link
+    their original source, with the "Stand" date beside it.
+  - "Unabhängig, kein offizieller Partner" among the boundaries, no
+    manufacturer logos, du, and the site's copy rules.
+  - Only `disclosure: "named"` cases that list the platform
+    (`referencesForPlatform`). An anonymous case must never be tied to a
+    system — the system can identify the client.
+  - Version and support facts go stale. Re-check the sources, and raise
+    `updatedAt` when a fact changes — never the date alone.
 - **The digital business card is a STANDALONE page** — `/visitenkarte` and
   `/en/business-card`, both five-line wrappers around
   `components/BusinessCardPage.astro`. It is the one route that renders
@@ -126,7 +179,7 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     shows. Re-run it (`npm run businesscard:sync`) after changing how the page
     looks, or the tile advertises the old design.
 - **Prices are the home section `#preise`** (`sections/Pricing.astro`): all
-  four rates, what each includes, and "So entsteht Ihr Preis" — visible without
+  four rates, what each includes, and "So entsteht dein Preis" — visible without
   a click. `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to it;
   `/kontakt` and `/en/contact` with a 301 to `#contact`. The section keeps an
   alias anchor `pricing-teaser` for old deep links. Redirects stay out of the
@@ -461,12 +514,35 @@ process; cache fingerprinting does not replace the restart.
   `alwaysPaths` and on the `sitemap` cache event; `/sitemap-index.xml` stays
   prerendered because its only variable content is `lastmod`.
 - Keep page titles and descriptions distinct, truthful and within the limits
-  enforced by `src/lib/seo.test.ts`. `Layout.astro` must use the route's actual
-  title rather than a hard-coded tab title.
+  enforced by `src/lib/seo.test.ts`, `services.test.ts` and `platforms.test.ts`.
+  `Layout.astro` must use the route's actual title rather than a hard-coded tab
+  title. Titles put the search term first and "— Tracht Digital" last.
 - JSON-LD must match visible content after CMS resolution. FAQ answers must use
   the same resolved values as the rendered section. Pricing structured data may
   include numeric hourly offers only. There is no `HowTo` node any more: Google
   retired those rich results, and the process is not a set of instructions.
+  Subpages emit one `@graph` (`lib/jsonld.ts`): `WebPage` with author,
+  publisher and the visible date as `dateModified`; `Service`, with an `Offer`
+  only where the page states the rate; `BreadcrumbList`; and `FAQPage` where
+  the page shows questions. Organization, Person and WebSite live on the home
+  page, and subpages reference them by `@id`.
+- **AI search (AI Overviews, ChatGPT, Copilot, Perplexity, Claude) reads the
+  same pages — write for people.** What helps is what the detail pages already
+  do: an answer-first paragraph naming who, what, for whom and where; headings
+  that are real questions, answered in their first sentences; tables of
+  checkable facts that link their original sources; a visible "Stand" date and
+  a named author; the same name for the same thing everywhere. What does not
+  help: extra "AI files", Markdown copies, keyword lists, bought mentions,
+  content chopped into fragments. `public/llms.txt` exists but earns little —
+  keep it true (`llmsTxt.test.ts`), do not grow it.
+- `public/robots.txt` names the search and fetch agents of OpenAI, Anthropic
+  and Perplexity, and every group repeats `Disallow: /install/`
+  (`robotsTxt.test.ts`). Blocking one of those agents removes the site from
+  that engine's answers without any error.
+- **IndexNow** (`npm run indexnow`) tells Bing and the other IndexNow engines
+  which URLs changed. The key is `public/<key>.txt`. The command reads the live
+  sitemap and is manual on purpose — run it after a deploy, never from the
+  build or the release; `-- --dry-run` lists without sending.
 - Service cards are semantic links with a full-card hit area, a visible
   keyboard focus and meaningful accessible text. Prefer native links,
   headings, lists, `<details>/<summary>` and form controls over scripted
@@ -514,6 +590,10 @@ npm run images:variants  # regenerate the committed pre-sized image copies
 npm run build        # SSR build plus deployable release assembly/verification
 npm run preview      # production-style local inspection
 npm run audit:ux -- <url>  # overflow, targets, fixed chrome, focus, axe, deep links
+npm run audit:seo -- <url> # every sitemap page: title, description, H1, canonical,
+                           # hreflang, OG image, JSON-LD, Stand/author, sources,
+                           # internal links, robots.txt, llms.txt
+npm run indexnow -- --dry-run  # the URLs IndexNow would be told about; manual, after a deploy
 ```
 
 The Vitest default environment is Node; opt a DOM-dependent test into jsdom in
