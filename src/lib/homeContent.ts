@@ -14,6 +14,8 @@ import type { Lang } from "./i18n";
  * ### The standing copy rules (see `homeContent.test.ts`, `addressForm.test.ts`)
  *
  * - **du**, lowercase (decided 2026-09-15). Only the legal texts stay formal.
+ * - **Short and clear** (asked for 2026-09-15): one statement per sentence,
+ *   no filler, lists of about three. Less text is read; more is scrolled past.
  * - No free and no time-boxed first conversation: never "kostenlos",
  *   "kostenfrei", "gratis" or a minute count. The one sentence about cost is
  *   "Kosten entstehen erst, wenn wir einen Auftrag vereinbaren." (decided
@@ -243,8 +245,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Websites, die Kunden bringen.",
       headlineAccent: "Digitalisierung,",
       headlineSuffix: "die entlastet.",
-      sub:
-        "Veraltete Website, Ärger mit dem Shop, doppelte Handarbeit? Ich plane die Lösung, setze sie selbst um und bleibe *dein fester Ansprechpartner*.",
+      sub: "Veraltete Website, Ärger mit dem Shop oder doppelte Handarbeit? Ich löse das und bleibe *dein fester Ansprechpartner*.",
       cta1: "Erstgespräch vereinbaren",
       cta2: "Leistungen ansehen",
       ctaNote:
@@ -254,12 +255,9 @@ const content: Record<Lang, HomeContent> = {
     whyMe: {
       headline: "Wieso",
       headlineAccent: "ich?",
-      lead:
-        "Du brauchst jemanden, der *den Überblick behält* – nicht fünf Anbieter, die sich gegenseitig die Verantwortung zuschieben.",
-      p1:
-        "Ich berate und setze selbst um: Website, Shop und Abläufe aus einer Hand. Du musst nichts zwischen Agentur, Programmierer und Hoster übersetzen.",
-      p2:
-        "Ich erkläre dir die Möglichkeiten in normaler Sprache und bleibe auf Wunsch auch nach dem Start dein Ansprechpartner – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
+      lead: "Du brauchst *einen Ansprechpartner* – nicht fünf Anbieter.",
+      p1: "Ich berate und setze selbst um: Website, Shop und Abläufe aus einer Hand.",
+      p2: "Auf Wunsch bleibe ich nach dem Start dein Ansprechpartner – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
       reasons: [
         {
           title: "Ein fester Ansprechpartner",
@@ -282,29 +280,22 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "Wobei ich dir",
       headlineAccent: "helfe.",
-      intro:
-        "Vier Leistungen, *ein Ansprechpartner*: vom Webauftritt bis zur Digitalisierung deiner Abläufe. Such dir den passenden Einstieg aus.",
+      intro: "Vier Leistungen, *ein Ansprechpartner*: vom Webauftritt bis zur Digitalisierung deiner Abläufe.",
     },
     websiteDemos: {
       headline: "Beispielseiten zum",
       headlineAccent: "Ausprobieren.",
-      intro:
-        "Eigene Demos mit fiktiven Firmen und eigene Projekte – *keine Kundenaufträge*. Klick dich durch, bevor wir über deine Seite sprechen.",
-      serviceIntro:
-        "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*. Klick dich durch, bevor wir über deine sprechen.",
+      intro: "Eigene Demos und Projekte – *keine Kundenaufträge*. Klick dich einfach durch.",
+      serviceIntro: "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*.",
       headlineSingle: "Eine Beispielseite zum",
-      introSingle:
-        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Schau dich um, bevor wir über deine Seite sprechen.",
-      serviceIntroSingle:
-        "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*. Schau sie dir an, bevor wir über deine sprechen.",
+      introSingle: "Eine eigene Beispielseite – *kein Kundenauftrag*. Klick dich einfach durch.",
+      serviceIntroSingle: "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*.",
     },
     referencesHome: {
       headline: "Umgesetzt für",
       headlineAccent: "Kunden.",
-      intro:
-        "Echte Projekte – mit dem, was *dabei herausgekommen ist*, und den Leistungen dahinter.",
-      label:
-        "Veröffentlicht nur mit ausdrücklicher Freigabe der Kunden – anonymisiert, sofern nicht anders vereinbart.",
+      intro: "Echte Projekte – und *was sie gebracht haben*.",
+      label: "Veröffentlicht nur mit Freigabe der Kunden.",
       serviceCta: "Zur passenden Leistung",
     },
     digitalResponsibility: {
@@ -324,7 +315,7 @@ const content: Record<Lang, HomeContent> = {
     contactHeading: {
       headline: "Womit fangen",
       headlineAccent: "wir an?",
-      sub: "Schreib mir in zwei, drei Sätzen, wo es hakt. Ich antworte in der Regel innerhalb von 24 Stunden.",
+      sub: "Schreib mir kurz, wo es hakt. Ich antworte in der Regel innerhalb von 24 Stunden.",
     },
     journalHeading: {
       headline: "Wissen für",
@@ -335,17 +326,17 @@ const content: Record<Lang, HomeContent> = {
       facts: [
         {
           title: "Ein fester Ansprechpartner",
-          text: "Du sprichst immer mit mir: {name}, Inhaber, aus {town} bei Hamburg.",
+          text: "Du sprichst immer mit mir: {name} aus {town} bei Hamburg.",
           linkLabel: "Wer ich bin",
         },
         {
           title: "Echte Kundenprojekte",
-          text: "Umgesetzte Arbeit, veröffentlicht nur mit Freigabe der Kunden.",
+          text: "Veröffentlicht nur mit Freigabe der Kunden.",
           linkLabel: "Projekte ansehen",
         },
         {
           title: "Offene Preise",
-          text: "Stundensätze ab {rate} € netto, Festpreis bei klarem Umfang.",
+          text: "Stundensätze ab {rate} € netto, bei klarem Umfang auch Festpreis.",
           linkLabel: "Preise ansehen",
         },
       ],
@@ -356,15 +347,15 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Ziel",
-          text: "Du schilderst, wo es hakt. Ich frage nach und sage dir ehrlich, ob und wie ich helfen kann.",
+          text: "Du erzählst, wo es hakt. Ich sage dir ehrlich, ob ich helfen kann.",
         },
         {
           label: "Vorbereitung",
-          text: "Zwei, drei Sätze zu deiner Lage genügen – ein Link hilft.",
+          text: "Zwei, drei Sätze genügen. Ein Link hilft.",
         },
         {
           label: "Ergebnis",
-          text: "Du weißt danach, was zuerst dran ist und was es ungefähr kostet.",
+          text: "Du weißt, was zuerst dran ist und was es ungefähr kostet.",
         },
         {
           label: "Kosten",
@@ -378,18 +369,18 @@ const content: Record<Lang, HomeContent> = {
       steps: [
         {
           title: "Einordnen",
-          text: "Im Erstgespräch klären wir Ziel und Umfang. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
+          text: "Im Erstgespräch klären wir Ziel und Umfang.",
         },
         {
           title: "Abrechnen",
-          text: "Nach Aufwand zum Stundensatz – oder zum Festpreis, wenn Ziel und Umfang vorher klar sind.",
+          text: "Nach Aufwand zum Stundensatz – oder zum Festpreis, wenn der Umfang klar ist.",
         },
         {
           title: "Weiter betreuen",
           text: "Für die laufende Betreuung gibt es auf Wunsch Monatsmodelle.",
         },
       ],
-      note: "Wovon der Aufwand abhängt: vom Bereich, vom Umfang und davon, wie klar die Aufgabe ist.",
+      note: "Der Aufwand hängt vom Umfang ab und davon, wie klar die Aufgabe ist.",
     },
   },
   en: {
@@ -398,8 +389,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Websites that bring in customers.",
       headlineAccent: "Digitalization",
       headlineSuffix: "that saves you time.",
-      sub:
-        "An outdated website, trouble with your shop, data typed in twice? I plan the fix, build it myself and stay *your single point of contact*.",
+      sub: "An outdated website, trouble with your shop or data typed in twice? I fix it and stay *your single point of contact*.",
       cta1: "Arrange an initial consultation",
       cta2: "View services",
       ctaNote: "Costs only arise once we agree on an assignment. I usually reply within 24 hours.",
@@ -408,12 +398,9 @@ const content: Record<Lang, HomeContent> = {
     whyMe: {
       headline: "Why",
       headlineAccent: "me?",
-      lead:
-        "You need someone who *keeps the whole picture* in view – not five suppliers passing responsibility back and forth.",
-      p1:
-        "I advise and build: website, shop and workflows from one source. You never have to translate between an agency, a developer and a host.",
-      p2:
-        "I explain the options in plain language and, if you like, stay your point of contact after launch – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
+      lead: "You need *one point of contact* – not five suppliers.",
+      p1: "I advise and build: website, shop and workflows from one source.",
+      p2: "If you like, I stay your point of contact after launch – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
       reasons: [
         {
           title: "One steady contact",
@@ -436,29 +423,22 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "How I can",
       headlineAccent: "help.",
-      intro:
-        "Four services, *one point of contact*: from your web presence to digitalizing your workflows. Pick the starting point that fits.",
+      intro: "Four services, *one point of contact*: from your web presence to digitalizing your workflows.",
     },
     websiteDemos: {
       headline: "Example sites to",
       headlineAccent: "try out.",
-      intro:
-        "My own demos with fictional companies, plus projects of my own – *not client work*. Click through them before we talk about yours.",
-      serviceIntro:
-        "My own demos and projects, live on the web – *not client work*. Click through them before we talk about yours.",
+      intro: "My own demos and projects – *not client work*. Just click through.",
+      serviceIntro: "My own demos and projects, live on the web – *not client work*.",
       headlineSingle: "An example site to",
-      introSingle:
-        "One of my own example sites, live on the web – *not client work*. Take a look around before we talk about yours.",
-      serviceIntroSingle:
-        "One of my own example sites, live on the web – *not client work*. Have a look before we talk about yours.",
+      introSingle: "One of my own example sites – *not client work*. Just click through.",
+      serviceIntroSingle: "One of my own example sites, live on the web – *not client work*.",
     },
     referencesHome: {
       headline: "Delivered for",
       headlineAccent: "clients.",
-      intro:
-        "Real projects – with *what came out of them* and the services behind them.",
-      label:
-        "Published only with the client's explicit approval – anonymised unless agreed otherwise.",
+      intro: "Real projects – and *what they achieved*.",
+      label: "Published only with the client's approval.",
       serviceCta: "See the matching service",
     },
     digitalResponsibility: {
@@ -478,7 +458,7 @@ const content: Record<Lang, HomeContent> = {
     contactHeading: {
       headline: "Where shall we",
       headlineAccent: "start?",
-      sub: "Tell me in two or three sentences where things get stuck. I usually reply within 24 hours.",
+      sub: "Tell me briefly where things get stuck. I usually reply within 24 hours.",
     },
     journalHeading: {
       headline: "Know-how for",
@@ -489,12 +469,12 @@ const content: Record<Lang, HomeContent> = {
       facts: [
         {
           title: "One steady contact",
-          text: "You always talk to me: {name}, owner, based in {town} near Hamburg.",
+          text: "You always talk to me: {name}, based in {town} near Hamburg.",
           linkLabel: "Who I am",
         },
         {
           title: "Real client projects",
-          text: "Delivered work, published only with the client's approval.",
+          text: "Published only with the client's approval.",
           linkLabel: "View projects",
         },
         {
@@ -510,15 +490,15 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Goal",
-          text: "You describe where things get stuck. I ask questions and tell you honestly whether and how I can help.",
+          text: "You tell me where things get stuck. I say honestly whether I can help.",
         },
         {
           label: "Preparation",
-          text: "Two or three sentences about your situation are enough – a link helps.",
+          text: "Two or three sentences are enough. A link helps.",
         },
         {
           label: "Outcome",
-          text: "Afterwards you know what comes first and roughly what it costs.",
+          text: "You know what comes first and roughly what it costs.",
         },
         {
           label: "Costs",
@@ -532,18 +512,18 @@ const content: Record<Lang, HomeContent> = {
       steps: [
         {
           title: "Assess",
-          text: "In the first conversation we clarify goal and scope. Costs only arise once we agree on an assignment.",
+          text: "In the first conversation we clarify goal and scope.",
         },
         {
           title: "Invoice",
-          text: "By effort at the hourly rate – or at a fixed price when goal and scope are clear up front.",
+          text: "By effort at the hourly rate – or at a fixed price when the scope is clear.",
         },
         {
           title: "Look after it",
-          text: "Monthly arrangements are available for ongoing support, if you want them.",
+          text: "Monthly arrangements are available for ongoing support.",
         },
       ],
-      note: "What the effort depends on: the area, the scope and how clearly the task is defined.",
+      note: "The effort depends on the scope and on how clearly the task is defined.",
     },
   },
 };

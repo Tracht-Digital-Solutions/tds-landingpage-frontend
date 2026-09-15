@@ -33,6 +33,11 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   hero slider were removed, not unmounted; do not bring them back. The old
   TechMarquee and Currently sections do not belong on the home page, and
   Portfolio stays hidden.
+- **Copy is short and clear** (asked for 2026-09-15): one statement per
+  sentence, about three points per list, four questions on a platform page,
+  six on the home page, no filler. When revising, cut before adding. The SEO
+  duties stay: summaries 81–160 characters, an answer-first paragraph with
+  who, what and where, question headings, sources for facts.
 - **The site says "du"** (decided 2026-09-15), lowercase, in every text that
   addresses the visitor — copy modules, components, islands, error messages.
   Only the legal register stays formal: Impressum, Datenschutzerklärung, the
