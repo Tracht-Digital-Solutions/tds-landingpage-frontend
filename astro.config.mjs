@@ -3,7 +3,7 @@ import node from "@astrojs/node";
 import react from "@astrojs/react";
 // Shared CSS minify settings (incl. the cssTarget that keeps lightningcss
 // from dropping the header backdrop-filter prefix). See tds-shared#10.
-import { tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
+import { motionSsrNoExternal, tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
 
 export default defineConfig({
   site: "https://tracht-digital.de",
@@ -106,6 +106,9 @@ export default defineConfig({
         "lenis",
         "react-hook-form",
         /^@hookform\//,
+        // tds-shared's components and motion primitives import `motion`; the
+        // release tree carries no copy of it. tds-shared owns the list.
+        ...motionSsrNoExternal,
       ],
       // Native addons cannot be bundled; sharp must resolve from node_modules.
       external: ["sharp"],

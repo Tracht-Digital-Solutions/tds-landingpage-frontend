@@ -36,6 +36,9 @@
    looks, edit surfaces/marketing.css in tds-shared-pkg and bump. */
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
+/* Cross-page fade between two pages of this site (no script; ignored where
+   unsupported, off under reduced motion). */
+@import "@tracht-digital-solutions/tds-shared/styles/page-transitions.css";
 @import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
 
 /* Tailwind ignores node_modules by default, and the shared React islands
@@ -69,15 +72,8 @@
   --lp-ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --lp-dur-enter: 520ms;
 
-  /* Opts this document into animating TO and FROM the intrinsic size
-     keywords (`auto`, `min-content`, …). Without it a height transition to
-     `auto` simply does not run and the element snaps — which is why the
-     FAQ accordion used to jump open and then fade its answer in after the
-     fact. Declared here rather than in the FAQ component because it is a
-     document-level switch: `:root` inside an Astro scoped `<style>` would
-     be rewritten to `:root[data-astro-cid-…]` and match nothing.
-     Browsers without it ignore the line and keep the instant open. */
-  interpolate-size: allow-keywords;
+  /* `interpolate-size` used to be switched on here, document-wide, for the
+     FAQ alone. tds-shared's `.tds-disclosure` scopes it to disclosures now. */
 }
 
 /* === Farbdosierung ================================================= */

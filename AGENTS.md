@@ -218,6 +218,14 @@ visual language rather than rebuilding it locally:
   the connector line. `ServiceDefinition.number` still orders the catalog and
   keys the card decoration — it is not display text. The home page's Process
   section is the one place that still numbers, deliberately.
+- Motion (tds-shared ≥ 0.38.4): pages cross-fade via the shared
+  `page-transitions.css`, FAQ answers grow open via `.tds-disclosure`, the
+  contact form animates errors and the thank-you with `tds-shared/motion/react`.
+  The hero stays plain Astro with CSS entrances — no island, no `motion`: its
+  SSR start state was once the mobile LCP. Scroll reveal stays `lib/reveal.ts`
+  (`[data-reveal]`); do not add tds-shared's `.tds-reveal` on top of it.
+  `motion` must not load before the contact form: `src/__tests__/motion.test.ts`
+  holds the rules, and a first-load measurement belongs in any change here.
 - Keep `SectionHeader` and `AccentLetters` semantics. Accent letters need one
   accessible label and must stop transforming under `prefers-reduced-motion`.
 - Test desktop, 375 px mobile, both themes and reduced motion. Horizontal
