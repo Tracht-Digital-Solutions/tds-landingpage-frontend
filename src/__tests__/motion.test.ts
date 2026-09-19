@@ -34,6 +34,15 @@ describe("motion on the landing page", () => {
     );
   });
 
+  it("switches page transitions on inline, first in <head>", () => {
+    // With the rule only in the stylesheet — linked at the end of a long
+    // head — Chrome decided the opt-in too early and skipped the transition.
+    const layout = src("layouts/Layout.astro");
+    const head = layout.slice(layout.indexOf("<head>"));
+    expect(head).toContain("<style is:inline set:html={pageTransitionOptIn} />");
+    expect(head.indexOf("pageTransitionOptIn")).toBeLessThan(head.indexOf("themeBootstrapScript"));
+  });
+
   it("animates the contact form only through the shared primitives", () => {
     const form = src("components/islands/ContactForm.tsx");
     expect(form).toContain('from "@tracht-digital-solutions/tds-shared/motion/react"');
