@@ -27,7 +27,7 @@ const { items, name = "faq" } = Astro.props;
 ---
 
 {items.map((item, i) => (
-  <details name={name} open={i === 0} class="faq-item" data-reveal>
+  <details name={name} open={i === 0} class="faq-item tds-disclosure" data-reveal>
     <summary class="faq-summary">
       <span class="faq-q">{item.q}</span>
       <span aria-hidden="true" class="faq-chevron">
@@ -110,43 +110,13 @@ const { items, name = "faq" } = Astro.props;
     color: var(--color-muted);
   }
 
-  /* `::details-content` is the element the browser wraps the answer in, and
-     with `interpolate-size: allow-keywords` (set on :root in global.css) a
-     transition to `auto` height is animatable. Without either feature the
-     whole block is skipped and the row opens instantly. */
-  @supports selector(::details-content) {
-    .faq-item::details-content {
-      block-size: 0;
-      overflow: clip;
-      opacity: 0;
-      transition:
-        block-size 320ms var(--lp-ease-soft),
-        opacity 220ms var(--tds-ease-out),
-        content-visibility 320ms allow-discrete;
-      transition-behavior: allow-discrete;
-    }
-    .faq-item[open]::details-content {
-      block-size: auto;
-      opacity: 1;
-    }
-  }
+  /* The answer grows open through tds-shared's `.tds-disclosure` (the
+     `::details-content` + `interpolate-size` pair that used to live here),
+     gated on support and on reduced motion there. */
 
   @media (prefers-reduced-motion: reduce) {
     .faq-chevron {
       transition: none;
-    }
-    /* END STATE. The shared reduced-motion block clamps duration, which for a
-       discrete `content-visibility` step is not enough — without this an
-       opened row could sit at height 0. */
-    @supports selector(::details-content) {
-      .faq-item::details-content,
-      .faq-item[open]::details-content {
-        transition: none;
-      }
-      .faq-item[open]::details-content {
-        block-size: auto;
-        opacity: 1;
-      }
     }
   }
 </style>

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
 import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
+import { Collapse, Presence } from "@tracht-digital-solutions/tds-shared/motion/react";
 import { CONTACT_DRAFT_EVENT, CONTACT_DRAFT_KEY } from "~/lib/contactDraft";
 import { contactFormCopy } from "~/lib/contactCopy";
 
@@ -56,7 +57,6 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [shake, setShake] = useState(false);
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const successHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   const {
     register,
@@ -68,10 +68,6 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
     resolver: zodResolver(ContactSchema),
     defaultValues: { consent: undefined as unknown as true },
   });
-
-  useEffect(() => {
-    if (submitState === "success") successHeadingRef.current?.focus();
-  }, [submitState]);
 
   // A draft from the service assistant (`lib/contactDraft.ts`): read from
   // storage when this form hydrates after the jump down here, or taken from the
@@ -163,14 +159,17 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
   const rowClass = (field?: FieldName) =>
     `contact-field-row ${field && errors[field] ? "contact-field-row--error" : ""}`;
 
-  if (submitState === "success") {
-    return (
+  // Plain JSX, not an inner component (a component declared in here would be
+  // a new type every render and remount the form on each keystroke).
+  const success = (
       <div className="contact-success flex flex-col items-start gap-4 py-12" role="status">
         <span className="contact-success__mark" aria-hidden="true">
           ✓
         </span>
         <h3
-          ref={successHeadingRef}
+          // Focused as it MOUNTS: the success view fades in after the form has
+          // faded out, so an effect keyed on submitState would find no heading.
+          ref={(el) => el?.focus()}
           tabIndex={-1}
           className="text-2xl font-[var(--font-display)] font-medium text-white outline-none"
           style={{ fontVariationSettings: '"opsz" 144' }}
@@ -179,12 +178,11 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
         </h3>
         <p className="text-white/75">{copy.form.successMessage}</p>
       </div>
-    );
-  }
+  );
 
   const submitting = submitState === "submitting";
 
-  return (
+  const form = (
     <div className={shake ? "shake" : ""}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8" noValidate>
         <div
@@ -210,11 +208,11 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             {...register("name")}
           />
           <span className="contact-field-line" aria-hidden="true" />
-          {errors.name && (
+          <Collapse open={Boolean(errors.name)}>
             <p id={errorId("name")} className="contact-field-error text-xs mt-2">
               {copy.errors.name}
             </p>
-          )}
+          </Collapse>
         </div>
 
         <div className={rowClass("email")}>
@@ -232,11 +230,11 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             {...register("email")}
           />
           <span className="contact-field-line" aria-hidden="true" />
-          {errors.email && (
+          <Collapse open={Boolean(errors.email)}>
             <p id={errorId("email")} className="contact-field-error text-xs mt-2">
               {copy.errors.email}
             </p>
-          )}
+          </Collapse>
         </div>
 
         <div className={rowClass()}>
@@ -268,11 +266,11 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
             {...register("message")}
           />
           <span className="contact-field-line" aria-hidden="true" />
-          {errors.message && (
+          <Collapse open={Boolean(errors.message)}>
             <p id={errorId("message")} className="contact-field-error text-xs mt-2">
               {copy.errors.message}
             </p>
-          )}
+          </Collapse>
         </div>
 
         <div>
@@ -302,21 +300,21 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
               {copy.form.consentSuffix}
             </span>
           </label>
-          {errors.consent && (
+          <Collapse open={Boolean(errors.consent)}>
             <p id={errorId("consent")} className="contact-field-error text-xs mt-2">
               {copy.errors.consent}
             </p>
-          )}
+          </Collapse>
         </div>
 
-        {submitState === "error" && (
+        <Collapse open={submitState === "error"}>
           <p id="contact-form-error" className="contact-field-error text-sm" role="alert">
             {copy.failure}
             <a href={`mailto:${copy.email}`} className="underline">
               {copy.email}
             </a>
           </p>
-        )}
+        </Collapse>
 
         <button
           type="submit"
@@ -353,5 +351,13 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
         </p>
       </form>
     </div>
+  );
+
+  // Form -> thank-you: a cross-fade rather than a cut. Server-rendered as the
+  // form, never hidden (Presence does not animate its first mount).
+  return (
+    <Presence view={submitState === "success" ? "success" : "form"}>
+      {submitState === "success" ? success : form}
+    </Presence>
   );
 }
