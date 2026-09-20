@@ -28,12 +28,16 @@ const { number, title, duration, description, outcome = "" } = Astro.props;
 <div class="relative flex gap-4 md:gap-6 py-5 md:py-6">
   {/* Numbered marker. The Process section wraps this column in a
       vertical gradient spine + start/end caps, so the marker just
-      needs to punch through that line. The ring matches the section
-      bg (--color-soft) so the spine doesn't bleed under the circle. */}
+      needs to punch through that line.
+
+      Two colours with two different jobs, and they used to be the other way
+      round because this section stood on sand: the RING masks the spine, so
+      it has to match the ground (--color-paper); the FILL has to differ from
+      that same ground or the marker disappears into it (--color-card). */}
   <div class="relative flex-shrink-0">
     <span
       aria-hidden="true"
-      class="relative z-10 inline-flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-[var(--color-paper)] text-[var(--color-accent)] ring-4 ring-[var(--color-soft)]"
+      class="relative z-10 inline-flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-[var(--color-card)] text-[var(--color-accent)] ring-4 ring-[var(--color-paper)]"
     >
       <ProcessIcon number={number} />
     </span>

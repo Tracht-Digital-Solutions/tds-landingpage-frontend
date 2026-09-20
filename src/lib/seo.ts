@@ -29,8 +29,8 @@ export const siteConfig = {
    * those.
    */
   description: {
-    de: "Webseiten, Onlineshops und Digitalisierung für Unternehmen: ein fester Ansprechpartner für Planung, Umsetzung und Pflege – aus Schwarzenbek bei Hamburg.",
-    en: "Websites, online shops and digitalization for businesses: one steady contact for planning, building and upkeep – from Schwarzenbek near Hamburg.",
+    de: "Bestehende Webseiten und Onlineshops übernehmen, reparieren, pflegen. Digitalisierung für Unternehmen – aus Schwarzenbek bei Hamburg.",
+    en: "Taking over, repairing and maintaining existing websites and online shops. Digitalization for businesses – from Schwarzenbek near Hamburg.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",

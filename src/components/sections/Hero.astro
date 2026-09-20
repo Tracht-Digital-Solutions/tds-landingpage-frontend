@@ -9,14 +9,19 @@
  *
  * ### What replaced what, so nobody restores it
  *
- * - **It is `.astro`, not a React island.** The island rendered its eyebrow,
- *   headline, sub and buttons as motion elements, and their server-rendered
- *   markup carried the entrance's start state: `style="opacity:0"`. Until React
- *   hydrated, the most important screen of the site was blank — and on a phone
- *   the largest thing to paint first was the cookie notice, which became the
- *   page's LCP element at 4.1 s. The copy is plain HTML now and paints with the
- *   first frame; the entrance is a transform-only CSS rise, off under reduced
- *   motion. No `motion` import, no island, no hydration cost.
+ * - **The COPY is `.astro`, not a React island.** The island rendered its
+ *   eyebrow, headline, sub and buttons as motion elements, and their
+ *   server-rendered markup carried the entrance's start state:
+ *   `style="opacity:0"`. Until React hydrated, the most important screen of the
+ *   site was blank — and on a phone the largest thing to paint first was the
+ *   cookie notice, which became the page's LCP element at 4.1 s. The copy is
+ *   plain HTML and paints with the first frame; its entrance is a
+ *   transform-only CSS rise, off under reduced motion.
+ *
+ *   The decorative geometry is a different question and is a `motion` island
+ *   (`islands/HeroDecor.tsx`, `client:media`): those shapes are desktop-only
+ *   and `aria-hidden`, so nothing a visitor reads waits on them. The photo
+ *   stays here, in plain markup, for the same reason the copy does.
  * - **No showcase slider.** It rotated every 6 s through six slides, put a demo
  *   site's name in the page's first `<h2>`, and gave a real customer case and a
  *   fictional demo the identical card. Customer cases and example sites have
@@ -44,6 +49,7 @@ import type { Lang } from "~/lib/i18n";
 import type { HomeHeroContent, ResolvedTrustFact } from "~/lib/homeContent";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import CircuitRun from "~/components/ui/CircuitRun.astro";
+import HeroDecor from "~/components/islands/HeroDecor.tsx";
 
 interface Props {
   lang: Lang;
@@ -56,7 +62,7 @@ const { lang, hero, trust } = Astro.props;
 
 <section
   id="hero"
-  class="hero tds-wash relative min-h-svh flex flex-col justify-center overflow-hidden"
+  class="hero relative min-h-svh flex flex-col justify-center overflow-hidden"
   aria-labelledby="hero-heading"
   lang={lang === "en" ? "en" : undefined}
 >
@@ -74,23 +80,20 @@ const { lang, hero, trust } = Astro.props;
     </picture>
     <span class="hero-photo-scrim hidden md:block absolute inset-0"></span>
 
-    {/* Große Kapsel, links unten angeschnitten — below the actions, never
-        behind the copy. */}
-    <span
-      class="tds-shape tds-shape--capsule tds-shape--navy hidden xl:block"
-      style="bottom: -7rem; left: -16rem; width: 32rem; height: 13rem;"
-    ></span>
-    {/* Viertelkreis unten rechts, über beide Ränder hinaus — under the trust
-        card's lower edge, not behind it. */}
-    <span
-      class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux hidden xl:block"
-      style="bottom: -15rem; right: -11rem; width: 26rem; height: 26rem;"
-    ></span>
-    {/* Ein einzelner Ocker-Knoten als kleiner Akzent. */}
-    <span
-      class="tds-shape tds-shape--capsule tds-shape--gold hidden lg:block"
-      style="bottom: 7%; left: 44%; width: 0.5rem; height: 0.5rem; opacity: 0.9;"
-    ></span>
+    {/* Die konstruierte Geometrie — große Kapsel links unten angeschnitten,
+        Viertelkreis unten rechts über beide Ränder hinaus, ein einzelner
+        Ocker-Knoten als Akzent. Sie liegen alle in der echten Negativfläche
+        des Heros, nie hinter der Copy.
+
+        `client:media`, nicht `client:idle`: unterhalb von 64rem rendert keine
+        dieser Formen (`hidden lg:block` / `hidden xl:block`), und gemessen zog
+        die Island dort trotzdem ~220 KB JS nach — motion fuer etwas, das auf
+        dem Geraet gar nicht existiert. Mit der Media-Bedingung laedt ein
+        Telefon nichts davon. AUSSCHLIESSLICH diese drei Formen: das Foto oben
+        und jeder Textknoten unten bleiben statisches Astro-Markup, damit
+        nichts Sichtbares auf Hydration wartet. Die Begründung steht in
+        `islands/HeroDecor.tsx`, die Regel in `__tests__/motion.test.ts`. */}
+    <HeroDecor client:media="(min-width: 64rem)" />
     {/* Cut by the section's lower edge, with its box inside the bottom padding:
         since the note under the actions the copy column reaches down to where
         the conduit used to start (overlap measured at 1280 and 1440). */}

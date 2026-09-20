@@ -201,7 +201,7 @@ const jsonLd = asGraph(
       />
     )}
 
-    <DetailFaq title={content.faqTitle} items={content.faq} tone={hasReferences ? "sand" : "paper"} />
+    <DetailFaq title={content.faqTitle} items={content.faq} />
 
     <DetailRelated
       title={ui.relatedTitle}
@@ -211,7 +211,6 @@ const jsonLd = asGraph(
       platforms={siblings}
       articlesTitle={ui.articlesTitle}
       articles={articles}
-      tone={hasReferences ? "paper" : "sand"}
     />
 
     <DetailCta

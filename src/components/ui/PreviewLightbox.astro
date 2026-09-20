@@ -124,8 +124,18 @@ const ui =
 
 <style>
   .preview {
-    /* A dialog is `position: fixed` and auto-sized by the UA; these three
-       reset it to "as big as it usefully gets, centred". */
+    /* A dialog is `position: fixed` and auto-sized by the UA; these reset it
+       to "as big as it usefully gets".
+
+       `margin: auto` is NOT redundant with the UA stylesheet, and leaving it
+       out is what put this dialog in the top left corner. A modal dialog is
+       centred by `inset: 0` plus auto margins — and Tailwind's preflight sets
+       `margin: 0` on `*`, `::before`, `::after` and `::backdrop`, which beats
+       the UA rule. With all four insets at 0 and no auto margin left, the box
+       resolves against the start corner. Nothing errors; the dialog simply
+       opens in the corner. Say it here, unlayered, where the preflight cannot
+       reach it. */
+    margin: auto;
     width: min(96vw, 78rem);
     max-width: none;
     max-height: 92vh;
