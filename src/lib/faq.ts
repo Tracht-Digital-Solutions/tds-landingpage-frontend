@@ -45,17 +45,20 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         intro:
           "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten – kurz beantwortet.",
         items: [
-          {
-            q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Das hängt vom Umfang ab. Abgerechnet wird nach Aufwand oder zum Festpreis, wenn der Umfang klar ist. Die Stundensätze stehen bei den Preisen.",
-          },
+          // Erste Position, seit die Seite auf die Übernahme bestehender
+          // Auftritte zugespitzt ist: das ist die Frage, mit der die meisten
+          // hier ankommen, und sie steht damit über der Preisfrage.
           {
             q: "Kannst du meine bestehende Website oder meinen Shop übernehmen?",
-            a: "Ja, auch mit WordPress, WooCommerce, Shopware, TYPO3 oder bei STRATO. Ich behebe Fehler und kümmere mich um die Pflege.",
+            a: "Ja, auch mit WordPress, WooCommerce, Shopware, TYPO3 oder bei STRATO. Ich behebe Fehler und pflege sie weiter.",
           },
           {
-            q: "Ich weiß noch nicht, was ich brauche. Können wir trotzdem reden?",
-            a: "Ja. Erzähl mir, was nicht rundläuft – oder probier den Leistungsassistenten. Den nächsten Schritt finden wir gemeinsam.",
+            q: "Muss die Seite dafür neu gebaut werden?",
+            a: "Meistens nicht. Was trägt, bleibt – neu gebaut wird nur, was sich nicht mehr reparieren lässt.",
+          },
+          {
+            q: "Was kostet eine Website oder ein Onlineshop?",
+            a: "Das hängt vom Umfang ab. Abgerechnet wird nach Aufwand oder zum Festpreis bei klarem Umfang. Die Stundensätze stehen bei den Preisen.",
           },
           {
             // The one sentence about cost the site makes (decided 2026-09-12).
@@ -81,16 +84,16 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           "The key questions about working together, ownership and pricing — answered briefly.",
         items: [
           {
-            q: "What does a website or an online shop cost?",
-            a: "That depends on the scope. Work is billed by effort or at a fixed price once the scope is clear. You will find the hourly rates under Pricing.",
-          },
-          {
             q: "Can you take over my existing website or shop?",
-            a: "Yes, including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. I fix errors and take care of the upkeep.",
+            a: "Yes, including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. I fix errors and keep it maintained.",
           },
           {
-            q: "I don't know what I need yet. Can we still talk?",
-            a: "Yes. Tell me what is not running smoothly – or try the service assistant. We find the next step together.",
+            q: "Does the site have to be rebuilt for that?",
+            a: "Usually not. What holds up stays — only what cannot be repaired gets rebuilt.",
+          },
+          {
+            q: "What does a website or an online shop cost?",
+            a: "That depends on the scope. Work is billed by effort, or at a fixed price once the scope is clear. The hourly rates are under Pricing.",
           },
           {
             q: "What does the first conversation cost?",

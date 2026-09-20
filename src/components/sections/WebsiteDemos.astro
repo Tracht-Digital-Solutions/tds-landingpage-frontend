@@ -13,10 +13,9 @@
  * - `service` — the same grid inside the Webauftritt detail page, where the
  *   surrounding page has already made the argument and the lead can be shorter.
  *
- * Ground: PLAIN PAPER, no `tds-tone-*`. `Services.astro` above is
- * `tds-tone-sand`, and two sand grounds in a row read as one long section; the
- * cards take the sand fill instead, which is the inverse of the service grid
- * one section up.
+ * Ground: none of its own. The page has ONE ground (`.page-ground` in
+ * `layouts/Layout.astro`), and the cards take the sand fill so they read as
+ * cards against it.
  */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";

@@ -26,14 +26,18 @@ const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
 ---
 
-{/* Warmweiß mit weichen Markenfeldern an den Außenrändern — the first
-    paper section after the hero. The fields come from the shared `.tds-wash`;
-    they are dialled down on phones and in dark mode by the decor tokens.
-    Darunter liegt ein sehr leiser Fotogrund (siehe IMAGES.md). Gestapelt wird
-    Fläche → Wash-Felder (z -1) → Foto (`.tds-decor`, z 0) → Inhalt (z 1). */}
+{/* Kein eigener Grund mehr: die Markenfelder liegen seitenweit in
+    `.page-ground` (siehe `layouts/Layout.astro`). Hier bleibt nur der sehr
+    leise Fotogrund (siehe IMAGES.md). Gestapelt wird Seitengrund (fixiert,
+    z -1) → Foto (`.tds-decor`, z 0) → Inhalt (z 1).
+
+    `relative` ist Voraussetzung, nicht Kosmetik: `.tds-decor` ist
+    `position: absolute; inset: 0` und braucht diesen Abschnitt als
+    Bezugsrahmen. Es kam bis hierher von `.tds-wash` mit; ohne die Klasse
+    würde das Foto sonst am nächsten positionierten Vorfahren hängen. */}
 <section
   id="about"
-  class="tds-wash section-spacing"
+  class="relative section-spacing"
   aria-labelledby="about-heading"
 >
   {/* Fotogrund unter dem Wash, in der geteilten `.tds-decor`-Ebene, weil deren

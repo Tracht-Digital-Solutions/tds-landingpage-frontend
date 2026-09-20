@@ -88,14 +88,34 @@
       ueber diesen Wert hinaus; die Alphas rechnen `calc(0.14 * strength)`,
       ein Faktor > 1 ist also vorgesehen und kein Missbrauch.
 
-   2. `--lp-surface-card` ersetzt das papierweisse `--color-paper` als
-      Kartenfuellung. Das ist der groesste Einzelhebel gegen "zu viel Weiss":
-      die weisse Masse der Seite sind nicht die Abschnitte (die wechseln
-      laengst zwischen Papier und Sand), sondern die Karten darauf. */
+   2. `--lp-surface-card` ist die Kartenfuellung der Seite — der groesste
+      Einzelhebel gegen "zu viel Weiss": die weisse Masse einer Seite sind
+      nicht die Abschnitte, sondern die Karten darauf.
+
+      Die Basis ist seit dem durchgehenden Papiergrund (`.page-ground`) eine
+      Mischung aus Sand und Weiss, und beide Zahlen darin sind gemessen, nicht
+      gewaehlt:
+
+      - Reines `--color-card` als Basis ergab im Hellmodus Kontrast 1.001 zum
+        Papier darunter. Eine randlose Karte, die exakt so hell ist wie ihre
+        Flaeche, ist keine Karte mehr. Vorher fiel das nicht auf, weil die
+        Karten auf Sand standen.
+      - Reines `--color-soft` als Basis loeste das, riss aber ein zweites Loch
+        auf: `--color-muted` landete darauf bei 4.48 und damit UNTER 4.5. Das
+        traf die Listen der Leistungsseiten, und `npm run audit:ux` hat es als
+        20 axe-Verstoesse gemeldet — sichtbar war nichts.
+
+      70 % Sand ist der Punkt, an dem beides haelt: muted bei 4.67, Abstand
+      zum Papiergrund 1.10 (hell) und 1.23 (dunkel). Wer hier dreht, muss
+      BEIDE Zahlen neu messen — sie bewegen sich gegenlaeufig. */
 :root {
   --tds-decor-field-strength: 1.5;
   --tds-decor-shape-alpha: 0.16;
-  --lp-surface-card: color-mix(in srgb, var(--color-accent-pink) 5%, var(--color-card));
+  --lp-surface-card: color-mix(
+    in srgb,
+    var(--color-accent-pink) 5%,
+    color-mix(in srgb, var(--color-soft) 70%, var(--color-card))
+  );
 }
 
 /* ACHTUNG, und der Grund, warum der Block oben nicht allein stehen darf:
@@ -215,6 +235,52 @@ figcaption {
    clip + visible don't coerce each other, so vertical scroll is fine.) */
 body {
   overflow-x: clip;
+  /* Stated, not inherited. `.page-ground` sits at `z-index: -1`, which puts
+     it behind the body's own content but still IN FRONT of the body's
+     background — so the body needs a real background for the layer to have
+     something to lie on. Without it the ground paints against the canvas and
+     the root's background propagation makes the two fight. */
+  background-color: var(--color-paper);
+}
+
+/* --- The page's one ground -----------------------------------------------
+   See `layouts/Layout.astro` for why this exists instead of a `.tds-wash`
+   per section.
+
+   Viewport-anchored on purpose: the three fields keep the size they were
+   drawn at while the page scrolls over them, instead of being stretched down
+   a 10,000px document into a flat tint. The alphas are the shared
+   `--tds-decor-*` tokens, so this follows the dark theme and the phone
+   reduction without a second set of numbers.
+
+   `z-index: -1` needs no `isolation: isolate` here: the body is the nearest
+   stacking context that matters and nothing between them creates one. That
+   is a real constraint, not an observation — giving <body> a `transform`,
+   `filter`, `opacity` or `will-change` would trap this layer behind the
+   body background and the ground would vanish with no error anywhere. */
+.page-ground {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60rem 45rem at 6% 14%,
+      rgb(var(--tds-decor-navy) / calc(0.11 * var(--tds-decor-field-strength))),
+      transparent 62%
+    ),
+    radial-gradient(
+      55rem 40rem at 96% 42%,
+      rgb(var(--tds-decor-bordeaux) / calc(0.1 * var(--tds-decor-field-strength))),
+      transparent 60%
+    ),
+    /* Low and off-centre, never the middle of the viewport: a tint directly
+       behind body copy is the one thing this layer must not do. */
+    radial-gradient(
+      48rem 34rem at 70% 96%,
+      rgb(var(--tds-decor-coral) / calc(0.09 * var(--tds-decor-field-strength))),
+      transparent 58%
+    );
 }
 
 /* Clearance for the fixed chrome on ANY kind of scroll the browser performs
@@ -471,3 +537,69 @@ html {
 /* (The price drawer's push, panel and scrim lived here. The prices are an
    ordinary section since the 2026-09 redesign — `sections/Pricing.astro` —
    so there is no overlay left to position, trap focus in or undo on Back.) */
+
+/* === Cross-page transitions, this site's part ==============================
+
+   The shared stylesheet (`page-transitions.css`, imported at the top of this
+   file) cross-fades whole pages and says why it is opacity only: the header
+   is identical on both sides of a navigation, so ANY movement of the root
+   snapshot reads as the entire page lurching, chrome included.
+
+   That objection is about the root snapshot, not about movement. Give the two
+   pieces of chrome a transition name of their own and they leave that
+   snapshot: the browser then matches each one to its twin on the next page
+   and holds it still, while what is left of `root` — the content between them
+   — is free to move. So the header stays put, the footer stays put, and the
+   content rises a little as it fades in, which is what makes a navigation
+   read as one page turning rather than two pages swapping.
+
+   Scoped to `:active-view-transition-type(page)` for the same reason the
+   shared sheet is: <ThemeToggle> animates the very same
+   `::view-transition-*(root)` pseudo-elements from JS for its theme wipe, and
+   that transition carries no type. Drop the scope and the theme switch
+   inherits a rise it was never meant to have.
+
+   Nothing here is needed under reduced motion — the shared sheet sets
+   `navigation: none` there, so no transition runs at all and these rules
+   never match. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Must stay unique in the document. Both are single instances; a second
+     header on one page would make the browser skip the transition entirely
+     and log a duplicate-name warning. */
+  .site-header {
+    view-transition-name: lp-site-header;
+  }
+  .site-footer {
+    view-transition-name: lp-site-footer;
+  }
+
+  /* Only `animation-name` is replaced. Duration, easing and `both` still come
+     from the shared rule, so this stays one movement with one timing rather
+     than a second animation racing the first. */
+  :root:active-view-transition-type(page)::view-transition-new(root) {
+    animation-name: tds-page-in, lp-page-rise;
+  }
+
+  /* Naming the chrome is not enough to hold it still. The browser's default
+     for a matched group is to cross-fade the old snapshot into the new one
+     under `mix-blend-mode: plus-lighter` — and the two snapshots here are the
+     same header, so that is a fade of an image into itself. On opaque chrome
+     it is invisible; on this header it is not, because the pill is
+     translucent with a backdrop blur, and plus-lighter ADDS the two
+     translucent copies. The result is a brief brightening of the navigation
+     on every navigation. Switching the group's own animations off leaves the
+     new snapshot standing there, which is the whole intent. */
+  :root:active-view-transition-type(page)::view-transition-old(lp-site-header),
+  :root:active-view-transition-type(page)::view-transition-new(lp-site-header),
+  :root:active-view-transition-type(page)::view-transition-old(lp-site-footer),
+  :root:active-view-transition-type(page)::view-transition-new(lp-site-footer) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+}
+
+@keyframes lp-page-rise {
+  from {
+    transform: translateY(1.25rem);
+  }
+}

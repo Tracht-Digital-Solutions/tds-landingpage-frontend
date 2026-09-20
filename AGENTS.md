@@ -27,9 +27,9 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   (`sections/CustomerCases.astro`) → Vorgehen (with the first-conversation card)
   → Beispielseiten (`sections/Showcase.astro`) → compact Journal → Wieso ich? →
   Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ →
-  Kontakt. The showcase keeps sand on both sides and the FAQ stays directly
-  above the navy contact block; the one paper-on-paper seam is Wieso ich? above
-  the prices. The positioning band, the pricing teaser with its drawer and the
+  Kontakt. The FAQ stays directly
+  above the navy contact block. The positioning band, the pricing teaser with
+  its drawer and the
   hero slider were removed, not unmounted; do not bring them back. The old
   TechMarquee and Currently sections do not belong on the home page, and
   Portfolio stays hidden.
@@ -88,11 +88,18 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     later, an event for a live one), and text the visitor typed is never
     replaced. Its copy is code-owned (no CMS block) and follows the same rules
     as the rest: du, no free and no timed first conversation.
-- **The hero is `sections/Hero.astro` — server-rendered, no island.**
-  - The eyebrow names the audience, the H1 the benefit, the sub (`#hero-sub`)
-    the problems and the outcome, followed by two real anchors, one of them
-    primary. The brand motto no longer leads the hero; it said nothing a
+- **The hero is `sections/Hero.astro` — its copy and photo are
+  server-rendered; only the decoration is an island.**
+  - The eyebrow names the SITUATION the visitor is in, the H1 the benefit, the
+    sub (`#hero-sub`) what is on offer, followed by two real anchors, one of
+    them primary. The brand motto no longer leads the hero; it said nothing a
     visitor could check.
+  - **The page is written for businesses that already HAVE a website or shop**
+    (decided 2026-09-20). Taking one over, repairing it and maintaining it is
+    the lead story — not a rebuild, and not "Digitalisierung" in the abstract.
+    The service catalog is unchanged; only the narrative is. The
+    Germany-wide keyword target stays in the meta description, where
+    `seo.test.ts` holds it.
   - The right column is a trust card with at most THREE checkable facts
     (`home_trust`, `resolveTrustFacts` in `lib/homeContent.ts`): name and town
     from `siteConfig`, the lowest rate from the pricing block, each linking to
@@ -218,14 +225,41 @@ visual language rather than rebuilding it locally:
   the connector line. `ServiceDefinition.number` still orders the catalog and
   keys the card decoration — it is not display text. The home page's Process
   section is the one place that still numbers, deliberately.
+- **The page has ONE ground.** `.page-ground` in `layouts/Layout.astro` is a
+  single viewport-anchored layer carrying the brand fields; `body` is
+  `--color-paper`. No section paints a tone or a `.tds-wash` of its own — the
+  alternating paper/sand bands were removed because the ground restarted at
+  every section edge. The only different-coloured surface left is the navy
+  contact block (`.tds-tone-navy`), which simply paints over the layer.
+  Two consequences: nothing between `body` and that layer may create a
+  stacking context (a `transform`, `filter` or `opacity` on `<body>` hides the
+  ground with no error), and every borderless card's fill must be checked
+  against `--color-paper`, not against a band.
+- `--lp-surface-card` is the card fill and both numbers in it are measured —
+  see the comment in `styles/global.css`. It has to separate from the paper
+  ground AND keep `--color-muted` above 4.5 on top of it; the two pull in
+  opposite directions. Re-measure both before touching it, and run
+  `npm run audit:ux` — the contrast half of that pair fails silently.
 - Motion (tds-shared ≥ 0.38.4): pages cross-fade via the shared
-  `page-transitions.css`, FAQ answers grow open via `.tds-disclosure`, the
-  contact form animates errors and the thank-you with `tds-shared/motion/react`.
-  The hero stays plain Astro with CSS entrances — no island, no `motion`: its
-  SSR start state was once the mobile LCP. Scroll reveal stays `lib/reveal.ts`
-  (`[data-reveal]`); do not add tds-shared's `.tds-reveal` on top of it.
-  `motion` must not load before the contact form: `src/__tests__/motion.test.ts`
-  holds the rules, and a first-load measurement belongs in any change here.
+  `page-transitions.css` plus this site's own half in `global.css` (the header
+  and footer carry `view-transition-name`, so they hold still while the
+  content fades and rises — the two rules are one mechanism). FAQ answers grow
+  open via `.tds-disclosure`, the contact form animates errors and the
+  thank-you with `tds-shared/motion/react`.
+  The hero's COPY and PHOTO stay plain Astro — its SSR start state was once the
+  mobile LCP (4.1 s). Its decorative geometry is a `motion` island
+  (`islands/HeroDecor.tsx`) mounted `client:media="(min-width: 64rem)"`:
+  measured, `client:idle` cost a phone ~129 KB of JS for shapes that do not
+  render below that width. LCP is unchanged at 390 px (588 ms vs 592 ms, median
+  of 5, CPU ×4; LCP element `H1#hero-heading` either way). Scroll reveal stays
+  `lib/reveal.ts` (`[data-reveal]`); do not add tds-shared's `.tds-reveal` on
+  top of it. `src/__tests__/motion.test.ts` holds the rules, and a first-load
+  measurement belongs in any change here.
+- **A `<dialog>` needs `margin: auto` spelled out.** Tailwind's preflight
+  resets `margin: 0` on `*`, which beats the UA rule that centres a modal
+  dialog, so it opens in the top left corner — working, focus-trapped and in
+  the wrong place. Both dialogs shipped that way. `previewLightbox.test.ts`
+  now checks every `.astro` file that contains a `<dialog>`.
 - Keep `SectionHeader` and `AccentLetters` semantics. Accent letters need one
   accessible label and must stop transforming under `prefers-reduced-motion`.
 - Test desktop, 375 px mobile, both themes and reduced motion. Horizontal

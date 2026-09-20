@@ -176,9 +176,9 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Webauftritt",
         summary:
-          "Website, Onlineshop und Marketing aus einer Hand: Ich baue deinen Auftritt, mache ihn sichtbar und halte ihn aktuell.",
+          "Bestehende Website oder Shop übernehmen, reparieren und pflegen – oder neu bauen, wenn sich das nicht mehr lohnt.",
         intro:
-          "Deine Website entscheidet oft, ob jemand anfragt. Deshalb plane ich *Gestaltung, Technik und Sichtbarkeit zusammen*.",
+          "Meistens muss nichts neu gebaut werden. Ich übernehme, *was trägt* – und ersetze nur, was sich nicht mehr retten lässt.",
         situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Deine Website ist veraltet und schwer zu pflegen.",
@@ -190,7 +190,7 @@ export const serviceDefinitions = [
           "Website bauen – für Handy und Bildschirm",
           "Onlineshop einrichten oder reparieren, z. B. WooCommerce oder Shopware 6",
           "Bestehende Seiten auf WordPress, TYPO3 oder bei STRATO übernehmen",
-          "Google Ads, Unternehmensprofil und Auffindbarkeit",
+          "Marketing: Google Ads, Unternehmensprofil und Auffindbarkeit",
         ],
         outcomesTitle: "Das erreichst du",
         outcomes: [
@@ -224,9 +224,9 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Web Presence",
         summary:
-          "Website, online shop and marketing from one source: I build your presence, make it visible and keep it up to date.",
+          "Taking over, repairing and maintaining an existing website or shop – or building new where that no longer pays off.",
         intro:
-          "Your website often decides whether someone gets in touch. That is why I plan *design, technology and visibility together*.",
+          "Usually nothing has to be rebuilt. I take over *what holds up* – and replace only what cannot be saved.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "Your website is outdated and hard to maintain.",
@@ -238,7 +238,7 @@ export const serviceDefinitions = [
           "Build the website – for phones and screens",
           "Set up or repair an online shop, e.g. WooCommerce or Shopware 6",
           "Take over existing sites on WordPress, TYPO3 or at STRATO",
-          "Google Ads, business profile and findability",
+          "Marketing: Google Ads, business profile and findability",
         ],
         outcomesTitle: "What you achieve",
         outcomes: [

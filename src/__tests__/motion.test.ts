@@ -12,12 +12,55 @@ import { describe, expect, it } from "vitest";
 const src = (path: string) => readFileSync(join(__dirname, "..", path), "utf8");
 
 describe("motion on the landing page", () => {
-  it("keeps the hero free of any animation runtime", () => {
-    // The hero island once rendered Motion's `opacity:0` start state into the
-    // SSR HTML and became its own mobile LCP (4.1s). It is plain Astro now.
+  /**
+   * The rule the 4.1s mobile LCP actually taught.
+   *
+   * The old hero island rendered Motion's `opacity:0` start state into the SSR
+   * HTML for its eyebrow, headline, sub and buttons, so the first screen was
+   * blank until React hydrated. The lesson is not "the hero may not animate" —
+   * it is that nothing a visitor READS or LOOKS AT may wait on hydration.
+   *
+   * So: the copy and the photo stay plain Astro in `Hero.astro`, and the only
+   * island it mounts is the decorative geometry, which is `aria-hidden` and
+   * `hidden xl:block` — absent entirely on the device the incident was
+   * measured on.
+   */
+  it("keeps the hero's copy and photo out of any animation runtime", () => {
     const hero = src("components/sections/Hero.astro");
     expect(hero).not.toMatch(/motion\/react|from ["']motion/);
-    expect(hero).not.toMatch(/client:(load|idle|visible|only)/);
+
+    // Exactly one island, and it is the decoration.
+    const hydrated = hero.match(/<(\w+)[^>]*client:(load|idle|visible|only|media)/g) ?? [];
+    expect(hydrated).toHaveLength(1);
+    expect(hydrated[0]).toContain("HeroDecor");
+    // And it only loads where its shapes exist at all. Below 64rem none of
+    // them render — and measured, `client:idle` still pulled ~220 KB of JS
+    // onto phones for geometry that was not on the screen. `client:media` is
+    // what stops that; it is not interchangeable with the other directives.
+    expect(hero).toContain('client:media="(min-width: 64rem)"');
+
+    // The things that must still be server-rendered text and markup.
+    expect(hero).toContain("<h1");
+    expect(hero).toContain("<picture>");
+    for (const field of ["hero.headline", "hero.eyebrow", "hero.sub", "hero.cta1"]) {
+      expect(hero, `${field} must render in Astro`).toContain(field);
+    }
+  });
+
+  it("lets the hero decoration animate, but nothing it renders is read", () => {
+    const decor = src("components/islands/HeroDecor.tsx");
+    // Through tds-shared, never a bare `motion` import — same rule as the form.
+    expect(decor).toContain('from "@tracht-digital-solutions/tds-shared/motion/react"');
+    expect(decor).not.toMatch(/from ["'](motion|framer-motion)["']/);
+    // Decoration only: no text, no image, no control. Checked against the
+    // code with its comments stripped — the file's own documentation names
+    // `<picture>` as the thing that stays in Astro, and a naive grep reads
+    // that mention as a violation of the rule it is explaining.
+    const code = decor.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code).not.toMatch(/<(img|picture|h[1-6]|a|button|p)[\s>/]/);
+    // It must have a branch that mounts no animation at all under reduced
+    // motion — a zero duration still costs the listener and the frames.
+    expect(decor).toContain("prefers-reduced-motion: reduce");
   });
 
   it("opens FAQ answers through tds-shared's disclosure, not a local copy", () => {
@@ -32,6 +75,40 @@ describe("motion on the landing page", () => {
     expect(src("styles/global.css")).toContain(
       '@import "@tracht-digital-solutions/tds-shared/styles/page-transitions.css";',
     );
+  });
+
+  /**
+   * The site's own half of the page transition.
+   *
+   * The shared stylesheet is opacity-only and says why: the header is
+   * identical across a navigation, so moving the root snapshot moves the
+   * chrome with it. Naming the chrome takes it out of that snapshot, which is
+   * what makes the content's rise safe — the two rules are one mechanism and
+   * removing either one silently breaks the other. Without the names, the
+   * whole page lurches; without the rise, the names buy nothing.
+   */
+  it("holds the chrome still and moves only the content", () => {
+    const css = src("styles/global.css");
+    expect(css).toMatch(/\.site-header\s*\{\s*view-transition-name:\s*lp-site-header/);
+    expect(css).toMatch(/\.site-footer\s*\{\s*view-transition-name:\s*lp-site-footer/);
+    expect(css).toContain("animation-name: tds-page-in, lp-page-rise;");
+    expect(css).toMatch(/@keyframes lp-page-rise/);
+
+    // Every rule of this mechanism has to carry the `page` type: ThemeToggle
+    // animates the same root pseudo-elements from JS for its theme wipe, and
+    // that transition has no type. An unscoped rule would join it.
+    // Comments stripped from the WHOLE file before looking, and no slicing:
+    // the section marker itself lives inside a comment, so cutting there
+    // starts the text mid-comment and every later `*/` pairs with the wrong
+    // `/*` — which left the prose that explains this very rule looking like a
+    // selector that breaks it.
+    for (const line of css.replace(/\/\*[\s\S]*?\*\//g, "").split("\n")) {
+      if (line.includes("::view-transition-")) {
+        expect(line, "unscoped view-transition rule").toContain(
+          "active-view-transition-type(page)",
+        );
+      }
+    }
   });
 
   it("switches page transitions on inline, first in <head>", () => {

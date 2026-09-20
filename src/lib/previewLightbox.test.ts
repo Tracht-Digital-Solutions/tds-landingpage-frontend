@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -131,5 +131,43 @@ describe("the lightbox script", () => {
   it("binds each dialog to its own section", () => {
     // Two shelves on one page must not drive one another's dialog.
     expect(lightbox).toMatch(/dialog\.closest\("section"\)/);
+  });
+});
+
+/**
+ * Centring, for every `<dialog>` this site renders — not just this one.
+ *
+ * A modal dialog is centred by the UA stylesheet: `inset: 0` on all four
+ * sides plus `margin: auto`. Tailwind's preflight resets `margin: 0` on `*`,
+ * `::before`, `::after` and `::backdrop`, which beats that UA rule, so the
+ * auto margins are gone and the box resolves against the start corner. Both
+ * dialogs on the home page opened in the TOP LEFT corner for exactly this
+ * reason, and nothing errored: the overlay worked, Escape worked, the focus
+ * trap worked, the picture was simply in the wrong place.
+ *
+ * The rule is written against every dialog in the tree rather than the two
+ * that exist today, because the next one will be written by copying one of
+ * them and the omission is invisible until someone opens it.
+ */
+describe("every dialog", () => {
+  const astroFiles = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const path = resolve(dir, entry.name);
+      if (entry.isDirectory()) return astroFiles(path);
+      return entry.name.endsWith(".astro") ? [path] : [];
+    });
+
+  const withDialog = astroFiles(resolve(process.cwd(), "src"))
+    .map((path) => [path, readFileSync(path, "utf8")] as const)
+    .filter(([, source]) => source.includes("<dialog"));
+
+  it("has at least the two the home page renders", () => {
+    // A zero-length list would make every assertion below pass vacuously.
+    expect(withDialog.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it.each(withDialog.map(([path]) => path))("centres itself: %s", (path) => {
+    const source = withDialog.find(([candidate]) => candidate === path)?.[1] ?? "";
+    expect(source).toMatch(/margin(-inline|-block)?:\s*auto/);
   });
 });

@@ -76,7 +76,7 @@ const colClass: Record<number, string> = {
 const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
 ---
 
-<section id="blog" class="py-16 md:py-24 tds-tone-sand" aria-labelledby="journal-heading">
+<section id="blog" class="py-16 md:py-24" aria-labelledby="journal-heading">
   <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
     <div class="flex items-end justify-between mb-10">
       <h2
@@ -114,7 +114,7 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
 
     <a
       href="https://blog.tracht-digital.de"
-      class="sm:hidden mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-paper)] px-5 py-2.5 text-sm font-medium text-[var(--color-primary)]"
+      class="sm:hidden mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-primary)]"
     >
       {t.blog.allPosts}
       <span aria-hidden="true">↗</span>

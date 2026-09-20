@@ -189,6 +189,26 @@ const showCookieNotice = !bare;
     <slot name="head" />
   </head>
   <body>
+    {/* The page's ONE ground.
+
+        The sections used to alternate paper and sand and each washed section
+        painted its own `.tds-wash` fields, so the ground restarted at every
+        section edge: six colour events down the home page, each with its own
+        1px seam, and three separate copies of the same three radial fields
+        beginning again at a boundary the reader can see.
+
+        This is the replacement: one layer, `position: fixed`, so it is
+        anchored to the VIEWPORT rather than stretched over the document.
+        That distinction is the whole point — `primitives.css` warns that
+        putting `.tds-wash` on the body flattens it into one dull tint,
+        which is what happens when three small radial fields are asked to
+        cover ten thousand pixels of scroll. Fixed, they stay the size they
+        were drawn at and the page moves over them.
+
+        A section that wants a different colour simply paints over it
+        (`.tds-tone-navy` on the contact block). Nothing has to be
+        maintained per section for that to hold. */}
+    <div class="page-ground" aria-hidden="true"></div>
     {/* In the page's language: it said "Skip to content" on every German page.
         z-50 lifts it over the fixed header (z-40) when it takes focus. */}
     <a

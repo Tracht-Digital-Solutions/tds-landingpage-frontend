@@ -88,10 +88,10 @@ const hasPhoto = hasPhotoCover(coverHint);
   }
 
   .post-card {
-    /* Not `--color-soft`: this section's own ground IS `--color-soft`
-       (`.tds-tone-sand`), and a borderless card whose fill matches its
-       section is not a card. Paper against sand is the same pairing the
-       service grid uses one section earlier. */
+    /* A borderless card whose fill matches its ground is not a card. The
+       ground is `--color-paper` everywhere on this site now (`.page-ground`
+       in the layout), so the fill is the tinted card surface — the same
+       pairing the service grid uses one section earlier. */
     --lp-card-bg: var(--lp-surface-card);
     --lp-card-bg-hover: color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
 
