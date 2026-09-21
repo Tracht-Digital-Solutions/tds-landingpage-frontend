@@ -33,11 +33,13 @@ describe("motion on the landing page", () => {
     const hydrated = hero.match(/<(\w+)[^>]*client:(load|idle|visible|only|media)/g) ?? [];
     expect(hydrated).toHaveLength(1);
     expect(hydrated[0]).toContain("HeroDecor");
-    // And it only loads where its shapes exist at all. Below 64rem none of
-    // them render — and measured, `client:idle` still pulled ~220 KB of JS
-    // onto phones for geometry that was not on the screen. `client:media` is
-    // what stops that; it is not interchangeable with the other directives.
-    expect(hero).toContain('client:media="(min-width: 64rem)"');
+    // It loads at every width since 2026-09-21. It used to be gated on
+    // `client:media="(min-width: 64rem)"`, because below that the shapes were
+    // hidden and the island bought a phone nothing — but that also meant a
+    // phone had NO motion in the hero at all. The shapes render everywhere
+    // now, so the gate is gone; the ~129 KB it costs there is watched by
+    // `npm run audit:perf` rather than by a directive.
+    expect(hero).toContain("<HeroDecor client:idle />");
 
     // The things that must still be server-rendered text and markup.
     expect(hero).toContain("<h1");
@@ -45,6 +47,26 @@ describe("motion on the landing page", () => {
     for (const field of ["hero.headline", "hero.eyebrow", "hero.sub", "hero.cta1"]) {
       expect(hero, `${field} must render in Astro`).toContain(field);
     }
+  });
+
+  /**
+   * The headline animates as ONE block, and this is the guard on that.
+   *
+   * A per-word stagger was built and measured out again: each word has to be
+   * `inline-block` for a transform to apply, which (a) fragmented the H1 into
+   * nine small LCP candidates so `p#hero-sub` took its place as the largest
+   * paint, and (b) removed every opportunity for `hyphens: auto` to break a
+   * long German word, which is the one thing the H1's own comment says it
+   * must keep doing.
+   */
+  it("does not split the headline into transformable fragments", () => {
+    const hero = src("components/sections/Hero.astro");
+    const markup = hero.slice(hero.indexOf("<h1"), hero.indexOf("</h1>"));
+    expect(markup).not.toMatch(/hero-word/);
+    expect(markup).not.toMatch(/\.split\(/);
+    // The properties that need an unbroken text block to work on.
+    expect(hero).toMatch(/hyphens:\s*auto/);
+    expect(hero).toMatch(/overflow-wrap:\s*break-word/);
   });
 
   it("lets the hero decoration animate, but nothing it renders is read", () => {

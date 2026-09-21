@@ -301,9 +301,16 @@ export default function ContactForm({
             <label htmlFor="subject" className="contact-field-label">
               {copy.reasonLabel}
             </label>
+            {/* NOT `fieldClass`. That class family ends in
+                `.contact-field { background-color: transparent !important }`,
+                which exists so Safari and Firefox-on-macOS cannot paint a
+                light UA background behind a text input on the navy section —
+                and it beat every attempt to give this control the
+                navigation's frosted fill. A select is not a text field any
+                more; it carries its own surface, so it gets its own class. */}
             <select
               id="subject"
-              className={`${fieldClass} contact-select`}
+              className="contact-select block w-full text-base leading-snug border-0 outline-none focus:outline-none focus:ring-0"
               defaultValue=""
               {...register("subject")}
             >

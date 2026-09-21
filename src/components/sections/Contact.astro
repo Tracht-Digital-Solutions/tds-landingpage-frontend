@@ -931,19 +931,132 @@ const socials = {
        page's colours while the popup keeps the light default. Unreadable, and
        invisible from the page itself.
      - Its own arrow, since removing the appearance removes the platform's. */
+  /* The control wears the NAVIGATION's surface: the same frosted pill, so the
+     one thing the visitor has to choose reads as a control rather than as
+     another underlined line in a stack of them.
+
+     Same recipe as `.site-header`, deliberately down to the numbers —
+     `--color-paper` at 62 %, `blur(22px) saturate(150%)`, the shared pill
+     radius. `--color-paper` is the right token here and not `--color-card`
+     because `.tds-tone-navy` re-maps the latter to a translucent white for
+     this section; paper is untouched by the tone and flips with the theme on
+     its own, so the pill is frosted light on the light theme and frosted
+     near-black on the dark one, exactly as the bar is.
+
+     CONTRACT, inherited from tds-shared: author `backdrop-filter` UNPREFIXED
+     ONLY. lightningcss collapses a hand-written pair to the `-webkit-` form
+     and drops the standard property, which kills the blur in Firefox. */
   #contact .contact-select {
     appearance: none;
-    color-scheme: dark;
     cursor: pointer;
-    padding-right: 2rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    /* Light control → light native popup where the popup is the platform's. */
+    color-scheme: light;
+    padding: 0.75rem 2.25rem 0.75rem 1rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    background-color: color-mix(in srgb, var(--color-paper) 62%, transparent);
+    backdrop-filter: blur(22px) saturate(150%);
+    color: var(--color-primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23050f68' stroke-opacity='0.75' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.5rem center;
+    background-position: right 0.85rem center;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      transform 200ms var(--tds-ease-out);
+  }
+  :global(:root[data-theme="dark"]) #contact .contact-select {
+    color-scheme: dark;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2393a7ff' stroke-opacity='0.85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    #contact .contact-select:hover {
+      background-color: color-mix(in srgb, var(--color-paper) 82%, transparent);
+      transform: translateY(-1px);
+    }
+  }
+  /* The row's underline would draw a second line under a pill. */
+  #contact .contact-select + .contact-field-line {
+    display: none;
   }
   /* The resting option is a prompt, not an answer — dimmed like a placeholder
      so an unanswered dropdown does not read as a choice already made. */
   #contact .contact-select:has(option[value=""]:checked) {
-    color: rgb(255 255 255 / 0.5);
+    color: color-mix(in srgb, var(--color-primary) 55%, var(--color-paper));
+  }
+
+  /* === The open list ================================================
+
+     A native `<select>`'s popup is drawn by the operating system and cannot
+     be styled, animated or blurred — which is why this needs
+     `appearance: base-select`. Where a browser has it, the picker becomes a
+     real element: rounded, frosted like the bar, and it animates open.
+     Where it does not, everything above still applies and the platform draws
+     its own list, which is a perfectly good dropdown.
+
+     `transition-behavior: allow-discrete` plus `@starting-style` is what lets
+     a `display: none` element animate in at all — without the pair the panel
+     would simply appear. */
+  @supports (appearance: base-select) {
+    #contact .contact-select,
+    #contact .contact-select::picker(select) {
+      appearance: base-select;
+    }
+    #contact .contact-select::picker(select) {
+      margin-top: 0.4rem;
+      padding: 0.35rem;
+      border: none;
+      border-radius: 14px;
+      background-color: color-mix(in srgb, var(--color-paper) 82%, transparent);
+      backdrop-filter: blur(22px) saturate(150%);
+      box-shadow: 0 18px 40px -22px rgb(0 0 0 / 0.55);
+      /* The OPEN state is the picker's only state — the element does not
+         exist while the select is closed — so the resting values go here and
+         `@starting-style` supplies the frame it animates from.
+
+         Written this way and not as `::picker(select):popover-open`, which
+         reads more naturally and which lightningcss refuses outright:
+         "Invalid pseudo class after pseudo element". It fails the BUILD, not
+         the page, so it is caught — but only after the first `npm run build`
+         of the day. */
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 160ms var(--tds-ease-out),
+        transform 160ms var(--tds-ease-out),
+        overlay 160ms allow-discrete,
+        display 160ms allow-discrete;
+    }
+    @starting-style {
+      #contact .contact-select::picker(select) {
+        opacity: 0;
+        transform: translateY(-0.4rem) scale(0.98);
+      }
+    }
+    #contact .contact-select option {
+      padding: 0.55rem 0.75rem;
+      border-radius: 10px;
+      color: var(--color-primary);
+      transition: background-color 120ms var(--tds-ease-out);
+    }
+    #contact .contact-select option:hover,
+    #contact .contact-select option:focus {
+      background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    }
+    #contact .contact-select option:checked {
+      background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
+    }
+    /* The platform's tick column would sit beside our own chevron. */
+    #contact .contact-select option::checkmark {
+      display: none;
+    }
+    #contact .contact-select::picker-icon {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #contact .contact-select,
+    #contact .contact-select::picker(select) {
+      transition: none;
+    }
   }
 
   /* The line under the message label that says what belongs in the field. */

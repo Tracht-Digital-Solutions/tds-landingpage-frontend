@@ -19,6 +19,7 @@
     "images:variants": "tsx scripts/image-variants.ts",
     "audit:ux": "node scripts/ux-audit.mjs",
     "audit:seo": "node scripts/seo-audit.mjs",
+    "audit:perf": "node scripts/perf-audit.mjs",
     "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
@@ -33,7 +34,6 @@
     "@tracht-digital-solutions/tds-shared": "^0.39.0",
     "astro": "^7.2.6",
     "lenis": "^1.3.26",
-    "marked": "^18.0.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.75.0",

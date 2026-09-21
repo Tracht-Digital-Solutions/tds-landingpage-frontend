@@ -579,6 +579,9 @@ html {
   :root:active-view-transition-type(page)::view-transition-new(root) {
     animation-name: tds-page-in, lp-page-rise;
   }
+  :root:active-view-transition-type(page)::view-transition-old(root) {
+    animation-name: tds-page-out, lp-page-sink;
+  }
 
   /* Naming the chrome is not enough to hold it still. The browser's default
      for a matched group is to cross-fade the old snapshot into the new one
@@ -598,8 +601,17 @@ html {
   }
 }
 
+/* The incoming page rises further than it used to (1.25rem was barely a
+   nudge), and the outgoing one now SINKS instead of only fading. Two
+   directions read as one page replacing another; one direction read as a
+   flicker. */
 @keyframes lp-page-rise {
   from {
-    transform: translateY(1.25rem);
+    transform: translateY(3rem);
+  }
+}
+@keyframes lp-page-sink {
+  to {
+    transform: translateY(-1.5rem);
   }
 }

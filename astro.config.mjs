@@ -101,7 +101,6 @@ export default defineConfig({
       // a new island library that imports `react` belongs in this list.
       noExternal: [
         /^@tracht-digital-solutions\//,
-        "marked",
         "zod",
         "lenis",
         "react-hook-form",

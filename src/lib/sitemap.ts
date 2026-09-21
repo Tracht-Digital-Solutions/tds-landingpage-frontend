@@ -29,6 +29,17 @@ export interface SitemapEntry {
   en: string;
   changefreq: "weekly" | "monthly";
   priority: number;
+  /**
+   * When this page last really changed, as YYYY-MM-DD.
+   *
+   * Optional, and the fallback is the render date — which is what EVERY
+   * entry used to report, on every request. A sitemap whose lastmod is
+   * always today tells a crawler that the whole site changed since its last
+   * visit, every visit, which is the same as telling it nothing. Service and
+   * platform pages carry a real `updatedAt` that already drives their
+   * `dateModified` and the visible "Stand" line; it belongs here too.
+   */
+  lastmod?: string;
 }
 
 /**
@@ -62,6 +73,7 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     en: serviceHref(service, "en"),
     changefreq: "monthly" as const,
     priority: 0.8,
+    lastmod: service.updatedAt,
   })),
   // The shop system and CMS pages sit below the service they belong to
   // (Webauftritt), which is what the lower priority says.
@@ -70,6 +82,7 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     en: platformHref(platform, "en"),
     changefreq: "monthly" as const,
     priority: 0.7,
+    lastmod: platform.updatedAt,
   })),
 ];
 
@@ -154,7 +167,7 @@ export function renderUrlset(entries: readonly SitemapEntry[], lastmod: string):
         "<url>",
         `<loc>${escapeXml(loc)}</loc>`,
         alternates,
-        `<lastmod>${escapeXml(lastmod)}</lastmod>`,
+        `<lastmod>${escapeXml(entry.lastmod ?? lastmod)}</lastmod>`,
         `<changefreq>${entry.changefreq}</changefreq>`,
         `<priority>${entry.priority.toFixed(1)}</priority>`,
         "</url>",

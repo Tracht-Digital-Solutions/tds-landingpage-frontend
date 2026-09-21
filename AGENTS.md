@@ -292,6 +292,28 @@ visual language rather than rebuilding it locally:
   `lib/reveal.ts` (`[data-reveal]`); do not add tds-shared's `.tds-reveal` on
   top of it. `src/__tests__/motion.test.ts` holds the rules, and a first-load
   measurement belongs in any change here.
+- **Motion, after the 2026-09-21 pass.** It was measured at 1.7 px/s — under
+  the threshold at which movement registers — and absent on phones entirely.
+  Now the hero decoration arrives visibly, drifts at ~5–10 px/s, follows the
+  pointer ~60 px, and the gold node walks the conduit (~49 px/s). The
+  scroll-linked part is CSS (`animation-timeline: view()`), NOT a hook: the
+  shared motion entry re-exports only `m` and `AnimatePresence`, and a bare
+  `motion` import is forbidden. Three rules hold it together:
+  - **The capsule and the quarter circle still start at `xl`.** Below that the
+    hero has no negative space — measured, the only free bands at 390 px are
+    100 px at the top and 56 px at the bottom, and the top one belongs to the
+    fixed header. Placing them lower produced sixteen "decoration over
+    content" failures in `audit:ux`. Only the small node renders below `xl`,
+    in the bottom band, walking horizontally.
+  - **The node is deliberately outside the scroll-drift rule.** Two travels on
+    one axis read as a wobble, and the extra 56 px put it on the eyebrow.
+  - **Nothing a visitor reads animates from `opacity: 0`.** The staged
+    entrance is the elements AROUND the headline; the headline rises as one
+    block. The note above its markup says what a per-word split broke.
+- **No opening hours are published**, on the page or in the schema. Julian
+  works by arrangement, and schema.org cannot express that — `opens`/`closes`
+  would be an invented promise of availability. `jsonld.test.ts` fails if
+  anyone adds them.
 - **A `<dialog>` needs `margin: auto` spelled out.** Tailwind's preflight
   resets `margin: 0` on `*`, which beats the UA rule that centres a modal
   dialog, so it opens in the top left corner — working, focus-trapped and in
@@ -695,8 +717,23 @@ npm run audit:ux -- <url>  # overflow, targets, fixed chrome, focus, axe, deep l
 npm run audit:seo -- <url> # every sitemap page: title, description, H1, canonical,
                            # hreflang, OG image, JSON-LD, Stand/author, sources,
                            # internal links, robots.txt, llms.txt
+npm run audit:perf -- <url> # LCP median of 5 + the LCP ELEMENT, CLS, TTFB,
+                           # byte weight by type, decoded JS. 390px, CPU x4,
+                           # cache off. Budgets in scripts/perf-budget.json;
+                           # over one = exit 1. In Git Bash prefix
+                           # MSYS_NO_PATHCONV=1 or `--paths=/` is rewritten
+                           # into a Windows path.
 npm run indexnow -- --dry-run  # the URLs IndexNow would be told about; manual, after a deploy
 ```
+
+**Every performance number in this file used to be a hand-taken Lighthouse
+reading that nothing could reproduce, so nothing could regress against them.
+`audit:perf` is that gate.** Its most load-bearing check is not a number: it
+pins the LCP ELEMENT to `h1#hero-heading`. A per-word entrance on the headline
+was built, and it fragmented the H1 into nine small candidates so the
+paragraph below silently became the largest paint — no timing got worse, the
+metric simply stopped watching the headline. Measure locally against locally;
+the local server does not compress and its first requests are cold.
 
 The Vitest default environment is Node; opt a DOM-dependent test into jsdom in
 that test file. `dist/`, `release/` and `var/` are generated and excluded from

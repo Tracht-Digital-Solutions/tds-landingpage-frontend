@@ -4,12 +4,29 @@
 // relative url(./files/*.woff2) refs, so Vite never emits the fonts.
 import "@fontsource/lato/400.css";
 import "@fontsource/lato/700.css";
-import "@fontsource/lato/900.css";
+// Lato 900 is NOT imported. It was, and no rule in this site or in
+// tds-shared's stylesheets ever selected it — 22.5 KB woff2 plus a 17.2 KB
+// legacy woff and a 5.6 KB latin-ext, downloaded for a weight nothing asked
+// for. Re-add it only together with the rule that uses it.
+//
 // Body + mono, matching --font-body / --font-mono in tds-shared's base.css.
 // This site used to load Geist and nothing at all for mono (Geist Mono was
 // never installed, so `font-mono` silently fell back to a system face).
+//
+// JetBrains Mono stays although it is 40 KB for seven micro-labels: it is a
+// brand invariant (AGENTS.md names the three faces), and it is measurably
+// NOT in the LCP path — it starts at 654 ms against an LCP of 628 ms,
+// because nothing above the fold uses it. Its cyrillic, greek and vietnamese
+// subsets cost nothing on the wire; `unicode-range` means a German or
+// English page never requests them.
 import "@fontsource-variable/plus-jakarta-sans";
 import "@fontsource-variable/jetbrains-mono";
+// The one font file the LCP element needs, imported for its hashed URL so it
+// can be preloaded below. `?url` gives the emitted asset path rather than
+// inlining the file. Lato is not variable, and the H1 asks for weight 500 —
+// the font-matching algorithm resolves that to the 400 face, which is why
+// this is the file to preload and not the 700.
+import latoLcpFont from "@fontsource/lato/files/lato-latin-400-normal.woff2?url";
 import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
@@ -117,6 +134,17 @@ const showCookieNotice = !bare;
          incoming page's opt-in at its first render, and the stylesheet linked at the
          end of this head often arrives later (tds-shared pageTransitionOptIn). -->
     <style is:inline set:html={pageTransitionOptIn} />
+    {/* The LCP element's font, fetched as early as the parser can see it.
+        Without this it is discovered only when the inlined CSS is parsed —
+        measured live, the two Lato faces did not finish until 520 ms against
+        an LCP of 628 ms, so the headline's glyphs were on the critical path
+        with nothing telling the browser to start them sooner.
+
+        `crossorigin` is REQUIRED even though the file is same-origin: fonts
+        are always fetched in CORS mode, and a preload without it is a second,
+        separate request that warms nothing — the classic way this tag makes a
+        page slower instead of faster. */}
+    <link rel="preload" href={latoLcpFont} as="font" type="font/woff2" crossorigin />
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#050f68" media="(prefers-color-scheme: light)" />
