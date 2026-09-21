@@ -200,6 +200,27 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     JSON-LD, so the card cannot drift from the Impressum. The postal address
     stays off it, matching `kontakt.vcf.ts`. Row ids key the icons and the
     tests, so they carry no copy.
+  - **The contact section links to it as a drawn MINI CARD**
+    (`.mini-card` in `sections/Contact.astro`, 2026-09-21), not as a text link
+    and not as a picture: `public/images/business-card.webp` is a 1440×900
+    screenshot of the page, which shrunk to card size is a tiny web page.
+    Three things hold it together, each silent when broken:
+    - **It draws itself from `--color-paper`, `--color-primary` and
+      `--color-accent` only.** The section carries `.tds-tone-navy`, which
+      re-maps `--color-black` to white plus `--color-muted`, `--color-line`,
+      `--color-card` and `--color-soft` to translucent whites — correct for
+      components on a dark ground, fatal for a LIGHT card, which would come
+      out white on white. Those three tokens are the ones the tone leaves
+      alone. Muted text is mixed from them at 75 %, a measured value: 55 %
+      failed contrast on the 10–11 px lines and `audit:ux` caught it as two
+      serious axe violations while the card looked fine.
+    - **The QR arrives as `BUSINESS_CARD_QR_PATH`, never the encoder** — see
+      the firewall in `businessCardQr.test.ts` — on an explicit white plate in
+      both themes, because the SVG is black on transparent.
+    - **One anchor, with an `aria-label`.** The visible text is a name, so a
+      content-derived accessible name reads the whole card out and never says
+      what following it does; the label states the action and keeps the
+      visible name inside it. `miniBusinessCard.test.ts` holds all of this.
   - It renders **no CMS block at all**, which is why it is not in
     `cache.ts#contentPages` — only in `alwaysPaths`. A block save must not
     rebuild it.
