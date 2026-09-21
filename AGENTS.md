@@ -367,8 +367,23 @@ visual language rather than rebuilding it locally:
 - **"echt" and "wirklich" never appear on the site**, in any inflection
   (2026-09-21) — also why the slogan lost its "wirklich" in tds-shared 0.40.
   `bannedWords.test.ts` scans every copy source with comments stripped plus
-  the tds-shared strings; `npm run audit:seo` scans the rendered pages, which
-  catches panel overrides and synced demo descriptions.
+  the tds-shared strings; `cms.ts` REFUSES a panel string containing one
+  (`lib/copyRules.ts`) and keeps the committed text, so a block saved before
+  the rule cannot bring the word back; `npm run audit:seo` scans the rendered
+  pages for anything else (a synced demo description).
+- **The closing bar of every example site is served from here**
+  (`public/embed/tds-brand-bar.js`, 2026-09-21). demo1 (Kanzlei), demo2
+  (BLOCK/01, repo `beispiel-shop`), demo3 (Immobilienportal) and the
+  Schreinerei demo each embed only `<tds-brand-bar lang="…">` with a fallback
+  link inside, plus
+  `<script src="https://tracht-digital.de/embed/tds-brand-bar.js" defer>`.
+  The copies they used to carry had drifted (labels, 8 px type, links). It is
+  a CLASSIC script (a cross-origin module would need CORS), renders in Shadow
+  DOM so no host stylesheet can restyle it, and offers exactly one knob:
+  `--tds-brand-bar-pad-bottom` for a host with a floating button over the
+  bar's lower edge. `.htaccess` caches `/embed/` for an hour, so a change
+  reaches every demo the same day. `brandBar.test.ts` holds the contract. Edit
+  the bar HERE, never in a demo.
 - **Republished screenshots carry a content version.** `/demos`,
   `/references` and `/images/business-card.webp` keep their names across the
   sync scripts and are cached for a week, so a new capture did not show on

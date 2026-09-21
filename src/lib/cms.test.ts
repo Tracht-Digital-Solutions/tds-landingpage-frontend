@@ -43,6 +43,20 @@ describe("cmsFor", () => {
     expect(out).toEqual({ headline: "Edited", body: "Edited body" });
   });
 
+  it("refuses a panel string with a word the site never says", async () => {
+    // A block saved before 2026-09-21 — e.g. the old slogan "…, die wirklich
+    // passen." — must not bring the word back; the committed text wins.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonOk({ blocks: { hero: { headline: "Lösungen, die wirklich passen.", body: "Echte Projekte" } } }),
+      ),
+    );
+    const { cmsFor } = await load();
+
+    expect(await cmsFor("hero", "de", fallback)).toEqual(fallback);
+  });
+
   it("falls back to the default when the section is absent", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonOk({ blocks: {} })));
     const { cmsFor } = await load();

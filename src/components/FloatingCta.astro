@@ -118,6 +118,12 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        is not. `translate` is its own property, so the hover lift on
        `transform` still composes with it. */
     translate: 0 calc(-1 * var(--tds-bottom-lane, 0px));
+    /* The group is only a positioning box. Since the CTA parts stand down
+       individually (the accessibility button stays), the box itself stays on
+       screen — and without this it swallowed clicks on whatever lay under its
+       invisible area (measured: the footer's "Cookie-Einstellungen"). Only the
+       children take pointer events; the suppression rules switch them off. */
+    pointer-events: none;
     z-index: 35;
     display: flex;
     flex-direction: column;
@@ -138,6 +144,10 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
           env(safe-area-inset-bottom, 0px)
       );
     }
+  }
+
+  .floating-cta-group > :global(*) {
+    pointer-events: auto;
   }
 
   /* --- Out of the way ------------------------------------------------- */

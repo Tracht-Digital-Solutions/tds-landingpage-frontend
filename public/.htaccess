@@ -63,6 +63,11 @@ Options -Indexes
   # a photo reaches everyone without a rename.
   RewriteRule ^(images|demos|references)/ - [E=TDS_MEDIA:1]
 
+  # The brand bar every example site embeds (embed/tds-brand-bar.js). An hour,
+  # not a week: it is the ONE copy of that bar, and a change to it should reach
+  # every demo the same day.
+  RewriteRule ^embed/ - [E=TDS_EMBED:1]
+
   # (1) A real file: hashed assets, prerendered /og/default.png, /kontakt.vcf,
   #     robots.txt, favicon. DOCUMENT_ROOT + REQUEST_URI rather than
   #     REQUEST_FILENAME, because Passenger hooks Apache's map_to_storage and
@@ -111,6 +116,7 @@ Options -Indexes
 <IfModule mod_headers.c>
   Header set Cache-Control "public, max-age=31536000, immutable" env=TDS_IMMUTABLE
   Header set Cache-Control "public, max-age=604800" env=TDS_MEDIA
+  Header set Cache-Control "public, max-age=3600" env=TDS_EMBED
 
   # Cached HTML is a snapshot the panel can replace at any moment, so it must
   # never be held by a browser or an intermediary. Revalidation is cheap: the

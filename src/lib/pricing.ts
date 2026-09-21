@@ -1,4 +1,5 @@
 import { cmsFor, fetchBlocks } from "./cms";
+import { hasBannedWord } from "./copyRules";
 import type { Lang } from "./i18n";
 import type { ServiceId } from "./services";
 
@@ -248,6 +249,7 @@ export function validatePricePackages(value: unknown): PricePackage[] {
       typeof candidate.description === "string" ? candidate.description.trim() : "";
     const price = typeof candidate.price === "number" ? candidate.price : Number.NaN;
     if (title === "" || !Number.isFinite(price) || price <= 0) return [];
+    if (hasBannedWord(title) || hasBannedWord(description)) return [];
 
     // The bullet list may legitimately be absent; a package is still a package
     // without one. Anything non-textual in it, though, means the item is not
@@ -256,7 +258,7 @@ export function validatePricePackages(value: unknown): PricePackage[] {
     let includes: string[] = [];
     if (Array.isArray(includesRaw)) {
       for (const entry of includesRaw) {
-        if (typeof entry !== "string" || entry.trim() === "") return [];
+        if (typeof entry !== "string" || entry.trim() === "" || hasBannedWord(entry)) return [];
         includes.push(entry.trim());
       }
     } else if (includesRaw !== undefined && includesRaw !== null) {
