@@ -43,7 +43,11 @@ const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessSt
         number: "01",
         title: "Zuhören",
         duration: "Zum Einstieg",
-        description: "Du erzählst, wo es hakt. Ich sage dir ehrlich, ob sich eine Umsetzung lohnt.",
+        // Bewusst NICHT der Satz aus `homeContent.firstCall.items[0]`. Beide
+        // standen wortgleich auf derselben Seite, 26 Zeilen auseinander. Was
+        // das Erstgespräch ist, sagt das Formular nach dem Absenden; dieser
+        // Schritt sagt, was daraus folgt.
+        description: "Du zeigst mir, was du hast. Ich sage dir, was sich lohnt und was nicht.",
       },
       {
         number: "02",
@@ -75,7 +79,7 @@ const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessSt
         number: "01",
         title: "Listen",
         duration: "To start",
-        description: "You tell me where things get stuck. I say honestly whether building something is worth it.",
+        description: "You show me what you have. I tell you what is worth doing and what is not.",
       },
       {
         number: "02",

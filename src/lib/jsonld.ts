@@ -127,12 +127,66 @@ interface ServiceOffering {
   rate: number;
 }
 
+/** A fixed-price package, as it appears in the offer catalogue. */
+export interface PackageOffering {
+  name: string;
+  description: string;
+  /** Net EUR, a single figure for the whole package. */
+  price: number;
+}
+
 /**
  * Service + OfferCatalog for the pricing page. Each rate becomes a
  * PriceSpecification (UnitPriceSpecification, hourly) inside an
  * OfferCatalog — that's how Schema.org expresses tiered hourly rates.
+ *
+ * A fixed price is a DIFFERENT specification and must not be squeezed through
+ * the hourly one. `UnitPriceSpecification` with `unitCode: "HUR"` states "this
+ * many euros per hour"; emitting a package total that way would publish a
+ * four-figure hourly rate to every consumer that reads the markup rather than
+ * the page. Packages therefore get a plain `PriceSpecification` with no unit,
+ * which is what a one-off total is.
  */
-export function pricingSchema(items: ServiceOffering[]): WithContext {
+export function pricingSchema(
+  items: ServiceOffering[],
+  packages: PackageOffering[] = [],
+): WithContext {
+  // One array, built explicitly: the two offer shapes differ (an hourly rate
+  // carries a reference quantity, a package total does not), and `concat`
+  // would demand they be the same type.
+  const offers: Record<string, unknown>[] = [
+    ...items.map((item) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: item.name,
+        description: item.description,
+      },
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: item.rate,
+        priceCurrency: "EUR",
+        unitCode: "HUR",
+        referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "HUR" },
+        valueAddedTaxIncluded: false,
+      },
+    })),
+    ...packages.map((item) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: item.name,
+        ...(item.description ? { description: item.description } : {}),
+      },
+      priceSpecification: {
+        "@type": "PriceSpecification",
+        price: item.price,
+        priceCurrency: "EUR",
+        valueAddedTaxIncluded: false,
+      },
+    })),
+  ];
+
   return {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -143,22 +197,7 @@ export function pricingSchema(items: ServiceOffering[]): WithContext {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Stundensätze",
-      itemListElement: items.map((item) => ({
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: item.name,
-          description: item.description,
-        },
-        priceSpecification: {
-          "@type": "UnitPriceSpecification",
-          price: item.rate,
-          priceCurrency: "EUR",
-          unitCode: "HUR",
-          referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "HUR" },
-          valueAddedTaxIncluded: false,
-        },
-      })),
+      itemListElement: offers,
     },
   };
 }

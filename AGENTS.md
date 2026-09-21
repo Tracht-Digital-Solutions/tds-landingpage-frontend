@@ -60,6 +60,22 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   down while `#hero` or `#contact` is on screen, and on short viewports while
   the cookie notice is open; it publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
+- **The contact form asks WHAT it is about and answers WHAT HAPPENS NEXT**
+  (2026-09-21). A reason dropdown above the message posts as `subject`, which
+  `POST /contact` has accepted and stored all along — it just needed declaring
+  in tds-shared's `ContactSchema`, because `zodResolver` forwards only the keys
+  the schema knows. The reasons come from `contact.reasons` in the panel and
+  ship committed (see the empty-list rule under Content and CMS). Optional on
+  purpose: a forced choice costs submissions from the people whose request
+  fits no entry.
+  The message field is guided by an element, not a placeholder — a placeholder
+  vanishes on the first keystroke — tied to the textarea with
+  `aria-describedby` alongside the error when there is one.
+  The four "what happens next" points are the CONFIRMATION's content now. They
+  used to stand above the form, where they repeated the process section word
+  for word and pushed the form below the fold. `ui/FirstCall.astro` keeps its
+  `contact` variant for stored blocks but has no caller on the home page.
+  `contactForm.test.ts` holds all of it.
 - **The Leistungsassistent is a button, not a section** (decided 2026-09-15) —
   for the visitor who does not know what they need or what it costs.
   `components/ServiceAssistant.astro` renders ONE native
@@ -297,10 +313,24 @@ stretched over the tile.
 The redesigned page-level blocks are `home_hero`, `why_me`,
 `services_overview`, `digital_responsibility`, `pricing_services` and `faq_v2`.
 Since the 2026-09 redesign `digital_responsibility`, `why_me.reasons` and
-`home_hero.scrollHint` have no renderer (kept so stored blocks keep loading),
-and three blocks were added with no Website-CMS schema yet — `home_trust`,
-`first_call`, `pricing_logic` — which fall back to `lib/homeContent.ts` the way
-`references_home` and `website_demos` do.
+`home_hero.scrollHint` have no renderer (kept so stored blocks keep loading).
+
+**Every block this site renders has a panel schema** in
+`tds-ext-website-cms-pkg/islands/sections.ts`. This section used to claim that
+`home_trust`, `first_call`, `pricing_logic`, `references_home` and
+`website_demos` had none; that was written before website-cms 0.4.x and stayed
+wrong for months. Check the other repo before repeating a claim like this.
+
+**A CMS-editable list needs a NON-EMPTY committed fallback.** `mergeCmsValue`
+refuses an override for a list whose local default is empty — with no committed
+item there is no runtime shape to validate the incoming ones against — so
+shipping `[]` makes the panel field permanently inert, in silence. Two lists
+here genuinely must default to empty (service references and the fixed-price
+packages: nobody may publish an invented case or an invented price), and both
+therefore validate the RAW block field themselves, outside `cmsFor` —
+`validateServiceReferences` in `lib/services.ts` and `validatePricePackages` in
+`lib/pricing.ts`. The contact form's `reasons` are the opposite case: they ship
+committed, and must stay that way.
 
 **Copy rules held by `homeContent.test.ts`** — Julian's decisions, not style:
 no free and no time-boxed first conversation ("kostenlos", "kostenfrei",
@@ -381,9 +411,9 @@ Two asymmetries to know before hunting for them:
   case.
 
 The home section's framing is the `references_home` block, defaulting to
-`homeContent.ts`. Like `website_demos` it has no Website-CMS schema yet and
-falls back cleanly until it does; `block` cache events already rebuild the home
-and service pages for any block id, so no event mapping was added for it.
+`homeContent.ts`, and it is editable in the panel like every other block;
+`block` cache events already rebuild the home and service pages for any block
+id, so no event mapping was added for it.
 
 Home cards, pricing and detail pages resolve from one service catalog/default;
 DE and EN are edited separately. Change fallbacks, the Website-CMS
@@ -452,7 +482,7 @@ visitor scanning the shelf wants to know which of these is a shop and which is
 a page. Adding a label means adding it to the vocabulary, in both languages,
 deliberately. Everything else still comes from the demo: `homeContent.ts` owns
 only the section's own framing, overridable through the `website_demos` block
-(no Website-CMS schema yet; falls back cleanly until there is one). Never write
+(editable in the panel, falling back to the committed copy). Never write
 a description for someone's site — a demo without a meta description simply
 shows none.
 
@@ -565,8 +595,12 @@ process; cache fingerprinting does not replace the restart.
   `Layout.astro` must use the route's actual title rather than a hard-coded tab
   title. Titles put the search term first and "— Tracht Digital" last.
 - JSON-LD must match visible content after CMS resolution. FAQ answers must use
-  the same resolved values as the rendered section. Pricing structured data may
-  include numeric hourly offers only. There is no `HowTo` node any more: Google
+  the same resolved values as the rendered section. Pricing structured data
+  carries hourly rates as `UnitPriceSpecification` with `unitCode: "HUR"`, and
+  a fixed-price package as a plain `PriceSpecification` with no unit — pushing
+  a package total through the hourly branch publishes a four-figure *hourly
+  rate* to everything that parses the markup instead of reading the page
+  (`pricing.test.ts` holds the two apart). There is no `HowTo` node any more: Google
   retired those rich results, and the process is not a set of instructions.
   Subpages emit one `@graph` (`lib/jsonld.ts`): `WebPage` with author,
   publisher and the visible date as `dateModified`; `Service`, with an `Offer`
