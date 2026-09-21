@@ -93,7 +93,7 @@ const pricedServices = await Promise.all(
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
-  websiteSchema(),
+  websiteSchema(lang),
   pricingSchema(
     pricedServices.map(({ definition, content }) => ({
       name: content.title,

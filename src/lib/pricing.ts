@@ -221,3 +221,17 @@ export function lowestRate(pricing: PricingContent): number {
     pricing.rateWebPresence,
   );
 }
+
+/**
+ * The top of the published band, for the `priceRange` of the LocalBusiness
+ * node. Derived rather than written down for the same reason `lowestRate` is:
+ * the rates move, and a second place stating them would drift.
+ */
+export function highestRate(pricing: PricingContent): number {
+  return Math.max(
+    pricing.rateConsulting,
+    pricing.rateProcess,
+    pricing.rateSolutions,
+    pricing.rateWebPresence,
+  );
+}

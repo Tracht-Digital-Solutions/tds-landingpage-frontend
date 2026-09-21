@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "Budgets for `npm run audit:perf`. A tripwire against regression, not a",
+    "target: every number sits deliberately ABOVE the measurement taken when",
+    "it was written, so an ordinary change never trips it and a doubling does.",
+    "",
+    "THE NUMBERS HERE ARE UNCOMPRESSED, because that is what the tool sees.",
+    "`encodedBodySize` on a local `node app.cjs` is the raw body — the host",
+    "gzips, measured 2026-09-21: the home document is 348 KB raw and 76 KB on",
+    "the wire. So `documentKb` and `totalKb` are a proxy for how much the page",
+    "asks the browser to parse, not for what a visitor downloads.",
+    "",
+    "Baseline, local release build, 390px / CPU x4 / cache off:",
+    "  LCP median 1140 ms, document 342 KB, JS decoded 418 KB, total 1007 KB.",
+    "Live for comparison: LCP median 628 ms, TTFB 153 ms, CLS 0.",
+    "The local LCP spread is wide (584-1652) — a cold Node process answering",
+    "its first requests. Compare local against local, never local against live.",
+    "",
+    "`lcpElement` is the load-bearing entry. The hero headline losing that",
+    "place is how the cookie notice became the LCP element at 4.1 s, and no",
+    "byte count would have shown it."
+  ],
+  "lcpElement": "h1#hero-heading",
+  "default": {
+    "lcpMedian": 2200,
+    "cls": 0.05,
+    "ttfb": 600,
+    "jsDecodedKb": 600,
+    "totalKb": 1200,
+    "documentKb": 400
+  },
+  "pages": {}
+}

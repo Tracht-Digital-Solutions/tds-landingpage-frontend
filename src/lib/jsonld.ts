@@ -11,7 +11,11 @@
  * what AI search engines parse), so keeping the renderers next to the
  * data lets us iterate the shape without touching the source of truth.
  */
-import { portraitSrc } from "./imageVariants";
+import { LOGO, portraitSrc } from "./imageVariants";
+// Sync helpers only — `getPricingDefault` reads the committed object and
+// touches neither the CMS nor `contentCache`, so this stays a leaf import and
+// cannot close an import cycle the way `contentCache` once did.
+import { getPricingDefault, highestRate, lowestRate } from "./pricing";
 import { siteConfig } from "./seo";
 
 type WithContext<T extends Record<string, unknown> = Record<string, unknown>> =
@@ -77,6 +81,46 @@ export function organizationSchema() {
       longitude: siteConfig.geo.longitude,
     },
     knowsAbout: [...siteConfig.knowsAbout],
+    /**
+     * The logo, which Google's Organization rich result and the knowledge
+     * panel both look for. The file and its dimensions have been in
+     * `lib/imageVariants.ts` the whole time; nothing referenced them from
+     * the graph, so the node described a business with no mark.
+     *
+     * An absolute URL and explicit dimensions, because a crawler fetching
+     * this node has no page context to resolve a relative path against.
+     */
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteConfig.url}${LOGO.mark.original}`,
+      width: LOGO.mark.width,
+      height: LOGO.mark.height,
+    },
+    image: `${siteConfig.url}${LOGO.mark.original}`,
+    /**
+     * The same two channels as the flat `email`/`telephone` above, but as a
+     * ContactPoint — which is the shape that states WHO they are for and in
+     * which languages they are answered.
+     */
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: siteConfig.email,
+      telephone: siteConfig.telephone,
+      areaServed: "DE",
+      availableLanguage: ["de", "en"],
+    },
+    /**
+     * Expected on a LocalBusiness-typed entity, and honest: the site already
+     * publishes every hourly rate openly, so this repeats a fact rather than
+     * inventing a band.
+     *
+     * NOT here: `openingHoursSpecification`. Julian works by arrangement, and
+     * the vocabulary has no way to say that — `opens`/`closes` would be an
+     * invented promise of availability. The page says it in words instead.
+     * Do not "complete" this node with hours.
+     */
+    priceRange: `${lowestRate(getPricingDefault("de"))}–${highestRate(getPricingDefault("de"))} €/h`,
   };
 
   if (socials.length > 0) base.sameAs = socials;
@@ -85,17 +129,23 @@ export function organizationSchema() {
 }
 
 /**
- * WebSite schema with a SearchAction so AI agents that look for a
- * site search target know one exists (currently the blog, since the
- * marketing site has no first-class search).
+ * The WebSite node.
+ *
+ * **There is no `SearchAction`, and the docblock used to claim one.** This
+ * site has no search — not a hidden one, none at all — and a `SearchAction`
+ * pointing at a URL template that answers nothing is a lie told to a crawler
+ * in a machine-readable format. The comment was wrong, not the code.
+ *
+ * `description` takes the page's language. It was pinned to German, so every
+ * English page described itself in German to anything reading the graph.
  */
-export function websiteSchema() {
+export function websiteSchema(lang: "de" | "en" = "de") {
   return {
     "@type": "WebSite",
     "@id": `${siteConfig.url}/#website`,
     url: siteConfig.url,
     name: siteConfig.name,
-    description: siteConfig.description.de,
+    description: siteConfig.description[lang],
     publisher: { "@id": `${siteConfig.url}/#organization` },
     inLanguage: ["de-DE", "en-GB"],
   };

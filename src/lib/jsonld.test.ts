@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getPricingDefault, highestRate, lowestRate } from "./pricing";
 import {
   asGraph,
   breadcrumbNode,
@@ -8,6 +9,7 @@ import {
   personSchema,
   serviceNode,
   webPageNode,
+  websiteSchema,
 } from "./jsonld";
 import { siteConfig } from "./seo";
 
@@ -113,5 +115,61 @@ describe("identity schemas", () => {
   it("filters falsy social links out of sameAs", () => {
     const sameAs = personSchema().sameAs as string[];
     expect(sameAs.every(Boolean)).toBe(true);
+  });
+});
+
+/**
+ * The Organization node's local-business completers, added 2026-09-21.
+ *
+ * None of these fails visibly: a node without a logo still validates, a
+ * `priceRange` copied by hand still renders, and an invented opening hour
+ * would look like diligence.
+ */
+describe("the organization node", () => {
+  const org = organizationSchema() as Record<string, any>;
+
+  it("carries a logo Google can actually fetch", () => {
+    // Absolute, with dimensions: a crawler reading this node has no page to
+    // resolve a relative path against.
+    expect(org.logo["@type"]).toBe("ImageObject");
+    expect(org.logo.url).toMatch(/^https:\/\/tracht-digital\.de\//);
+    expect(org.logo.width).toBeGreaterThan(0);
+    expect(org.logo.height).toBeGreaterThan(0);
+    expect(org.image).toBe(org.logo.url);
+  });
+
+  it("names its contact channels and the languages they are answered in", () => {
+    expect(org.contactPoint["@type"]).toBe("ContactPoint");
+    expect(org.contactPoint.availableLanguage).toEqual(["de", "en"]);
+    expect(org.contactPoint.email).toBe(siteConfig.email);
+  });
+
+  it("derives priceRange from the published rates, never from a literal", () => {
+    // The rates move. A second place stating them by hand drifts, silently.
+    const pricing = getPricingDefault("de");
+    expect(org.priceRange).toContain(String(lowestRate(pricing)));
+    expect(org.priceRange).toContain(String(highestRate(pricing)));
+  });
+
+  it("publishes NO opening hours", () => {
+    // Julian works by arrangement and schema.org has no way to say that.
+    // `opens`/`closes` would be an invented promise of availability — this
+    // guard is here so nobody "completes" the node with one.
+    expect(org.openingHoursSpecification).toBeUndefined();
+    expect(JSON.stringify(org)).not.toMatch(/opens|closes|openingHours/i);
+  });
+});
+
+describe("the website node", () => {
+  it("describes itself in the page's own language", () => {
+    // It was pinned to German, so every English page described itself in
+    // German to anything reading the graph.
+    expect((websiteSchema("de") as any).description).toBe(siteConfig.description.de);
+    expect((websiteSchema("en") as any).description).toBe(siteConfig.description.en);
+  });
+
+  it("claims no search it does not have", () => {
+    // The docblock promised a SearchAction for years; the site has no search.
+    expect((websiteSchema("de") as any).potentialAction).toBeUndefined();
   });
 });

@@ -55,6 +55,14 @@ Options -Indexes
   # to content whose filename changes when its bytes do.
   RewriteRule ^_astro/ - [E=TDS_IMMUTABLE:1]
 
+  # The committed media (images, demo and reference captures) is NOT hashed —
+  # `/images/sections/hero.webp` keeps its name when its bytes change — so it
+  # cannot be immutable. It had no Cache-Control at all, which left roughly
+  # 1.6 MB revalidating on every visit. A week is the compromise: long enough
+  # that a returning visitor re-downloads nothing, short enough that replacing
+  # a photo reaches everyone without a rename.
+  RewriteRule ^(images|demos|references)/ - [E=TDS_MEDIA:1]
+
   # (1) A real file: hashed assets, prerendered /og/default.png, /kontakt.vcf,
   #     robots.txt, favicon. DOCUMENT_ROOT + REQUEST_URI rather than
   #     REQUEST_FILENAME, because Passenger hooks Apache's map_to_storage and
@@ -102,6 +110,7 @@ Options -Indexes
 
 <IfModule mod_headers.c>
   Header set Cache-Control "public, max-age=31536000, immutable" env=TDS_IMMUTABLE
+  Header set Cache-Control "public, max-age=604800" env=TDS_MEDIA
 
   # Cached HTML is a snapshot the panel can replace at any moment, so it must
   # never be held by a browser or an intermediary. Revalidation is cheap: the

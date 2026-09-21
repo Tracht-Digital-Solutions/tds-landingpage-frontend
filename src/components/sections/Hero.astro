@@ -19,9 +19,9 @@
  *   transform-only CSS rise, off under reduced motion.
  *
  *   The decorative geometry is a different question and is a `motion` island
- *   (`islands/HeroDecor.tsx`, `client:media`): those shapes are desktop-only
- *   and `aria-hidden`, so nothing a visitor reads waits on them. The photo
- *   stays here, in plain markup, for the same reason the copy does.
+ *   (`islands/HeroDecor.tsx`, `client:idle`): those shapes are `aria-hidden`
+ *   decoration, so nothing a visitor reads waits on them. The photo stays
+ *   here, in plain markup, for the same reason the copy does.
  * - **No showcase slider.** It rotated every 6 s through six slides, put a demo
  *   site's name in the page's first `<h2>`, and gave a real customer case and a
  *   fictional demo the identical card. Customer cases and example sites have
@@ -37,9 +37,11 @@
  * the eyebrow, the headline, the sub, the buttons, the trust card or the fixed
  * navigation — the diagonal that crossed the header and the capsule behind the
  * eyebrow were removed for that reason, and `scripts/ux-audit.mjs` measures the
- * overlap. The capsule, the quarter circle and the conduit start at `xl`: at
- * 768 and 1024 px the actions and the trust card reach down into exactly that
- * space (measured). Below `lg` there is no decoration at all.
+ * overlap. The capsule and the quarter circle still start at `xl`: at 768 and
+ * 1024 px the actions and the trust card reach down into exactly that space
+ * (measured, twice). Since 2026-09-21 the small gold NODE renders below that
+ * too, in the free band above the eyebrow — before, a phone had no motion in
+ * the hero at all. The conduit (`CircuitRun`) stays `xl`.
  *
  * The photo is a `<picture>` whose source applies from `48rem`; below that the
  * `<img>` holds a 1×1 inline GIF. It used to be a plain `<img class="hidden
@@ -58,6 +60,7 @@ interface Props {
 }
 
 const { lang, hero, trust } = Astro.props;
+
 ---
 
 <section
@@ -85,15 +88,18 @@ const { lang, hero, trust } = Astro.props;
         Ocker-Knoten als Akzent. Sie liegen alle in der echten Negativfläche
         des Heros, nie hinter der Copy.
 
-        `client:media`, nicht `client:idle`: unterhalb von 64rem rendert keine
-        dieser Formen (`hidden lg:block` / `hidden xl:block`), und gemessen zog
-        die Island dort trotzdem ~220 KB JS nach — motion fuer etwas, das auf
-        dem Geraet gar nicht existiert. Mit der Media-Bedingung laedt ein
-        Telefon nichts davon. AUSSCHLIESSLICH diese drei Formen: das Foto oben
-        und jeder Textknoten unten bleiben statisches Astro-Markup, damit
-        nichts Sichtbares auf Hydration wartet. Die Begründung steht in
-        `islands/HeroDecor.tsx`, die Regel in `__tests__/motion.test.ts`. */}
-    <HeroDecor client:media="(min-width: 64rem)" />
+        `client:idle`, und seit 2026-09-21 auf jeder Breite. Vorher lud die
+        Island erst ab 64rem, weil ALLE Formen darunter ausgeblendet waren —
+        ein Telefon hatte damit gar keine Bewegung im Hero. Jetzt laeuft dort
+        wenigstens der Knoten. Das kostet
+        gemessen ~129 KB JS dort; bezahlt wird es aus den Einsparungen
+        derselben Änderung, und `npm run audit:perf` bewacht die Grenze.
+
+        AUSSCHLIESSLICH diese drei Formen: das Foto oben und jeder Textknoten
+        unten bleiben statisches Astro-Markup, damit nichts Sichtbares auf
+        Hydration wartet. Die Begründung steht in `islands/HeroDecor.tsx`,
+        die Regel in `__tests__/motion.test.ts`. */}
+    <HeroDecor client:idle />
     {/* Cut by the section's lower edge, with its box inside the bottom padding:
         since the note under the actions the copy column reaches down to where
         the conduit used to start (overlap measured at 1280 and 1440). */}
@@ -105,6 +111,30 @@ const { lang, hero, trust } = Astro.props;
       <div class="hero-copy">
         <p class="hero-eyebrow hero-rise">{hero.eyebrow}</p>
 
+        {/* The headline rises as ONE block, and that was measured, not
+            assumed.
+
+            It was briefly split into per-word spans for a staggered entrance.
+            Two things broke, neither of them visible:
+
+            1. **It stopped being the LCP element.** A transform does nothing
+               to a non-replaced inline box, so each word had to be
+               `inline-block` — which turned one text block of 37,898 px² into
+               nine candidates of a few hundred each. None beat the paragraph
+               below, so `p#hero-sub` became the largest paint and the
+               headline dropped out of the metric entirely. `audit:perf`
+               pins the element for exactly this reason.
+            2. **It stopped being hyphenatable.** An `inline-block` never
+               breaks inside itself, so `hyphens: auto` and
+               `overflow-wrap: break-word` below — which exist because one
+               15-letter German word at 34 px on a 320 px screen is already
+               close — would have had nothing to act on. A longer word from
+               the CMS would simply have run off the screen.
+
+            The stagger lives in the elements AROUND it instead: eyebrow,
+            headline, sub, actions, note, trust card, each on its own delay.
+            That reads as a page assembling itself and costs the headline
+            nothing. */}
         <h1 id="hero-heading" class="hero-title hero-rise">
           {hero.headline}
           {/* A real break, not a hope: `text-wrap: balance` would otherwise
@@ -203,6 +233,122 @@ const { lang, hero, trust } = Astro.props;
       color-mix(in srgb, var(--color-paper) 72%, transparent) 62%,
       color-mix(in srgb, var(--color-paper) 42%, transparent) 100%
     );
+  }
+
+  /* === Die Formen der Dekorationsebene =============================
+
+     Position und Groesse stehen HIER, nicht in `islands/HeroDecor.tsx`, und
+     zwar `:global()`, weil das DOM einer React-Island Astros
+     Scoped-Style-Attribut nie bekommt. Die Trennung ist nicht nur Ordnung:
+     so schreibt die Island ausschliesslich Transforms, und genau die kann
+     der Compositor bewegen, ohne Layout anzufassen.
+
+     Bis 2026-09-21 waren die Formen unter 64rem ausgeblendet. Sie sind
+     jetzt ueberall da, auf dem Telefon kleiner und weiter aussen, damit sie
+     in der echten Negativflaeche bleiben und nie hinter der Copy landen. */
+  :global(.hero-shape) {
+    position: absolute;
+    pointer-events: none;
+    /* Eigene Ebene, damit Drift und Parallaxe nicht jedes Frame neu rastern. */
+    will-change: transform;
+  }
+  /* Below 80rem the two LARGE shapes are not drawn, and that is measured
+     rather than taste. At 390 px the hero's content runs from y=100 to
+     y=1054 and spans the full width between the gutters; the only empty
+     bands are 100 px at the top and 56 px at the bottom. A capsule or a
+     quarter circle put anywhere else lands on the trust card — which
+     `npm run audit:ux` reports as "decoration over content", sixteen hard
+     failures the first time this was tried. The limit is 80rem and not
+     64rem for the same reason the original code gave: at 1024 px the
+     buttons and the note reach down into exactly that corner.
+
+     The NODE does fit, and it is the liveliest of the three anyway
+     (measured ~49 px/s against the capsule's 9): it sits in the top band
+     and walks across it. So a phone gets motion in the hero, in the one
+     place the layout actually leaves free. */
+  :global(.hero-shape--capsule),
+  :global(.hero-shape--quarter) {
+    display: none;
+  }
+  :global(.hero-shape--node) {
+    /* The BOTTOM band, not the top one. The top looked free — the copy does
+       not start until y=100 on a phone — but the fixed header floats from
+       y=12 to roughly y=88, so a node up there sits on the navigation, which
+       `audit:ux` reports as decoration over content. Measured, the free band
+       below the content is 56 px at 390 px and 122 px at 1024 px, and the
+       floating CTA stands down while the hero is on screen. */
+    bottom: 1.25rem;
+    left: 5%;
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+  @media (min-width: 80rem) {
+    :global(.hero-shape--capsule),
+    :global(.hero-shape--quarter) {
+      display: block;
+    }
+    :global(.hero-shape--capsule) {
+      bottom: -7rem;
+      left: -16rem;
+      width: 32rem;
+      height: 13rem;
+    }
+    :global(.hero-shape--quarter) {
+      bottom: -15rem;
+      right: -11rem;
+      width: 26rem;
+      height: 26rem;
+    }
+    :global(.hero-shape--node) {
+      top: auto;
+      bottom: 7%;
+      left: 44%;
+    }
+  }
+
+  /* Die scrollgesteuerte Szene. CSS, kein JavaScript: `animation-timeline`
+     laeuft auf dem Compositor, braucht keinen Scroll-Listener und keinen
+     Hook aus einer Bibliothek, die die geteilte Motion-Schicht gar nicht
+     re-exportiert. Wo es fehlt (Safari heute), passiert einfach nichts —
+     die Formen behalten ihre Drift und ihre Parallaxe.
+
+     `animation-composition: add` ist das Entscheidende: ohne sie wuerde
+     diese Animation die Transforms der Island ERSETZEN statt sich zu ihnen
+     zu addieren, und Drift wie Parallaxe waeren beim Scrollen tot. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      /* The NODE is deliberately not in this list. It already walks its own
+         path, and adding the scroll drift on top moved it up to 56 px further
+         down — straight onto the eyebrow, which `audit:ux` caught as
+         decoration over content at every width. Two travels on one axis also
+         read as one confused wobble rather than two ideas. */
+      :global(.hero-shape--capsule),
+      :global(.hero-shape--quarter) {
+        animation: hero-scroll-drift linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 100%;
+        animation-composition: add;
+      }
+      :global(.hero-shape--quarter) {
+        animation-name: hero-scroll-drift-reverse;
+      }
+    }
+  }
+  @keyframes hero-scroll-drift {
+    from {
+      transform: translateY(-3.5rem);
+    }
+    to {
+      transform: translateY(3.5rem);
+    }
+  }
+  @keyframes hero-scroll-drift-reverse {
+    from {
+      transform: translateY(3rem);
+    }
+    to {
+      transform: translateY(-3rem);
+    }
   }
 
   .hero-grid {
@@ -432,19 +578,19 @@ const { lang, hero, trust } = Astro.props;
       animation: hero-rise 560ms var(--lp-ease-soft) both;
     }
     .hero-title.hero-rise {
-      animation-delay: 40ms;
+      animation-delay: 90ms;
     }
     .hero-sub.hero-rise {
-      animation-delay: 80ms;
+      animation-delay: 220ms;
     }
     .hero-actions.hero-rise {
-      animation-delay: 120ms;
+      animation-delay: 300ms;
     }
     .hero-note.hero-rise {
-      animation-delay: 140ms;
+      animation-delay: 360ms;
     }
     .hero-trust.hero-rise {
-      animation-delay: 160ms;
+      animation-delay: 420ms;
     }
     .hero-cta--primary:hover {
       transform: translateY(-2px);
@@ -452,7 +598,7 @@ const { lang, hero, trust } = Astro.props;
   }
   @keyframes hero-rise {
     from {
-      transform: translateY(0.75rem);
+      transform: translateY(1.5rem);
     }
   }
   @media (prefers-reduced-motion: reduce) {
