@@ -1,7 +1,12 @@
 ---
 import { tFor, resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
-import { businessCardHref } from "~/lib/businessCard";
+// The QR comes in as a PATH, never as the encoder. `lib/businessCardQr.ts`
+// imports `qrcode` at module scope, the package is a devDependency and is not
+// in the release tree, and reaching for it from a page answered 500 on the
+// host for both card pages. `businessCardQr.test.ts` keeps that firewall.
+import { businessCardHref, BUSINESS_CARD_QR_PATH } from "~/lib/businessCard";
+import { siteConfig } from "~/lib/seo";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
@@ -301,32 +306,63 @@ const socials = {
               .vcf lands in a phone's address book, the card is what a person
               can be shown, scan or forward. It is also the one place on this
               site where a visitor meets a digital business card as a thing
-              that can be built for them — hence a link, not a duplicate of
-              the download. */}
+              that can be built for them — so it is SHOWN as a card rather than
+              announced as a link.
+
+              Drawn, not photographed. `public/images/business-card.webp` is a
+              1440×900 screenshot of the page; shrunk to this size it would be
+              a tiny web page, not a business card. Markup stays sharp at any
+              size, follows the theme and needs no asset kept in sync.
+
+              ONE anchor around the whole thing. A second one inside would be
+              invalid and browsers recover by closing the outer early, dropping
+              everything after it out of the link — the failure
+              `ui/CardActions.astro` documents. The .vcf pill above is a
+              sibling, never a child.
+
+              `aria-label`, and here it is the right tool rather than the
+              usual mistake: the visible text of this card is a NAME, so the
+              name a screen reader would otherwise derive from the content is
+              the whole card read out — eyebrow, name, role, company, postcode
+              — and never states that following it opens anything. The label
+              says the action AND keeps the visible words in it (WCAG "Label in
+              Name"), built from the same `siteConfig` value the card prints so
+              the two cannot drift. It belongs on an `<a>`, which is nameable;
+              on a span or div it would be `aria-prohibited-attr`. */}
           <a
             href={businessCardHref(lang)}
-            class="mt-3 inline-flex items-center gap-2 text-sm text-white/70 hover:text-[var(--color-accent-pink)] transition-colors [@media(pointer:coarse)]:min-h-11"
+            class="mini-card mt-4"
+            aria-label={
+              lang === "en"
+                ? `Open the digital business card of ${siteConfig.founder.name}`
+                : `Digitale Visitenkarte von ${siteConfig.founder.name} ansehen`
+            }
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <rect x="2" y="4" width="20" height="16" rx="2" />
-              <circle cx="9" cy="11" r="2.25" />
-              <path d="M5.5 17c.6-1.6 2-2.4 3.5-2.4s2.9.8 3.5 2.4" />
-              <line x1="15" y1="9.5" x2="19" y2="9.5" />
-              <line x1="15" y1="13" x2="19" y2="13" />
-            </svg>
-            {lang === "en" ? "Open the digital business card" : "Digitale Visitenkarte ansehen"}
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true" class="tds-brandbar tds-brandbar--sm mini-card__bar"></span>
+
+            <span class="mini-card__body">
+              <span class="mini-card__eyebrow">
+                {lang === "en" ? "Digital business card" : "Digitale Visitenkarte"}
+              </span>
+              <span class="mini-card__name">{siteConfig.founder.name}</span>
+              <span class="mini-card__role">{siteConfig.founder.jobTitle}</span>
+              <span class="mini-card__org">{siteConfig.name}</span>
+            </span>
+
+            {/* Decorative: it encodes the very destination this link already
+                has, so announcing it would be the same thing said twice.
+                The white plate is not styling — the SVG is black on
+                transparent, and on the dark theme it would otherwise be black
+                on near-black and stop scanning. */}
+            <span class="mini-card__qr" aria-hidden="true">
+              <img src={BUSINESS_CARD_QR_PATH[lang]} alt="" width="96" height="96" loading="lazy" decoding="async" />
+            </span>
+
+            <span class="mini-card__place">
+              {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
+            </span>
+            <span aria-hidden="true" class="mini-card__go">→</span>
+
           </a>
         </div>
       </aside>
@@ -675,6 +711,165 @@ const socials = {
     }
     to {
       transform: none;
+    }
+  }
+
+  /* === The mini business card ======================================
+
+     A light card lying on the navy block, in the proportions of a printed one
+     (85.6 × 54 mm ≈ 1.586). The whole thing is the link.
+
+     THE COLOUR RULE, and the reason this looks odd at first glance: the
+     section carries `.tds-tone-navy`, which re-maps `--color-black` to
+     #ffffff and `--color-muted`, `--color-line`, `--color-card` and
+     `--color-soft` to translucent whites, so that ordinary components render
+     correctly on a dark ground. A LIGHT card is the exception on that ground —
+     built from those tokens it would be white text on a white card.
+
+     So it draws itself from the three the tone does NOT touch:
+     `--color-paper`, `--color-primary` and `--color-accent`. Nothing is
+     hard-coded, dark mode follows on its own, and there is no token to
+     restore. Measured — card against ground / name on card: 15.75 / 15.75 in
+     light, 1.20 / 8.67 in dark. */
+  .mini-card {
+    --mini-card-ink: var(--color-primary);
+    /* 75 %, and the number is measured rather than chosen. The company line
+       and the postcode are 11 px and 10 px — under 18 px, so they owe 4.5:1,
+       not 3:1. At 55 % they sat at 4.00 in light and 3.29 in dark and
+       `npm run audit:ux` reported them as two serious axe violations; nothing
+       about them looked wrong. 75 % gives 7.77 and 5.24 and still reads as
+       muted beside the name at full strength. */
+    --mini-card-muted: color-mix(in srgb, var(--color-primary) 75%, var(--color-paper));
+
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr auto;
+    gap: 0.5rem 1rem;
+    width: 100%;
+    max-width: 22rem;
+    aspect-ratio: 1.586;
+    padding: 1.125rem 1.25rem;
+    border-radius: 8px;
+    background: var(--color-paper);
+    text-decoration: none;
+    /* Transform only. A blurred shadow transitioned every frame re-rasterises
+       the whole blur; the lift is the movement, the shadow is static. */
+    box-shadow: 0 14px 30px -18px rgb(0 0 0 / 0.55);
+    transition: transform 220ms var(--tds-ease-out);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mini-card:hover,
+    .mini-card:focus-visible {
+      transform: translateY(-3px);
+    }
+  }
+  .mini-card:focus-visible {
+    /* On a dark ground the ring has to be the light one, and it needs an
+       offset or it sits on the card's own edge and disappears into it. */
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 3px;
+  }
+
+  .mini-card__bar {
+    grid-column: 1 / -1;
+    /* The PLAIN run, not `--on-dark`. That variant exists because bordeaux
+       sinks into navy — and this bar lies on the paper card, not on the
+       section behind it. */
+    align-self: start;
+  }
+
+  .mini-card__body {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  .mini-card__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .mini-card__name {
+    margin-top: 0.35rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--mini-card-ink);
+  }
+  .mini-card__role {
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--color-accent);
+  }
+  .mini-card__org {
+    margin-top: 0.2rem;
+    font-size: 0.6875rem;
+    line-height: 1.3;
+    color: var(--mini-card-muted);
+  }
+
+  .mini-card__qr {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    display: block;
+    padding: 0.3rem;
+    border-radius: 4px;
+    /* Explicitly #fff in BOTH themes, like `.card__qr-code` on the card page:
+       the SVG is black on transparent, so on the dark theme it would be black
+       on near-black and simply stop scanning. */
+    background: #ffffff;
+  }
+  .mini-card__qr img {
+    display: block;
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+
+  .mini-card__place {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.02em;
+    color: var(--mini-card-muted);
+  }
+  .mini-card__go {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: end;
+    justify-self: end;
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    transition: transform 220ms var(--tds-ease-out);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mini-card:hover .mini-card__go {
+      transform: translateX(3px);
+    }
+  }
+
+  /* Phones: the card keeps its proportions but the QR would crowd the name at
+     327px, so it steps down with the type. */
+  @media (max-width: 26rem) {
+    .mini-card {
+      padding: 1rem;
+    }
+    .mini-card__qr img {
+      width: 3rem;
+      height: 3rem;
+    }
+    .mini-card__name {
+      font-size: 1.125rem;
     }
   }
 
