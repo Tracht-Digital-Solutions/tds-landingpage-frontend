@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
+import { BANNED_WORDS } from "./copyRules";
 
 /**
  * "echt" and "wirklich" never appear on the landing page (decided 2026-09-21),
@@ -17,7 +18,7 @@ import { translations } from "@tracht-digital-solutions/tds-shared/i18n";
  * strings this site renders. Panel overrides are not in the repository;
  * `npm run audit:seo` scans the rendered pages for them.
  */
-export const BANNED = /\b(echt|wirklich)[a-zäöüß]*/i;
+const BANNED = BANNED_WORDS;
 
 const root = join(__dirname, "..");
 
@@ -44,6 +45,8 @@ describe("the banned words", () => {
       // Legal texts are statutory wording, not copy (and say "Sie" for the
       // same reason, see addressForm.test.ts).
       if (path.includes(`${join("pages", "legal")}`)) continue;
+      // The rule itself has to name the words.
+      if (path.endsWith("copyRules.ts")) continue;
       const code = stripComments(readFileSync(path, "utf8"));
       code.split("\n").forEach((line, index) => {
         const match = line.match(BANNED);

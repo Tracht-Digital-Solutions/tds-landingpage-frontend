@@ -1,6 +1,7 @@
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { contentApiBase } from "./connection";
 import { contentCache } from "./contentCache";
+import { hasBannedWord } from "./copyRules";
 /**
  * Server-side fetch of editable landingpage content blocks from
  * tds-content-api's `GET /landing?lang=…`. Each block is the content object
@@ -45,7 +46,7 @@ type NewListItemResult = {
  */
 function validateNewListItem(schema: unknown, candidate: unknown): NewListItemResult {
   if (typeof schema === "string") {
-    return typeof candidate === "string" && candidate.trim() !== ""
+    return typeof candidate === "string" && candidate.trim() !== "" && !hasBannedWord(candidate)
       ? { value: candidate, valid: true }
       : { value: schema, valid: false };
   }
@@ -112,7 +113,9 @@ function validateNewListItem(schema: unknown, candidate: unknown): NewListItemRe
  */
 function mergeCmsValue(fallback: unknown, candidate: unknown): MergeResult {
   if (typeof fallback === "string") {
-    return typeof candidate === "string" && candidate.trim() !== ""
+    // A panel string with a word the site never says (copyRules.ts) is not an
+    // override, it is a block saved before the rule: keep the committed text.
+    return typeof candidate === "string" && candidate.trim() !== "" && !hasBannedWord(candidate)
       ? { value: candidate, applied: true }
       : { value: fallback, applied: false };
   }
