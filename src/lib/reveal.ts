@@ -46,7 +46,10 @@ export function mountReveal(root: ParentNode = document): () => void {
 
   // No flag, no hidden state. Reduced motion therefore costs exactly one
   // matchMedia call and changes nothing else about the page.
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+    document.documentElement.hasAttribute("data-a11y-motion")
+  ) {
     return () => {};
   }
 

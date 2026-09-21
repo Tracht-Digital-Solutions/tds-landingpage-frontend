@@ -22,8 +22,8 @@ The home page keeps the existing Tracht Digital Solutions visual system. Since
 as digitalization, and addresses the visitor with "du" (the legal texts stay
 formal). The sections follow the questions a visitor has:
 
-1. Hero: audience, problems and result, the first-conversation CTA and a card of
-   three verifiable facts
+1. Hero: the brand slogan ("Digitale Lösungen, die passen.") and two buttons —
+   nothing else
 2. Four service areas — Webauftritt first — each with a typical starting point,
    result and scope, plus links to the shop system and CMS pages
 3. Client projects (approved reference cases only)
@@ -32,9 +32,19 @@ formal). The sections follow the questions a visitor has:
    as such
 6. Compact journal teaser
 7. Wieso ich? / Why me?
-8. Prices: every rate and how a price comes about
+8. Prices: three fixed-price packages (390 €, 650 €, 1.040 € net — hours × the
+   Webauftritt rate), then every hourly rate and how a price comes about
 9. FAQ
-10. Contact
+10. Contact, with the digital business card docked on the section's right edge
+    (it slides out as the pointer comes near)
+
+The page uses the full screen width. Motion comes from the Motion library
+through `tds-shared/motion/dom`, loaded lazily: the CTA follows the pointer, the
+generated photos settle and drift, pages change with an exit and an entrance
+while the fixed navigation holds still, and every modal bounces in and out. The
+floating CTA menu carries accessibility tools — larger text, higher contrast,
+motion off — stored on the device. See AGENTS.md for the rules that keep all of
+it off the LCP path.
 
 The **Leistungsassistent** is not a section: a button in the services and in
 the pricing section opens it as a dialog. Three questions point to one or more

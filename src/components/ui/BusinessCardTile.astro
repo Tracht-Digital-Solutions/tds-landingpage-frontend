@@ -1,4 +1,5 @@
 ---
+import { mediaSrc } from "~/lib/mediaSrc";
 /**
  * The digital business card, as a card on a shelf.
  *
@@ -71,7 +72,7 @@ const href = businessCardHref(lang);
           `npm run businesscard:sync`; a missing file leaves an empty band
           rather than a collapsed card. */}
       <img
-        src={BUSINESS_CARD_PREVIEW}
+        src={mediaSrc(BUSINESS_CARD_PREVIEW)}
         alt={copy.previewAlt}
         width={DEMO_PREVIEW.width}
         height={DEMO_PREVIEW.height}

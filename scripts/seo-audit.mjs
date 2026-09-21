@@ -201,6 +201,19 @@ for (const url of pageUrls) {
   }));
   const h1s = headings.filter((h) => h.level === 1);
   if (h1s.length !== 1) fail(path, `${h1s.length} <h1> elements`);
+
+  // "echt" and "wirklich" never appear on the site (decided 2026-09-21).
+  // `bannedWords.test.ts` holds the repository; this catches what only the
+  // rendered page shows — a panel override, a synced demo description.
+  // Scripts, styles and comments are cut first; they are not visible text.
+  const visible = text(
+    body
+      .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+      .replace(/<!--[\s\S]*?-->/g, " "),
+  );
+  const banned = visible.match(/\b(echt|wirklich)[a-zäöüß]*/i);
+  if (banned) fail(path, `banned word "${banned[0]}" in the visible text`);
   for (let i = 1; i < headings.length; i += 1) {
     if (headings[i].level > headings[i - 1].level + 1) {
       warn(path, `heading skips from h${headings[i - 1].level} to h${headings[i].level} ("${headings[i].text.slice(0, 50)}")`);

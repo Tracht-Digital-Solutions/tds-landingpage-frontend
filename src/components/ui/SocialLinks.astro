@@ -1,0 +1,79 @@
+---
+/**
+ * The row of social icons — contact section and footer (`lib/socials.ts`).
+ *
+ * Each link is an icon only, so it carries an `aria-label`; the SVG is
+ * decoration. Opens in a new tab with `noopener noreferrer`. The pill grows to
+ * 44 px under a coarse pointer. On a dark ground only (both callers are navy
+ * or ink), so white is the resting colour and the brand colour the hover.
+ */
+import type { SocialLink } from "~/lib/socials";
+
+interface Props {
+  links: SocialLink[];
+  class?: string;
+}
+
+const { links, class: className } = Astro.props;
+---
+
+<ul class:list={["social-links", className]}>
+  {
+    links.map((link) => (
+      <li>
+        <a
+          href={link.href}
+          aria-label={link.label}
+          rel="noopener noreferrer"
+          target="_blank"
+          class="social-link"
+          style={`--social-brand: ${link.brand}`}
+          data-social={link.id}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d={link.icon} />
+          </svg>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .social-links {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.1);
+    color: rgb(255 255 255 / 0.75);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out),
+      transform 200ms var(--tds-ease-out);
+  }
+  .social-link:hover,
+  .social-link:focus-visible {
+    background: #fff;
+    color: var(--social-brand);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .social-link:hover {
+      transform: translateY(-2px);
+    }
+  }
+  @media (pointer: coarse) {
+    .social-link {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+    }
+  }
+</style>

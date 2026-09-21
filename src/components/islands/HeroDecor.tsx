@@ -94,10 +94,18 @@ export default function HeroDecor() {
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(query.matches);
-    const onChange = () => setReduced(query.matches);
+    // The site's own motion switch (A11yTools) counts the same as the OS one.
+    const siteSwitch = () => document.documentElement.hasAttribute("data-a11y-motion");
+    setReduced(query.matches || siteSwitch());
+    const onChange = () => setReduced(query.matches || siteSwitch());
     query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
+    // Flipped live from the tools panel, not only at load.
+    const observer = new MutationObserver(onChange);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-a11y-motion"] });
+    return () => {
+      query.removeEventListener("change", onChange);
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {

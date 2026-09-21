@@ -61,7 +61,10 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   the cookie notice is open; it publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
 - **The contact form asks WHAT it is about and answers WHAT HAPPENS NEXT**
-  (2026-09-21). A reason dropdown above the message posts as `subject`, which
+  (2026-09-21). The closed dropdown wears the text fields' own class
+  (`fieldClass` + `.contact-select`: transparent, the row's underline, the
+  accent line on focus); only the OPEN list keeps its frosted `::picker(select)`.
+  A reason dropdown above the message posts as `subject`, which
   `POST /contact` has accepted and stored all along — it just needed declaring
   in tds-shared's `ContactSchema`, because `zodResolver` forwards only the keys
   the schema knows. The reasons come from `contact.reasons` in the panel and
@@ -106,21 +109,20 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     as the rest: du, no free and no timed first conversation.
 - **The hero is `sections/Hero.astro` — its copy and photo are
   server-rendered; only the decoration is an island.**
-  - The eyebrow names the SITUATION the visitor is in, the H1 the benefit, the
-    sub (`#hero-sub`) what is on offer, followed by two real anchors, one of
-    them primary. The brand motto no longer leads the hero; it said nothing a
-    visitor could check.
+  - **The hero is the SLOGAN and two buttons, nothing else** (decided
+    2026-09-21). The H1 is `footer.slogan` — "Digitale Lösungen, die passen." —
+    read from the same `footer` block the footer prints, so there is one
+    source; the button labels stay in `home_hero`. Eyebrow, sub, ctaNote and
+    the trust card were removed; their fields stay in `home_hero`/`home_trust`
+    so stored blocks keep loading, but nothing renders them. The keywords the
+    H1 no longer carries live in the `<title>`, the meta description and the
+    services section.
   - **The page is written for businesses that already HAVE a website or shop**
     (decided 2026-09-20). Taking one over, repairing it and maintaining it is
     the lead story — not a rebuild, and not "Digitalisierung" in the abstract.
     The service catalog is unchanged; only the narrative is. The
     Germany-wide keyword target stays in the meta description, where
     `seo.test.ts` holds it.
-  - The right column is a trust card with at most THREE checkable facts
-    (`home_trust`, `resolveTrustFacts` in `lib/homeContent.ts`): name and town
-    from `siteConfig`, the lowest rate from the pricing block, each linking to
-    the section that proves it. The cases fact drops out when no case is
-    published. No unverifiable claims, logos or counters there.
   - Nothing in the hero may ship at `opacity: 0`. The former React island
     rendered its copy with motion's start state in the SSR markup, so the most
     important screen was blank until hydration and the cookie notice became the
@@ -131,10 +133,9 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     in the page's first `<h2>` and gave real cases and fictional demos the same
     card.
   - Decoration lives only in the hero's negative space (lower left, lower
-    right), never behind the copy, the trust card or the fixed header;
-    `npm run audit:ux` measures the overlap. The navy capsule, the bordeaux
-    quarter and the conduit start at `xl`: at 768 and 1024 px the actions and
-    the trust card reach down into exactly that space (measured).
+    right), never behind the copy or the fixed header; `npm run audit:ux`
+    measures the overlap. The navy capsule, the bordeaux quarter and the
+    conduit start at `xl`.
   - The photo is a `<picture>` whose source applies from `48rem`; phones get a
     1×1 inline GIF and download nothing (the old `<img class="hidden md:block">`
     cost every phone 60 KB it never showed).
@@ -200,6 +201,13 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     JSON-LD, so the card cannot drift from the Impressum. The postal address
     stays off it, matching `kontakt.vcf.ts`. Row ids key the icons and the
     tests, so they carry no copy.
+  - **On wide screens with a mouse the card is DOCKED on the contact
+    section's right edge** (2026-09-21): only its tab ("Visitenkarte") shows,
+    and it slides out on a spring as soon as the pointer comes within 160 px
+    (`lib/motion/businessCard.ts`, closes beyond 240 px), on hover and on
+    keyboard focus (the latter two also without JavaScript, via CSS). Touch
+    and narrower screens keep it inline in the aside. The section is
+    `overflow-x: clip` there so the parked card adds no scroll width.
   - **The contact section links to it as a drawn MINI CARD**
     (`.mini-card` in `sections/Contact.astro`, 2026-09-21), not as a text link
     and not as a picture: `public/images/business-card.webp` is a 1440×900
@@ -227,9 +235,18 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   - `scripts/business-card-sync.ts` captures the screenshot the showcase tile
     shows. Re-run it (`npm run businesscard:sync`) after changing how the page
     looks, or the tile advertises the old design.
-- **Prices are the home section `#preise`** (`sections/Pricing.astro`): all
-  four rates, what each includes, and "So entsteht dein Preis" — visible without
-  a click. `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to it;
+- **Prices are the home section `#preise`** (`sections/Pricing.astro`):
+  "Festpreise" first, then the four hourly rates, then "So entsteht dein
+  Preis" — visible without a click.
+  - **Three fixed-price packages** (2026-09-21), committed in `lib/pricing.ts`:
+    Website-Check 390 €, Website-Übernahme 650 €, Onepager 1.040 € — each is
+    HOURS × the Webauftritt rate (6/10/16 h × 65 €), so a package is never a
+    cheaper or dearer figure than the same work by the hour. Checked against
+    the market that day (freelance 60–120 €/h, one-pagers 700–1,500 €).
+    `pricing.test.ts` holds the relation, `seo.test.ts` the "ab 390 €" in the
+    meta description. A valid `pricing_services.packages` list in the panel
+    REPLACES them as a whole; an empty or broken one falls back to them.
+    JSON-LD: plain `PriceSpecification`, never `unitCode: HUR`. `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to it;
   `/kontakt` and `/en/contact` with a 301 to `#contact`. The section keeps an
   alias anchor `pricing-teaser` for old deep links. Redirects stay out of the
   sitemap and out of `alwaysPaths` (the page cache only stores 200 responses).
@@ -277,21 +294,48 @@ visual language rather than rebuilding it locally:
   ground AND keep `--color-muted` above 4.5 on top of it; the two pull in
   opposite directions. Re-measure both before touching it, and run
   `npm run audit:ux` — the contrast half of that pair fails silently.
-- Motion (tds-shared ≥ 0.38.4): pages cross-fade via the shared
-  `page-transitions.css` plus this site's own half in `global.css` (the header
-  and footer carry `view-transition-name`, so they hold still while the
-  content fades and rises — the two rules are one mechanism). FAQ answers grow
-  open via `.tds-disclosure`, the contact form animates errors and the
-  thank-you with `tds-shared/motion/react`.
-  The hero's COPY and PHOTO stay plain Astro — its SSR start state was once the
-  mobile LCP (4.1 s). Its decorative geometry is a `motion` island
-  (`islands/HeroDecor.tsx`) mounted `client:media="(min-width: 64rem)"`:
-  measured, `client:idle` cost a phone ~129 KB of JS for shapes that do not
-  render below that width. LCP is unchanged at 390 px (588 ms vs 592 ms, median
-  of 5, CPU ×4; LCP element `H1#hero-heading` either way). Scroll reveal stays
-  `lib/reveal.ts` (`[data-reveal]`); do not add tds-shared's `.tds-reveal` on
-  top of it. `src/__tests__/motion.test.ts` holds the rules, and a first-load
-  measurement belongs in any change here.
+- **The page uses the full screen width** (2026-09-21). Every section, the
+  header and the footer sit in `.lp-container` (`global.css`): full width,
+  gutter `clamp(1.5rem, 1rem + 3vw, 5rem)`, no max-width. Reading width is not
+  the container's job — text blocks keep their own `max-w-*`. Check 375, 1920
+  and 2560 px for horizontal overflow.
+- **Motion is the Motion library, on plain markup** (2026-09-21, tds-shared
+  ≥ 0.40): `lib/motion/boot.ts`, mounted once from `Layout.astro`, loads
+  `tds-shared/motion/dom` (vanilla Motion) with `import()` at idle — at once
+  only after an internal navigation — and nothing under reduced motion. It
+  drives:
+  - **the CTA** (`[data-cta]`, `cta.ts`): magnetic pull under a fine pointer,
+    press squeeze, one light sweep on arrival. The floating CTA is NOT a
+    `[data-cta]` — its own transform does show/hide.
+  - **the generated photos** (`[data-motion-image]`, `images.ts`): settle
+    from a larger scale when they scroll in, then drift ±20 px. Transform
+    only — the grounds carry their resting opacity in CSS.
+  - **page transitions** (`pageTransition.ts`): `<main>` animates out on a
+    same-site click and the next page's `<main>` in. The header is fixed
+    OUTSIDE `<main>`, so it never moves. The hand-over is a sessionStorage flag
+    read by an inline head script (`PAGE_ENTER_SCRIPT`), with a CSS failsafe
+    that shows `<main>` after 1.5 s; a first visit never carries it, so the
+    LCP never sees a hidden `<main>`. The native cross-document View
+    Transition was removed — two mechanisms would play two animations.
+  - **the business card** (`businessCard.ts`, see the contact section).
+  - **UX cues** (`ux.ts`): a pill glides behind the header link of the
+    section on screen (`aria-current="location"`); price cards arrive staggered
+    and lift on hover; the contact form's rows — the reason dropdown with them
+    — arrive as one staggered group (`[data-motion-stagger]`, the honeypot
+    skipped).
+  - **every modal** (`dialog.ts`): bounces in on open and out on close,
+    Escape included (`cancel` is intercepted), and always ends in
+    `dialog.close()` behind a timeout. One flat navy backdrop, one flat dialog
+    colour, a bare cross without a chip.
+  Start states are written from JS and only onto elements that are off screen;
+  an element on screen when Motion mounts is never reset. Pass explicit
+  keyframes (`[0, 1]`) when a start state comes from CSS — Motion otherwise
+  reads the resting computed value and the animation measures as a jump.
+  The hero's COPY stays plain Astro — its SSR start state was once the mobile
+  LCP (4.1 s). Its decorative geometry is `islands/HeroDecor.tsx`
+  (`client:idle`). Scroll reveal stays `lib/reveal.ts` (`[data-reveal]`).
+  `src/__tests__/motion.test.ts` holds the rules; `npm run audit:perf` measures
+  390 px AND 1440 px and pins `h1#hero-heading` as the LCP element on both.
 - **Motion, after the 2026-09-21 pass.** It was measured at 1.7 px/s — under
   the threshold at which movement registers — and absent on phones entirely.
   Now the hero decoration arrives visibly, drifts at ~5–10 px/s, follows the
@@ -310,6 +354,27 @@ visual language rather than rebuilding it locally:
   - **Nothing a visitor reads animates from `opacity: 0`.** The staged
     entrance is the elements AROUND the headline; the headline rises as one
     block. The note above its markup says what a per-word split broke.
+- **Accessibility tools in the floating CTA menu** (`components/A11yTools.astro`,
+  `lib/a11yPrefs.ts`): larger text, higher contrast, motion off — `aria-pressed`
+  switches in a native popover, stored in localStorage and applied by an inline
+  head script before the first paint. The button stays visible while the CTA
+  beside it stands down over the hero and the form (the suppression rules hide
+  the group's CHILDREN except the tools). Every JS motion path asks
+  `lessMotion()` (or the `data-a11y-motion` attribute) as well as the media
+  query. The lane offset of the group is a `translate`, not `bottom`: the
+  cookie notice arrives after first paint and a `bottom` change measured as
+  0.033 CLS.
+- **"echt" and "wirklich" never appear on the site**, in any inflection
+  (2026-09-21) — also why the slogan lost its "wirklich" in tds-shared 0.40.
+  `bannedWords.test.ts` scans every copy source with comments stripped plus
+  the tds-shared strings; `npm run audit:seo` scans the rendered pages, which
+  catches panel overrides and synced demo descriptions.
+- **Republished screenshots carry a content version.** `/demos`,
+  `/references` and `/images/business-card.webp` keep their names across the
+  sync scripts and are cached for a week, so a new capture did not show on
+  reload. `scripts/media-versions.mjs` hashes their bytes at build time
+  (`virtual:media-versions`) and `mediaSrc()` appends `?v=<hash>` to `src`,
+  every `srcset` candidate and the lightbox source.
 - **No opening hours are published**, on the page or in the schema. Julian
   works by arrangement, and schema.org cannot express that — `opens`/`closes`
   would be an invented promise of availability. `jsonld.test.ts` fails if
@@ -367,12 +432,14 @@ wrong for months. Check the other repo before repeating a claim like this.
 **A CMS-editable list needs a NON-EMPTY committed fallback.** `mergeCmsValue`
 refuses an override for a list whose local default is empty — with no committed
 item there is no runtime shape to validate the incoming ones against — so
-shipping `[]` makes the panel field permanently inert, in silence. Two lists
-here genuinely must default to empty (service references and the fixed-price
-packages: nobody may publish an invented case or an invented price), and both
-therefore validate the RAW block field themselves, outside `cmsFor` —
-`validateServiceReferences` in `lib/services.ts` and `validatePricePackages` in
-`lib/pricing.ts`. The contact form's `reasons` are the opposite case: they ship
+shipping `[]` makes the panel field permanently inert, in silence. Service
+references genuinely must default to empty (nobody may publish an invented
+case), so `validateServiceReferences` in `lib/services.ts` validates the RAW
+block field outside `cmsFor`. The fixed-price packages go through the same raw
+validation (`validatePricePackages` in `lib/pricing.ts`) for a different
+reason: they have committed defaults now, but a panel list must replace them
+as a whole — a field-by-field merge could pair a panel title with a committed
+price. The contact form's `reasons` are the opposite case: they ship
 committed, and must stay that way.
 
 **Copy rules held by `homeContent.test.ts`** — Julian's decisions, not style:

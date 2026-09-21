@@ -43,7 +43,8 @@ interface Props {
 }
 
 const { lang, headingLevel = 2, factsTitle } = Astro.props;
-const CardHeading = `h${headingLevel}` as "h2" | "h3";
+// One level under the "Stundensätze" heading the cards now sit beneath.
+const CardHeading = `h${headingLevel + 1}` as "h3" | "h4";
 const SectionHeading = `h${headingLevel}` as "h2" | "h3";
 const hasFacts = Astro.slots.has("default");
 
@@ -67,11 +68,62 @@ const contactHref = `${homeHref}#contact`;
 const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
 // Code-owned: the heading names what the block IS. The packages under it are
 // the editable part.
-const packagesTitle = lang === "de" ? "Feste Preise" : "Fixed prices";
+const packagesTitle = lang === "de" ? "Festpreise" : "Fixed prices";
+const ratesTitle = lang === "de" ? "Stundensätze" : "Hourly rates";
+const netLabel = lang === "de" ? "netto" : "net";
 ---
 
 <div class="pricing-list">
-  <div class="pricing-list__grid">
+  {/* Fixed prices FIRST (2026-09-21): three packages with one figure each,
+      then the hourly rates for everything else. The committed packages are
+      hours × the Webauftritt rate (lib/pricing.ts); a panel list replaces
+      them as a whole. The block still renders nothing for an empty list. */}
+  {
+    pricing.packages.length > 0 && (
+      <section class="pricing-packages" aria-labelledby="pricing-packages-heading">
+        <SectionHeading
+          id="pricing-packages-heading"
+          class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
+        >
+          {packagesTitle}
+        </SectionHeading>
+        <ul class="pricing-packages__grid" data-motion-cards>
+          {pricing.packages.map((pkg) => (
+            <li class="pricing-packages__card">
+              <p class="pricing-packages__title">{pkg.title}</p>
+              <p class="pricing-packages__price">
+                <span class="tabular-nums">{formatRate(pkg.price)}</span>
+                <span class="pricing-packages__net">{netLabel}</span>
+              </p>
+              {pkg.description && (
+                <p class="pricing-packages__text">{pkg.description}</p>
+              )}
+              {pkg.includes.length > 0 && (
+                <ul class="pricing-packages__includes">
+                  {pkg.includes.map((entry) => (
+                    <li>
+                      <span aria-hidden="true" class="text-[var(--color-accent)]">
+                        ✓
+                      </span>
+                      <span>{entry}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <SectionHeading
+    id="pricing-rates-heading"
+    class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
+  >
+    {ratesTitle}
+  </SectionHeading>
+  <div class="pricing-list__grid" data-motion-cards>
     {
       services.map(({ definition, content }) => {
         const rate = getServiceRate(pricing, definition.id);
@@ -115,52 +167,6 @@ const packagesTitle = lang === "de" ? "Feste Preise" : "Fixed prices";
     }
   </div>
 
-  {/* Fixed prices, beside the hourly rates.
-
-      Rendered only when there is at least one package. The committed list is
-      empty and stays that way until real figures exist — an invented price is
-      a claim about a real business, and `pricing.ts` has carried the "no
-      invented number" rule since the catalogue had a rate-less service.
-      Julian fills them in the panel (`pricing_services.packages`) or they get
-      committed; either way nothing half-finished reaches the page. */}
-  {
-    pricing.packages.length > 0 && (
-      <section class="pricing-packages" aria-labelledby="pricing-packages-heading">
-        <SectionHeading
-          id="pricing-packages-heading"
-          class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
-        >
-          {packagesTitle}
-        </SectionHeading>
-        <ul class="pricing-packages__grid">
-          {pricing.packages.map((pkg) => (
-            <li class="pricing-packages__card">
-              <p class="pricing-packages__title">{pkg.title}</p>
-              <p class="pricing-packages__price">
-                <span class="tabular-nums">{formatRate(pkg.price)}</span>
-              </p>
-              {pkg.description && (
-                <p class="pricing-packages__text">{pkg.description}</p>
-              )}
-              {pkg.includes.length > 0 && (
-                <ul class="pricing-packages__includes">
-                  {pkg.includes.map((entry) => (
-                    <li>
-                      <span aria-hidden="true" class="text-[var(--color-accent)]">
-                        ✓
-                      </span>
-                      <span>{entry}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
   <section
     class="rounded-[6px] p-6 md:p-8 mb-10 bg-[var(--color-soft)]"
     aria-labelledby="pricing-notes-heading"
@@ -202,6 +208,7 @@ const packagesTitle = lang === "de" ? "Feste Preise" : "Fixed prices";
       <p class="text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">{pricing.ctaSub}</p>
       <a
         href={contactHref}
+        data-cta
         class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
       >
         {pricing.ctaButton}
@@ -247,13 +254,19 @@ const packagesTitle = lang === "de" ? "Feste Preise" : "Fixed prices";
      above them, so there is nothing left for it to style.) */
 
   /* === Fixed-price packages ========================================
-     Their own band under the rate grid, so a fixed price is never mistaken
+     Their own band above the rate grid, so a fixed price is never mistaken
      for an hourly one. Auto-fit rather than a fixed column count: how many
      packages exist is editorial, and `auto-fit` with a floor keeps a lone
      package from being stretched into a poster — the same trap the demo
      shelf's grid caps for. */
   .pricing-packages {
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
+  }
+  .pricing-packages__net {
+    margin-left: 0.4rem;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--color-muted);
   }
   .pricing-packages__grid {
     display: grid;
@@ -288,7 +301,7 @@ const packagesTitle = lang === "de" ? "Feste Preise" : "Fixed prices";
     margin: 0 0 0.75rem;
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: 2rem;
+    font-size: clamp(2rem, 1.6rem + 1.2vw, 2.75rem);
     line-height: 1.1;
     color: var(--color-primary);
   }

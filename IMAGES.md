@@ -53,6 +53,12 @@ remove the file as well.
 
 Never hand-place a picture into either folder.
 
+A re-captured screenshot keeps its file name, and browsers keep `/demos`,
+`/references` and `/images` for a week. So the page never links the bare name:
+`mediaSrc()` appends a hash of the file's bytes (`?v=…`, computed at build time
+by `scripts/media-versions.mjs`). After a sync, a rebuild is all it takes for
+the new picture to show on the next reload.
+
 ## Conventions
 
 | | |

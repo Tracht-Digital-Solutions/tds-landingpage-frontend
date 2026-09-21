@@ -296,7 +296,7 @@ const content: Record<Lang, HomeContent> = {
     referencesHome: {
       headline: "Umgesetzt für",
       headlineAccent: "Kunden.",
-      intro: "Echte Projekte – und *was sie gebracht haben*.",
+      intro: "Abgeschlossene Projekte – und *was sie gebracht haben*.",
       label: "Veröffentlicht nur mit Freigabe der Kunden.",
       serviceCta: "Zur passenden Leistung",
     },
@@ -331,7 +331,7 @@ const content: Record<Lang, HomeContent> = {
           linkLabel: "Wer ich bin",
         },
         {
-          title: "Echte Kundenprojekte",
+          title: "Kundenprojekte mit Freigabe",
           text: "Veröffentlicht nur mit Freigabe der Kunden.",
           linkLabel: "Projekte ansehen",
         },
@@ -438,7 +438,7 @@ const content: Record<Lang, HomeContent> = {
     referencesHome: {
       headline: "Delivered for",
       headlineAccent: "clients.",
-      intro: "Real projects – and *what they achieved*.",
+      intro: "Finished projects – and *what they achieved*.",
       label: "Published only with the client's approval.",
       serviceCta: "See the matching service",
     },
@@ -473,7 +473,7 @@ const content: Record<Lang, HomeContent> = {
           linkLabel: "Who I am",
         },
         {
-          title: "Real client projects",
+          title: "Approved client projects",
           text: "Published only with the client's approval.",
           linkLabel: "View projects",
         },

@@ -1,5 +1,6 @@
 ---
 import { resolveLang, localizePath } from "~/lib/i18n";
+import A11yTools from "~/components/A11yTools.astro";
 
 /**
  * Persistent bottom-corner control, in two shapes.
@@ -39,6 +40,10 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   data-near="false"
   data-on-dark="false"
 >
+  {/* Accessibility tools (2026-09-21). They stay reachable while the CTA
+      below stands down over the hero and the form — see the rules below. */}
+  <A11yTools />
+
   <button type="button" class="floating-cta-top" aria-label={topLabel}>
     <svg
       aria-hidden="true"
@@ -103,9 +108,16 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        indicator on a notched phone and resolves to 0px everywhere else; this
        control never had that and sat under the gesture bar. */
     bottom: calc(
-      var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 1rem +
+      var(--tds-right-lane, 0px) + 1rem +
         env(safe-area-inset-bottom, 0px)
     );
+    /* The cookie notice's lane moves the group with `translate`, not with
+       `bottom`: the notice appears after the first paint, and a change of
+       `bottom` is a layout shift — measured 0.033 CLS on a phone once the
+       accessibility button made the group visible over the hero. A transform
+       is not. `translate` is its own property, so the hover lift on
+       `transform` still composes with it. */
+    translate: 0 calc(-1 * var(--tds-bottom-lane, 0px));
     z-index: 35;
     display: flex;
     flex-direction: column;
@@ -114,6 +126,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        fades out of the way where the page already offers the same action. */
     transition:
       transform 220ms var(--lp-ease-soft),
+      translate 300ms var(--tds-ease-out),
       opacity 200ms var(--tds-ease-out),
       visibility var(--tds-dur-none, 0s) linear 200ms;
   }
@@ -121,7 +134,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     .floating-cta-group {
       right: 1.5rem;
       bottom: calc(
-        var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 1.5rem +
+        var(--tds-right-lane, 0px) + 1.5rem +
           env(safe-area-inset-bottom, 0px)
       );
     }
@@ -143,14 +156,17 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        button together covered 58 % of a 320×568 phone and 94 % of a 400 %
        zoomed window, with the hero's button underneath them. Until the notice
        is dismissed, this one waits. */
-  .floating-cta-group[data-suppressed="true"],
-  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) {
+  /* The CTA parts stand down — NOT the accessibility button, which is the
+     group's first child and has to be reachable on the very first screen.
+     So the rule hides the children, not the group. */
+  .floating-cta-group[data-suppressed="true"] > :global(:not(.a11y-toggle):not(.a11y-panel)),
+  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) > :global(:not(.a11y-toggle):not(.a11y-panel)) {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
   }
   @media (max-height: 44rem) {
-    :global(:root:has(.cookie-notice)) .floating-cta-group {
+    :global(:root:has(.cookie-notice)) .floating-cta-group > :global(:not(.a11y-toggle):not(.a11y-panel)) {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -159,6 +175,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   .floating-cta-group[data-suppressed="false"] {
     transition:
       transform 220ms var(--lp-ease-soft),
+      translate 300ms var(--tds-ease-out),
       opacity 200ms var(--tds-ease-out),
       visibility var(--tds-dur-none, 0s) linear 0s;
   }

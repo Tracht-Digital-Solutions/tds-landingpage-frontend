@@ -4,6 +4,8 @@ import react from "@astrojs/react";
 // Shared CSS minify settings (incl. the cssTarget that keeps lightningcss
 // from dropping the header backdrop-filter prefix). See tds-shared#10.
 import { motionSsrNoExternal, tdsViteBuild } from "@tracht-digital-solutions/tds-shared/astro";
+import { fileURLToPath } from "node:url";
+import { mediaVersionsPlugin } from "./scripts/media-versions.mjs";
 
 export default defineConfig({
   site: "https://tracht-digital.de",
@@ -76,6 +78,9 @@ export default defineConfig({
     service: { entrypoint: "astro/assets/services/sharp" },
   },
   vite: {
+    // Content hashes for the screenshots that keep their names across syncs
+    // (scripts/media-versions.mjs) — a new capture reaches a reload at once.
+    plugins: [mediaVersionsPlugin(fileURLToPath(new URL("./public", import.meta.url)))],
     build: { ...tdsViteBuild },
     ssr: {
       // Bundle the first-party and pure-JS packages INTO dist/server.

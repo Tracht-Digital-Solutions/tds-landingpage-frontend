@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { getPricingDefault, getServiceRate, validatePricePackages } from "./pricing";
+import {
+  PACKAGE_HOURS,
+  getDefaultPackages,
+  getPricingDefault,
+  getServiceRate,
+  validatePricePackages,
+} from "./pricing";
 import { pricingSchema } from "./jsonld";
 import { serviceDefinitions } from "./services";
 
@@ -61,11 +67,9 @@ describe("pricing defaults", () => {
 /**
  * Fixed-price packages.
  *
- * They default to an EMPTY list, which is not an oversight: nobody may publish
- * an invented price, so the page shows no package until a real one exists.
- * That empty default is exactly what `cmsFor()` refuses to merge a CMS list
- * against, which is why `validatePricePackages` checks the raw block field
- * instead — the same boundary `validateServiceReferences` guards.
+ * Three committed packages since 2026-09-21, each priced as hours × the
+ * Webauftritt rate. A panel list replaces them as a whole when it validates;
+ * `validatePricePackages` checks that raw field.
  */
 describe("validatePricePackages", () => {
   const complete = {
@@ -105,12 +109,25 @@ describe("validatePricePackages", () => {
     expect(validatePricePackages([noList])).toEqual([{ ...noList, includes: [] }]);
   });
 
-  it("ships no committed package until real figures exist", () => {
-    // The guard on this whole feature. If this ever fails, check that the
-    // numbers came from Julian and not from an example.
+  it("prices every committed package as hours × the Webauftritt rate", () => {
+    // Decided 2026-09-21: a package is the same work billed by the hour, never
+    // a cheaper or dearer figure. A rate change fails here until they follow.
     for (const lang of ["de", "en"] as const) {
-      const prose = JSON.stringify(getPricingDefault(lang));
-      expect(prose).not.toMatch(/1\.?900|2\.?400/);
+      const rate = getPricingDefault(lang).rateWebPresence;
+      const packages = getDefaultPackages(lang);
+      expect(packages.map((pkg) => pkg.price)).toEqual(PACKAGE_HOURS.map((h) => h * rate));
+      // The committed list has to pass the same gate as a panel list.
+      expect(validatePricePackages(packages)).toEqual(packages);
+    }
+  });
+
+  it("keeps both languages in step: same count, same figures", () => {
+    const de = getDefaultPackages("de");
+    const en = getDefaultPackages("en");
+    expect(en.map((p) => p.price)).toEqual(de.map((p) => p.price));
+    for (const pkg of [...de, ...en]) {
+      expect(pkg.includes.length, pkg.title).toBeLessThanOrEqual(3);
+      expect(pkg.description.length, pkg.title).toBeGreaterThan(0);
     }
   });
 });

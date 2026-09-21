@@ -35,7 +35,9 @@ import FloatingCta from "~/components/FloatingCta.astro";
 import JsonLd from "~/components/JsonLd.astro";
 import { LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
 import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
-import { pageTransitionOptIn, themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
+import { themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
+import { PAGE_ENTER_SCRIPT } from "~/lib/motion/constants";
+import { A11Y_BOOT_SCRIPT } from "~/lib/a11yPrefs";
 import { siteConfig } from "~/lib/seo";
 import { isExcluded } from "~/lib/sitemap";
 import { tFor } from "~/lib/i18n";
@@ -130,10 +132,15 @@ const showCookieNotice = !bare;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- The cross-page transition switch, as early as it can be: Chrome decides the
-         incoming page's opt-in at its first render, and the stylesheet linked at the
-         end of this head often arrives later (tds-shared pageTransitionOptIn). -->
-    <style is:inline set:html={pageTransitionOptIn} />
+    {/* The page transition's hand-over, first in <head>: after an internal
+        click it marks <html> so the incoming <main> starts at its entrance
+        state before the body paints (lib/motion/pageTransition.ts). A first
+        visit never carries the flag, so the LCP never sees it. */}
+    {/* The visitor's accessibility settings (lib/a11yPrefs.ts), first of
+        all: text size and contrast must be right in the first paint, and the
+        page-enter flag below reads the motion switch. */}
+    <script is:inline set:html={A11Y_BOOT_SCRIPT} />
+    <script is:inline set:html={PAGE_ENTER_SCRIPT} />
     {/* The LCP element's font, fetched as early as the parser can see it.
         Without this it is discovered only when the inlined CSS is parsed —
         measured live, the two Lato faces did not finish until 520 ms against
@@ -281,6 +288,16 @@ const showCookieNotice = !bare;
       import { mountReveal } from "~/lib/reveal";
 
       mountReveal();
+    </script>
+
+    {/* The Motion layer: CTA, photos, page transitions, business card, nav
+        indicator. It loads its runtime with `import()` at idle (at once only
+        after an internal navigation) and nothing under reduced motion —
+        see lib/motion/boot.ts. */}
+    <script>
+      import { bootMotion } from "~/lib/motion/boot";
+
+      bootMotion();
     </script>
 
     {/* Dynamic document.title — observes every <section id="…"> on

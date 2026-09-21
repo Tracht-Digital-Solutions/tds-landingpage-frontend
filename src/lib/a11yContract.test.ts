@@ -256,7 +256,9 @@ describe("the service assistant", () => {
     expect(markup).toMatch(/<dialog[^>]*id="leistungsassistent"[^>]*aria-labelledby="assistant-title"/);
     expect(markup).toMatch(/id="assistant-title"/);
     expect(markup).not.toMatch(/role="dialog"|aria-modal/);
-    expect(script).toMatch(/\.showModal\(\)/);
+    // Opened through the bouncing wrapper, which calls showModal() itself.
+    expect(script).toMatch(/modal\.open\(\)/);
+    expect(read("src/lib/motion/dialog.ts")).toMatch(/dialog\.showModal\(\)/);
   });
 
   it("gives focus back to the button that opened it, or to where a link moved the page", () => {

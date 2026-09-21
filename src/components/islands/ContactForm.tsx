@@ -224,7 +224,11 @@ export default function ContactForm({
 
   const form = (
     <div className={shake ? "shake" : ""}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8" noValidate>
+      {/* `data-motion-stagger`: the rows — the reason dropdown among them —
+          arrive one after another as the form scrolls in (lib/motion/ux.ts,
+          vanilla Motion on this markup, off screen only). The honeypot is
+          `aria-hidden` and skipped, or the fade would reveal it. */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8" noValidate data-motion-stagger>
         <div
           style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}
           aria-hidden="true"
@@ -301,16 +305,14 @@ export default function ContactForm({
             <label htmlFor="subject" className="contact-field-label">
               {copy.reasonLabel}
             </label>
-            {/* NOT `fieldClass`. That class family ends in
-                `.contact-field { background-color: transparent !important }`,
-                which exists so Safari and Firefox-on-macOS cannot paint a
-                light UA background behind a text input on the navy section —
-                and it beat every attempt to give this control the
-                navigation's frosted fill. A select is not a text field any
-                more; it carries its own surface, so it gets its own class. */}
+            {/* The SAME `fieldClass` as the text fields (2026-09-21): the closed
+                control reads as one more row of the form — transparent, on
+                the row's underline, with the accent line growing on focus.
+                Only the OPEN list keeps its own frosted surface
+                (`::picker(select)` in Contact.astro). */}
             <select
               id="subject"
-              className="contact-select block w-full text-base leading-snug border-0 outline-none focus:outline-none focus:ring-0"
+              className={`${fieldClass} contact-select`}
               defaultValue=""
               {...register("subject")}
             >
