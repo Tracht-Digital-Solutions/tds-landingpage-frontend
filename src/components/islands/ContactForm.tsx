@@ -50,8 +50,31 @@ type FieldName = "name" | "email" | "message" | "consent";
  * - **The words come from `lib/contactCopy.ts`** (2026-09-15): the site says
  *   "du", the shared bundle says "Sie", and the sentences that address the
  *   visitor — errors, success, the failure message — are overridden there.
+ * - **A reason dropdown, and the next steps AFTER sending** (2026-09-21). The
+ *   chosen reason travels as `subject`, so the request arrives in the panel
+ *   under a heading instead of as one more untitled message. And the four
+ *   "what happens next" points, which used to sit above the form, now fill the
+ *   confirmation: on the way in they were a wall between the visitor and the
+ *   field they came to type in, and they duplicated the process section word
+ *   for word. Afterwards they are the answer to the only question left.
+ *
+ * ### Why `reasons` and `nextSteps` are props
+ *
+ * Both are CMS-editable (`contact.reasons`, `first_call`), and resolving a
+ * block means `cmsFor`, which is server-only. An island cannot call it. So
+ * `sections/Contact.astro` resolves and hands the finished values down.
  */
-export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
+export default function ContactForm({
+  lang = "de",
+  reasons = [],
+  nextSteps,
+}: {
+  lang?: Lang;
+  /** Options for the reason dropdown, already resolved against the CMS. */
+  reasons?: readonly string[];
+  /** What happens after sending — rendered in place of the form. */
+  nextSteps?: { title: string; items: readonly { label: string; text: string }[] };
+}) {
   const copy = contactFormCopy(lang);
 
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
@@ -177,6 +200,23 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           {copy.form.successTitle}
         </h3>
         <p className="text-white/75">{copy.form.successMessage}</p>
+
+        {/* The next steps, at the one moment they are the whole question.
+            A <dl>, like `ui/FirstCall.astro` renders them, so the pairing of
+            label and text survives without the visual card around it. */}
+        {nextSteps && nextSteps.items.length > 0 && (
+          <div className="contact-next mt-4 w-full">
+            <h4 className="contact-next__title">{nextSteps.title}</h4>
+            <dl className="contact-next__list">
+              {nextSteps.items.map((item) => (
+                <div className="contact-next__item" key={item.label}>
+                  <dt className="contact-next__label">{item.label}</dt>
+                  <dd className="contact-next__text">{item.text}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
       </div>
   );
 
@@ -252,17 +292,57 @@ export default function ContactForm({ lang = "de" }: { lang?: Lang }) {
           <span className="contact-field-line" aria-hidden="true" />
         </div>
 
+        {/* The reason for getting in touch. Optional on purpose: making it
+            mandatory costs submissions from the people whose request fits no
+            entry, and they are the ones worth hearing from. Rendered only when
+            there are options — the list is CMS-editable and can be emptied. */}
+        {reasons.length > 0 && (
+          <div className={rowClass()}>
+            <label htmlFor="subject" className="contact-field-label">
+              {copy.reasonLabel}
+            </label>
+            <select
+              id="subject"
+              className={`${fieldClass} contact-select`}
+              defaultValue=""
+              {...register("subject")}
+            >
+              <option value="">{copy.reasonEmpty}</option>
+              {reasons.map((reason) => (
+                <option key={reason} value={reason}>
+                  {reason}
+                </option>
+              ))}
+            </select>
+            <span className="contact-field-line" aria-hidden="true" />
+          </div>
+        )}
+
         <div className={rowClass("message")}>
           <label htmlFor="message" className="contact-field-label">
             {copy.form.message}
           </label>
+          {/* The guidance is a real element, not the placeholder: a
+              placeholder vanishes with the first keystroke, which is when the
+              visitor still needs to know what to write. Tied to the field with
+              `aria-describedby`, alongside the error when there is one. */}
+          <p id="contact-message-hint" className="contact-field-hint">
+            {copy.messageHint}
+          </p>
           <textarea
             id="message"
             rows={4}
             required
-            placeholder={copy.form.messagePlaceholder}
             className={`${fieldClass} resize-none`}
             {...a11yFor("message")}
+            // Overrides the `aria-describedby` from `a11yFor` deliberately:
+            // the hint applies whether or not there is an error, so when there
+            // IS one the field has to point at both, in reading order.
+            aria-describedby={
+              errors.message
+                ? `contact-message-hint ${errorId("message")}`
+                : "contact-message-hint"
+            }
             {...register("message")}
           />
           <span className="contact-field-line" aria-hidden="true" />

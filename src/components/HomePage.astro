@@ -100,6 +100,13 @@ const jsonLd = asGraph(
       description: content.summary,
       rate: getServiceRate(pricing, definition.id),
     })),
+    // Fixed prices go in as their own offers, without an hourly unit. Empty
+    // until real figures exist, and an empty list adds nothing to the graph.
+    pricing.packages.map((pkg) => ({
+      name: pkg.title,
+      description: pkg.description,
+      price: pkg.price,
+    })),
   ),
   faqPageSchema(faq.items),
   {

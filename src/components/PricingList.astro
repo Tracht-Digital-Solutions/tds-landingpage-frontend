@@ -65,6 +65,9 @@ const formatRate = (rate: number) =>
 const homeHref = localizePath("/", lang);
 const contactHref = `${homeHref}#contact`;
 const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
+// Code-owned: the heading names what the block IS. The packages under it are
+// the editable part.
+const packagesTitle = lang === "de" ? "Feste Preise" : "Fixed prices";
 ---
 
 <div class="pricing-list">
@@ -89,29 +92,15 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
               <span class="text-sm text-[var(--color-muted)]">{pricing.hourSuffix}</span>
             </div>
 
-            <p class="text-sm leading-relaxed mb-7 text-[var(--color-muted)]">
-              {content.summary}
-            </p>
-
+            {/* Neither the summary nor the keyword list is repeated here.
+                `sections/Services.astro` sits one section above this one and
+                already gives every service its situation, its outcome and the
+                SAME keyword chips — this card was the second half of a
+                duplicate, down to a second link to the same page under a
+                different name. What a rate card owes the reader is the rate.
+                The service's own words are one scroll up, and behind the
+                link. */}
             <div class="mt-auto">
-              <p class="text-xs font-medium tracking-wider uppercase mb-3 text-[var(--color-muted)]">
-                {pricing.includesLabel}
-              </p>
-              {/* The code-owned keyword list, not the first four lines of "Was
-                  ich übernehme". Cards side by side are scanned, not read, and
-                  four full sentences per card turned this grid into a wall of
-                  prose. The detail page behind each card is where the
-                  sentences belong. */}
-              <ul class="pricing-list__includes">
-                {definition.keywords[lang].map((keyword) => (
-                  <li class="text-sm leading-snug flex gap-2 text-[var(--color-black)]">
-                    <span aria-hidden="true" class="text-[var(--color-accent)]">
-                      ✓
-                    </span>
-                    <span>{keyword}</span>
-                  </li>
-                ))}
-              </ul>
               <a
                 href={serviceHref(definition, lang)}
                 class="inline-flex items-center gap-2 text-sm font-medium transition-colors text-[var(--color-primary)] hover:text-[var(--color-accent)] [@media(pointer:coarse)]:min-h-11"
@@ -125,6 +114,52 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
       })
     }
   </div>
+
+  {/* Fixed prices, beside the hourly rates.
+
+      Rendered only when there is at least one package. The committed list is
+      empty and stays that way until real figures exist — an invented price is
+      a claim about a real business, and `pricing.ts` has carried the "no
+      invented number" rule since the catalogue had a rate-less service.
+      Julian fills them in the panel (`pricing_services.packages`) or they get
+      committed; either way nothing half-finished reaches the page. */}
+  {
+    pricing.packages.length > 0 && (
+      <section class="pricing-packages" aria-labelledby="pricing-packages-heading">
+        <SectionHeading
+          id="pricing-packages-heading"
+          class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
+        >
+          {packagesTitle}
+        </SectionHeading>
+        <ul class="pricing-packages__grid">
+          {pricing.packages.map((pkg) => (
+            <li class="pricing-packages__card">
+              <p class="pricing-packages__title">{pkg.title}</p>
+              <p class="pricing-packages__price">
+                <span class="tabular-nums">{formatRate(pkg.price)}</span>
+              </p>
+              {pkg.description && (
+                <p class="pricing-packages__text">{pkg.description}</p>
+              )}
+              {pkg.includes.length > 0 && (
+                <ul class="pricing-packages__includes">
+                  {pkg.includes.map((entry) => (
+                    <li>
+                      <span aria-hidden="true" class="text-[var(--color-accent)]">
+                        ✓
+                      </span>
+                      <span>{entry}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 
   <section
     class="rounded-[6px] p-6 md:p-8 mb-10 bg-[var(--color-soft)]"
@@ -207,23 +242,75 @@ const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
     }
   }
 
-  /* Cards stacked on a phone: the keywords run as one wrapping line of ticks
-     instead of a column, which took a quarter of every card's height. Side by
-     side a column is quicker to scan, so it comes back there. */
-  .pricing-list__includes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem 1rem;
-    margin: 0 0 1.5rem;
+  /* (`.pricing-list__includes` lived here. The rate cards stopped repeating
+     the keyword list that `sections/Services.astro` already shows one section
+     above them, so there is nothing left for it to style.) */
+
+  /* === Fixed-price packages ========================================
+     Their own band under the rate grid, so a fixed price is never mistaken
+     for an hourly one. Auto-fit rather than a fixed column count: how many
+     packages exist is editorial, and `auto-fit` with a floor keeps a lone
+     package from being stretched into a poster — the same trap the demo
+     shelf's grid caps for. */
+  .pricing-packages {
+    margin-bottom: 2.5rem;
+  }
+  .pricing-packages__grid {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
   @container pricing-list (min-width: 42rem) {
-    .pricing-list__includes {
-      display: grid;
-      gap: 0.5rem;
-      margin-bottom: 1.75rem;
+    .pricing-packages__grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
     }
+  }
+  .pricing-packages__card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-radius: 6px;
+    /* Differs from the rate cards' `--color-soft` on purpose: two price
+       families on one ground need two fills, or the eye reads eight cards of
+       one kind. */
+    background: var(--lp-surface-card);
+  }
+  .pricing-packages__title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-black);
+  }
+  .pricing-packages__price {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 2rem;
+    line-height: 1.1;
+    color: var(--color-primary);
+  }
+  .pricing-packages__text {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+  .pricing-packages__includes {
+    display: grid;
+    gap: 0.5rem;
+    margin: auto 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-black);
+  }
+  .pricing-packages__includes li {
+    display: flex;
+    gap: 0.5rem;
   }
 
   .pricing-list__notes--after {

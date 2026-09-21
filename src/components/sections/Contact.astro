@@ -5,7 +5,6 @@ import { businessCardHref } from "~/lib/businessCard";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
-import FirstCall from "~/components/ui/FirstCall.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -28,7 +27,44 @@ const contact = await cmsFor("contact", lang, {
   email: t.contact.info.email,
   phone: t.contact.info.phone,
   location: t.contact.info.location,
+  /**
+   * The options in the form's reason dropdown, editable in the panel under
+   * `contact.reasons`.
+   *
+   * Committed non-empty, and that is load-bearing rather than tidy:
+   * `mergeCmsValue` refuses an override for a list whose committed fallback is
+   * empty, because an empty default gives it no runtime shape to validate the
+   * incoming items against. Ship `[]` here and every edit Julian makes in the
+   * panel is discarded in silence, for good.
+   *
+   * The entries lead with the takeover the site is written for and end with a
+   * way out, so nobody has to misfile their request to send it.
+   */
+  reasons:
+    lang === "de"
+      ? [
+          "Bestehende Website übernehmen",
+          "Onlineshop übernehmen oder reparieren",
+          "Fehler auf einer laufenden Seite",
+          "Pflege und Wartung",
+          "Abläufe digitalisieren",
+          "Etwas anderes",
+        ]
+      : [
+          "Take over an existing website",
+          "Take over or repair an online shop",
+          "A fault on a live site",
+          "Maintenance and upkeep",
+          "Digitalize workflows",
+          "Something else",
+        ],
 });
+
+// What happens after sending. It used to stand ABOVE the form, where it was a
+// wall between the visitor and the field they came here to type in — and it
+// repeated the process section word for word. It is the confirmation's content
+// now: the same four points, at the moment they answer the only open question.
+const nextSteps = await cmsFor("first_call", lang, getHomeContent(lang).firstCall);
 
 // Phone display reads with country code spaced for legibility; the
 // tel: href version strips the spaces so dialers handle it cleanly.
@@ -98,15 +134,18 @@ const socials = {
     ></span>
     <p class="text-white/75 max-w-lg mb-8 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
 
-    {/* What happens after the message — at the one moment a visitor decides
-        whether to send it. Goal, preparation, outcome, and the one sentence
-        about cost; see `ui/FirstCall.astro` for the rules it keeps. */}
-    <div class="mb-10 md:mb-14">
-      <FirstCall variant="contact" />
-    </div>
+    {/* The "what happens next" card that used to stand here is gone. It said
+        the same four things as the process section, verbatim, one screen
+        further down — and it pushed the form itself below the fold. The form's
+        confirmation carries it now, which is where it is actually an answer. */}
 
     <div class="grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">
-      <ContactForm client:visible lang={lang} />
+      <ContactForm
+        client:visible
+        lang={lang}
+        reasons={contact.reasons}
+        nextSteps={{ title: nextSteps.nextStepsTitle, items: nextSteps.items }}
+      />
 
       <aside class="space-y-6 md:space-y-8">
         <div>
@@ -637,6 +676,88 @@ const socials = {
     to {
       transform: none;
     }
+  }
+
+  /* === Contact form: what happens next ==============================
+
+     The four points that used to sit above the form, rendered inside the
+     confirmation. No card around them — they already sit on the navy ground
+     with the tick and the heading, and a second surface there would read as a
+     dialog inside a dialog. */
+  .contact-next {
+    border-top: 1px solid rgb(255 255 255 / 0.16);
+    padding-top: 1.5rem;
+  }
+  .contact-next__title {
+    margin: 0 0 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.5);
+  }
+  .contact-next__list {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  /* Two columns as soon as there is room. `auto-fit` with a `min()` floor
+     rather than a breakpoint: this block sits in one half of a two-column
+     grid, so the viewport says nothing useful about how wide it is. */
+  @media (min-width: 30rem) {
+    .contact-next__list {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+      column-gap: 1.5rem;
+    }
+  }
+  .contact-next__label {
+    margin: 0 0 0.25rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-pink);
+  }
+  .contact-next__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: rgb(255 255 255 / 0.75);
+  }
+
+  /* === Contact form: the reason dropdown ============================
+
+     A native <select>, styled to sit in the same underlined row as the text
+     fields. Three things it needs that an <input> does not:
+
+     - `appearance: none`, or the platform paints its own chrome over the row.
+     - An explicit `color-scheme: dark`: without it Chrome renders the OPTION
+       list on a white sheet with white text, because the options inherit the
+       page's colours while the popup keeps the light default. Unreadable, and
+       invisible from the page itself.
+     - Its own arrow, since removing the appearance removes the platform's. */
+  #contact .contact-select {
+    appearance: none;
+    color-scheme: dark;
+    cursor: pointer;
+    padding-right: 2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='0.6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+  }
+  /* The resting option is a prompt, not an answer — dimmed like a placeholder
+     so an unanswered dropdown does not read as a choice already made. */
+  #contact .contact-select:has(option[value=""]:checked) {
+    color: rgb(255 255 255 / 0.5);
+  }
+
+  /* The line under the message label that says what belongs in the field. */
+  #contact .contact-field-hint {
+    margin: 0 0 0.5rem;
+    padding-inline: 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.55);
   }
 
   /* === Contact form: send button ==================================== */

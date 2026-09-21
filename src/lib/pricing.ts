@@ -1,4 +1,4 @@
-import { cmsFor } from "./cms";
+import { cmsFor, fetchBlocks } from "./cms";
 import type { Lang } from "./i18n";
 import type { ServiceId } from "./services";
 
@@ -12,6 +12,21 @@ import type { ServiceId } from "./services";
  * `*asterisks*` mark a word for emphasis (see `./emphasis`); a CMS override
  * without them renders as plain text.
  */
+
+/**
+ * One fixed-price package, beside the hourly rates.
+ *
+ * `price` is a number, not prose: it is formatted as currency for the page and
+ * emitted as a numeric `Offer` in structured data. A string here would put an
+ * unparseable value into both.
+ */
+export interface PricePackage {
+  title: string;
+  /** Net EUR, a single figure. Never a range — see `homeContent.test.ts`. */
+  price: number;
+  description: string;
+  includes: string[];
+}
 
 export interface PricingContent {
   label: string;
@@ -101,8 +116,71 @@ export function getPricingDefault(lang: Lang): PricingContent {
   return defaults[lang];
 }
 
-export async function getPricingContent(lang: Lang): Promise<PricingContent> {
-  return cmsFor("pricing_services", lang, getPricingDefault(lang));
+/**
+ * The pricing block plus its fixed-price packages.
+ *
+ * `packages` is deliberately NOT a field of `PricingContent`: that object is
+ * the runtime schema `cmsFor()` merges against, and a list whose committed
+ * default is empty is one it refuses outright. The packages therefore come off
+ * the raw block, exactly as service references do.
+ */
+export type ResolvedPricing = PricingContent & { packages: PricePackage[] };
+
+export async function getPricingContent(lang: Lang): Promise<ResolvedPricing> {
+  const resolved = await cmsFor("pricing_services", lang, getPricingDefault(lang));
+  const blocks = await fetchBlocks(lang);
+  const block = blocks["pricing_services"];
+  const packages = isRecord(block) ? validatePricePackages(block.packages) : [];
+  return { ...resolved, packages };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Validate the fixed-price packages, which default to an EMPTY list.
+ *
+ * Same boundary problem as `validateServiceReferences` in `./services`, for
+ * the same reason: `cmsFor()` refuses to infer a schema from an empty fallback
+ * list, and the committed default here has to be empty because nobody may
+ * publish an invented price. So the raw block field is validated here instead.
+ *
+ * Strict on purpose, and one malformed item rejects the whole list — matching
+ * `cmsFor()`'s own list behaviour. A package with a missing title or a price
+ * of `0` is not a cheaper package, it is an unfinished one, and a page that
+ * shows "0 €" beside a real figure is worse than a page that shows neither.
+ */
+export function validatePricePackages(value: unknown): PricePackage[] {
+  if (!Array.isArray(value) || value.length === 0) return [];
+
+  const packages: PricePackage[] = [];
+  for (const candidate of value) {
+    if (!isRecord(candidate)) return [];
+
+    const title = typeof candidate.title === "string" ? candidate.title.trim() : "";
+    const description =
+      typeof candidate.description === "string" ? candidate.description.trim() : "";
+    const price = typeof candidate.price === "number" ? candidate.price : Number.NaN;
+    if (title === "" || !Number.isFinite(price) || price <= 0) return [];
+
+    // The bullet list may legitimately be absent; a package is still a package
+    // without one. Anything non-textual in it, though, means the item is not
+    // what it claims to be.
+    const includesRaw = candidate.includes;
+    let includes: string[] = [];
+    if (Array.isArray(includesRaw)) {
+      for (const entry of includesRaw) {
+        if (typeof entry !== "string" || entry.trim() === "") return [];
+        includes.push(entry.trim());
+      }
+    } else if (includesRaw !== undefined && includesRaw !== null) {
+      return [];
+    }
+
+    packages.push({ title, price, description, includes });
+  }
+  return packages;
 }
 
 /**
