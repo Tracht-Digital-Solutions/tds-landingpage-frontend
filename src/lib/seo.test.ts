@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { getDefaultPackages } from "./pricing";
 import { siteConfig } from "./seo";
 
 /**
@@ -131,6 +132,20 @@ describe("the keyword commitments", () => {
     // A local-only areaServed would drop the Germany-wide half of the target.
     expect(siteConfig.areaServed).toContain("Deutschland");
     expect(siteConfig.areaServed.some((a) => /Schwarzenbek|Hamburg/.test(a))).toBe(true);
+  });
+});
+
+describe("the fixed-price floor in the descriptions", () => {
+  /**
+   * Since 2026-09-21 the home description names the lowest fixed price — the
+   * one number a searcher comparing offers wants before the click. It is a
+   * literal in `siteConfig`, so this ties it to the committed packages: a
+   * package price change fails here until the description follows.
+   */
+  it("quotes the cheapest committed package", () => {
+    const floor = Math.min(...getDefaultPackages("de").map((pkg) => pkg.price));
+    expect(siteConfig.description.de).toContain(`ab ${floor} €`);
+    expect(siteConfig.description.en).toContain(`from €${floor}`);
   });
 });
 

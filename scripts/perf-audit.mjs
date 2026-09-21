@@ -61,6 +61,14 @@ const flag = (name, fallback) => {
 };
 const paths = flag("paths", "/,/en/").split(",");
 const runs = Number(flag("runs", "5"));
+// Two devices since 2026-09-21. The phone is where the 4.1 s LCP happened;
+// the desktop is where the hero PHOTO loads (from 48rem) and the Motion layer
+// is busiest, so an image or a start state could take the LCP there first.
+const devices = flag("devices", "mobile,desktop").split(",");
+const VIEWPORTS = {
+  mobile: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true },
+  desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, isMobile: false, hasTouch: false },
+};
 const asJson = args.includes("--json");
 
 const budgets = JSON.parse(readFileSync(join(here, "perf-budget.json"), "utf8"));
@@ -69,13 +77,8 @@ const kb = (bytes) => Math.round(bytes / 1024);
 const median = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 
 /** One throttled load. Returns the timings and the byte weight. */
-async function measure(browser, url) {
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    deviceScaleFactor: 3,
-    isMobile: true,
-    hasTouch: true,
-  });
+async function measure(browser, url, device) {
+  const context = await browser.newContext(VIEWPORTS[device]);
   const page = await context.newPage();
   const session = await context.newCDPSession(page);
   await session.send("Emulation.setCPUThrottlingRate", { rate: 4 });
@@ -151,10 +154,11 @@ const browser = await chromium.launch({ channel: process.env.PERF_AUDIT_CHANNEL 
 const report = [];
 let failed = 0;
 
+for (const device of devices)
 for (const path of paths) {
   const url = `${base}${path}`;
   const samples = [];
-  for (let i = 0; i < runs; i++) samples.push(await measure(browser, url));
+  for (let i = 0; i < runs; i++) samples.push(await measure(browser, url, device));
 
   const lcpMedian = Math.round(median(samples.map((s) => s.lcp)));
   const last = samples[samples.length - 1];
@@ -162,6 +166,7 @@ for (const path of paths) {
     last.documentBytes + Object.values(last.weight).reduce((sum, n) => sum + n, 0);
 
   const page = {
+    device,
     path,
     lcpMedian,
     lcpAll: samples.map((s) => Math.round(s.lcp)).sort((a, b) => a - b),
@@ -181,7 +186,7 @@ for (const path of paths) {
 
   if (asJson) continue;
 
-  console.log(`\n${url}`);
+  console.log(`\n${url}  [${device}]`);
   console.log(
     `  LCP        ${page.lcpMedian} ms (Median aus ${runs}: ${page.lcpAll.join(", ")}) → ${page.lcpElement}`,
   );
@@ -193,7 +198,9 @@ for (const path of paths) {
   }
 
   // Budgets are per page path, falling back to the shared default.
-  const budget = budgets.pages?.[path] ?? budgets.default;
+  const deviceBudget = budgets.devices?.[device] ?? {};
+  const budget = { ...budgets.default, ...(deviceBudget.budget ?? {}), ...(budgets.pages?.[path] ?? {}) };
+  const expectedElement = deviceBudget.lcpElement ?? budgets.lcpElement;
   for (const [key, limit] of Object.entries(budget)) {
     const value = page[key];
     if (typeof value !== "number") continue;
@@ -202,9 +209,9 @@ for (const path of paths) {
       failed++;
     }
   }
-  if (budgets.lcpElement && page.lcpElement !== budgets.lcpElement) {
+  if (expectedElement && page.lcpElement !== expectedElement) {
     console.log(
-      `  ✗ LCP-Element ist ${page.lcpElement}, erwartet ${budgets.lcpElement} — etwas hat die Ueberschrift verdraengt`,
+      `  ✗ LCP-Element ist ${page.lcpElement}, erwartet ${expectedElement} — etwas hat die Ueberschrift verdraengt`,
     );
     failed++;
   }

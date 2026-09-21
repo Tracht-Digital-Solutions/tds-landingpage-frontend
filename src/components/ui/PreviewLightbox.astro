@@ -142,42 +142,71 @@ const ui =
     padding: 0;
     border: none;
     border-radius: 8px;
-    background: var(--color-card);
+    /* One flat colour, image well and bar included (2026-09-21). */
+    background: var(--color-paper);
     color: var(--color-black);
     overflow: hidden;
   }
   .preview::backdrop {
-    /* Deliberately not `--color-black` at low alpha: in dark mode that is a
-       near-transparent film over an already dark page and the modal stops
-       reading as modal. A fixed dark wash works in both themes. */
-    background: rgb(8 10 24 / 0.72);
+    /* ONE flat colour behind every modal (2026-09-21): the brand navy, dense
+       enough that the page behind stops competing, in both themes. It fades
+       in with the dialog and out while `lib/motion/dialog.ts` plays the exit. */
+    background: var(--color-surface-navy);
+    opacity: 0.9;
+    transition: opacity 300ms var(--tds-ease-out);
+  }
+  .preview[data-closing]::backdrop {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .preview[open]::backdrop {
+      animation: previewBackdropIn 220ms var(--tds-ease-out);
+    }
+  }
+  @keyframes previewBackdropIn {
+    from {
+      opacity: 0;
+    }
   }
 
+  /* The cross sits in its own band above the capture, on the dialog's colour —
+     a bare cross over a screenshot would have no contrast to rely on. */
   .preview__frame {
     position: relative;
     display: flex;
     flex-direction: column;
+    padding-top: 3.25rem;
   }
 
   .preview__close {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 0.5rem;
+    right: 0.5rem;
     z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
+    padding: 0;
     border: none;
     border-radius: 100px;
-    background: color-mix(in srgb, var(--color-card) 88%, transparent);
+    /* A bare cross, no chip behind it (2026-09-21). The hover answers with
+       colour and a quarter turn instead of a fill. */
+    background: none;
     color: var(--color-black);
     cursor: pointer;
-    transition: background-color 200ms var(--tds-ease-out);
+    transition:
+      color 200ms var(--tds-ease-out),
+      transform 260ms var(--tds-ease-out);
   }
   .preview__close:hover {
-    background: var(--color-card);
+    color: var(--color-accent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .preview__close:hover {
+      transform: rotate(90deg);
+    }
   }
   .preview__close:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -193,7 +222,7 @@ const ui =
     /* The captures are 16:10; the cap keeps a tall window from stretching the
        bar off the bottom of the screen. */
     aspect-ratio: 16 / 10;
-    max-height: 78vh;
+    max-height: 74vh;
     background: var(--color-paper);
   }
 
@@ -203,7 +232,7 @@ const ui =
     justify-content: space-between;
     gap: 1rem;
     padding: 0.875rem 1.25rem;
-    background: var(--color-soft);
+    background: var(--color-paper);
   }
   .preview__meta {
     min-width: 0;
@@ -262,35 +291,6 @@ const ui =
     }
   }
 
-  /* Opening motion, and only on opening — a modal that fades OUT keeps the
-     page behind it under a film while the visitor is already trying to read
-     it again. */
-  @media (prefers-reduced-motion: no-preference) {
-    .preview[open] {
-      animation: previewIn 180ms var(--tds-ease-out);
-    }
-    .preview[open]::backdrop {
-      animation: previewBackdropIn 180ms var(--tds-ease-out);
-    }
-  }
-  @keyframes previewIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-  @keyframes previewBackdropIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
 </style>
 
 <script>
@@ -300,6 +300,8 @@ const ui =
    * Scoped per section rather than per document so a second shelf on a future
    * page gets its own dialog instead of quietly driving the first one's.
    */
+  import { animatedDialog } from "~/lib/motion/dialog";
+
   const dialogs = document.querySelectorAll<HTMLDialogElement>("[data-preview-dialog]");
 
   for (const dialog of dialogs) {
@@ -317,6 +319,9 @@ const ui =
     const visit = dialog.querySelector<HTMLAnchorElement>("[data-preview-visit]");
     const close = dialog.querySelector<HTMLButtonElement>("[data-preview-close]");
     if (!img || !title || !host || !visit || !close) continue;
+
+    // Bounces in and out (lib/motion/dialog.ts); Escape goes the same way.
+    const modal = animatedDialog(dialog);
 
     /**
      * The control that opened the dialog, so focus can go back to it.
@@ -340,14 +345,14 @@ const ui =
         visit.href = button.dataset.previewHref ?? "#";
 
         opener = button;
-        dialog.showModal();
+        modal.open();
       });
 
       // Revealed only now that there is something behind it.
       button.hidden = false;
     }
 
-    close.addEventListener("click", () => dialog.close());
+    close.addEventListener("click", () => modal.close());
 
     /**
      * Backdrop dismissal.
@@ -358,7 +363,7 @@ const ui =
      * the dialog itself" is exactly "the visitor clicked outside".
      */
     dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) dialog.close();
+      if (event.target === dialog) modal.close();
     });
 
     // The resting source from the markup, restored on close.

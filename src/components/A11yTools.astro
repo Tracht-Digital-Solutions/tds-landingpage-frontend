@@ -1,0 +1,273 @@
+---
+/**
+ * Accessibility tools in the floating CTA menu (2026-09-21): larger text,
+ * higher contrast, motion off. The settings themselves live in
+ * `lib/a11yPrefs.ts`; this is the button and its panel.
+ *
+ * - **A native popover**, not a hand-built one: the top layer, Escape, light
+ *   dismiss and `aria-expanded` on the invoker come from the platform. Where
+ *   `popover` is missing the button stays hidden — it ships `hidden` and the
+ *   script reveals it, like the assistant's buttons.
+ * - **Toggle buttons with `aria-pressed`**, so a screen reader announces
+ *   "pressed"/"not pressed" rather than a colour change it cannot see.
+ * - **Always reachable.** The CTA beside it stands down over the hero and the
+ *   contact form; this button does not (`FloatingCta.astro`), because the
+ *   visitor who needs larger text needs it on the first screen.
+ */
+import { resolveLang } from "~/lib/i18n";
+
+const lang = resolveLang(Astro.currentLocale);
+const copy =
+  lang === "en"
+    ? {
+        open: "Accessibility settings",
+        title: "Accessibility",
+        text: "Larger text",
+        contrast: "Higher contrast",
+        motion: "Motion off",
+        note: "Saved on this device.",
+        close: "Close",
+      }
+    : {
+        open: "Einstellungen zur Barrierefreiheit",
+        title: "Barrierefreiheit",
+        text: "Größere Schrift",
+        contrast: "Hoher Kontrast",
+        motion: "Bewegung aus",
+        note: "Wird auf diesem Gerät gespeichert.",
+        close: "Schließen",
+      };
+const toggles = [
+  { pref: "text", label: copy.text },
+  { pref: "contrast", label: copy.contrast },
+  { pref: "motion", label: copy.motion },
+] as const;
+---
+
+<button
+  type="button"
+  class="a11y-toggle"
+  popovertarget="a11y-panel"
+  aria-label={copy.open}
+  data-a11y-open
+  hidden
+>
+  {/* The universal-access figure. */}
+  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="4.5" r="1.75"></circle>
+    <path d="M5 8.5l7 1.5 7-1.5"></path>
+    <path d="M12 10v4.5"></path>
+    <path d="M9 21l3-6.5 3 6.5"></path>
+  </svg>
+</button>
+
+<div id="a11y-panel" popover class="a11y-panel" role="dialog" aria-labelledby="a11y-panel-title">
+  <div class="a11y-panel__head">
+    <p id="a11y-panel-title" class="a11y-panel__title">{copy.title}</p>
+    <button type="button" class="a11y-panel__close" popovertarget="a11y-panel" popovertargetaction="hide">
+      <span class="sr-only">{copy.close}</span>
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+  <ul class="a11y-panel__list">
+    {
+      toggles.map((toggle) => (
+        <li>
+          <button type="button" class="a11y-switch" aria-pressed="false" data-a11y-pref={toggle.pref}>
+            <span class="a11y-switch__label">{toggle.label}</span>
+            <span class="a11y-switch__track" aria-hidden="true">
+              <span class="a11y-switch__thumb" />
+            </span>
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="a11y-panel__note">{copy.note}</p>
+</div>
+
+<style>
+  .a11y-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 0.625rem;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    background: var(--color-surface-navy);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 20px -10px rgb(0 0 0 / 0.45);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      transform 200ms var(--tds-ease-out);
+  }
+  .a11y-toggle[hidden] {
+    display: none;
+  }
+  .a11y-toggle:hover {
+    background: var(--color-surface-accent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .a11y-toggle:hover {
+      transform: translateY(-2px);
+    }
+  }
+  .a11y-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  /* In the top layer, docked above the floating control. `margin: 0` because
+     the UA centres a popover with auto margins. */
+  .a11y-panel {
+    position: fixed;
+    inset: auto 1rem calc(var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 5.5rem + env(safe-area-inset-bottom, 0px)) auto;
+    width: min(20rem, calc(100vw - 2rem));
+    margin: 0;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--color-paper);
+    color: var(--color-black);
+    box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.55);
+    /* It springs open with Motion (script below), from the corner it
+       belongs to. */
+    transform-origin: bottom right;
+  }
+  .a11y-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .a11y-panel__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .a11y-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.75rem;
+    border: none;
+    background: none;
+    color: var(--color-black);
+    cursor: pointer;
+  }
+  .a11y-panel__close:hover {
+    color: var(--color-accent);
+  }
+  .a11y-panel__list {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .a11y-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.25rem 0;
+    border: none;
+    background: none;
+    color: var(--color-black);
+    font: inherit;
+    font-size: 0.9375rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .a11y-switch:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .a11y-switch__track {
+    position: relative;
+    flex: none;
+    width: 2.5rem;
+    height: 1.4rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-black) 22%, var(--color-paper));
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .a11y-switch__thumb {
+    position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: #fff;
+    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .a11y-switch[aria-pressed="true"] .a11y-switch__track {
+    background: var(--color-primary);
+  }
+  .a11y-switch[aria-pressed="true"] .a11y-switch__thumb {
+    transform: translateX(1.1rem);
+  }
+  .a11y-panel__note {
+    margin: 0.75rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .a11y-switch__thumb,
+    .a11y-toggle {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { lessMotion, readPrefs, setPref, type A11yPref } from "~/lib/a11yPrefs";
+
+  const opener = document.querySelector<HTMLButtonElement>("[data-a11y-open]");
+  const panel = document.getElementById("a11y-panel");
+  // No popover support, no tools: the button stays hidden, as it shipped.
+  if (opener && panel && typeof panel.showPopover === "function") {
+    const switches = panel.querySelectorAll<HTMLButtonElement>("[data-a11y-pref]");
+    const sync = () => {
+      const prefs = readPrefs();
+      for (const button of switches) {
+        button.setAttribute("aria-pressed", String(prefs[button.dataset.a11yPref as A11yPref]));
+      }
+    };
+    for (const button of switches) {
+      button.addEventListener("click", () => {
+        const pref = button.dataset.a11yPref as A11yPref;
+        setPref(pref, button.getAttribute("aria-pressed") !== "true");
+        sync();
+      });
+    }
+    sync();
+
+    // The same bounce as the modals, on opening. Motion is loaded on the first
+    // open, never before; without it (or with motion off) the panel just shows.
+    panel.addEventListener("toggle", (event) => {
+      if ((event as ToggleEvent).newState !== "open" || lessMotion()) return;
+      void import("@tracht-digital-solutions/tds-shared/motion/dom")
+        .then(({ animate }) => {
+          void animate(panel, { scale: [0.86, 1], y: [16, 0] }, { type: "spring", bounce: 0.42, visualDuration: 0.36 });
+          void animate(panel, { opacity: [0, 1] }, { duration: 0.16 });
+        })
+        .catch(() => {});
+    });
+    opener.hidden = false;
+  }
+</script>

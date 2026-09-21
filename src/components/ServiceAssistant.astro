@@ -134,9 +134,25 @@ const pricesHref = `${home}#preise`;
     overscroll-behavior: contain;
   }
   .assistant::backdrop {
-    /* Same wash as the preview lightbox: a fixed dark film reads as modal in
-       both themes. */
-    background: rgb(8 10 24 / 0.72);
+    /* ONE flat colour behind every modal (2026-09-21): the brand navy, dense
+       enough that the page behind stops competing, in both themes. It fades
+       in with the dialog and out while `lib/motion/dialog.ts` plays the exit. */
+    background: var(--color-surface-navy);
+    opacity: 0.9;
+    transition: opacity 300ms var(--tds-ease-out);
+  }
+  .assistant[data-closing]::backdrop {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .assistant[open]::backdrop {
+      animation: assistantBackdropIn 220ms var(--tds-ease-out);
+    }
+  }
+  @keyframes assistantBackdropIn {
+    from {
+      opacity: 0;
+    }
   }
   .assistant__frame {
     padding: clamp(1.25rem, 3vw, 2rem);
@@ -168,53 +184,36 @@ const pricesHref = `${home}#preise`;
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
+    padding: 0;
     border: none;
     border-radius: 100px;
-    background: var(--color-soft);
+    /* A bare cross, no chip behind it (2026-09-21). The hover answers with
+       colour and a quarter turn instead of a fill. */
+    background: none;
     color: var(--color-black);
     cursor: pointer;
-    transition: background-color 200ms var(--tds-ease-out);
+    transition:
+      color 200ms var(--tds-ease-out),
+      transform 260ms var(--tds-ease-out);
   }
   .assistant__close:hover {
-    background: var(--color-card);
+    color: var(--color-accent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .assistant__close:hover {
+      transform: rotate(90deg);
+    }
   }
   .assistant__close:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
-  /* Opening motion only — see the preview lightbox for why a modal never fades out. */
-  @media (prefers-reduced-motion: no-preference) {
-    .assistant[open] {
-      animation: assistantIn 180ms var(--tds-ease-out);
-    }
-    .assistant[open]::backdrop {
-      animation: assistantBackdropIn 180ms var(--tds-ease-out);
-    }
-  }
-  @keyframes assistantIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-  @keyframes assistantBackdropIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
+  /* No panel of its own inside the dialog: the modal is ONE flat colour
+     (2026-09-21), so the finder sits directly on it. */
   :global(.finder) {
-    padding: clamp(1.25rem, 3vw, 2rem);
-    border-radius: 6px;
-    background: var(--lp-surface-card, var(--color-card));
+    padding: 0;
+    background: none;
   }
 
   /* Progress: the words carry it; the bar only repeats it for the eye. */
@@ -536,8 +535,10 @@ const pricesHref = `${home}#preise`;
   @media (prefers-reduced-motion: reduce) {
     :global(.finder__option),
     :global(.finder__cta),
-    .assistant__close {
+    .assistant__close,
+    .assistant__close:hover {
       transition: none;
+      transform: none;
     }
   }
 </style>
@@ -546,6 +547,7 @@ const pricesHref = `${home}#preise`;
   // NOT `is:inline` — an inline script is not bundled, so this import would
   // reach the browser as a bare specifier.
   import { CONTACT_DRAFT_EVENT } from "~/lib/contactDraft";
+  import { animatedDialog } from "~/lib/motion/dialog";
 
   const dialog = document.querySelector<HTMLDialogElement>("[data-assistant-dialog]");
   /** Addresses that open the assistant: its own, and the old section anchor. */
@@ -554,6 +556,8 @@ const pricesHref = `${home}#preise`;
   // No dialog support means no assistant. The buttons stay `hidden`, the state
   // they shipped in, so nothing has to be undone.
   if (dialog && typeof dialog.showModal === "function") {
+    // Bounces in and out (lib/motion/dialog.ts); Escape goes the same way.
+    const modal = animatedDialog(dialog);
     let opener: HTMLElement | null = null;
     let restoreFocus = true;
     /** Where a link inside the dialog moved the page — focus follows it on close. */
@@ -564,7 +568,7 @@ const pricesHref = `${home}#preise`;
       opener = trigger;
       restoreFocus = true;
       destination = null;
-      dialog.showModal();
+      modal.open();
     };
 
     for (const button of document.querySelectorAll<HTMLButtonElement>("[data-assistant-open]")) {
@@ -574,13 +578,13 @@ const pricesHref = `${home}#preise`;
     }
 
     dialog.querySelector<HTMLButtonElement>("[data-assistant-close]")?.addEventListener("click", () => {
-      dialog.close();
+      modal.close();
     });
 
     dialog.addEventListener("click", (event) => {
       // A click on the backdrop reports the dialog itself as its target.
       if (event.target === dialog) {
-        dialog.close();
+        modal.close();
         return;
       }
       // A link to a section of THIS page (the contact form, the prices):
@@ -589,7 +593,7 @@ const pricesHref = `${home}#preise`;
       if (link instanceof HTMLAnchorElement && link.hash && link.pathname === location.pathname) {
         restoreFocus = false;
         destination = document.getElementById(decodeURIComponent(link.hash.slice(1)));
-        dialog.close();
+        modal.close();
       }
     });
 
@@ -598,7 +602,7 @@ const pricesHref = `${home}#preise`;
       if (!dialog.open) return;
       restoreFocus = false;
       destination = document.getElementById("contact");
-      dialog.close();
+      modal.close();
     });
 
     dialog.addEventListener("close", () => {

@@ -50,9 +50,9 @@ import { siteConfig } from "~/lib/seo";
 import type { Lang } from "~/lib/i18n";
 import { getFaqContent } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
-import { getHomeContent, resolveTrustFacts } from "~/lib/homeContent";
-import { getPricingContent, getServiceRate, lowestRate } from "~/lib/pricing";
-import { referenceCases } from "~/lib/references";
+import { getHomeContent } from "~/lib/homeContent";
+import { tFor } from "~/lib/i18n";
+import { getPricingContent, getServiceRate } from "~/lib/pricing";
 import { resolveServiceContent, serviceDefinitions } from "~/lib/services";
 
 interface Props {
@@ -62,19 +62,12 @@ interface Props {
 const { lang } = Astro.props;
 const home = getHomeContent(lang);
 
-// Hero copy is editable over the API; the trust card's facts are filled from
-// the values they state, so they cannot disagree with the Impressum or the
-// price list.
+// The hero is the brand slogan and two buttons. The slogan comes from the
+// `footer` block — the same field the footer prints — so it has one source;
+// the button labels stay in `home_hero`.
 const hero = await cmsFor("home_hero", lang, home.hero);
-const trustContent = await cmsFor("home_trust", lang, home.trust);
+const footer = await cmsFor("footer", lang, tFor(lang).footer);
 const pricing = await getPricingContent(lang);
-const trust = resolveTrustFacts(trustContent, {
-  name: siteConfig.founder.name,
-  town: siteConfig.address.addressLocality,
-  rate: lowestRate(pricing),
-  hasCases: referenceCases.length > 0,
-});
-
 // Resolved here too so the FAQPage JSON-LD stays 1:1 with the (possibly
 // admin-edited) answers FAQ.astro renders. cms.ts memoises the fetch.
 const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
@@ -118,9 +111,10 @@ const jsonLd = asGraph(
     publisher: { "@id": `${siteConfig.url}/#organization` },
     author: { "@id": `${siteConfig.url}/#person` },
     primaryImageOfPage: `${siteConfig.url}/og/default.png`,
-    // The headline and the benefit claim under it — what a voice assistant
-    // should read if it reads anything.
-    speakable: speakableSchema(["#hero-heading", "#hero-sub"]),
+    // The slogan and the FAQ — what a voice assistant should read if it
+    // reads anything. (`#hero-sub` went with the hero's reduction to the
+    // slogan.)
+    speakable: speakableSchema(["#hero-heading", "#faq"]),
   },
 );
 
@@ -146,7 +140,7 @@ const titles = {
 >
   <Header />
   <main id="main">
-    <Hero lang={lang} hero={hero} trust={trust} />
+    <Hero lang={lang} slogan={footer.slogan} cta1={hero.cta1} cta2={hero.cta2} />
     <Services />
     <CustomerCases />
     <Process />

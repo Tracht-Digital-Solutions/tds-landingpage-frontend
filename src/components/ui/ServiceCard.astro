@@ -49,7 +49,7 @@ const PHOTO = { width: 1586, height: 992 };
   `object-position: top` is not a taste call: IMAGES.md composes every service
   photo with the subject in the upper two thirds.
 */}
-<article class="service-tile group relative flex flex-col bg-[var(--lp-surface-card)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--color-accent-pink)_10%,var(--color-card))]">
+<article data-motion-tile class="service-tile group relative flex flex-col bg-[var(--lp-surface-card)] transition-colors duration-200 hover:bg-[color-mix(in_srgb,var(--color-accent-pink)_10%,var(--color-card))]">
   {image && (
     <div class="service-tile__shot" aria-hidden="true">
       <img
@@ -61,6 +61,7 @@ const PHOTO = { width: 1586, height: 992 };
         height={PHOTO.height}
         loading="lazy"
         decoding="async"
+        data-motion-image
       />
     </div>
   )}
@@ -132,6 +133,12 @@ const PHOTO = { width: 1586, height: 992 };
   .service-tile:hover .service-tile__shot img,
   .service-tile:focus-within .service-tile__shot img {
     transform: scale(1.04);
+  }
+  /* Once Motion is mounted it owns this transform (settle, drift and the hover
+     zoom, lib/motion/images.ts); the CSS zoom and its transition would fight
+     the values it writes every frame. */
+  :global(html[data-motion="on"]) .service-tile__shot img {
+    transition: none;
   }
 
   .service-tile__link {

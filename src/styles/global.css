@@ -36,9 +36,6 @@
    looks, edit surfaces/marketing.css in tds-shared-pkg and bump. */
 @import "@tracht-digital-solutions/tds-shared/styles/base.css";
 @import "@tracht-digital-solutions/tds-shared/styles/primitives.css";
-/* Cross-page fade between two pages of this site (no script; ignored where
-   unsupported, off under reduced motion). */
-@import "@tracht-digital-solutions/tds-shared/styles/page-transitions.css";
 @import "@tracht-digital-solutions/tds-shared/styles/surfaces/marketing.css";
 
 /* Tailwind ignores node_modules by default, and the shared React islands
@@ -538,80 +535,120 @@ html {
    ordinary section since the 2026-09 redesign — `sections/Pricing.astro` —
    so there is no overlay left to position, trap focus in or undo on Back.) */
 
-/* === Cross-page transitions, this site's part ==============================
+/* === Page transitions (Motion) =============================================
 
-   The shared stylesheet (`page-transitions.css`, imported at the top of this
-   file) cross-fades whole pages and says why it is opacity only: the header
-   is identical on both sides of a navigation, so ANY movement of the root
-   snapshot reads as the entire page lurching, chrome included.
+   The native cross-document View Transition is gone: it did not run in
+   Firefox, and it needed the header named out of the root snapshot to keep
+   still. `lib/motion/pageTransition.ts` animates `<main>` out and the next
+   page's `<main>` in with Motion; the fixed header is outside `<main>` on
+   every page, so it never moves.
 
-   That objection is about the root snapshot, not about movement. Give the two
-   pieces of chrome a transition name of their own and they leave that
-   snapshot: the browser then matches each one to its twin on the next page
-   and holds it still, while what is left of `root` — the content between them
-   — is free to move. So the header stays put, the footer stays put, and the
-   content rises a little as it fades in, which is what makes a navigation
-   read as one page turning rather than two pages swapping.
-
-   Scoped to `:active-view-transition-type(page)` for the same reason the
-   shared sheet is: <ThemeToggle> animates the very same
-   `::view-transition-*(root)` pseudo-elements from JS for its theme wipe, and
-   that transition carries no type. Drop the scope and the theme switch
-   inherits a rise it was never meant to have.
-
-   Nothing here is needed under reduced motion — the shared sheet sets
-   `navigation: none` there, so no transition runs at all and these rules
-   never match. */
-@media (prefers-reduced-motion: no-preference) {
-  /* Must stay unique in the document. Both are single instances; a second
-     header on one page would make the browser skip the transition entirely
-     and log a duplicate-name warning. */
-  .site-header {
-    view-transition-name: lp-site-header;
-  }
-  .site-footer {
-    view-transition-name: lp-site-footer;
-  }
-
-  /* Only `animation-name` is replaced. Duration, easing and `both` still come
-     from the shared rule, so this stays one movement with one timing rather
-     than a second animation racing the first. */
-  :root:active-view-transition-type(page)::view-transition-new(root) {
-    animation-name: tds-page-in, lp-page-rise;
-  }
-  :root:active-view-transition-type(page)::view-transition-old(root) {
-    animation-name: tds-page-out, lp-page-sink;
-  }
-
-  /* Naming the chrome is not enough to hold it still. The browser's default
-     for a matched group is to cross-fade the old snapshot into the new one
-     under `mix-blend-mode: plus-lighter` — and the two snapshots here are the
-     same header, so that is a fade of an image into itself. On opaque chrome
-     it is invisible; on this header it is not, because the pill is
-     translucent with a backdrop blur, and plus-lighter ADDS the two
-     translucent copies. The result is a brief brightening of the navigation
-     on every navigation. Switching the group's own animations off leaves the
-     new snapshot standing there, which is the whole intent. */
-  :root:active-view-transition-type(page)::view-transition-old(lp-site-header),
-  :root:active-view-transition-type(page)::view-transition-new(lp-site-header),
-  :root:active-view-transition-type(page)::view-transition-old(lp-site-footer),
-  :root:active-view-transition-type(page)::view-transition-new(lp-site-footer) {
-    animation: none;
-    mix-blend-mode: normal;
-  }
+   The start state of the incoming page. `data-page-enter` is set by the
+   inline head script ONLY after an internal click, never on a first visit, so
+   no LCP measurement sees it. The failsafe keyframe shows `<main>` after
+   1.5 s whatever happens to the script — hidden content is never left
+   waiting on JavaScript. */
+html[data-page-enter] #main {
+  opacity: 0;
+  transform: translateY(2rem);
+  animation: lp-enter-failsafe 1ms 1.5s forwards;
 }
-
-/* The incoming page rises further than it used to (1.25rem was barely a
-   nudge), and the outgoing one now SINKS instead of only fading. Two
-   directions read as one page replacing another; one direction read as a
-   flicker. */
-@keyframes lp-page-rise {
-  from {
-    transform: translateY(3rem);
-  }
-}
-@keyframes lp-page-sink {
+@keyframes lp-enter-failsafe {
   to {
-    transform: translateY(-1.5rem);
+    opacity: 1;
+    transform: none;
   }
+}
+
+/* === Accessibility tools (components/A11yTools.astro) =======================
+
+   Three switches, each a boolean attribute on <html>, set from localStorage
+   by the inline boot script before the first paint (lib/a11yPrefs.ts). */
+
+/* Larger text. Nearly everything is sized in rem, so the root carries it. */
+html[data-a11y-text] {
+  font-size: 118.75%;
+}
+
+/* Higher contrast: nothing rides on a pale grey, no link on colour alone.
+   The dark tones re-map --color-muted themselves, so they are named here too. */
+html[data-a11y-contrast] {
+  --color-muted: var(--color-black);
+}
+html[data-a11y-contrast] .tds-tone-navy,
+html[data-a11y-contrast] .tds-tone-ink {
+  --color-muted: #fff;
+}
+html[data-a11y-contrast] main a:not([data-cta]):not(.btn):not(.hero-cta),
+html[data-a11y-contrast] footer a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* Motion off: the same end states as prefers-reduced-motion, for visitors who
+   cannot set that in their system. JS motion asks lessMotion() as well. */
+html[data-a11y-motion] *,
+html[data-a11y-motion] *::before,
+html[data-a11y-motion] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* === Full-width layout =======================================================
+
+   One container for every section, header and footer: the page uses the
+   screen instead of an 80rem column. 120rem is the shared site bar's width
+   (tds-shared), and the gutter grows with the viewport. Reading width is NOT
+   this container's job — text blocks keep their own `max-w-*`. */
+.lp-container {
+  width: 100%;
+  max-width: none;
+  margin-inline: auto;
+  padding-inline: clamp(1.5rem, 1rem + 3vw, 5rem);
+}
+
+/* === CTA arrival sweep (lib/motion/cta.ts) ================================== */
+:where([data-cta]) {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* Motion owns the transform of every CTA once it is mounted. A CSS
+   transition on `transform` (`.btn` has one) would smear each frame it
+   writes, so only the colour properties keep transitioning. */
+html[data-motion="on"] :where([data-cta]) {
+  transition-property: background-color, color, border-color, box-shadow, opacity;
+}
+/* The header's section indicator (lib/motion/ux.ts). Invisible until Motion
+   places it; it sits under the links, which are `position: relative`. */
+.nav-pill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0;
+  height: 2rem;
+  margin-top: -1rem;
+  border-radius: var(--tds-radius-pill, 100px);
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+[data-nav-links] a[aria-current="location"] {
+  color: var(--color-primary);
+}
+.cta-shine {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  pointer-events: none;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.38) 50%,
+    transparent 100%
+  );
+  z-index: -1;
 }

@@ -218,13 +218,13 @@ export async function renderDefaultOgPng(): Promise<Buffer> {
               children: [
                 {
                   type: "span",
-                  props: { children: "Digitale Lösungen, die" },
+                  props: { children: "Digitale Lösungen," },
                 },
                 {
                   type: "span",
                   props: {
                     style: { color: ACCENT },
-                    children: "wirklich passen.",
+                    children: "die passen.",
                   },
                 },
               ],

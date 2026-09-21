@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
+import { mediaVersionsPlugin } from "./scripts/media-versions.mjs";
 
 /**
  * Unit-test harness for the landingpage's framework-agnostic logic. Astro
@@ -18,6 +19,7 @@ import { fileURLToPath } from "node:url";
  * `src/lib/scrollLock.test.ts` is the current example.
  */
 export default defineConfig({
+  plugins: [mediaVersionsPlugin(fileURLToPath(new URL("./public", import.meta.url)))],
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
     environment: "node",

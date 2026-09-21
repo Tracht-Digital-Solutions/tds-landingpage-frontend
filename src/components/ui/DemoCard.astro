@@ -53,6 +53,7 @@
 import type { Lang } from "~/lib/i18n";
 import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
 import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
+import { mediaSrc } from "~/lib/mediaSrc";
 import { demoUi, type ResolvedDemo } from "~/lib/demos";
 import type { CardAction } from "~/lib/cardActions";
 import CardActions from "~/components/ui/CardActions.astro";
@@ -108,8 +109,8 @@ const origin = DEMO_ORIGINS[definition.origin][lang];
           arrives — screenshots loading lazily into unsized boxes is a
           section that reflows under the reader. */}
       <img
-        src={preview}
-        srcset={srcsetFor(preview, PREVIEW_VARIANT_WIDTHS, previewWidth)}
+        src={mediaSrc(preview)}
+        srcset={srcsetFor(preview, PREVIEW_VARIANT_WIDTHS, previewWidth, mediaSrc)}
         sizes="(min-width: 64rem) 34vw, (min-width: 48rem) 48vw, 85vw"
         alt={previewAlt}
         width={previewWidth}
@@ -129,7 +130,7 @@ const origin = DEMO_ORIGINS[definition.origin][lang];
         class="demo-card__zoom"
         hidden
         data-preview-open
-        data-preview-src={preview}
+        data-preview-src={mediaSrc(preview)}
         data-preview-alt={previewAlt}
         data-preview-title={title}
         data-preview-host={definition.host}
@@ -164,7 +165,7 @@ const origin = DEMO_ORIGINS[definition.origin][lang];
              screen reader announcing the icon too would just say it twice. */
           <img
             class="demo-card__favicon"
-            src={favicon}
+            src={mediaSrc(favicon)}
             alt=""
             aria-hidden="true"
             width="20"

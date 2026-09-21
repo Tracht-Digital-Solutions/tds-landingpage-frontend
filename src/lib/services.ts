@@ -398,7 +398,7 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Prozessoptimierung",
         summary:
-          "Ich schaue mir deine täglichen Abläufe an, streiche unnötige Schritte und automatisiere, was wirklich Zeit spart.",
+          "Ich schaue mir deine täglichen Abläufe an, streiche unnötige Schritte und automatisiere, was spürbar Zeit spart.",
         intro:
           "Gute Digitalisierung beginnt mit einem ehrlichen Blick auf deinen Alltag. *Erst verstehen, dann vereinfachen.*",
         situationsTitle: "Kommt dir das bekannt vor?",
@@ -443,7 +443,7 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Process Optimization",
         summary:
-          "I look at your day-to-day workflows, remove the steps nobody needs and automate what really saves time.",
+          "I look at your day-to-day workflows, remove the steps nobody needs and automate what noticeably saves time.",
         intro:
           "Good digital work starts with an honest look at your daily routine. *Understand first, then simplify.*",
         situationsTitle: "Does this sound familiar?",

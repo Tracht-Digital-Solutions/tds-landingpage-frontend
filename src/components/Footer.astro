@@ -7,6 +7,8 @@ import { legalCopy } from "~/lib/legal";
 import { sectionLinks } from "~/lib/navigation";
 import { platformDefinitions, platformHref } from "~/lib/platforms";
 import { siteConfig } from "~/lib/seo";
+import { socialLinks } from "~/lib/socials";
+import SocialLinks from "~/components/ui/SocialLinks.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -59,7 +61,7 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
     AA needs for small text, and flagged by axe on every page. It is `/70`
     now; the column labels moved from `/50` to `/60` with it. */}
 <footer class="site-footer tds-tone-ink pt-16">
-  <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+  <div class="lp-container">
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
       <div>
         <p class="brand-wordmark text-2xl mb-3">
@@ -133,6 +135,9 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
             {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
           </li>
         </ul>
+        {/* The same row as the contact section (lib/socials.ts), so a reader
+            who scrolled past the form still finds the profiles. */}
+        <SocialLinks links={socialLinks(contact.phone)} class="mt-5" />
       </div>
     </div>
 

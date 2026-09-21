@@ -4,7 +4,7 @@
     "demo1": {
       "status": "ok",
       "title": "Demo & Partner Rechtsanwälte",
-      "description": "Hochwertige Demonstrationsseite einer fiktiven deutschen Wirtschaftskanzlei. Keine Rechtsberatung, keine echten Kontaktdaten.",
+      "description": "Hochwertige Demonstrationsseite einer fiktiven deutschen Wirtschaftskanzlei. Keine Rechtsberatung, keine gültigen Kontaktdaten.",
       "siteLang": "de",
       "favicon": "/demos/demo1-favicon.svg",
       "preview": "/demos/demo1.webp",

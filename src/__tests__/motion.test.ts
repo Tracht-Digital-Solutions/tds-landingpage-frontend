@@ -44,9 +44,11 @@ describe("motion on the landing page", () => {
     // The things that must still be server-rendered text and markup.
     expect(hero).toContain("<h1");
     expect(hero).toContain("<picture>");
-    for (const field of ["hero.headline", "hero.eyebrow", "hero.sub", "hero.cta1"]) {
+    // Slogan + two buttons, nothing else (2026-09-21).
+    for (const field of ["{slogan}", "{cta1}", "{cta2}"]) {
       expect(hero, `${field} must render in Astro`).toContain(field);
     }
+    expect(hero).not.toMatch(/hero-trust|hero-sub|hero-eyebrow|hero-note/);
   });
 
   /**
@@ -93,53 +95,89 @@ describe("motion on the landing page", () => {
     expect(src("styles/global.css")).not.toMatch(/^\s*interpolate-size:/m);
   });
 
-  it("cross-fades between pages with the shared stylesheet", () => {
-    expect(src("styles/global.css")).toContain(
-      '@import "@tracht-digital-solutions/tds-shared/styles/page-transitions.css";',
-    );
+  /**
+   * Page transitions are Motion's since 2026-09-21 (`lib/motion/pageTransition.ts`).
+   * The native cross-document View Transition is gone — two mechanisms on one
+   * navigation would play two animations.
+   */
+  it("animates page changes with Motion, not a native View Transition", () => {
+    const css = src("styles/global.css");
+    expect(css).not.toContain("page-transitions.css");
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/view-transition/);
+    const layout = src("layouts/Layout.astro");
+    expect(layout).not.toContain("pageTransitionOptIn");
+    // The hand-over script runs first in <head>, before the body paints.
+    const head = layout.slice(layout.indexOf("<head>"));
+    expect(head).toContain("<script is:inline set:html={PAGE_ENTER_SCRIPT} />");
+    expect(head.indexOf("PAGE_ENTER_SCRIPT")).toBeLessThan(head.indexOf("themeBootstrapScript"));
+  });
+
+  it("never leaves the incoming page hidden", () => {
+    // The start state exists only under the attribute, and a failsafe
+    // keyframe shows <main> whatever happens to the script.
+    const css = src("styles/global.css");
+    expect(css).toMatch(/html\[data-page-enter\] #main \{[^}]*animation: lp-enter-failsafe/);
+    expect(css).toMatch(/@keyframes lp-enter-failsafe \{\s*to \{\s*opacity: 1;/);
+    // The flag is set only after an internal click, and never under reduced motion.
+    expect(src("lib/motion/constants.ts")).toContain("prefers-reduced-motion: reduce");
+    expect(src("lib/motion/pageTransition.ts")).toContain('addEventListener("pageshow"');
   });
 
   /**
-   * The site's own half of the page transition.
-   *
-   * The shared stylesheet is opacity-only and says why: the header is
-   * identical across a navigation, so moving the root snapshot moves the
-   * chrome with it. Naming the chrome takes it out of that snapshot, which is
-   * what makes the content's rise safe — the two rules are one mechanism and
-   * removing either one silently breaks the other. Without the names, the
-   * whole page lurches; without the rise, the names buy nothing.
+   * Every modal bounces in AND out through one helper (2026-09-21), shows one
+   * flat colour behind it, and closes with a bare cross.
    */
-  it("holds the chrome still and moves only the content", () => {
-    const css = src("styles/global.css");
-    expect(css).toMatch(/\.site-header\s*\{\s*view-transition-name:\s*lp-site-header/);
-    expect(css).toMatch(/\.site-footer\s*\{\s*view-transition-name:\s*lp-site-footer/);
-    expect(css).toContain("animation-name: tds-page-in, lp-page-rise;");
-    expect(css).toMatch(/@keyframes lp-page-rise/);
+  it("animates every modal through lib/motion/dialog.ts", () => {
+    for (const file of ["components/ServiceAssistant.astro", "components/ui/PreviewLightbox.astro"]) {
+      const code = src(file);
+      expect(code, file).toContain('import { animatedDialog } from "~/lib/motion/dialog"');
+      // No raw open/close left that would skip the animation.
+      const script = code.slice(code.indexOf("<script>"));
+      expect(script, file).not.toMatch(/dialog\.(showModal|close)\(\)/);
+      // The cross has no chip behind it.
+      expect(code, file).toMatch(/__close \{[^}]*background: none;/);
+      // One flat colour behind the dialog.
+      expect(code, file).toMatch(/::backdrop \{[^}]*background: var\(--color-surface-navy\);/);
+    }
+    const helper = src("lib/motion/dialog.ts");
+    expect(helper).toContain('addEventListener("cancel"');
+    expect(helper).toContain("prefers-reduced-motion: reduce");
+    expect(helper).toMatch(/setTimeout\(finish/);
+  });
 
-    // Every rule of this mechanism has to carry the `page` type: ThemeToggle
-    // animates the same root pseudo-elements from JS for its theme wipe, and
-    // that transition has no type. An unscoped rule would join it.
-    // Comments stripped from the WHOLE file before looking, and no slicing:
-    // the section marker itself lives inside a comment, so cutting there
-    // starts the text mid-comment and every later `*/` pairs with the wrong
-    // `/*` — which left the prose that explains this very rule looking like a
-    // selector that breaks it.
-    for (const line of css.replace(/\/\*[\s\S]*?\*\//g, "").split("\n")) {
-      if (line.includes("::view-transition-")) {
-        expect(line, "unscoped view-transition rule").toContain(
-          "active-view-transition-type(page)",
-        );
-      }
+  it("keeps the header out of every animation", () => {
+    // It holds still because it is not inside <main>, the only thing the
+    // transition moves.
+    const header = src("components/Header.astro");
+    expect(header).not.toMatch(/data-cta|data-motion-image/);
+    expect(src("lib/motion/pageTransition.ts")).toContain('getElementById("main")');
+  });
+
+  it("loads the Motion runtime lazily, through tds-shared, and not under reduced motion", () => {
+    const boot = src("lib/motion/boot.ts");
+    expect(boot).toContain('import("@tracht-digital-solutions/tds-shared/motion/dom")');
+    expect(boot).not.toMatch(/^import .*motion\/dom/m);
+    expect(boot).toContain("prefers-reduced-motion: reduce");
+    for (const file of ["boot", "cta", "images", "pageTransition", "businessCard", "ux"]) {
+      const code = src(`lib/motion/${file}.ts`);
+      expect(code, file).not.toMatch(/from ["'](motion|framer-motion)["']/);
     }
   });
 
-  it("switches page transitions on inline, first in <head>", () => {
-    // With the rule only in the stylesheet — linked at the end of a long
-    // head — Chrome decided the opt-in too early and skipped the transition.
-    const layout = src("layouts/Layout.astro");
-    const head = layout.slice(layout.indexOf("<head>"));
-    expect(head).toContain("<style is:inline set:html={pageTransitionOptIn} />");
-    expect(head.indexOf("pageTransitionOptIn")).toBeLessThan(head.indexOf("themeBootstrapScript"));
+  it("gives the generated photos and the CTA their Motion hooks", () => {
+    for (const file of [
+      "components/sections/Hero.astro",
+      "components/sections/About.astro",
+      "components/sections/Contact.astro",
+      "components/ui/ServiceCard.astro",
+      "components/detail/DetailHero.astro",
+    ]) {
+      expect(src(file), file).toContain("data-motion-image");
+    }
+    expect(src("components/sections/Hero.astro")).toMatch(/hero-cta--primary" data-cta/);
+    // Start states come from JS, off screen only — never from the markup.
+    expect(src("lib/motion/images.ts")).toContain("onScreen(image)");
+    expect(src("lib/motion/ux.ts")).toContain("onScreen(group)");
   });
 
   it("animates the contact form only through the shared primitives", () => {

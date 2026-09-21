@@ -18,7 +18,12 @@
     "",
     "`lcpElement` is the load-bearing entry. The hero headline losing that",
     "place is how the cookie notice became the LCP element at 4.1 s, and no",
-    "byte count would have shown it."
+    "byte count would have shown it.",
+    "",
+    "Devices (2026-09-21): mobile 390px and desktop 1440px. Each may carry its",
+    "own lcpElement and budget overrides under devices.<name>. The desktop is",
+    "where the hero photo loads and Motion is busiest; the H1 has to stay the",
+    "LCP element there too, or a start state has overtaken it."
   ],
   "lcpElement": "h1#hero-heading",
   "default": {
@@ -29,5 +34,16 @@
     "totalKb": 1200,
     "documentKb": 400
   },
-  "pages": {}
+  "pages": {},
+  "devices": {
+    "mobile": {
+      "lcpElement": "h1#hero-heading"
+    },
+    "desktop": {
+      "lcpElement": "h1#hero-heading",
+      "budget": {
+        "lcpMedian": 1800
+      }
+    }
+  }
 }

@@ -48,10 +48,16 @@ export function variantSrc(src: string, width: number): string {
  * (`withoutEnlargement`), so a wider "variant" would be a copy of the original
  * under a false width.
  */
-export function srcsetFor(src: string, widths: readonly number[], intrinsicWidth: number): string {
+export function srcsetFor(
+  src: string,
+  widths: readonly number[],
+  intrinsicWidth: number,
+  /** Maps each file URL before it is listed — `mediaSrc` adds the cache-busting version. */
+  url: (path: string) => string = (path) => path,
+): string {
   return [
-    ...widths.filter((width) => width < intrinsicWidth).map((width) => `${variantSrc(src, width)} ${width}w`),
-    `${src} ${intrinsicWidth}w`,
+    ...widths.filter((width) => width < intrinsicWidth).map((width) => `${url(variantSrc(src, width))} ${width}w`),
+    `${url(src)} ${intrinsicWidth}w`,
   ].join(", ");
 }
 

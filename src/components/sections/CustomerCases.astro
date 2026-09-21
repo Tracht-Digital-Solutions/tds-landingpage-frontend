@@ -65,7 +65,7 @@ const badge = lang === "de" ? "Kundenprojekt" : "Client project";
 {
   cards.length > 0 && (
     <section id="cases" class="section-spacing" aria-labelledby="cases-heading">
-      <div class="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
+      <div class="lp-container">
         <div class="max-w-2xl mx-auto md:mx-0">
           <SectionHeader
             headline={content.headline}
@@ -90,12 +90,17 @@ const badge = lang === "de" ? "Kundenprojekt" : "Client project";
 }
 
 <style>
-  /* `start`, not stretch: only one of the cards carries a screenshot band, and
-     stretching the other to its height would open a hole under its text. */
+  /* Every case card the same height (2026-09-21), across rows too: `stretch`
+     evens out one row and `grid-auto-rows: 1fr` evens the rows against each
+     other. What used to argue for `start` — a card without a screenshot band
+     would open a hole under its text — is answered inside the card: its
+     service pills sit on `margin-top: auto`, so the extra height lands between
+     the text and the pills, not below them. */
   .cases-grid {
     display: grid;
     gap: 1rem;
-    align-items: start;
+    align-items: stretch;
+    grid-auto-rows: 1fr;
     margin-top: 2.5rem;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
   }

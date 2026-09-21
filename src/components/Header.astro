@@ -65,11 +65,17 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         by a hairline divider; with the borderless pass that separation is
         carried by the wider gap alone. */}
     <div class="flex items-center gap-1 lg:gap-3">
-      <div class="hidden lg:flex items-center gap-1">
+      {/* `data-nav-links` + the pill: Motion glides the pill behind the
+          link of the section on screen and marks it `aria-current`
+          (lib/motion/ux.ts). Home page only — elsewhere no section matches
+          and the pill stays invisible. */}
+      <div class="hidden lg:flex items-center gap-1 relative" data-nav-links>
+        <span class="nav-pill" data-nav-pill aria-hidden="true"></span>
         {items.map((item) => (
           <a
             href={sectionHref(item.id)}
-            class="inline-flex items-center px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
+            data-section={item.id}
+            class="relative inline-flex items-center px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             {item.label}
           </a>

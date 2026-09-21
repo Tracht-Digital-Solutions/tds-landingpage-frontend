@@ -92,7 +92,8 @@ function planFor(target: ScrollTarget) {
 export default function SmoothScroll() {
   useEffect(() => {
     const prefersReduce = () =>
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.hasAttribute("data-a11y-motion");
 
     // The page belongs to the tween while a jump is running: wheel, touch
     // and the scroll keys are swallowed until it lands. See ~/lib/scrollLock

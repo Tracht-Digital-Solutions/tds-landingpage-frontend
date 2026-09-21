@@ -57,7 +57,7 @@ const defaults: Record<Lang, PricingContent> = {
     label: "— Preise",
     headline: "Preise ohne",
     headlineAccent: "Überraschungen.",
-    sub: "Du siehst vorher, was jede Leistung pro Stunde kostet. Bei klarem Umfang geht auch ein *Festpreis*.",
+    sub: "Drei Pakete zum *Festpreis*. Alles andere rechne ich nach Stunden ab, zu Sätzen, die du vorher kennst.",
     teaserHeadline: "Planbare Sätze,",
     teaserHeadlineAccent: "passende Modelle.",
     teaserSub:
@@ -87,7 +87,7 @@ const defaults: Record<Lang, PricingContent> = {
     label: "— Pricing",
     headline: "Pricing without",
     headlineAccent: "surprises.",
-    sub: "You can see up front what each service costs per hour. When the scope is clear, a *fixed price* works too.",
+    sub: "Three packages at a *fixed price*. Everything else is billed by the hour, at rates you know up front.",
     teaserHeadline: "Predictable rates,",
     teaserHeadlineAccent: "models that fit.",
     teaserSub:
@@ -112,6 +112,92 @@ const defaults: Record<Lang, PricingContent> = {
   },
 };
 
+/**
+ * The committed fixed-price packages (decided 2026-09-21).
+ *
+ * Each figure is HOURS × the Webauftritt rate (65 € net), rounded to nothing —
+ * 6 h, 10 h and 16 h — so a package is never cheaper or dearer than the same
+ * work billed by the hour. Checked against the market the same day: freelance
+ * web rates 60–120 €/h, one-pagers 700–1,500 €, a takeover audit well under an
+ * agency's. `pricing.test.ts` holds the hours × rate relation, so a rate change
+ * in code fails the test until the packages follow.
+ *
+ * Not `cmsFor`-merged (see `ResolvedPricing`): a valid panel list REPLACES
+ * this one as a whole, an empty or malformed one falls back to it.
+ */
+export const PACKAGE_HOURS = [6, 10, 16] as const;
+
+const defaultPackages: Record<Lang, PricePackage[]> = {
+  de: [
+    {
+      title: "Website-Check",
+      price: 390,
+      description: "Ich prüfe deine Seite und sage dir, was zuerst dran ist.",
+      includes: [
+        "Technik, Sicherheit und Ladezeit geprüft",
+        "Schriftlicher Bericht mit Prioritäten",
+        "Besprechung der Ergebnisse",
+      ],
+    },
+    {
+      title: "Website-Übernahme",
+      price: 650,
+      description: "Ich übernehme deine bestehende Seite sauber und gesichert.",
+      includes: [
+        "Zugänge und Hosting übernommen",
+        "Vollständige Sicherung",
+        "Updates eingespielt, Fehler dokumentiert",
+      ],
+    },
+    {
+      title: "Onepager",
+      price: 1040,
+      description: "Eine neue Seite, die alles Wichtige auf einen Blick zeigt.",
+      includes: [
+        "Bis zu fünf Abschnitte",
+        "Kontaktformular, Impressum und Datenschutz eingebunden",
+        "Für Handy und Desktop gebaut",
+      ],
+    },
+  ],
+  en: [
+    {
+      title: "Website check",
+      price: 390,
+      description: "I review your site and tell you what to fix first.",
+      includes: [
+        "Tech, security and load time reviewed",
+        "Written report with priorities",
+        "Walk-through of the results",
+      ],
+    },
+    {
+      title: "Website takeover",
+      price: 650,
+      description: "I take over your existing site cleanly and backed up.",
+      includes: [
+        "Access and hosting taken over",
+        "Full backup",
+        "Updates applied, faults documented",
+      ],
+    },
+    {
+      title: "One-pager",
+      price: 1040,
+      description: "A new site that shows everything important at a glance.",
+      includes: [
+        "Up to five sections",
+        "Contact form, imprint and privacy policy included",
+        "Built for phone and desktop",
+      ],
+    },
+  ],
+};
+
+export function getDefaultPackages(lang: Lang): PricePackage[] {
+  return defaultPackages[lang];
+}
+
 export function getPricingDefault(lang: Lang): PricingContent {
   return defaults[lang];
 }
@@ -119,10 +205,10 @@ export function getPricingDefault(lang: Lang): PricingContent {
 /**
  * The pricing block plus its fixed-price packages.
  *
- * `packages` is deliberately NOT a field of `PricingContent`: that object is
- * the runtime schema `cmsFor()` merges against, and a list whose committed
- * default is empty is one it refuses outright. The packages therefore come off
- * the raw block, exactly as service references do.
+ * `packages` is deliberately NOT a field of `PricingContent`. The panel list
+ * replaces the committed one AS A WHOLE when it validates — a field-by-field
+ * `cmsFor()` merge could pair a panel title with a committed price, which
+ * would publish a figure nobody set for that package.
  */
 export type ResolvedPricing = PricingContent & { packages: PricePackage[] };
 
@@ -130,7 +216,8 @@ export async function getPricingContent(lang: Lang): Promise<ResolvedPricing> {
   const resolved = await cmsFor("pricing_services", lang, getPricingDefault(lang));
   const blocks = await fetchBlocks(lang);
   const block = blocks["pricing_services"];
-  const packages = isRecord(block) ? validatePricePackages(block.packages) : [];
+  const fromPanel = isRecord(block) ? validatePricePackages(block.packages) : [];
+  const packages = fromPanel.length > 0 ? fromPanel : getDefaultPackages(lang);
   return { ...resolved, packages };
 }
 
@@ -139,12 +226,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Validate the fixed-price packages, which default to an EMPTY list.
+ * Validate the panel's fixed-price packages (`pricing_services.packages`).
  *
- * Same boundary problem as `validateServiceReferences` in `./services`, for
- * the same reason: `cmsFor()` refuses to infer a schema from an empty fallback
- * list, and the committed default here has to be empty because nobody may
- * publish an invented price. So the raw block field is validated here instead.
+ * The raw block field, outside `cmsFor()` — see `ResolvedPricing`. An empty
+ * or invalid list means "use the committed packages".
  *
  * Strict on purpose, and one malformed item rejects the whole list — matching
  * `cmsFor()`'s own list behaviour. A package with a missing title or a price
