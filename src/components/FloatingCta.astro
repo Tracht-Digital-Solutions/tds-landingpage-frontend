@@ -44,7 +44,6 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   class="floating-cta-group"
   aria-label={regionLabel}
   data-scrolled-down="false"
-  data-on-dark="false"
 >
   <div class="tree-slot tree-slot--top">
     <div class="tree-slot__inner">
@@ -242,12 +241,6 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     outline: 2px solid currentColor;
     outline-offset: -4px;
   }
-  /* The receiver is the primary action: a faint disc of its own inside the
-     pill, so it reads as the button the shape exists for. */
-  .floating-cta {
-    background: rgb(255 255 255 / 0.1);
-  }
-
   /* The word beside the receiver, sliding out to the left on hover. */
   .floating-cta__hint {
     position: absolute;
@@ -299,31 +292,62 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     box-shadow: var(--tds-shadow-hard-press);
   }
 
-  /* Over a dark ground (and in the dark theme) the shape turns white, and
-     its shadow black — a navy offset would vanish on the navy block. The
-     shadow is re-declared, because `var()` in a custom property resolves
-     where it is declared. */
-  .floating-cta-group[data-on-dark="true"] {
+  /* The receiver is the CONTACT action and the button the shape exists for:
+     a pink disc with a navy receiver (2026-09-22, "hervorgehoben"), in both
+     layers. Hovering it turns the disc navy. */
+  .floating-cta,
+  .floating-cta-group--twin .floating-cta {
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+  }
+  .floating-cta:is(:hover, :focus-visible),
+  .floating-cta-group:has(.floating-cta:hover) + .floating-cta-group--twin .floating-cta {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+
+  /* === The inverted twin: a colour change exactly at the section line ===
+     The script clones the pill into `.floating-cta-group--twin`, laid exactly
+     over it in the inverted colours (white, navy icons, black shadow ink), and
+     clips BOTH layers per scroll frame: the twin to the part of the pill that
+     lies over a dark band, the original to the rest. So the colour changes at
+     the line itself, part of the pill already white while the rest is still
+     navy — entering and leaving alike. The twin is `aria-hidden` and `inert`,
+     carries no ids, no popover and no links, and takes no pointer. */
+  .floating-cta-group--twin {
     --tds-shadow-ink: rgb(0 0 0 / 0.55);
     --tds-shadow-hard: 6px 6px 0 0 var(--tds-shadow-ink);
     --tds-shadow-hard-sm: 3px 3px 0 0 var(--tds-shadow-ink);
     --tds-shadow-hard-press: 1px 1px 0 0 var(--tds-shadow-ink);
+    --tds-shadow-hard-sm-hover: 5px 5px 0 0 var(--tds-shadow-ink);
     background-color: #fff;
     color: var(--color-surface-navy);
+    pointer-events: none;
+    clip-path: inset(100% 0 0 0);
   }
-  .floating-cta-group[data-on-dark="true"] :is(.floating-cta-top, .floating-cta):hover,
-  .floating-cta-group[data-on-dark="true"] .floating-cta,
-  .floating-cta-group[data-on-dark="true"] :global(.a11y-toggle:hover) {
-    background: rgb(5 15 104 / 0.08);
+  .floating-cta-group--twin * {
+    pointer-events: none !important;
   }
+  /* The twin follows the original's hover and press, which it cannot have
+     itself. */
   @media (hover: hover) {
-    .floating-cta-group[data-on-dark="true"]:hover {
+    .floating-cta-group:hover + .floating-cta-group--twin {
       background-color: var(--color-surface-accent);
       color: #fff;
     }
-    .floating-cta-group[data-on-dark="true"]:hover :is(.floating-cta-top, .floating-cta):hover,
-    .floating-cta-group[data-on-dark="true"]:hover .floating-cta {
-      background: rgb(255 255 255 / 0.14);
+    .floating-cta-group:has(.floating-cta:hover) + .floating-cta-group--twin .floating-cta__hint,
+    .floating-cta-group:has(.floating-cta:focus-visible) + .floating-cta-group--twin .floating-cta__hint {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  .floating-cta-group:has(:is(.floating-cta, .floating-cta-top):active) + .floating-cta-group--twin {
+    translate: 2px calc(2px - var(--tds-bottom-lane, 0px));
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floating-cta-group:has(:is(.floating-cta, .floating-cta-top):active) + .floating-cta-group--twin {
+      translate: 0 calc(-1 * var(--tds-bottom-lane, 0px));
     }
   }
 
@@ -368,61 +392,68 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 </style>
 
 <script>
+  import { makeTwin, measureDarkRanges, splitClip, type Range } from "~/lib/darkSplit";
+
   const group = document.querySelector<HTMLElement>(".floating-cta-group");
   const topBtn = group?.querySelector<HTMLElement>(".floating-cta-top");
 
   if (group) {
     /**
-     * Which parts of the DOCUMENT are a dark ground, in absolute page
-     * coordinates, measured once and re-measured only when the page's own
-     * geometry changes — never per scroll frame (that was the largest source
-     * of scroll jank on a phone). The dark grounds are the shared tone
-     * primitives `.tds-tone-navy` and `.tds-tone-ink`: classes, so the answer
-     * does not change with the theme.
+     * The inverted twin (see the CSS and `lib/darkSplit.ts`): laid exactly
+     * over the pill and clipped, with the original, at the line of every dark
+     * band — the colour changes AT the section edge, part of the pill already
+     * white while the rest is still navy.
      */
-    let darkRanges: Array<[number, number]> = [];
+    const twin = makeTwin(group, "floating-cta-group--twin");
+    group.after(twin);
+    const twinA11y = twin.querySelector<HTMLElement>(".a11y-toggle");
+    const a11y = group.querySelector<HTMLElement>(".a11y-toggle");
+    // Mirror the states that change the pill's layout, so both fold alike.
+    const mirror = () => {
+      for (const key of ["suppressed", "scrolledDown"] as const) {
+        const value = group.dataset[key];
+        if (value === undefined) delete twin.dataset[key];
+        else if (twin.dataset[key] !== value) twin.dataset[key] = value;
+      }
+      if (twinA11y && a11y) twinA11y.hidden = a11y.hidden;
+    };
+    new MutationObserver(mirror).observe(group, { attributes: true, subtree: true, attributeFilter: ["data-suppressed", "data-scrolled-down", "hidden"] });
 
-    /** The pill's lower button, as a distance up from the viewport bottom. */
-    let anchorFromBottom = 0;
+    /** Dark bands in page coordinates; measured, never read per frame. */
+    let darkRanges: Range[] = [];
+    /** The pill's box in the viewport — fixed, so it moves only on resize. */
+    let box = { top: 0, bottom: 0 };
 
     const measure = () => {
-      const offset = window.scrollY;
-      darkRanges = Array.from(
-        document.querySelectorAll<HTMLElement>(".tds-tone-navy, .tds-tone-ink"),
-      ).map((element) => {
-        const rect = element.getBoundingClientRect();
-        return [rect.top + offset, rect.bottom + offset] as [number, number];
-      });
+      darkRanges = measureDarkRanges();
       const rect = group.getBoundingClientRect();
-      // The lowest 3.5 rem of the pill — where the receiver sits.
-      anchorFromBottom = window.innerHeight - (rect.bottom - 28);
+      box = { top: rect.top, bottom: rect.bottom };
     };
 
-    // In dark mode every ground is dark, so the inverted (white) pill is
-    // correct everywhere and the ranges do not need consulting at all.
+    // In dark mode every ground is dark, so the twin covers the whole pill.
     const documentIsDark = () =>
       document.documentElement.getAttribute("data-theme") === "dark";
 
     let frame = 0;
     // Compare before writing: a data-attribute write invalidates style for
     // the whole control, sixty times a second.
-    const setFlag = (key: "scrolledDown" | "onDark" | "suppressed", on: boolean) => {
+    const setFlag = (key: "scrolledDown" | "suppressed", on: boolean) => {
       const value = on ? "true" : "false";
       if (group.dataset[key] !== value) group.dataset[key] = value;
     };
 
+    let lastTwin = "";
+    let lastOriginal = "";
     const update = () => {
       frame = 0;
       // Fold out "Nach oben" after ~one viewport of scroll.
       setFlag("scrolledDown", window.scrollY > window.innerHeight * 0.8);
 
       // Pure arithmetic from here down — no layout is read during a scroll.
-      const centre = window.scrollY + window.innerHeight - anchorFromBottom;
-      setFlag(
-        "onDark",
-        documentIsDark() ||
-          darkRanges.some(([top, bottom]) => centre >= top && centre <= bottom),
-      );
+      const y = window.scrollY;
+      const clip = splitClip(y + box.top, y + box.bottom, darkRanges, documentIsDark());
+      if (clip.twin !== lastTwin) twin.style.clipPath = lastTwin = clip.twin;
+      if (clip.original !== lastOriginal) group.style.clipPath = lastOriginal = clip.original;
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -436,6 +467,8 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     update();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", remeasure);
+    // The pill grows and shrinks as its slots fold: follow its box.
+    new ResizeObserver(remeasure).observe(group);
 
     /**
      * Fold the trunk away while the page already shows the same action: the

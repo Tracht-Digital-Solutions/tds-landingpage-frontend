@@ -729,3 +729,51 @@ html[data-motion="on"] :where([data-cta]) {
 /* A card inside a scroll track would lose its offset to the track's clip:
    the track keeps room for it (the showcase in `Showcase.astro`, the
    packages in `PricingList.astro`). */
+
+/* === Hover lift (2026-09-22) ==============================================
+   An interactive element with a hard shadow comes OFF the page toward the
+   pointer: 2px up-left (`translate` — Motion keeps `transform` for the
+   magnetic CTAs) while its offset grows by the same 2px. Keyboard focus
+   lifts it too. `:not(:active)` hands a pressed control to the press rule
+   above; non-interactive boxes (price cards, notes) never lift. */
+:where(
+  .hero-cta,
+  [data-cta],
+  a[class*="rounded-[100px]"],
+  a[class*="rounded-full"][class*="px-5"],
+  a[class*="rounded-full"][class*="px-7"],
+  .first-call__cta,
+  .submit-button
+):where(:hover, :focus-visible):not(:active):not(:disabled) {
+  translate: -2px -2px;
+  box-shadow: var(--tds-shadow-hard-sm-hover);
+}
+:where(a.post-card, .demo-card, .reference-card, .bc-tile, a.faq-cta):where(:hover, :focus-within) {
+  translate: -2px -2px;
+  box-shadow: var(--tds-shadow-hard-hover);
+}
+:where(a.post-card, .demo-card, .reference-card, .bc-tile, a.faq-cta) {
+  transition-property: background-color, color, translate;
+  transition-duration: 160ms;
+}
+:where(a[class*="rounded-full"][class*="text-xs"]):where(:hover, :focus-visible) {
+  translate: -1px -1px;
+  box-shadow: var(--tds-shadow-hard-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    .hero-cta,
+    [data-cta],
+    a[class*="rounded-[100px]"],
+    a[class*="rounded-full"],
+    .first-call__cta,
+    .submit-button,
+    a.post-card,
+    .demo-card,
+    .reference-card,
+    .bc-tile,
+    a.faq-cta
+  ):where(:hover, :focus-visible, :focus-within) {
+    translate: none;
+  }
+}

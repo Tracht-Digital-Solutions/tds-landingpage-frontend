@@ -24,6 +24,8 @@ export function mountPropertyTabs({ animate, pointerSpring }: Dom): void {
   const tabs = Array.from(nav.querySelectorAll<HTMLElement>("[data-property-tab]"));
   if (tabs.length === 0) return;
   const dock = window.matchMedia(DOCK_QUERY);
+  // The inverted twin (PropertyTabs.astro) slides with the originals.
+  const twinTabs = Array.from(document.querySelectorAll<HTMLElement>(".property-tabs--twin .property-tab"));
 
   let active: HTMLElement | null = null;
   const travel = (tab: HTMLElement) => Math.max(0, tab.offsetWidth - PEEK_PX);
@@ -37,6 +39,8 @@ export function mountPropertyTabs({ animate, pointerSpring }: Dom): void {
       if (i === index) x = travel(tab);
       else if (index >= 0 && Math.abs(i - index) === 1) x = NEIGHBOUR_PX;
       void animate(tab, { x }, pointerSpring);
+      const twin = twinTabs[i];
+      if (twin) void animate(twin, { x }, pointerSpring);
     });
   };
 
@@ -52,6 +56,6 @@ export function mountPropertyTabs({ animate, pointerSpring }: Dom): void {
   });
   dock.addEventListener("change", () => {
     active = null;
-    tabs.forEach((tab) => void animate(tab, { x: 0 }, { duration: 0 }));
+    [...tabs, ...twinTabs].forEach((tab) => void animate(tab, { x: 0 }, { duration: 0 }));
   });
 }

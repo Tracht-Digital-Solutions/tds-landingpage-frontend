@@ -137,6 +137,7 @@ const ICONS: Record<PropertyTabId, string[]> = {
   .property-tab:focus-visible {
     translate: 0 0;
     background: var(--color-surface-accent);
+    box-shadow: var(--tds-shadow-hard-sm-hover);
   }
   .property-tab:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -171,18 +172,46 @@ const ICONS: Record<PropertyTabId, string[]> = {
     color: #fff;
   }
 
-  /* Over a dark band (the navy contact block, the footer) the navy tab
-     would vanish; it turns white there, like the floating tree. The script
-     below writes `data-on-dark`. */
-  .property-tabs[data-on-dark="true"] .property-tab {
+  /* === The inverted twin: the colour changes exactly at the band line ===
+     Over a dark band (the navy contact block, the footer) a navy tab would
+     vanish. The script clones the nav into `.property-tabs--twin` — white
+     tabs, navy text, black shadow ink — laid exactly over it, and clips both
+     at the line of every full-bleed dark band (`lib/darkSplit.ts`). The twin
+     is `aria-hidden`, `inert` and link-less, and mirrors the original's
+     hover and focus through `:has()` (the slide itself, with Motion, is
+     applied to both by `lib/motion/propertyTabs.ts`). */
+  .property-tabs--twin {
+    --tds-shadow-ink: rgb(0 0 0 / 0.55);
+    --tds-shadow-hard-sm: 3px 3px 0 0 var(--tds-shadow-ink);
+    --tds-shadow-hard-sm-hover: 5px 5px 0 0 var(--tds-shadow-ink);
+    clip-path: inset(100% 0 0 0);
+  }
+  .property-tabs--twin,
+  .property-tabs--twin * {
+    pointer-events: none !important;
+  }
+  .property-tabs--twin .property-tab,
+  :global(:root[data-theme="dark"]) .property-tabs--twin .property-tab {
     background: #fff;
     color: var(--color-surface-navy);
+    box-shadow: var(--tds-shadow-hard-sm);
   }
-  .property-tabs[data-on-dark="true"] .property-tab:hover,
-  .property-tabs[data-on-dark="true"] .property-tab:focus-visible {
+  .property-tabs:has(li:nth-child(1) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(1) .property-tab,
+  .property-tabs:has(li:nth-child(2) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(2) .property-tab,
+  .property-tabs:has(li:nth-child(3) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(3) .property-tab,
+  .property-tabs:has(li:nth-child(4) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(4) .property-tab {
+    translate: 0 0;
     background: var(--color-surface-accent);
     color: #fff;
+    box-shadow: var(--tds-shadow-hard-sm-hover);
   }
+  .property-tabs:has(li:nth-child(1) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(1) :is(.property-tab__label, .property-tab__arrow),
+  .property-tabs:has(li:nth-child(2) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(2) :is(.property-tab__label, .property-tab__arrow),
+  .property-tabs:has(li:nth-child(3) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(3) :is(.property-tab__label, .property-tab__arrow),
+  .property-tabs:has(li:nth-child(4) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(4) :is(.property-tab__label, .property-tab__arrow) {
+    opacity: 1;
+  }
+
 
   /* Motion runs the slide: the CSS translate stays parked and Motion's
      transform adds the travel (lib/motion/propertyTabs.ts). */
@@ -201,39 +230,46 @@ const ICONS: Record<PropertyTabId, string[]> = {
 </style>
 
 <script>
-  // Which parts of the document are a dark ground, measured once and again
-  // only when the page's height changes — never per scroll frame. The same
-  // approach as the floating tree in `FloatingCta.astro`.
+  import { makeTwin, measureDarkRanges, splitClip, type Range } from "~/lib/darkSplit";
+
+  // The inverted twin (see the CSS above and `lib/darkSplit.ts`), clipped
+  // with the original at the line of every full-bleed dark band — the colour
+  // changes at the section edge, not all at once. Bands are measured once and
+  // again only when the page's height changes; a scroll frame is arithmetic.
   const nav = document.querySelector<HTMLElement>("[data-property-tabs]");
   if (nav && window.matchMedia("(min-width: 64rem) and (hover: hover) and (pointer: fine)").matches) {
-    let ranges: Array<[number, number]> = [];
+    const twin = makeTwin(nav, "property-tabs--twin");
+    nav.after(twin);
+
+    let ranges: Range[] = [];
+    let box = { top: 0, bottom: 0 };
     const measure = () => {
-      const offset = window.scrollY;
-      ranges = Array.from(document.querySelectorAll<HTMLElement>(".tds-tone-navy, .tds-tone-ink"))
-        // Only grounds that reach the left edge the tabs sit on — a navy card
-        // inside the content column never passes behind them.
-        .filter((element) => !nav.contains(element) && element.getBoundingClientRect().left < 48)
-        .map((element) => {
-          const box = element.getBoundingClientRect();
-          return [box.top + offset, box.bottom + offset] as [number, number];
-        });
+      // Only grounds that reach the left edge the tabs sit on — a navy card
+      // inside the content column never passes behind them.
+      ranges = measureDarkRanges((element) => element.getBoundingClientRect().left < 48);
+      const rect = nav.getBoundingClientRect();
+      box = { top: rect.top, bottom: rect.bottom };
     };
     let frame = 0;
+    let lastTwin = "";
+    let lastOriginal = "";
     const update = () => {
       frame = 0;
-      const centre = window.scrollY + window.innerHeight / 2;
-      const dark = ranges.some(([top, bottom]) => centre >= top && centre <= bottom);
-      const value = dark ? "true" : "false";
-      if (nav.dataset.onDark !== value) nav.dataset.onDark = value;
+      const y = window.scrollY;
+      const clip = splitClip(y + box.top, y + box.bottom, ranges);
+      if (clip.twin !== lastTwin) twin.style.clipPath = lastTwin = clip.twin;
+      if (clip.original !== lastOriginal) nav.style.clipPath = lastOriginal = clip.original;
     };
     measure();
     update();
     window.addEventListener("scroll", () => {
       if (!frame) frame = requestAnimationFrame(update);
     }, { passive: true });
-    new ResizeObserver(() => {
+    const remeasure = () => {
       measure();
       update();
-    }).observe(document.documentElement);
+    };
+    window.addEventListener("resize", remeasure);
+    new ResizeObserver(remeasure).observe(document.documentElement);
   }
 </script>

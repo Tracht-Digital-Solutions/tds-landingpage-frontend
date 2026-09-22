@@ -50,15 +50,37 @@ const { items, name = "faq" } = Astro.props;
 ))}
 
 <style>
+  /* ROUND rows (2026-09-22): each question is its own rounded card with the
+     site's hard shadow (global.css) and a round chevron button; hovering a
+     row lifts it. */
+  .faq-item {
+    border-radius: 1.5rem;
+    overflow: hidden;
+    background: var(--lp-surface-card);
+    transition: translate 160ms var(--tds-ease-out);
+  }
+  @media (hover: hover) {
+    .faq-item:has(> .faq-summary:hover) {
+      translate: -2px -2px;
+      box-shadow: var(--tds-shadow-hard-hover);
+    }
+  }
+  .faq-item:has(> .faq-summary:focus-visible) {
+    box-shadow: var(--tds-shadow-hard-hover);
+  }
   .faq-summary {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
-    padding: 1.25rem 1rem;
+    padding: 1rem 1rem 1rem 1.5rem;
     cursor: pointer;
     list-style: none;
-    border-radius: 6px;
+    border-radius: 1.5rem;
+  }
+  .faq-summary:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -4px;
   }
   .faq-summary::-webkit-details-marker {
     display: none;
@@ -80,6 +102,7 @@ const { items, name = "faq" } = Astro.props;
      colour alone — the fill and the rotated chevron carry it with it. */
   .faq-item[open] > .faq-summary {
     background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-radius: 1.5rem 1.5rem 0 0;
   }
   .faq-item[open] > .faq-summary .faq-q,
   .faq-summary:hover .faq-q {
@@ -88,8 +111,14 @@ const { items, name = "faq" } = Astro.props;
 
   .faq-chevron {
     flex-shrink: 0;
-    margin-top: 0.25rem;
-    color: var(--color-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
     /* The rotation springs; the colour beside it eases, because a colour that
        overshoots lands outside the palette. */
     transition:
@@ -97,14 +126,15 @@ const { items, name = "faq" } = Astro.props;
       color 200ms var(--tds-ease-out);
   }
   .faq-item[open] > .faq-summary .faq-chevron {
-    color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-paper);
     transform: rotate(90deg);
   }
 
   .faq-a {
     margin: 0;
     max-width: 44rem;
-    padding: 0.5rem 1rem 1.25rem;
+    padding: 0.25rem 1.5rem 1.5rem;
     font-size: 1.0625rem;
     line-height: 1.65;
     color: var(--color-muted);
@@ -115,6 +145,10 @@ const { items, name = "faq" } = Astro.props;
      gated on support and on reduced motion there. */
 
   @media (prefers-reduced-motion: reduce) {
+    .faq-item {
+      transition: none;
+      translate: none !important;
+    }
     .faq-chevron {
       transition: none;
     }

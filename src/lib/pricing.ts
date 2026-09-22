@@ -64,9 +64,7 @@ const defaults: Record<Lang, PricingContent> = {
     // Festpreis and Angebot are steps of `pricing_logic` (homeContent.ts),
     // rendered in the same box as these notes — listing them here as well
     // printed each of them twice.
-    notes: [
-      "Umschaltbar: netto oder brutto mit 19 % Mehrwertsteuer.",
-    ],
+    notes: [],
     ctaTitle: "Individuelle Lösungen",
     ctaSub: "Passt dein Vorhaben in kein Paket? Dann gibt es den Preis auf Anfrage.",
     ctaButton: "Anfrage stellen",
@@ -78,9 +76,7 @@ const defaults: Record<Lang, PricingContent> = {
     headlineAccent: "surprises.",
     sub: "Three packages at a *fixed price*. Everything else gets its own quote.",
     notesTitle: "Good to know",
-    notes: [
-      "Switchable: net, or gross with 19 % German VAT.",
-    ],
+    notes: [],
     ctaTitle: "Custom solutions",
     ctaSub: "Your project fits no package? Then the price is on request.",
     ctaButton: "Send a request",
@@ -92,7 +88,9 @@ const defaults: Record<Lang, PricingContent> = {
  * The committed fixed-price packages (decided 2026-09-21).
  *
  * Checked against the market that day: freelance web rates 60–120 €/h,
- * one-pagers 700–1,500 €, a takeover audit well under an agency's.
+ * one-pagers 700–1,500 €, a takeover audit well under an agency's. The middle
+ * package became "Website-Optimierung" at 780 € on 2026-09-22 (12 h × 65 €):
+ * freelance page-speed work runs 299–799 €, an on-page SEO package 499–999 €.
  *
  * Not `cmsFor`-merged (see `ResolvedPricing`): a valid panel list REPLACES
  * this one as a whole, an empty or malformed one falls back to it.
@@ -110,13 +108,13 @@ const defaultPackages: Record<Lang, PricePackage[]> = {
       ],
     },
     {
-      title: "Website-Übernahme",
-      price: 650,
-      description: "Ich übernehme deine bestehende Seite sauber und gesichert.",
+      title: "Website-Optimierung",
+      price: 780,
+      description: "Ich mache deine bestehende Seite schneller, sicherer und besser auffindbar.",
       includes: [
-        "Zugänge und Hosting übernommen",
-        "Vollständige Sicherung",
-        "Updates eingespielt, Fehler dokumentiert",
+        "Ladezeit optimiert: Bilder, Caching, Code",
+        "Technische Fehler behoben, Updates eingespielt",
+        "Titel und Beschreibungen für Google überarbeitet",
       ],
     },
     {
@@ -142,13 +140,13 @@ const defaultPackages: Record<Lang, PricePackage[]> = {
       ],
     },
     {
-      title: "Website takeover",
-      price: 650,
-      description: "I take over your existing site cleanly and backed up.",
+      title: "Website optimisation",
+      price: 780,
+      description: "I make your existing site faster, safer and easier to find.",
       includes: [
-        "Access and hosting taken over",
-        "Full backup",
-        "Updates applied, faults documented",
+        "Load time optimised: images, caching, code",
+        "Technical faults fixed, updates applied",
+        "Titles and descriptions reworked for Google",
       ],
     },
     {

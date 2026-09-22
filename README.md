@@ -32,7 +32,7 @@ formal). The sections follow the questions a visitor has:
    as such
 6. Compact journal teaser
 7. Wieso ich? / Why me?
-8. Prices: three fixed-price packages (390 €, 650 €, 1.040 €) with a net/gross
+8. Prices: three fixed-price packages (390 €, 780 €, 1.040 €) with a net/gross
    switch, how a price comes about, and "Individuelle Lösungen" on request —
    no hourly rates
 9. FAQ

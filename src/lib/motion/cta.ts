@@ -3,8 +3,8 @@
  * the hero's "Erstgespräch vereinbaren", the floating button, the one under
  * the prices and the one closing a service page.
  *
- * - **Magnetic:** under a fine pointer the button leans up to 6 px toward the
- *   cursor and springs back when it leaves. Never on touch — a finger has no
+ * - **Magnetic:** under a fine pointer the button leans up to 14 px toward the
+ *   cursor and bounces back when it leaves. Never on touch — a finger has no
  *   position to lean toward before it lands.
  * - **Press:** a short squeeze to 0.96 on pointer AND keyboard activation,
  *   released on a spring.
@@ -16,7 +16,10 @@
  */
 type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 
-const PULL = 6;
+/** How far the button follows the pointer, in px at its edge (2026-09-22: 6 → 14, "deutlicher"). */
+const PULL = 14;
+/** The way back: a spring that overshoots, so the button visibly bounces home. */
+const RETURN = { type: "spring", bounce: 0.55, visualDuration: 0.5 } as const;
 
 export function mountCta({ animate, hover, press, inView, pointerSpring, hasFinePointer }: Dom): void {
   const buttons = Array.from(document.querySelectorAll<HTMLElement>("[data-cta]"));
@@ -30,12 +33,12 @@ export function mountCta({ animate, hover, press, inView, pointerSpring, hasFine
           const box = button.getBoundingClientRect();
           const dx = (event.clientX - (box.left + box.width / 2)) / (box.width / 2);
           const dy = (event.clientY - (box.top + box.height / 2)) / (box.height / 2);
-          void animate(button, { x: dx * PULL, y: dy * PULL * 0.6 }, pointerSpring);
+          void animate(button, { x: dx * PULL, y: dy * PULL * 0.8 }, pointerSpring);
         };
         button.addEventListener("pointermove", move);
         return () => {
           button.removeEventListener("pointermove", move);
-          void animate(button, { x: 0, y: 0 }, pointerSpring);
+          void animate(button, { x: 0, y: 0 }, RETURN);
         };
       });
     }

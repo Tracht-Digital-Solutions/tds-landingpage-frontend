@@ -11,9 +11,12 @@ type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 
 const SPRING = { type: "spring", bounce: 0.45, visualDuration: 0.42 } as const;
 
-export function mountFloatingCta({ animate }: Dom): void {
-  const group = document.querySelector<HTMLElement>(".floating-cta-group");
-  if (!group) return;
+export function mountFloatingCta(dom: Dom): void {
+  // The pill and its inverted twin (FloatingCta.astro) pop alike.
+  document.querySelectorAll<HTMLElement>(".floating-cta-group").forEach((group) => mountOne(group, dom));
+}
+
+function mountOne(group: HTMLElement, { animate }: Dom): void {
   const trunkIcon = group.querySelector<SVGElement>(".floating-cta .tree-icon");
   const topIcon = group.querySelector<SVGElement>(".floating-cta-top .tree-icon");
 

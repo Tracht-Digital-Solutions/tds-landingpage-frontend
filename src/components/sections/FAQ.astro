@@ -142,7 +142,8 @@ const contactHref = `${localizePath("/", lang)}#contact`;
   .faq-list {
     grid-area: list;
     display: grid;
-    gap: 0.25rem;
+    /* Room for each row's hard shadow and its hover lift (6 + 2 px). */
+    gap: 0.875rem;
   }
   .faq-cta {
     grid-area: cta;
