@@ -167,6 +167,12 @@ const panelRows = `1 / ${services.length + 2}`;
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
+  /* Hover lifts a title toward the pointer (the open one on the desktop is
+     painted by the marker and stays put). */
+  .svc-explorer__button:is(:hover, :focus-visible):not(:active) {
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-sm-hover);
+  }
   .svc-explorer__button:active {
     translate: 2px 2px;
     box-shadow: var(--tds-shadow-hard-press);
@@ -313,6 +319,10 @@ const panelRows = `1 / ${services.length + 2}`;
   }
   .svc-explorer__more:hover {
     background: var(--color-surface-accent);
+  }
+  .svc-explorer__more:is(:hover, :focus-visible):not(:active) {
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-sm-hover);
   }
   .svc-explorer__more:active {
     translate: 2px 2px;

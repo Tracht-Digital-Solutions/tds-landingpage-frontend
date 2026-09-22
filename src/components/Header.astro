@@ -3,7 +3,6 @@ import LanguageSwitch from "~/components/LanguageSwitch.astro";
 import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/components";
 import { resolveLang, localizePath } from "~/lib/i18n";
 import { propertyLinks, sectionLinks } from "~/lib/navigation";
-import { siteConfig } from "~/lib/seo";
 import { LOGO, logoSrc, logoSrcset } from "~/lib/imageVariants";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -81,14 +80,9 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
             {item.label}
           </a>
         ))}
-        <a
-          href={siteConfig.blogUrl}
-          rel="me noopener"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
-        >
-          Journal
-          <span aria-hidden="true" class="text-[10px] leading-none">↗</span>
-        </a>
+        {/* No "Journal" here since 2026-09-22: the journal is one of the
+            bookmarks on the left edge (`PropertyTabs.astro`) on a desktop,
+            and in the mobile menu's second block on a phone. */}
       </div>
 
       {/* `client:idle`, not `client:load`: this one button was what loaded the

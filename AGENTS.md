@@ -68,8 +68,14 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   while `#hero` or `#contact` is on screen and on short viewports while the
   cookie notice is open; the tools never fold. Motion only pops the icon of a
   slot that opens (`lib/motion/floatingCta.ts`). Hover anywhere turns the
-  whole pill bordeaux; over a dark ground it turns white with a black ink
-  (the shadow tokens are re-declared there — `var()` in a custom property
+  whole pill bordeaux. The receiver is the CONTACT action and a pink disc
+  (navy on hover). The colour changes EXACTLY at a dark band's line: an
+  inverted twin (`makeTwin`, `lib/darkSplit.ts`: `aria-hidden`, `inert`, no
+  ids, links or popover) lies over the pill and both are clipped per scroll
+  frame (`splitClip`), the twin to the dark part, the original to the rest;
+  the twin mirrors the fold attributes and, through `+`, hover and press
+  (its shadow ink is black — the tokens are re-declared there, `var()` in a
+  custom property
   resolves where it is declared). It publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
 - **Hard 2D shadows everywhere** (2026-09-22, tds-shared ≥ 0.42): boxes take
@@ -78,7 +84,11 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   applies them through a zero-specificity `:where()` list (cards by class and
   `rounded-[6px]`, pill links, CTAs), components that state a shadow use the
   same tokens. A scroll track keeps padding for the offset (showcase,
-  packages), and a seam mosaic takes ONE shadow on its container. Never
+  packages), and a seam mosaic takes ONE shadow on its container. Hover and
+  keyboard focus LIFT an interactive one 2px up-left while the offset grows
+  by 2px (`--tds-shadow-hard(-sm)-hover`, tds-shared ≥ 0.42.2; `:where` list
+  at the end of `global.css`); the FAQ rows are round cards that lift the
+  same way. Never
   transition a `box-shadow`.
 - **The services are an interactive list** (`ui/ServiceExplorer.astro`,
   `lib/serviceExplorer.ts`, 2026-09-22), not a tile mosaic: an `<h3><button
@@ -98,8 +108,11 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   Desktop with a mouse only (`(min-width: 64rem) and (hover: hover) and
   (pointer: fine)`); on a phone the same four links are the mobile menu's
   second block. The nav is `overflow: clip`, or the parked parts count as
-  horizontal overflow in `audit:ux`; it turns white over a full-bleed dark
-  band (`data-on-dark`, measured like the tree).
+  horizontal overflow in `audit:ux`. Over a full-bleed dark band the colour
+  changes at the line the same way as the pill (twin + `splitClip`; the
+  twin mirrors hover per tab with `:has()` and the Motion slide in
+  `propertyTabs.ts`). No "Journal" in the desktop header bar any more — the
+  bookmark is the way there.
 - **The contact form asks WHAT it is about and answers WHAT HAPPENS NEXT**
   (2026-09-21). The closed dropdown wears the text fields' own class
   (`fieldClass` + `.contact-select`: transparent, the row's underline, the
@@ -293,7 +306,9 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     block (`faq_v2`, `pricing_logic`, a service's `priceText`) saved before
     the change still overrides the new defaults until it is cleared.
   - **Three fixed-price packages** (2026-09-21), committed in `lib/pricing.ts`:
-    Website-Check 390 €, Website-Übernahme 650 €, Onepager 1.040 € (net).
+    Website-Check 390 €, Website-Optimierung 780 € (was Website-Übernahme
+    650 € until 2026-09-22; freelance page-speed work 299–799 €, on-page SEO
+    499–999 €), Onepager 1.040 € (net). No committed notes under the prices.
     `seo.test.ts` holds the "ab 390 €" in the meta description, and the
     Webauftritt `priceText` names the lowest package. A valid
     `pricing_services.packages` list in the panel REPLACES them as a whole;
@@ -361,7 +376,8 @@ visual language rather than rebuilding it locally:
   `tds-shared/motion/dom` (vanilla Motion) with `import()` at idle — at once
   only after an internal navigation — and nothing under reduced motion. It
   drives:
-  - **the CTA** (`[data-cta]`, `cta.ts`): magnetic pull under a fine pointer,
+  - **the CTA** (`[data-cta]`, `cta.ts`): magnetic pull (14 px) under a fine
+    pointer with a bouncing return,
     press squeeze, one light sweep on arrival. The floating tree is NOT a
     `[data-cta]` — `floatingCta.ts` springs its spread and its trunk.
   - **the bookmarks** (`propertyTabs.ts`), see above.

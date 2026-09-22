@@ -361,7 +361,8 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     text-decoration: none;
     transition:
       background-color 200ms var(--tds-ease-out),
-      color 200ms var(--tds-ease-out);
+      color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
     /* No `transform` transition: Motion writes the transform every frame,
        and a CSS transition on top would smear each of those writes. */
   }

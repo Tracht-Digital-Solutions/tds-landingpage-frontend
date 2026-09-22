@@ -34,7 +34,7 @@ describe("pricing defaults", () => {
 
   it("adds 19 % VAT for the gross view, to the cent", () => {
     expect(VAT_RATE).toBe(0.19);
-    expect(getDefaultPackages("de").map((pkg) => grossPrice(pkg.price))).toEqual([464.1, 773.5, 1237.6]);
+    expect(getDefaultPackages("de").map((pkg) => grossPrice(pkg.price))).toEqual([464.1, 928.2, 1237.6]);
   });
 });
 
@@ -86,7 +86,7 @@ describe("validatePricePackages", () => {
   it("keeps the committed package figures and passes its own gate", () => {
     for (const lang of ["de", "en"] as const) {
       const packages = getDefaultPackages(lang);
-      expect(packages.map((pkg) => pkg.price)).toEqual([390, 650, 1040]);
+      expect(packages.map((pkg) => pkg.price)).toEqual([390, 780, 1040]);
       // The committed list has to pass the same gate as a panel list.
       expect(validatePricePackages(packages)).toEqual(packages);
     }
