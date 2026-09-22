@@ -243,9 +243,9 @@ const ui =
        `scrollLeft = 24`, not 0, and the "prev" button (which disables on
        `scrollLeft <= 2`) never disables at all. */
     scroll-padding-inline: 1.5rem;
-    /* A little vertical room: the cards' focus ring is drawn with a 3px
-       offset and would be clipped by the scroll container without it. */
-    padding-block: 0.25rem;
+    /* Vertical room: the cards' focus ring (3px offset) and, below, their
+       hard 6px shadow would be clipped by the scroll container without it. */
+    padding-block: 0.25rem 0.625rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
@@ -289,7 +289,8 @@ const ui =
     }
     .showcase__track {
       gap: 1.5rem;
-      padding-inline: 0;
+      /* Room on the right for the last card's hard shadow. */
+      padding-inline: 0 0.5rem;
       scroll-padding-inline: 0;
     }
     .showcase__slide {
@@ -352,7 +353,7 @@ const ui =
        buttons float above the row rather than sit in it. */
     background: var(--color-paper);
     color: var(--color-black);
-    box-shadow: 0 6px 20px -8px color-mix(in srgb, var(--color-black) 55%, transparent);
+    box-shadow: var(--tds-shadow-hard-sm);
     cursor: pointer;
     transition:
       background-color 200ms var(--tds-ease-out),

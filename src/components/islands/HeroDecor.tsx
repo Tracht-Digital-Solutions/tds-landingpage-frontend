@@ -16,7 +16,7 @@ import { MotionScope, m, useCoarsePointer } from "@tracht-digital-solutions/tds-
  * So the rule is not "no motion in the hero". It is: **no text node, and no
  * image, may depend on hydration to become visible.** The copy and the photo
  * are plain HTML in `sections/Hero.astro`. What is left — the geometric
- * shapes at the section's edges and the "fit" motif — is what this island renders,
+ * shapes at the section's edges — is what this island renders,
  * and they are `aria-hidden` decoration behind `pointer-events: none`.
  *
  * ### 2026-09-21: it was too quiet to see, and it was missing on phones
@@ -30,7 +30,8 @@ import { MotionScope, m, useCoarsePointer } from "@tracht-digital-solutions/tds-
  * - The arrival travels far enough to read as an arrival.
  * - The drift is an order of magnitude more present (~10 px/s against 1.7).
  * - The pointer moves the shapes ~60 px instead of 26, by depth.
- * - The gold node walks the conduit instead of blinking in place.
+ * - (2026-09-22) The gold node and the "fit" motif were removed on
+ *   Julian's word — the scene is the two constructed shapes, no ball.
  * - It mounts at every width. That costs a measured ~129 KB of JS on phones,
  *   paid for out of the savings in the same change (the unused Lato 900, the
  *   dead `marked` dependency) and watched by `npm run audit:perf`.
@@ -55,36 +56,19 @@ import { MotionScope, m, useCoarsePointer } from "@tracht-digital-solutions/tds-
 
 /**
  * How far each shape follows the pointer, in px at the screen's edge.
- *
- * The node is absent: it is busy walking the conduit, and adding a pointer
- * offset on the same axis would fight its own path.
  */
 const PARALLAX = { capsule: 60, quarter: 42 } as const;
-
-/**
- * One round of the "fit" motif, in seconds, and where in it the socket jolts:
- * at the moment the key lands (0.24–0.36 of the key's own timeline).
- */
-const FIT_CYCLE = 5;
-const FIT_TIMES = [0, 0.22, 0.26, 0.31, 0.38, 1];
 
 export default function HeroDecor() {
   const coarse = useCoarsePointer();
   const [reduced, setReduced] = useState(false);
   /**
-   * Below 80rem the scene sits in the phone arrangement (`sections/Hero.astro`),
-   * and the node walks a DIFFERENT path there: a free band on a phone is
-   * about 100 px tall, and the conduit walk lifts the node 58 px, which put it
-   * on the eyebrow — `audit:ux` reported it as decoration over content at
-   * every narrow width. On a narrow screen it therefore runs horizontally and
-   * stays in its lane.
-   *
-   * Read SYNCHRONOUSLY on the first client render, not in the effect. With
-   * the effect answering one tick later, the node spent its opening frames on
-   * the desktop path — which lifts it 58 px, straight under the fixed header,
-   * and `audit:ux` reported it as decoration over the navigation. Nothing
-   * mismatches at hydration: `narrow` only ever feeds `animate`, and the
-   * server-rendered style comes from `initial`, which is the same either way.
+   * Below 80rem the scene sits in the phone arrangement (`sections/Hero.astro`)
+   * and drifts less, because the free bands there are tight. Read
+   * SYNCHRONOUSLY on the first client render so the opening frames already use
+   * the right drift. `narrow` only ever feeds `animate`, never `initial` —
+   * `initial` is server-rendered, and a width-dependent start state was a
+   * hydration mismatch.
    */
   const [narrow, setNarrow] = useState(() =>
     typeof window === "undefined" ? false : window.matchMedia("(max-width: 79.999rem)").matches,
@@ -142,12 +126,6 @@ export default function HeroDecor() {
       <>
         <span className="hero-shape hero-shape--capsule tds-shape tds-shape--capsule tds-shape--navy" />
         <span className="hero-shape hero-shape--quarter tds-shape tds-shape--quarter-tl tds-shape--bordeaux" />
-        <span className="hero-shape hero-shape--node tds-shape tds-shape--capsule tds-shape--gold" />
-        {/* At rest the key sits in its socket: the finished picture. */}
-        <span className="hero-fit">
-          <span className="hero-fit__socket tds-shape tds-shape--navy" />
-          <span className="hero-fit__key tds-shape tds-shape--gold" />
-        </span>
       </>
     );
   }
@@ -190,61 +168,6 @@ export default function HeroDecor() {
           y: { duration: 11, repeat: Infinity, ease: "easeInOut", delay: 0.1 },
         }}
       />
-
-      {/* The gold node WALKS THE CONDUIT instead of blinking where it stands.
-          The waypoints trace `ui/CircuitRun.astro`'s first path — right along
-          the lower run, up at the corner, then right again — as fractions of
-          the shape's own offset parent, so it keeps to the line at any width.
-          It is the farthest of the three, so it answers the pointer least. */}
-      <m.span
-        className="hero-shape hero-shape--node tds-shape tds-shape--capsule tds-shape--gold"
-        initial={{ opacity: 0, scale: 0.3 }}
-        animate={{
-          opacity: [0, 1, 1, 1, 0],
-          scale: 1,
-          x: narrow ? [0, 60, 120, 180, 220] : [0, 90, 90, 190, 190],
-          y: narrow ? [0, 0, 0, 0, 0] : [0, 0, -58, -58, -58],
-        }}
-        transition={{
-          scale: { type: "spring", stiffness: 200, damping: 15, delay: 0.5 },
-          opacity: { duration: 7, repeat: Infinity, times: [0, 0.12, 0.5, 0.88, 1], delay: 0.5 },
-          x: { duration: 7, repeat: Infinity, times: [0, 0.3, 0.45, 0.85, 1], ease: "easeInOut", delay: 0.5 },
-          y: { duration: 7, repeat: Infinity, times: [0, 0.3, 0.45, 0.85, 1], ease: "easeInOut", delay: 0.5 },
-        }}
-      />
-
-      {/* "Die passen." — the slogan, drawn. A gold key slides in from the
-          right and SNAPS into the round notch of a navy socket (an overshoot,
-          then home), the socket gives a small jolt as it lands, and after a
-          pause the key slips out to do it again. Added 2026-09-22 so the
-          first screen has something happening on a phone, where the large
-          shapes can only sit at the edges. */}
-      <span className="hero-fit">
-        <m.span
-          className="hero-fit__socket tds-shape tds-shape--navy"
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0, scale: [1, 1, 0.94, 1.03, 1, 1] }}
-          transition={{
-            opacity: { duration: 0.5, delay: 0.3 },
-            x: { type: "spring", stiffness: 120, damping: 14, delay: 0.3 },
-            scale: { duration: FIT_CYCLE, repeat: Infinity, times: FIT_TIMES, delay: 0.9 },
-          }}
-        />
-        <m.span
-          className="hero-fit__key tds-shape tds-shape--gold"
-          initial={{ opacity: 0, x: 70 }}
-          animate={{
-            opacity: [0, 1, 1, 1, 1, 0],
-            x: [70, 70, -6, 2, 0, 0, 70],
-            rotate: [0, 0, -30, 8, 0, 0, 90],
-          }}
-          transition={{
-            opacity: { duration: FIT_CYCLE, repeat: Infinity, times: [0, 0.08, 0.3, 0.5, 0.86, 1], delay: 0.9 },
-            x: { duration: FIT_CYCLE, repeat: Infinity, times: [0, 0.08, 0.24, 0.3, 0.36, 0.86, 1], ease: "easeInOut", delay: 0.9 },
-            rotate: { duration: FIT_CYCLE, repeat: Infinity, times: [0, 0.08, 0.24, 0.3, 0.36, 0.86, 1], ease: "easeInOut", delay: 0.9 },
-          }}
-        />
-      </span>
     </MotionScope>
   );
 }

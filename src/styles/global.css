@@ -619,7 +619,7 @@ html[data-a11y-motion] *::after {
    transition on `transform` (`.btn` has one) would smear each frame it
    writes, so only the colour properties keep transitioning. */
 html[data-motion="on"] :where([data-cta]) {
-  transition-property: background-color, color, border-color, box-shadow, opacity;
+  transition-property: background-color, color, border-color, translate, opacity;
 }
 /* The header's section indicator (lib/motion/ux.ts). Invisible until Motion
    places it; it sits under the links, which are `position: relative`. */
@@ -652,3 +652,80 @@ html[data-motion="on"] :where([data-cta]) {
   );
   z-index: -1;
 }
+
+/* === Hard 2D shadows (2026-09-22) ==========================================
+   A fixed, unblurred offset on every box and every control of the site —
+   the tokens come from tds-shared (`--tds-shadow-hard*`, set by the
+   marketing surface; a dark tone flips the ink). `:where()` keeps these at
+   zero specificity: a component that states its own shadow wins, and the
+   components here only ever state the same tokens.
+
+   Boxes take the large offset, controls the small one and PRESS into it
+   (`translate`, never `transform` — Motion owns the CTAs' transform). A
+   shadow is never transitioned: it is painted, not composited.
+
+   Not here, on purpose: text, the decoration layer (`.tds-shape`, circuits),
+   static chips and badges, the process markers, the underline form fields.
+   The services mosaic on a service page takes ONE shadow on its container,
+   not one per tile — its 1px seams are the tiles' separation. */
+:where(
+  [class*="rounded-[6px]"],
+  .demo-card,
+  .post-card,
+  .reference-card,
+  .bc-tile,
+  .faq-item,
+  .first-call,
+  .pricing-packages__card
+) {
+  box-shadow: var(--tds-shadow-hard);
+}
+:where(
+  .hero-cta,
+  [data-cta],
+  a[class*="rounded-[100px]"],
+  a[class*="rounded-full"][class*="px-5"],
+  a[class*="rounded-full"][class*="px-7"],
+  .first-call__cta,
+  .faq-cta-pill,
+  .submit-button,
+  .showcase-nav__btn,
+  .vat-switch
+) {
+  box-shadow: var(--tds-shadow-hard-sm);
+}
+/* The link chips (the systems under the services) are controls too, but
+   small: the press offset is their resting shadow. */
+:where(a[class*="rounded-full"][class*="text-xs"]) {
+  box-shadow: var(--tds-shadow-hard-press);
+}
+:where(
+  .hero-cta,
+  [data-cta],
+  a[class*="rounded-[100px]"],
+  a[class*="rounded-full"][class*="px-5"],
+  a[class*="rounded-full"][class*="px-7"],
+  .first-call__cta,
+  .submit-button,
+  .showcase-nav__btn
+):active:not(:disabled) {
+  translate: 2px 2px;
+  box-shadow: var(--tds-shadow-hard-press);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(
+    .hero-cta,
+    [data-cta],
+    a[class*="rounded-[100px]"],
+    a[class*="rounded-full"][class*="px-5"],
+    a[class*="rounded-full"][class*="px-7"],
+    .first-call__cta,
+    .submit-button,
+    .showcase-nav__btn
+  ):active:not(:disabled) {
+    translate: none;
+  }
+}
+/* A card inside a scroll track would lose its offset to the track's clip:
+   the track keeps room for it (the showcase in `Showcase.astro`, the
+   packages in `PricingList.astro`). */

@@ -18,7 +18,7 @@
  * links are the second block of the mobile menu (`Header.astro`), from the
  * same list (`propertyLinks()` in `lib/navigation.ts`).
  *
- * The parked peek is 2.75rem, inside the page gutter from 64rem up
+ * The parked peek is 3rem, inside the page gutter from 64rem up
  * (`clamp(1.5rem, 1rem + 3vw, 5rem)` is ≥ 2.9rem there), so a parked tab
  * never covers content.
  */
@@ -58,8 +58,8 @@ const ICONS: Record<PropertyTabId, string[]> = {
             <svg
               aria-hidden="true"
               class="property-tab__icon"
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -112,21 +112,22 @@ const ICONS: Record<PropertyTabId, string[]> = {
   }
 
   .property-tab {
-    --tab-peek: 2.75rem;
+    --tab-peek: 3rem;
     pointer-events: auto;
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
-    min-height: 2.75rem;
-    padding: 0 0.75rem 0 1.25rem;
+    /* Taller since 2026-09-22 — a bookmark, not a chip. */
+    min-height: 3.25rem;
+    padding: 0 0.875rem 0 1.25rem;
     border-radius: 0 9999px 9999px 0;
     background: var(--color-surface-navy);
     color: #fff;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     white-space: nowrap;
     text-decoration: none;
-    box-shadow: 0 10px 24px -14px rgb(5 15 104 / 0.55);
+    box-shadow: var(--tds-shadow-hard-sm);
     translate: calc(-100% + var(--tab-peek)) 0;
     transition:
       translate 420ms var(--lp-ease-bounce, var(--tds-ease-out)),
@@ -163,7 +164,6 @@ const ICONS: Record<PropertyTabId, string[]> = {
   :global(:root[data-theme="dark"]) .property-tab {
     background: var(--color-card);
     color: var(--color-black);
-    box-shadow: 0 10px 24px -14px rgb(0 0 0 / 0.7);
   }
   :global(:root[data-theme="dark"]) .property-tab:hover,
   :global(:root[data-theme="dark"]) .property-tab:focus-visible {

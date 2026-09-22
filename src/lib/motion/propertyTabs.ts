@@ -14,7 +14,7 @@ type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 
 const DOCK_QUERY = "(min-width: 64rem) and (hover: hover) and (pointer: fine)";
 /** Must match `--tab-peek` in `PropertyTabs.astro`. */
-const PEEK_PX = 44;
+const PEEK_PX = 48;
 /** How far a neighbour leans out with the open tab. */
 const NEIGHBOUR_PX = 10;
 

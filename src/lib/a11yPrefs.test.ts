@@ -50,8 +50,13 @@ describe("accessibility preferences", () => {
     const tools = src("components/A11yTools.astro");
     expect(tools).toContain('aria-pressed="false"');
     expect(tools).toContain("popovertarget=\"a11y-panel\"");
-    // The CTA stands down over the hero; the tools must not.
-    expect(src("components/FloatingCta.astro")).toMatch(/:not\(\.a11y-toggle\)/);
+    // The receiver folds away over the hero; the tools must not. Since
+    // 2026-09-22 the control is one pill of slots: only the trunk slot is in
+    // the suppression rules, and the short-screen rule spares the tools' slot.
+    const cta = src("components/FloatingCta.astro");
+    expect(cta).toMatch(/\[data-suppressed="true"\] \.tree-slot--trunk/);
+    expect(cta).not.toMatch(/\[data-suppressed="true"\] \.tree-slot--a11y/);
+    expect(cta).toMatch(/\.tree-slot:not\(\.tree-slot--a11y\)/);
     for (const file of ["lib/motion/boot.ts", "lib/motion/dialog.ts"]) {
       expect(src(file), file).toContain("lessMotion");
     }

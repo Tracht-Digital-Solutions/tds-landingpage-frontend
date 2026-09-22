@@ -57,21 +57,38 @@ Use current code, configuration and tests as the source of truth. Keep setup in
 - **One primary call to action per section**, "Erstgespräch vereinbaren": in
   the hero, beside the process steps (`ui/FirstCall.astro`), and the contact
   form itself; under the prices it is "Individuelle Lösungen – auf Anfrage".
-- **The floating control is a TREE** (`FloatingCta.astro`, 2026-09-22): a
-  round trunk with a telephone receiver that leads ONLY to the contact form
-  (`aria-label` "Zum Kontaktformular" — no `tel:`), and two branches above it,
-  the accessibility tools and "Nach oben", joined by necks (`::after` in the
-  branch's own colour). Near the pointer, on hover and on focus inside, it
-  spreads out: one registered custom property, `--tree-spread`, drives every
-  translate and neck, CSS-transitioned or on a Motion spring
-  (`lib/motion/floatingCta.ts`). Hover on any part turns every part
-  bordeaux, a dark ground turns every part white — those shared-colour rules
-  are `:global()` whole, because Astro's scoping of `:is(…, :global(x))` left
-  the a11y button (another component) out. Only the trunk stands down while
-  `#hero` or `#contact` is on screen (Motion spring; CSS holds `visibility`
-  back until the exit has played) and on short viewports while the cookie
-  notice is open; the branches stay. It publishes `--lp-floating-lane` so
+- **The floating control is ONE pill** (`FloatingCta.astro`, 2026-09-22 —
+  the first version, three circles joined by necks, did not read as one
+  shape). The group is the shape: navy, pill radius, hard shadow; inside it
+  three transparent 3rem buttons in SLOTS — "Nach oben", the accessibility
+  tools, and the telephone receiver that leads ONLY to the contact form
+  (`aria-label` "Zum Kontaktformular" — no `tel:`). A slot folds with
+  `grid-template-rows: 1fr ↔ 0fr`, so the pill grows and shrinks upwards:
+  "Nach oben" opens after a viewport of scroll, the receiver folds away
+  while `#hero` or `#contact` is on screen and on short viewports while the
+  cookie notice is open; the tools never fold. Motion only pops the icon of a
+  slot that opens (`lib/motion/floatingCta.ts`). Hover anywhere turns the
+  whole pill bordeaux; over a dark ground it turns white with a black ink
+  (the shadow tokens are re-declared there — `var()` in a custom property
+  resolves where it is declared). It publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
+- **Hard 2D shadows everywhere** (2026-09-22, tds-shared ≥ 0.42): boxes take
+  `--tds-shadow-hard`, controls `--tds-shadow-hard-sm` and press into it with
+  `translate`. The tokens come from the marketing surface; `global.css`
+  applies them through a zero-specificity `:where()` list (cards by class and
+  `rounded-[6px]`, pill links, CTAs), components that state a shadow use the
+  same tokens. A scroll track keeps padding for the offset (showcase,
+  packages), and a seam mosaic takes ONE shadow on its container. Never
+  transition a `box-shadow`.
+- **The services are an interactive list** (`ui/ServiceExplorer.astro`,
+  `lib/serviceExplorer.ts`, 2026-09-22), not a tile mosaic: an `<h3><button
+  aria-expanded aria-controls>` per service and its panel (photo, starting
+  point, outcome, scope, a named "Details & Ablauf" link). From 64rem the
+  titles stand left and one panel right (click, or hover with a 140 ms
+  intent; a navy marker slides behind the open title); on a phone it is an
+  accordion. Without JavaScript every panel shows — `hidden` is only set by
+  the script, and the desktop grid only applies with `[data-enhanced]`.
+  `ServiceCard.astro` remains for the related services on a service page.
 - **Bookmarks on the left edge** (`PropertyTabs.astro`, 2026-09-22): Journal,
   Tools, Kundenportal, Shop (`propertyLinks()` in `lib/navigation.ts` —
   `propertyHome` from tds-shared, the portal from `siteConfig.portalUrl`).
@@ -158,9 +175,9 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     card.
   - Decoration lives only in the hero's negative space, never behind the
     copy or the fixed header; `npm run audit:ux` measures the overlap. Since
-    2026-09-22 the whole scene renders on a phone too — quarter in the top
-    band, capsule, node and the "fit" motif (a gold key snapping into a navy
-    socket — "die passen") in the bottom band — and on short screens
+    2026-09-22 the scene renders on a phone too — quarter in the top band,
+    capsule in the bottom band; the gold node and the "fit" motif were
+    removed the same day on Julian's word (no ball) — and on short screens
     (`max-height: 46rem` below 80rem) none of it. The scroll drift and the
     conduit stay desktop-only (`xl`/80rem): a 3 rem drift carried the quarter
     onto the header on a phone. Under the slogan a `.tds-brandbar` draws
@@ -310,8 +327,8 @@ visual language rather than rebuilding it locally:
 - A borderless card must use a fill that differs from its section background.
   Preserve a visible hover response and `:focus-visible` state when replacing
   borders. Never remove a focus ring.
-- Avoid generic SaaS styling, new palettes, glows, organic blobs, heavy
-  shadows, strong gradients, gratuitous motion and framework/tech-stack
+- Avoid generic SaaS styling, new palettes, glows, organic blobs, BLURRED
+  shadows (the only shadow is the fixed hard 2D offset, see above), strong gradients, gratuitous motion and framework/tech-stack
   diagrams on the home page.
 - Subpages carry no numbering. Service detail pages and the pricing cards show
   no chapter number above the title, and the process stepper marks its steps
@@ -380,10 +397,10 @@ visual language rather than rebuilding it locally:
 - **Motion, after the 2026-09-21 pass.** It was measured at 1.7 px/s — under
   the threshold at which movement registers — and absent on phones entirely.
   Now the hero decoration arrives visibly, drifts at ~5–10 px/s, follows the
-  pointer ~60 px, and the gold node walks the conduit (~49 px/s). The
+  pointer ~60 px (the gold node that walked the conduit is gone). The
   scroll-linked part is CSS (`animation-timeline: view()`), NOT a hook: the
   shared motion entry re-exports only `m` and `AnimatePresence`, and a bare
-  `motion` import is forbidden. Three rules hold it together:
+  `motion` import is forbidden. Two rules hold it together:
   - **On a phone the shapes keep to measured bands** (2026-09-22). The old
     "large shapes from `xl` only" rule dated from the hero with its trust
     card; with the slogan and two buttons a 390 px phone has ~250 px free
@@ -392,8 +409,6 @@ visual language rather than rebuilding it locally:
     which is server-rendered — a width-dependent start state was a hydration
     mismatch) and has no scroll drift. `audit:ux` at 360×740 is the tightest
     case.
-  - **The node is deliberately outside the scroll-drift rule.** Two travels on
-    one axis read as a wobble, and the extra 56 px put it on the eyebrow.
   - **Nothing a visitor reads animates from `opacity: 0`.** The staged
     entrance is the elements AROUND the headline; the headline rises as one
     block. The note above its markup says what a per-word split broke.

@@ -21,8 +21,9 @@
  *
  * Only in the negative space, never behind the copy or the fixed header —
  * `scripts/ux-audit.mjs` measures the overlap. `HeroDecor` is the one island
- * (`client:idle`); since 2026-09-22 the whole scene — capsule, quarter,
- * node and the "fit" motif — renders on every width, in the free bands.
+ * (`client:idle`): the capsule and the quarter render
+ * in the free bands on every width (the gold node and the "fit" motif went
+ * on 2026-09-22).
  *
  * The photo is a `<picture>` whose source applies from `48rem`; a phone gets a
  * 1×1 GIF and downloads nothing. It carries `data-motion-image`: Motion
@@ -66,14 +67,14 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     <span class="hero-photo-scrim hidden md:block absolute inset-0"></span>
 
     {/* Die konstruierte Geometrie — große Kapsel links unten angeschnitten,
-        Viertelkreis unten rechts über beide Ränder hinaus, ein einzelner
-        Ocker-Knoten als Akzent. Sie liegen alle in der echten Negativfläche
+        Viertelkreis unten rechts über beide Ränder hinaus. Sie liegen alle
+        in der echten Negativfläche
         des Heros, nie hinter der Copy.
 
         `client:idle`, und seit 2026-09-21 auf jeder Breite. Vorher lud die
         Island erst ab 64rem, weil ALLE Formen darunter ausgeblendet waren —
-        ein Telefon hatte damit gar keine Bewegung im Hero. Jetzt laeuft dort
-        wenigstens der Knoten. Das kostet
+        ein Telefon hatte damit gar keine Bewegung im Hero. Jetzt bewegen sich
+        dort Kapsel und Viertelkreis. Das kostet
         gemessen ~129 KB JS dort; bezahlt wird es aus den Einsparungen
         derselben Änderung, und `npm run audit:perf` bewacht die Grenze.
 
@@ -178,8 +179,7 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
      about 280 px below the buttons (y≈565 to 844). So the phone gets the
      whole scene again, smaller and at the edges: the quarter in the top band
      under the header's right end, the capsule in the bottom band from the
-     left edge, the node walking above it, and the "fit" motif (a socket and
-     the key that snaps into it) bottom right. Each stays in its band;
+     left edge. Each stays in its band;
      `audit:ux` measures it. */
   :global(.hero-shape--quarter) {
     top: 5.75rem;
@@ -197,50 +197,12 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     width: 12rem;
     height: 4.75rem;
   }
-  :global(.hero-shape--node) {
-    bottom: 7.5rem;
-    left: 6%;
-    width: 0.5rem;
-    height: 0.5rem;
-  }
-  :global(.hero-fit) {
-    position: absolute;
-    right: 12%;
-    bottom: 6.5rem;
-    width: 5.5rem;
-    height: 3rem;
-    pointer-events: none;
-  }
-  /* The socket: a navy block with a round notch in its right edge. */
-  :global(.hero-fit__socket) {
-    position: absolute;
-    inset: 0 0.75rem 0 0;
-    /* A small, crisp graphic rather than a faint field: the motif has to
-       read at 5 rem wide. */
-    --tds-decor-shape-alpha: 0.9;
-    border-radius: 6px;
-    -webkit-mask: radial-gradient(circle 0.95rem at 100% 50%, transparent 97%, #000 100%);
-    mask: radial-gradient(circle 0.95rem at 100% 50%, transparent 97%, #000 100%);
-  }
-  /* The key: a gold disc whose resting place is exactly that notch. */
-  :global(.hero-fit__key) {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-top: -0.75rem;
-    --tds-decor-shape-alpha: 1;
-    border-radius: 9999px;
-  }
   @media (max-width: 79.999rem) and (max-height: 46rem) {
     /* Short screens (an SE, a landscape phone, a window zoomed to 400 %): the
        copy fills the hero and there is no free band left, so the scene stays
        out — `audit:ux` measured the quarter on the slogan at 720×450. */
     :global(.hero-shape--capsule),
-    :global(.hero-shape--quarter),
-    :global(.hero-shape--node),
-    :global(.hero-fit) {
+    :global(.hero-shape--quarter) {
       display: none;
     }
   }
@@ -257,19 +219,8 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
       width: 18rem;
       height: 7rem;
     }
-    :global(.hero-fit) {
-      right: 10%;
-      bottom: 4.5rem;
-      transform: scale(1.3);
-    }
   }
   @media (min-width: 80rem) {
-    :global(.hero-fit) {
-      top: 22%;
-      right: 9%;
-      bottom: auto;
-      transform: scale(1.5);
-    }
     :global(.hero-shape--capsule) {
       bottom: -7rem;
       left: -16rem;
@@ -282,11 +233,6 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
       right: -11rem;
       width: 26rem;
       height: 26rem;
-    }
-    :global(.hero-shape--node) {
-      top: auto;
-      bottom: 7%;
-      left: 44%;
     }
   }
 
@@ -303,11 +249,6 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
      header, and a 3 rem drift carried the quarter onto it (`audit:ux`). */
   @media (prefers-reduced-motion: no-preference) and (min-width: 80rem) {
     @supports (animation-timeline: view()) {
-      /* The NODE is deliberately not in this list. It already walks its own
-         path, and adding the scroll drift on top moved it up to 56 px further
-         down — straight onto the eyebrow, which `audit:ux` caught as
-         decoration over content at every width. Two travels on one axis also
-         read as one confused wobble rather than two ideas. */
       :global(.hero-shape--capsule),
       :global(.hero-shape--quarter) {
         animation: hero-scroll-drift linear both;

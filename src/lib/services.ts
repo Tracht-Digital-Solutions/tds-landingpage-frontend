@@ -212,7 +212,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "Festpreise ab 390 € netto, alles andere auf Anfrage. Bei Anzeigen kommt das Werbebudget dazu.",
+          "Festpreise ab 390 € netto, alles andere auf Anfrage.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -260,7 +260,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "Fixed prices from €390 net, everything else on request. Ads come with their own budget.",
+          "Fixed prices from €390 net, everything else on request.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],
