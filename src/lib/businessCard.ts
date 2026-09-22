@@ -190,7 +190,7 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
       id: "pricing",
       group: "more",
       label: de ? "Preise" : "Pricing",
-      meta: de ? "Stundensatz und Pakete" : "Hourly rate and packages",
+      meta: de ? "Festpreise und Pakete" : "Fixed prices and packages",
       href: site.pricing,
     },
     {

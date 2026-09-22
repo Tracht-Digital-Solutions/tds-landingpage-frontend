@@ -1,5 +1,7 @@
 import type { Lang } from "./i18n";
+import { propertyHome } from "@tracht-digital-solutions/tds-shared/nav";
 import { referenceCases } from "./references";
+import { siteConfig } from "./seo";
 
 /**
  * The home page's section navigation — ONE list for the header, the mobile
@@ -29,5 +31,32 @@ export function sectionLinks(lang: Lang): SectionLink[] {
     ...(referenceCases.length > 0 ? [{ id: "cases", label: de ? "Projekte" : "Projects" }] : []),
     { id: "process", label: de ? "Vorgehen" : "Process" },
     { id: "preise", label: de ? "Preise" : "Pricing" },
+  ];
+}
+
+/**
+ * The sister properties — the bookmarks docked on the left edge on a desktop
+ * (`components/PropertyTabs.astro`) and the second block of the mobile menu.
+ *
+ * Journal, Tools and Shop come from tds-shared's `propertyHome`, the one list
+ * every public header uses, so a moved origin moves here too. The customer
+ * portal is not a public property there; its origin is `siteConfig.portalUrl`.
+ * The names are proper names and stay the same in both languages, except the
+ * portal's, which is a description.
+ */
+export type PropertyTabId = "journal" | "tools" | "portal" | "shop";
+
+export interface PropertyTabLink {
+  id: PropertyTabId;
+  label: string;
+  href: string;
+}
+
+export function propertyLinks(lang: Lang): PropertyTabLink[] {
+  return [
+    { id: "journal", label: "Journal", href: propertyHome("journal", lang) },
+    { id: "tools", label: "Tools", href: propertyHome("tools", lang) },
+    { id: "portal", label: lang === "de" ? "Kundenportal" : "Customer portal", href: siteConfig.portalUrl },
+    { id: "shop", label: "Shop", href: propertyHome("shop", lang) },
   ];
 }

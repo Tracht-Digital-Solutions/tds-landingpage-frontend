@@ -169,7 +169,8 @@ export interface JournalHeadingContent {
  * One fact on the hero's trust card.
  *
  * `text` may carry `{name}`, `{town}` and `{rate}`. They are filled from
- * `siteConfig` and the pricing block by `resolveTrustFacts`, never typed into
+ * `siteConfig` and the pricing block (`{rate}` is the lowest package price
+ * since the hourly rates went, 2026-09-22) by `resolveTrustFacts`, never typed into
  * the copy: the Impressum and the price list are where those values are true,
  * and a sentence that repeats them by hand drifts the first time either moves.
  */
@@ -337,7 +338,7 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "Offene Preise",
-          text: "Stundensätze ab {rate} € netto, bei klarem Umfang auch Festpreis.",
+          text: "Festpreise ab {rate} € netto, alles andere auf Anfrage.",
           linkLabel: "Preise ansehen",
         },
       ],
@@ -374,7 +375,7 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "Abrechnen",
-          text: "Nach Aufwand zum Stundensatz – oder zum Festpreis, wenn der Umfang klar ist.",
+          text: "Zum Festpreis als Paket – oder mit einem eigenen Angebot für dein Vorhaben.",
         },
         {
           title: "Weiter betreuen",
@@ -479,7 +480,7 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "Open pricing",
-          text: "Hourly rates from €{rate} net, a fixed price when the scope is clear.",
+          text: "Fixed prices from €{rate} net, everything else on request.",
           linkLabel: "View pricing",
         },
       ],
@@ -516,7 +517,7 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "Invoice",
-          text: "By effort at the hourly rate – or at a fixed price when the scope is clear.",
+          text: "At a fixed price as a package – or with a quote of its own for your project.",
         },
         {
           title: "Look after it",

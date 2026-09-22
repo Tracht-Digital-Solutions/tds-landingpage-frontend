@@ -1,0 +1,239 @@
+---
+/**
+ * Bookmarks on the left edge (2026-09-22): Journal, Tools, Kundenportal and
+ * Shop — the sister properties, one tab each.
+ *
+ * Parked, only the tab's icon end sticks out of the viewport's left edge; on
+ * hover or keyboard focus the whole bookmark slides in from the left. The
+ * parked offset is `translate: calc(-100% + peek)`, a percentage of the tab's
+ * OWN width, so CSS alone places every tab correctly whatever its label — and
+ * slides it in on `:hover`/`:focus-visible` without JavaScript. With Motion
+ * running (`html[data-motion="on"]`), `lib/motion/propertyTabs.ts` takes the
+ * slide over and gives it a spring; the CSS translate then stays parked and
+ * Motion's transform adds the travel on top.
+ *
+ * **Desktop with a mouse only** — `(min-width: 64rem) and (hover: hover) and
+ * (pointer: fine)`, the same query that docks the business card. A bookmark
+ * that opens on hover means nothing under a thumb; on a phone the same four
+ * links are the second block of the mobile menu (`Header.astro`), from the
+ * same list (`propertyLinks()` in `lib/navigation.ts`).
+ *
+ * The parked peek is 2.75rem, inside the page gutter from 64rem up
+ * (`clamp(1.5rem, 1rem + 3vw, 5rem)` is ≥ 2.9rem there), so a parked tab
+ * never covers content.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { propertyLinks, type PropertyTabId } from "~/lib/navigation";
+
+const lang = resolveLang(Astro.currentLocale);
+const links = propertyLinks(lang);
+const navLabel = lang === "de" ? "Weitere Angebote" : "More from Tracht Digital";
+const external = lang === "de" ? "(öffnet eine andere Website)" : "(opens another website)";
+
+/** Stroke icons on a 24-unit grid, drawn in `currentColor`. */
+const ICONS: Record<PropertyTabId, string[]> = {
+  journal: [
+    "M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z",
+    "M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z",
+  ],
+  tools: [
+    "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z",
+  ],
+  portal: ["M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2", "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"],
+  shop: ["M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z", "M3 6h18", "M16 10a4 4 0 0 1-8 0"],
+};
+---
+
+<nav class="property-tabs" aria-label={navLabel} data-property-tabs>
+  <ul class="property-tabs__list">
+    {
+      links.map((link) => (
+        <li>
+          <a href={link.href} class="property-tab" data-property-tab={link.id} rel="noopener">
+            <span class="property-tab__label">
+              {link.label}
+              <span class="sr-only"> {external}</span>
+            </span>
+            <span aria-hidden="true" class="property-tab__arrow">↗</span>
+            <svg
+              aria-hidden="true"
+              class="property-tab__icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              {ICONS[link.id].map((d) => (
+                <path d={d} />
+              ))}
+            </svg>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .property-tabs {
+    display: none;
+  }
+  @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+    .property-tabs {
+      display: block;
+      position: fixed;
+      left: 0;
+      top: 50%;
+      translate: 0 -50%;
+      /* Under the header (40) and the floating control (35), over the page. */
+      z-index: 30;
+      /* Clips the parked tabs at the viewport edge, so their hidden part is
+         not horizontal overflow (audit:ux measures with the body clip
+         lifted). The padding leaves room for the shadow and the focus ring
+         of a tab that has slid in. */
+      overflow: clip;
+      padding: 0.75rem 1.75rem 0.75rem 0;
+      /* The box is only a column; the tabs take the pointer. */
+      pointer-events: none;
+    }
+  }
+  .property-tabs__list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .property-tab {
+    --tab-peek: 2.75rem;
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    padding: 0 0.75rem 0 1.25rem;
+    border-radius: 0 9999px 9999px 0;
+    background: var(--color-surface-navy);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    box-shadow: 0 10px 24px -14px rgb(5 15 104 / 0.55);
+    translate: calc(-100% + var(--tab-peek)) 0;
+    transition:
+      translate 420ms var(--lp-ease-bounce, var(--tds-ease-out)),
+      background-color 200ms var(--tds-ease-out);
+  }
+  .property-tab:hover,
+  .property-tab:focus-visible {
+    translate: 0 0;
+    background: var(--color-surface-accent);
+  }
+  .property-tab:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .property-tab__label,
+  .property-tab__arrow {
+    opacity: 0.35;
+    transition: opacity 200ms var(--tds-ease-out);
+  }
+  .property-tab:hover :is(.property-tab__label, .property-tab__arrow),
+  .property-tab:focus-visible :is(.property-tab__label, .property-tab__arrow) {
+    opacity: 1;
+  }
+  .property-tab__arrow {
+    font-size: 0.75rem;
+  }
+  /* The icon is the tab's right end — the part that peeks out when parked. */
+  .property-tab__icon {
+    flex: none;
+    margin-left: 0.125rem;
+  }
+
+  /* In the dark theme the navy tab would disappear into the ground. */
+  :global(:root[data-theme="dark"]) .property-tab {
+    background: var(--color-card);
+    color: var(--color-black);
+    box-shadow: 0 10px 24px -14px rgb(0 0 0 / 0.7);
+  }
+  :global(:root[data-theme="dark"]) .property-tab:hover,
+  :global(:root[data-theme="dark"]) .property-tab:focus-visible {
+    background: var(--color-surface-accent);
+    color: #fff;
+  }
+
+  /* Over a dark band (the navy contact block, the footer) the navy tab
+     would vanish; it turns white there, like the floating tree. The script
+     below writes `data-on-dark`. */
+  .property-tabs[data-on-dark="true"] .property-tab {
+    background: #fff;
+    color: var(--color-surface-navy);
+  }
+  .property-tabs[data-on-dark="true"] .property-tab:hover,
+  .property-tabs[data-on-dark="true"] .property-tab:focus-visible {
+    background: var(--color-surface-accent);
+    color: #fff;
+  }
+
+  /* Motion runs the slide: the CSS translate stays parked and Motion's
+     transform adds the travel (lib/motion/propertyTabs.ts). */
+  :global(:root[data-motion="on"]) .property-tab,
+  :global(:root[data-motion="on"]) .property-tab:hover,
+  :global(:root[data-motion="on"]) .property-tab:focus-visible {
+    translate: calc(-100% + var(--tab-peek)) 0;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .property-tab {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Which parts of the document are a dark ground, measured once and again
+  // only when the page's height changes — never per scroll frame. The same
+  // approach as the floating tree in `FloatingCta.astro`.
+  const nav = document.querySelector<HTMLElement>("[data-property-tabs]");
+  if (nav && window.matchMedia("(min-width: 64rem) and (hover: hover) and (pointer: fine)").matches) {
+    let ranges: Array<[number, number]> = [];
+    const measure = () => {
+      const offset = window.scrollY;
+      ranges = Array.from(document.querySelectorAll<HTMLElement>(".tds-tone-navy, .tds-tone-ink"))
+        // Only grounds that reach the left edge the tabs sit on — a navy card
+        // inside the content column never passes behind them.
+        .filter((element) => !nav.contains(element) && element.getBoundingClientRect().left < 48)
+        .map((element) => {
+          const box = element.getBoundingClientRect();
+          return [box.top + offset, box.bottom + offset] as [number, number];
+        });
+    };
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const centre = window.scrollY + window.innerHeight / 2;
+      const dark = ranges.some(([top, bottom]) => centre >= top && centre <= bottom);
+      const value = dark ? "true" : "false";
+      if (nav.dataset.onDark !== value) nav.dataset.onDark = value;
+    };
+    measure();
+    update();
+    window.addEventListener("scroll", () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    }, { passive: true });
+    new ResizeObserver(() => {
+      measure();
+      update();
+    }).observe(document.documentElement);
+  }
+</script>

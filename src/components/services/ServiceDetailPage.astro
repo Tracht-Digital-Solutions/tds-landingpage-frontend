@@ -7,7 +7,7 @@
  * The `<title>` and the "Stand" date are code-owned (`seoTitle`, `updatedAt` in
  * `lib/services.ts`), everything the page says is the resolved CMS content. The
  * JSON-LD is one graph: the page (dated, authored, published), the service with
- * its real hourly rate, and the breadcrumb.
+ * the service (no price of its own since 2026-09-22), and the breadcrumb.
  */
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
@@ -26,7 +26,6 @@ import DetailCta from "~/components/detail/DetailCta.astro";
 import { asGraph, breadcrumbNode, serviceNode, webPageNode } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
-import { getPricingContent, getServiceRate } from "~/lib/pricing";
 import { businessCardCopy } from "~/lib/businessCard";
 import { platformDefinitions, platformHref } from "~/lib/platforms";
 import {
@@ -51,8 +50,6 @@ const alternatePaths = {
   de: serviceHref(service, "de"),
   en: serviceHref(service, "en"),
 };
-const pricing = await getPricingContent(lang);
-const serviceRate = getServiceRate(pricing, service.id);
 const ui =
   lang === "de"
     ? { breadcrumb: "Brotkrümelnavigation", home: "Startseite" }
@@ -83,8 +80,8 @@ const platformHub =
         otherMore: "Send a short note",
       };
 
-// Every service carries a rate — `getServiceRate` is total — so every service
-// page states an `Offer`. The platform pages name no amount and carry none.
+// No `offers`: the site publishes no hourly rates (2026-09-22). The price box
+// links to the packages instead, like the platform pages do.
 const breadcrumbId = `${canonical}#breadcrumb`;
 const jsonLd = asGraph(
   webPageNode({
@@ -102,7 +99,6 @@ const jsonLd = asGraph(
     lang,
     serviceType: content.title,
     outputs: content.outcomes,
-    rate: serviceRate,
   }),
   breadcrumbNode(breadcrumbId, [
     { name: ui.home, url: `${siteConfig.url}${homeHref}` },
@@ -157,6 +153,7 @@ const jsonLd = asGraph(
       process={content.process}
       priceLabel={content.priceLabel}
       priceText={content.priceText}
+      priceLink={{ href: `${homeHref}#preise`, label: lang === "de" ? "Festpreise ansehen" : "See fixed prices" }}
     />
 
     {content.references.length > 0 && (

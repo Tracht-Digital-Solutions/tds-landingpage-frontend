@@ -15,26 +15,27 @@
 
 ## Leistungen
 
-Vier Leistungen, jede mit einer eigenen Seite. Alle Stundensätze sind netto,
-zuzüglich Mehrwertsteuer; steht der Umfang vorher fest, ist auch ein Festpreis
-möglich. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.
+Vier Leistungen, jede mit einer eigenen Seite. Drei Pakete haben einen
+Festpreis (netto, zuzüglich Mehrwertsteuer): Website-Check 390 €,
+Website-Übernahme 650 €, Onepager 1.040 €. Alles andere gibt es auf Anfrage.
+Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.
 
-- **Webauftritt** (65 € netto/Std.) — Website, Onlineshop und Marketing aus
+- **Webauftritt** (Festpreise ab 390 € netto) — Website, Onlineshop und Marketing aus
   einer Hand: bauen, zu den Kunden bringen, dauerhaft pflegen.
   https://tracht-digital.de/leistungen/webauftritt
   (English: https://tracht-digital.de/en/services/web-presence)
-- **Beratung & Konzeption** (75 € netto/Std.) — digitale Vorhaben sortieren,
+- **Beratung & Konzeption** (auf Anfrage) — digitale Vorhaben sortieren,
   Möglichkeiten mit Kosten und Folgen zeigen, daraus einen klaren Fahrplan
   machen.
   https://tracht-digital.de/leistungen/beratung-konzeption
   (English: https://tracht-digital.de/en/services/consulting-planning)
-- **Prozessoptimierung** (70 € netto/Std.) — tägliche Abläufe ansehen,
-  unnötige Schritte streichen, automatisieren, was wirklich Zeit spart.
+- **Prozessoptimierung** (auf Anfrage) — tägliche Abläufe ansehen,
+  unnötige Schritte streichen, automatisieren, was Zeit spart.
   https://tracht-digital.de/leistungen/prozessoptimierung
   (English: https://tracht-digital.de/en/services/process-optimization)
-- **Individuelle Lösungen** (70 € netto/Std.) — vorhandene Programme
+- **Individuelle Lösungen** (auf Anfrage) — vorhandene Programme
   verbinden, passende Werkzeuge ergänzen, eigene Software nur dort bauen, wo
-  sie wirklich hilft.
+  sie hilft.
   https://tracht-digital.de/leistungen/individuelle-loesungen
   (English: https://tracht-digital.de/en/services/tailored-solutions)
 
@@ -42,8 +43,8 @@ möglich. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.
 
 Eine eigene Seite je System: typische Probleme, was übernommen wird,
 Entscheidungshilfen mit Quellen und häufige Fragen. Unabhängig – kein
-offizieller Partner der Hersteller. Abgerechnet wird nach Aufwand zum
-Stundensatz des Webauftritts oder zum Festpreis, sobald der Umfang klar ist.
+offizieller Partner der Hersteller. Abgerechnet wird zum Festpreis oder
+nach einem eigenen Angebot, bevor die Arbeit beginnt.
 
 - **WooCommerce** — Fehler beheben, Shop erstellen, Theme anpassen.
   https://tracht-digital.de/leistungen/woocommerce
@@ -86,5 +87,5 @@ Stundensatz des Webauftritts oder zum Festpreis, sobald der Umfang klar ist.
   (Tracht Digital Solutions, tracht-digital.de) zitiert werden.
 - Die Seiten werden serverseitig gerendert; JSON-LD-Strukturdaten stehen im
   `<head>` jeder Seite. Leistungs- und Systemseiten nennen ihr Stand-Datum.
-- Die einzigen genannten Preise sind die Stundensätze oben. Projektpreise
-  hängen vom Umfang ab.
+- Die einzigen genannten Preise sind die drei Festpreise oben. Alle anderen
+  Preise hängen vom Umfang ab; sie gibt es auf Anfrage.

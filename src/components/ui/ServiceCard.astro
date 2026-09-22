@@ -118,9 +118,17 @@ const PHOTO = { width: 1586, height: 992 };
      not reflow and shift the seams while the photos arrive. */
   .service-tile__shot {
     position: relative;
-    aspect-ratio: 16 / 10;
+    /* A letterbox on a phone (2026-09-22): at 16:10 the photo alone took
+       240 px of every one of the four cards, and the section ran over three
+       screens before a word of the second service. */
+    aspect-ratio: 21 / 9;
     overflow: hidden;
     background: var(--color-paper);
+  }
+  @media (min-width: 48rem) {
+    .service-tile__shot {
+      aspect-ratio: 16 / 10;
+    }
   }
   .service-tile__shot img {
     display: block;

@@ -55,11 +55,34 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   — do not merge them again. `CustomerCases` renders nothing without a case;
   `Showcase` always has at least the business card.
 - **One primary call to action per section**, "Erstgespräch vereinbaren": in
-  the hero, beside the process steps (`ui/FirstCall.astro`), under the prices,
-  and the contact form itself. The floating CTA (`FloatingCta.astro`) stands
-  down while `#hero` or `#contact` is on screen, and on short viewports while
-  the cookie notice is open; it publishes `--lp-floating-lane` so
+  the hero, beside the process steps (`ui/FirstCall.astro`), and the contact
+  form itself; under the prices it is "Individuelle Lösungen – auf Anfrage".
+- **The floating control is a TREE** (`FloatingCta.astro`, 2026-09-22): a
+  round trunk with a telephone receiver that leads ONLY to the contact form
+  (`aria-label` "Zum Kontaktformular" — no `tel:`), and two branches above it,
+  the accessibility tools and "Nach oben", joined by necks (`::after` in the
+  branch's own colour). Near the pointer, on hover and on focus inside, it
+  spreads out: one registered custom property, `--tree-spread`, drives every
+  translate and neck, CSS-transitioned or on a Motion spring
+  (`lib/motion/floatingCta.ts`). Hover on any part turns every part
+  bordeaux, a dark ground turns every part white — those shared-colour rules
+  are `:global()` whole, because Astro's scoping of `:is(…, :global(x))` left
+  the a11y button (another component) out. Only the trunk stands down while
+  `#hero` or `#contact` is on screen (Motion spring; CSS holds `visibility`
+  back until the exit has played) and on short viewports while the cookie
+  notice is open; the branches stay. It publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
+- **Bookmarks on the left edge** (`PropertyTabs.astro`, 2026-09-22): Journal,
+  Tools, Kundenportal, Shop (`propertyLinks()` in `lib/navigation.ts` —
+  `propertyHome` from tds-shared, the portal from `siteConfig.portalUrl`).
+  Parked with only the icon out (`translate: calc(-100% + peek)`, a share of
+  the tab's own width), they slide in on hover/focus — CSS alone, or a Motion
+  spring with the neighbours leaning out (`lib/motion/propertyTabs.ts`).
+  Desktop with a mouse only (`(min-width: 64rem) and (hover: hover) and
+  (pointer: fine)`); on a phone the same four links are the mobile menu's
+  second block. The nav is `overflow: clip`, or the parked parts count as
+  horizontal overflow in `audit:ux`; it turns white over a full-bleed dark
+  band (`data-on-dark`, measured like the tree).
 - **The contact form asks WHAT it is about and answers WHAT HAPPENS NEXT**
   (2026-09-21). The closed dropdown wears the text fields' own class
   (`fieldClass` + `.contact-select`: transparent, the row's underline, the
@@ -95,8 +118,9 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   natively.
   - It asks three things — topic, recognised starting points, stage — and
     recommends one or more services, each with the visitor's own answers as
-    the reason, the published hourly rate (resolved from the pricing block on
-    the server) and, for Webauftritt, the platform pages. It never comes back
+    the reason, its price (Webauftritt: "Festpreise ab" the lowest package,
+    resolved on the server; every other service "auf Anfrage") and, for
+    Webauftritt, the platform pages. It never comes back
     empty and never names an estimate or a range. `SERVICE_ORDER` is the
     catalogue order and breaks ties.
   - Its starting points are the services' `situations`, resolved on the server
@@ -132,10 +156,15 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   - There is no showcase slider any more: it auto-rotated, put a demo's title
     in the page's first `<h2>` and gave real cases and fictional demos the same
     card.
-  - Decoration lives only in the hero's negative space (lower left, lower
-    right), never behind the copy or the fixed header; `npm run audit:ux`
-    measures the overlap. The navy capsule, the bordeaux quarter and the
-    conduit start at `xl`.
+  - Decoration lives only in the hero's negative space, never behind the
+    copy or the fixed header; `npm run audit:ux` measures the overlap. Since
+    2026-09-22 the whole scene renders on a phone too — quarter in the top
+    band, capsule, node and the "fit" motif (a gold key snapping into a navy
+    socket — "die passen") in the bottom band — and on short screens
+    (`max-height: 46rem` below 80rem) none of it. The scroll drift and the
+    conduit stay desktop-only (`xl`/80rem): a 3 rem drift carried the quarter
+    onto the header on a phone. Under the slogan a `.tds-brandbar` draws
+    itself (transform only) and the copy drifts up on scroll-out.
   - The photo is a `<picture>` whose source applies from `48rem`; phones get a
     1×1 inline GIF and download nothing (the old `<img class="hidden md:block">`
     cost every phone 60 KB it never showed).
@@ -236,17 +265,28 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     shows. Re-run it (`npm run businesscard:sync`) after changing how the page
     looks, or the tile advertises the old design.
 - **Prices are the home section `#preise`** (`sections/Pricing.astro`):
-  "Festpreise" first, then the four hourly rates, then "So entsteht dein
-  Preis" — visible without a click.
+  "Festpreise" with a Netto/Brutto switch, then "So entsteht dein Preis",
+  then "Individuelle Lösungen – auf Anfrage" — visible without a click.
+  - **No hourly rates anywhere** (decided 2026-09-22): not in the price list,
+    the service pages' price box (it links to `#preise`), the assistant, the
+    JSON-LD (`priceRange` is the package span, service nodes carry no
+    `offers`) or `llms.txt`. The rate fields are gone from `PricingContent`,
+    so stored panel values are ignored. `pricing.test.ts`, `llmsTxt.test.ts`
+    and `serviceFinder.test.ts` fail on "Stunde"/"hour" in that copy. A panel
+    block (`faq_v2`, `pricing_logic`, a service's `priceText`) saved before
+    the change still overrides the new defaults until it is cleared.
   - **Three fixed-price packages** (2026-09-21), committed in `lib/pricing.ts`:
-    Website-Check 390 €, Website-Übernahme 650 €, Onepager 1.040 € — each is
-    HOURS × the Webauftritt rate (6/10/16 h × 65 €), so a package is never a
-    cheaper or dearer figure than the same work by the hour. Checked against
-    the market that day (freelance 60–120 €/h, one-pagers 700–1,500 €).
-    `pricing.test.ts` holds the relation, `seo.test.ts` the "ab 390 €" in the
-    meta description. A valid `pricing_services.packages` list in the panel
-    REPLACES them as a whole; an empty or broken one falls back to them.
-    JSON-LD: plain `PriceSpecification`, never `unitCode: HUR`. `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to it;
+    Website-Check 390 €, Website-Übernahme 650 €, Onepager 1.040 € (net).
+    `seo.test.ts` holds the "ab 390 €" in the meta description, and the
+    Webauftritt `priceText` names the lowest package. A valid
+    `pricing_services.packages` list in the panel REPLACES them as a whole;
+    an empty or broken one falls back to them. JSON-LD: plain
+    `PriceSpecification`, never `unitCode: HUR`.
+  - **Net/gross** (`PricingList.astro`): each price renders net with
+    `data-gross` (`grossPrice()`, `VAT_RATE` 0.19); the switch ships `hidden`,
+    remembers the choice in localStorage (`tds-price-mode`) and counts the
+    figures over with Motion. On a phone the packages are a snap row that is
+    focusable only while it overflows. `/preise`, `/en/preise` and `/en/pricing` answer with a 301 to it;
   `/kontakt` and `/en/contact` with a 301 to `#contact`. The section keeps an
   alias anchor `pricing-teaser` for old deep links. Redirects stay out of the
   sitemap and out of `alwaysPaths` (the page cache only stores 200 responses).
@@ -305,8 +345,9 @@ visual language rather than rebuilding it locally:
   only after an internal navigation — and nothing under reduced motion. It
   drives:
   - **the CTA** (`[data-cta]`, `cta.ts`): magnetic pull under a fine pointer,
-    press squeeze, one light sweep on arrival. The floating CTA is NOT a
-    `[data-cta]` — its own transform does show/hide.
+    press squeeze, one light sweep on arrival. The floating tree is NOT a
+    `[data-cta]` — `floatingCta.ts` springs its spread and its trunk.
+  - **the bookmarks** (`propertyTabs.ts`), see above.
   - **the generated photos** (`[data-motion-image]`, `images.ts`): settle
     from a larger scale when they scroll in, then drift ±20 px. Transform
     only — the grounds carry their resting opacity in CSS.
@@ -343,23 +384,25 @@ visual language rather than rebuilding it locally:
   scroll-linked part is CSS (`animation-timeline: view()`), NOT a hook: the
   shared motion entry re-exports only `m` and `AnimatePresence`, and a bare
   `motion` import is forbidden. Three rules hold it together:
-  - **The capsule and the quarter circle still start at `xl`.** Below that the
-    hero has no negative space — measured, the only free bands at 390 px are
-    100 px at the top and 56 px at the bottom, and the top one belongs to the
-    fixed header. Placing them lower produced sixteen "decoration over
-    content" failures in `audit:ux`. Only the small node renders below `xl`,
-    in the bottom band, walking horizontally.
+  - **On a phone the shapes keep to measured bands** (2026-09-22). The old
+    "large shapes from `xl` only" rule dated from the hero with its trust
+    card; with the slogan and two buttons a 390 px phone has ~250 px free
+    under the header and ~280 px under the buttons. The phone arrangement is
+    smaller, drifts less (`narrow` in `HeroDecor.tsx`, never in `initial`,
+    which is server-rendered — a width-dependent start state was a hydration
+    mismatch) and has no scroll drift. `audit:ux` at 360×740 is the tightest
+    case.
   - **The node is deliberately outside the scroll-drift rule.** Two travels on
     one axis read as a wobble, and the extra 56 px put it on the eyebrow.
   - **Nothing a visitor reads animates from `opacity: 0`.** The staged
     entrance is the elements AROUND the headline; the headline rises as one
     block. The note above its markup says what a per-word split broke.
-- **Accessibility tools in the floating CTA menu** (`components/A11yTools.astro`,
+- **Accessibility tools in the floating tree** (`components/A11yTools.astro`,
   `lib/a11yPrefs.ts`): larger text, higher contrast, motion off — `aria-pressed`
-  switches in a native popover, stored in localStorage and applied by an inline
-  head script before the first paint. The button stays visible while the CTA
-  beside it stands down over the hero and the form (the suppression rules hide
-  the group's CHILDREN except the tools). Every JS motion path asks
+  switches in a native popover (docked to the tree's left), stored in
+  localStorage and applied by an inline head script before the first paint.
+  The branch stays visible while the trunk stands down over the hero and the
+  form. Every JS motion path asks
   `lessMotion()` (or the `data-a11y-motion` attribute) as well as the media
   query. The lane offset of the group is a `translate`, not `bottom`: the
   cookie notice arrives after first paint and a `bottom` change measured as
@@ -462,9 +505,9 @@ no free and no time-boxed first conversation ("kostenlos", "kostenfrei",
 "gratis", minutes); the one sentence about its cost is "Kosten entstehen erst,
 wenn wir einen Auftrag vereinbaren."; no project price ranges, only the cost
 logic.
-The flat pricing block owns the page/teaser copy, four numeric hourly rates,
-notes and CTA. Every service has a rate, so there is no custom-rate label and
-no highlighted card any more. Legacy `hero`, `about`, `services`,
+The flat pricing block owns the section copy, notes and the closing
+"Individuelle Lösungen" box; the packages are its `packages` list. It carries
+no rates since 2026-09-22. Legacy `hero`, `about`, `services`,
 `consulting`, `pricing` and `faq` rows remain readable in the editor for stored
 content but have no active home/pricing renderer; do not wire them back. The
 `tech` and `portfolio` blocks were removed from the CMS schema together with
@@ -645,11 +688,9 @@ demos and the business card already sit on their service, and there it is
 `null`. `cardActions.test.ts` guards the geometry, that absence, and that a
 reference card never repeats its primary service as a badge.
 
-On the home page the shelf gives **two tracks to its lead card**, the first
-demo. Both card families answer the extra width through a container query, and the
-extra width is width, not height — the slides stretch to the tallest card, so a
-taller lead card would pad every other card's body with the difference. The
-band goes to `32 / 10`, exactly twice `16 / 10` at the same height.
+On the home page **every card of the shelf is one track wide** (2026-09-22,
+on Julian's word) — the first demo used to be a two-track lead card. The
+arrow step measures the first slide, since all slides are equal.
 
 The framing exists **twice, for one card and for several** (`headlineSingle`,
 `introSingle`, `serviceIntroSingle`), and `demosCopy()` picks by the number
@@ -721,11 +762,11 @@ process; cache fingerprinting does not replace the restart.
   title. Titles put the search term first and "— Tracht Digital" last.
 - JSON-LD must match visible content after CMS resolution. FAQ answers must use
   the same resolved values as the rendered section. Pricing structured data
-  carries hourly rates as `UnitPriceSpecification` with `unitCode: "HUR"`, and
-  a fixed-price package as a plain `PriceSpecification` with no unit — pushing
-  a package total through the hourly branch publishes a four-figure *hourly
-  rate* to everything that parses the markup instead of reading the page
-  (`pricing.test.ts` holds the two apart). There is no `HowTo` node any more: Google
+  carries each fixed-price package as a plain `PriceSpecification` with no
+  unit — a `UnitPriceSpecification` with `unitCode: "HUR"` would publish a
+  four-figure *hourly rate* to everything that parses the markup instead of
+  reading the page (`pricing.test.ts`). The figures are net; the gross view
+  is not a second price. There is no `HowTo` node any more: Google
   retired those rich results, and the process is not a set of instructions.
   Subpages emit one `@graph` (`lib/jsonld.ts`): `WebPage` with author,
   publisher and the visible date as `dateModified`; `Service`, with an `Offer`

@@ -138,7 +138,7 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
                 <p className="finder__summary">{service.summary}</p>
                 <p className="finder__rate">
                   <span className="finder__rate-label">{copy.rateLabel}</span>{" "}
-                  <span className="finder__rate-value">{copy.rateValue(service.rate)}</span>
+                  <span className="finder__rate-value">{service.fromPrice !== undefined ? copy.priceFrom(service.fromPrice) : copy.priceOnRequest}</span>
                 </p>
                 {match.reasons.length > 0 && (
                   <>

@@ -21,8 +21,8 @@
  *
  * Only in the negative space, never behind the copy or the fixed header —
  * `scripts/ux-audit.mjs` measures the overlap. `HeroDecor` is the one island
- * (`client:idle`); the capsule and the quarter start at `xl`, the gold node
- * walks the bottom band on every width.
+ * (`client:idle`); since 2026-09-22 the whole scene — capsule, quarter,
+ * node and the "fit" motif — renders on every width, in the free bands.
  *
  * The photo is a `<picture>` whose source applies from `48rem`; a phone gets a
  * 1×1 GIF and downloads nothing. It carries `data-motion-image`: Motion
@@ -77,7 +77,7 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
         gemessen ~129 KB JS dort; bezahlt wird es aus den Einsparungen
         derselben Änderung, und `npm run audit:perf` bewacht die Grenze.
 
-        AUSSCHLIESSLICH diese drei Formen: das Foto oben und jeder Textknoten
+        AUSSCHLIESSLICH diese Formen: das Foto oben und jeder Textknoten
         unten bleiben statisches Astro-Markup, damit nichts Sichtbares auf
         Hydration wartet. Die Begründung steht in `islands/HeroDecor.tsx`,
         die Regel in `__tests__/motion.test.ts`. */}
@@ -95,6 +95,10 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
           H1 into small LCP candidates and removed every chance for
           `hyphens: auto` to break a long word. */}
       <h1 id="hero-heading" class="hero-title hero-rise">{slogan}</h1>
+      {/* The brand's three-part bar, drawn out from the left once the slogan
+          has landed (2026-09-22). Decoration: `aria-hidden`, transform only,
+          and at rest without motion. */}
+      <span aria-hidden="true" class="tds-brandbar hero-brandbar"></span>
 
       {/* Real anchors: they work before JavaScript, and `SmoothScroll` gives
           them the site's jump when it is there. The primary one is Motion's
@@ -164,40 +168,107 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     /* Eigene Ebene, damit Drift und Parallaxe nicht jedes Frame neu rastern. */
     will-change: transform;
   }
-  /* Below 80rem the two LARGE shapes are not drawn, and that is measured
-     rather than taste. At 390 px the hero's content runs from y=100 to
-     y=1054 and spans the full width between the gutters; the only empty
-     bands are 100 px at the top and 56 px at the bottom. A capsule or a
-     quarter circle put anywhere else lands on the trust card — which
-     `npm run audit:ux` reports as "decoration over content", sixteen hard
-     failures the first time this was tried. The limit is 80rem and not
-     64rem for the same reason the original code gave: at 1024 px the
-     buttons and the note reach down into exactly that corner.
-
-     The NODE does fit, and it is the liveliest of the three anyway
-     (measured ~49 px/s against the capsule's 9): it sits in the top band
-     and walks across it. So a phone gets motion in the hero, in the one
-     place the layout actually leaves free. */
-  :global(.hero-shape--capsule),
+  /* Until 2026-09-22 the two large shapes were not drawn below 80rem: with
+     the trust card in the hero, the only free bands on a phone were 100 px
+     at the top and 56 px at the bottom, and `audit:ux` reported sixteen
+     "decoration over content" failures the first time they were tried. */
+  /* 2026-09-22: the measurement above is from the hero WITH its trust card.
+     Since the hero is the slogan and two buttons, a 390 px phone has about
+     250 px free between the header (ends y=76) and the slogan (y≈320), and
+     about 280 px below the buttons (y≈565 to 844). So the phone gets the
+     whole scene again, smaller and at the edges: the quarter in the top band
+     under the header's right end, the capsule in the bottom band from the
+     left edge, the node walking above it, and the "fit" motif (a socket and
+     the key that snaps into it) bottom right. Each stays in its band;
+     `audit:ux` measures it. */
   :global(.hero-shape--quarter) {
-    display: none;
+    top: 5.75rem;
+    right: calc(min(9rem, 14svh) * -0.5);
+    /* Tied to the height: on a 740 px phone the slogan starts ~220 px down. */
+    width: min(9rem, 14svh);
+    height: min(9rem, 14svh);
+  }
+  :global(.hero-shape--capsule) {
+    /* Low in the band: its drift lifts it, and on a 360×740 phone the
+       buttons end about 180 px above the bottom edge (`audit:ux`). On a
+       first visit the cookie notice covers it, which is the lesser evil. */
+    bottom: 1.5rem;
+    left: -4.5rem;
+    width: 12rem;
+    height: 4.75rem;
   }
   :global(.hero-shape--node) {
-    /* The BOTTOM band, not the top one. The top looked free — the copy does
-       not start until y=100 on a phone — but the fixed header floats from
-       y=12 to roughly y=88, so a node up there sits on the navigation, which
-       `audit:ux` reports as decoration over content. Measured, the free band
-       below the content is 56 px at 390 px and 122 px at 1024 px, and the
-       floating CTA stands down while the hero is on screen. */
-    bottom: 1.25rem;
-    left: 5%;
+    bottom: 7.5rem;
+    left: 6%;
     width: 0.5rem;
     height: 0.5rem;
   }
-  @media (min-width: 80rem) {
+  :global(.hero-fit) {
+    position: absolute;
+    right: 12%;
+    bottom: 6.5rem;
+    width: 5.5rem;
+    height: 3rem;
+    pointer-events: none;
+  }
+  /* The socket: a navy block with a round notch in its right edge. */
+  :global(.hero-fit__socket) {
+    position: absolute;
+    inset: 0 0.75rem 0 0;
+    /* A small, crisp graphic rather than a faint field: the motif has to
+       read at 5 rem wide. */
+    --tds-decor-shape-alpha: 0.9;
+    border-radius: 6px;
+    -webkit-mask: radial-gradient(circle 0.95rem at 100% 50%, transparent 97%, #000 100%);
+    mask: radial-gradient(circle 0.95rem at 100% 50%, transparent 97%, #000 100%);
+  }
+  /* The key: a gold disc whose resting place is exactly that notch. */
+  :global(.hero-fit__key) {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: -0.75rem;
+    --tds-decor-shape-alpha: 1;
+    border-radius: 9999px;
+  }
+  @media (max-width: 79.999rem) and (max-height: 46rem) {
+    /* Short screens (an SE, a landscape phone, a window zoomed to 400 %): the
+       copy fills the hero and there is no free band left, so the scene stays
+       out — `audit:ux` measured the quarter on the slogan at 720×450. */
     :global(.hero-shape--capsule),
+    :global(.hero-shape--quarter),
+    :global(.hero-shape--node),
+    :global(.hero-fit) {
+      display: none;
+    }
+  }
+  @media (min-width: 48rem) {
     :global(.hero-shape--quarter) {
-      display: block;
+      top: 7rem;
+      right: -5rem;
+      width: 13rem;
+      height: 13rem;
+    }
+    :global(.hero-shape--capsule) {
+      bottom: 3rem;
+      left: -6rem;
+      width: 18rem;
+      height: 7rem;
+    }
+    :global(.hero-fit) {
+      right: 10%;
+      bottom: 4.5rem;
+      transform: scale(1.3);
+    }
+  }
+  @media (min-width: 80rem) {
+    :global(.hero-fit) {
+      top: 22%;
+      right: 9%;
+      bottom: auto;
+      transform: scale(1.5);
     }
     :global(.hero-shape--capsule) {
       bottom: -7rem;
@@ -206,6 +277,7 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
       height: 13rem;
     }
     :global(.hero-shape--quarter) {
+      top: auto;
       bottom: -15rem;
       right: -11rem;
       width: 26rem;
@@ -227,7 +299,9 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
      `animation-composition: add` ist das Entscheidende: ohne sie wuerde
      diese Animation die Transforms der Island ERSETZEN statt sich zu ihnen
      zu addieren, und Drift wie Parallaxe waeren beim Scrollen tot. */
-  @media (prefers-reduced-motion: no-preference) {
+  /* From 80rem only: on a phone the shapes sit in tight bands under the
+     header, and a 3 rem drift carried the quarter onto it (`audit:ux`). */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 80rem) {
     @supports (animation-timeline: view()) {
       /* The NODE is deliberately not in this list. It already walks its own
          path, and adding the scroll drift on top moved it up to 56 px further
@@ -278,10 +352,12 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
      eyebrow, sub and card used to share. */
   .hero-title {
     max-width: 18ch;
-    margin: 0 auto 2.5rem;
+    margin: 0 auto 1.5rem;
     font-family: var(--font-display);
     font-weight: 500;
-    font-size: clamp(2.5rem, 1.2rem + 5.6vw, 7.5rem);
+    /* 3rem floor since 2026-09-22: at 2.5rem the slogan was a small island in
+       the middle of an empty phone screen. */
+    font-size: clamp(3rem, 1.2rem + 6vw, 7.5rem);
     line-height: 1.02;
     letter-spacing: -0.03em;
     color: var(--color-black);
@@ -295,6 +371,20 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
   @media (min-width: 768px) {
     .hero-title {
       margin-inline: 0;
+    }
+  }
+
+  .hero-brandbar {
+    --tds-brandbar-height: 0.3rem;
+    margin: 0 auto 2.25rem;
+    transform-origin: left center;
+  }
+  @media (min-width: 768px) {
+    .hero-brandbar {
+      margin-inline: 0;
+      --tds-brandbar-1: 4rem;
+      --tds-brandbar-2: 1.75rem;
+      --tds-brandbar-3: 0.875rem;
     }
   }
 
@@ -373,10 +463,36 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     .hero-actions.hero-rise {
       animation-delay: 160ms;
     }
+    /* The bar draws itself once the slogan has landed, with a small
+       overshoot — the one flourish on the first screen. */
+    .hero-brandbar {
+      animation: hero-bar-draw 900ms var(--lp-ease-bounce, var(--tds-ease-out)) 380ms both;
+    }
+
+    /* Scrolling away, the copy drifts up a little faster than the page and
+       the bar stretches — transform only, on the compositor, and nothing at
+       all where scroll timelines are missing. */
+    @supports (animation-timeline: view()) {
+      .hero-body {
+        animation: hero-copy-leave linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 100%;
+      }
+    }
   }
   @keyframes hero-rise {
     from {
       transform: translateY(1.5rem);
+    }
+  }
+  @keyframes hero-bar-draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes hero-copy-leave {
+    to {
+      transform: translateY(-4.5rem);
     }
   }
   @media (prefers-reduced-motion: reduce) {

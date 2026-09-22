@@ -155,7 +155,7 @@ export const serviceDefinitions = [
     // was briefly its own service; splitting it made the visitor choose
     // between building a presence and being found through it, which is not a
     // choice a small business has. The ad-budget sentence in `boundaries`
-    // came from that entry and has to stay — an hourly rate on its own
+    // came from that entry and has to stay — a fixed price on its own
     // understates what running ads actually costs.
     id: "web-presence",
     number: "01",
@@ -212,7 +212,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "65 € netto pro Stunde, bei Anzeigen plus Werbebudget. Bei klarem Umfang auch zum Festpreis.",
+          "Festpreise ab 390 € netto, alles andere auf Anfrage. Bei Anzeigen kommt das Werbebudget dazu.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -260,7 +260,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "€65 net per hour, plus the ad budget where ads are involved. A fixed price once the scope is clear.",
+          "Fixed prices from €390 net, everything else on request. Ads come with their own budget.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],
@@ -323,7 +323,7 @@ export const serviceDefinitions = [
           "Fahrplan festhalten – dann umsetzen oder übergeben",
         ],
         priceLabel: "Preis",
-        priceText: "75 € netto pro Stunde. Für ein klar abgegrenztes Konzept auch zum Festpreis.",
+        priceText: "Auf Anfrage. Für ein klar abgegrenztes Konzept bekommst du einen Festpreis.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -368,7 +368,7 @@ export const serviceDefinitions = [
           "Write down the roadmap – then build or hand over",
         ],
         priceLabel: "Price",
-        priceText: "€75 net per hour. A fixed price for a clearly bounded concept.",
+        priceText: "On request. A clearly bounded concept gets a fixed price.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],
@@ -431,7 +431,7 @@ export const serviceDefinitions = [
           "Einführen und bei Bedarf nachbessern",
         ],
         priceLabel: "Preis",
-        priceText: "70 € netto pro Stunde. Ein Festpreis ist möglich, sobald Ablauf und Ziel klar sind.",
+        priceText: "Auf Anfrage. Sobald Ablauf und Ziel klar sind, bekommst du einen Festpreis.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -476,7 +476,7 @@ export const serviceDefinitions = [
           "Roll it out and refine it",
         ],
         priceLabel: "Price",
-        priceText: "€70 net per hour. A fixed price is possible once the workflow and the goal are clear.",
+        priceText: "On request. Once the workflow and the goal are clear, you get a fixed price.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],
@@ -539,7 +539,7 @@ export const serviceDefinitions = [
           "Einführen und weiter betreuen",
         ],
         priceLabel: "Preis",
-        priceText: "70 € netto pro Stunde. Bei festem Umfang auch Festpreise für einzelne Etappen.",
+        priceText: "Auf Anfrage. Bei festem Umfang gibt es Festpreise für einzelne Etappen.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -584,7 +584,7 @@ export const serviceDefinitions = [
           "Roll out and keep supporting it",
         ],
         priceLabel: "Price",
-        priceText: "€70 net per hour. Once the scope is set, fixed prices for single stages.",
+        priceText: "On request. Once the scope is set, fixed prices for single stages.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],

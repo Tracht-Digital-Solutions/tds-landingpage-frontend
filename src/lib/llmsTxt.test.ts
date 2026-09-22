@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getPricingDefault, getServiceRate } from "./pricing";
+import { getDefaultPackages } from "./pricing";
 import { platformDefinitions } from "./platforms";
 import { serviceDefinitions } from "./services";
 import { SITEMAP_ENTRIES, absolute } from "./sitemap";
@@ -26,22 +26,22 @@ describe("llms.txt", () => {
     }
   });
 
-  it("quotes each service with its current rate, in the catalogue's order", () => {
-    const pricing = getPricingDefault("de");
+  it("lists every service in the catalogue's order, without an hourly rate", () => {
     let previous = -1;
     for (const service of serviceDefinitions) {
-      const line = `**${service.fallback.de.title}** (${getServiceRate(pricing, service.id)} € netto/Std.)`;
+      const line = `**${service.fallback.de.title}** (`;
       const at = llms.indexOf(line);
       expect(at, line).toBeGreaterThan(previous);
       previous = at;
     }
+    // No hourly rates since 2026-09-22.
+    expect(llms).not.toMatch(/Std\.|Stundensatz|pro Stunde/);
   });
 
   it("states no amount the price list does not have", () => {
-    const pricing = getPricingDefault("de");
-    const rates = new Set(serviceDefinitions.map((service) => getServiceRate(pricing, service.id)));
-    for (const match of llms.matchAll(/(\d+)\s*€/g)) {
-      expect(rates.has(Number(match[1])), match[0]).toBe(true);
+    const prices = new Set(getDefaultPackages("de").map((pkg) => pkg.price));
+    for (const match of llms.matchAll(/(\d[\d.]*)\s*€/g)) {
+      expect(prices.has(Number(match[1]!.replaceAll(".", ""))), match[0]).toBe(true);
     }
   });
 

@@ -33,7 +33,7 @@
  * `.finder` rule below is `:global`, anchored on the `.finder` root.
  */
 import { localizePath, resolveLang } from "~/lib/i18n";
-import { getPricingContent, getServiceRate } from "~/lib/pricing";
+import { getPricingContent } from "~/lib/pricing";
 import { platformDefinitions, platformHref } from "~/lib/platforms";
 import { resolveServiceContent, serviceDefinitions, serviceHref } from "~/lib/services";
 import { FINDER_SECTION } from "~/lib/serviceFinder";
@@ -42,6 +42,7 @@ import ServiceFinderIsland from "~/components/islands/ServiceFinder";
 const lang = resolveLang(Astro.currentLocale);
 const section = FINDER_SECTION[lang];
 const pricing = await getPricingContent(lang);
+const lowestPackage = pricing.packages.length > 0 ? Math.min(...pricing.packages.map((pkg) => pkg.price)) : undefined;
 const services = await Promise.all(
   serviceDefinitions.map(async (definition) => {
     const content = await resolveServiceContent(definition, lang);
@@ -51,7 +52,8 @@ const services = await Promise.all(
       summary: content.summary,
       href: serviceHref(definition, lang),
       situations: content.situations.slice(0, 4),
-      rate: getServiceRate(pricing, definition.id),
+      // Only the Webauftritt has packages; everything else is on request.
+      ...(definition.id === "web-presence" && lowestPackage !== undefined ? { fromPrice: lowestPackage } : {}),
       ...(definition.id === "web-presence"
         ? {
             platforms: platformDefinitions.map((platform) => ({

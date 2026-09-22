@@ -57,6 +57,13 @@ const steps = process.steps;
           aria-hidden="true"
           class="absolute left-[1.375rem] md:left-6 top-6 bottom-6 w-px bg-gradient-to-b from-[var(--color-accent)]/40 via-[var(--color-line)] to-[var(--color-accent)]/20"
         ></span>
+        {/* The spine fills in as the steps scroll past (2026-09-22) — a CSS
+            scroll timeline, transform only; without one it stays empty and
+            the grey spine above carries the sequence alone. */}
+        <span
+          aria-hidden="true"
+          class="process-spine-fill absolute left-[1.375rem] md:left-6 top-6 bottom-6 w-0.5 -translate-x-1/4 bg-[var(--color-accent)]"
+        ></span>
 
         {/* Start cap — small accent dot anchoring the top of the spine. */}
         <span
@@ -93,3 +100,36 @@ const steps = process.steps;
     </div>
   </div>
 </section>
+
+<style>
+  .process-spine-fill {
+    transform-origin: top center;
+    transform: scaleY(0);
+    border-radius: 1px;
+  }
+  @supports not (animation-timeline: view()) {
+    .process-spine-fill {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .process-spine-fill {
+        animation: process-spine-fill linear both;
+        animation-timeline: view();
+        animation-range: entry 30% cover 65%;
+      }
+    }
+  }
+  /* Reduced motion: the finished line, not an empty one. */
+  @media (prefers-reduced-motion: reduce) {
+    .process-spine-fill {
+      transform: none;
+    }
+  }
+  @keyframes process-spine-fill {
+    to {
+      transform: scaleY(1);
+    }
+  }
+</style>

@@ -16,6 +16,8 @@ export const siteConfig = {
   url: "https://tracht-digital.de",
   /** Sister origin where the journal lives. */
   blogUrl: "https://blog.tracht-digital.de",
+  /** The customer portal (tds-customer-frontend). */
+  portalUrl: "https://app.tracht-digital.de",
   /** Primary content language. */
   defaultLocale: "de" as const,
   /**
