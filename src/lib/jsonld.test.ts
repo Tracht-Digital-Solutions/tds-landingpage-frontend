@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getPricingDefault, highestRate, lowestRate } from "./pricing";
+import { getDefaultPackages } from "./pricing";
 import {
   asGraph,
   breadcrumbNode,
@@ -37,13 +37,14 @@ describe("graph nodes for detail pages", () => {
     expect(node.inLanguage).toBe("de-DE");
   });
 
-  it("offers a price only where the page names one", () => {
+  it("carries no hourly offer on a service node", () => {
+    // No hourly rates since 2026-09-22; the packages live in the pricing
+    // catalogue, not on each service.
     const base = { url, name: "n", description: "d", lang: "en" as const, serviceType: "t" };
-    expect((serviceNode(base) as Record<string, unknown>).offers).toBeUndefined();
-    const priced = serviceNode({ ...base, rate: 65 }) as Record<string, any>;
-    expect(priced.offers.priceSpecification.price).toBe(65);
-    expect(priced.offers.priceSpecification.valueAddedTaxIncluded).toBe(false);
-    expect(priced.provider["@id"]).toBe(organizationSchema()["@id"]);
+    const node = serviceNode(base) as Record<string, any>;
+    expect(node.offers).toBeUndefined();
+    expect(JSON.stringify(node)).not.toContain("HUR");
+    expect(node.provider["@id"]).toBe(organizationSchema()["@id"]);
   });
 
   it("builds a breadcrumb node with an id and no context of its own", () => {
@@ -144,11 +145,12 @@ describe("the organization node", () => {
     expect(org.contactPoint.email).toBe(siteConfig.email);
   });
 
-  it("derives priceRange from the published rates, never from a literal", () => {
-    // The rates move. A second place stating them by hand drifts, silently.
-    const pricing = getPricingDefault("de");
-    expect(org.priceRange).toContain(String(lowestRate(pricing)));
-    expect(org.priceRange).toContain(String(highestRate(pricing)));
+  it("derives priceRange from the published packages, never from a literal", () => {
+    // The figures move. A second place stating them by hand drifts, silently.
+    const prices = getDefaultPackages("de").map((pkg) => pkg.price);
+    expect(org.priceRange).toContain(String(Math.min(...prices)));
+    expect(org.priceRange).toContain(String(Math.max(...prices)));
+    expect(org.priceRange).not.toContain("/h");
   });
 
   it("publishes NO opening hours", () => {

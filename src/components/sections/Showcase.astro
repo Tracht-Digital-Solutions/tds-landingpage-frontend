@@ -67,16 +67,15 @@ type Slide =
 /**
  * The shelf as one list: the demos in catalog order, then the business card.
  *
- * THE LEAD CARD — two tracks wide from `lg` — is the first demo, i.e. the first
- * slide that carries a picture. Wider rather than taller: the slides stretch to
- * the tallest card, so height spent on the lead card would pad every other
- * card. Both card families answer the width through their own container query.
+ * Every card is ONE track wide (2026-09-22). The first demo used to be a lead
+ * card two tracks wide from `lg`; Julian asked for equal widths, so the shelf
+ * reads as a row of peers. Both card families answer the width through their
+ * own container query.
  */
 const slides: Slide[] = [
   ...demos.map((demo): Slide => ({ kind: "demo", key: `demo:${demo.definition.id}`, demo })),
   { kind: "business-card", key: "business-card" },
 ];
-const leadKey = demos.length > 0 ? slides[0]!.key : null;
 
 /** Carousel chrome. This site's own words about its own control, so it follows
  *  the page's locale and is not editable copy — a mislabelled control is an
@@ -128,7 +127,7 @@ const ui =
       >
         {slides.map((slide) => (
           <div
-            class:list={["showcase__slide", slide.key === leadKey && "showcase__slide--lead"]}
+            class="showcase__slide"
           >
             {slide.kind === "demo" && (
               <DemoCard demo={slide.demo} lang={lang} serviceLink={webPresenceLink} />
@@ -302,14 +301,6 @@ const ui =
     .showcase__slide {
       flex-basis: calc((100% - 3rem) / 3);
     }
-
-    /* THE LEAD CARD, and only here: two of the three tracks plus the gap
-       between them, so it lines up with the grid the other cards sit on.
-       Deliberately NOT applied at `md`, where two of two is the whole
-       container — a lone full-width card is a poster, not a shelf. */
-    .showcase__slide--lead {
-      flex-basis: calc((100% - 3rem) / 3 * 2 + 1.5rem);
-    }
   }
 
   /* POINTER DEVICES ONLY, and hidden by default so that is the fallback.
@@ -426,15 +417,10 @@ const ui =
     /**
      * One slide plus one gap — how far a click travels.
      *
-     * Measured from an ORDINARY slide, not from `firstElementChild`: the first
-     * one is the lead card and it is two tracks wide above `lg`, so measuring
-     * it would make every arrow click jump two cards and skip whatever sat
-     * between them. Falls back to the first child for a shelf that is nothing
-     * but a lead card, where two tracks is all there is to travel anyway.
+     * Every slide is one track wide, so the first one measures them all.
      */
     const step = () => {
-      const slide = (track.querySelector(":scope > :not(.showcase__slide--lead)") ??
-        track.firstElementChild) as HTMLElement | null;
+      const slide = track.firstElementChild as HTMLElement | null;
       if (!slide) return track.clientWidth;
       const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
       return slide.getBoundingClientRect().width + gap;

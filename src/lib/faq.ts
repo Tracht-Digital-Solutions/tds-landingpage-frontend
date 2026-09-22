@@ -58,7 +58,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Das hängt vom Umfang ab. Abgerechnet wird nach Aufwand oder zum Festpreis bei klarem Umfang. Die Stundensätze stehen bei den Preisen.",
+            a: "Drei Pakete haben einen Festpreis, sie stehen bei den Preisen. Alles andere bekommst du als eigenes Angebot.",
           },
           {
             // The one sentence about cost the site makes (decided 2026-09-12).
@@ -93,7 +93,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "What does a website or an online shop cost?",
-            a: "That depends on the scope. Work is billed by effort, or at a fixed price once the scope is clear. The hourly rates are under Pricing.",
+            a: "Three packages have a fixed price, listed under Pricing. Everything else gets a quote of its own.",
           },
           {
             q: "What does the first conversation cost?",

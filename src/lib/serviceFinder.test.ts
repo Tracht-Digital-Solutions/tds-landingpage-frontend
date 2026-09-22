@@ -19,7 +19,7 @@ const services: FinderService[] = SERVICE_ORDER.map((id) => ({
   summary: `Zusammenfassung ${id}`,
   href: `/leistungen/${id}`,
   situations: [1, 2, 3, 4, 5].map((n) => `${id} Ausgangslage ${n}.`),
-  rate: 70,
+  fromPrice: 390,
 }));
 
 const answers = (over: Partial<FinderAnswers> = {}): FinderAnswers => ({
@@ -168,12 +168,14 @@ describe("the finder's copy", () => {
     expect(JSON.stringify([FINDER_COPY.en, FINDER_SECTION.en])).not.toMatch(/\bfree\b|minute/i);
   });
 
-  it("names no amount of its own — only the published rate it is handed", () => {
-    // JSON.stringify drops the two functions; the rate one is checked below.
+  it("names no amount of its own — only the package price it is handed", () => {
+    // JSON.stringify drops the functions; the price one is checked below.
     const words = JSON.stringify([FINDER_COPY, FINDER_SECTION]);
     expect(words).not.toMatch(/€|\bEUR\b|\bEuro\b/);
     expect(words).not.toMatch(/\d+\s*[–-]\s*\d+/);
-    expect(FINDER_COPY.de.rateValue(65)).toBe("65 € netto pro Stunde");
-    expect(FINDER_COPY.en.rateValue(65)).toBe("€65 net per hour");
+    expect(FINDER_COPY.de.priceFrom(390)).toBe("Festpreise ab 390 € netto");
+    expect(FINDER_COPY.en.priceFrom(390)).toBe("Fixed prices from €390 net");
+    // No hourly rates since 2026-09-22.
+    expect(words).not.toMatch(/Stunde|hourly|per hour|an hour/i);
   });
 });

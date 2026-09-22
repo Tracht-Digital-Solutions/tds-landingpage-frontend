@@ -12,10 +12,10 @@
  * data lets us iterate the shape without touching the source of truth.
  */
 import { LOGO, portraitSrc } from "./imageVariants";
-// Sync helpers only — `getPricingDefault` reads the committed object and
+// Sync helpers only — `getDefaultPackages` reads the committed list and
 // touches neither the CMS nor `contentCache`, so this stays a leaf import and
 // cannot close an import cycle the way `contentCache` once did.
-import { getPricingDefault, highestRate, lowestRate } from "./pricing";
+import { getDefaultPackages } from "./pricing";
 import { siteConfig } from "./seo";
 
 type WithContext<T extends Record<string, unknown> = Record<string, unknown>> =
@@ -111,16 +111,16 @@ export function organizationSchema() {
       availableLanguage: ["de", "en"],
     },
     /**
-     * Expected on a LocalBusiness-typed entity, and honest: the site already
-     * publishes every hourly rate openly, so this repeats a fact rather than
-     * inventing a band.
+     * Expected on a LocalBusiness-typed entity, and honest: the band is the
+     * committed fixed-price packages the page publishes, so this repeats a fact
+     * rather than inventing one. No hourly rates since 2026-09-22.
      *
      * NOT here: `openingHoursSpecification`. Julian works by arrangement, and
      * the vocabulary has no way to say that — `opens`/`closes` would be an
      * invented promise of availability. The page says it in words instead.
      * Do not "complete" this node with hours.
      */
-    priceRange: `${lowestRate(getPricingDefault("de"))}–${highestRate(getPricingDefault("de"))} €/h`,
+    priceRange: packagePriceRange(),
   };
 
   if (socials.length > 0) base.sameAs = socials;
@@ -170,13 +170,6 @@ export function breadcrumbSchema(
   };
 }
 
-interface ServiceOffering {
-  name: string;
-  description: string;
-  /** Per-hour EUR rate. */
-  rate: number;
-}
-
 /** A fixed-price package, as it appears in the offer catalogue. */
 export interface PackageOffering {
   name: string;
@@ -186,67 +179,42 @@ export interface PackageOffering {
 }
 
 /**
- * Service + OfferCatalog for the pricing page. Each rate becomes a
- * PriceSpecification (UnitPriceSpecification, hourly) inside an
- * OfferCatalog — that's how Schema.org expresses tiered hourly rates.
+ * Service + OfferCatalog for the pricing section: one Offer per fixed-price
+ * package. The site publishes no hourly rates any more (2026-09-22), so the
+ * catalogue holds only what the page shows.
  *
- * A fixed price is a DIFFERENT specification and must not be squeezed through
- * the hourly one. `UnitPriceSpecification` with `unitCode: "HUR"` states "this
- * many euros per hour"; emitting a package total that way would publish a
- * four-figure hourly rate to every consumer that reads the markup rather than
- * the page. Packages therefore get a plain `PriceSpecification` with no unit,
- * which is what a one-off total is.
+ * A package total is a plain `PriceSpecification` with no unit — never a
+ * `UnitPriceSpecification` with `unitCode: "HUR"`, which states "this many
+ * euros per hour" and would publish a four-figure hourly rate to every
+ * consumer that reads the markup rather than the page. The figures are net;
+ * the gross view on the page is derived and is not a second price.
  */
-export function pricingSchema(
-  items: ServiceOffering[],
-  packages: PackageOffering[] = [],
-): WithContext {
-  // One array, built explicitly: the two offer shapes differ (an hourly rate
-  // carries a reference quantity, a package total does not), and `concat`
-  // would demand they be the same type.
-  const offers: Record<string, unknown>[] = [
-    ...items.map((item) => ({
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "Service",
-        name: item.name,
-        description: item.description,
-      },
-      priceSpecification: {
-        "@type": "UnitPriceSpecification",
-        price: item.rate,
-        priceCurrency: "EUR",
-        unitCode: "HUR",
-        referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "HUR" },
-        valueAddedTaxIncluded: false,
-      },
-    })),
-    ...packages.map((item) => ({
-      "@type": "Offer",
-      itemOffered: {
-        "@type": "Service",
-        name: item.name,
-        ...(item.description ? { description: item.description } : {}),
-      },
-      priceSpecification: {
-        "@type": "PriceSpecification",
-        price: item.price,
-        priceCurrency: "EUR",
-        valueAddedTaxIncluded: false,
-      },
-    })),
-  ];
+export function pricingSchema(packages: PackageOffering[]): WithContext {
+  const offers = packages.map((item) => ({
+    "@type": "Offer",
+    itemOffered: {
+      "@type": "Service",
+      name: item.name,
+      ...(item.description ? { description: item.description } : {}),
+    },
+    priceSpecification: {
+      "@type": "PriceSpecification",
+      price: item.price,
+      priceCurrency: "EUR",
+      valueAddedTaxIncluded: false,
+    },
+  }));
 
   return {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: `${siteConfig.name} — Stundensätze`,
+    name: `${siteConfig.name} — Festpreise`,
     provider: { "@id": `${siteConfig.url}/#organization` },
     serviceType: "Software development & digital consulting",
     areaServed: siteConfig.areaServed.map((a) => ({ "@type": "Place", name: a })),
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Stundensätze",
+      name: "Festpreise",
       itemListElement: offers,
     },
   };
@@ -324,14 +292,12 @@ interface ServiceInput {
   lang: "de" | "en";
   serviceType: string;
   outputs?: readonly string[];
-  /** Net hourly rate in EUR. Omitted where the page names no amount. */
-  rate?: number;
 }
 
 /**
- * A service offered on a page, provided by the organisation. `offers` appears
- * only with a real hourly rate — the platform pages state none, so they carry
- * none (see `lib/platforms.ts`).
+ * A service offered on a page, provided by the organisation. No `offers`:
+ * the site publishes no hourly rates (2026-09-22), and a service page names
+ * no single price of its own — the packages live in the pricing catalogue.
  */
 export function serviceNode(input: ServiceInput): object {
   return {
@@ -345,21 +311,6 @@ export function serviceNode(input: ServiceInput): object {
     areaServed: siteConfig.areaServed.map((name) => ({ "@type": "Place", name })),
     inLanguage: input.lang === "de" ? "de-DE" : "en-GB",
     ...(input.outputs ? { serviceOutput: [...input.outputs] } : {}),
-    ...(input.rate !== undefined
-      ? {
-          offers: {
-            "@type": "Offer",
-            priceSpecification: {
-              "@type": "UnitPriceSpecification",
-              price: input.rate,
-              priceCurrency: "EUR",
-              unitCode: "HUR",
-              referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "HUR" },
-              valueAddedTaxIncluded: false,
-            },
-          },
-        }
-      : {}),
   };
 }
 
@@ -420,4 +371,10 @@ export function asGraph(...nodes: object[]): WithContext {
     "@context": "https://schema.org",
     "@graph": nodes,
   };
+}
+
+/** "390–1040 €" — the span of the committed fixed-price packages. */
+function packagePriceRange(): string {
+  const prices = getDefaultPackages("de").map((pkg) => pkg.price);
+  return `${Math.min(...prices)}–${Math.max(...prices)} €`;
 }

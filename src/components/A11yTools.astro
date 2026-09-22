@@ -96,7 +96,7 @@ const toggles = [
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
-    margin-bottom: 0.625rem;
+    position: relative;
     padding: 0;
     border: none;
     border-radius: 9999px;
@@ -128,8 +128,10 @@ const toggles = [
      the UA centres a popover with auto margins. */
   .a11y-panel {
     position: fixed;
-    inset: auto 1rem calc(var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 5.5rem + env(safe-area-inset-bottom, 0px)) auto;
-    width: min(20rem, calc(100vw - 2rem));
+    /* Beside the tree, not over it (2026-09-22): the tree is three buttons
+       tall now, so the panel docks to its left, bottom-aligned with it. */
+    inset: auto 5.25rem calc(var(--tds-right-lane, 0px) + var(--tds-bottom-lane, 0px) + 1rem + env(safe-area-inset-bottom, 0px)) auto;
+    width: min(20rem, calc(100vw - 6.25rem));
     margin: 0;
     padding: 1.25rem;
     border: none;

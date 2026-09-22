@@ -165,11 +165,11 @@ export type JournalSlug = keyof typeof JOURNAL_ARTICLES;
 const COST: Record<Lang, { title: string; text: string }> = {
   de: {
     title: "Was kostet das?",
-    text: "Abgerechnet wird nach Aufwand zum Stundensatz – oder zum Festpreis, wenn der Umfang klar ist. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
+    text: "Du bekommst einen Festpreis oder ein eigenes Angebot, bevor ich anfange. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
   },
   en: {
     title: "What does it cost?",
-    text: "Billed by effort at the hourly rate – or at a fixed price once the scope is clear. Costs only arise once we agree on an assignment.",
+    text: "You get a fixed price or a quote of your own before I start. Costs only arise once we agree on an assignment.",
   },
 };
 

@@ -32,6 +32,7 @@ import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import CustomCursor from "~/components/islands/CustomCursor.tsx";
 import FloatingCta from "~/components/FloatingCta.astro";
+import PropertyTabs from "~/components/PropertyTabs.astro";
 import JsonLd from "~/components/JsonLd.astro";
 import { LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
 import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
@@ -261,6 +262,7 @@ const showCookieNotice = !bare;
     {!bare && <CustomCursor client:idle />}
     <slot />
     {!bare && <FloatingCta />}
+    {!bare && <PropertyTabs />}
     {showCookieNotice && (
       <ConsentBanner
         client:idle

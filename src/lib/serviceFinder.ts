@@ -1,6 +1,6 @@
 /**
  * Leistungsassistent — three questions that point a visitor at one or more of
- * the four services, with the published rate of each, and the copy for them.
+ * the four services, with what each costs, and the copy for them.
  *
  * ### Why it exists
  *
@@ -9,7 +9,7 @@
  * is mine — and what does it cost?" is exactly the question that makes people
  * leave instead of writing. The assistant asks from the visitor's side — what
  * bothers you, what do you recognise, how far along are you — and answers with
- * services, reasons, the hourly rate and the way to the first conversation.
+ * services, reasons, the price and the way to the first conversation.
  *
  * Since 2026-09-15 it is not a section of its own any more: it waits behind a
  * button ("Leistungsassistent starten") in the services and the pricing section
@@ -20,8 +20,9 @@
  * - The starting points it offers are the services' own `situations`, resolved
  *   on the server exactly like on the service pages (the island receives them as
  *   props). An edit in the panel therefore changes the assistant too.
- * - The only amount it names is each service's published hourly rate, taken
- *   from the pricing block on the server — the number the price list shows. No
+ * - The only amount it names is the lowest published fixed price (Webauftritt),
+ *   taken from the pricing block on the server; every other service is "auf
+ *   Anfrage" (no hourly rates since 2026-09-22). No
  *   estimate, no range, no duration (`serviceFinder.test.ts`).
  * - It sends nothing. The result becomes a draft in the contact form's message
  *   field (`contactDraft.ts`); the visitor reads it, edits it, and submits.
@@ -51,8 +52,9 @@ export interface FinderService {
   summary: string;
   href: string;
   situations: string[];
-  /** The published net hourly rate from the pricing block. */
-  rate: number;
+  /** The lowest fixed package price (net) that applies, if any; otherwise the
+   *  service is quoted on request. Resolved on the server. */
+  fromPrice?: number;
   /** The shop system and CMS pages that belong to this service, if any. */
   platforms?: { label: string; href: string }[];
 }
@@ -113,8 +115,9 @@ interface FinderCopy {
   whyLabel: string;
   detailLink: string;
   rateLabel: string;
-  /** The published rate in words. The number comes from the pricing block, never from here. */
-  rateValue: (rate: number) => string;
+  /** A fixed price in words. The number comes from the pricing block, never from here. */
+  priceFrom: (amount: number) => string;
+  priceOnRequest: string;
   platformsLabel: string;
   note: string;
   priceLink: string;
@@ -155,8 +158,9 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rankAlso: "Passt ebenfalls",
     whyLabel: "Deine Angaben dazu:",
     detailLink: "Leistung im Detail",
-    rateLabel: "Stundensatz:",
-    rateValue: (rate) => `${rate} € netto pro Stunde`,
+    rateLabel: "Preis:",
+    priceFrom: (amount) => `Festpreise ab ${amount} € netto`,
+    priceOnRequest: "Individuell, auf Anfrage",
     platformsLabel: "Seiten zu deinem System:",
     note: "Eine erste Orientierung. Was genau passt, klären wir im Erstgespräch.",
     priceLink: "So entsteht dein Preis",
@@ -200,8 +204,9 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rankAlso: "Also fits",
     whyLabel: "Your answers:",
     detailLink: "Service details",
-    rateLabel: "Hourly rate:",
-    rateValue: (rate) => `€${rate} net per hour`,
+    rateLabel: "Price:",
+    priceFrom: (amount) => `Fixed prices from €${amount} net`,
+    priceOnRequest: "Custom, on request",
     platformsLabel: "Pages for your system:",
     note: "A first sense of direction. We work out exactly what fits in the first conversation.",
     priceLink: "How your price comes about",
@@ -223,17 +228,17 @@ export const FINDER_SECTION: Record<
 > = {
   de: {
     title: "Welche Leistung passt zu dir?",
-    intro: "Drei kurze Fragen. Danach weißt du, welche Leistung passt und was eine Stunde kostet.",
+    intro: "Drei kurze Fragen. Danach weißt du, welche Leistung passt und was sie kostet.",
     close: "Leistungsassistent schließen",
     servicesLink: "Unsicher, was du brauchst oder was es kostet? Leistungsassistent starten",
-    pricingLink: "Unsicher, welcher Satz zu dir passt? Leistungsassistent starten",
+    pricingLink: "Unsicher, was zu dir passt? Leistungsassistent starten",
   },
   en: {
     title: "Which service fits you?",
-    intro: "Three short questions. Then you know which service fits and what an hour costs.",
+    intro: "Three short questions. Then you know which service fits and what it costs.",
     close: "Close the service assistant",
     servicesLink: "Not sure what you need or what it costs? Start the service assistant",
-    pricingLink: "Not sure which rate fits you? Start the service assistant",
+    pricingLink: "Not sure what fits you? Start the service assistant",
   },
 };
 

@@ -1,171 +1,168 @@
 ---
 /**
- * The price list itself: one card per service, the notes, the closing CTA.
+ * The price list itself: the fixed-price packages, the notes, the closing
+ * call for everything else.
  *
  * It has been a page, a drawer on the home page, and since the 2026-09
  * redesign it is part of the home page's pricing section
  * (`sections/Pricing.astro`). It is a component so there is ONE definition of
- * what a price card says — the rates, the included keywords and the "Gut zu
- * wissen" notes were the kind of thing that gets copied for a second surface
- * and then updated on one of them.
+ * what a price card says.
  *
  * Renders no `<main>`, no header and no footer: it is a fragment, placed by
  * whoever shows it.
  *
+ * ### No hourly rates (2026-09-22)
+ *
+ * The four rate cards are gone, here and everywhere else on the site. What is
+ * not a package is quoted individually — the navy box at the end says so and
+ * leads to the form.
+ *
+ * ### Net / gross
+ *
+ * Every package price is rendered net with its gross twin in `data-gross`.
+ * The switch above the cards ships `hidden` and is revealed by the script, so
+ * a page without JavaScript shows the net figures and the "netto" label and
+ * nothing that does not work. The choice is remembered per browser.
+ *
  * ### Heading levels are a prop, not a guess
  *
  * The titles sit under whatever heading the caller placed above the list —
- * `<h2>` on a page of its own, `<h3>` inside the home page's pricing section. A
- * component that hardcoded one level would skip or repeat a level depending on
- * where it was dropped, which nobody sees and a screen reader announces.
+ * `<h2>` on a page of its own, `<h3>` inside the home page's pricing section.
  *
  * ### The facts box
  *
  * The notes box is also where the caller explains how a price comes about:
  * pass `factsTitle` and put the explanation in the default slot, and it renders
- * above the notes, in the same box. The home section first came out as two
- * boxes, one under the other, that both said "Festpreis".
+ * above the notes, in the same box.
  */
 import { localizePath, type Lang } from "~/lib/i18n";
-import { getPricingContent, getServiceRate } from "~/lib/pricing";
-import {
-  resolveServiceContent,
-  serviceDefinitions,
-  serviceHref,
-} from "~/lib/services";
+import { getPricingContent, grossPrice, VAT_RATE } from "~/lib/pricing";
 
 interface Props {
   lang: Lang;
-  /** The level for a card's title. The caller knows what sits above it. */
+  /** The level for a section title. The caller knows what sits above it. */
   headingLevel?: 2 | 3;
   /** Title of the notes box when the default slot adds an explanation to it. */
   factsTitle?: string;
 }
 
 const { lang, headingLevel = 2, factsTitle } = Astro.props;
-// One level under the "Stundensätze" heading the cards now sit beneath.
-const CardHeading = `h${headingLevel + 1}` as "h3" | "h4";
 const SectionHeading = `h${headingLevel}` as "h2" | "h3";
 const hasFacts = Astro.slots.has("default");
 
 const pricing = await getPricingContent(lang);
-const services = await Promise.all(
-  serviceDefinitions.map(async (definition) => ({
-    definition,
-    content: await resolveServiceContent(definition, lang),
-  })),
-);
+const locale = lang === "de" ? "de-DE" : "en-IE";
 
-const formatRate = (rate: number) =>
-  new Intl.NumberFormat(lang === "de" ? "de-DE" : "en-IE", {
+/** Whole euros stay whole; a gross figure with cents shows them. */
+const formatPrice = (value: number) =>
+  new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(rate);
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 
 const homeHref = localizePath("/", lang);
 const contactHref = `${homeHref}#contact`;
-const detailsLabel = lang === "de" ? "Leistung im Detail" : "Service details";
+const vatPercent = Math.round(VAT_RATE * 100);
 // Code-owned: the heading names what the block IS. The packages under it are
 // the editable part.
-const packagesTitle = lang === "de" ? "Festpreise" : "Fixed prices";
-const ratesTitle = lang === "de" ? "Stundensätze" : "Hourly rates";
-const netLabel = lang === "de" ? "netto" : "net";
+const ui =
+  lang === "de"
+    ? {
+        packagesTitle: "Festpreise",
+        net: "netto",
+        gross: `inkl. ${vatPercent} % MwSt.`,
+        switchLabel: "Preise anzeigen",
+        netOption: "Netto",
+        grossOption: "Brutto",
+      }
+    : {
+        packagesTitle: "Fixed prices",
+        net: "net",
+        gross: `incl. ${vatPercent} % VAT`,
+        switchLabel: "Show prices",
+        netOption: "Net",
+        grossOption: "Gross",
+      };
 ---
 
-<div class="pricing-list">
-  {/* Fixed prices FIRST (2026-09-21): three packages with one figure each,
-      then the hourly rates for everything else. The committed packages are
-      hours × the Webauftritt rate (lib/pricing.ts); a panel list replaces
-      them as a whole. The block still renders nothing for an empty list. */}
+<div class="pricing-list" data-vat-scope data-locale={locale}>
+  {/* Fixed prices FIRST, then how a price comes about, then the one call for
+      everything else. The committed packages live in lib/pricing.ts; a panel
+      list replaces them as a whole. The block renders nothing for an empty
+      list. */}
   {
     pricing.packages.length > 0 && (
       <section class="pricing-packages" aria-labelledby="pricing-packages-heading">
-        <SectionHeading
-          id="pricing-packages-heading"
-          class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
-        >
-          {packagesTitle}
-        </SectionHeading>
-        <ul class="pricing-packages__grid" data-motion-cards>
-          {pricing.packages.map((pkg) => (
-            <li class="pricing-packages__card">
-              <p class="pricing-packages__title">{pkg.title}</p>
-              <p class="pricing-packages__price">
-                <span class="tabular-nums">{formatRate(pkg.price)}</span>
-                <span class="pricing-packages__net">{netLabel}</span>
-              </p>
-              {pkg.description && (
-                <p class="pricing-packages__text">{pkg.description}</p>
-              )}
-              {pkg.includes.length > 0 && (
-                <ul class="pricing-packages__includes">
-                  {pkg.includes.map((entry) => (
-                    <li>
-                      <span aria-hidden="true" class="text-[var(--color-accent)]">
-                        ✓
-                      </span>
-                      <span>{entry}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div class="pricing-packages__head">
+          <SectionHeading
+            id="pricing-packages-heading"
+            class="font-[var(--font-display)] text-2xl text-[var(--color-black)]"
+          >
+            {ui.packagesTitle}
+          </SectionHeading>
+          {/* Two toggle buttons, not a checkbox: each names the state it
+              selects, and `aria-pressed` tells a screen reader which is on. */}
+          <div class="vat-switch" role="group" aria-label={ui.switchLabel} data-vat-switch hidden>
+            <span class="vat-switch__thumb" aria-hidden="true"></span>
+            <button type="button" class="vat-switch__option" data-vat-mode="net" aria-pressed="true">
+              {ui.netOption}
+            </button>
+            <button type="button" class="vat-switch__option" data-vat-mode="gross" aria-pressed="false">
+              {ui.grossOption}
+            </button>
+          </div>
+        </div>
+        {/* A swipe row on a phone (three stacked cards were a screen and a
+            half of scrolling), a grid from 42rem of container width. It ships
+            focusable (axe checks before any script) and the script drops the
+            tab stop while the row does not overflow. */}
+        <div class="pricing-packages__scroller" data-packages-scroller role="group" aria-label={ui.packagesTitle} tabindex="0">
+          <ul class="pricing-packages__grid" data-motion-cards>
+            {pricing.packages.map((pkg) => (
+              <li class="pricing-packages__card">
+                <p class="pricing-packages__title">{pkg.title}</p>
+                <p class="pricing-packages__price">
+                  <span
+                    class="tabular-nums"
+                    data-price
+                    data-net={pkg.price}
+                    data-gross={grossPrice(pkg.price)}
+                  >
+                    {formatPrice(pkg.price)}
+                  </span>
+                  <span
+                    class="pricing-packages__net"
+                    data-price-suffix
+                    data-label-net={ui.net}
+                    data-label-gross={ui.gross}
+                  >
+                    {ui.net}
+                  </span>
+                </p>
+                {pkg.description && (
+                  <p class="pricing-packages__text">{pkg.description}</p>
+                )}
+                {pkg.includes.length > 0 && (
+                  <ul class="pricing-packages__includes">
+                    {pkg.includes.map((entry) => (
+                      <li>
+                        <span aria-hidden="true" class="text-[var(--color-accent)]">
+                          ✓
+                        </span>
+                        <span>{entry}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     )
   }
-
-  <SectionHeading
-    id="pricing-rates-heading"
-    class="font-[var(--font-display)] text-2xl text-[var(--color-black)] mb-5"
-  >
-    {ratesTitle}
-  </SectionHeading>
-  <div class="pricing-list__grid" data-motion-cards>
-    {
-      services.map(({ definition, content }) => {
-        const rate = getServiceRate(pricing, definition.id);
-        return (
-          <article class="relative rounded-[6px] p-6 md:p-7 flex flex-col bg-[var(--color-soft)]">
-            {/* No number above the title — see the note in
-                ServiceDetailPage.astro. The card's own edge separates it from
-                its neighbours; a mono "03" only ever said which slot it
-                happened to sit in. */}
-            <CardHeading class="font-[var(--font-display)] text-2xl mb-3 text-[var(--color-black)]">
-              {content.title}
-            </CardHeading>
-
-            <div class="flex items-baseline gap-2 mb-5 min-h-12">
-              <span class="font-[var(--font-display)] font-medium tabular-nums text-4xl text-[var(--color-primary)]">
-                {formatRate(rate)}
-              </span>
-              <span class="text-sm text-[var(--color-muted)]">{pricing.hourSuffix}</span>
-            </div>
-
-            {/* Neither the summary nor the keyword list is repeated here.
-                `sections/Services.astro` sits one section above this one and
-                already gives every service its situation, its outcome and the
-                SAME keyword chips — this card was the second half of a
-                duplicate, down to a second link to the same page under a
-                different name. What a rate card owes the reader is the rate.
-                The service's own words are one scroll up, and behind the
-                link. */}
-            <div class="mt-auto">
-              <a
-                href={serviceHref(definition, lang)}
-                class="inline-flex items-center gap-2 text-sm font-medium transition-colors text-[var(--color-primary)] hover:text-[var(--color-accent)] [@media(pointer:coarse)]:min-h-11"
-              >
-                {detailsLabel}
-                <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          </article>
-        );
-      })
-    }
-  </div>
 
   <section
     class="rounded-[6px] p-6 md:p-8 mb-10 bg-[var(--color-soft)]"
@@ -192,6 +189,7 @@ const netLabel = lang === "de" ? "netto" : "net";
     </ul>
   </section>
 
+  {/* Everything that is not a package: "Individuelle Lösungen auf Anfrage". */}
   <section
     class="tds-tone-navy relative overflow-hidden rounded-[6px] p-8 md:p-12 text-center"
     aria-labelledby="pricing-cta-heading"
@@ -219,65 +217,129 @@ const netLabel = lang === "de" ? "netto" : "net";
 </div>
 
 <style>
-  /* A CONTAINER query, not a media query.
-   *
-   * The list has lived in a 34rem drawer and lives in a full-width section
-   * now. A `@media (min-width: 60rem)` asks the VIEWPORT how much room there
-   * is and got the answer for the window, not for the panel — two columns
-   * opened inside a 544px drawer and each card had ~250px for a heading like
-   * "Prozessoptimierung". The column count belongs to the box the list sits
-   * in, wherever that is.
-   *
-   * The caller declares the containment (`.pricing-host` in
-   * `sections/Pricing.astro`), because a container cannot query itself. */
-  .pricing-list__grid {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-  @container pricing-list (min-width: 42rem) {
-    .pricing-list__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  /* The full-width home section (`sections/Pricing.astro`) has room for all
-     four side by side — the one arrangement in which every rate is visible at
-     once, which is the point of showing prices at all. */
-  @container pricing-list (min-width: 64rem) {
-    .pricing-list__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
-  /* (`.pricing-list__includes` lived here. The rate cards stopped repeating
-     the keyword list that `sections/Services.astro` already shows one section
-     above them, so there is nothing left for it to style.) */
-
-  /* === Fixed-price packages ========================================
-     Their own band above the rate grid, so a fixed price is never mistaken
-     for an hourly one. Auto-fit rather than a fixed column count: how many
-     packages exist is editorial, and `auto-fit` with a floor keeps a lone
-     package from being stretched into a poster — the same trap the demo
-     shelf's grid caps for. */
+  /* === Fixed-price packages ======================================== */
   .pricing-packages {
     margin-bottom: 3rem;
   }
+  .pricing-packages__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* --- Net / gross switch ------------------------------------------- */
+  .vat-switch {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0.25rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: var(--lp-surface-card);
+  }
+  .vat-switch[hidden] {
+    display: none;
+  }
+  /* The thumb slides under the pressed option. Its position is a transform
+     keyed on the attribute, so the CSS alone is correct; Motion only adds
+     the spring on a click. */
+  .vat-switch__thumb {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    width: calc(50% - 0.25rem);
+    border-radius: inherit;
+    background: var(--color-surface-navy);
+    transition: transform 320ms var(--lp-ease-bounce, var(--tds-ease-out));
+  }
+  .vat-switch[data-mode="gross"] .vat-switch__thumb {
+    transform: translateX(100%);
+  }
+  .vat-switch__option {
+    position: relative;
+    z-index: 1;
+    min-width: 5rem;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: none;
+    border-radius: inherit;
+    background: none;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .vat-switch__option[aria-pressed="true"] {
+    color: #fff;
+  }
+  .vat-switch__option:hover:not([aria-pressed="true"]) {
+    color: var(--color-primary);
+  }
+  .vat-switch__option:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vat-switch__thumb {
+      transition: none;
+    }
+  }
+
   .pricing-packages__net {
     margin-left: 0.4rem;
     font-family: var(--font-body);
     font-size: 0.875rem;
     color: var(--color-muted);
   }
+
+  /* A swipe row below 42rem of container width. The card is 85 % wide so the
+     next one peeks in — the one cue a row gives that there is more. */
+  .pricing-packages__scroller {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
+    scrollbar-width: none;
+    /* Room for the cards' hover lift and the focus ring. */
+    padding-block: 0.5rem;
+    margin-block: -0.5rem;
+  }
+  .pricing-packages__scroller::-webkit-scrollbar {
+    display: none;
+  }
+  .pricing-packages__scroller:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
   .pricing-packages__grid {
-    display: grid;
-    gap: 1rem;
+    display: flex;
+    gap: 0.75rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
+  .pricing-packages__card {
+    flex: none;
+    width: 85%;
+    scroll-snap-align: start;
+  }
   @container pricing-list (min-width: 42rem) {
+    .pricing-packages__scroller {
+      overflow: visible;
+      scroll-snap-type: none;
+    }
     .pricing-packages__grid {
+      display: grid;
+      gap: 1rem;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    }
+    .pricing-packages__card {
+      width: auto;
     }
   }
   .pricing-packages__card {
@@ -285,9 +347,6 @@ const netLabel = lang === "de" ? "netto" : "net";
     flex-direction: column;
     padding: 1.5rem;
     border-radius: 6px;
-    /* Differs from the rate cards' `--color-soft` on purpose: two price
-       families on one ground need two fills, or the eye reads eight cards of
-       one kind. */
     background: var(--lp-surface-card);
   }
   .pricing-packages__title {
@@ -332,3 +391,107 @@ const netLabel = lang === "de" ? "netto" : "net";
     border-top: 1px solid var(--color-line);
   }
 </style>
+
+<script>
+  import { lessMotion } from "~/lib/a11yPrefs";
+
+  type Mode = "net" | "gross";
+  const STORAGE_KEY = "tds-price-mode";
+
+  const readMode = (): Mode => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) === "gross" ? "gross" : "net";
+    } catch {
+      return "net";
+    }
+  };
+  const storeMode = (mode: Mode) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, mode);
+    } catch {
+      // Private window or blocked storage: the switch still works, it just
+      // forgets.
+    }
+  };
+
+  document.querySelectorAll<HTMLElement>("[data-vat-scope]").forEach((scope) => {
+    const toggle = scope.querySelector<HTMLElement>("[data-vat-switch]");
+    if (!toggle) return;
+    const buttons = Array.from(toggle.querySelectorAll<HTMLButtonElement>("[data-vat-mode]"));
+    const prices = Array.from(scope.querySelectorAll<HTMLElement>("[data-price]"));
+    const suffixes = Array.from(scope.querySelectorAll<HTMLElement>("[data-price-suffix]"));
+    const locale = scope.dataset.locale || document.documentElement.lang || "de-DE";
+    const format = (value: number, cents: boolean) =>
+      new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: cents ? 2 : 0,
+        maximumFractionDigits: cents ? 2 : 0,
+      }).format(value);
+
+    let mode: Mode = "net";
+    const apply = (next: Mode, animated: boolean) => {
+      const previous = mode;
+      mode = next;
+      toggle.dataset.mode = next;
+      for (const button of buttons) {
+        button.setAttribute("aria-pressed", String(button.dataset.vatMode === next));
+      }
+      for (const suffix of suffixes) {
+        suffix.textContent = (next === "gross" ? suffix.dataset.labelGross : suffix.dataset.labelNet) ?? "";
+      }
+      for (const price of prices) {
+        const to = Number(price.dataset[next]);
+        const from = Number(price.dataset[previous]);
+        const cents = !Number.isInteger(to);
+        if (!animated || from === to || lessMotion()) {
+          price.textContent = format(to, cents);
+          continue;
+        }
+        // The figure counts to its new value — the eye sees WHAT changed,
+        // not just that something did. Motion is loaded on the first click.
+        void import("@tracht-digital-solutions/tds-shared/motion/dom")
+          .then(({ animate }) => {
+            animate(from, to, {
+              duration: 0.45,
+              ease: [0.2, 0.8, 0.2, 1],
+              onUpdate: (value: number) => {
+                price.textContent = format(value, cents);
+              },
+              onComplete: () => {
+                price.textContent = format(to, cents);
+              },
+            });
+          })
+          .catch(() => {
+            price.textContent = format(to, cents);
+          });
+      }
+    };
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        const next = button.dataset.vatMode === "gross" ? "gross" : "net";
+        if (next === mode) return;
+        storeMode(next);
+        apply(next, true);
+      });
+    }
+
+    const stored = readMode();
+    if (stored !== "net") apply(stored, false);
+    else toggle.dataset.mode = "net";
+    toggle.hidden = false;
+  });
+
+  // The swipe row is a tab stop only while it actually overflows — at grid
+  // width it is a plain list and a stop there would lead nowhere.
+  document.querySelectorAll<HTMLElement>("[data-packages-scroller]").forEach((scroller) => {
+    const sync = () => {
+      if (scroller.scrollWidth > scroller.clientWidth + 1) scroller.tabIndex = 0;
+      else scroller.removeAttribute("tabindex");
+    };
+    sync();
+    new ResizeObserver(sync).observe(scroller);
+  });
+</script>

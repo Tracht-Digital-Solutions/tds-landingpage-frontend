@@ -3,27 +3,36 @@ import { resolveLang, localizePath } from "~/lib/i18n";
 import A11yTools from "~/components/A11yTools.astro";
 
 /**
- * Persistent bottom-corner control, in two shapes.
+ * Persistent bottom-corner control — a small TREE since 2026-09-22.
  *
- * **Fine pointer.** Idle: just the "book a call" CTA (links to the contact
- * section). Once the visitor scrolls ~one viewport down, a small arrow-sized
- * scroll-to-top button rises out of the CTA and fuses with it — same navy
- * fill, its base tucked behind the CTA so the two read as one merged shape.
- *
- * **Coarse pointer.** The fused shape is a mouse idea: it announces itself by
- * growing as the cursor approaches, and it shrinks to an unlabelled 44px
- * circle on a phone — the single most important call to action on the site,
- * reduced to a calendar glyph with no word next to it. On touch it is a
- * labelled bar across the bottom instead, and the scroll-to-top button sits
- * above it as its own round target rather than fusing with it.
- *
- * The whole control flips to white when it floats over a dark section so it
- * never disappears.
+ * - **The trunk** is a round button with a telephone receiver. It leads to
+ *   the contact FORM (`/#contact`) and nowhere else — no `tel:` link, no
+ *   menu. Its accessible name says so, because the receiver alone could be
+ *   read as "call". It replaced the calendar pill labelled "Erstgespräch
+ *   vereinbaren" and, on touch, the full-width bar.
+ * - **Two branches** sit above it: the accessibility tools and "Nach oben"
+ *   (which grows out of the stem once the visitor has scrolled about a
+ *   viewport). Each branch hangs from a NECK — its `::after`, drawn in its own
+ *   background colour — reaching down behind the element under it, so the
+ *   three read as one shape.
+ * - **It spreads out** when the pointer comes near, on hover and on keyboard
+ *   focus inside it: the branches move apart and the necks stretch with them.
+ *   One unitless custom property, `--tree-spread` (0 → 1), drives every part,
+ *   so they can never disagree. CSS transitions it (it is a registered
+ *   `@property`); with Motion running, `lib/motion/floatingCta.ts` drives it
+ *   on a spring instead.
+ * - **One colour.** Hovering any part turns every part bordeaux; over a dark
+ *   ground every part turns white.
+ * - **The trunk stands down** over the hero and the contact section (one
+ *   primary action per view — see the rules below) and comes back with a
+ *   Motion spring. The two branches are NOT part of that: the accessibility
+ *   tools stay reachable on every screen, and "Nach oben" follows the scroll.
  */
 const lang = resolveLang(Astro.currentLocale);
 const home = localizePath("/", lang);
 const href = `${home === "/" ? "" : home.replace(/\/$/, "")}/#contact`;
-const label = lang === "de" ? "Erstgespräch vereinbaren" : "Arrange an initial consultation";
+const label = lang === "de" ? "Zum Kontaktformular" : "Go to the contact form";
+const hint = lang === "de" ? "Kontakt" : "Contact";
 const topLabel = lang === "en" ? "Back to top" : "Nach oben";
 // A landmark of its own: it floats outside `<main>` and the footer, and axe
 // reported it as content outside every region (`region`).
@@ -31,7 +40,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 ---
 
 {/* No `data-suppressed` in the markup on purpose — see the rules below: on a
-    page with a hero the control starts hidden until the script has measured
+    page with a hero the trunk starts hidden until the script has measured
     that the hero is gone, so it never flashes over the hero's own button. */}
 <aside
   class="floating-cta-group"
@@ -40,10 +49,6 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   data-near="false"
   data-on-dark="false"
 >
-  {/* Accessibility tools (2026-09-21). They stay reachable while the CTA
-      below stands down over the hero and the form — see the rules below. */}
-  <A11yTools />
-
   <button type="button" class="floating-cta-top" aria-label={topLabel}>
     <svg
       aria-hidden="true"
@@ -62,33 +67,52 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     </svg>
   </button>
 
+  {/* Accessibility tools (2026-09-21). They stay reachable while the trunk
+      below stands down over the hero and the form — see the rules below. */}
+  <A11yTools />
+
   <a href={href} class="floating-cta" aria-label={label}>
+    {/* The telephone receiver. */}
     <svg
       aria-hidden="true"
-      width="18"
-      height="18"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="2"
+      stroke-width="1.9"
       stroke-linecap="round"
       stroke-linejoin="round"
       class="floating-cta__icon"
     >
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
     </svg>
-    <span class="floating-cta__label">{label}</span>
-    <span aria-hidden="true" class="floating-cta__arrow">→</span>
+    {/* A visible word on hover for a mouse; the accessible name is the
+        label above, so this one is hidden from assistive tech. */}
+    <span aria-hidden="true" class="floating-cta__hint">{hint}</span>
   </a>
 </aside>
 
 <style>
-  /* Positioning wrapper only — no background of its own. The arrow nub is
-     centred over the CTA pill below it. */
+  /* The spread of the tree, 0 (resting) → 1 (spread out). Registered so a
+     CSS transition can interpolate it; Motion animates the same property. */
+  @property --tree-spread {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 0;
+  }
+
+  /* Positioning wrapper only — no background of its own. */
   .floating-cta-group {
+    /* Geometry of the tree. The neck of a branch reaches from its lower edge
+       across the gap and `--tree-overlap` behind the element below it. */
+    --tree-gap: 0.5rem;
+    --tree-overlap: 0.5rem;
+    /* How much further apart the parts move when the tree spreads. */
+    --tree-reach: 0.625rem;
+    --tree-branch: 2.75rem;
+    --tree-trunk: 3.5rem;
+
     position: fixed;
     right: 1rem;
     /* Stack above whatever else already occupies this corner, rather than
@@ -98,15 +122,12 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        - `--tds-right-lane` is the live-chat launcher's height. That widget is
          fixed in THIS corner at `z-index: 95` — twelve layers above this
          control — so with it switched on for the landingpage it covered the
-         CTA completely. It renders nothing until an admin enables it per
-         frontend, which is the only reason this was not already visible.
+         CTA completely.
        - `--tds-bottom-lane` is the cookie notice's height. That notice spans
          the FULL width on a phone, so it occupies this corner too.
 
-       Both fall back to `0px`, so with neither component on screen this is the
-       plain 1rem it has always been. `env()` last — it clears the home
-       indicator on a notched phone and resolves to 0px everywhere else; this
-       control never had that and sat under the gesture bar. */
+       Both fall back to `0px`. `env()` last — it clears the home indicator on
+       a notched phone and resolves to 0px everywhere else. */
     bottom: calc(
       var(--tds-right-lane, 0px) + 1rem +
         env(safe-area-inset-bottom, 0px)
@@ -118,23 +139,21 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        is not. `translate` is its own property, so the hover lift on
        `transform` still composes with it. */
     translate: 0 calc(-1 * var(--tds-bottom-lane, 0px));
-    /* The group is only a positioning box. Since the CTA parts stand down
-       individually (the accessibility button stays), the box itself stays on
-       screen — and without this it swallowed clicks on whatever lay under its
-       invisible area (measured: the footer's "Cookie-Einstellungen"). Only the
-       children take pointer events; the suppression rules switch them off. */
+    /* The group is only a positioning box. Since the trunk stands down
+       individually (the branches stay), the box itself stays on screen — and
+       without this it swallowed clicks on whatever lay under its invisible
+       area (measured: the footer's "Cookie-Einstellungen"). Only the children
+       take pointer events; the suppression rules switch them off. */
     pointer-events: none;
     z-index: 35;
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Lifts as one unit when the CTA is hovered (see :has rule below), and
-       fades out of the way where the page already offers the same action. */
+    gap: var(--tree-gap);
     transition:
       transform 220ms var(--lp-ease-soft),
       translate 300ms var(--tds-ease-out),
-      opacity 200ms var(--tds-ease-out),
-      visibility var(--tds-dur-none, 0s) linear 200ms;
+      --tree-spread 520ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
   @media (min-width: 768px) {
     .floating-cta-group {
@@ -150,27 +169,84 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     pointer-events: auto;
   }
 
+  /* --- Spread ------------------------------------------------------- */
+
+  /* Pointer near, pointer on it, or keyboard focus inside: spread out. With
+     Motion running the property is written inline on a spring, and this rule
+     only matters as the resting fallback. */
+  .floating-cta-group[data-near="true"],
+  .floating-cta-group:hover,
+  .floating-cta-group:focus-within {
+    --tree-spread: 1;
+  }
+  :global(:root[data-motion="on"]) .floating-cta-group {
+    transition:
+      transform 220ms var(--lp-ease-soft),
+      translate 300ms var(--tds-ease-out);
+  }
+
+  /* Each branch moves up by its distance from the trunk. `translate`, so the
+     transforms written by Motion and the hover rules stay free. */
+  .floating-cta-group > :global(.a11y-toggle) {
+    translate: 0 calc(var(--tree-spread) * -1 * var(--tree-reach));
+  }
+  .floating-cta-top {
+    translate: 0 calc(var(--tree-spread) * -2 * var(--tree-reach));
+  }
+
+  /* The neck: a narrower stem hanging from a branch down behind the element
+     under it. Same colour as its branch (`inherit`), so it follows every
+     state. It stretches by exactly the distance the branches move apart:
+     rest length gap + overlap, spread length that plus the reach. */
+  .floating-cta-top::after,
+  .floating-cta-group > :global(.a11y-toggle)::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 1.1rem;
+    height: calc(var(--tree-gap) + var(--tree-overlap));
+    margin-left: -0.55rem;
+    background-color: inherit;
+    border-radius: 0 0 0.6rem 0.6rem;
+    transform-origin: top center;
+    transform: scaleY(
+      calc(1 + var(--tree-spread) * 0.625)
+    );
+    z-index: -1;
+    pointer-events: none;
+  }
+  /* The a11y branch's neck joins the trunk; while the trunk stands down it
+     has nothing to join and folds up. */
+  .floating-cta-group[data-suppressed="true"] > :global(.a11y-toggle)::after,
+  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) > :global(.a11y-toggle)::after {
+    transform: scaleY(0);
+  }
+  .floating-cta-group > :global(.a11y-toggle)::after {
+    transition: transform 280ms var(--tds-ease-out);
+  }
+
   /* --- Out of the way ------------------------------------------------- */
 
-  /* ONE primary call to action per view. The floating control repeats the
-     hero's button and the contact form's purpose, so it stands down while
-     either of them is on screen (the script below writes `data-suppressed`).
+  /* ONE primary call to action per view. The trunk repeats the hero's button
+     and the contact form's purpose, so it stands down while either of them
+     is on screen (the script below writes `data-suppressed`).
 
      Two states needed CSS on top of that:
 
-     - BEFORE the script has run. On a page with a hero the control starts
+     - BEFORE the script has run. On a page with a hero the trunk starts
        hidden, rather than appearing over the hero's own button and vanishing
        a moment later. A page without a hero (a service page) has nothing to
        wait for and shows it straight away.
      - SHORT screens with the cookie notice open. Header, notice and this
-       button together covered 58 % of a 320×568 phone and 94 % of a 400 %
-       zoomed window, with the hero's button underneath them. Until the notice
-       is dismissed, this one waits. */
-  /* The CTA parts stand down — NOT the accessibility button, which is the
-     group's first child and has to be reachable on the very first screen.
-     So the rule hides the children, not the group. */
-  .floating-cta-group[data-suppressed="true"] > :global(:not(.a11y-toggle):not(.a11y-panel)),
-  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) > :global(:not(.a11y-toggle):not(.a11y-panel)) {
+       button together covered most of a 320×568 phone. Until the notice is
+       dismissed, the trunk waits.
+
+     The branches are not in these rules: `:not(.a11y-toggle)` keeps the
+     accessibility tools reachable on the first screen, and "Nach oben" has
+     its own scroll rule below. */
+  .floating-cta-group[data-suppressed="true"] > .floating-cta,
+  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) > .floating-cta {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -182,36 +258,40 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       pointer-events: none;
     }
   }
-  .floating-cta-group[data-suppressed="false"] {
+  /* With Motion running, the trunk's opacity and scale are Motion's spring
+     (lib/motion/floatingCta.ts); CSS only withholds `visibility` until the
+     exit has played, so the trunk does not vanish before it has shrunk. */
+  :global(:root[data-motion="on"]) .floating-cta {
     transition:
-      transform 220ms var(--lp-ease-soft),
-      translate 300ms var(--tds-ease-out),
-      opacity 200ms var(--tds-ease-out),
-      visibility var(--tds-dur-none, 0s) linear 0s;
+      background-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease,
+      visibility 0s linear 0s;
+  }
+  :global(:root[data-motion="on"]) .floating-cta-group[data-suppressed="true"] > .floating-cta {
+    transition:
+      background-color 220ms ease,
+      color 220ms ease,
+      box-shadow 220ms ease,
+      visibility 0s linear 360ms;
   }
 
   /* The height this control reserves at the bottom edge, for
      `scroll-padding-bottom` in global.css: a focused link must scroll above
      it, not behind it. Published here because only this component knows its
-     own geometry — the pill on a pointer, the full-width bar on touch — and
-     cleared while the control is out of the way. */
+     own geometry, and cleared while the trunk is out of the way. */
   :global(:root) {
-    --lp-floating-lane: 4rem;
+    --lp-floating-lane: 4.5rem;
   }
   @media (min-width: 768px) {
     :global(:root) {
-      --lp-floating-lane: 4.5rem;
-    }
-  }
-  @media (hover: none) {
-    :global(:root) {
-      --lp-floating-lane: 4.75rem;
+      --lp-floating-lane: 5rem;
     }
   }
   :global(:root:has(.floating-cta-group[data-suppressed="true"])) {
     --lp-floating-lane: 0px;
   }
-  /* Short screens hide the group while the cookie notice is open (below), so
+  /* Short screens hide the trunk while the cookie notice is open (above), so
      nothing may reserve its lane either. */
   @media (max-height: 44rem) {
     :global(:root:has(.cookie-notice)) {
@@ -219,75 +299,55 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     }
   }
 
-  /* --- Scroll-to-top (small arrow nub, merges into the CTA) --------- */
+  /* --- "Nach oben" (upper branch) ---------------------------------- */
   .floating-cta-top {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Arrow-sized but a touch bigger so it reads clearly; fully round. */
-    width: 1.9rem;
-    height: 1.9rem;
+    width: var(--tree-branch);
+    height: var(--tree-branch);
+    padding: 0;
+    border: none;
     border-radius: 9999px;
     color: #fff;
     background-color: var(--color-surface-navy);
-    /* Overlap the CTA so the two navy shapes fuse into one rounded
-       component; the ::after neck (below) keeps them connected as the
-       nub slides up. */
-    margin-bottom: -0.85rem;
-    position: relative;
-    z-index: 0;
     cursor: pointer;
-    /* Collapsed: tucked down inside the CTA, invisible + click-through. */
+    /* Collapsed: folded down into the branch below, invisible and
+       click-through, until the visitor has scrolled about a viewport. */
     opacity: 0;
-    transform: translateY(1.1rem) scale(0.4);
+    transform: translateY(1.5rem) scale(0.3);
     transform-origin: center bottom;
     pointer-events: none;
     transition:
       opacity 220ms ease,
-      transform 380ms var(--lp-ease-bounce),
+      transform 420ms var(--lp-ease-bounce),
       background-color 220ms ease,
       color 220ms ease;
   }
-  /* Fluid neck: a narrower navy stem dropping from the nub down behind the
-     CTA pill, so a droplet-like pinch connects them. Inherits the nub's
-     background-color, so it recolours with every state (navy / accent /
-     white-on-dark). Sits behind the pill (pill is z-index 1). */
-  .floating-cta-top::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 55%;
-    width: 1.15rem;
-    height: 1.7rem;
-    transform: translateX(-50%);
-    background-color: inherit;
-    border-radius: 0 0 0.7rem 0.7rem;
-    z-index: -1;
-  }
-  /* Revealed and resting — already peeks clearly above the CTA. */
   .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
   .floating-cta-top__icon {
     transition: transform 220ms ease;
   }
+  .floating-cta-top:focus-visible,
+  .floating-cta:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
 
-  /* --- CTA pill ----------------------------------------------------- */
+  /* --- Trunk: the receiver ------------------------------------------- */
   .floating-cta {
     position: relative;
     z-index: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    /* Fine-pointer phones (a small desktop window): a compact icon-only
-       tap target. The touch block at the bottom of this file replaces it
-       with a labelled bar wherever there is no hover. */
-    padding: 0.85rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+    width: var(--tree-trunk);
+    height: var(--tree-trunk);
     color: #fff;
     background-color: var(--color-surface-navy);
     border-radius: 9999px;
@@ -299,182 +359,118 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       background-color 220ms ease,
       color 220ms ease,
       box-shadow 220ms ease;
-    animation: floating-cta-in 500ms var(--lp-ease-bounce) 600ms both;
-  }
-  @media (min-width: 640px) {
-    .floating-cta {
-      padding: 0.85rem 1.25rem;
-    }
-  }
-  .floating-cta__label {
-    display: none;
-  }
-  @media (min-width: 640px) {
-    .floating-cta__label {
-      display: inline;
-    }
-  }
-  /* Only the touch bar shows the arrow — on the round pill it would be a
-     third glyph competing with the icon inside a 44px circle. */
-  .floating-cta__arrow {
-    display: none;
   }
   .floating-cta__icon {
     transition: transform 220ms ease;
-    animation: floating-cta-bob 3s ease-in-out 1.2s infinite;
+    transform-origin: 60% 40%;
+  }
+  /* The word beside the trunk, sliding out to the left on hover. */
+  .floating-cta__hint {
+    position: absolute;
+    right: calc(100% + 0.625rem);
+    top: 50%;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    background: inherit;
+    color: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    translate: 0.5rem -50%;
+    pointer-events: none;
+    transition:
+      opacity 200ms var(--tds-ease-out),
+      translate 320ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
 
   /* --- Hover states, fine pointers only ----------------------------- */
 
   /* All of this is behind `(hover: hover)` on purpose. `:hover` on a touch
      screen is a STICKY state: the browser applies it on tap and leaves it
-     applied until the next tap elsewhere, so the "lift + warm to burgundy"
-     read as the control changing colour permanently after being used once. */
+     applied until the next tap elsewhere. */
   @media (hover: hover) {
-    .floating-cta-group:hover .floating-cta-top__icon {
+    .floating-cta-top:hover .floating-cta-top__icon {
       transform: translateY(-2px);
-    }
-    /* Cursor nearby — slides up so it reads more clearly. */
-    .floating-cta-group[data-scrolled-down="true"][data-near="true"] .floating-cta-top {
-      transform: translateY(-0.4rem) scale(1.02);
-    }
-    /* Hovering the control — slides up the most. */
-    .floating-cta-group[data-scrolled-down="true"]:hover .floating-cta-top {
-      transform: translateY(-0.8rem) scale(1.06);
     }
     .floating-cta:hover .floating-cta__icon {
-      transform: scale(1.1) rotate(-6deg);
+      /* The receiver rings: a short wobble. */
+      animation: floating-cta-ring 520ms ease-in-out;
+    }
+    .floating-cta:hover .floating-cta__hint,
+    .floating-cta:focus-visible .floating-cta__hint {
+      opacity: 1;
+      translate: 0 -50%;
     }
 
-    /* Hover either piece: the whole merged control lifts and warms to
-       burgundy with white text — applies in both the navy and inverted
-       states (the :has selector out-specifies the [data-on-dark] rules),
-       and recolours both pieces so the fused shape stays one colour.
-       Hovering the arrow nub yields the identical look to hovering the CTA. */
-    .floating-cta-group:has(.floating-cta:hover),
-    .floating-cta-group:has(.floating-cta-top:hover) {
+    /* Hover ANY part: the whole tree lifts and warms to bordeaux with white
+       text — in the navy and in the inverted state (the :has selector
+       out-specifies the [data-on-dark] rules). Every part recolours, necks
+       included, so the fused shape stays one colour. */
+    :global(.floating-cta-group:has(> :is(.floating-cta, .floating-cta-top, .a11y-toggle):hover)) {
       transform: translateY(-2px);
     }
-    .floating-cta-group:has(.floating-cta:hover) .floating-cta,
-    .floating-cta-group:has(.floating-cta:hover) .floating-cta-top,
-    .floating-cta-group:has(.floating-cta-top:hover) .floating-cta,
-    .floating-cta-group:has(.floating-cta-top:hover) .floating-cta-top {
+    :global(.floating-cta-group:has(> :is(.floating-cta, .floating-cta-top, .a11y-toggle):hover)
+      > :is(.floating-cta, .floating-cta-top, .a11y-toggle)) {
       background-color: var(--color-surface-accent);
       color: #fff;
     }
-    .floating-cta-group:has(.floating-cta:hover) .floating-cta,
-    .floating-cta-group:has(.floating-cta-top:hover) .floating-cta {
+    :global(.floating-cta-group:has(> :is(.floating-cta, .floating-cta-top, .a11y-toggle):hover) > .floating-cta) {
       box-shadow:
         0 22px 48px -14px rgba(5, 15, 104, 0.55),
         0 8px 18px -6px rgba(5, 15, 104, 0.4);
     }
   }
 
-  /* Over a dark section both pieces flip to white (toggled in script). */
-  .floating-cta-group[data-on-dark="true"] .floating-cta,
-  .floating-cta-group[data-on-dark="true"] .floating-cta-top {
+  /* Over a dark section every part flips to white (toggled in script). */
+  :global(.floating-cta-group[data-on-dark="true"] > :is(.floating-cta, .floating-cta-top, .a11y-toggle)) {
     background-color: #fff;
     color: var(--color-surface-navy);
   }
-  .floating-cta-group[data-on-dark="true"] .floating-cta {
+  .floating-cta-group[data-on-dark="true"] > .floating-cta {
     box-shadow:
       0 14px 34px -12px rgba(0, 0, 0, 0.45),
       0 4px 10px -4px rgba(0, 0, 0, 0.3);
   }
 
-  /* --- Touch: a labelled bar, not a glyph --------------------------- */
+  /* --- Touch --------------------------------------------------------- */
 
-  /* Keyed on `(hover: none)` rather than a width, because the problem is
-     the input device: a 44px unlabelled circle is fine next to a cursor
-     that can hover it for a tooltip, and useless under a thumb. Placed
-     LAST so it wins over the `min-width: 640px` rules above without
-     needing a specificity bump. */
+  /* A thumb does not approach, it arrives: no spread, and the page keeps
+     clear of the round trunk at the end of the document. */
   @media (hover: none) {
     .floating-cta-group {
-      left: 1rem;
-      right: 1rem;
-      align-items: flex-end;
+      --tree-trunk: 3.5rem;
     }
-    @media (min-width: 768px) {
-      .floating-cta-group {
-        left: 1.5rem;
-        right: 1.5rem;
-      }
-    }
-
-    .floating-cta {
-      width: 100%;
-      /* 56px, comfortably past the 44px floor the shared `.btn` uses —
-         this is a primary action a thumb reaches for at the bottom of the
-         screen, where accuracy is worst. */
-      min-height: 3.5rem;
-      padding: 0.75rem 1.5rem;
-      gap: 0.625rem;
-    }
-    .floating-cta__label {
-      display: inline;
-    }
-    .floating-cta__arrow {
-      display: inline;
-      margin-left: auto;
-      /* Pushed to the trailing edge with the icon at the leading one, so
-         the bar reads as a row rather than as a centred blob. */
-      padding-left: 0.5rem;
-    }
-    .floating-cta__icon {
-      /* The bob loop is a "look at me" idle for a small distant circle; in
-         a full-width bar it just wobbles the row's leading glyph. */
-      animation: none;
-      flex-shrink: 0;
-    }
-
-    /* No fusion on touch. The nub grew out of the pill because a cursor
-       approached it; a thumb does not approach, it arrives — so this is
-       its own round target above the bar, at a size a thumb can hit. */
-    .floating-cta-top {
-      width: 2.75rem;
-      height: 2.75rem;
-      margin-bottom: 0.625rem;
-      transform: translateY(0.75rem) scale(0.6);
-    }
-    .floating-cta-top::after {
-      display: none;
-    }
-
-    /* The bar is fixed over the end of the document, so the last thing on
-       every page (the footer's bottom row) sat underneath it. The lanes in
-       `bottom` keep the bar clear of the cookie notice; this keeps the
-       PAGE clear of the bar. */
     :global(body) {
-      padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
   }
 
-  @keyframes floating-cta-in {
-    from {
-      opacity: 0;
-      transform: translateY(24px) scale(0.92);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @keyframes floating-cta-bob {
+  @keyframes floating-cta-ring {
     0%,
     100% {
-      transform: translateY(0);
+      transform: rotate(0);
     }
-    50% {
-      transform: translateY(-3px);
+    20% {
+      transform: rotate(-14deg);
+    }
+    40% {
+      transform: rotate(12deg);
+    }
+    60% {
+      transform: rotate(-8deg);
+    }
+    80% {
+      transform: rotate(4deg);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .floating-cta,
+    .floating-cta-group {
+      transition: none;
+    }
     .floating-cta__icon {
-      animation: none;
+      animation: none !important;
     }
     .floating-cta-top {
       transition:
@@ -483,10 +479,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
         color 220ms ease;
       transform: none;
     }
-    .floating-cta-group[data-scrolled-down="true"] .floating-cta-top {
-      transform: none;
-    }
-    .floating-cta-group:has(.floating-cta:hover) {
+    :global(.floating-cta-group:has(> :is(.floating-cta, .floating-cta-top, .a11y-toggle):hover)) {
       transform: none;
     }
   }
@@ -500,27 +493,19 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     /**
      * Which parts of the DOCUMENT are a dark ground, in absolute page
      * coordinates, measured once and re-measured only when the page's own
-     * geometry changes.
-     *
-     * This replaces a per-frame `elementsFromPoint()` + a `getComputedStyle()`
-     * walk up the ancestor chain, which ran inside the scroll rAF: three
-     * forced synchronous layouts, sixty times a second, for the whole life of
-     * the page, to answer a question whose answer changes about four times per
-     * visit. It was the single largest source of scroll jank on a phone, and
-     * because a `data-theme` MutationObserver also scheduled it, it ran in the
-     * middle of the theme transition as well.
+     * geometry changes — never per scroll frame (that was the largest source
+     * of scroll jank on a phone).
      *
      * The dark grounds are the two shared tone primitives — `.tds-tone-navy`
-     * (contact, both navy callouts, the pricing highlight card, the service
-     * price aside and CTA panel) and `.tds-tone-ink` (the footer). Those are
-     * CLASSES, so unlike a sampled colour they do not change with the theme,
-     * which is what lets the answer be cached at all.
+     * and `.tds-tone-ink` (the footer). Those are CLASSES, so unlike a sampled
+     * colour they do not change with the theme.
      */
     let darkRanges: Array<[number, number]> = [];
 
     /** The control's own centre, as a distance up from the viewport bottom. */
     let anchorFromBottom = 0;
 
+    const trunk = group.querySelector<HTMLElement>(".floating-cta");
     const measure = () => {
       const offset = window.scrollY;
       darkRanges = Array.from(
@@ -530,24 +515,19 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
         return [rect.top + offset, rect.bottom + offset] as [number, number];
       });
 
-      const rect = group.getBoundingClientRect();
+      // The trunk is the lowest, largest part; its centre decides the colour.
+      const rect = (trunk ?? group).getBoundingClientRect();
       anchorFromBottom = window.innerHeight - (rect.top + rect.height / 2);
     };
 
-    // In dark mode every ground is dark, including the paper between the
-    // navy blocks — so the inverted (white) control is correct everywhere and
-    // the ranges do not need consulting at all.
+    // In dark mode every ground is dark, so the inverted (white) control is
+    // correct everywhere and the ranges do not need consulting at all.
     const documentIsDark = () =>
       document.documentElement.getAttribute("data-theme") === "dark";
 
     let frame = 0;
-    // Both flags are re-derived on every frame of every scroll, but they
-    // only CHANGE a handful of times per page. Writing a data-attribute
-    // costs the same whether or not the value differs: it invalidates style
-    // for this element and, because the control is styled through several
-    // `:has()` and attribute selectors, for the pieces inside it — sixty
-    // times a second, to arrive at the markup that was already there.
-    // Comparing first is free.
+    // Compare before writing: a data-attribute write invalidates style for
+    // the whole control (several `:has()` rules), sixty times a second.
     const setFlag = (key: "scrolledDown" | "onDark" | "suppressed", on: boolean) => {
       const value = on ? "true" : "false";
       if (group.dataset[key] !== value) group.dataset[key] = value;
@@ -555,7 +535,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
     const update = () => {
       frame = 0;
-      // Reveal the scroll-to-top nub after ~one viewport of scroll.
+      // Grow the "Nach oben" branch after ~one viewport of scroll.
       setFlag("scrolledDown", window.scrollY > window.innerHeight * 0.8);
 
       // Pure arithmetic from here down — no layout is read during a scroll.
@@ -583,13 +563,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
      * Stand down while the page already shows the same action.
      *
      * The hero counts as "on screen" while it still reaches into the upper
-     * half of the viewport — by the time only its bottom edge is left, its
-     * button has long scrolled away and the visitor would otherwise be without
-     * any call to action. The contact section counts as soon as any of it is
-     * visible: the form IS the destination.
+     * half of the viewport. The contact section counts as soon as any of it
+     * is visible: the form IS the destination.
      *
      * No IntersectionObserver (or no hero and no contact section on this page)
-     * means nothing to wait for, so the control simply shows.
+     * means nothing to wait for, so the trunk simply shows.
      */
     const hero = document.getElementById("hero");
     const contact = document.getElementById("contact");
@@ -612,25 +590,19 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       setFlag("suppressed", false);
     }
 
-    // Anything that changes the page's height moves every range below it:
-    // late-loading images and web fonts, an opened FAQ row, the cookie
-    // notice appearing. A ResizeObserver on the document element catches
-    // all of them and fires only when the height actually changes — which
-    // is the whole point of not doing this per frame.
+    // Anything that changes the page's height moves every range below it.
     new ResizeObserver(remeasure).observe(document.documentElement);
 
-    // Re-evaluate when the colour theme flips. This no longer measures
-    // anything; it only re-reads the attribute the scroll handler consults.
+    // Re-evaluate when the colour theme flips.
     new MutationObserver(update).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme"],
     });
 
-    // Proximity: as the pointer nears the control, slide the scroll-to-top
-    // arrow up (the CSS slides it further again on hover). Hover-capable
-    // pointers only — touch has no "near" state.
+    // Proximity: as the pointer nears the control, the tree spreads out.
+    // Hover-capable pointers only — touch has no "near" state.
     if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      const NEAR = 150;
+      const NEAR = 120;
       let near = false;
       let px = 0;
       let py = 0;

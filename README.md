@@ -32,8 +32,9 @@ formal). The sections follow the questions a visitor has:
    as such
 6. Compact journal teaser
 7. Wieso ich? / Why me?
-8. Prices: three fixed-price packages (390 €, 650 €, 1.040 € net — hours × the
-   Webauftritt rate), then every hourly rate and how a price comes about
+8. Prices: three fixed-price packages (390 €, 650 €, 1.040 €) with a net/gross
+   switch, how a price comes about, and "Individuelle Lösungen" on request —
+   no hourly rates
 9. FAQ
 10. Contact, with the digital business card docked on the section's right edge
     (it slides out as the pointer comes near)
@@ -42,13 +43,15 @@ The page uses the full screen width. Motion comes from the Motion library
 through `tds-shared/motion/dom`, loaded lazily: the CTA follows the pointer, the
 generated photos settle and drift, pages change with an exit and an entrance
 while the fixed navigation holds still, and every modal bounces in and out. The
-floating CTA menu carries accessibility tools — larger text, higher contrast,
-motion off — stored on the device. See AGENTS.md for the rules that keep all of
+floating control is a small tree — a receiver that leads to the contact form,
+with accessibility tools (larger text, higher contrast, motion off, stored on
+the device) and "back to top" as branches. Bookmarks on the left edge lead to
+Journal, Tools, customer portal and Shop. See AGENTS.md for the rules that keep all of
 it off the LCP path.
 
 The **Leistungsassistent** is not a section: a button in the services and in
 the pricing section opens it as a dialog. Three questions point to one or more
-services with their hourly rate and hand the result to the contact form as a
+services with their price (fixed or on request) and hand the result to the contact form as a
 draft.
 
 The former tech-stack and current-topics sections, the positioning callout, the
