@@ -66,7 +66,6 @@ const defaults: Record<Lang, PricingContent> = {
     // printed each of them twice.
     notes: [
       "Umschaltbar: netto oder brutto mit 19 % Mehrwertsteuer.",
-      "Bei Anzeigen kommt dein Werbebudget dazu. Es geht direkt an Google.",
     ],
     ctaTitle: "Individuelle Lösungen",
     ctaSub: "Passt dein Vorhaben in kein Paket? Dann gibt es den Preis auf Anfrage.",
@@ -81,7 +80,6 @@ const defaults: Record<Lang, PricingContent> = {
     notesTitle: "Good to know",
     notes: [
       "Switchable: net, or gross with 19 % German VAT.",
-      "Ads come with your own media budget. It goes to Google directly.",
     ],
     ctaTitle: "Custom solutions",
     ctaSub: "Your project fits no package? Then the price is on request.",

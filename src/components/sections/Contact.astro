@@ -242,7 +242,7 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
               TODO: promote to tds-shared contact.vcard */}
           <a
             href="/kontakt.vcf"
-            class="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm text-white hover:bg-white hover:text-[var(--color-surface-navy)] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_-10px_rgba(0,0,0,0.45)] transition-all duration-200"
+            class="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm text-white hover:bg-white hover:text-[var(--color-surface-navy)] transition-all duration-200"
           >
             <svg
               width="18"
@@ -478,9 +478,7 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
     position: relative;
     z-index: 1;
     border-radius: 4px 4px 0 0;
-    transition:
-      background-color 220ms ease,
-      box-shadow 220ms ease;
+    transition: background-color 220ms ease;
   }
   /* Faint wash on hover (before focus) so the field warms up under the
      cursor. */
@@ -489,9 +487,8 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
   }
   .contact-field:focus {
     background-color: rgb(255 255 255 / 0.16) !important;
-    box-shadow:
-      0 -1px 0 rgb(255 255 255 / 0.12) inset,
-      0 14px 36px -12px rgba(255, 122, 156, 0.4);
+    /* The inset line only — the soft pink glow went with the 2D pass. */
+    box-shadow: 0 -1px 0 rgb(255 255 255 / 0.12) inset;
   }
 
   /* Error variant — solid pink baseline so the broken field reads
@@ -722,7 +719,7 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
     text-decoration: none;
     /* Transform only. A blurred shadow transitioned every frame re-rasterises
        the whole blur; the lift is the movement, the shadow is static. */
-    box-shadow: 0 14px 30px -18px rgb(0 0 0 / 0.55);
+    box-shadow: var(--tds-shadow-hard);
     transition: transform 220ms var(--tds-ease-out);
   }
   @media (prefers-reduced-motion: no-preference) {
@@ -860,7 +857,7 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
       translate: 0 -50%;
       padding-left: calc(var(--mini-card-tab) + 1.25rem);
       border-radius: 10px 0 0 10px;
-      box-shadow: -18px 20px 40px -24px rgb(0 0 0 / 0.6);
+      box-shadow: var(--tds-shadow-hard);
       transform: translateX(calc(100% - var(--mini-card-tab)));
       transition: transform 420ms var(--tds-ease-out);
     }
@@ -1017,7 +1014,7 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
       border-radius: 14px;
       background-color: color-mix(in srgb, var(--color-paper) 82%, transparent);
       backdrop-filter: blur(22px) saturate(150%);
-      box-shadow: 0 18px 40px -22px rgb(0 0 0 / 0.55);
+      box-shadow: var(--tds-shadow-hard-sm);
       /* The OPEN state is the picker's only state — the element does not
          exist while the select is closed — so the resting values go here and
          `@starting-style` supplies the frame it animates from.
@@ -1089,11 +1086,11 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
     background-color: var(--color-accent-pink);
     isolation: isolate;
     transition:
-      box-shadow 220ms ease,
-      color 220ms ease;
-    box-shadow:
-      0 6px 18px -8px rgba(255, 122, 156, 0.55),
-      0 2px 6px -2px rgba(5, 15, 104, 0.18);
+      color 220ms ease,
+      translate 200ms var(--tds-ease-out);
+    /* The site's hard 2D offset (global.css); on the navy tone its ink is
+       black. */
+    box-shadow: var(--tds-shadow-hard-sm);
   }
   .submit-button::before {
     content: "";
@@ -1117,14 +1114,8 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
   .submit-button:hover:not(:disabled)::before {
     background-position: 0% 0;
   }
-  .submit-button:hover:not(:disabled) {
-    box-shadow:
-      0 14px 36px -10px rgba(255, 122, 156, 0.65),
-      0 6px 14px -4px rgba(5, 15, 104, 0.25);
-  }
   .submit-button:active:not(:disabled) {
-    box-shadow:
-      0 4px 12px -4px rgba(255, 122, 156, 0.5),
-      0 1px 3px -1px rgba(5, 15, 104, 0.15);
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
   }
 </style>

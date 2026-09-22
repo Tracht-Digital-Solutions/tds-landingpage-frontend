@@ -90,38 +90,32 @@ const toggles = [
 </div>
 
 <style>
+  /* One button INSIDE the floating pill (`FloatingCta.astro`), which paints
+     the fill, the colour and the shadow for all of its buttons at once; this
+     one is only a transparent round hit area with a hover tint. */
   .a11y-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    position: relative;
+    width: 3rem;
+    height: 3rem;
     padding: 0;
     border: none;
     border-radius: 9999px;
-    background: var(--color-surface-navy);
-    color: #fff;
+    background: transparent;
+    color: inherit;
     cursor: pointer;
-    box-shadow: 0 8px 20px -10px rgb(0 0 0 / 0.45);
-    transition:
-      background-color 200ms var(--tds-ease-out),
-      transform 200ms var(--tds-ease-out);
+    transition: background-color 200ms var(--tds-ease-out);
   }
   .a11y-toggle[hidden] {
     display: none;
   }
   .a11y-toggle:hover {
-    background: var(--color-surface-accent);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .a11y-toggle:hover {
-      transform: translateY(-2px);
-    }
+    background: rgb(255 255 255 / 0.14);
   }
   .a11y-toggle:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
   }
 
   /* In the top layer, docked above the floating control. `margin: 0` because
@@ -138,7 +132,7 @@ const toggles = [
     border-radius: 10px;
     background: var(--color-paper);
     color: var(--color-black);
-    box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.55);
+    box-shadow: var(--tds-shadow-hard);
     /* It springs open with Motion (script below), from the corner it
        belongs to. */
     transform-origin: bottom right;

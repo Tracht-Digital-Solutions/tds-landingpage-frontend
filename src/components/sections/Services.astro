@@ -9,7 +9,7 @@ import {
   serviceHref,
 } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
-import ServiceCard from "~/components/ui/ServiceCard.astro";
+import ServiceExplorer from "~/components/ui/ServiceExplorer.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import { FINDER_SECTION } from "~/lib/serviceFinder";
 
@@ -64,36 +64,24 @@ const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your
       </button>
     </p>
 
-    {/* One surface divided into four, not four cards floating on sand.
-
-        The separation is a 1px grid gap over a parent painted in
-        `--color-line`: the tiles paint their own fill, the gap lets the
-        parent show through, and what a visitor sees is a hairline seam.
-
-        `data-reveal` sits on the mosaic rather than on each tile on purpose:
-        four tiles sliding up independently would open and close the seams
-        while they travel. One picture, one entrance.
-
-        Each tile answers the four questions a visitor scanning services has —
-        what problem does it start from, what do I end up with, what does it
-        cover, where do I go next — from the SAME resolved content the detail
+    {/* An interactive list since 2026-09-22 (`ui/ServiceExplorer.astro`):
+        the four titles on the left, one open panel on the right, an
+        accordion on a phone. Each panel answers what a visitor scanning
+        services asks — the typical starting point, the outcome, the scope
+        and where to go next — from the SAME resolved content the service
         page renders, so an edit in the panel moves both. */}
-    <div
-      data-reveal
-      class="-mx-6 md:mx-0 overflow-hidden rounded-none md:rounded-[6px] bg-[var(--color-line)] grid gap-px sm:grid-cols-2"
-    >
-      {services.map(({ definition, content }) => (
-        <ServiceCard
-          href={serviceHref(definition, lang)}
-          title={content.title}
-          problem={content.situations[0] ?? ""}
-          result={content.outcomes[0] ?? ""}
-          keywords={definition.keywords[lang]}
-          image={definition.image}
-          lang={lang}
-        />
-      ))}
-    </div>
+    <ServiceExplorer
+      lang={lang}
+      services={services.map(({ definition, content }) => ({
+        id: definition.id,
+        href: serviceHref(definition, lang),
+        title: content.title,
+        problem: content.situations[0] ?? "",
+        result: content.outcomes[0] ?? "",
+        keywords: definition.keywords[lang],
+        image: definition.image ?? null,
+      }))}
+    />
 
     {/* The systems people search for by name, one chip each, in the chips'
         own style — the way from "Webauftritt" to "my WooCommerce shop". */}

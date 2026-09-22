@@ -1,0 +1,422 @@
+---
+/**
+ * The services as an INTERACTIVE LIST (2026-09-22) — the home page's
+ * services section, replacing the four-tile mosaic.
+ *
+ * Left, the four titles, each with the one sentence of what you end up with;
+ * right, one panel: the photo, the typical starting point, the outcome, the
+ * scope and the way to the service page. On a phone the same markup is an
+ * accordion. Behaviour and its reasons: `lib/serviceExplorer.ts`.
+ *
+ * Every panel is server-rendered from the SAME resolved content the service
+ * pages use (`situations[0]`, `outcomes[0]`, the keywords), so a panel edit
+ * moves both. `hidden` is set only by the script: without it, all four
+ * panels simply show.
+ *
+ * The title is an `<h3>` around the button — the disclosure pattern keeps
+ * the section's heading outline, which the tiles' `<h3>` links had.
+ */
+import type { Lang } from "~/lib/i18n";
+import { SERVICE_PHOTO_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
+
+interface ExplorerService {
+  id: string;
+  href: string;
+  title: string;
+  problem: string;
+  result: string;
+  keywords: readonly string[];
+  image: string | null;
+}
+
+interface Props {
+  services: ExplorerService[];
+  lang: Lang;
+}
+
+const { services, lang } = Astro.props;
+const ui =
+  lang === "de"
+    ? { problem: "Typische Ausgangslage", result: "Ergebnis", scope: "Umfang", more: "Details & Ablauf" }
+    : { problem: "Typical starting point", result: "Outcome", scope: "Scope", more: "Details & process" };
+/** Every service photo is committed at 1586 × 992 (IMAGES.md). */
+const PHOTO = { width: 1586, height: 992 };
+// The panels span every title row plus one filler row that takes the slack.
+const panelRows = `1 / ${services.length + 2}`;
+---
+
+<div class="svc-explorer" data-service-explorer data-reveal>
+  <span class="svc-explorer__marker" aria-hidden="true" data-explorer-marker hidden></span>
+  {
+    services.map((service, index) => (
+      <>
+        <h3 class="svc-explorer__head" style={`grid-row: ${index + 1}`}>
+          <button
+            type="button"
+            class="svc-explorer__button"
+            id={`svc-button-${service.id}`}
+            aria-expanded="true"
+            aria-controls={`svc-panel-${service.id}`}
+            data-explorer-button
+          >
+            <span class="svc-explorer__title">{service.title}</span>
+            {service.result && <span class="svc-explorer__teaser">{service.result}</span>}
+            <span class="svc-explorer__chevron" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+            </span>
+          </button>
+        </h3>
+        <div
+          class="svc-explorer__panel"
+          id={`svc-panel-${service.id}`}
+          role="region"
+          aria-labelledby={`svc-button-${service.id}`}
+          style={`--panel-rows: ${panelRows}`}
+        >
+          {service.image && (
+            <div class="svc-explorer__shot" data-explorer-shot>
+              <img
+                src={service.image}
+                srcset={srcsetFor(service.image, SERVICE_PHOTO_VARIANT_WIDTHS, PHOTO.width)}
+                sizes="(min-width: 64rem) 55vw, 100vw"
+                alt=""
+                width={PHOTO.width}
+                height={PHOTO.height}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          )}
+          <div class="svc-explorer__body" data-explorer-body>
+            <dl class="svc-explorer__facts">
+              {service.problem && (
+                <div>
+                  <dt>{ui.problem}</dt>
+                  <dd>{service.problem}</dd>
+                </div>
+              )}
+              {service.result && (
+                <div>
+                  <dt>{ui.result}</dt>
+                  <dd>{service.result}</dd>
+                </div>
+              )}
+              {service.keywords.length > 0 && (
+                <div>
+                  <dt>{ui.scope}</dt>
+                  <dd>
+                    <ul class="svc-explorer__chips">
+                      {service.keywords.map((keyword) => (
+                        <li>{keyword}</li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              )}
+            </dl>
+            <a href={service.href} class="svc-explorer__more">
+              {ui.more}
+              <span class="sr-only">: {service.title}</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </>
+    ))
+  }
+</div>
+
+<style>
+  .svc-explorer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* --- Titles ------------------------------------------------------- */
+  .svc-explorer__head {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+  .svc-explorer__button {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 1rem;
+    align-items: center;
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 1.125rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--lp-surface-card);
+    box-shadow: var(--tds-shadow-hard-sm);
+    color: var(--color-black);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out),
+      translate 200ms var(--tds-ease-out);
+  }
+  .svc-explorer__button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .svc-explorer__button:active {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  .svc-explorer__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.75rem);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .svc-explorer__teaser {
+    grid-column: 1;
+    margin-top: 0.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+  .svc-explorer__chevron {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent);
+    transition: rotate 260ms var(--lp-ease-bounce, var(--tds-ease-out));
+  }
+  /* The accordion turns the chevron down when a panel is open. */
+  .svc-explorer__button[aria-expanded="true"] .svc-explorer__chevron {
+    rotate: 90deg;
+  }
+  .svc-explorer__button[aria-expanded="true"] {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  .svc-explorer__button[aria-expanded="true"] .svc-explorer__teaser {
+    color: rgb(255 255 255 / 0.78);
+  }
+  .svc-explorer__button[aria-expanded="true"] .svc-explorer__chevron {
+    background: rgb(255 255 255 / 0.16);
+    color: #fff;
+  }
+  @media (hover: hover) {
+    .svc-explorer__button[aria-expanded="false"]:hover {
+      background: color-mix(in srgb, var(--color-accent-pink) 14%, var(--lp-surface-card));
+    }
+  }
+  /* Before the script: every panel shows, so no title claims to be the one
+     that is open. */
+  .svc-explorer:not([data-enhanced]) .svc-explorer__teaser {
+    color: var(--color-muted);
+  }
+  .svc-explorer:not([data-enhanced]) .svc-explorer__chevron {
+    display: none;
+  }
+  .svc-explorer:not([data-enhanced]) .svc-explorer__button {
+    background: var(--lp-surface-card);
+    color: var(--color-black);
+  }
+
+  /* --- Panel ------------------------------------------------------- */
+  .svc-explorer__panel {
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--lp-surface-card);
+    box-shadow: var(--tds-shadow-hard);
+  }
+  .svc-explorer__panel[hidden] {
+    display: none;
+  }
+  .svc-explorer__shot {
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    background: var(--color-paper);
+  }
+  .svc-explorer__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* IMAGES.md composes every service photo with the subject in the upper
+       two thirds. */
+    object-position: top center;
+  }
+  .svc-explorer__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+  .svc-explorer__facts {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+  }
+  .svc-explorer__facts dt {
+    margin-bottom: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .svc-explorer__facts dd {
+    margin: 0;
+    color: var(--color-black);
+    line-height: 1.55;
+  }
+  .svc-explorer__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.375rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .svc-explorer__chips li {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--lp-surface-card));
+    color: var(--color-accent);
+    font-size: 0.75rem;
+  }
+  .svc-explorer__more {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border-radius: 9999px;
+    background: var(--color-surface-navy);
+    box-shadow: var(--tds-shadow-hard-sm);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      translate 200ms var(--tds-ease-out);
+  }
+  .svc-explorer__more:hover {
+    background: var(--color-surface-accent);
+  }
+  .svc-explorer__more:active {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  .svc-explorer__more:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  /* The marker is only a desktop idea (it slides behind the open title). */
+  .svc-explorer__marker {
+    display: none;
+  }
+
+  /* --- Desktop: list left, panel right ------------------------------ */
+  @media (min-width: 64rem) {
+    /* Only once the script runs: without it every panel is open, and four
+       panels in one grid cell would lie on top of each other. */
+    .svc-explorer[data-enhanced] {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+      grid-template-rows: repeat(4, auto) 1fr;
+      column-gap: 2rem;
+      row-gap: 0.75rem;
+      align-items: start;
+    }
+    .svc-explorer[data-enhanced] .svc-explorer__head {
+      grid-column: 1;
+    }
+    .svc-explorer[data-enhanced] .svc-explorer__panel {
+      grid-column: 2;
+      grid-row: var(--panel-rows);
+    }
+    .svc-explorer__shot {
+      aspect-ratio: 16 / 9;
+    }
+    .svc-explorer__body {
+      padding: 2rem;
+    }
+    .svc-explorer__facts {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 2rem;
+    }
+    .svc-explorer__facts > div:last-child {
+      grid-column: 1 / -1;
+    }
+    /* On the desktop the OPEN title is not painted by the button itself:
+       a navy marker slides behind it from title to title. */
+    .svc-explorer[data-enhanced] .svc-explorer__button[aria-expanded="true"] {
+      background: transparent;
+      box-shadow: none;
+    }
+    .svc-explorer[data-enhanced] .svc-explorer__button[aria-expanded="true"] .svc-explorer__chevron {
+      rotate: 0deg;
+    }
+    .svc-explorer__marker:not([hidden]) {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: var(--marker-w, 0px);
+      height: var(--marker-h, 0px);
+      translate: 0 var(--marker-y, 0px);
+      border-radius: 6px;
+      background: var(--color-surface-navy);
+      box-shadow: var(--tds-shadow-hard-sm);
+      transition:
+        translate 380ms var(--lp-ease-bounce, var(--tds-ease-out)),
+        height 380ms var(--tds-ease-out);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .svc-explorer__marker:not([hidden]),
+    .svc-explorer__chevron,
+    .svc-explorer__button,
+    .svc-explorer__more {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { mountServiceExplorer } from "~/lib/serviceExplorer";
+  import { lessMotion } from "~/lib/a11yPrefs";
+
+  document.querySelectorAll<HTMLElement>("[data-service-explorer]").forEach((root) => {
+    mountServiceExplorer(root, {
+      onOpen: (panel) => {
+        if (lessMotion()) return;
+        // The panel's content arrives on a short spring — the photo settles
+        // from a hair larger, the text rises. Motion is loaded on the first
+        // switch, never before.
+        void import("@tracht-digital-solutions/tds-shared/motion/dom")
+          .then(({ animate }) => {
+            const shot = panel.querySelector<HTMLElement>("[data-explorer-shot] img");
+            const body = panel.querySelector<HTMLElement>("[data-explorer-body]");
+            if (shot) void animate(shot, { scale: [1.06, 1], opacity: [0.4, 1] }, { type: "spring", bounce: 0, visualDuration: 0.5 });
+            if (body) void animate(body, { y: [14, 0], opacity: [0, 1] }, { type: "spring", bounce: 0.25, visualDuration: 0.4 });
+          })
+          .catch(() => {});
+      },
+    });
+  });
+</script>
