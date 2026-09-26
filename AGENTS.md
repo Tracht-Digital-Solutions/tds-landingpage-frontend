@@ -137,7 +137,13 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   `components/ServiceAssistant.astro` renders ONE native
   `<dialog id="leistungsassistent">` on the home page around
   `islands/ServiceFinder.tsx`; questions, weights and copy live in
-  `lib/serviceFinder.ts`. The buttons in the services and the pricing section
+  `lib/serviceFinder.ts`. It is HIGHLIGHTED (2026-09-22): the way in is a
+  navy card with a compass (`ui/AssistantCard.astro`) under the services list
+  and, compact, under the prices; the dialog is round, with a segmented
+  progress, questions sliding in from the side they go to
+  (`AnimatePresence` with `initial={false}`, focus by a stable callback ref),
+  round answer cards that lift and pop a tick, and staggered result cards —
+  the best fit navy, the hand-off CTA pink. The cards in the services and the pricing section
   (`[data-assistant-open]`) ship `hidden` and are revealed only once
   `showModal` exists; `/#leistungsassistent` and the old `/#leistungsfinder`
   open the dialog directly. The script gives focus back to the button that
@@ -381,6 +387,9 @@ visual language rather than rebuilding it locally:
     press squeeze, one light sweep on arrival. The floating tree is NOT a
     `[data-cta]` — `floatingCta.ts` springs its spread and its trunk.
   - **the bookmarks** (`propertyTabs.ts`), see above.
+  - **the brand bars** (`brandbar.ts`): every `.tds-brandbar` on screen leans
+    toward a pointer within 260 px (`translate`, ±14 px) and stretches its
+    segments (`--tds-brandbar-1/2/3`), then springs back with a bounce.
   - **the generated photos** (`[data-motion-image]`, `images.ts`): settle
     from a larger scale when they scroll in, then drift ±20 px. Transform
     only — the grounds carry their resting opacity in CSS.
@@ -720,8 +729,13 @@ demos and the business card already sit on their service, and there it is
 reference card never repeats its primary service as a badge.
 
 On the home page **every card of the shelf is one track wide** (2026-09-22,
-on Julian's word) — the first demo used to be a two-track lead card. The
-arrow step measures the first slide, since all slides are equal.
+on Julian's word) — the first demo used to be a two-track lead card. Since
+the same day the shelf has **no arrows**: it drifts on its own (32 px/s, a
+seamless loop over one set of `aria-hidden`/`inert` clones) and is swiped —
+touch natively, mouse by drag. It stops under the pointer, with focus inside,
+during a drag or touch, off screen and in a hidden tab, and never drifts under
+reduced motion or the site's motion switch. `showcaseDrag.test.ts` holds the
+drag rules and the clones.
 
 The framing exists **twice, for one card and for several** (`headlineSingle`,
 `introSingle`, `serviceIntroSingle`), and `demosCopy()` picks by the number

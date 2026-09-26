@@ -1,0 +1,172 @@
+---
+/**
+ * The way into the Leistungsassistent, HIGHLIGHTED (2026-09-22) — it used to
+ * be a text link under the services and the prices.
+ *
+ * One navy card that is itself the button: the compass, the question, one
+ * line, and a pink "Assistent starten". It lifts under the pointer like every
+ * control with a hard shadow, and the arrow runs ahead.
+ *
+ * It ships `hidden` and `ServiceAssistant.astro` reveals it once the dialog
+ * can open — a button that cannot open anything is never shown (the rule in
+ * `a11yContract.test.ts`).
+ */
+import type { Lang } from "~/lib/i18n";
+import { FINDER_SECTION } from "~/lib/serviceFinder";
+
+interface Props {
+  lang: Lang;
+  /** `compact` sits under the prices: one row, no eyebrow. */
+  variant?: "full" | "compact";
+}
+
+const { lang, variant = "full" } = Astro.props;
+const copy = FINDER_SECTION[lang];
+---
+
+<button type="button" data-assistant-open hidden class:list={["assistant-card", `assistant-card--${variant}`]}>
+  <span class="assistant-card__icon" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9.5"></circle>
+      <polygon points="15.5 8.5 13.4 13.4 8.5 15.5 10.6 10.6 15.5 8.5" fill="currentColor"></polygon>
+    </svg>
+  </span>
+  <span class="assistant-card__body">
+    {variant === "full" && <span class="assistant-card__eyebrow">{copy.cardEyebrow}</span>}
+    <span class="assistant-card__title">{copy.title}</span>
+    <span class="assistant-card__text">{copy.cardText}</span>
+  </span>
+  <span class="assistant-card__cta" aria-hidden="true">
+    {copy.cardCta}
+    <span class="assistant-card__arrow">→</span>
+  </span>
+</button>
+
+<style>
+  .assistant-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem 1.25rem;
+    width: 100%;
+    padding: 1.5rem;
+    border: 0;
+    border-radius: 1.5rem;
+    background: var(--color-surface-navy);
+    color: #fff;
+    font: inherit;
+    text-align: left;
+    box-shadow: var(--tds-shadow-hard);
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
+  }
+  .assistant-card[hidden] {
+    display: none;
+  }
+  @media (min-width: 48rem) {
+    .assistant-card {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      padding: 1.75rem 2rem;
+    }
+  }
+  .assistant-card:is(:hover, :focus-visible) {
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-hover);
+  }
+  .assistant-card:active {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  .assistant-card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+  .assistant-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 999px;
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+    transition: rotate 500ms var(--lp-ease-bounce, var(--tds-ease-out));
+  }
+  /* The needle swings when the card is pointed at. */
+  .assistant-card:hover .assistant-card__icon {
+    rotate: 25deg;
+  }
+  .assistant-card__body {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  .assistant-card__eyebrow {
+    font: 500 0.6875rem/1.2 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent-pink);
+  }
+  .assistant-card__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.75rem);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .assistant-card__text {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.78);
+  }
+  .assistant-card__cta {
+    grid-column: 1 / -1;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  @media (min-width: 48rem) {
+    .assistant-card__cta {
+      grid-column: auto;
+    }
+  }
+  .assistant-card__arrow {
+    transition: translate 200ms var(--tds-ease-out);
+  }
+  .assistant-card:hover .assistant-card__arrow {
+    translate: 4px 0;
+  }
+  .assistant-card--compact {
+    padding-block: 1.125rem;
+  }
+  .assistant-card--compact .assistant-card__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .assistant-card--compact .assistant-card__title {
+    font-size: 1.25rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .assistant-card,
+    .assistant-card__icon,
+    .assistant-card__arrow {
+      transition: none;
+    }
+    .assistant-card:is(:hover, :focus-visible, :active) {
+      translate: none;
+    }
+    .assistant-card:hover .assistant-card__icon {
+      rotate: none;
+    }
+  }
+</style>
