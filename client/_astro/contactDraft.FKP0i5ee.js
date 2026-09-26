@@ -1,0 +1,1 @@
+var e=`tds-contact-draft`,t=`tds:contact-draft`;function n(n){try{window.sessionStorage.setItem(e,n)}catch{}window.dispatchEvent(new CustomEvent(t,{detail:n}))}export{e as n,n as r,t};

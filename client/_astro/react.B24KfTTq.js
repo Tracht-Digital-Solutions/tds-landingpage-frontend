@@ -1,0 +1,1 @@
+import{r as e}from"./react.DB-4Zxce.js";import{t}from"./chunk-K3B6PMZC.Cr-Jc6jj.js";var n=e({Collapse:()=>t});export{n as t};
