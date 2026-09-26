@@ -67,3 +67,19 @@ describe("the showcase drag gesture", () => {
     expect(pointerDownHandler()).toContain('event.pointerType !== "mouse"');
   });
 });
+
+describe("the shelf runs on its own (2026-09-22)", () => {
+  it("has no arrow buttons any more", () => {
+    expect(source).not.toMatch(/data-carousel-(prev|next|nav)/);
+  });
+
+  it("clones the cards only as unreachable copies", () => {
+    expect(source).toMatch(/clone\.setAttribute\("aria-hidden", "true"\)/);
+    expect(source).toMatch(/clone\.setAttribute\("inert", ""\)/);
+    expect(source).toMatch(/node\.removeAttribute\("id"\)/);
+  });
+
+  it("never drifts under reduced motion or the site's motion switch", () => {
+    expect(source).toMatch(/if \(reduce\.matches \|\| lessMotion\(\)/);
+  });
+});

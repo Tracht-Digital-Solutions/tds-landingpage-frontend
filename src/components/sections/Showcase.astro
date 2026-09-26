@@ -112,11 +112,11 @@ const ui =
 
     {/* The track is a real scroll container, not a transformed strip. That
         is the whole design: a trackpad swipe, a touch drag, a shift-wheel
-        and the arrow buttons all move the same thing, and a card that
+        and the drift all move the same thing, and a card that
         receives focus is scrolled into view by the browser rather than by
         code we would have to write. `data-carousel` is what the script
-        binds to; with no JavaScript the row still scrolls, just without
-        the buttons — which is why they start `hidden`. */}
+        binds to; with no JavaScript the row still scrolls, it just does
+        not drift. */}
     <div class="showcase" data-carousel>
       <div
         class="showcase__track"
@@ -137,52 +137,6 @@ const ui =
         ))}
       </div>
 
-      {/* Flanking the track, vertically centred, half over the outermost
-          card — one arrangement at every width.
-
-          Hidden from assistive tech, and that is the point rather than an
-          oversight: the track is a plain scroll container that a screen
-          reader already walks card by card, and a keyboard user reaches
-          every card in DOM order. These buttons add nothing there — they
-          are a pointer affordance.
-
-          Two conditions gate them, and only one is in this file: the CSS
-          shows them on pointer devices alone, and the script keeps them
-          `hidden` until it measures a real overflow. */}
-      <div class="showcase-nav" aria-hidden="true" data-carousel-nav hidden>
-        <button type="button" class="showcase-nav__btn" data-carousel-prev tabindex="-1">
-          <span class="sr-only">{ui.prev}</span>
-          <svg
-            aria-hidden="true"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M15 5 8 12l7 7" />
-          </svg>
-        </button>
-        <button type="button" class="showcase-nav__btn" data-carousel-next tabindex="-1">
-          <span class="sr-only">{ui.next}</span>
-          <svg
-            aria-hidden="true"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="m9 5 7 7-7 7" />
-          </svg>
-        </button>
-      </div>
     </div>
   </div>
 
@@ -304,28 +258,9 @@ const ui =
     }
   }
 
-  /* POINTER DEVICES ONLY, and hidden by default so that is the fallback.
-     On a phone the shelf is swiped, and a 44px button parked over the card
-     would cover content to offer a slower version of the gesture the
-     visitor is already making. `hover: hover` AND `pointer: fine`: a laptop
-     with both a touchscreen and a mouse must keep the arrows. */
-  .showcase-nav {
-    display: none;
-  }
-
+  /* No arrows since 2026-09-22: the shelf runs on its own (script below) and
+     is swiped — by touch natively, by mouse with a drag. */
   @media (hover: hover) and (pointer: fine) {
-    .showcase-nav {
-      display: block;
-    }
-
-    /* `.showcase-nav { display: block }` beats the user agent's
-       low-specificity `[hidden] { display: none }`, so the attribute the
-       script writes would do nothing without this. It has to live INSIDE this
-       query: outside it the two rules would race by source order. */
-    .showcase-nav[hidden] {
-      display: none;
-    }
-
     .showcase__track {
       cursor: grab;
     }
@@ -335,116 +270,42 @@ const ui =
       user-select: none;
     }
   }
-
-  .showcase-nav__btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    /* The shared 44px minimum. */
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: var(--tds-radius-pill);
-    /* PAPER, not sand: half of each button lies over a card whose fill is
-       sand. The shadow is the only one on this shelf, which is what says the
-       buttons float above the row rather than sit in it. */
-    background: var(--color-paper);
-    color: var(--color-black);
-    box-shadow: var(--tds-shadow-hard-sm);
-    cursor: pointer;
-    transition:
-      background-color 200ms var(--tds-ease-out),
-      color 200ms var(--tds-ease-out),
-      opacity 200ms var(--tds-ease-out);
-  }
-  [data-carousel-prev] {
-    left: var(--showcase-edge);
-  }
-  [data-carousel-next] {
-    right: var(--showcase-edge);
-  }
-  .showcase-nav__btn:hover {
-    background: color-mix(in srgb, var(--color-primary) 8%, var(--color-paper));
-    color: var(--color-primary);
-  }
-  /* Disabled rather than removed at the ends of the track: a control that
-     disappears moves the one beside it under the cursor mid-click. */
-  .showcase-nav__btn[disabled] {
-    opacity: 0.35;
-    cursor: default;
-  }
-  .showcase-nav__btn[disabled]:hover {
-    background: var(--color-paper);
-    color: var(--color-black);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .showcase-nav__btn {
-      transition: none;
-    }
+  /* While the shelf runs on its own, snapping and smooth scrolling would
+     fight every frame it writes; both return when it stops for good. */
+  .showcase__track.is-autoplay {
+    scroll-snap-type: none;
+    scroll-behavior: auto;
   }
 </style>
 
 <script>
+  import { lessMotion } from "~/lib/a11yPrefs";
+
   /**
-   * Arrow navigation and mouse dragging for the showcase shelf.
+   * The showcase shelf runs ON ITS OWN and is swiped (2026-09-22) — the
+   * arrow buttons are gone.
    *
-   * Everything here is an enhancement on top of a track that already scrolls:
-   * the buttons ship `hidden` and are only revealed once this measures a real
-   * overflow, so a shelf whose cards all fit shows no controls at all, and a
-   * failed bundle leaves a plain scrolling row rather than dead arrows.
-   *
-   * The step is measured from a slide instead of being written down, because
-   * the slide width is three different values across two breakpoints and a
-   * hardcoded number would drift the first time one of them is tuned.
+   * - **Autoscroll:** the track drifts left at `SPEED` px/s. The cards are
+   *   cloned once behind the originals — the clones `aria-hidden`, `inert`,
+   *   without ids and out of the tab order — so the drift loops without a
+   *   seam: past the width of the original set, the position wraps back.
+   * - **It stops** while the pointer rests on the shelf, while focus is
+   *   inside it, during a drag or a touch, while it is off screen or the tab
+   *   hidden, and never starts under reduced motion or the site's own "motion
+   *   off" switch (then the shelf is simply swiped). WCAG 2.2.2: the movement
+   *   pauses under the pointer and on focus, and the motion switch ends it.
+   * - **Swipe:** touch scrolls natively; a mouse drags (below — the three
+   *   rules there are guarded by `showcaseDrag.test.ts`).
    */
   const carousels = document.querySelectorAll<HTMLElement>("[data-carousel]");
+  /** Drift speed, px per second. */
+  const SPEED = 32;
+  /** After a touch, how long the shelf waits before drifting again. */
+  const TOUCH_REST_MS = 4000;
 
   for (const root of carousels) {
     const track = root.querySelector<HTMLElement>("[data-carousel-track]");
-    // The nav is a sibling of the track's wrapper, not a child, so it is found
-    // from the section rather than from `root`.
-    const section = root.closest("section");
-    const nav = section?.querySelector<HTMLElement>("[data-carousel-nav]") ?? null;
-    const prev = nav?.querySelector<HTMLButtonElement>("[data-carousel-prev]") ?? null;
-    const next = nav?.querySelector<HTMLButtonElement>("[data-carousel-next]") ?? null;
-    if (!track || !nav || !prev || !next) continue;
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    /**
-     * One slide plus one gap — how far a click travels.
-     *
-     * Every slide is one track wide, so the first one measures them all.
-     */
-    const step = () => {
-      const slide = track.firstElementChild as HTMLElement | null;
-      if (!slide) return track.clientWidth;
-      const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
-      return slide.getBoundingClientRect().width + gap;
-    };
-
-    /**
-     * Native smooth scrolling on the TRACK, not a rAF tween.
-     *
-     * This is deliberate and worth keeping: the page sets
-     * `scroll-behavior: smooth` globally, which starves any hand-written
-     * requestAnimationFrame tween (it fights the browser's own animation for
-     * the same scroll position). `scrollBy` is the same mechanism, so the two
-     * cannot disagree.
-     */
-    const go = (direction: 1 | -1) => {
-      track.scrollBy({
-        left: direction * step(),
-        behavior: reduce.matches ? "auto" : "smooth",
-      });
-    };
-
-    prev.addEventListener("click", () => go(-1));
-    next.addEventListener("click", () => go(1));
+    if (!track) continue;
 
     /**
      * Drag the shelf with a mouse.
@@ -547,30 +408,105 @@ const ui =
       true,
     );
 
-    const sync = () => {
-      // `scrollWidth - clientWidth` can be a fraction of a pixel off on a
-      // fractional layout, so both ends get a 2px tolerance rather than an
-      // exact comparison — without it the "next" button never disables.
-      const max = track.scrollWidth - track.clientWidth;
-      const overflowing = max > 2;
 
-      nav.hidden = !overflowing;
-      // The nav is `aria-hidden`, so its buttons must be unreachable by Tab as
-      // well; a focusable element inside an aria-hidden subtree is exactly the
-      // state assistive tech has no way to describe.
-      prev.disabled = track.scrollLeft <= 2;
-      next.disabled = track.scrollLeft >= max - 2;
+    // --- Autoscroll ---------------------------------------------------------
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const originals = Array.from(track.children) as HTMLElement[];
+    if (reduce.matches || lessMotion() || originals.length === 0) continue;
+    if (track.scrollWidth <= track.clientWidth + 2) continue;
+
+    // The clones: a second, unreachable copy of the set behind the first.
+    for (const slide of originals) {
+      const clone = slide.cloneNode(true) as HTMLElement;
+      clone.classList.add("showcase__slide--clone");
+      clone.setAttribute("aria-hidden", "true");
+      clone.setAttribute("inert", "");
+      for (const node of [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))]) {
+        node.removeAttribute("id");
+        if (node.tabIndex >= 0) node.tabIndex = -1;
+      }
+      track.append(clone);
+    }
+    const firstClone = track.children[originals.length] as HTMLElement;
+    /** The width of one full set, measured from where its copy begins. */
+    let loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
+    new ResizeObserver(() => {
+      loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
+    }).observe(track);
+
+    track.classList.add("is-autoplay");
+    let position = track.scrollLeft;
+    let hovered = false;
+    let focused = false;
+    let visible = false;
+    let touchUntil = 0;
+    let last = 0;
+    let frame = 0;
+
+    const running = () =>
+      visible && !hovered && !focused && !dragging && !document.hidden && performance.now() > touchUntil;
+
+    const tick = (now: number) => {
+      frame = 0;
+      if (!running()) {
+        last = 0;
+        return;
+      }
+      if (last) {
+        position += (SPEED * (now - last)) / 1000;
+        if (loop > 0 && position >= loop) position -= loop;
+        track.scrollLeft = position;
+      }
+      last = now;
+      frame = requestAnimationFrame(tick);
+    };
+    const resume = () => {
+      if (frame || !running()) return;
+      // Pick up wherever a swipe or a drag left the shelf.
+      position = track.scrollLeft;
+      if (loop > 0 && position >= loop) position -= loop;
+      last = 0;
+      frame = requestAnimationFrame(tick);
     };
 
-    sync();
-    track.addEventListener("scroll", sync, { passive: true });
-    // Slide width changes at both breakpoints and when the scrollbar-less
-    // track is re-laid-out by a font or image load, so the end states are
-    // recomputed from the element rather than from the window.
-    if (typeof ResizeObserver !== "undefined") {
-      new ResizeObserver(sync).observe(track);
-    } else {
-      window.addEventListener("resize", sync, { passive: true });
-    }
+    // A hand scroll that runs into the clones wraps back as well, so the
+    // shelf never ends while the visitor swipes it either.
+    track.addEventListener(
+      "scroll",
+      () => {
+        if (frame || loop <= 0) return;
+        if (track.scrollLeft >= loop) track.scrollLeft -= loop;
+      },
+      { passive: true },
+    );
+
+    track.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse") hovered = true;
+    });
+    track.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "mouse") return;
+      hovered = false;
+      resume();
+    });
+    track.addEventListener("focusin", () => {
+      focused = true;
+    });
+    track.addEventListener("focusout", () => {
+      focused = track.contains(document.activeElement);
+      resume();
+    });
+    track.addEventListener("touchstart", () => {
+      touchUntil = Number.POSITIVE_INFINITY;
+    }, { passive: true });
+    track.addEventListener("touchend", () => {
+      touchUntil = performance.now() + TOUCH_REST_MS;
+      window.setTimeout(resume, TOUCH_REST_MS + 50);
+    }, { passive: true });
+    track.addEventListener("pointerup", () => window.setTimeout(resume, 0));
+    document.addEventListener("visibilitychange", resume);
+    new IntersectionObserver((entries) => {
+      visible = entries.some((entry) => entry.isIntersecting);
+      resume();
+    }).observe(track);
   }
 </script>

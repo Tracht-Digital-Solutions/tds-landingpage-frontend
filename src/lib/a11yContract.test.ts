@@ -275,8 +275,13 @@ describe("the service assistant", () => {
   it("keeps its buttons hidden until the dialog can open", () => {
     // A button that cannot open anything is never shown. The display utility
     // on the button beats the UA's `[hidden]` rule, hence the unlayered rule.
+    // Since 2026-09-22 both ways in are the highlighted card, used in both
+    // sections.
+    expect(template(read("src/components/ui/AssistantCard.astro"))).toMatch(
+      /<button\s+type="button"\s+data-assistant-open\s+hidden/,
+    );
     for (const file of ["src/components/sections/Services.astro", "src/components/sections/Pricing.astro"]) {
-      expect(template(read(file)), file).toMatch(/<button\s+type="button"\s+data-assistant-open\s+hidden/);
+      expect(template(read(file)), file).toMatch(/<AssistantCard\b/);
     }
     expect(script).toMatch(/typeof dialog\.showModal === "function"/);
     expect(script).toMatch(/button\.hidden = false/);

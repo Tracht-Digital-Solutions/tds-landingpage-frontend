@@ -79,6 +79,14 @@ const pricesHref = `${home}#preise`;
 >
   <div class="assistant__frame">
     <div class="assistant__head">
+      {/* The compass: the assistant finds the way when the services alone do
+          not say which one is yours. */}
+      <span class="assistant__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9.5"></circle>
+          <polygon points="15.5 8.5 13.4 13.4 8.5 15.5 10.6 10.6 15.5 8.5" fill="currentColor"></polygon>
+        </svg>
+      </span>
       <div>
         <h2 id="assistant-title" class="assistant__title">{section.title}</h2>
         <p class="assistant__intro">{section.intro}</p>
@@ -129,7 +137,11 @@ const pricesHref = `${home}#preise`;
     max-height: 92vh;
     padding: 0;
     border: none;
-    border-radius: 8px;
+    border-radius: 1.75rem;
+    /* Over the navy backdrop a navy offset would vanish: black ink here. */
+    --tds-shadow-ink: rgb(0 0 0 / 0.5);
+    --tds-shadow-hard: 6px 6px 0 0 var(--tds-shadow-ink);
+    box-shadow: 10px 10px 0 0 var(--tds-shadow-ink);
     background: var(--color-paper);
     color: var(--color-black);
     overflow: auto;
@@ -165,6 +177,22 @@ const pricesHref = `${home}#preise`;
     justify-content: space-between;
     gap: 1rem;
     margin-bottom: 1.25rem;
+  }
+  .assistant__icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 999px;
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+    box-shadow: var(--tds-shadow-hard-sm);
+  }
+  .assistant__head > div {
+    flex: 1;
+    min-width: 0;
   }
   .assistant__title {
     margin: 0;
@@ -212,36 +240,47 @@ const pricesHref = `${home}#preise`;
   }
 
   /* No panel of its own inside the dialog: the modal is ONE flat colour
-     (2026-09-21), so the finder sits directly on it. */
+     (2026-09-21), so the finder sits directly on it. Redesigned 2026-09-22:
+     round answer cards with the site's hard shadow that lift under the
+     pointer, a segmented progress, and result cards with a rank badge. */
   :global(.finder) {
     padding: 0;
     background: none;
   }
+  :global(.finder__stage) {
+    min-width: 0;
+  }
 
-  /* Progress: the words carry it; the bar only repeats it for the eye. */
+  /* Progress: the words carry it; the segments only repeat it for the eye. */
   :global(.finder__progress) {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin: 0 0 1rem;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 1.25rem;
     font: 500 0.75rem/1.2 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--color-muted);
   }
-  :global(.finder__bar) {
-    flex: 1;
-    max-width: 10rem;
-    height: 4px;
+  :global(.finder__segments) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.375rem;
+    flex: 0 1 12rem;
+  }
+  :global(.finder__segment) {
+    height: 6px;
     overflow: hidden;
     border-radius: 999px;
-    background: var(--color-line);
+    background: color-mix(in srgb, var(--color-primary) 14%, var(--color-paper));
   }
-  :global(.finder__bar i) {
+  :global(.finder__segment i) {
     display: block;
     height: 100%;
     border-radius: inherit;
     background: var(--color-accent);
+    transform-origin: left center;
   }
 
   :global(.finder__fieldset) {
@@ -255,21 +294,21 @@ const pricesHref = `${home}#preise`;
   :global(.finder__question) {
     padding: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
-    line-height: 1.2;
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+    line-height: 1.15;
     color: var(--color-black);
     outline: none;
     text-wrap: balance;
   }
   :global(.finder__help) {
-    margin: 0.35rem 0 1.25rem;
+    margin: 0.4rem 0 1.5rem;
     font-size: 0.9375rem;
     color: var(--color-muted);
   }
 
   :global(.finder__options) {
     display: grid;
-    gap: 0.625rem;
+    gap: 0.875rem;
   }
   @media (min-width: 40rem) {
     :global(.finder__options) {
@@ -277,40 +316,76 @@ const pricesHref = `${home}#preise`;
     }
   }
   :global(.finder__option) {
+    position: relative;
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    min-height: 2.75rem;
-    padding: 0.875rem 1rem;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
-    background: var(--color-paper);
+    gap: 0.875rem;
+    min-height: 3.25rem;
+    padding: 1rem 1.125rem;
+    border-radius: 1.25rem;
+    background: var(--lp-surface-card);
+    box-shadow: var(--tds-shadow-hard-sm);
     cursor: pointer;
     transition:
-      border-color 150ms var(--tds-ease-out),
-      background-color 150ms var(--tds-ease-out);
+      background-color 150ms var(--tds-ease-out),
+      color 150ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
   }
-  :global(.finder__option:hover) {
-    border-color: var(--color-primary);
+  @media (hover: hover) {
+    :global(.finder__option:hover) {
+      translate: -2px -2px;
+      box-shadow: var(--tds-shadow-hard-sm-hover);
+    }
+  }
+  :global(.finder__option:active) {
+    translate: 1px 1px;
+    box-shadow: var(--tds-shadow-hard-press);
   }
   :global(.finder__option:has(:checked)) {
-    border-color: var(--color-primary);
-    background: color-mix(in srgb, var(--color-primary) 7%, var(--color-paper));
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  :global(.finder__option:has(:checked) .finder__option-label) {
+    color: #fff;
+  }
+  :global(.finder__option:has(:checked) .finder__option-hint) {
+    color: rgb(255 255 255 / 0.75);
   }
   /* The ring goes around the whole answer, the control itself draws none. */
   :global(.finder__option:has(:focus-visible)) {
     outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
+  /* The native input stays in the page — focusable, announced, operable with
+     Space — but is drawn by `.finder__check` instead. */
   :global(.finder__input) {
-    flex: none;
-    width: 1.125rem;
-    height: 1.125rem;
-    margin: 0.15rem 0 0;
-    accent-color: var(--color-primary);
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
   }
-  :global(.finder__input:focus-visible) {
-    outline: none;
+  :global(.finder__check) {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.05rem;
+    border-radius: 0.5rem;
+    background: var(--color-paper);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+    color: var(--color-surface-navy);
+  }
+  :global(.finder__option--radio .finder__check) {
+    border-radius: 999px;
+  }
+  :global(.finder__option:has(:checked) .finder__check) {
+    background: var(--color-accent-pink);
+    box-shadow: none;
   }
   :global(.finder__option-body) {
     display: grid;
@@ -331,6 +406,7 @@ const pricesHref = `${home}#preise`;
   :global(.finder__hint) {
     margin: 1rem 0 0;
     font-size: 0.9375rem;
+    font-weight: 600;
     color: var(--tds-eyebrow-color, var(--color-accent));
   }
 
@@ -339,8 +415,8 @@ const pricesHref = `${home}#preise`;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+    gap: 0.875rem;
+    margin-top: 1.75rem;
   }
   :global(.finder__nav) {
     justify-content: flex-end;
@@ -358,25 +434,51 @@ const pricesHref = `${home}#preise`;
     font-size: 0.9375rem;
     font-weight: 600;
     text-decoration: none;
+    box-shadow: var(--tds-shadow-hard-sm);
     cursor: pointer;
-    transition: background-color 200ms var(--tds-ease-out);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
   }
-  :global(.finder__cta:hover) {
+  :global(.finder__cta:is(:hover, :focus-visible)) {
     background: var(--color-surface-accent);
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-sm-hover);
+  }
+  :global(.finder__cta:active) {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  /* The hand-off to the contact form is the goal of the whole assistant. */
+  :global(.finder__cta--contact) {
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+  }
+  :global(.finder__cta--contact:is(:hover, :focus-visible)) {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  :global(.finder__cta:focus-visible),
+  :global(.finder__secondary:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
   :global(.finder__secondary) {
     min-height: 3rem;
     padding: 0.75rem 1.25rem;
-    border: 1px solid var(--color-line);
+    border: 0;
     border-radius: var(--tds-radius-pill, 100px);
-    background: transparent;
+    background: var(--lp-surface-card);
     color: var(--color-black);
     font-size: 0.9375rem;
     font-weight: 500;
+    box-shadow: var(--tds-shadow-hard-press);
     cursor: pointer;
+    transition: translate 160ms var(--tds-ease-out);
   }
   :global(.finder__secondary:hover) {
-    border-color: var(--color-primary);
+    translate: -1px -1px;
+    box-shadow: var(--tds-shadow-hard-sm);
   }
 
   :global(.finder__result-title) {
@@ -389,7 +491,7 @@ const pricesHref = `${home}#preise`;
   }
   :global(.finder__matches) {
     display: grid;
-    gap: 0.75rem;
+    gap: 1rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -404,21 +506,47 @@ const pricesHref = `${home}#preise`;
   :global(.finder__match) {
     display: flex;
     flex-direction: column;
-    padding: 1.25rem;
-    border: 1px solid var(--color-line);
-    border-radius: 6px;
-    background: var(--color-paper);
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+    background: var(--lp-surface-card);
+    box-shadow: var(--tds-shadow-hard);
   }
-  :global(.finder__match:first-child) {
-    border-color: var(--color-primary);
+  /* The best fit is the one navy card. */
+  :global(.finder__match[data-rank="best"]) {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  :global(.finder__match[data-rank="best"] :is(.finder__match-title, .finder__rate, .finder__why, .finder__why-label)) {
+    color: #fff;
+  }
+  :global(.finder__match[data-rank="best"] .finder__summary) {
+    color: rgb(255 255 255 / 0.78);
+  }
+  :global(.finder__match[data-rank="best"] :is(.finder__rate-value, .finder__detail, .finder__tick, .finder__rank)) {
+    color: var(--color-accent-pink);
   }
   :global(.finder__rank) {
-    margin: 0 0 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--tds-eyebrow-color, var(--color-accent));
+  }
+  :global(.finder__rank-badge) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+    font: 700 0.8125rem/1 var(--font-display);
+    letter-spacing: 0;
   }
   :global(.finder__match-title) {
     margin: 0 0 0.5rem;
@@ -433,8 +561,6 @@ const pricesHref = `${home}#preise`;
     line-height: 1.55;
     color: var(--color-muted);
   }
-  /* The rate is the answer to "what does it cost?" — set apart from the
-     summary, in the price list's own colour. */
   :global(.finder__rate) {
     margin: 0 0 0.875rem;
     font-size: 0.9375rem;
@@ -476,7 +602,7 @@ const pricesHref = `${home}#preise`;
   :global(.finder__platforms) {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.375rem;
+    gap: 0.5rem;
     margin: 0 0 0.75rem;
     padding: 0;
     list-style: none;
@@ -513,10 +639,11 @@ const pricesHref = `${home}#preise`;
     text-decoration: none;
   }
   :global(.finder__detail:hover) {
-    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
   :global(.finder__note) {
-    margin: 1.25rem 0 0;
+    margin: 1.5rem 0 0;
     font-size: 0.9375rem;
     color: var(--color-muted);
   }
@@ -537,10 +664,12 @@ const pricesHref = `${home}#preise`;
   @media (prefers-reduced-motion: reduce) {
     :global(.finder__option),
     :global(.finder__cta),
+    :global(.finder__secondary),
     .assistant__close,
     .assistant__close:hover {
       transition: none;
       transform: none;
+      translate: none !important;
     }
   }
 </style>

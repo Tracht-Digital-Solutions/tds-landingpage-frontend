@@ -11,7 +11,7 @@ import {
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceExplorer from "~/components/ui/ServiceExplorer.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
-import { FINDER_SECTION } from "~/lib/serviceFinder";
+import AssistantCard from "~/components/ui/AssistantCard.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -45,23 +45,8 @@ const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your
       headingClass="mb-6"
       bar
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-3 text-center md:text-left mx-auto md:mx-0">
+    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-10 text-center md:text-left mx-auto md:mx-0">
       <Emphasis text={servicesContent.intro} />
-    </p>
-    {/* For the visitor who reads four tiles and still cannot say which one is
-        theirs — or what it costs: the assistant asks instead. It opens as a
-        dialog (`components/ServiceAssistant.astro`), which also reveals this
-        button once it can open anything. */}
-    <p class="mb-10 text-center md:text-left">
-      <button
-        type="button"
-        data-assistant-open
-        hidden
-        class="inline-flex min-h-11 items-center gap-2 text-left text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors cursor-pointer"
-      >
-        {FINDER_SECTION[lang].servicesLink}
-        <span aria-hidden="true">→</span>
-      </button>
     </p>
 
     {/* An interactive list since 2026-09-22 (`ui/ServiceExplorer.astro`):
@@ -82,6 +67,14 @@ const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your
         image: definition.image ?? null,
       }))}
     />
+
+    {/* For the visitor who reads the list and still cannot say which service
+        is theirs — or what it costs: the assistant asks instead. Highlighted
+        since 2026-09-22; it opens as a dialog (`components/ServiceAssistant.astro`),
+        which also reveals the card once it can open anything. */}
+    <div class="mt-10">
+      <AssistantCard lang={lang} />
+    </div>
 
     {/* The systems people search for by name, one chip each, in the chips'
         own style — the way from "Webauftritt" to "my WooCommerce shop". */}

@@ -94,6 +94,8 @@ const MIN_SCORE = 2;
 
 interface FinderCopy {
   progress: (step: number, total: number) => string;
+  /** The progress line once the questions are done. */
+  resultLabel: string;
   topicsQuestion: string;
   topicsHelp: string;
   /** Service topics show the service's title as their hint; only `unsure` needs its own. */
@@ -129,6 +131,7 @@ interface FinderCopy {
 export const FINDER_COPY: Record<Lang, FinderCopy> = {
   de: {
     progress: (step, total) => `Schritt ${step} von ${total}`,
+    resultLabel: "Ergebnis",
     topicsQuestion: "Worum geht es dir vor allem?",
     topicsHelp: "Mehrfachauswahl möglich.",
     topics: {
@@ -175,6 +178,7 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
   },
   en: {
     progress: (step, total) => `Step ${step} of ${total}`,
+    resultLabel: "Result",
     topicsQuestion: "What matters most to you?",
     topicsHelp: "Choose as many as apply.",
     topics: {
@@ -224,7 +228,17 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
 /** The dialog around the assistant, and the buttons that open it. */
 export const FINDER_SECTION: Record<
   Lang,
-  { title: string; intro: string; close: string; servicesLink: string; pricingLink: string }
+  {
+    title: string;
+    intro: string;
+    close: string;
+    servicesLink: string;
+    pricingLink: string;
+    /** The highlighted card that opens the assistant (2026-09-22). */
+    cardEyebrow: string;
+    cardText: string;
+    cardCta: string;
+  }
 > = {
   de: {
     title: "Welche Leistung passt zu dir?",
@@ -232,6 +246,9 @@ export const FINDER_SECTION: Record<
     close: "Leistungsassistent schließen",
     servicesLink: "Unsicher, was du brauchst oder was es kostet? Leistungsassistent starten",
     pricingLink: "Unsicher, was zu dir passt? Leistungsassistent starten",
+    cardEyebrow: "Leistungsassistent",
+    cardText: "Drei kurze Fragen, eine klare Empfehlung.",
+    cardCta: "Assistent starten",
   },
   en: {
     title: "Which service fits you?",
@@ -239,6 +256,9 @@ export const FINDER_SECTION: Record<
     close: "Close the service assistant",
     servicesLink: "Not sure what you need or what it costs? Start the service assistant",
     pricingLink: "Not sure what fits you? Start the service assistant",
+    cardEyebrow: "Service assistant",
+    cardText: "Three short questions, one clear recommendation.",
+    cardCta: "Start the assistant",
   },
 };
 
