@@ -415,26 +415,38 @@ const ui =
     if (reduce.matches || lessMotion() || originals.length === 0) continue;
     if (track.scrollWidth <= track.clientWidth + 2) continue;
 
-    // The clones: a second, unreachable copy of the set behind the first.
-    for (const slide of originals) {
-      const clone = slide.cloneNode(true) as HTMLElement;
-      clone.classList.add("showcase__slide--clone");
-      clone.setAttribute("aria-hidden", "true");
-      clone.setAttribute("inert", "");
-      for (const node of [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))]) {
-        node.removeAttribute("id");
-        if (node.tabIndex >= 0) node.tabIndex = -1;
+    /**
+     * The clones: a second, unreachable copy of the set behind the first —
+     * built only when the shelf FIRST comes into view, never at load.
+     *
+     * A cloned card carries cloned `<img loading="lazy">` tags, and the
+     * browser fetches them as soon as they are in the document: building them
+     * up front pulled every demo screenshot into the first page load and put
+     * it 210 KB over the weight budget (`npm run audit:perf`).
+     */
+    let loop = 0;
+    let firstClone: HTMLElement | null = null;
+    const measureLoop = () => {
+      if (firstClone) loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
+    };
+    const buildClones = () => {
+      if (firstClone) return;
+      for (const slide of originals) {
+        const clone = slide.cloneNode(true) as HTMLElement;
+        clone.classList.add("showcase__slide--clone");
+        clone.setAttribute("aria-hidden", "true");
+        clone.setAttribute("inert", "");
+        for (const node of [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))]) {
+          node.removeAttribute("id");
+          if (node.tabIndex >= 0) node.tabIndex = -1;
+        }
+        track.append(clone);
       }
-      track.append(clone);
-    }
-    const firstClone = track.children[originals.length] as HTMLElement;
-    /** The width of one full set, measured from where its copy begins. */
-    let loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
-    new ResizeObserver(() => {
-      loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
-    }).observe(track);
-
-    track.classList.add("is-autoplay");
+      firstClone = track.children[originals.length] as HTMLElement;
+      measureLoop();
+      track.classList.add("is-autoplay");
+    };
+    new ResizeObserver(measureLoop).observe(track);
     let position = track.scrollLeft;
     let hovered = false;
     let focused = false;
@@ -506,6 +518,7 @@ const ui =
     document.addEventListener("visibilitychange", resume);
     new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
+      if (visible) buildClones();
       resume();
     }).observe(track);
   }
