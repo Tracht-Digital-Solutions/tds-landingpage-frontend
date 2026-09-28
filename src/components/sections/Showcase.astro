@@ -146,7 +146,7 @@ const ui =
         code we would have to write. `data-carousel` is what the script
         binds to; with no JavaScript the row still scrolls, it just does
         not drift. */}
-    <div class="showcase" data-carousel>
+    <div class="showcase lp-band" data-carousel>
       <div
         class="showcase__track"
         data-carousel-track
@@ -196,49 +196,9 @@ const ui =
   }
 
   .showcase {
-    position: relative;
+    /* Bleed, slots and their shadows come from `.lp-band` in global.css —
+       the price row uses the same class. Only the spacing is local. */
     margin-top: 3rem;
-    /* How wide the slot in the page is. */
-    --showcase-slit: 0.5rem;
-    /* FULL BLEED at every width (2026-09-28). The shelf used to stop at the
-       text column on desktop, which reads as a list that happens to scroll.
-       Running it to both window edges — and letting the cards pass UNDER a
-       slot at each end (the two pseudo-elements below) — is what makes it a
-       band being fed through the page instead.
-
-       `50% - 50vw` rather than a fixed negative margin: the container's width
-       changes with the viewport and the gutter, and this is the one
-       expression that lands on the window edge at every one of them.
-       `#showcase` is `overflow-x: clip`, so the bleed adds no scroll width. */
-    margin-inline: calc(50% - 50vw);
-  }
-
-  /* The slots. Page-coloured bars at both window edges with the hard shadow
-     falling INWARD, so the band visibly disappears behind the page surface
-     rather than stopping at a margin. Flat colour and an unblurred offset —
-     the same language as every other edge on this site; a gradient fade here
-     would be the one soft edge on the page.
-
-     Above the pill and the cards (`z-index`), and click-through, so a card
-     travelling under a slot can still be reached where it is visible. */
-  .showcase::before,
-  .showcase::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    z-index: 2;
-    width: var(--showcase-slit);
-    background: var(--color-paper);
-    pointer-events: none;
-  }
-  .showcase::before {
-    left: 0;
-    box-shadow: 3px 0 0 0 var(--tds-shadow-ink);
-  }
-  .showcase::after {
-    right: 0;
-    box-shadow: -3px 0 0 0 var(--tds-shadow-ink);
   }
 
   .showcase__track {
@@ -249,13 +209,13 @@ const ui =
        height only becomes definite by being stretched here; the cards'
        `height: 100%` resolves against that row. */
     gap: 1rem;
-    padding-inline: var(--showcase-slit);
+    padding-inline: var(--lp-slit);
     /* MUST match `padding-inline`. `scroll-snap-align: start` aligns a slide
        to the scrollport's start edge, and without a matching scroll-padding
        that edge is INSIDE the padding: the track's resting position is then
        `scrollLeft = 24`, not 0, and the "prev" button (which disables on
        `scrollLeft <= 2`) never disables at all. */
-    scroll-padding-inline: var(--showcase-slit);
+    scroll-padding-inline: var(--lp-slit);
     /* Vertical room: the cards' focus ring (3px offset) and, below, their
        hard 6px shadow would be clipped by the scroll container without it. */
     padding-block: 0.25rem 0.625rem;

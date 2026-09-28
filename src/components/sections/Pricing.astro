@@ -86,6 +86,15 @@ const logic = await cmsFor("pricing_logic", lang, getHomeContent(lang).pricingLo
 </section>
 
 <style>
+  /* The price row bleeds to both window edges (`.lp-band`); without this the
+     bleed is horizontal overflow of the document. `clip`, never `hidden`:
+     `hidden` would make this a scroll container, and then a card taking
+     keyboard focus would scroll THIS box instead of the page. Same rule as
+     `#showcase`. */
+  #preise {
+    overflow-x: clip;
+  }
+
   /* The steps are passed into the price list's notes box, which already has a
      ground of its own — so they are rows with a marker, not boxes. Scoped here
      because slotted markup keeps the scope of the component that wrote it. */

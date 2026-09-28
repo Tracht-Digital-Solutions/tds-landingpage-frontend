@@ -616,6 +616,58 @@ html[data-motion="on"] :where([data-cta]) {
   z-index: -1;
 }
 
+/* === The band (2026-09-28, shared 2026-09-29) =============================
+   A row that scrolls sideways runs to BOTH window edges and passes under a
+   slot at each end, so it reads as one band being fed through the page
+   rather than as a list that happens to scroll.
+
+   Written once here because there are two of them — the showcase shelf and
+   the price row — and a second hand-copy would drift. The host element needs
+   `position: relative` and an ancestor with `overflow-x: clip`, or the bleed
+   becomes real horizontal scroll (`audit:ux` measures with the body clip
+   lifted, so it would fail there rather than hide).
+
+   `50% - 50vw` and not a fixed negative margin: the container's width moves
+   with the viewport and the gutter, and this is the one expression that lands
+   on the window edge at every combination of them.
+
+   Deliberately NOT applied to the comparison table on a service page. That
+   table scrolls sideways too, but it is a table inside a card — the slot says
+   "this continues past the page", and a framed table already says where it
+   ends. A metaphor applied where it does not hold is noise. */
+.lp-band {
+  position: relative;
+  /* How wide the slot in the page is. */
+  --lp-slit: 0.5rem;
+  margin-inline: calc(50% - 50vw);
+}
+/* Page-coloured bars at both window edges with the hard shadow falling
+   INWARD, so the band visibly disappears behind the page surface. Flat colour
+   and an unblurred offset — the same language as every other edge here; a
+   gradient fade would be the one soft edge on the page.
+
+   Above the cards, and click-through, so a card travelling under a slot can
+   still be reached wherever it is visible. */
+.lp-band::before,
+.lp-band::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: var(--lp-slit);
+  background: var(--color-paper);
+  pointer-events: none;
+}
+.lp-band::before {
+  left: 0;
+  box-shadow: 3px 0 0 0 var(--tds-shadow-ink);
+}
+.lp-band::after {
+  right: 0;
+  box-shadow: -3px 0 0 0 var(--tds-shadow-ink);
+}
+
 /* === Hard 2D shadows (2026-09-22) ==========================================
    A fixed, unblurred offset on every box and every control of the site —
    the tokens come from tds-shared (`--tds-shadow-hard*`, set by the
