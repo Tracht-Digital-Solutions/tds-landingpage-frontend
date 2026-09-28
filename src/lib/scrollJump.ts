@@ -69,6 +69,33 @@ export function fitOvershoot(
   return lo;
 }
 
+/**
+ * How long a jump of `distance` px should take (2026-09-28).
+ *
+ * It used to be a flat 1200 ms for every jump, and that is what made a SHORT
+ * jump feel slow: the same twelve hundred milliseconds spent crossing two
+ * hundred pixels is a page creeping, not a page moving. The duration follows
+ * the distance now, between a floor that keeps the bounce readable and the
+ * old ceiling that stops a jump across the whole document from taking all
+ * day.
+ *
+ * `sqrt`, not a straight line: a linear duration makes a long jump slow AND a
+ * short one abrupt, because the perceived speed is what the eye reads, not the
+ * time. The square root gives a long jump a higher top speed while keeping its
+ * arrival gentle — the standard curve for exactly this.
+ */
+export const JUMP_MIN_MS = 420;
+export const JUMP_MAX_MS = 1200;
+/** The distance at which the ceiling is reached, px. About three viewports. */
+const JUMP_FULL_SPAN = 4800;
+
+export function jumpDuration(distance: number): number {
+  const span = Math.abs(distance);
+  if (span === 0) return 0;
+  const ratio = Math.min(1, Math.sqrt(span / JUMP_FULL_SPAN));
+  return Math.round(JUMP_MIN_MS + (JUMP_MAX_MS - JUMP_MIN_MS) * ratio);
+}
+
 export interface JumpGeometry {
   /** Current scroll position, px. */
   startY: number;

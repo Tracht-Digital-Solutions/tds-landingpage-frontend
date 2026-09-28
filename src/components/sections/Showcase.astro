@@ -198,20 +198,47 @@ const ui =
   .showcase {
     position: relative;
     margin-top: 3rem;
-    /* Where the shelf's content edge is, measured from `.showcase` itself.
-       It exists because the arrows are positioned against the page's TEXT
-       edge, not against this box: on phones `.showcase` is pulled 1.5rem
-       wider than the text column (the bleed below), so an arrow at `left: 0`
-       would sit at the window edge. Same two values as `padding-inline` and
-       `scroll-padding-inline` on the track, and they have to stay that way —
-       all three describe the same edge. */
-    --showcase-edge: 1.5rem;
-    /* The track bleeds to both viewport edges on phones so a half-visible next
-       card sits at the screen edge instead of behind a 1.5rem margin — that
-       peek is the only thing telling a touch user there is more. The padding
-       puts the first card back on the page's text edge. Above the container
-       width there is nothing to bleed into, so it is switched off. */
-    margin-inline: -1.5rem;
+    /* How wide the slot in the page is. */
+    --showcase-slit: 0.5rem;
+    /* FULL BLEED at every width (2026-09-28). The shelf used to stop at the
+       text column on desktop, which reads as a list that happens to scroll.
+       Running it to both window edges — and letting the cards pass UNDER a
+       slot at each end (the two pseudo-elements below) — is what makes it a
+       band being fed through the page instead.
+
+       `50% - 50vw` rather than a fixed negative margin: the container's width
+       changes with the viewport and the gutter, and this is the one
+       expression that lands on the window edge at every one of them.
+       `#showcase` is `overflow-x: clip`, so the bleed adds no scroll width. */
+    margin-inline: calc(50% - 50vw);
+  }
+
+  /* The slots. Page-coloured bars at both window edges with the hard shadow
+     falling INWARD, so the band visibly disappears behind the page surface
+     rather than stopping at a margin. Flat colour and an unblurred offset —
+     the same language as every other edge on this site; a gradient fade here
+     would be the one soft edge on the page.
+
+     Above the pill and the cards (`z-index`), and click-through, so a card
+     travelling under a slot can still be reached where it is visible. */
+  .showcase::before,
+  .showcase::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: var(--showcase-slit);
+    background: var(--color-paper);
+    pointer-events: none;
+  }
+  .showcase::before {
+    left: 0;
+    box-shadow: 3px 0 0 0 var(--tds-shadow-ink);
+  }
+  .showcase::after {
+    right: 0;
+    box-shadow: -3px 0 0 0 var(--tds-shadow-ink);
   }
 
   .showcase__track {
@@ -222,13 +249,13 @@ const ui =
        height only becomes definite by being stretched here; the cards'
        `height: 100%` resolves against that row. */
     gap: 1rem;
-    padding-inline: 1.5rem;
+    padding-inline: var(--showcase-slit);
     /* MUST match `padding-inline`. `scroll-snap-align: start` aligns a slide
        to the scrollport's start edge, and without a matching scroll-padding
        that edge is INSIDE the padding: the track's resting position is then
        `scrollLeft = 24`, not 0, and the "prev" button (which disables on
        `scrollLeft <= 2`) never disables at all. */
-    scroll-padding-inline: 1.5rem;
+    scroll-padding-inline: var(--showcase-slit);
     /* Vertical room: the cards' focus ring (3px offset) and, below, their
        hard 6px shadow would be clipped by the scroll container without it. */
     padding-block: 0.25rem 0.625rem;
@@ -268,25 +295,23 @@ const ui =
     grid-template-rows: 1fr;
   }
 
+  /* The slide width is measured against the WINDOW now, not the text column,
+     because the track spans the window. The card count per screen is what
+     these fractions are really about, so they are written as viewport
+     fractions and capped, rather than as a share of a container that is no
+     longer the reference. */
   @media (min-width: 768px) {
-    .showcase {
-      margin-inline: 0;
-      --showcase-edge: 0rem;
-    }
     .showcase__track {
       gap: 1.5rem;
-      /* Room on the right for the last card's hard shadow. */
-      padding-inline: 0 0.5rem;
-      scroll-padding-inline: 0;
     }
     .showcase__slide {
-      flex-basis: calc((100% - 1.5rem) / 2);
+      flex-basis: min(24rem, calc((100% - 3rem) / 2.4));
     }
   }
 
   @media (min-width: 1024px) {
     .showcase__slide {
-      flex-basis: calc((100% - 3rem) / 3);
+      flex-basis: min(26rem, calc((100% - 6rem) / 3.4));
     }
   }
 
@@ -461,8 +486,7 @@ const ui =
     const measureLoop = () => {
       if (firstClone) loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
     };
-    const buildClones = () => {
-      if (firstClone) return;
+    const appendCopy = () => {
       for (const slide of originals) {
         const clone = slide.cloneNode(true) as HTMLElement;
         clone.classList.add("showcase__slide--clone");
@@ -474,8 +498,35 @@ const ui =
         }
         track.append(clone);
       }
+    };
+    const buildClones = () => {
+      if (firstClone) return;
+      appendCopy();
       firstClone = track.children[originals.length] as HTMLElement;
       measureLoop();
+      /**
+       * Enough copies that the wrap is never visible.
+       *
+       * The drift wraps by subtracting one set's width (`loop`), so at that
+       * moment the window shows `loop` … `loop + clientWidth`. Those pixels
+       * have to exist, which is the whole condition: `scrollWidth` has to
+       * reach past the wrap point by one windowful. One copy satisfies it
+       * while a set is at least as wide as the window — true at every width
+       * with twelve cards, and NOT true for a shorter shelf on a wide screen,
+       * which is the case this loop is here for.
+       *
+       * Note what it is not: `loop` does not grow when a copy is added, so
+       * the condition is not self-defeating. The first draft asked for
+       * `scrollWidth - loop >= clientWidth + loop`, which is a windowful plus
+       * a whole extra set, and it silently appended two sets too many — 24
+       * cards' worth of images for nothing. The guard is a backstop against a
+       * measurement of zero, not a budget.
+       */
+      let guard = 6;
+      while (loop > 0 && track.scrollWidth < loop + track.clientWidth && guard > 0) {
+        appendCopy();
+        guard -= 1;
+      }
       track.classList.add("is-autoplay");
     };
     new ResizeObserver(measureLoop).observe(track);
