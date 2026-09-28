@@ -5,36 +5,61 @@ import ProcessIcon from "./ProcessIcon.astro";
  * One step of the home page's process list: marker, number, title, duration,
  * what happens, and what the visitor has afterwards.
  *
- * The OUTCOME line used to live in a detail panel beside the list that opened
- * only on hover or when the list item itself took keyboard focus — and to take
- * focus, each `<li>` carried `tabindex="0"` with no role and no name, i.e. a
- * focus stop that announced nothing. The panel was also `aria-hidden`, so a
- * screen reader never got the outcome at all. It is part of the step now,
- * visible to everyone, and nothing here is focusable because nothing here is
- * interactive.
+ * ### Why it is a card (2026-09-28)
+ *
+ * It was loose text hanging off a thin spine — a title, a pill, two paragraphs
+ * and nothing holding them — beside a right-hand column that is a proper card
+ * with a picture and labelled rows. Four steps of that read as one unstructured
+ * block, which is what it was called.
+ *
+ * The step is a card now, in the same language as every other box on the site
+ * (6px, sand on paper, the shared hard shadow through `rounded-[6px]`), and it
+ * carries the SAME two labelled rows the first-conversation card beside it
+ * uses: what happens, and what you have afterwards. So the two columns are
+ * built the same way instead of being a list next to a panel.
+ *
+ * The MARKER stays outside the card, in the rail. That is what keeps the
+ * section's spine — the gradient line and its scroll-driven fill — running
+ * through the numbers; moving it inside would have left the line pointing at
+ * nothing.
+ *
+ * Nothing here is focusable, because nothing here is interactive. The outcome
+ * used to live in a hover-only detail panel that was `aria-hidden`, on list
+ * items carrying `tabindex="0"` with no role — a focus stop that announced
+ * nothing, in front of text a screen reader never reached.
  */
 interface Props {
   number: string;
   title: string;
   duration: string;
   description: string;
-  /** "Ergebnis: …" — what the visitor holds after this step. Optional for CMS blocks without it. */
+  /** What the visitor holds after this step. Optional for CMS blocks without it. */
   outcome?: string;
 }
 
 const { number, title, duration, description, outcome = "" } = Astro.props;
+
+/**
+ * A stored block may still carry the old "Ergebnis: …" / "Outcome: …" prefix,
+ * from when the line had no label of its own. The label says it now, so the
+ * prefix would read twice.
+ */
+const outcomeText = outcome.replace(/^\s*(Ergebnis|Outcome)\s*:\s*/i, "");
+
+const labels = Astro.currentLocale === "en"
+  ? { what: "What happens", result: "What you have afterwards" }
+  : { what: "Was passiert", result: "Was du danach hast" };
 ---
 
-<div class="relative flex gap-4 md:gap-6 py-5 md:py-6">
+<div class="relative flex gap-4 md:gap-6 py-3 md:py-4">
   {/* Numbered marker. The Process section wraps this column in a
       vertical gradient spine + start/end caps, so the marker just
       needs to punch through that line.
 
-      Two colours with two different jobs, and they used to be the other way
-      round because this section stood on sand: the RING masks the spine, so
-      it has to match the ground (--color-paper); the FILL has to differ from
-      that same ground or the marker disappears into it (--color-card). */}
-  <div class="relative flex-shrink-0">
+      Two colours with two different jobs: the RING masks the spine, so it has
+      to match the ground (--color-paper); the FILL has to differ from that
+      same ground or the marker disappears into it (--color-card). */}
+  <div class="relative flex-shrink-0 pt-4">
     <span
       aria-hidden="true"
       class="relative z-10 inline-flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-[var(--color-card)] text-[var(--color-accent)] ring-4 ring-[var(--color-paper)]"
@@ -43,26 +68,45 @@ const { number, title, duration, description, outcome = "" } = Astro.props;
     </span>
   </div>
 
-  <div class="flex-1 min-w-0 pb-2">
-    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
-      {/* The order is carried by the `<ol>`; the numeral is for the eye. */}
-      <span aria-hidden="true" class="text-xs font-medium tracking-widest text-[var(--color-muted)] tabular-nums">
-        {number}
-      </span>
-      <h3 class="text-lg font-[var(--font-display)] font-medium text-[var(--color-black)]">
-        {title}
-      </h3>
-      <span class="text-xs text-[var(--color-muted)] bg-[var(--color-card)] px-2.5 py-1 rounded-[100px]">
-        {duration}
-      </span>
-    </div>
-    <p class="text-sm text-[var(--color-muted)] leading-relaxed">
-      {description}
-    </p>
-    {outcome && (
-      <p class="mt-3 text-sm font-medium text-[var(--color-accent)]">
-        {outcome}
+  <div class="process-step flex-1 min-w-0 rounded-[6px] overflow-hidden bg-[var(--color-soft)]">
+    <div class="p-5 md:p-6">
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3">
+        {/* The order is carried by the `<ol>`; the numeral is for the eye. */}
+        <span aria-hidden="true" class="text-xs font-medium tracking-widest text-[var(--color-muted)] tabular-nums">
+          {number}
+        </span>
+        <h3 class="text-lg font-[var(--font-display)] font-medium text-[var(--color-black)]">
+          {title}
+        </h3>
+        <span class="text-xs text-[var(--color-muted)] bg-[var(--color-card)] px-2.5 py-1 rounded-[100px]">
+          {duration}
+        </span>
+      </div>
+
+      <p class="eyebrow process-step__label">{labels.what}</p>
+      <p class="text-sm text-[var(--color-black)] leading-relaxed">
+        {description}
       </p>
-    )}
+    </div>
+
+    {
+      outcomeText && (
+        /* The same seam every card on this site draws before its last line. */
+        <div class="process-step__result px-5 md:px-6 py-3.5">
+          <p class="eyebrow process-step__label">{labels.result}</p>
+          <p class="text-sm font-medium text-[var(--color-accent)] leading-snug">{outcomeText}</p>
+        </div>
+      )
+    }
   </div>
 </div>
+
+<style>
+  .process-step__label {
+    margin: 0 0 0.25rem;
+  }
+  .process-step__result {
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    background: color-mix(in srgb, var(--color-black) 3%, transparent);
+  }
+</style>
