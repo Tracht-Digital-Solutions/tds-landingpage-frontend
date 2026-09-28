@@ -12,6 +12,7 @@ import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
 import { socialLinks } from "~/lib/socials";
+import type { ServiceId } from "~/lib/services";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -66,6 +67,36 @@ const contact = await cmsFor("contact", lang, {
           "Something else",
         ],
 });
+
+/**
+ * Which reason the service assistant's recommendation preselects.
+ *
+ * It lives HERE, beside the list it picks from, because that is the only place
+ * that can keep the two in step — `lib/serviceFinder.ts` has never seen these
+ * strings, and they share no wording with the service names ("Webauftritt"
+ * against "Bestehende Website übernehmen"), so a text match between them would
+ * never fire.
+ *
+ * Not every service has one, and the gaps are deliberate rather than
+ * unfinished: the assistant recommends "Beratung & Konzeption" precisely when
+ * nothing else pointed anywhere, and filing that under a concrete reason would
+ * be inventing the answer the visitor did not give. An unmapped service leaves
+ * the dropdown as it was.
+ *
+ * The index, not the text: an edit to the wording above moves with it, and an
+ * editor who replaces the whole list in the panel simply gets no preselection
+ * instead of a wrong one (the form checks the value is actually an option).
+ */
+const reasonForService: Partial<Record<ServiceId, number>> = {
+  "web-presence": 0,
+  process: 4,
+  solutions: 4,
+};
+const assistantReasons = Object.fromEntries(
+  Object.entries(reasonForService)
+    .map(([id, index]) => [id, contact.reasons[index as number]])
+    .filter(([, reason]) => typeof reason === "string"),
+) as Record<string, string>;
 
 // What happens after sending. It used to stand ABOVE the form, where it was a
 // wall between the visitor and the field they came here to type in — and it
@@ -145,6 +176,7 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
         client:visible
         lang={lang}
         reasons={contact.reasons}
+        assistantReasons={assistantReasons}
         nextSteps={{ title: nextSteps.nextStepsTitle, items: nextSteps.items }}
       />
 

@@ -247,6 +247,18 @@ const pricesHref = `${home}#preise`;
     padding: 0;
     background: none;
   }
+  /* The swipe's clip (2026-09-28). A step entering from one stage-width to the
+     right is horizontal overflow, and `.assistant` is `overflow: auto` — so a
+     scrollbar appeared across the bottom of the dialog for the length of every
+     transition. `clip`, not `hidden`: `hidden` would make this a scroll
+     container of its own, and then a control taking focus inside a step would
+     scroll THIS box instead of the dialog. */
+  :global(.finder__stage-track) {
+    overflow-x: clip;
+    /* `clip` on one axis needs the other to be explicit, or it resolves to
+       `auto` and re-creates the scroll container this exists to prevent. */
+    overflow-y: visible;
+  }
   :global(.finder__stage) {
     min-width: 0;
   }

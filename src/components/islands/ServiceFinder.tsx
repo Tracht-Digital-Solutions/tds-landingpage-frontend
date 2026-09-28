@@ -144,15 +144,32 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
     handOffContactDraft(buildDraft(matches, { topics, situations, stage }, services, lang));
   };
 
-  /** A step slides in from the side it goes to, and out to the other. */
+  /**
+   * A step SWIPES: the next one comes in from the right while the one before
+   * it leaves to the left, and neither fades (2026-09-28, asked for).
+   *
+   * What it replaced: a 48px nudge with an opacity cross-fade, which reads as
+   * two cards dissolving into each other rather than as one strip moving on.
+   * Without the fade the travel has to be the full width — a step appearing
+   * out of nothing 48px off its resting place would be a pop, not a slide —
+   * so the distance is `100%` of the stage and `.finder__stage-track` clips
+   * it. THAT CLIP IS REQUIRED: the dialog is `overflow: auto`, so a step
+   * standing one stage-width to the right is horizontal overflow, and a
+   * scrollbar appeared across the bottom of the assistant for the length of
+   * every transition.
+   *
+   * `popLayout` rather than `mode="wait"`: waiting plays the two halves one
+   * after the other, which is a gap in the middle of what should be one
+   * movement. `popLayout` takes the leaving step out of the flow so both are
+   * on screen together without the incoming one being pushed down the page.
+   */
   const slide = {
-    enter: (dir: 1 | -1) => ({ x: dir * 48, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: (dir: 1 | -1) => ({ x: dir * -48, opacity: 0 }),
+    enter: (dir: 1 | -1) => ({ x: `${dir * 100}%` }),
+    center: { x: "0%" },
+    exit: (dir: 1 | -1) => ({ x: `${dir * -100}%` }),
   };
   const slideTransition = still ?? {
-    x: { type: "spring" as const, bounce: 0.2, visualDuration: 0.38 },
-    opacity: { duration: 0.18 },
+    x: { type: "spring" as const, bounce: 0.18, visualDuration: 0.42 },
   };
 
 
@@ -181,7 +198,9 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
           </span>
         </div>
 
-        <AnimatePresence initial={false} mode="wait" custom={direction}>
+        {/* The clip the swipe needs — see the note on `slide`. */}
+        <div className="finder__stage-track">
+        <AnimatePresence initial={false} mode="popLayout" custom={direction}>
           {step === STEP_COUNT ? (
             <m.div
               key="result"
@@ -381,6 +400,7 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
             </m.form>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </MotionScope>
   );
