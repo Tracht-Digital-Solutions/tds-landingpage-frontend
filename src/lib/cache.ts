@@ -12,6 +12,7 @@
 
 import { forLanguages, type EventMap } from "@tracht-digital-solutions/tds-shared/cache";
 import { BUSINESS_CARD_SLUG } from "./businessCard";
+import { CREDENTIALS_SLUG } from "./credentials";
 import { platformDefinitions, platformHref } from "./platforms";
 import { serviceDefinitions, serviceHref } from "./services";
 
@@ -137,6 +138,10 @@ export const alwaysPaths = [
   ]),
   BUSINESS_CARD_SLUG.de,
   BUSINESS_CARD_SLUG.en,
+  // Like the business card: code-owned throughout, so no block save can date
+  // it — but a full rebuild still has to render it.
+  CREDENTIALS_SLUG.de,
+  CREDENTIALS_SLUG.en,
   "/sitemap-0.xml",
   "/sitemap-index.xml",
 ];

@@ -1,0 +1,303 @@
+---
+/**
+ * One design study on the showcase shelf: genre, the capture, the invented
+ * brand, what the page shows and the trade it was drawn for.
+ *
+ * Built to `DemoCard.astro`'s measurements on purpose — the two stand next to
+ * each other in one track, stretched to a common height, and a band even a few
+ * pixels off is visible as a broken row. Four things differ, and each of them
+ * is a fact about what a study IS:
+ *
+ * 1. The origin pill says "Designstudie · eigenständig erstellt". A visitor
+ *    judging this business by its work has to be able to tell a running site
+ *    from a drawing before they read anything else. (The captures carry the
+ *    same statement as a watermark, which is belt and braces.)
+ * 2. No favicon. There is no site to take one from.
+ * 3. The caption under the body is the SECTOR, where a demo card has its host.
+ *    A study has no address, and inventing one would be the single most
+ *    misleading thing this card could do.
+ * 4. No magnifier on the picture. A demo card has two destinations — the live
+ *    site and the enlarged capture — so the second needs a control of its own.
+ *    A study has ONE, and it is the enlargement, so it is the call to action in
+ *    the bar. Two controls for one destination would offer a choice that is
+ *    not one.
+ *
+ * The description is written by us (see `lib/designStudies.ts`); a demo's is
+ * harvested from the demo. That is the difference between describing our own
+ * drawing and quoting somebody's page.
+ */
+import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
+import { coverView, studyUi, type DesignStudy } from "~/lib/designStudies";
+import type { Lang } from "~/lib/i18n";
+import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
+import { mediaSrc } from "~/lib/mediaSrc";
+import type { CardAction } from "~/lib/cardActions";
+import CardActions from "~/components/ui/CardActions.astro";
+
+interface Props {
+  study: DesignStudy;
+  lang: Lang;
+  /** The service page this study is evidence for. See `DemoCard`'s note. */
+  serviceLink?: CardAction | null;
+}
+
+const { study, lang, serviceLink = null } = Astro.props;
+const ui = studyUi[lang];
+
+const cover = coverView(study);
+const kind = DEMO_KINDS[study.kind][lang];
+const origin = DEMO_ORIGINS.study[lang];
+const sector = study.sector[lang];
+
+/** This site's own words about its own picture, so it follows the page. */
+const alt =
+  lang === "de"
+    ? `Designstudie für ${study.title} – ${sector}`
+    : `Design study for ${study.title} – ${sector}`;
+
+/**
+ * Every capture, for the dialog's view strip — and `undefined` when there is
+ * only one.
+ *
+ * The strip needs at least two to be a choice, so a lone view would ship a
+ * serialised array into the markup of five of the seven cards for a control
+ * that never appears. The home page's document is the one budget this section
+ * spends from (`scripts/perf-budget.json`).
+ *
+ * Serialised whole rather than by id: the dialog is a script with no access to
+ * the catalog, and a lookup table shipped separately would be a second list to
+ * keep in step. `mediaSrc` is applied here so each view carries the same
+ * cache-busting version the card's own `<img>` does.
+ */
+const views =
+  study.views.length > 1
+    ? study.views.map((view) => ({
+        id: view.id,
+        label: view.label[lang],
+        src: mediaSrc(view.src),
+        ratio: `${view.width} / ${view.height}`,
+      }))
+    : undefined;
+
+/**
+ * `tall` whenever the capture is taller than wide.
+ *
+ * Every full-page shot here is, most of them by a factor of two and one by
+ * three. `contain` in the dialog's default 16:10 box would draw a two-metre
+ * page as a thumb-wide strip down the middle of the screen — the exact thing
+ * the dialog exists to prevent.
+ */
+const fit = cover.height > cover.width ? "tall" : "cover";
+---
+
+<article class="study-card-slot" data-reveal>
+  <div class="study-card">
+    <div class="study-card__shot">
+      <img
+        src={mediaSrc(cover.src)}
+        srcset={srcsetFor(cover.src, PREVIEW_VARIANT_WIDTHS, cover.width, mediaSrc)}
+        sizes="(min-width: 64rem) 34vw, (min-width: 48rem) 48vw, 85vw"
+        alt={alt}
+        width={cover.width}
+        height={cover.height}
+        loading="lazy"
+        decoding="async"
+      />
+
+      <span class="study-card__origin">{origin}</span>
+    </div>
+
+    <div class="study-card__body">
+      <p class="study-card__kind">{kind}</p>
+      <h3 class="study-card__title">{study.title}</h3>
+      <p class="study-card__text">{study.description[lang]}</p>
+
+      <p class="study-card__sector">
+        <span class="sr-only">{ui.sectorLabel}: </span>
+        {sector}
+      </p>
+    </div>
+
+    <CardActions
+      lang={lang}
+      service={serviceLink}
+      cta={{
+        label: ui.open,
+        // The bar's control is the card's control, so its accessible name has
+        // to say which study it opens — "Design ansehen" alone would read
+        // identically on every card in the shelf.
+        detail: study.title,
+        preview: {
+          src: mediaSrc(cover.src),
+          alt,
+          title: study.title,
+          caption: sector,
+          fit,
+          ratio: `${cover.width} / ${cover.height}`,
+          views,
+        },
+      }}
+    />
+  </div>
+</article>
+
+<style>
+  .study-card-slot {
+    /* A grid child, not a flex item: under size containment a flex item takes
+       its base size from max-content and collapses. Same note as the demo
+       card, same reason. */
+    container-type: inline-size;
+  }
+
+  .study-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* The sand fill, like every other card on this shelf — the section keeps
+       the plain paper ground. */
+    background: var(--color-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    color: inherit;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .study-card:hover,
+  .study-card:focus-within {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+  }
+
+  .study-card__shot {
+    position: relative;
+    /* THE SAME BOX as a demo card's band. These cards share one track and the
+       shelf stretches every slide to the tallest; a different ratio here would
+       pad every demo card's body by the difference. */
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .study-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Anchored to the top: a full-page capture's hero is the part worth
+       showing, and the enlargement is one press away for the rest. */
+    object-fit: cover;
+    object-position: top center;
+    transition: transform 700ms var(--lp-ease-soft);
+  }
+  .study-card:hover .study-card__shot img,
+  .study-card:focus-within .study-card__shot img {
+    transform: scale(1.03);
+  }
+
+  /* Pinned to the picture's top left. No magnifier owns the top right here, so
+     it may run wider than the demo card's does. Click-through, so the card's
+     stretched control still takes the tap. */
+  .study-card__origin {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    max-width: calc(100% - 1.25rem);
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    color: var(--color-black);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
+  .study-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1.125rem 1.25rem 1rem;
+  }
+
+  .study-card__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .study-card__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .study-card:hover .study-card__title,
+  .study-card:focus-within .study-card__title {
+    color: var(--color-primary);
+  }
+
+  .study-card__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .study-card__sector {
+    margin: 0;
+    /* Pinned to the bottom of the body so the captions line up across a row
+       whose descriptions are different lengths — exactly like a demo card's
+       host line, which is the slot this one occupies. */
+    margin-top: auto;
+    padding-top: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+
+  @container (min-width: 30rem) {
+    .study-card__body {
+      padding: 1.375rem 1.5rem 1.25rem;
+    }
+    .study-card__title {
+      font-size: 1.625rem;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+    }
+    .study-card__text {
+      font-size: 0.9375rem;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      max-width: 46ch;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .study-card__shot img {
+      transition: none;
+    }
+    .study-card:hover .study-card__shot img,
+    .study-card:focus-within .study-card__shot img {
+      transform: none;
+    }
+  }
+</style>

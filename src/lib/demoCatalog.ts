@@ -60,14 +60,20 @@ export type DemoKind = keyof typeof DEMO_KINDS;
  *   so; the badge says it before anybody has to read.
  * - `own` — a real site of Tracht Digital Solutions itself. The shop is one:
  *   it sells for real, so calling it "fictional" would be the opposite lie.
+ * - `study` — a design study: a picture of a page that was never built and is
+ *   not hosted anywhere (`designStudies.ts`). It shares this shelf because it
+ *   is the same kind of evidence, and "eigenständig erstellt" is the phrase
+ *   the captures themselves carry as a watermark.
  *
- * Closed, like `DEMO_KINDS`, and for the same reason. Neither label may ever be
- * "Kundenprojekt" — customer cases are `references.ts`, a different catalog
+ * Closed, like `DEMO_KINDS`, and for the same reason. No label may ever name a
+ * client — not even to deny one, which is why the study says what it IS rather
+ * than what it is not. Customer cases are `references.ts`, a different catalog
  * with its own consent rules.
  */
 export const DEMO_ORIGINS = {
   demo: { de: "Demo · fiktives Beispiel", en: "Demo · fictional example" },
   own: { de: "Eigenes Projekt", en: "Own project" },
+  study: { de: "Designstudie · eigenständig erstellt", en: "Design study · self-initiated" },
 } as const;
 
 export type DemoOrigin = keyof typeof DEMO_ORIGINS;

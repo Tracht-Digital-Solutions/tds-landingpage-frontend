@@ -25,7 +25,8 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   first: Hero (benefit + trust card) → Leistungen (Webauftritt first, the
   systems strip, the assistant's button) → Kundenprojekte
   (`sections/CustomerCases.astro`) → Vorgehen (with the first-conversation card)
-  → Beispielseiten (`sections/Showcase.astro`) → compact Journal → Wieso ich? →
+  → Beispielseiten und Designstudien (`sections/Showcase.astro`) → compact
+  Journal → Wieso ich? (mit dem Nachweis-Teaser) →
   Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ →
   Kontakt. The FAQ stays directly
   above the navy contact block. The positioning band, the pricing teaser with
@@ -48,12 +49,25 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   saved before the switch still override the defaults until they are cleared.
 - **Client work and samples are separate sections.** Approved reference cases
   render on the detail page of each service they belong to and in
-  `CustomerCases` (badge "Kundenprojekt"); the demos and the business card
-  render in `Showcase`, each with an origin badge (`DEMO_ORIGINS`: "Demo ·
-  fiktives Beispiel" / "Eigenes Projekt"). They shared one carousel until
+  `CustomerCases` (badge "Kundenprojekt"); the demos, the design studies and
+  the business card render in `Showcase`, each with an origin badge
+  (`DEMO_ORIGINS`: "Demo · fiktives Beispiel" / "Eigenes Projekt" /
+  "Designstudie · eigenständig erstellt"). They shared one carousel until
   2026-09 and nothing on a card told a client's project from a fictional demo
-  — do not merge them again. `CustomerCases` renders nothing without a case;
+  — do not merge them again. No origin label may name a client, not even to
+  deny one (`demos.test.ts`). `CustomerCases` renders nothing without a case;
   `Showcase` always has at least the business card.
+- **A design study is a picture, not a site** (2026-09-28). Seven of them
+  (`lib/designStudies.ts`, `ui/StudyCard.astro`) sit in the shelf after the
+  demos: invented brands, no host, no URL, nothing to probe. Their captures
+  carry "DESIGNSTUDIE · eigenständig erstellt · kein Kundenauftrag" as a
+  watermark and the card repeats it as a badge. The card is built to
+  `DemoCard`'s measurements (same 16:10 band — the shelf stretches every slide
+  to the tallest), shows the SECTOR where a demo shows its host, and has no
+  magnifier: its one destination is the enlargement, so that is the call to
+  action in the bar. They do NOT appear in `sections/WebsiteDemos.astro` —
+  that grid is the demo catalog. `npm run studies:import` writes the WebP; the
+  PNG originals stay out of the repo.
 - **One primary call to action per section**, "Erstgespräch vereinbaren": in
   the hero, beside the process steps (`ui/FirstCall.astro`), and the contact
   form itself; under the prices it is "Individuelle Lösungen – auf Anfrage".
@@ -247,6 +261,21 @@ Use current code, configuration and tests as the source of truth. Keep setup in
     system — the system can identify the client.
   - Version and support facts go stale. Re-check the sources, and raise
     `updatedAt` when a fact changes — never the date alone.
+- **The certificates are a page of their own** — `/qualifikationen` and
+  `/en/qualifications` (2026-09-28), three-line wrappers around
+  `components/CredentialsPage.astro`. Thirteen LinkedIn Learning paths, each
+  shown as the DOCUMENT it is: the rendered PDF, `object-fit: contain` on
+  paper, never cropped — a cropped certificate is an unreadable one. The
+  catalog, the priority order and the four groups are decided once in
+  `lib/credentials.ts` and nothing sorts at the call site; the titles are not
+  translated, because they are the names of documents. **The sentence under
+  the lead stays**: these are learning paths, not vendor exams and not a
+  degree, and `credentials.test.ts` fails without it — the Microsoft wordmark
+  on the paper reads as a certification otherwise. `sections/About.astro`
+  teases the first three of the catalog and links here; that block is code,
+  not `cmsFor("why_me", …)`, so an editor cannot publish a qualification that
+  does not exist. `npm run certificates:render` rebuilds the pictures from the
+  committed PDFs.
 - **The digital business card is a STANDALONE page** — `/visitenkarte` and
   `/en/business-card`, both five-line wrappers around
   `components/BusinessCardPage.astro`. It is the one route that renders
@@ -468,9 +497,10 @@ visual language rather than rebuilding it locally:
   reaches every demo the same day. `brandBar.test.ts` holds the contract. Edit
   the bar HERE, never in a demo.
 - **Republished screenshots carry a content version.** `/demos`,
-  `/references` and `/images/business-card.webp` keep their names across the
-  sync scripts and are cached for a week, so a new capture did not show on
-  reload. `scripts/media-versions.mjs` hashes their bytes at build time
+  `/references`, `/designstudien`, `/zertifikate` and
+  `/images/business-card.webp` keep their names across the
+  scripts that write them and are cached for a week, so a new capture did
+  not show on reload. `scripts/media-versions.mjs` hashes their bytes at build time
   (`virtual:media-versions`) and `mediaSrc()` appends `?v=<hash>` to `src`,
   every `srcset` candidate and the lightbox source.
 - **No opening hours are published**, on the page or in the schema. Julian

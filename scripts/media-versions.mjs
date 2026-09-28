@@ -7,9 +7,10 @@ import { join, relative, sep } from "node:path";
  * republishes under an UNCHANGING name.
  *
  * `/demos/demo1.webp` keeps its name when `npm run demos:sync` captures it
- * again, and `.htaccess` lets browsers keep `/demos`, `/references` and
- * `/images` for a week (`TDS_MEDIA`). So a new screenshot reached nobody who
- * had seen the old one: reloading showed the old picture for up to seven days.
+ * again, and `.htaccess` lets browsers keep `/demos`, `/references`,
+ * `/designstudien`, `/zertifikate` and `/images` for a week (`TDS_MEDIA`). So a
+ * new screenshot reached nobody who had seen the old one: reloading showed the
+ * old picture for up to seven days.
  * Renaming on every sync would break the sync scripts' ownership of their
  * folders; a `?v=<hash>` does not — Apache serves the same file, and the
  * browser cache keys on the full URL.
@@ -20,7 +21,7 @@ import { join, relative, sep } from "node:path";
  * Used by `astro.config.mjs` and `vitest.config.ts`; read through
  * `mediaSrc()` in `src/lib/imageVariants.ts`.
  */
-const ROOTS = ["demos", "references", "images/business-card.webp"];
+const ROOTS = ["demos", "references", "designstudien", "zertifikate", "images/business-card.webp"];
 const MEDIA = /\.(webp|png|jpe?g|avif|gif|svg|ico)$/i;
 
 function walk(path) {
