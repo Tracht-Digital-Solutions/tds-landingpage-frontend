@@ -1,6 +1,13 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 import { JUMP_MAX_MS, jumpDuration, planJump } from "~/lib/scrollJump";
+import {
+  classifyWheel,
+  WHEEL_PROFILE,
+  WHEEL_SAMPLE_SIZE,
+  type WheelKind,
+  type WheelSample,
+} from "~/lib/wheelKind";
 import { createScrollLock } from "~/lib/scrollLock";
 
 type ScrollTarget = number | HTMLElement | string;
@@ -223,13 +230,50 @@ export default function SmoothScroll() {
 
     // ── Desktop path: Lenis smooth wheel + bounce click-jumps ──
     const lenis = new Lenis({
-      duration: 1.1,
+      duration: WHEEL_PROFILE.mouse.duration,
       // Plain expo ease-out for wheel scrolling — smooth, no overshoot.
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
 
     (window as unknown as { lenis?: Lenis }).lenis = lenis;
+
+    /**
+     * Adapt the smoothing to what the visitor is actually holding.
+     *
+     * A mouse wheel sends coarse notches that want a long tween to become a
+     * glide; a trackpad sends a continuous stream the operating system has
+     * already given momentum to, and a second momentum on top of that is what
+     * makes a page feel late under the hand. The device is inferred from the
+     * events (`lib/wheelKind.ts`), never from the user agent.
+     *
+     * It starts on the mouse profile — the one the site shipped with, and the
+     * safe way round: too smooth for a trackpad is pleasant, too tight for a
+     * wheel is a staircase. Once a verdict forms it STAYS: a classifier that
+     * flipped mid-gesture would change the feel under a hand that is still
+     * moving.
+     */
+    let wheelKind: WheelKind | null = null;
+    const samples: WheelSample[] = [];
+    let lastWheelAt = 0;
+    const onWheel = (event: WheelEvent) => {
+      if (wheelKind) return;
+      const now = event.timeStamp;
+      samples.push({
+        deltaY: event.deltaY,
+        deltaX: event.deltaX,
+        deltaMode: event.deltaMode,
+        gap: lastWheelAt ? now - lastWheelAt : Infinity,
+      });
+      lastWheelAt = now;
+      if (samples.length > WHEEL_SAMPLE_SIZE) samples.shift();
+      const verdict = classifyWheel(samples);
+      if (!verdict) return;
+      wheelKind = verdict;
+      // `duration` is the one profile knob Lenis exposes on a live instance.
+      lenis.options.duration = WHEEL_PROFILE[verdict].duration;
+    };
+    window.addEventListener("wheel", onWheel, { passive: true });
 
     const tdsScrollTo: Window["tdsScrollTo"] = (target, opts) => {
       const { destY, distance, easing } = planFor(target);
@@ -278,6 +322,7 @@ export default function SmoothScroll() {
       cancelAnimationFrame(rafId);
       inputLock.destroy();
       document.removeEventListener("click", onClick);
+      window.removeEventListener("wheel", onWheel);
       lenis.destroy();
       delete (window as unknown as { lenis?: Lenis }).lenis;
       delete window.tdsScrollTo;
