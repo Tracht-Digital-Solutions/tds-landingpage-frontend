@@ -13,26 +13,36 @@ describe("darkSpan", () => {
 });
 
 describe("splitClip", () => {
-  it("hides the twin over a light page and the original over a dark band", () => {
-    expect(splitClip(100, 200, []).twin).toBe("inset(100% 0 0 0)");
-    expect(splitClip(100, 200, [[0, 500]]).original).toBe("inset(100% 0 0 0)");
+  it("hides the twin over a light page and shows it whole over a dark band", () => {
+    expect(splitClip(100, 200, [])).toBe("inset(100% 0 0 0)");
+    expect(splitClip(100, 200, [[0, 500]])).toBe(`inset(${-P}px ${-P}px ${-P}px ${-P}px)`);
+  });
+
+  /**
+   * The original is NEVER clipped, and that is the whole point of this
+   * function returning one string instead of two. `clip-path` clips hit
+   * testing as well as paint: clipping the original to the light part left
+   * the bookmarks and the floating pill unclickable wherever they went white,
+   * because the twin over them is `inert` by design. Nothing here may grow a
+   * second return value again.
+   */
+  it("returns one clip, for the twin alone", () => {
+    expect(typeof splitClip(100, 200, [[0, 500]])).toBe("string");
   });
 
   it("cuts both layers at the line when a band starts inside the element", () => {
     // A dark band from y=160 down: the lower 40 px are white already.
     const clip = splitClip(100, 200, [[160, 900]]);
-    expect(clip.twin).toBe(`inset(60px ${-P}px ${-P}px ${-P}px)`);
-    expect(clip.original).toBe(`inset(${-P}px ${-P}px 40px ${-P}px)`);
+    expect(clip).toBe(`inset(60px ${-P}px ${-P}px ${-P}px)`);
   });
 
   it("cuts at the band's lower edge when leaving it", () => {
     const clip = splitClip(100, 200, [[0, 130]]);
-    expect(clip.twin).toBe(`inset(${-P}px ${-P}px 70px ${-P}px)`);
-    expect(clip.original).toBe(`inset(30px ${-P}px ${-P}px ${-P}px)`);
+    expect(clip).toBe(`inset(${-P}px ${-P}px 70px ${-P}px)`);
   });
 
-  it("shows only the twin in the dark theme", () => {
-    expect(splitClip(100, 200, [], true).original).toBe("inset(100% 0 0 0)");
+  it("shows the twin whole in the dark theme", () => {
+    expect(splitClip(100, 200, [], true)).toBe(`inset(${-P}px ${-P}px ${-P}px ${-P}px)`);
   });
 });
 

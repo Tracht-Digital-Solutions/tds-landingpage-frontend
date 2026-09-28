@@ -42,37 +42,40 @@ export function darkSpan(top: number, bottom: number, ranges: readonly Range[]):
   return from < to ? [from, to] : null;
 }
 
-export interface SplitClip {
-  /** For the inverted twin: the dark part. */
-  twin: string;
-  /** For the original: the light part (unclipped when dark sits in the middle). */
-  original: string;
-}
-
 const HIDDEN = "inset(100% 0 0 0)";
 
 /**
- * Clip paths for an element spanning `[top, bottom]` (same coordinates as the
- * ranges). `allDark` is the dark theme, where every ground is dark.
+ * The twin's clip for an element spanning `[top, bottom]` (same coordinates as
+ * the ranges). `allDark` is the dark theme, where every ground is dark.
+ *
+ * ### Why only the twin is clipped (2026-09-28)
+ *
+ * Both layers used to be clipped: the twin to the dark part, the ORIGINAL to
+ * the rest. It looked right and it broke the control. `clip-path` clips hit
+ * testing, not just paint — so over a dark band the original was clipped to
+ * nothing and could not be clicked, while the twin sitting on top is `inert`
+ * and `pointer-events: none` by design. The bookmarks and the floating pill
+ * were dead every time they went white, which is exactly where a visitor is
+ * most likely to reach for them: on the contact block and in the footer.
+ *
+ * The original does not need a clip. The twin is laid exactly over it and
+ * covers it opaquely wherever it is drawn, so painting the original in full
+ * underneath produces the same picture — and leaves one layer that always
+ * takes the pointer, at every scroll position.
  */
-export function splitClip(top: number, bottom: number, ranges: readonly Range[], allDark = false): SplitClip {
+export function splitClip(top: number, bottom: number, ranges: readonly Range[], allDark = false): string {
   const pad = SHADOW_PAD;
   const full = `inset(${-pad}px ${-pad}px ${-pad}px ${-pad}px)`;
-  if (allDark) return { twin: full, original: HIDDEN };
+  if (allDark) return full;
   const span = darkSpan(top, bottom, ranges);
-  if (!span) return { twin: HIDDEN, original: full };
+  if (!span) return HIDDEN;
   const [from, to] = span;
   const coversTop = from <= top;
   const coversBottom = to >= bottom;
-  if (coversTop && coversBottom) return { twin: full, original: HIDDEN };
+  if (coversTop && coversBottom) return full;
   const twinTop = coversTop ? -pad : from - top;
   const twinBottom = coversBottom ? -pad : bottom - to;
-  const twin = `inset(${twinTop}px ${-pad}px ${twinBottom}px ${-pad}px)`;
-  // The original keeps what the twin does not cover — one side of one line.
-  let original = full;
-  if (coversTop) original = `inset(${to - top}px ${-pad}px ${-pad}px ${-pad}px)`;
-  else if (coversBottom) original = `inset(${-pad}px ${-pad}px ${bottom - from}px ${-pad}px)`;
-  return { twin, original };
+  return `inset(${twinTop}px ${-pad}px ${twinBottom}px ${-pad}px)`;
 }
 
 /**

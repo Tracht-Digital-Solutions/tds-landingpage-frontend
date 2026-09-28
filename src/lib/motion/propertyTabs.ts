@@ -18,6 +18,18 @@ const PEEK_PX = 48;
 /** How far a neighbour leans out with the open tab. */
 const NEIGHBOUR_PX = 10;
 
+/**
+ * Coming OUT bounces; going back does not (2026-09-28, asked for).
+ *
+ * `pointerSpring` settles in one barely visible swing — right for a control
+ * that tracks the pointer, too flat for a bookmark being thumbed out of a
+ * stack. The overshoot is what makes it read as a physical card catching at
+ * the end of its travel. Returning stays on the shared spring: a bookmark
+ * springing back past its parked position would look like a mistake, and four
+ * of them doing it at once even more so.
+ */
+const OUT_SPRING = { type: "spring", bounce: 0.38, visualDuration: 0.42 } as const;
+
 export function mountPropertyTabs({ animate, pointerSpring }: Dom): void {
   const nav = document.querySelector<HTMLElement>("[data-property-tabs]");
   if (!nav) return;
@@ -38,9 +50,11 @@ export function mountPropertyTabs({ animate, pointerSpring }: Dom): void {
       let x = 0;
       if (i === index) x = travel(tab);
       else if (index >= 0 && Math.abs(i - index) === 1) x = NEIGHBOUR_PX;
-      void animate(tab, { x }, pointerSpring);
+      // Out on the bouncing spring, back on the flat one.
+      const transition = x > 0 ? OUT_SPRING : pointerSpring;
+      void animate(tab, { x }, transition);
       const twin = twinTabs[i];
-      if (twin) void animate(twin, { x }, pointerSpring);
+      if (twin) void animate(twin, { x }, transition);
     });
   };
 
