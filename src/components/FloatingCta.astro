@@ -360,9 +360,20 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     }
   }
 
-  /* Touch: the page keeps clear of the pill at the end of the document. */
+  /* Touch: the page keeps clear of the pill at the end of the document.
+
+     On the FOOTER, not on `body` (2026-09-29). Padding on the body adds its
+     height BELOW the last element, and the last element is the dark footer —
+     so the strip the pill sits over was the body's own near-white ground, and
+     a phone showed a white bar across the bottom of every page. Growing the
+     footer instead keeps the band dark all the way to the edge and reserves
+     exactly the same room.
+
+     Every page that renders this control also renders the footer (both are
+     `{!bare && …}` in `layouts/Layout.astro`), so nothing is left without the
+     clearance. */
   @media (hover: none) {
-    :global(body) {
+    :global(.site-footer) {
       padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
     }
   }

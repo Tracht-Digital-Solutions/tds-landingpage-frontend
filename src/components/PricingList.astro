@@ -118,6 +118,7 @@ const ui =
             half of scrolling), a grid from 42rem of container width. It ships
             focusable (axe checks before any script) and the script drops the
             tab stop while the row does not overflow. */}
+        <div class="pricing-packages__band lp-band">
         <div class="pricing-packages__scroller" data-packages-scroller role="group" aria-label={ui.packagesTitle} tabindex="0">
           <ul class="pricing-packages__grid" data-motion-cards>
             {pricing.packages.map((pkg) => (
@@ -159,6 +160,7 @@ const ui =
               </li>
             ))}
           </ul>
+        </div>
         </div>
       </section>
     )
@@ -299,11 +301,17 @@ const ui =
   }
 
   /* A swipe row below 42rem of container width. The card is 85 % wide so the
-     next one peeks in — the one cue a row gives that there is more. */
+     next one peeks in — the one cue a row gives that there is more.
+
+     The row is a BAND (`.lp-band` in global.css): it runs to both window
+     edges and its cards pass under a slot at each end, like the showcase
+     shelf. The band sits on a WRAPPER and not on the scroller itself — the
+     slots are absolutely positioned, and an absolutely positioned child of a
+     scroll container scrolls away with the content. */
   .pricing-packages__scroller {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: 0;
+    scroll-padding-inline: var(--lp-slit);
     scrollbar-width: none;
     /* Room for the cards' hover lift and the focus ring. */
     padding-block: 0.5rem;
@@ -321,7 +329,8 @@ const ui =
     display: flex;
     gap: 0.75rem;
     margin: 0;
-    padding: 0;
+    /* The first and last card start at the slot, not at the window edge. */
+    padding: 0 var(--lp-slit);
     list-style: none;
   }
   .pricing-packages__card {
@@ -330,6 +339,15 @@ const ui =
     scroll-snap-align: start;
   }
   @container pricing-list (min-width: 42rem) {
+    /* No row, no band. From here the packages are a grid that does not
+       scroll, and a slot in the page edge would be a slot into nothing. */
+    .pricing-packages__band {
+      margin-inline: 0;
+    }
+    .pricing-packages__band::before,
+    .pricing-packages__band::after {
+      content: none;
+    }
     .pricing-packages__scroller {
       overflow: visible;
       scroll-snap-type: none;
@@ -337,6 +355,7 @@ const ui =
     .pricing-packages__grid {
       display: grid;
       gap: 1rem;
+      padding: 0;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
     }
     .pricing-packages__card {
