@@ -26,7 +26,6 @@ import { getHomeContent } from "~/lib/homeContent";
 import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
 import { siteConfig } from "~/lib/seo";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
-import Emphasis from "~/components/ui/Emphasis.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
@@ -84,15 +83,23 @@ const credentialsUi =
   <div class="lp-container">
     <div class="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24 items-center">
       <div class="max-w-sm mx-auto md:mx-0 w-full">
-        <div class="relative">
-          {/* The portrait is framed by CONSTRUCTED geometry, not by a glow:
-              one strongly-rounded rectangle, offset behind the cut-out. It
-              runs down to the image's own bottom edge and fades there. Its
-              offsets live in `.portrait-shape` (global.css) because they
-              change with the width. */}
-          <span
-            aria-hidden="true"
-            class="portrait-shape tds-shape tds-shape--rect tds-shape--coral -z-10"></span>
+        {/* A CARD, like every other box on this site since 0.42 (2026-09-28).
+            It used to be a masked cut-out dissolving into a coral rectangle
+            that dissolved with it — the last piece of the old soft language,
+            sitting one screen below a row of hard-edged 6px cards.
+
+            The coral stays, as an offset plate behind the card rather than a
+            frame bleeding through the photo: geometry, not a glow. The card
+            itself takes the section's card fill and the shared hard shadow
+            (`.about-portrait` is in the `:where()` list in `global.css`), and
+            the photo now ends on its own edge instead of fading out. */}
+        {/* Two boxes, and they have to stay two. The CARD clips (its picture
+            and its caption round off against `overflow: hidden`); the PLATE
+            has to escape that clip to be seen at all. Putting both on one
+            element is what made the coral invisible the first time. */}
+        <div class="about-portrait">
+          <span aria-hidden="true" class="about-portrait__plate tds-shape tds-shape--coral"></span>
+          <div class="about-portrait__card">
           <img
             src={portraitSrc(720)}
             srcset={portraitSrcset()}
@@ -102,8 +109,16 @@ const credentialsUi =
             alt={siteConfig.founder.name}
             loading="lazy"
             decoding="async"
-            class="portrait-fade rounded-[2px] aspect-[3/4] object-cover object-top w-full"
+            class="about-portrait__img"
           />
+          {/* The caption the card earns by being a card: who this is. It was
+              only in the photo's `alt` before, i.e. invisible to everyone who
+              can see. */}
+          <p class="about-portrait__caption">
+            <span class="about-portrait__name">{siteConfig.founder.name}</span>
+            <span class="about-portrait__role">{siteConfig.founder.jobTitle}</span>
+          </p>
+          </div>
         </div>
       </div>
 
@@ -116,11 +131,16 @@ const credentialsUi =
           <AccentLetters text={about.headlineAccent} />
         </h2>
 
-        <p class="text-lg font-medium text-[var(--color-black)] mb-6 leading-relaxed">
-          <Emphasis text={about.lead} />
-        </p>
-        <p class="text-[var(--color-muted)] mb-4 leading-relaxed">{about.p1}</p>
-        <p class="text-[var(--color-muted)] leading-relaxed">{about.p2}</p>
+        {/* `lead` and `p1` are NOT rendered (2026-09-28, asked for). They
+            claimed "einen Ansprechpartner – nicht fünf Anbieter" and "ich
+            übernehme bestehende Seiten und Shops, statt alles neu zu bauen":
+            the first is a comparison with suppliers nobody named, the second
+            repeats the hero word for word one screen further down. Both stay
+            in the content shape so a stored `why_me` block keeps loading —
+            the same arrangement as `reasons`, and the reason this is a
+            render-side removal rather than an edit to the strings: a panel
+            block saved before today would otherwise put them back. */}
+        <p class="text-lg font-medium text-[var(--color-black)] leading-relaxed">{about.p2}</p>
 
         <div class="credentials-teaser">
           <p class="eyebrow credentials-teaser__label">{credentialsUi.label}</p>
@@ -164,6 +184,68 @@ const credentialsUi =
       color-mix(in srgb, var(--color-paper) 74%, transparent) 66%,
       color-mix(in srgb, var(--color-paper) 46%, transparent) 100%
     );
+  }
+
+  /* --- The portrait, as a card ------------------------------------------
+     Radius, fill and shadow are the site's card language (6px, sand on paper,
+     the hard 2D offset from `global.css`). Nothing here is decorative for its
+     own sake: the plate behind is the brand's coral, offset like the shadow
+     is, so the card reads as constructed rather than floating. */
+  /* The frame: positions the plate, clips nothing. */
+  .about-portrait {
+    position: relative;
+  }
+  .about-portrait__card {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--color-soft);
+  }
+  /* The coral plate, offset UP-LEFT — the opposite corner from the hard
+     shadow, which falls down-right. Two offsets in the same direction read as
+     a smudge; opposite corners read as a card held between two constructed
+     edges. Bottom and right stay inside the card, so the plate is only ever
+     visible as two bands. */
+  .about-portrait__plate {
+    position: absolute;
+    inset: -0.75rem 1.5rem 1.5rem -0.75rem;
+    border-radius: 6px;
+    --tds-decor-shape-alpha: 1;
+  }
+  .about-portrait__img {
+    display: block;
+    width: 100%;
+    /* The photo's own frame. It ends on its edge now — the mask that dissolved
+       the bottom and the right is gone with the shape it was hiding from. */
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: top center;
+    background: var(--color-paper);
+  }
+  .about-portrait__caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0.875rem 1.125rem 1rem;
+    /* The same seam every card on this site draws under a picture. */
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    text-align: left;
+  }
+  .about-portrait__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.0625rem;
+    line-height: 1.2;
+    color: var(--color-black);
+  }
+  .about-portrait__role {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--color-muted);
   }
 
   /* The certificates, as a caption under the prose rather than as a fourth

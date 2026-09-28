@@ -312,47 +312,10 @@ html {
   }
 }
 
-/* About portrait — the headshot is an isolated cut-out on a near-white
-   background. Cropped into the 3:4 frame the figure ends on a hard
-   rectangular line at the bottom (torso) and right (shoulder). Fade
-   those two edges to transparent so the portrait dissolves into the
-   paper instead of stopping on a hard cut. */
-.portrait-fade {
-  -webkit-mask-image:
-    linear-gradient(to bottom, #000 70%, transparent 100%),
-    linear-gradient(to right, #000 86%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(to bottom, #000 70%, transparent 100%),
-    linear-gradient(to right, #000 86%, transparent 100%);
-  mask-composite: intersect;
-}
-
-/* The coral rectangle behind the portrait. It used to stop 2.5rem above
-   the image's bottom edge — but the mask above turns the bottom 30% of
-   the portrait transparent, so what the visitor saw in that band was the
-   rectangle showing straight THROUGH the torso: a hard pink edge crossing
-   the figure, reading as an overlap rather than as a frame.
-
-   Moving the shape does not fix that (it is visible through the fade
-   wherever it sits), and hardening the portrait's edge was not wanted. So
-   the shape ends the way the portrait ends: the same kind of fade, pulled
-   in slightly so the geometry never outlives the figure it frames. Both
-   now dissolve on one baseline instead of one cutting across the other.
-
-   Bottom-only — the left/right/top overhang is the frame and stays. */
-.portrait-shape.tds-shape {
-  /* On a phone the portrait is as wide as the column, and the column's gutter
-     is 1.5rem: a 2rem offset put the rectangle 8px past a 320px screen. */
-  inset: -1rem -1rem 0 -1rem;
-  -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
-  mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
-}
-@media (min-width: 48rem) {
-  .portrait-shape.tds-shape {
-    inset: -1.25rem -2rem 0 -1.25rem;
-  }
-}
+/* (The About portrait's mask and its coral rectangle lived here. It is a
+   card now and owns its own styles — see `sections/About.astro`. The two
+   rules were a pair: the photo faded out at the bottom and the shape behind
+   it had to fade on the same baseline, or it showed through the torso.) */
 
 /* (The hero's styles lived here while the hero was a React island, which
    cannot carry an Astro `<style>`. It is `sections/Hero.astro` now and owns
@@ -673,6 +636,7 @@ html[data-motion="on"] :where([data-cta]) {
   .demo-card,
   .study-card,
   .credential-card,
+  .about-portrait__card,
   .post-card,
   .reference-card,
   .bc-tile,

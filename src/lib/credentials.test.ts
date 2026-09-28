@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { hasBannedWord } from "./copyRules";
 import {
+  credentialIssuers,
+  listSentence,
   CREDENTIAL_GROUPS,
   CREDENTIAL_GROUP_ORDER,
   CREDENTIALS_SLUG,
@@ -137,9 +139,32 @@ describe("the page", () => {
    * same standard every other number on this site is held to.
    */
   it("says what these are and what they are not", () => {
-    expect(page).toContain("LinkedIn Learning");
-    expect(page).toMatch(/keine Herstellerprüfungen und kein Hochschulabschluss/);
-    expect(page).toMatch(/not vendor exams and not an academic degree/);
+    // The PROVIDER is not asserted here any more: it is read from the catalog
+    // (`credentialIssuers()`), so a certificate from somewhere other than
+    // LinkedIn Learning changes the sentence rather than making it a lie. What
+    // is asserted is the limitation, which holds whoever issued the thing.
+    expect(page).toContain("credentialIssuers()");
+    expect(page).toMatch(/keine Herstellerprüfung und kein Hochschulabschluss/);
+    expect(page).toMatch(/not a vendor exam and not an academic degree/);
+  });
+
+  it("names the providers from the catalog, never in prose", () => {
+    const { platforms, partners } = credentialIssuers();
+    expect(platforms.length, "a platform per certificate").toBeGreaterThan(0);
+    expect(partners.length, "at least one partner").toBeGreaterThan(0);
+    // Every issuer the catalog holds has to survive the split, or the sentence
+    // silently drops one.
+    for (const entry of credentials) {
+      const [platform] = entry.issuer.split("·").map((part) => part.trim());
+      expect(platforms, entry.id).toContain(platform);
+    }
+  });
+
+  it("joins a list the way each language does", () => {
+    expect(listSentence(["a"], "de")).toBe("a");
+    expect(listSentence(["a", "b"], "de")).toBe("a und b");
+    expect(listSentence(["a", "b", "c"], "en")).toBe("a, b and c");
+    expect(listSentence([], "de")).toBe("");
   });
 
   it("is listed in the sitemap, in both languages", () => {
