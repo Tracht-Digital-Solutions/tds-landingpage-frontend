@@ -113,14 +113,25 @@ const ICONS: Record<PropertyTabId, string[]> = {
 
   .property-tab {
     --tab-peek: 3rem;
-    /* How far the hard shadow is offset at its widest (the hover value). The
-       shadow is a copy of the tab moved down-RIGHT, so a tab sitting flush on
-       the viewport edge had no shadow under its bottom-left corner: a notch
-       that opened exactly as the tab slid out. Pushing the tab that far past
-       the edge puts the shadow's own left edge at x=0 and closes it, in both
-       the resting and the hover offset. The nav's `overflow: clip` swallows
-       the part that now hangs outside. */
-    --tab-bleed: 5px;
+    /* How far the tab hangs past the left edge of the window. Two things
+       have to fit inside it, and the nav's `overflow: clip` swallows the lot:
+
+       1. THE SHADOW'S OFFSET at its widest (the hover value, 5px). The hard
+          shadow is a copy of the tab moved down-RIGHT, so a tab sitting flush
+          on the edge had no shadow under its bottom-left corner — a notch
+          that opened exactly as the tab slid out.
+       2. THE SPRING'S OVERSHOOT. Sliding out bounces (bounce 0.38 in
+          `lib/motion/propertyTabs.ts`), which by definition carries the tab
+          PAST its resting position — and past it means rightwards, off the
+          edge it is anchored to. Measured at 1440px: the left edge reached
+          +3.1px, i.e. a 3px gap at the window edge for the length of the
+          bounce.
+
+       12px covers both with room for a longer label in another language. It
+       cannot be derived from the spring at build time, so it is measured and
+       written down; `npm run audit:ux` would catch it growing into real
+       overflow. */
+    --tab-bleed: 12px;
     pointer-events: auto;
     display: inline-flex;
     align-items: center;
