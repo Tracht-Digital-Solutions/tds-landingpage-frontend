@@ -509,15 +509,19 @@ const profileSchema = {
     text-align: center;
     margin-top: 1rem;
   }
+  /* A CARD, not a disc (2026-09-28). The round portrait with a fill ring was
+     the last of the soft language on this page — everything else on the site
+     is a 6px box with an unblurred offset, and this page is the one a visitor
+     is shown as an example of the work. Same treatment as the portrait in
+     "Wieso ich?". */
   .card__portrait {
-    width: 7.5rem;
-    height: 7.5rem;
-    border-radius: var(--tds-radius-pill);
+    width: 8rem;
+    height: 10rem;
+    border-radius: 6px;
     object-fit: cover;
-    /* A plate rather than a drop shadow, which the design invariants rule
-       out: the ring is the card fill, so the portrait reads as mounted on
-       the page in both themes. */
-    box-shadow: 0 0 0 0.5rem var(--lp-surface-card);
+    object-position: top center;
+    background: var(--color-soft);
+    box-shadow: var(--tds-shadow-hard-sm);
   }
   .card__eyebrow {
     margin: 1.75rem 0 0.75rem;
@@ -567,17 +571,34 @@ const profileSchema = {
     margin-top: 2rem;
     padding: 1rem 1.5rem;
     border-radius: var(--tds-radius-pill);
-    background: var(--color-black);
-    color: var(--color-paper);
+    /* Navy, the site's primary — black was this page's own colour and nothing
+       else's. The hard offset and the press into it are the shared control
+       behaviour; `translate`, never `transform`, so nothing fights Motion. */
+    background: var(--color-surface-navy);
+    color: #fff;
     text-align: left;
     text-decoration: none;
+    box-shadow: var(--tds-shadow-hard-sm);
     transition:
-      transform 200ms var(--tds-ease-out),
-      opacity 200ms var(--tds-ease-out);
+      translate 200ms var(--tds-ease-out),
+      background-color 200ms var(--tds-ease-out);
   }
   .card__save:hover {
-    transform: translateY(-2px);
-    opacity: 0.92;
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-sm-hover);
+    background: var(--color-surface-accent);
+  }
+  .card__save:active {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card__save,
+    .card__save:hover,
+    .card__save:active {
+      translate: none;
+      transition: background-color 200ms var(--tds-ease-out);
+    }
   }
   .card__save-icon {
     flex: none;
@@ -618,13 +639,30 @@ const profileSchema = {
     background: var(--lp-surface-card);
     color: var(--color-black);
     text-decoration: none;
+    box-shadow: var(--tds-shadow-hard-sm);
     transition:
       background-color 200ms var(--tds-ease-out),
-      transform 200ms var(--tds-ease-out);
+      translate 160ms var(--tds-ease-out);
   }
-  .card__row:hover {
+  /* Up-LEFT into a growing offset, the site's one hover for a box that leads
+     somewhere. It used to rise straight up with no shadow to rise out of. */
+  .card__row:hover,
+  .card__row:focus-visible {
     background: color-mix(in srgb, var(--color-accent) 8%, var(--lp-surface-card));
-    transform: translateY(-2px);
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-sm-hover);
+  }
+  .card__row:active {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card__row,
+    .card__row:hover,
+    .card__row:focus-visible,
+    .card__row:active {
+      translate: none;
+    }
   }
   .card__row-icon {
     flex: none;
@@ -666,6 +704,7 @@ const profileSchema = {
     padding: 1.25rem;
     border-radius: 6px;
     background: var(--color-soft);
+    box-shadow: var(--tds-shadow-hard);
   }
   .card__qr-code {
     display: block;
