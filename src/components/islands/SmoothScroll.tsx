@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
-import { planJump } from "~/lib/scrollJump";
+import { JUMP_MAX_MS, jumpDuration, planJump } from "~/lib/scrollJump";
 import { createScrollLock } from "~/lib/scrollLock";
 
 type ScrollTarget = number | HTMLElement | string;
@@ -18,7 +18,11 @@ declare global {
 }
 
 /** How long a click-jump takes, both paths. */
-const JUMP_DURATION_MS = 1200;
+/**
+ * The longest a jump may take. The actual duration follows the distance
+ * (`jumpDuration`) — a flat 1200 ms made a short jump crawl.
+ */
+const JUMP_DURATION_MS = JUMP_MAX_MS;
 
 /**
  * Clearance for the fixed floating header, read back off `<html>`'s
@@ -181,9 +185,10 @@ export default function SmoothScroll() {
         }
 
         inputLock.engage();
+        const durationMs = jumpDuration(distance);
         const start = performance.now();
         const step = (now: number) => {
-          const t = Math.min(1, (now - start) / JUMP_DURATION_MS);
+          const t = Math.min(1, (now - start) / durationMs);
           jumpTo(startY + distance * easing(t));
           if (t < 1) {
             rafId = requestAnimationFrame(step);
@@ -244,7 +249,7 @@ export default function SmoothScroll() {
       // applying `scroll-padding-top` a second time — it only does that for
       // element targets, which would double the clearance.
       lenis.scrollTo(destY, {
-        duration: JUMP_DURATION_MS / 1000,
+        duration: jumpDuration(distance) / 1000,
         easing,
         immediate,
         lock: animated,

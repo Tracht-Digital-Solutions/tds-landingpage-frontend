@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MAX_OVERSHOOT,
-  easeOutBack,
-  fitOvershoot,
-  peakOvershoot,
-  planJump,
-} from "./scrollJump";
+import { JUMP_MAX_MS, JUMP_MIN_MS, MAX_OVERSHOOT, easeOutBack, fitOvershoot, jumpDuration, peakOvershoot, planJump } from "./scrollJump";
 
 /** Highest value the easing reaches, sampled finely. */
 function sampledPeak(ease: (t: number) => number): number {
@@ -137,5 +131,48 @@ describe("planJump", () => {
     expect(plan.destY).toBe(0);
     expect(plan.distance).toBe(0);
     expect(plan.overshoot).toBe(0);
+  });
+});
+
+/**
+ * The duration follows the distance (2026-09-28).
+ *
+ * A flat 1200 ms for every jump is what made a short one feel slow: the same
+ * twelve hundred milliseconds spent crossing two hundred pixels reads as the
+ * page creeping. What a test can see is the shape — monotonic, floored,
+ * capped — not the feel.
+ */
+describe("jumpDuration", () => {
+  it("never drops below the floor or climbs past the ceiling", () => {
+    // The floor is the limit as the distance goes to zero, not the value at
+    // one pixel — the curve starts there and rises.
+    expect(jumpDuration(1)).toBeGreaterThanOrEqual(JUMP_MIN_MS);
+    expect(jumpDuration(1)).toBeLessThan(JUMP_MIN_MS + 30);
+    expect(jumpDuration(50_000)).toBe(JUMP_MAX_MS);
+    expect(jumpDuration(-50_000)).toBe(JUMP_MAX_MS);
+  });
+
+  it("grows with the distance, and never shrinks", () => {
+    const spans = [100, 400, 900, 1600, 3000, 4800, 9000];
+    const times = spans.map(jumpDuration);
+    for (let i = 1; i < times.length; i += 1) {
+      expect(times[i]!, `${spans[i]}px`).toBeGreaterThanOrEqual(times[i - 1]!);
+    }
+  });
+
+  it("is symmetric: scrolling up takes as long as scrolling down", () => {
+    expect(jumpDuration(-1800)).toBe(jumpDuration(1800));
+  });
+
+  it("does not animate a jump of nothing", () => {
+    expect(jumpDuration(0)).toBe(0);
+  });
+
+  /**
+   * The point of the change, as a number: a short jump is now quicker than a
+   * long one by a wide margin, where the two used to be identical.
+   */
+  it("moves a short jump distinctly faster than a long one", () => {
+    expect(jumpDuration(300)).toBeLessThan(jumpDuration(4000) * 0.6);
   });
 });

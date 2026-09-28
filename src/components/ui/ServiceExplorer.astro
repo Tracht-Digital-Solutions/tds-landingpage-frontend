@@ -41,8 +41,16 @@ const ui =
     : { problem: "Typical starting point", result: "Outcome", scope: "Scope", more: "Details & process" };
 /** Every service photo is committed at 1586 × 992 (IMAGES.md). */
 const PHOTO = { width: 1586, height: 992 };
-// The panels span every title row plus one filler row that takes the slack.
-const panelRows = `1 / ${services.length + 2}`;
+/**
+ * The panel spans EXACTLY the title rows — first to last, nothing after.
+ *
+ * It used to span one filler row on top of them, and that filler is what let
+ * it grow past the list: the panel is the tallest thing in the grid, the
+ * filler row took the slack, and the card ended some 300px below the last
+ * service (measured at 1440: card 715, titles 417). Bounded by the titles, the
+ * photo takes whatever height is left instead of setting it.
+ */
+const panelRows = "1 / -1";
 ---
 
 <div class="svc-explorer" data-service-explorer data-reveal>
@@ -343,9 +351,12 @@ const panelRows = `1 / ${services.length + 2}`;
     /* Only once the script runs: without it every panel is open, and four
        panels in one grid cell would lie on top of each other. */
     .svc-explorer[data-enhanced] {
+      /* The containing block for the panel, which is taken out of flow below. */
+      position: relative;
       display: grid;
       grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
-      grid-template-rows: repeat(4, auto) 1fr;
+      /* No filler row any more — see `panelRows` above. */
+      grid-template-rows: repeat(4, auto);
       column-gap: 2rem;
       row-gap: 0.75rem;
       align-items: start;
@@ -353,12 +364,47 @@ const panelRows = `1 / ${services.length + 2}`;
     .svc-explorer[data-enhanced] .svc-explorer__head {
       grid-column: 1;
     }
+    /* THE LIST SETS THE HEIGHT, the card matches it (2026-09-28, asked for).
+       That needs the panel out of the track sizing altogether, not merely
+       stretched: a spanning grid ITEM contributes its height to the rows it
+       spans, so simply bounding it to the four title rows pushed the titles
+       apart instead — 417px of list became 678px of list, which is the same
+       mismatch upside down.
+
+       An absolutely positioned grid child is placed in the area named by
+       `grid-row`/`grid-column` and takes that area as its containing block,
+       while contributing NOTHING to how the tracks are sized. So the rows are
+       measured from the titles alone and `inset: 0` fills whatever that came
+       to. */
     .svc-explorer[data-enhanced] .svc-explorer__panel {
+      position: absolute;
+      inset: 0;
       grid-column: 2;
       grid-row: var(--panel-rows);
+      display: flex;
+      flex-direction: column;
+      /* Without it a flex container refuses to go below its content's
+         min-content height and the photo's floor would push it out again. */
+      min-height: 0;
+      /* A panel whose text is taller than the list may not spill over it. */
+      overflow: hidden;
     }
+    /* The PHOTO absorbs the difference. It is the one part of the panel with
+       no information in its height: the text underneath says the same thing at
+       any size, a band of a photograph does not. `cover` keeps the framing. */
     .svc-explorer__shot {
-      aspect-ratio: 16 / 9;
+      flex: 1 1 auto;
+      min-height: 6rem;
+      aspect-ratio: auto;
+    }
+    /* A band this shallow crops to a strip, and a centred strip of a
+       photograph is usually its emptiest part — the middle distance. Lifting
+       the crop slightly keeps the subject in it. */
+    .svc-explorer__shot img {
+      object-position: 50% 38%;
+    }
+    .svc-explorer__body {
+      flex: none;
     }
     .svc-explorer__body {
       padding: 2rem;
