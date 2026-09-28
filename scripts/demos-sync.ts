@@ -40,6 +40,8 @@ import { JSDOM } from "jsdom";
 import sharp from "sharp";
 import { chromium } from "playwright-core";
 import { capturePreview } from "./capture-preview.ts";
+// No-import module, shared with `lib/cms.ts` so both refuse the same words.
+import { hasBannedWord } from "../src/lib/copyRules";
 import {
   DEMO_ASSET_DIR,
   DEMO_PREVIEW,
@@ -303,10 +305,29 @@ async function harvest(demo: DemoDefinition): Promise<Harvest> {
 
   // No description is a legitimate outcome. The card shows the title and the
   // screenshot; inventing a sentence about someone's site is not on the table.
-  const description = firstMeta(doc, [
+  const harvested = firstMeta(doc, [
     'meta[name="description"]',
     'meta[property="og:description"]',
   ]);
+
+  /**
+   * A harvested sentence is still a sentence this site publishes.
+   *
+   * The banned words ("echt", "wirklich" — `lib/copyRules.ts`) are a rule about
+   * what tracht-digital.de SAYS, and a demo's meta description is rendered on
+   * a card here, in this site's voice as far as a visitor is concerned. So it
+   * is refused the same way `lib/cms.ts` refuses a panel override that carries
+   * one: the value is dropped, the card renders without a description, and
+   * nothing about it is rewritten — the fix belongs on the demo.
+   *
+   * It fired the first time on 2026-09-28, when demo1's own description
+   * changed to "keine echten Kontaktdaten" and `bannedWords.test.ts` failed on
+   * the snapshot rather than on any copy anybody had written here.
+   */
+  const description = harvested && hasBannedWord(harvested) ? null : harvested;
+  if (harvested && description === null) {
+    console.warn(`  ${demo.id}  description dropped — banned word: ${JSON.stringify(harvested)}`);
+  }
 
   const declaredLang = (doc.documentElement.getAttribute("lang") ?? "").trim().toLowerCase();
   const siteLang = /^[a-z]{2}(-[a-z0-9]+)*$/.test(declaredLang) ? declaredLang : null;

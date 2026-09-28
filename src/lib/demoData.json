@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-09T18:29:18.209Z",
+  "generatedAt": "2026-09-28T15:20:58.694Z",
   "demos": {
     "demo1": {
       "status": "ok",
       "title": "Demo & Partner Rechtsanwälte",
-      "description": "Hochwertige Demonstrationsseite einer fiktiven deutschen Wirtschaftskanzlei. Keine Rechtsberatung, keine gültigen Kontaktdaten.",
+      "description": null,
       "siteLang": "de",
       "favicon": "/demos/demo1-favicon.svg",
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T18:29:06.891Z"
+      "checkedAt": "2026-09-28T15:20:47.261Z"
     },
     "demo2": {
       "status": "ok",
@@ -21,7 +21,7 @@
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T18:29:07.128Z"
+      "checkedAt": "2026-09-28T15:20:47.476Z"
     },
     "demo3": {
       "status": "ok",
@@ -32,7 +32,7 @@
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T18:29:07.434Z"
+      "checkedAt": "2026-09-28T15:20:47.708Z"
     },
     "demo4": {
       "status": "tls-invalid",
@@ -43,7 +43,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-09T18:29:07.522Z"
+      "checkedAt": "2026-09-28T15:20:47.773Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-09T18:29:07.637Z"
+      "checkedAt": "2026-09-28T15:20:47.837Z"
     },
     "shop": {
       "status": "ok",
@@ -65,7 +65,7 @@
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-09T18:29:07.904Z"
+      "checkedAt": "2026-09-28T15:20:48.023Z"
     }
   }
 }
