@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
 import { runtimeSetting } from "@tracht-digital-solutions/tds-shared/api";
 import { Collapse, Presence } from "@tracht-digital-solutions/tds-shared/motion/react";
-import { CONTACT_DRAFT_EVENT, CONTACT_DRAFT_KEY } from "~/lib/contactDraft";
+import { CONTACT_DRAFT_EVENT, CONTACT_DRAFT_KEY, parseContactDraft } from "~/lib/contactDraft";
 import { contactFormCopy } from "~/lib/contactCopy";
 
 /**
@@ -67,11 +67,19 @@ type FieldName = "name" | "email" | "message" | "consent";
 export default function ContactForm({
   lang = "de",
   reasons = [],
+  assistantReasons = {},
   nextSteps,
 }: {
   lang?: Lang;
   /** Options for the reason dropdown, already resolved against the CMS. */
   reasons?: readonly string[];
+  /**
+   * Service id → the reason that service preselects, from
+   * `sections/Contact.astro`. A prop rather than a lookup here: the options
+   * are written there and are CMS-editable, so the mapping has to live beside
+   * them or the two drift apart silently.
+   */
+  assistantReasons?: Readonly<Record<string, string>>;
   /** What happens after sending — rendered in place of the form. */
   nextSteps?: { title: string; items: readonly { label: string; text: string }[] };
 }) {
@@ -98,11 +106,29 @@ export default function ContactForm({
   // visitor still reads, edits and sends. What they typed themselves is never
   // replaced; the draft goes underneath it.
   useEffect(() => {
-    const apply = (draft: unknown) => {
-      if (typeof draft !== "string" || draft.trim() === "") return;
+    const apply = (value: unknown) => {
+      const draft = parseContactDraft(value);
+      if (!draft) return;
+
+      /**
+       * The reason the assistant's recommendation maps to — and only while the
+       * visitor has not chosen one themselves. It is checked against the
+       * options actually rendered: a value the select has no `<option>` for
+       * would set the field to nothing at all, and a panel edit to the list is
+       * exactly how that happens.
+       */
+      const mapped = draft.service ? assistantReasons[draft.service] : undefined;
+      if (mapped && reasons.includes(mapped) && !String(getValues("subject") ?? "").trim()) {
+        setValue("subject", mapped, { shouldDirty: true });
+      }
+
       const current = String(getValues("message") ?? "");
-      if (current.includes(draft.trim())) return;
-      setValue("message", current.trim() ? `${current.trimEnd()}\n\n${draft}` : draft, { shouldDirty: true });
+      if (current.includes(draft.message.trim())) return;
+      setValue(
+        "message",
+        current.trim() ? `${current.trimEnd()}\n\n${draft.message}` : draft.message,
+        { shouldDirty: true },
+      );
     };
     try {
       const stored = window.sessionStorage.getItem(CONTACT_DRAFT_KEY);
@@ -123,7 +149,7 @@ export default function ContactForm({
     };
     window.addEventListener(CONTACT_DRAFT_EVENT, onDraft);
     return () => window.removeEventListener(CONTACT_DRAFT_EVENT, onDraft);
-  }, [getValues, setValue]);
+  }, [getValues, setValue, reasons, assistantReasons]);
 
   useEffect(
     () => () => {

@@ -127,17 +127,31 @@ describe("buildDraft", () => {
       situations: [{ key: "process:0", serviceId: "process", text: "Dieselben Daten werden mehrfach eingetippt." }],
       stage: "rough",
     });
-    const draft = buildDraft(recommend(given, "de"), given, services, "de");
-    expect(draft).toContain(FINDER_COPY.de.draft.intro);
-    expect(draft).toContain("Titel process");
-    expect(draft).toContain("Dieselben Daten werden mehrfach eingetippt.");
-    expect(draft).toContain(FINDER_COPY.de.stages.rough.label);
+    const { message } = buildDraft(recommend(given, "de"), given, services, "de");
+    expect(message).toContain(FINDER_COPY.de.draft.intro);
+    expect(message).toContain("Titel process");
+    expect(message).toContain("Dieselben Daten werden mehrfach eingetippt.");
+    expect(message).toContain(FINDER_COPY.de.stages.rough.label);
+  });
+
+  /**
+   * What preselects "Worum geht es?" on the contact form is the STRONGEST
+   * match's id — not its title. The options over there are written in
+   * `sections/Contact.astro`, are CMS-editable, and share no wording with the
+   * service names, so a label sent from here could only ever fail to match.
+   */
+  it("carries the strongest match's id, not a label", () => {
+    const given = answers({ topics: ["process"] });
+    const matches = recommend(given, "de");
+    const { service } = buildDraft(matches, given, services, "de");
+    expect(service).toBe("process");
+    expect(service).toBe(matches[0]!.serviceId);
   });
 
   it("is long enough for the contact form on its own", () => {
     // ContactSchema (tds-shared) wants a message of at least 20 characters.
-    const draft = buildDraft(recommend(answers({ topics: ["unsure"] }), "en"), answers({ topics: ["unsure"] }), services, "en");
-    expect(draft.trim().length).toBeGreaterThanOrEqual(20);
+    const { message } = buildDraft(recommend(answers({ topics: ["unsure"] }), "en"), answers({ topics: ["unsure"] }), services, "en");
+    expect(message.trim().length).toBeGreaterThanOrEqual(20);
   });
 });
 

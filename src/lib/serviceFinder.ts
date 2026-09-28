@@ -314,13 +314,20 @@ export function recommend(answers: FinderAnswers, lang: Lang): FinderMatch[] {
   return matches.length > 0 ? matches : [{ serviceId: "consulting", score: 0, reasons: [] }];
 }
 
-/** The text handed to the contact form — the visitor's choices, nothing invented. */
+/**
+ * What is handed to the contact form — the visitor's choices, nothing invented.
+ *
+ * `service` is the strongest match's ID, carried over so the contact form can
+ * preselect its "Worum geht es?" dropdown. Deliberately the id and not a
+ * label: the options there are written and edited elsewhere and share no
+ * wording with the service names, so the file that owns them owns the mapping.
+ */
 export function buildDraft(
   matches: readonly FinderMatch[],
   answers: FinderAnswers,
   services: readonly FinderService[],
   lang: Lang,
-): string {
+): { message: string; service?: ServiceId } {
   const { draft, stages } = FINDER_COPY[lang];
   const title = (id: ServiceId) => services.find((service) => service.id === id)?.title ?? id;
   const lines = [draft.intro, `${draft.services}: ${matches.map((match) => title(match.serviceId)).join(", ")}`];
@@ -328,5 +335,9 @@ export function buildDraft(
     lines.push(`${draft.situations}: ${answers.situations.map((choice) => choice.text).join(" ")}`);
   }
   if (answers.stage) lines.push(`${draft.stage}: ${stages[answers.stage].label}`);
-  return `${lines.join("\n")}\n\n`;
+  const best = matches[0];
+  return {
+    message: `${lines.join("\n")}\n\n`,
+    service: best?.serviceId,
+  };
 }
