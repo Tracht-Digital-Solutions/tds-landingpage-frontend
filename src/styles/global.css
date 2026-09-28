@@ -671,6 +671,8 @@ html[data-motion="on"] :where([data-cta]) {
 :where(
   [class*="rounded-[6px]"],
   .demo-card,
+  .study-card,
+  .credential-card,
   .post-card,
   .reference-card,
   .bc-tile,
@@ -748,11 +750,27 @@ html[data-motion="on"] :where([data-cta]) {
   translate: -2px -2px;
   box-shadow: var(--tds-shadow-hard-sm-hover);
 }
-:where(a.post-card, .demo-card, .reference-card, .bc-tile, a.faq-cta):where(:hover, :focus-within) {
+:where(
+  a.post-card,
+  .demo-card,
+  .study-card,
+  .credential-card,
+  .reference-card,
+  .bc-tile,
+  a.faq-cta
+):where(:hover, :focus-within) {
   translate: -2px -2px;
   box-shadow: var(--tds-shadow-hard-hover);
 }
-:where(a.post-card, .demo-card, .reference-card, .bc-tile, a.faq-cta) {
+:where(
+  a.post-card,
+  .demo-card,
+  .study-card,
+  .credential-card,
+  .reference-card,
+  .bc-tile,
+  a.faq-cta
+) {
   transition-property: background-color, color, translate;
   transition-duration: 160ms;
 }
@@ -770,6 +788,8 @@ html[data-motion="on"] :where([data-cta]) {
     .submit-button,
     a.post-card,
     .demo-card,
+    .study-card,
+    .credential-card,
     .reference-card,
     .bc-tile,
     a.faq-cta

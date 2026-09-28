@@ -16,6 +16,7 @@
  */
 
 import { BUSINESS_CARD_SLUG } from "./businessCard";
+import { CREDENTIALS_SLUG } from "./credentials";
 import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
@@ -67,6 +68,14 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     en: BUSINESS_CARD_SLUG.en,
     changefreq: "monthly",
     priority: 0.5,
+  },
+  // The certificates. Above the business card and below a service page: it is
+  // evidence for what the service pages claim, not a thing for sale.
+  {
+    de: CREDENTIALS_SLUG.de,
+    en: CREDENTIALS_SLUG.en,
+    changefreq: "monthly",
+    priority: 0.6,
   },
   ...serviceDefinitions.map((service) => ({
     de: serviceHref(service, "de"),

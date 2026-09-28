@@ -1,6 +1,6 @@
 {
   "name": "tds-landingpage-frontend",
-  "version": "0.43.0",
+  "version": "0.44.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +16,8 @@
     "test:run": "vitest run",
     "references:sync": "tsx scripts/references-sync.ts",
     "businesscard:sync": "tsx scripts/business-card-sync.ts",
+    "certificates:render": "tsx scripts/certificates-render.ts",
+    "studies:import": "tsx scripts/design-studies.ts",
     "images:variants": "tsx scripts/image-variants.ts",
     "audit:ux": "node scripts/ux-audit.mjs",
     "audit:seo": "node scripts/seo-audit.mjs",
@@ -74,6 +76,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "jsdom": "^30.0.1",
+    "pdfjs-dist": "^6.3.289",
     "playwright-core": "^1.62.1",
     "qrcode": "1.5.4",
     "satori": "^0.33.4",

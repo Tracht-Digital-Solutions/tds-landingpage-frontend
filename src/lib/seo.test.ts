@@ -62,6 +62,8 @@ const MIN_USEFUL = 80;
 const DESCRIPTION_SOURCES: Record<string, string> = {
   "src/pages/visitenkarte.astro": "src/components/BusinessCardPage.astro",
   "src/pages/en/business-card.astro": "src/components/BusinessCardPage.astro",
+  "src/pages/qualifikationen.astro": "src/components/CredentialsPage.astro",
+  "src/pages/en/qualifications.astro": "src/components/CredentialsPage.astro",
 };
 
 function renderedDescriptions(rel: string): string[] {
@@ -84,6 +86,8 @@ const INDEXABLE_PAGES = [
   // URL is a 301 now. A redirect has no description to budget.
   "src/pages/visitenkarte.astro",
   "src/pages/en/business-card.astro",
+  "src/pages/qualifikationen.astro",
+  "src/pages/en/qualifications.astro",
   "src/pages/legal/impressum.astro",
   "src/pages/legal/datenschutz.astro",
 ] as const;

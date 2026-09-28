@@ -24,6 +24,16 @@
  * on the service it belongs to, and a link back to the page you are standing
  * on is a dead end.
  *
+ * ### When the right one is a button
+ *
+ * A design study and a certificate are PICTURES. There is no page to send
+ * anybody to, and the card's one destination is the enlarged capture — so
+ * those cards pass `cta.preview` instead of `cta.href` and this renders a
+ * `<button data-preview-open>` in the same slot, with the same class. It ships
+ * `hidden` and `ui/PreviewLightbox.astro` reveals it once its dialog is wired,
+ * so a page without JavaScript shows a card with no control rather than one
+ * that does nothing.
+ *
  * ### The layering, which is the whole trick
  *
  * The CTA carries a stretched `::after` over the entire card, so the card keeps
@@ -78,7 +88,38 @@ const ui = cardActionUi[lang];
   }
 
   {
-    cta && (
+    cta?.preview && (
+      /* A card whose only destination is a picture. `PreviewLightbox.astro`
+         reveals this button once its dialog is wired — same fallback as the
+         magnifier on a demo card, so a page without JavaScript shows a card
+         with no dead control rather than a button that does nothing.
+
+         Same class as the anchor above, deliberately: the stretched `::after`
+         that makes the whole card clickable and the focus ring drawn around
+         the card are written for `.card-actions__cta`, and a second class
+         would need both of them copied. */
+      <button
+        type="button"
+        class="card-actions__cta"
+        hidden
+        data-preview-open
+        data-preview-src={cta.preview.src}
+        data-preview-alt={cta.preview.alt}
+        data-preview-title={cta.preview.title}
+        data-preview-host={cta.preview.caption}
+        data-preview-fit={cta.preview.fit}
+        data-preview-ratio={cta.preview.ratio}
+        data-preview-views={cta.preview.views ? JSON.stringify(cta.preview.views) : undefined}
+      >
+        {cta.label}
+        {cta.detail && <span class="sr-only"> — {cta.detail}</span>}
+        <span aria-hidden="true">→</span>
+      </button>
+    )
+  }
+
+  {
+    cta && !cta.preview && (
       <a
         class="card-actions__cta"
         href={cta.href}
@@ -169,6 +210,14 @@ const ui = cardActionUi[lang];
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
+    /* The button variant. A `<button>` brings the UA's own font, background,
+       border and padding with it; the anchor beside it brings none of those,
+       and the two sit on the same line of the same shelf. */
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    cursor: pointer;
     /* Never wraps mid-label: the service link beside it is the one that gives
        way on a narrow card. */
     flex: none;
@@ -184,6 +233,14 @@ const ui = cardActionUi[lang];
     position: absolute;
     inset: 0;
     z-index: 0;
+  }
+  /* MUST stay, and must stay after the rule above: `display: inline-flex`
+     out-specifies the user agent's `[hidden] { display: none }`, so the
+     attribute `PreviewLightbox.astro` removes would do nothing without this
+     and the button would sit there before its dialog exists. Same trap as the
+     magnifier on a demo card. */
+  .card-actions__cta[hidden] {
+    display: none;
   }
   /* The ring is drawn around the card instead (see the global block below); a
      second one here would put two rings on one control. */
@@ -233,19 +290,19 @@ const ui = cardActionUi[lang];
    * The card roots are named explicitly rather than matched by shape: a
    * wildcard would draw a ring around whatever box happened to contain a bar.
    */
-  :where(.demo-card, .reference-card, .bc-tile):has(.card-actions__cta:focus-visible) {
+  :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):has(.card-actions__cta:focus-visible) {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
-  :where(.demo-card, .reference-card, .bc-tile):hover .card-actions__cta svg,
-  :where(.demo-card, .reference-card, .bc-tile):focus-within .card-actions__cta svg {
+  :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):hover .card-actions__cta svg,
+  :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):focus-within .card-actions__cta svg {
     transform: translate(2px, -2px);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :where(.demo-card, .reference-card, .bc-tile):hover .card-actions__cta svg,
-    :where(.demo-card, .reference-card, .bc-tile):focus-within .card-actions__cta svg {
+    :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):hover .card-actions__cta svg,
+    :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):focus-within .card-actions__cta svg {
       transform: none;
     }
   }

@@ -14,14 +14,24 @@
  * `DEMO_ORIGINS`), and the framing says "keine Kundenaufträge" in words.
  *
  * `WebsiteDemos.astro` still renders the same demo cards as a grid on the
- * Webauftritt detail page, where the demos ARE the argument.
+ * Webauftritt detail page, where the demos ARE the argument. The design
+ * studies do NOT appear there: that page's grid is the demo catalog.
+ *
+ * ### Three kinds of card, one shelf
+ *
+ * A demo is a running site. A design study (`lib/designStudies.ts`) is a
+ * picture of a page that was never built. The business card is a page of this
+ * deployment. All three are our own work and none of them is a client's, which
+ * is why they share a row — and each says which it is in its own badge
+ * (`DEMO_ORIGINS`) before a visitor reads anything else.
  *
  * ### The gate
  *
  * The business-card tile always renders — it is a page of this very deployment
  * — so the shelf is never empty. The demo cards are strict about availability
- * (`lib/demos.ts`), and the framing picks its singular or plural copy from the
- * number of demos that survived (`demosCopy`).
+ * (`lib/demos.ts`); a study has nothing to probe and always renders. The
+ * framing picks its singular or plural copy from the two counts together
+ * (`demosCopy`).
  *
  * ### Ground
  *
@@ -32,10 +42,12 @@ import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { demosCopy, getHomeContent } from "~/lib/homeContent";
 import { getDemos } from "~/lib/demos";
+import { designStudies } from "~/lib/designStudies";
 import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import Emphasis from "~/components/ui/Emphasis.astro";
 import DemoCard from "~/components/ui/DemoCard.astro";
+import StudyCard from "~/components/ui/StudyCard.astro";
 import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
 import PreviewLightbox from "~/components/ui/PreviewLightbox.astro";
 
@@ -43,7 +55,16 @@ const lang = resolveLang(Astro.currentLocale);
 const content = await cmsFor("website_demos", lang, getHomeContent(lang).websiteDemos);
 
 const demos = await getDemos();
-const copy = demosCopy(content, demos.length, "home");
+/**
+ * The count that picks the singular framing is the whole shelf's, not the
+ * demos' alone.
+ *
+ * It used to be `demos.length`, from when a demo was the only kind of card
+ * here. With the design studies committed the shelf cannot be down to one
+ * example even if every demo host goes dark, and saying "eine Beispielseite"
+ * over a row of eight would be plainly wrong.
+ */
+const copy = demosCopy(content, demos.length + designStudies.length, "home");
 
 /**
  * The service every demo and the business-card tile is evidence for.
@@ -62,18 +83,26 @@ const webPresenceLink = {
 
 type Slide =
   | { kind: "demo"; key: string; demo: (typeof demos)[number] }
+  | { kind: "study"; key: string; study: (typeof designStudies)[number] }
   | { kind: "business-card"; key: string };
 
 /**
- * The shelf as one list: the demos in catalog order, then the business card.
+ * The shelf as one list: the demos in catalog order, then the design studies,
+ * then the business card.
+ *
+ * Running sites first, deliberately. A demo can be opened and used; a study
+ * can only be looked at, and the strongest evidence belongs at the start of
+ * the row. Every card carries its own origin badge, so the boundary between
+ * the two does not have to be a visitor's problem.
  *
  * Every card is ONE track wide (2026-09-22). The first demo used to be a lead
  * card two tracks wide from `lg`; Julian asked for equal widths, so the shelf
- * reads as a row of peers. Both card families answer the width through their
- * own container query.
+ * reads as a row of peers. All three card families answer the width through
+ * their own container query.
  */
 const slides: Slide[] = [
   ...demos.map((demo): Slide => ({ kind: "demo", key: `demo:${demo.definition.id}`, demo })),
+  ...designStudies.map((study): Slide => ({ kind: "study", key: `study:${study.id}`, study })),
   { kind: "business-card", key: "business-card" },
 ];
 
@@ -83,12 +112,12 @@ const slides: Slide[] = [
 const ui =
   lang === "de"
     ? {
-        carousel: "Beispielseiten und eigene Projekte",
+        carousel: "Beispielseiten, Designstudien und eigene Projekte",
         prev: "Vorherige Karten",
         next: "Weitere Karten",
       }
     : {
-        carousel: "Example sites and own projects",
+        carousel: "Example sites, design studies and own projects",
         prev: "Previous cards",
         next: "More cards",
       };
@@ -131,6 +160,9 @@ const ui =
           >
             {slide.kind === "demo" && (
               <DemoCard demo={slide.demo} lang={lang} serviceLink={webPresenceLink} />
+            )}
+            {slide.kind === "study" && (
+              <StudyCard study={slide.study} lang={lang} serviceLink={webPresenceLink} />
             )}
             {slide.kind === "business-card" && <BusinessCardTile serviceLink={webPresenceLink} />}
           </div>

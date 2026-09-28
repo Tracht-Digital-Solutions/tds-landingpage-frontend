@@ -12,10 +12,13 @@
  *
  * Nothing here touches the network.
  */
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { writePreviewVariants } from "./capture-preview";
+import { CREDENTIAL_ASSET_DIR } from "../src/lib/credentialMeta";
+import { STUDY_ASSET_DIR } from "../src/lib/designStudyMeta";
 import {
   LOGO,
   PORTRAIT_WIDTHS,
@@ -94,6 +97,23 @@ async function main(): Promise<void> {
     for (const written of await writePreviewVariants(fromPublic(src))) {
       // eslint-disable-next-line no-console
       console.log(`  ${path.relative(root, written)}`);
+    }
+  }
+
+  // The certificates and the design studies. Both folders are written by a
+  // script of their own (`certificates:render`, `studies:import`) that already
+  // writes the copies — this covers the case where only the original was
+  // replaced by hand, exactly like the service photos above. Anything with a
+  // width suffix is a copy and is skipped.
+  for (const dir of [CREDENTIAL_ASSET_DIR, STUDY_ASSET_DIR]) {
+    const folder = path.join(publicDir, dir);
+    if (!existsSync(folder)) continue;
+    for (const file of await fs.readdir(folder)) {
+      if (!file.endsWith(".webp") || /-\d+\.webp$/.test(file)) continue;
+      for (const written of await writePreviewVariants(path.join(folder, file))) {
+        // eslint-disable-next-line no-console
+        console.log(`  ${path.relative(root, written)}`);
+      }
     }
   }
 }

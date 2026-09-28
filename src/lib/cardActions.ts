@@ -9,8 +9,33 @@
  */
 import type { Lang } from "./i18n";
 
+/**
+ * What the enlarging button hands `ui/PreviewLightbox.astro` when it is
+ * pressed. Every field lands on the button as a `data-preview-*` attribute.
+ *
+ * Present on a `CardAction` INSTEAD of `href`: a design study and a
+ * certificate have no page to send anybody to — the picture is the whole of
+ * them — so their call to action opens the dialog rather than navigating.
+ */
+export interface CardPreview {
+  src: string;
+  alt: string;
+  title: string;
+  /** The caption line under the title: a host, a sector, an issuer. */
+  caption: string;
+  /** `tall` lets the dialog scroll a full-page capture instead of squashing it. */
+  fit?: "cover" | "tall";
+  /** `width / height` of the picture, so the dialog reserves the right box. */
+  ratio?: string;
+  /** Further captures of the same thing, offered as a strip under the picture. */
+  views?: ReadonlyArray<{ id: string; label: string; src: string; ratio: string }>;
+}
+
 export interface CardAction {
-  href: string;
+  /** The link's destination — or absent, when `preview` opens a dialog instead. */
+  href?: string;
+  /** Opens the shared lightbox instead of navigating. Never set beside `href`. */
+  preview?: CardPreview;
   label: string;
   /** Leaves this site: new tab, `rel`, outward arrow, spoken hint. */
   external?: boolean;

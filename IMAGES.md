@@ -54,7 +54,8 @@ remove the file as well.
 Never hand-place a picture into either folder.
 
 A re-captured screenshot keeps its file name, and browsers keep `/demos`,
-`/references` and `/images` for a week. So the page never links the bare name:
+`/references`, `/designstudien`, `/zertifikate` and `/images` for a week. So
+the page never links the bare name:
 `mediaSrc()` appends a hash of the file's bytes (`?v=…`, computed at build time
 by `scripts/media-versions.mjs`). After a sync, a rebuild is all it takes for
 the new picture to show on the next reload.
@@ -65,6 +66,8 @@ the new picture to show on the next reload.
 |---|---|
 | Demo previews | `public/demos/<id>.webp`, **1440 × 900** (16:10), plus `<id>-favicon.<ext>` |
 | Reference previews | `public/references/<case-id>.webp`, **1440 × 900** (16:10) |
+| Design studies | `public/designstudien/<id>[-<view>].webp`, full-page captures of whatever height, width capped at **1440**. Written by `npm run studies:import -- --from "<folder>"`; the PNG originals live in `stuff/Beispieldesigns, Optimierungen/` in the workspace, not in this repo. The file-name map is `lib/designStudyMeta.ts` |
+| Certificates | `public/zertifikate/<id>.webp`, **1584 × 1224** (US Letter landscape at scale 2). Rendered from the committed PDFs in `src/assets/certificates/` by `npm run certificates:render` (pdf.js in a headless Chromium — `sharp` cannot read PDF). Quality 88, not 82: these are pictures of small type |
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
 | Section grounds | `public/images/sections/<name>.webp`, **1870 × 841** (≈2.22:1); hero **1642 × 958** (≈1.71:1) |
 | Format | WebP, quality 82 (AVIF 55 if a second source is ever added) |

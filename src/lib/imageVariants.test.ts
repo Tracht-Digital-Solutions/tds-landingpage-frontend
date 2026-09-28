@@ -1,7 +1,10 @@
 import { access } from "node:fs/promises";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { credentials, credentialImageSrc } from "./credentials";
+import { CREDENTIAL_IMAGE } from "./credentialMeta";
 import { resolveSnapshotDemos } from "./demos";
+import { designStudies } from "./designStudies";
 import {
   LOGO,
   PORTRAIT_WIDTHS,
@@ -61,6 +64,30 @@ describe("every srcset candidate is committed", () => {
       if (!service.image) continue;
       for (const width of SERVICE_PHOTO_VARIANT_WIDTHS) {
         await expect(onDisk(variantSrc(service.image, width)), variantSrc(service.image, width)).resolves.toBeUndefined();
+      }
+    }
+  });
+
+  it("for each certificate", async () => {
+    for (const entry of credentials) {
+      const src = credentialImageSrc(entry.id);
+      for (const width of PREVIEW_VARIANT_WIDTHS) {
+        if (width >= CREDENTIAL_IMAGE.width) continue;
+        await expect(onDisk(variantSrc(src, width)), variantSrc(src, width)).resolves.toBeUndefined();
+      }
+    }
+  });
+
+  it("for each design study capture", async () => {
+    for (const study of designStudies) {
+      for (const view of study.views) {
+        for (const width of PREVIEW_VARIANT_WIDTHS) {
+          if (width >= view.width) continue;
+          await expect(
+            onDisk(variantSrc(view.src, width)),
+            variantSrc(view.src, width),
+          ).resolves.toBeUndefined();
+        }
       }
     }
   });
