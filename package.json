@@ -23,7 +23,8 @@
     "audit:seo": "node scripts/seo-audit.mjs",
     "audit:perf": "node scripts/perf-audit.mjs",
     "indexnow": "node scripts/indexnow.mjs",
-    "audit:contrast": "node scripts/contrast-probe.mjs"
+    "audit:contrast": "node scripts/contrast-probe.mjs",
+    "audit:chrome": "node scripts/audit-chrome.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
