@@ -12,7 +12,7 @@
  * renders from the same source as the visible answers.
  */
 import { resolveLang, localizePath } from "~/lib/i18n";
-import { getFaqContent } from "~/lib/faq";
+import { getFaqContent, homeFaqItems, faqPageHref } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import CircuitRun from "~/components/ui/CircuitRun.astro";
@@ -34,13 +34,24 @@ const ui =
         moreTitle: "Deine Frage war nicht dabei?",
         moreText: "Schreib mir direkt – Antwort in der Regel innerhalb von 24 Stunden.",
         moreCta: "Schreib mir",
+        allQuestions: "Alle Fragen ansehen",
       }
     : {
         moreTitle: "Not the question you had?",
         moreText: "Write to me directly — usually answered within 24 hours.",
         moreCta: "Get in touch",
+        allQuestions: "See all questions",
       };
 const contactHref = `${localizePath("/", lang)}#contact`;
+const allQuestionsHref = faqPageHref(lang);
+
+/**
+ * SIX here, not twelve (`homeFaqItems`). The home page's budget is six
+ * questions; the other six are one click away, and the JSON-LD this page emits
+ * covers exactly these — see the note in `lib/faq.ts`.
+ */
+const shown = homeFaqItems(content);
+const hiddenCount = content.items.length - shown.length;
 ---
 
 <section
@@ -67,7 +78,21 @@ const contactHref = `${localizePath("/", lang)}#contact`;
       </div>
 
       <div class="faq-list">
-        <FaqAccordion items={content.items} name="faq" />
+        <FaqAccordion items={shown} name="faq" />
+        {/* The way on, at the end of the list rather than inside the contact
+            card below: a reader who has just worked through six questions is
+            here, and the card is one whole link already — a second link nested
+            inside an `<a>` is not markup. The count is printed because "more"
+            without a number is a promise a visitor cannot size. */}
+        {
+          hiddenCount > 0 && (
+            <a class="faq-all" href={allQuestionsHref}>
+              {ui.allQuestions}
+              <span class="faq-all__count">{hiddenCount}</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          )
+        }
       </div>
 
       {/* The list can only ever answer the questions it anticipated. This is
@@ -148,6 +173,59 @@ const contactHref = `${localizePath("/", lang)}#contact`;
   .faq-cta {
     grid-area: cta;
   }
+
+  /* The link to the rest. A row in the list's own rhythm, not a button: it
+     continues the column of questions rather than interrupting it, and the
+     count sits in the accent so the eye finds the number before the words. */
+  .faq-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: start;
+    margin-top: 0.25rem;
+    padding: 0.5rem 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .faq-all:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .faq-all:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+  .faq-all__count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.375rem;
+    height: 1.375rem;
+    padding: 0 0.375rem;
+    border-radius: var(--tds-radius-pill);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .faq-all span[aria-hidden] {
+    transition: transform 200ms var(--tds-ease-out);
+  }
+  .faq-all:hover span[aria-hidden] {
+    transform: translateX(2px);
+  }
+  @media (pointer: coarse) {
+    .faq-all {
+      min-height: 2.75rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq-all span[aria-hidden] {
+      transition: none;
+    }
+  }
+
   @media (min-width: 64rem) {
     .faq-layout {
       grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);

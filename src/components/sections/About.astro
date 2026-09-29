@@ -1,13 +1,33 @@
 ---
 /**
- * Wieso ich? — the person behind the page: portrait, and in plain words what
- * working with one person means.
+ * Wieso ich? — the person behind the page: portrait, the motivation, and in
+ * plain words what working with one person means.
  *
- * The four claim tiles that used to sit under the text ("Verständlich erklärt",
- * "Auch nach dem Start da", …) are not rendered any more. They were assertions
- * a visitor could not check, a screen below a hero that now carries three
- * facts they can. `why_me.reasons` stays in the content shape so a stored block
- * keeps loading.
+ * ### Why the right column looks the way it does (2026-09-29)
+ *
+ * It used to print ONE sentence (`p2`) and the certificates teaser, beside a
+ * 3:4 portrait, in a grid with `items-center` and a 6rem column gap. That is
+ * where the "so many gaps" reading came from: not a spacing bug, but two
+ * columns of wildly different height, the short one centred so its slack fell
+ * both above and below.
+ *
+ * Three things fixed it, and only the third is about spacing:
+ *
+ * 1. The column has CONTENT now — `motivation`, the one block on this page
+ *    that can only come from Julian, plus three of the four `reasons`.
+ * 2. `items-start`, so the short column stops floating in the middle of the
+ *    tall one.
+ * 3. The blocks are separated by the 1px seam `.credentials-teaser` already
+ *    drew, not by a gap. Three stacked lists separated by air read as three
+ *    things that fell apart; separated by a line they read as one panel.
+ *
+ * `lead` and `p1` are still NOT rendered, and that is unchanged: the first is a
+ * comparison with suppliers nobody named, the second repeats the hero word for
+ * word one screen further down. The fourth reason ("Verständlich erklärt") is
+ * out for the same reason the tiles were — it is the one claim a visitor cannot
+ * check. All of them stay in the content shape so a stored `why_me` block keeps
+ * loading; that is why this is a render-side choice rather than an edit to the
+ * strings.
  *
  * The portrait is a pre-sized static copy (`lib/imageVariants.ts`), loaded
  * lazily — it sits below the fold. It used to be `<Image loading="eager">`,
@@ -29,6 +49,19 @@ import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
+
+/**
+ * Three of the four reasons. Index 2 is the committed "Verständlich erklärt" /
+ * "Explained plainly" — the one entry a visitor has no way to check, and the
+ * two motivation paragraphs above are the demonstration of it anyway.
+ *
+ * By POSITION, not by matching the title: the titles are CMS-editable, so a
+ * text match would silently start rendering four again the first time somebody
+ * rephrases one. An editor who replaces the whole list gets their own third
+ * entry dropped instead, which is visible in the editor and theirs to fix. The
+ * cap is what keeps a longer stored list from stretching the column.
+ */
+const renderedReasons = about.reasons.filter((_, index) => index !== 2).slice(0, 3);
 
 /**
  * The certificates, teased where the person is introduced.
@@ -81,7 +114,10 @@ const credentialsUi =
     <span class="about-photo-scrim absolute inset-0"></span>
   </span>
   <div class="lp-container">
-    <div class="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24 items-center">
+    {/* `items-start`, not `items-center`: the columns are deliberately unequal
+        (a 3:4 portrait against a text column) and centring the shorter one
+        splits its slack above AND below it. See the note at the top. */}
+    <div class="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-start">
       <div class="max-w-sm mx-auto md:mx-0 w-full">
         {/* A CARD, like every other box on this site since 0.42 (2026-09-28).
             It used to be a masked cut-out dissolving into a coral rectangle
@@ -131,18 +167,37 @@ const credentialsUi =
           <AccentLetters text={about.headlineAccent} />
         </h2>
 
-        {/* `lead` and `p1` are NOT rendered (2026-09-28, asked for). They
-            claimed "einen Ansprechpartner – nicht fünf Anbieter" and "ich
-            übernehme bestehende Seiten und Shops, statt alles neu zu bauen":
-            the first is a comparison with suppliers nobody named, the second
-            repeats the hero word for word one screen further down. Both stay
-            in the content shape so a stored `why_me` block keeps loading —
-            the same arrangement as `reasons`, and the reason this is a
-            render-side removal rather than an edit to the strings: a panel
-            block saved before today would otherwise put them back. */}
+        {/* See the note at the top for what is NOT rendered here and why. */}
         <p class="text-lg font-medium text-[var(--color-black)] leading-relaxed">{about.p2}</p>
 
-        <div class="credentials-teaser">
+        {/* The motivation. First person, and the only block on this page a
+            competitor could not write — which is why it stands above the
+            reasons rather than after them. */}
+        <div class="about-block">
+          <p class="eyebrow about-block__label">{about.motivation.title}</p>
+          {
+            about.motivation.body.map((paragraph) => (
+              <p class="about-motivation__text">{paragraph}</p>
+            ))
+          }
+        </div>
+
+        {/* Three of four (see the top). Same drawn marker as the certificates
+            below, so the column does not carry two bullet styles. */}
+        <div class="about-block">
+          <ul class="about-reasons">
+            {
+              renderedReasons.map((reason) => (
+                <li>
+                  <span class="about-reasons__title">{reason.title}</span>
+                  <span class="about-reasons__text">{reason.description}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div class="about-block credentials-teaser">
           <p class="eyebrow credentials-teaser__label">{credentialsUi.label}</p>
           <ul class="credentials-teaser__list">
             {
@@ -248,16 +303,77 @@ const credentialsUi =
     color: var(--color-muted);
   }
 
-  /* The certificates, as a caption under the prose rather than as a fourth
-     paragraph. It is a LIST of documents: three names, the issuer under each,
-     and one way to all of them. No card, no fill — this section is the
-     quietest on the page and a box here would make the portrait compete with
-     a panel. */
-  .credentials-teaser {
-    margin-top: 2rem;
+  /* --- The three blocks under the paragraph ------------------------------
+     Motivation, reasons, certificates. A SEAM between them, not a gap: three
+     stacked lists separated by air read as three things that came apart, and
+     that was most of the "so many gaps" reading this section earned. One line
+     and they read as one panel — the same borderless card language the rest of
+     the page uses, without a fill that would make the portrait compete with a
+     box.
+
+     The rule came out of `.credentials-teaser`, which owned it alone while it
+     was the only block here. */
+  .about-block {
+    margin-top: 1.75rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--color-line);
   }
+  .about-block__label {
+    margin: 0 0 0.75rem;
+  }
+  .about-motivation__text {
+    margin: 0 0 0.625rem;
+    line-height: 1.6;
+    color: var(--color-ink);
+  }
+  .about-motivation__text:last-child {
+    margin-bottom: 0;
+  }
+
+  /* The reasons. Title and line stacked per row, same drawn marker as the
+     certificates below — a second bullet style in one column is the kind of
+     detail that reads as carelessness without anyone being able to name it. */
+  .about-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .about-reasons li {
+    position: relative;
+    padding-left: 1.125rem;
+    text-align: left;
+  }
+  .about-reasons li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 100px;
+    background: var(--color-accent);
+  }
+  .about-reasons__title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--color-black);
+  }
+  .about-reasons__text {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+
+  /* The certificates, as a caption under the prose rather than as a fourth
+     paragraph. It is a LIST of documents: three names, the issuer under each,
+     and one way to all of them. Its seam and top spacing now come from
+     `.about-block`. */
   .credentials-teaser__label {
     margin: 0 0 0.75rem;
   }
@@ -331,16 +447,22 @@ const credentialsUi =
     }
   }
 
-  /* On a phone the whole column is centred; the list keeps its own left edge
-     so three bullets do not zig-zag. */
+  /* On a phone the whole column is centred; every list keeps its own left edge
+     so the bullets do not zig-zag down the middle. */
   @media (max-width: 47.99rem) {
-    .credentials-teaser {
+    .about-block {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    .credentials-teaser__list {
+    .credentials-teaser__list,
+    .about-reasons {
       align-self: center;
+    }
+    /* Prose stays centred with the rest of the column — it has no marker to
+       hang, so a left edge of its own would look like a mistake. */
+    .about-motivation__text {
+      text-align: center;
     }
   }
 

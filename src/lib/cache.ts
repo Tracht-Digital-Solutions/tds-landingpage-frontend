@@ -13,6 +13,7 @@
 import { forLanguages, type EventMap } from "@tracht-digital-solutions/tds-shared/cache";
 import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { CREDENTIALS_SLUG } from "./credentials";
+import { FAQ_PAGE_SLUG, faqPageHref } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
 import { serviceDefinitions, serviceHref } from "./services";
 
@@ -41,6 +42,10 @@ function contentPages(lang: "de" | "en"): string[] {
     // contact blocks and name the Webauftritt service's title — a block save
     // can date them like any other page.
     ...platformDefinitions.map((platform) => platformHref(platform, lang)),
+    // The questions page reads the same `faq_v2` block the home page section
+    // does, so an admin editing an answer has to date this page too. Unlike the
+    // business card and the certificates, it is NOT code-owned throughout.
+    faqPageHref(lang),
   ];
 }
 
@@ -142,6 +147,8 @@ export const alwaysPaths = [
   // it — but a full rebuild still has to render it.
   CREDENTIALS_SLUG.de,
   CREDENTIALS_SLUG.en,
+  FAQ_PAGE_SLUG.de,
+  FAQ_PAGE_SLUG.en,
   "/sitemap-0.xml",
   "/sitemap-index.xml",
 ];

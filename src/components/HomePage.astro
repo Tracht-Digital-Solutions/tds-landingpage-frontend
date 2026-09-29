@@ -48,7 +48,7 @@ import {
 } from "~/lib/jsonld";
 import { siteConfig } from "~/lib/seo";
 import type { Lang } from "~/lib/i18n";
-import { getFaqContent } from "~/lib/faq";
+import { getFaqContent, homeFaqItems } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import { tFor } from "~/lib/i18n";
@@ -70,6 +70,11 @@ const pricing = await getPricingContent(lang);
 // Resolved here too so the FAQPage JSON-LD stays 1:1 with the (possibly
 // admin-edited) answers FAQ.astro renders. cms.ts memoises the fetch.
 const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
+// The SIX this page prints, not all twelve. `FAQ.astro` slices the same way, and
+// marking up an answer the page does not show is the one thing Google's FAQPage
+// guidance rules out. The other six are marked up on `/fragen`, where they are
+// visible.
+const shownFaq = homeFaqItems(faq);
 
 // The home page carries the canonical entity graph — Organization, Person and
 // WebSite live here; subpages reference them by @id. The fixed-price packages
@@ -86,7 +91,7 @@ const jsonLd = asGraph(
       price: pkg.price,
     })),
   ),
-  faqPageSchema(faq.items),
+  faqPageSchema(shownFaq),
   {
     "@type": "WebPage",
     "@id": `${siteConfig.url}/#webpage-${lang}`,

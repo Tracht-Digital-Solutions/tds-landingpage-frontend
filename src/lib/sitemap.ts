@@ -17,6 +17,7 @@
 
 import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { CREDENTIALS_SLUG } from "./credentials";
+import { FAQ_PAGE_SLUG } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
@@ -74,6 +75,16 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   {
     de: CREDENTIALS_SLUG.de,
     en: CREDENTIALS_SLUG.en,
+    changefreq: "monthly",
+    priority: 0.6,
+  },
+  // Every FAQ answer, where all twelve are visible (the home page shows six).
+  // `monthly` and 0.6: the answers change when the offer does, and the page is
+  // a real destination for question searches — but it still sits below a
+  // service page, which is what somebody searching a question is looking for.
+  {
+    de: FAQ_PAGE_SLUG.de,
+    en: FAQ_PAGE_SLUG.en,
     changefreq: "monthly",
     priority: 0.6,
   },

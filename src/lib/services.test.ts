@@ -11,18 +11,24 @@ import {
 describe("service catalog", () => {
   it("pins the four services in the agreed display order", () => {
     // Webauftritt first since 2026-09-15 — the site leads with websites and
-    // shops. Only the order moved: ids, CMS keys and slugs are unchanged, so
-    // no URL and no saved panel block changed with it.
+    // shops, and the hero says so ("Deine Website läuft schon").
+    //
+    // `process` moved up to second on 2026-09-29, when it was renamed from
+    // "Prozessoptimierung" to "Abläufe digitalisieren": digitalization is the
+    // emphasis, so it stands directly beside the takeover rather than third
+    // behind advice about it. Only the order and the titles moved — ids, CMS
+    // keys and slugs are unchanged, so no URL and no saved panel block changed
+    // with either pass.
     expect(serviceDefinitions.map((service) => service.id)).toEqual([
       "web-presence",
-      "consulting",
       "process",
+      "consulting",
       "solutions",
     ]);
     expect(serviceDefinitions.map((service) => service.cmsKey)).toEqual([
       "service_web_presence",
-      "service_consulting",
       "service_process",
+      "service_consulting",
       "service_solutions",
     ]);
   });

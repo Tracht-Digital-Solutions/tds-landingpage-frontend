@@ -3,6 +3,7 @@ import { resolveEvents } from "@tracht-digital-solutions/tds-shared/cache";
 
 import { alwaysPaths, cacheEvents } from "./cache";
 import { BUSINESS_CARD_SLUG } from "./businessCard";
+import { faqPageHref } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
 import { serviceDefinitions, serviceHref } from "./services";
 import { SITEMAP_ENTRIES } from "./sitemap";
@@ -26,6 +27,9 @@ describe("cacheEvents", () => {
       ...serviceDefinitions.map((service) => serviceHref(service, lang)),
       // The platform pages render the first-call, footer and contact blocks.
       ...platformDefinitions.map((platform) => platformHref(platform, lang)),
+      // The questions page renders the same `faq_v2` block the home page's FAQ
+      // section does, so editing an answer has to rebuild it.
+      faqPageHref(lang),
       // The business card is NOT in here. It is a standalone page rendering
       // no CMS block, so a block save must not rebuild it — it is covered by
       // `alwaysPaths` instead, asserted further down.
