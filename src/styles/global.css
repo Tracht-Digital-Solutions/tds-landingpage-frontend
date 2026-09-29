@@ -312,6 +312,24 @@ html {
   }
 }
 
+/* ONE smoothing at a time (2026-09-29).
+
+   `tds-shared/styles/base.css` sets `html { scroll-behavior: smooth }` for
+   every site. On this one Lenis also smooths the wheel, so both were running:
+   the CSS engine and a rAF tween writing the same scroll position. That is the
+   bug `islands/SmoothScroll.tsx` documents around its `behavior: "instant"`
+   calls — a `scrollTo` whose `behavior` resolves to `auto` inherits the CSS
+   value, so a jump was handed to CSS while Lenis was mid-tween and on a phone
+   never arrived. It is also why a rAF tween can starve: the two fight per frame.
+
+   `data-lenis` is set on `<body>` by that island, and only on the fine-pointer
+   branch where Lenis actually runs. So the CSS smoothing survives exactly where
+   nothing else does the job: a coarse pointer, reduced motion, or no JS. The
+   in-app motion switch further down already forces `auto` on its own. */
+html:has(body[data-lenis="on"]) {
+  scroll-behavior: auto;
+}
+
 /* (The About portrait's mask and its coral rectangle lived here. It is a
    card now and owns its own styles — see `sections/About.astro`. The two
    rules were a pair: the photo faded out at the bottom and the shape behind
@@ -559,6 +577,35 @@ html[data-a11y-motion] *::after {
   scroll-behavior: auto !important;
 }
 
+/* === Section rhythm ==========================================================
+
+   Three steps for the space BETWEEN two sections, as HALF-gaps: the gap at a
+   boundary is the lower edge of the section above plus the upper edge of the
+   one below, so each side contributes one of these.
+
+     tight   ≈ 2.5 … 4rem total    two sections that are one thought
+     normal  ≈ 5 … 9rem total      the default step
+     wide    ≈ 7.5 … 14rem total   a real break in the argument
+
+   Why steps at all: every section used the same `.section-spacing`
+   (clamp(3.25rem, 6.5vw, 6.5rem) per edge, so 6.5 … 13rem at every boundary),
+   which reads as one endless ladder — nothing tells the eye that the pricing
+   logic belongs to the prices above it while the contact block is somewhere
+   new. Reported as "die Lücken zwischen den Sektionen passen noch nicht ganz"
+   (2026-09-29).
+
+   WHICH boundary gets which step is decided in ONE place, `HomePage.astro`, and
+   not here or in the sections: a section cannot know what follows it, and the
+   rhythm is a property of the page's order. These are only the three numbers.
+
+   `normal` is deliberately tighter than the old uniform value, so the page gets
+   shorter overall even though `wide` is about what every boundary used to be. */
+:root {
+  --lp-rhythm-tight: clamp(1.25rem, 2.5vw, 2rem);
+  --lp-rhythm-normal: clamp(2.5rem, 4.5vw, 4.5rem);
+  --lp-rhythm-wide: clamp(3.75rem, 7vw, 7rem);
+}
+
 /* === Full-width layout =======================================================
 
    One container for every section, header and footer: the page uses the
@@ -570,6 +617,92 @@ html[data-a11y-motion] *::after {
   max-width: none;
   margin-inline: auto;
   padding-inline: clamp(1.5rem, 1rem + 3vw, 5rem);
+}
+
+/* === Glass (2026-09-29) ======================================================
+
+   Asked for: the CTAs, the contact form and the bookmarks should read like the
+   site header — a translucent fill over a blur — and the shadow ink should be
+   translucent too, so the page shows through it.
+
+   `backdrop-filter` is authored UNPREFIXED, and only unprefixed. lightningcss
+   adds the `-webkit-` form at build time from `vite.build.cssTarget` (set by
+   `tdsViteBuild`); a hand-written pair gets collapsed to the `-webkit-` form
+   ALONE and the blur dies in Firefox. Same contract as `.brand-header`.
+
+   ### What the buttons get, and the one thing they cannot
+
+   A BLURRED BACKDROP: yes, on the button itself. A blurred SHADOW: no, and the
+   reason is structural rather than a choice. A hard shadow you can see through
+   has to be a plate — a copy of the shape offset behind the element — because a
+   `box-shadow` paints a colour and cannot filter what is behind it. A plate has
+   to be a child. And every CTA is `:where([data-cta])`, which sets
+   `overflow: hidden` so its arrival sweep (`.cta-shine`, a real element that
+   travels across the button on `translateX`) stays inside the pill. A clip that
+   holds the sweep in holds an `::after` in as well, so the plate would be
+   invisible.
+
+   So a button's shadow stays a `box-shadow` and becomes TRANSLUCENT ink: the
+   page is visible through it, just not blurred. The elements that do not clip
+   their own children — the header, the contact cards, the bookmarks — take a
+   real blurred plate. Moving the sweep off a child element (onto an animated
+   `background-position`, say) would remove the restriction; that is a change to
+   `lib/motion/cta.ts` and a separate decision.
+
+   `--tds-shadow-ink` is opaque `#050f68` on the marketing surface. Overriding
+   it here reaches every hard shadow on the page — cards included — which is the
+   intent: one ink, so a card and a button do not disagree about how solid a
+   shadow is. The dark theme's own value is already translucent (0.32), so it is
+   left alone. */
+[data-surface="marketing"] {
+  --tds-shadow-ink: rgb(5 15 104 / 0.6);
+}
+
+/* ### The blur goes on the CTA LIST, not on `.btn`
+
+   This site's CTAs are almost never `.btn` components — they are anchors with
+   utilities and component classes (`.hero-cta--primary`, `.first-call__cta`,
+   `.submit-button`, …), which is why the hard-shadow block further down matches
+   them by that hand-kept list rather than by a class. The glass has to match the
+   same set or it reaches nothing: a first pass that styled `.btn-primary` hit
+   one button on the whole home page (the service pages' `DetailHero`) and the
+   probe found the hero CTAs missing entirely.
+
+   A `backdrop-filter` on an OPAQUE fill does nothing at all, so this half only
+   pays off where the fill is translucent — and each fill is made translucent
+   where it is declared, in the component that owns it, because the fills differ
+   (navy, bordeaux, white, card) and no rule here can know which. */
+:where(
+  .hero-cta,
+  [data-cta],
+  a[class*="rounded-[100px]"],
+  a[class*="rounded-full"][class*="px-5"],
+  a[class*="rounded-full"][class*="px-7"],
+  .first-call__cta,
+  .faq-cta-pill,
+  .submit-button,
+  .showcase-nav__btn
+) {
+  backdrop-filter: blur(10px);
+}
+
+/* The `.btn` components that do exist (the service pages' hero CTA). 88% and
+   not the header's 62%: these fills carry WHITE type, and below roughly 85% a
+   light photo behind them bleeds through far enough to take the contrast with
+   it. `npm run audit:contrast` measures that from real pixels — axe cannot,
+   because it files a translucent background as "incomplete" rather than as a
+   violation. */
+[data-surface="marketing"] .btn-primary:not(.tds-menu-toggle) {
+  background-color: color-mix(in oklab, var(--color-primary) 88%, transparent);
+}
+[data-surface="marketing"] .btn-accent:not(.tds-menu-toggle) {
+  background-color: color-mix(in oklab, var(--color-accent) 88%, transparent);
+}
+/* tds-shared fades a button to `opacity: .92` on hover, which would fade the
+   blurred fill and the type with it. The fill already carries the state. */
+[data-surface="marketing"]
+  :is(.btn-primary, .btn-accent):hover:not(:disabled):not(.tds-menu-toggle) {
+  opacity: 1;
 }
 
 /* === CTA arrival sweep (lib/motion/cta.ts) ================================== */

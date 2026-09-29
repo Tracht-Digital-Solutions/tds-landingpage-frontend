@@ -144,3 +144,92 @@ const titles = {
   </main>
   <Footer />
 </Layout>
+
+{/* The page's vertical rhythm, in one place.
+
+    Each section renders `.section-spacing` (tds-shared: clamp(3.25rem, 6.5vw,
+    6.5rem) on both edges), which made every boundary identical — one endless
+    ladder, and the complaint that the gaps "passen noch nicht ganz"
+    (2026-09-29). The three steps are `--lp-rhythm-*` in `global.css`; WHICH
+    boundary gets which one is decided here, because a section cannot know what
+    follows it. Read the pairs below as boundaries, not as sections.
+
+    `is:global` because the sections are separate components and a scoped rule
+    would never reach them. ID selectors, so nothing needs `!important` against
+    the unlayered class from tds-shared — and NOT `:is(:global(…))`, which
+    scopes the wrong half of the selector. */}
+<style is:global>
+  /* hero → services: WIDE, and the whole gap is on services. The hero is
+     `min-h-svh` with no bottom padding of its own, so there is no upper half to
+     add — this is the one boundary where one side carries all of it. */
+  #services {
+    padding-block-start: calc(var(--lp-rhythm-wide) * 2);
+  }
+
+  /* services → cases: TIGHT. The four services and the client projects that
+     came out of them are one statement; the cases are the evidence for the
+     list above, not a new subject. */
+  #services {
+    padding-block-end: var(--lp-rhythm-tight);
+  }
+  #cases {
+    padding-block-start: var(--lp-rhythm-tight);
+  }
+
+  /* cases → process: NORMAL. */
+  #cases {
+    padding-block-end: var(--lp-rhythm-normal);
+  }
+  #process {
+    padding-block-start: var(--lp-rhythm-normal);
+  }
+
+  /* process → showcase: WIDE. "How we work" ends the argument about working
+     together; the shelf below it is a different kind of thing entirely. */
+  #process {
+    padding-block-end: var(--lp-rhythm-wide);
+  }
+  #showcase {
+    padding-block-start: var(--lp-rhythm-wide);
+  }
+
+  /* showcase → blog → about: NORMAL throughout. `#blog` is the one section
+     that never used `.section-spacing` (it had a hand-written `py-16 md:py-24`),
+     which is why both of its edges are set here rather than overridden. */
+  #showcase {
+    padding-block-end: var(--lp-rhythm-normal);
+  }
+  #blog {
+    padding-block: var(--lp-rhythm-normal);
+  }
+  #about {
+    padding-block-start: var(--lp-rhythm-normal);
+  }
+
+  /* about → preise: WIDE. Between the person and the money is the biggest
+     break on the page. */
+  #about {
+    padding-block-end: var(--lp-rhythm-wide);
+  }
+  #preise {
+    padding-block-start: var(--lp-rhythm-wide);
+  }
+
+  /* preise → faq: NORMAL. The questions are mostly about the prices above. */
+  #preise {
+    padding-block-end: var(--lp-rhythm-normal);
+  }
+  #faq {
+    padding-block-start: var(--lp-rhythm-normal);
+  }
+
+  /* faq → contact: WIDE. The navy block is the end of the page; it gets air
+     in front of it so it arrives rather than continues. Its own lower edge
+     keeps `.section-spacing` — below it is the footer, not another section. */
+  #faq {
+    padding-block-end: var(--lp-rhythm-wide);
+  }
+  #contact {
+    padding-block-start: var(--lp-rhythm-wide);
+  }
+</style>

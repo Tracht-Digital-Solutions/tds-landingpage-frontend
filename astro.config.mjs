@@ -47,6 +47,31 @@ export default defineConfig({
     // prerendered, because this site's route set only changes with a deploy.
   ],
 
+  /**
+   * Prefetch the page under the pointer (2026-09-29, asked for: hovering a link
+   * should load the page in the background).
+   *
+   * Astro's own prefetch, and deliberately NOT `<ClientRouter>`: this only
+   * fetches the document into the browser's cache, and the click that follows is
+   * an ordinary navigation. Client-side routing would be a different and much
+   * larger change — it would put every page swap through JavaScript, and the
+   * theme bootstrap, the page cache and the motion layer all assume a real
+   * document load.
+   *
+   * `prefetchAll` because this site's links all go somewhere worth prefetching
+   * (four service pages, the platform pages, the questions page); `hover` rather
+   * than `viewport` because a landing page has a lot of links below the fold and
+   * `viewport` would fetch most of the site to show one screen.
+   *
+   * The cross-property links in `PropertyTabs.astro` keep their hand-written
+   * `<link rel="prefetch">`: they point at OTHER origins (blog, tools, shop),
+   * which Astro's prefetch does not touch.
+   */
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "hover",
+  },
+
   i18n: {
     defaultLocale: "de",
     locales: ["de", "en"],

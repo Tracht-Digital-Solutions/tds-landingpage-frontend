@@ -22,7 +22,8 @@
     "audit:ux": "node scripts/ux-audit.mjs",
     "audit:seo": "node scripts/seo-audit.mjs",
     "audit:perf": "node scripts/perf-audit.mjs",
-    "indexnow": "node scripts/indexnow.mjs"
+    "indexnow": "node scripts/indexnow.mjs",
+    "audit:contrast": "node scripts/contrast-probe.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

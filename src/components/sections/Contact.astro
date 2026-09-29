@@ -1,17 +1,20 @@
 ---
 import { tFor, resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
-// The QR comes in as a PATH, never as the encoder. `lib/businessCardQr.ts`
-// imports `qrcode` at module scope, the package is a devDependency and is not
-// in the release tree, and reaching for it from a page answered 500 on the
-// host for both card pages. `businessCardQr.test.ts` keeps that firewall.
-import { businessCardHref, BUSINESS_CARD_QR_PATH } from "~/lib/businessCard";
+// Only the HREF here since 2026-09-29. The QR code went with the mini card
+// (see the note at the aside): it encoded the destination this link already
+// has. The firewall it used to illustrate still stands and still matters on the
+// card pages themselves — the QR travels as a PATH, never as the encoder,
+// because `lib/businessCardQr.ts` imports `qrcode` at module scope, the package
+// is a devDependency and is not in the release tree, and reaching for it from a
+// page answered 500 on the host. `businessCardQr.test.ts` keeps that.
+import { businessCardHref } from "~/lib/businessCard";
 import { siteConfig } from "~/lib/seo";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
-import { socialLinks } from "~/lib/socials";
+import { socialLinks, whatsappHref } from "~/lib/socials";
 import type { ServiceId } from "~/lib/services";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -108,6 +111,40 @@ const nextSteps = await cmsFor("first_call", lang, getHomeContent(lang).firstCal
 // tel: href version strips the spaces so dialers handle it cleanly.
 const phoneDisplay = contact.phone;
 const phoneHref = phoneDisplay.replace(/\s/g, "");
+
+/**
+ * Profiles only. WhatsApp is a way to reach a person and has its own row in the
+ * card above the seam; `lib/socials.ts` already treats it as a messenger deep
+ * link rather than a profile (it is absent from the JSON-LD `sameAs` for the
+ * same reason). Listing it in both places would be one label for two identical
+ * links a centimetre apart.
+ */
+const profileLinks = socialLinks(contact.phone).filter((link) => link.id !== "whatsapp");
+
+/**
+ * The WhatsApp glyph, taken from the shared icon set rather than copied: the row
+ * in the card needs it at a different size than `SocialLinks` renders, and two
+ * copies of a brand path is how one of them ends up a version behind.
+ */
+const WHATSAPP_ICON =
+  socialLinks(contact.phone).find((link) => link.id === "whatsapp")?.icon ?? "";
+
+// Card chrome, localized here rather than in the CMS block: these are labels
+// for links, not copy an editor should be able to empty.
+const ui =
+  lang === "de"
+    ? {
+        reachTitle: "Direkt erreichbar",
+        messengerLabel: "Messenger",
+        businessCard: "Visitenkarte",
+        saveContact: "Kontakt speichern",
+      }
+    : {
+        reachTitle: "Reach me directly",
+        messengerLabel: "Messenger",
+        businessCard: "Business card",
+        saveContact: "Save contact",
+      };
 ---
 
 {/* Vollflächiges TDS-Navy. Weiterhin KEIN Wash und keine Formen —
@@ -172,197 +209,167 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
         confirmation carries it now, which is where it is actually an answer. */}
 
     <div class="grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">
-      <ContactForm
-        client:visible
-        lang={lang}
-        reasons={contact.reasons}
-        assistantReasons={assistantReasons}
-        nextSteps={{ title: nextSteps.nextStepsTitle, items: nextSteps.items }}
-      />
+      {/* A glass card around the form (2026-09-29, asked for: the form should
+          read like the site header — translucent over a blur).
 
-      <aside class="space-y-6 md:space-y-8">
-        <div>
-          <p class="eyebrow text-white/50 mb-3">
-            {t.contact.info.emailLabel}
-          </p>
-          <a
-            href={`mailto:${contact.email}`}
-            class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors [@media(pointer:coarse)]:min-h-11"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <rect x="2" y="4" width="20" height="16" rx="2" />
-              <path d="m2 7 10 6 10-6" />
-            </svg>
-            {contact.email}
-          </a>
-        </div>
+          A WRAPPER here rather than a class inside the island: the island has
+          two roots, the form and the success view, and both belong on the same
+          surface. It also keeps the island untouched.
 
-        <div>
-          <p class="eyebrow text-white/50 mb-3">
-            {t.contact.info.phoneLabel}
-          </p>
-          <a
-            href={`tel:${phoneHref}`}
-            class="flex items-center gap-3 text-white hover:text-[var(--color-accent-pink)] transition-colors [@media(pointer:coarse)]:min-h-11"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <path
-                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"
-              />
-            </svg>
-            {phoneDisplay}
-          </a>
-        </div>
+          The fields themselves stay underline fields on this card — no fill of
+          their own. That is what keeps the contrast measurement unchanged: the
+          white type sits on navy plus a 7% white veil, not on a translucent
+          panel showing the damped photo underneath. The section's own rule
+          ("keine konkurrierenden Farbverläufe hinter dem Formular") is about
+          exactly that, and a flat veil is not a gradient. */}
+      <div class="contact-form-card">
+        <ContactForm
+          client:visible
+          lang={lang}
+          reasons={contact.reasons}
+          assistantReasons={assistantReasons}
+          nextSteps={{ title: nextSteps.nextStepsTitle, items: nextSteps.items }}
+        />
+      </div>
 
-        <div>
-          <p class="eyebrow text-white/50 mb-3">
-            {t.contact.info.locationLabel}
-          </p>
-          <span class="flex items-center gap-3 text-white">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            {contact.location}
-          </span>
-        </div>
+      {/* ONE card, not six stacked blocks (2026-09-29).
 
-        <div>
-          <p class="eyebrow text-white/50 mb-3">
-            {t.contact.info.socialLabel}
-          </p>
-          <SocialLinks links={socialLinks(contact.phone)} />
-        </div>
+          What stood here was a `space-y-8` column of six sibling `<div>`s —
+          e-mail, phone, location, socials, a .vcf pill and a mini business
+          card — each with its own eyebrow. Six labels down a column read as six
+          unrelated facts, and the two things a visitor actually wants to press
+          were the fourth and fifth of them.
 
-        <div>
-          {/* Single .vcf link: downloads on desktop, opens "add contact" on
-              mobile (text/vcard MIME set in public/.htaccess). Card generated
-              at build time from siteConfig → /kontakt.vcf.
-              TODO: promote to tds-shared contact.vcard */}
-          <a
-            href="/kontakt.vcf"
-            class="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm text-white hover:bg-white hover:text-[var(--color-surface-navy)] transition-all duration-200"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-              class="flex-shrink-0"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <line x1="19" y1="8" x2="19" y2="14" />
-              <line x1="22" y1="11" x2="16" y2="11" />
-            </svg>
-            {lang === "en" ? "Save contact" : "Kontakt speichern"}
-          </a>
+          Now it is a card with two zones. The top zone is the three ways to
+          reach a person, each a full-width link; the bottom zone is where
+          somebody is and what they can take away. One seam between them, which
+          is the section's own language (see `About.astro`).
 
-          {/* The file and the page, side by side and doing different jobs: the
-              .vcf lands in a phone's address book, the card is what a person
-              can be shown, scan or forward. It is also the one place on this
-              site where a visitor meets a digital business card as a thing
-              that can be built for them — so it is SHOWN as a card rather than
-              announced as a link.
+          WhatsApp appears ONCE, as a way — not again among the social buttons.
+          `lib/socials.ts` makes the same distinction in its own docblock: it is
+          a messenger deep link, not a profile, which is why it is absent from
+          `sameAs`. So the social row is profiles only. */}
+      <aside class="contact-card">
+        <p class="eyebrow contact-card__title">{ui.reachTitle}</p>
 
-              Drawn, not photographed. `public/images/business-card.webp` is a
-              1440×900 screenshot of the page; shrunk to this size it would be
-              a tiny web page, not a business card. Markup stays sharp at any
-              size, follows the theme and needs no asset kept in sync.
-
-              ONE anchor around the whole thing. A second one inside would be
-              invalid and browsers recover by closing the outer early, dropping
-              everything after it out of the link — the failure
-              `ui/CardActions.astro` documents. The .vcf pill above is a
-              sibling, never a child.
-
-              `aria-label`, and here it is the right tool rather than the
-              usual mistake: the visible text of this card is a NAME, so the
-              name a screen reader would otherwise derive from the content is
-              the whole card read out — eyebrow, name, role, company, postcode
-              — and never states that following it opens anything. The label
-              says the action AND keeps the visible words in it (WCAG "Label in
-              Name"), built from the same `siteConfig` value the card prints so
-              the two cannot drift. It belongs on an `<a>`, which is nameable;
-              on a span or div it would be `aria-prohibited-attr`. */}
-          <a
-            href={businessCardHref(lang)}
-            class="mini-card mt-4"
-            aria-label={
-              lang === "en"
-                ? `Open the digital business card of ${siteConfig.founder.name}`
-                : `Digitale Visitenkarte von ${siteConfig.founder.name} ansehen`
-            }
-          >
-            {/* The tab that stays visible while the card is docked on the
-                section's edge (wide screens with a mouse, see the CSS). */}
-            <span aria-hidden="true" class="mini-card__tab">
-              {lang === "en" ? "Business card" : "Visitenkarte"}
-            </span>
-            <span aria-hidden="true" class="tds-brandbar tds-brandbar--sm mini-card__bar"></span>
-
-            <span class="mini-card__body">
-              <span class="mini-card__eyebrow">
-                {lang === "en" ? "Digital business card" : "Digitale Visitenkarte"}
+        <ul class="contact-ways">
+          <li>
+            <a class="contact-way" href={`mailto:${contact.email}`}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="contact-way__icon"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m2 7 10 6 10-6" />
+              </svg>
+              <span class="contact-way__text">
+                <span class="contact-way__label">{t.contact.info.emailLabel}</span>
+                <span class="contact-way__value">{contact.email}</span>
               </span>
-              <span class="mini-card__name">{siteConfig.founder.name}</span>
-              <span class="mini-card__role">{siteConfig.founder.jobTitle}</span>
-              <span class="mini-card__org">{siteConfig.name}</span>
-            </span>
+              <span aria-hidden="true" class="contact-way__go">→</span>
+            </a>
+          </li>
 
-            {/* Decorative: it encodes the very destination this link already
-                has, so announcing it would be the same thing said twice.
-                The white plate is not styling — the SVG is black on
-                transparent, and on the dark theme it would otherwise be black
-                on near-black and stop scanning. */}
-            <span class="mini-card__qr" aria-hidden="true">
-              <img src={BUSINESS_CARD_QR_PATH[lang]} alt="" width="96" height="96" loading="lazy" decoding="async" />
-            </span>
+          <li>
+            <a class="contact-way" href={`tel:${phoneHref}`}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                class="contact-way__icon"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"
+                />
+              </svg>
+              <span class="contact-way__text">
+                <span class="contact-way__label">{t.contact.info.phoneLabel}</span>
+                <span class="contact-way__value">{phoneDisplay}</span>
+              </span>
+              <span aria-hidden="true" class="contact-way__go">→</span>
+            </a>
+          </li>
 
-            <span class="mini-card__place">
-              {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
-            </span>
-            <span aria-hidden="true" class="mini-card__go">→</span>
+          <li>
+            {/* `target`/`rel` because it leaves for a messenger, like every
+                link in `SocialLinks`. */}
+            <a
+              class="contact-way"
+              href={whatsappHref(contact.phone)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="contact-way__icon">
+                <path d={WHATSAPP_ICON} />
+              </svg>
+              <span class="contact-way__text">
+                <span class="contact-way__label">{ui.messengerLabel}</span>
+                <span class="contact-way__value">WhatsApp</span>
+              </span>
+              <span aria-hidden="true" class="contact-way__go">→</span>
+            </a>
+          </li>
+        </ul>
 
-          </a>
+        <div class="contact-card__foot">
+          {/* The NAP, in the same words the Impressum and the JSON-LD use — all
+              three read `siteConfig`, so they cannot drift apart. A local
+              business that states the same address everywhere is the whole
+              point of printing it twice. */}
+          <p class="contact-card__where">
+            <span class="contact-card__label">{t.contact.info.locationLabel}</span>
+            <span>{contact.location}</span>
+            <span class="contact-card__address">
+              {siteConfig.address.streetAddress}, {siteConfig.address.postalCode}{" "}
+              {siteConfig.address.addressLocality}
+            </span>
+          </p>
+
+          <div class="contact-card__actions">
+            {/* The business card page and the .vcf, side by side and doing
+                different jobs: the file lands in a phone's address book (the
+                text/vcard MIME is set in `public/.htaccess`), the page is what
+                a person can be shown, scan or forward.
+                TODO: promote the .vcf to tds-shared contact.vcard */}
+            <a class="contact-action" href={businessCardHref(lang)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <circle cx="8" cy="12" r="2.5" />
+                <path d="M14 10h5M14 14h3" />
+              </svg>
+              {ui.businessCard}
+            </a>
+            <a class="contact-action" href="/kontakt.vcf">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+              {ui.saveContact}
+            </a>
+          </div>
+
+          {profileLinks.length > 0 && (
+            <div class="contact-card__social">
+              <span class="contact-card__label">{t.contact.info.socialLabel}</span>
+              <SocialLinks links={profileLinks} />
+            </div>
+          )}
         </div>
       </aside>
     </div>
@@ -635,6 +642,23 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
     background-position: center;
     background-repeat: no-repeat;
     background-size: 66%;
+    /* Pressed into the block, like every control in the system since
+       tds-shared 0.45 — and asked for directly ("Checkboxen sollen einen
+       Schatten haben, welcher nach innen wirkt").
+
+       Restated rather than inherited: the shared rule styles the INPUT, and
+       here the input is invisible and this span is the picture (see the long
+       note above), so nothing reaches it.
+
+       Its own ink, too. `--tds-inset-ink` is black at 13%, tuned for a paper
+       ground; 13% black on navy is nothing at all. The small offset, not the
+       2px one the shared checkbox takes: this box is 16px and round, and 2px
+       inside a circle that size reads as a thick arc rather than a well. */
+    --tds-inset-ink: rgb(0 0 0 / 0.42);
+    box-shadow: var(--tds-shadow-inset-sm);
+    /* `box-shadow` is deliberately NOT in the transition — a shadow is painted,
+       not composited, and this repo does not animate one. It switches with the
+       fill, which does transition, so the change still reads as one movement. */
     transition:
       background-color 180ms ease,
       border-color 180ms ease;
@@ -691,6 +715,9 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
   .contact-consent-input:checked + .contact-consent-box {
     background-color: var(--color-accent-pink);
     border-color: var(--color-accent-pink);
+    /* Filled, so it is no longer a well to reach into — the same pairing the
+       shared checkbox makes in tds-shared/styles/primitives.css. */
+    box-shadow: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 13 4 4 10-10'/%3E%3C/svg%3E");
     animation: contact-consent-bounce 460ms cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -726,237 +753,185 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
     }
   }
 
-  /* === The mini business card ======================================
 
-     A light card lying on the navy block, in the proportions of a printed one
-     (85.6 × 54 mm ≈ 1.586). The whole thing is the link.
-
-     THE COLOUR RULE, and the reason this looks odd at first glance: the
-     section carries `.tds-tone-navy`, which re-maps `--color-black` to
-     #ffffff and `--color-muted`, `--color-line`, `--color-card` and
-     `--color-soft` to translucent whites, so that ordinary components render
-     correctly on a dark ground. A LIGHT card is the exception on that ground —
-     built from those tokens it would be white text on a white card.
-
-     So it draws itself from the three the tone does NOT touch:
-     `--color-paper`, `--color-primary` and `--color-accent`. Nothing is
-     hard-coded, dark mode follows on its own, and there is no token to
-     restore. Measured — card against ground / name on card: 15.75 / 15.75 in
-     light, 1.20 / 8.67 in dark. */
-  .mini-card {
-    --mini-card-ink: var(--color-primary);
-    /* 75 %, and the number is measured rather than chosen. The company line
-       and the postcode are 11 px and 10 px — under 18 px, so they owe 4.5:1,
-       not 3:1. At 55 % they sat at 4.00 in light and 3.29 in dark and
-       `npm run audit:ux` reported them as two serious axe violations; nothing
-       about them looked wrong. 75 % gives 7.77 and 5.24 and still reads as
-       muted beside the name at full strength. */
-    --mini-card-muted: color-mix(in srgb, var(--color-primary) 75%, var(--color-paper));
-
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto 1fr auto;
-    gap: 0.5rem 1rem;
-    width: 100%;
-    max-width: 22rem;
-    aspect-ratio: 1.586;
-    padding: 1.125rem 1.25rem;
-    border-radius: 8px;
-    background: var(--color-paper);
-    text-decoration: none;
-    /* Transform only. A blurred shadow transitioned every frame re-rasterises
-       the whole blur; the lift is the movement, the shadow is static. */
-    box-shadow: var(--tds-shadow-hard);
-    transition: transform 220ms var(--tds-ease-out);
+  /* The form's own glass, same recipe as the card beside it so the two read as
+     one pair rather than a panel next to bare fields. A touch lighter: it holds
+     input text, and the card holds links. */
+  #contact .contact-form-card {
+    border-radius: 6px;
+    padding: 1.5rem;
+    background: rgb(255 255 255 / 0.05);
+    backdrop-filter: blur(14px);
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .mini-card:hover,
-    .mini-card:focus-visible {
-      transform: translateY(-3px);
+  @media (min-width: 48rem) {
+    #contact .contact-form-card {
+      padding: 1.75rem;
     }
   }
-  .mini-card:focus-visible {
-    /* On a dark ground the ring has to be the light one, and it needs an
-       offset or it sits on the card's own edge and disappears into it. */
+
+  /* === The contact card ==============================================
+
+     ONE surface holding the three ways to reach a person and the two things
+     they can take away, replacing six stacked sibling blocks (2026-09-29).
+
+     Glass, like the site header: a translucent fill over a blur, so the navy
+     ground and its very damped photo stay visible through it instead of being
+     covered by a second opaque panel beside the form.
+
+     `backdrop-filter` is authored UNPREFIXED, and only unprefixed.
+     lightningcss adds the `-webkit-` form at build time from
+     `vite.build.cssTarget` (set by `tdsViteBuild`); a hand-written pair gets
+     collapsed to the `-webkit-` form ALONE and the blur dies in Firefox. */
+  #contact .contact-card {
+    border-radius: 6px;
+    padding: 1.5rem;
+    background: rgb(255 255 255 / 0.07);
+    backdrop-filter: blur(14px);
+  }
+  @media (min-width: 48rem) {
+    #contact .contact-card {
+      padding: 1.75rem;
+    }
+  }
+  #contact .contact-card__title {
+    margin: 0 0 1rem;
+    color: rgb(255 255 255 / 0.55);
+  }
+
+  /* The three ways. A SEAM between rows rather than a gap: the rows are one
+     list of one kind of thing, and air between them would make three cards
+     inside a card. Same decision as the three blocks in `About.astro`. */
+  #contact .contact-ways {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+  }
+  #contact .contact-ways li + li .contact-way {
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+  }
+
+  /* The whole row is the link — not just the value on it. A 2px-tall text
+     target inside a 3rem row is the most common way a contact block loses a
+     tap on a phone. */
+  #contact .contact-way {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    min-height: 3rem;
+    padding: 0.625rem 0.25rem;
+    color: #fff;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  #contact .contact-way:hover {
+    background: rgb(255 255 255 / 0.06);
+  }
+  #contact .contact-way:focus-visible {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  #contact .contact-way__icon {
+    flex: none;
+    color: rgb(255 255 255 / 0.65);
+    transition: color 200ms var(--tds-ease-out);
+  }
+  #contact .contact-way:hover .contact-way__icon {
+    color: var(--color-accent-pink);
+  }
+  #contact .contact-way__text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.0625rem;
+  }
+  #contact .contact-way__label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.5);
+  }
+  /* The value can be a long address on a narrow column; it wraps rather than
+     pushing the arrow out of the row. */
+  #contact .contact-way__value {
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  #contact .contact-way__go {
+    margin-left: auto;
+    flex: none;
+    color: rgb(255 255 255 / 0.4);
+    transition:
+      transform 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out);
+  }
+  #contact .contact-way:hover .contact-way__go {
+    color: #fff;
+    transform: translateX(2px);
+  }
+
+  /* Below the seam: where somebody is, and what can be taken away. A heavier
+     line than the row seams, because this is the card's one real division. */
+  #contact .contact-card__foot {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgb(255 255 255 / 0.28);
+    display: grid;
+    gap: 1.25rem;
+  }
+  #contact .contact-card__label {
+    display: block;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.5);
+    margin-bottom: 0.375rem;
+  }
+  #contact .contact-card__where {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: #fff;
+  }
+  #contact .contact-card__address {
+    display: block;
+    color: rgb(255 255 255 / 0.62);
+  }
+
+  /* Two buttons, side by side, wrapping on a narrow column. Not `.btn`:
+     unlayered tds-shared beats every Tailwind utility, and these need a fill
+     the navy ground does not provide. */
+  #contact .contact-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+  #contact .contact-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.125rem;
+    border-radius: var(--tds-radius-pill);
+    background: rgb(255 255 255 / 0.12);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out);
+  }
+  #contact .contact-action:hover {
+    background: #fff;
+    color: var(--color-surface-navy);
+  }
+  #contact .contact-action:focus-visible {
     outline: 2px solid var(--color-accent-pink);
     outline-offset: 3px;
-  }
-
-  .mini-card__bar {
-    grid-column: 1 / -1;
-    /* The PLAIN run, not `--on-dark`. That variant exists because bordeaux
-       sinks into navy — and this bar lies on the paper card, not on the
-       section behind it. */
-    align-self: start;
-  }
-
-  .mini-card__body {
-    grid-column: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0;
-  }
-  .mini-card__eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.5625rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--color-accent);
-  }
-  .mini-card__name {
-    margin-top: 0.35rem;
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 1.25rem;
-    line-height: 1.1;
-    letter-spacing: -0.015em;
-    color: var(--mini-card-ink);
-  }
-  .mini-card__role {
-    margin-top: 0.15rem;
-    font-size: 0.75rem;
-    line-height: 1.35;
-    color: var(--color-accent);
-  }
-  .mini-card__org {
-    margin-top: 0.2rem;
-    font-size: 0.6875rem;
-    line-height: 1.3;
-    color: var(--mini-card-muted);
-  }
-
-  .mini-card__qr {
-    grid-column: 2;
-    grid-row: 2;
-    align-self: center;
-    display: block;
-    padding: 0.3rem;
-    border-radius: 4px;
-    /* Explicitly #fff in BOTH themes, like `.card__qr-code` on the card page:
-       the SVG is black on transparent, so on the dark theme it would be black
-       on near-black and simply stop scanning. */
-    background: #ffffff;
-  }
-  .mini-card__qr img {
-    display: block;
-    width: 3.75rem;
-    height: 3.75rem;
-  }
-
-  .mini-card__place {
-    grid-column: 1;
-    grid-row: 3;
-    align-self: end;
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.02em;
-    color: var(--mini-card-muted);
-  }
-  .mini-card__go {
-    grid-column: 2;
-    grid-row: 3;
-    align-self: end;
-    justify-self: end;
-    font-size: 0.875rem;
-    color: var(--color-accent);
-    transition: transform 220ms var(--tds-ease-out);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .mini-card:hover .mini-card__go {
-      transform: translateX(3px);
-    }
-  }
-
-  /* === Docked on the section's right edge ==========================
-
-     Wide screens with a mouse only (the same query as
-     `lib/motion/businessCard.ts`): the card leaves the aside and pins to the
-     right edge of `#contact`, showing only its tab. It is absolutely
-     positioned against the section (the nearest positioned ancestor — the
-     grid and the container between are static on purpose).
-
-     Without JavaScript it still works: hover and keyboard focus pull it out
-     through CSS. With Motion mounted, the script owns the transform — it
-     opens on a spring as soon as the pointer comes NEAR — and the CSS
-     transition steps aside so the two never fight over one property.
-
-     Touch and narrower screens keep the inline card in the aside: there is
-     no pointer to come near, and a tab on the edge of a phone is a 44 px
-     target nobody would guess. */
-  .mini-card__tab {
-    display: none;
-  }
-  @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
-    #contact {
-      overflow-x: clip;
-    }
-    #contact .mini-card {
-      --mini-card-tab: 2.75rem;
-      position: absolute;
-      top: 50%;
-      right: 0;
-      z-index: 5;
-      width: 23rem;
-      max-width: none;
-      margin: 0;
-      translate: 0 -50%;
-      padding-left: calc(var(--mini-card-tab) + 1.25rem);
-      border-radius: 10px 0 0 10px;
-      box-shadow: var(--tds-shadow-hard);
-      transform: translateX(calc(100% - var(--mini-card-tab)));
-      transition: transform 420ms var(--tds-ease-out);
-    }
-    #contact .mini-card:hover,
-    #contact .mini-card:focus-visible {
-      transform: none;
-    }
-    html[data-motion="on"] #contact .mini-card {
-      transition: none;
-    }
-    #contact .mini-card__tab {
-      position: absolute;
-      inset: 0 auto 0 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: var(--mini-card-tab);
-      border-radius: 10px 0 0 10px;
-      background: var(--color-primary);
-      color: var(--color-paper);
-      font-family: var(--font-mono);
-      font-size: 0.6875rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      writing-mode: vertical-rl;
-      rotate: 180deg;
-    }
-    #contact .mini-card__bar {
-      margin-left: 0;
-    }
-  }
-  @media (min-width: 64rem) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
-    #contact .mini-card {
-      transition: none;
-    }
-  }
-
-  /* Phones: the card keeps its proportions but the QR would crowd the name at
-     327px, so it steps down with the type. */
-  @media (max-width: 26rem) {
-    .mini-card {
-      padding: 1rem;
-    }
-    .mini-card__qr img {
-      width: 3rem;
-      height: 3rem;
-    }
-    .mini-card__name {
-      font-size: 1.125rem;
-    }
   }
 
   /* === Contact form: what happens next ==============================

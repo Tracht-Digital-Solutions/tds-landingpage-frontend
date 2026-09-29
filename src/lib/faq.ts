@@ -123,7 +123,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
         headlineAccent: "questions.",
         intro:
           "Takeovers, pricing and working together – the questions I am asked most often.",
-        seoTitle: "Common Questions on Websites, Pricing and Process — Tracht Digital",
+        seoTitle: "Common Questions on Websites and Pricing — Tracht Digital",
         description:
           "Answers on taking over existing sites, fixed prices, timelines, logins and ongoing support. Answered briefly, without the jargon.",
         groups: {

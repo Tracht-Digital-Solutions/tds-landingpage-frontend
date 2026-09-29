@@ -182,7 +182,24 @@ const ICONS: Record<PropertyTabId, string[]> = {
     margin-left: calc(-1 * var(--tab-bleed));
     padding: 0 0.875rem 0 calc(1.25rem + var(--tab-bleed));
     border-radius: 0 9999px 9999px 0;
-    background: var(--color-surface-navy);
+    /* Glass, like the header (2026-09-29, asked for). 88% and not the header's
+       62%: a bookmark carries white type on navy and is 3.25rem tall, so there
+       is no room for the page to bleed through and still be read. The blur is
+       what makes it read as glass at that opacity.
+
+       Unprefixed `backdrop-filter` ONLY — lightningcss adds the `-webkit-` form
+       from `vite.build.cssTarget`, and a hand-written pair gets collapsed to the
+       prefixed one alone, killing the blur in Firefox.
+
+       Its SHADOW is translucent rather than blurred, and that is structural: a
+       blurred shadow has to be a plate behind the element, and `translate` on
+       this tab makes it a stacking context — a `z-index: -1` child would paint
+       over the tab's own fill instead of behind it. The header solves that by
+       moving its fill to a `::before`; here the fill is what the icon is read
+       against, so it stays where it is. `--tds-shadow-ink` is translucent on
+       this surface (global.css), so the page shows through the offset. */
+    background: color-mix(in oklab, var(--color-surface-navy) 88%, transparent);
+    backdrop-filter: blur(12px);
     color: #fff;
     font-size: 0.9375rem;
     font-weight: 600;
@@ -197,7 +214,7 @@ const ICONS: Record<PropertyTabId, string[]> = {
   .property-tab:hover,
   .property-tab:focus-visible {
     translate: 0 0;
-    background: var(--color-surface-accent);
+    background: color-mix(in oklab, var(--color-surface-accent) 88%, transparent);
     box-shadow: var(--tds-shadow-hard-sm-hover);
   }
   .property-tab:focus-visible {
@@ -224,12 +241,12 @@ const ICONS: Record<PropertyTabId, string[]> = {
 
   /* In the dark theme the navy tab would disappear into the ground. */
   :global(:root[data-theme="dark"]) .property-tab {
-    background: var(--color-card);
+    background: color-mix(in oklab, var(--color-card) 88%, transparent);
     color: var(--color-black);
   }
   :global(:root[data-theme="dark"]) .property-tab:hover,
   :global(:root[data-theme="dark"]) .property-tab:focus-visible {
-    background: var(--color-surface-accent);
+    background: color-mix(in oklab, var(--color-surface-accent) 88%, transparent);
     color: #fff;
   }
 
@@ -251,9 +268,16 @@ const ICONS: Record<PropertyTabId, string[]> = {
   .property-tabs--twin * {
     pointer-events: none !important;
   }
+  /* The twin stays OPAQUE while the original is glass (2026-09-29). It is laid
+     over the original rather than instead of it, so two 88% fills in its clipped
+     range would composite to ~98% — the tab would look denser over a dark band
+     than anywhere else. Opaque, it covers cleanly and the inversion is uniform.
+     It is also the one place where legibility depends on the fill NOT letting a
+     dark band through. */
   .property-tabs--twin .property-tab,
   :global(:root[data-theme="dark"]) .property-tabs--twin .property-tab {
     background: #fff;
+    backdrop-filter: none;
     color: var(--color-surface-navy);
     box-shadow: var(--tds-shadow-hard-sm);
   }

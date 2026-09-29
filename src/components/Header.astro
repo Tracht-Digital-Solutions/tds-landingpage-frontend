@@ -4,6 +4,7 @@ import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/components";
 import { resolveLang, localizePath } from "~/lib/i18n";
 import { propertyLinks, sectionLinks } from "~/lib/navigation";
 import { LOGO, logoSrc, logoSrcset } from "~/lib/imageVariants";
+import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 
 const lang = resolveLang(Astro.currentLocale);
 
@@ -69,13 +70,28 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
           link of the section on screen and marks it `aria-current`
           (lib/motion/ux.ts). Home page only — elsewhere no section matches
           and the pill stays invisible. */}
+      {/* The links are `--color-ink`, NOT `--color-muted` (fixed 2026-09-29).
+
+          Muted grey (#6b6b66) cannot reach 4.5:1 on this bar and never could:
+          measured 2.13:1 at the pricing section, where the 62% paper glass sits
+          over a navy decoration field and `saturate(150%)` amplifies the tint to
+          155,160,209. For muted text to pass there the fill would have to be
+          almost opaque paper, which is the one thing this bar is not.
+
+          Pre-existing rather than new — the tint, the filter and this colour
+          were all unchanged by the glass pass; `npm run audit:contrast` is what
+          finally measured it, because axe cannot resolve a translucent
+          background and files the result as "incomplete", never as a violation.
+
+          Ink at rest and navy on hover keeps a state change, and the active link
+          is already navy via `[aria-current]`. */}
       <div class="hidden lg:flex items-center gap-1 relative" data-nav-links>
         <span class="nav-pill" data-nav-pill aria-hidden="true"></span>
         {items.map((item) => (
           <a
             href={sectionHref(item.id)}
             data-section={item.id}
-            class="relative inline-flex items-center px-3 py-1.5 text-[var(--color-muted)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
+            class="relative inline-flex items-center px-3 py-1.5 text-[var(--color-ink)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             {item.label}
           </a>
@@ -114,6 +130,20 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       </button>
     </div>
   </nav>
+
+  {/* The reading progress, on the bar's lower edge (2026-09-29).
+
+      It used to be `fixed top-0 left-0 right-0` — a separate 2px line pinned to
+      the window, a few pixels above a bar that floats with its own margin, so
+      the two never related to each other. Inside the header it inherits the
+      docking morph for free: it narrows with the bar from full-bleed to 56rem
+      and lifts off the edge with it, which is what makes the progress and the
+      "click in" one movement rather than two things happening at once.
+
+      Inset from the ends rather than run edge to edge: the bar is a full pill,
+      so a straight line across its whole width would leave the shape at the
+      curves. */}
+  <ScrollProgress client:idle />
 </header>
 
 {/* Sheet, motion, scroll behaviour and the breakpoint are `.tds-mobile-menu`
@@ -217,26 +247,125 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        be 24px here and 22px docked), which is also what keeps the three
        states from drifting apart again. */
     border-radius: var(--tds-radius-pill);
-    background-color: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
+    /* THE FILL IS A VALUE NOW, NOT A DECLARATION (2026-09-29).
+
+       Every state below sets `--tds-header-fill` and `::before` paints it. The
+       element's own background stays transparent, and that is what lets the
+       shadow plate get BEHIND the glass — see the long note at `::after`.
+
+       It also collapses the duplication the comment above complains about: the
+       nine places that used to declare `background-color` now set one value. */
+    --tds-header-fill: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
+    background-color: transparent;
     /* No rim. The fill alone separates the bar from the page — the warm
        hairline (and before it the white glass highlight) is exactly the
        kind of 1px box the borderless pass removes. It was an INSET
        box-shadow, not a border, so it survived every `border` search;
        whatever replaces it must be judged in a browser, not in a grep. */
-    /* Only the unprefixed property is authored — lightningcss adds the
-       `-webkit-` prefix at build time per the configured cssTarget.
-       Hand-writing both makes lightningcss collapse them to `-webkit-`
-       only, which drops the blur in Firefox. See astro.config.mjs.
-
-       The blur now carries the bar on its own: with a 62% tint it is the
-       difference between "frosted" and "you can read the hero straight
-       through the nav". Removing it does not merely soften the look, it
-       breaks legibility — a browser that does not support backdrop-filter
-       gets the tint alone, which is why the tint is not lower still. */
-    backdrop-filter: blur(22px) saturate(150%);
-    transition:
-      background-color 250ms ease;
   }
+
+  /* The glass. Own layer so the plate can sit under it.
+
+     Only the unprefixed `backdrop-filter` is authored — lightningcss adds the
+     `-webkit-` prefix at build time per the configured cssTarget. Hand-writing
+     both makes lightningcss collapse them to `-webkit-` only, which drops the
+     blur in Firefox. See astro.config.mjs.
+
+     The blur carries the bar on its own: with a 62% tint it is the difference
+     between "frosted" and "you can read the hero straight through the nav".
+     Removing it does not merely soften the look, it breaks legibility — a
+     browser without backdrop-filter gets the tint alone, which is why the tint
+     is not lower still.
+
+     `z-index: 0` and not `auto`: it has to be a positioned box with a stacking
+     level, so the nav above it (level 1) and the plate below it (level -1) sort
+     around it predictably. */
+  .site-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background-color: var(--tds-header-fill);
+    backdrop-filter: blur(22px) saturate(150%);
+    transition: background-color 250ms ease;
+  }
+
+  /* The content, above both layers. */
+  .site-header > nav {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === The shadow, as a plate that clicks in ==========================
+
+     Asked for 2026-09-29: the shadow should travel in and out as the bar
+     docks, "als würde die Navigationsleiste reinklicken", instead of
+     switching on and off between the two states.
+
+     A `box-shadow` cannot do that. It is PAINTED, not composited, so
+     animating it repaints the bar every frame — and this repo's own rule
+     ("never transition a box-shadow") exists because of it. What can move is
+     a plate: a copy of the bar's own shape sitting behind it, offset
+     down-right, moving on `translate` and `opacity`, both of which the
+     compositor handles without a single repaint.
+
+     ### Why the fill had to move to `::before` for this to work
+
+     `z-index: -1` does NOT put a child behind its parent's background when the
+     parent forms a stacking context — and this one does twice over (`position:
+     fixed` with a `z-index`, plus `backdrop-filter`). Inside a stacking context
+     the parent's own background and borders paint FIRST, then negative-z
+     children, then everything else. So a plate at -1 under a filled bar paints
+     ON TOP of that fill: a navy pill offset 3px, under the nav links, over the
+     glass. Which is what this did in its first draft.
+
+     The fix is to give the element no background of its own and paint the glass
+     on `::before` (level 0) instead. Then the order inside the bar is: nothing →
+     plate (-1) → glass (0) → nav (1), which is the order a shadow needs.
+
+     A side effect worth keeping: `::before` blurs its own backdrop, and the
+     plate is part of that backdrop now. So the shadow is blurred exactly where
+     the bar overlaps it and sharp where it sticks out past the edge — which is
+     the "Schatten-Tinte soll auch Blur haben" half of the same request.
+
+     `border-radius: inherit` keeps it the same pill in all three states; the
+     radius is a token, so there is nothing to keep in step by hand. The ink is
+     `--tds-shadow-ink`, which the dark theme redefines (tds-shared base.css)
+     and `global.css` makes translucent on this surface — so the dark bar and the
+     see-through shadow both come for free, which is what six hand-written
+     `box-shadow` declarations used to do between them. */
+  .site-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--tds-shadow-ink);
+    /* The hard shadow's small offset, as a number rather than the token: the
+       token is a whole `box-shadow` value and cannot be split. 3px is
+       `--tds-shadow-hard-sm` on the marketing surface. */
+    translate: 3px 3px;
+    transition:
+      translate 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 200ms var(--tds-ease-out);
+  }
+  /* Docked: the plate slides INTO the bar and goes. Same 320ms as the
+     `max-width`/`top` morph below, so the bar shrinking and the shadow
+     retracting are one movement. */
+  .site-header[data-scrolled="false"]::after {
+    translate: 0 0;
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-header::after {
+      transition: none;
+    }
+  }
+
+  /* No `box-shadow` on the bar in any state since 2026-09-29 — the plate above
+     carries it, and it reads `--tds-shadow-ink`, which the dark theme redefines
+     for itself. Four hand-written declarations used to do that between them. */
 
   /* Dark mode — same glass, a slightly denser tint. There is no rim to
      help here (the borderless pass removed it), and white-on-dark type
@@ -246,12 +375,10 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      the dark hero. */
   :global(:root[data-theme="dark"]) .site-header {
     --tds-header-tint: 68%;
-    background-color: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
-    box-shadow: none;
+    --tds-header-fill: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
   }
   :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
-    background-color: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
-    box-shadow: var(--tds-shadow-hard-sm);
+    --tds-header-fill: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
   }
 
   /* Mobile + tablet, docked at the very top of the hero: dissolve the bar
@@ -261,12 +388,10 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      `.site-header` styling above). */
   @media (max-width: 1023px) {
     .site-header[data-scrolled="false"] {
-      background-color: transparent;
-      box-shadow: none;
+      --tds-header-fill: transparent;
     }
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
-      background-color: transparent;
-      box-shadow: none;
+      --tds-header-fill: transparent;
     }
   }
 
@@ -279,10 +404,10 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        fill above is now dense enough to replace the rim, this override is
        what keeps the docked bar from inheriting it. */
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
-      background-color: transparent;
+      --tds-header-fill: transparent;
     }
     :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
-      background-color: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
+      --tds-header-fill: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
     }
   }
 
@@ -306,13 +431,19 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 
       top: 0.75rem;
       max-width: 100%;
-      background-color: transparent;
-      box-shadow: none;
-      backdrop-filter: blur(24px) saturate(150%);
+      --tds-header-fill: transparent;
+      /* Only the geometry transitions on the element now. The fill fades on
+         `::before`, which owns it, and leaving `background-color` listed here
+         would name a property this element no longer changes. */
       transition:
         max-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
-        top 320ms cubic-bezier(0.4, 0, 0.2, 1),
-        background-color 250ms ease;
+        top 320ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* A heavier blur on the desktop bar — on `::before`, or it would be applied
+       twice: once by the layer that paints the glass and once by the element
+       behind it. */
+    .site-header::before {
+      backdrop-filter: blur(24px) saturate(150%);
     }
 
     /* Scrolled away from the top — the bar lifts off the edge and shrinks
@@ -322,16 +453,18 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        white; it is the one the visitor spends the whole page inside, which
        is why the translucency is spent here rather than on the dock.
 
-       The old `0 18px 50px -24px rgba(5,15,104,.45)` was a 50px navy plume
-       that read as grey haze on the warm ground. The shadow that replaced
-       it is doing more work now than it was: with a translucent fill it is
-       most of what separates the capsule from the content sliding under
-       it, so do not remove it along with the opacity. */
+       The shadow is not declared here any more (2026-09-29) — the plate at
+       `.site-header::after` carries it in every state, keyed on
+       `[data-scrolled]` alone, so it retracts into the bar as it docks instead
+       of switching off. What has NOT changed is how much work it is doing: the
+       old `0 18px 50px -24px rgba(5,15,104,.45)` was a 50px navy plume that
+       read as grey haze on the warm ground, and the hard offset that replaced
+       it is most of what separates this translucent capsule from the content
+       sliding under it. Do not take the plate away along with the opacity. */
     .site-header[data-scrolled="true"] {
       top: 1rem;
       max-width: 56rem;
-      background-color: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
-      box-shadow: var(--tds-shadow-hard-sm);
+      --tds-header-fill: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
     }
   }
 
