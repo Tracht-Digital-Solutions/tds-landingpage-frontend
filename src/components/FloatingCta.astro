@@ -127,6 +127,13 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     border-radius: 9999px;
     background-color: var(--color-surface-navy);
     color: #fff;
+    /* Its own shadow ink, darker than the page's.
+       `--tds-shadow-ink` is navy on this surface, which is right for the light
+       cards it was made for and invisible here: the pill is navy too, so its
+       hard shadow was navy on navy and only made the pill look 6px wider.
+       Measured — the pixel 3px off the pill's right edge was `5,15,104`, the
+       same value as the pill itself. */
+    --tds-shadow-ink: rgb(0 0 0 / 0.38);
     box-shadow: var(--tds-shadow-hard);
     /* Only the buttons take pointer events: the pill's padding ring never
        swallows a click meant for the page underneath. */
@@ -272,13 +279,28 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       background-color: var(--color-surface-accent);
       color: #fff;
     }
-    /* The receiver answers the pointer by GROWING (2026-09-28, asked for) —
-       the response a docked control can give without reaching sideways into
-       the page. It stays inside the pill's 0.25rem padding ring, so nothing
-       overlaps the buttons above it. */
+    /* The receiver POPS OUT of the pill (2026-09-29, asked for).
+
+       It used to only grow a little, inside the padding ring. Now it lifts off
+       the stack: it scales further, moves a couple of pixels down and right
+       — away from the buttons above it, toward the free corner — and takes a
+       hard shadow of its own, which is this site's whole vocabulary for "this
+       object is in front of that one". The disc stays navy while the pill
+       around it turns bordeaux, so the two read as separate things rather than
+       one shape that got bigger.
+
+       `z-index` because the slots above it would otherwise paint over the part
+       that now reaches past the pill's edge. The travel is kept small
+       deliberately: the twin's clip reaches 12px past the box
+       (`SHADOW_PAD`), and 4.3px of scale + 2px of travel + 3px of shadow fits
+       inside that with room to spare — a bigger pop would be cut in half the
+       moment it crossed a band. */
     .floating-cta:hover,
     .floating-cta:focus-visible {
-      scale: 1.1;
+      scale: 1.18;
+      translate: 2px 2px;
+      box-shadow: 3px 3px 0 0 rgb(0 0 0 / 0.42);
+      z-index: 1;
     }
     .floating-cta:hover .floating-cta__icon {
       /* The receiver rings: a short wobble. */
@@ -312,11 +334,38 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     background: var(--color-surface-navy);
     color: #fff;
   }
-  /* The twin grows with it, or the white copy stays the old size over a dark
-     band and the two disagree by 4px along the band's line. */
+  /* The twin pops with it, or the white copy stays the old size over a dark
+     band and the two disagree along the band's line. */
   @media (hover: hover) {
     .floating-cta-group:has(.floating-cta:hover) + .floating-cta-group--twin .floating-cta {
-      scale: 1.1;
+      scale: 1.18;
+      translate: 2px 2px;
+      box-shadow: 3px 3px 0 0 rgb(0 0 0 / 0.55);
+      z-index: 1;
+    }
+
+    /* The OTHER buttons' hover, which the twin could not show at all.
+
+       The twin takes no pointer by design, so it never matches `:hover` itself
+       — every hover state it shows has to be mirrored from the original. The
+       receiver had such a rule and the arrow and the accessibility toggle did
+       not, so over a dark band those two simply stopped responding: the wash
+       was painted on the original underneath and the opaque white twin covered
+       it. The button looked dead exactly where a visitor is most likely to
+       reach for it, on the contact block and in the footer. */
+    .floating-cta-group:has(.floating-cta-top:hover) + .floating-cta-group--twin .floating-cta-top {
+      /* Dark, not the original's white wash: the twin is white. */
+      background: rgb(5 15 104 / 0.12);
+    }
+    .floating-cta-group:has(.floating-cta-top:hover) + .floating-cta-group--twin .floating-cta-top .tree-icon {
+      translate: 0 -2px;
+    }
+    /* The accessibility toggle belongs to `A11yTools.astro`, so it carries
+       THAT component's scope hash — a scoped `.a11y-toggle` written here
+       would compile to a selector that can never match. The whole selector is
+       global for that reason, not for reach. */
+    :global(.floating-cta-group:has(.a11y-toggle:hover) + .floating-cta-group--twin .a11y-toggle) {
+      background: rgb(5 15 104 / 0.12);
     }
   }
 
