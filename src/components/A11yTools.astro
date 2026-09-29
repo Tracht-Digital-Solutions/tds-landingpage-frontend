@@ -253,16 +253,66 @@ const toggles = [
     }
     sync();
 
-    // The same bounce as the modals, on opening. Motion is loaded on the first
-    // open, never before; without it (or with motion off) the panel just shows.
+    /* The same bounce as the modals, on opening.
+
+       ### Why the start state is set in `beforetoggle`
+
+       It used to be set by Motion, inside the `.then()` of the dynamic import.
+       So the panel was shown by the browser at full size and full opacity,
+       painted, and only when the module arrived was it yanked back to
+       `scale: 0.86`, 16px down and invisible to spring in from there. That is
+       the flash and the jump: the first frames were the finished panel.
+
+       Two changes fix it and both are needed. `beforetoggle` runs BEFORE the
+       popover is shown, synchronously, so the very first painted frame is
+       already the start of the animation — no `await` sits between the two.
+       And the module is warmed on hover and focus, so by the time anyone
+       clicks it is usually resolved already.
+
+       The inline styles are always cleared again — on close, when the spring
+       finishes, and in `catch`. Without that last one a failed import would
+       leave the panel at `opacity: 0`: open, focus-trapping, and invisible. */
+    const rest = () => {
+      panel.style.opacity = "";
+      panel.style.transform = "";
+    };
+
+    let motion: Promise<typeof import("@tracht-digital-solutions/tds-shared/motion/dom")> | null = null;
+    const warm = () => {
+      motion ??= import("@tracht-digital-solutions/tds-shared/motion/dom");
+    };
+    opener.addEventListener("pointerenter", warm, { once: true });
+    opener.addEventListener("focus", warm, { once: true });
+
+    panel.addEventListener("beforetoggle", (event) => {
+      if ((event as ToggleEvent).newState !== "open") return;
+      if (lessMotion()) {
+        rest();
+        return;
+      }
+      // Motion's own transform order — translate, then scale — so this frame
+      // and its first frame are the same picture. The other order scales the
+      // offset and the panel would visibly shift on the handover.
+      panel.style.opacity = "0";
+      panel.style.transform = "translateY(16px) scale(0.86)";
+    });
+
     panel.addEventListener("toggle", (event) => {
-      if ((event as ToggleEvent).newState !== "open" || lessMotion()) return;
-      void import("@tracht-digital-solutions/tds-shared/motion/dom")
-        .then(({ animate }) => {
-          void animate(panel, { scale: [0.86, 1], y: [16, 0] }, { type: "spring", bounce: 0.42, visualDuration: 0.36 });
-          void animate(panel, { opacity: [0, 1] }, { duration: 0.16 });
+      if ((event as ToggleEvent).newState !== "open") {
+        rest();
+        return;
+      }
+      if (lessMotion()) return;
+      warm();
+      void motion!
+        .then(async ({ animate }) => {
+          await Promise.all([
+            animate(panel, { scale: [0.86, 1], y: [16, 0] }, { type: "spring", bounce: 0.42, visualDuration: 0.36 }),
+            animate(panel, { opacity: [0, 1] }, { duration: 0.16 }),
+          ]);
+          rest();
         })
-        .catch(() => {});
+        .catch(rest);
     });
     opener.hidden = false;
   }

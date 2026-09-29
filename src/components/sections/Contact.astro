@@ -503,24 +503,40 @@ const phoneHref = phoneDisplay.replace(/\s/g, "");
     opacity: 1;
   }
 
-  /* Subtle white wash on the input area itself when focused —
-     gives the field a quiet "warm spotlight" feel without painting
-     a full input box. Sits under the text via z-index. */
+  /* The field is PRESSED INTO the block (2026-09-29, asked for).
+
+     It used to be a transparent strip that only warmed up on focus. Now it is a
+     recessed trough: a darker ground with a hard inset shadow on the top and
+     left edges — the same shadow language as everything else on these sites,
+     just pointing inwards. `--tds-shadow-inset` from tds-shared is tuned for a
+     light surface (13% black), which is invisible on navy, so the ink is spelled
+     out here for this one dark ground.
+
+     The wash is now DARKER on focus, not lighter. A field that brightens as it
+     is pressed in is two opposite cues at once; going deeper says the same thing
+     as the shadow.
+
+     `!important` throughout: the element carries Tailwind's `bg-transparent`,
+     which is a utility and would otherwise win. */
   .contact-field {
     position: relative;
     z-index: 1;
-    border-radius: 4px 4px 0 0;
-    transition: background-color 220ms ease;
+    border-radius: 4px;
+    background-color: rgb(0 0 0 / 0.16) !important;
+    box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.3);
+    transition:
+      background-color 220ms ease,
+      box-shadow 220ms ease;
   }
-  /* Faint wash on hover (before focus) so the field warms up under the
-     cursor. */
   .contact-field-row:hover .contact-field:not(:focus) {
-    background-color: rgb(255 255 255 / 0.07) !important;
+    background-color: rgb(0 0 0 / 0.22) !important;
   }
   .contact-field:focus {
-    background-color: rgb(255 255 255 / 0.16) !important;
-    /* The inset line only — the soft pink glow went with the 2D pass. */
-    box-shadow: 0 -1px 0 rgb(255 255 255 / 0.12) inset;
+    background-color: rgb(0 0 0 / 0.28) !important;
+    /* Deeper, so focus reads as pressed further in rather than as a different
+       kind of highlight. The growing accent rule under the row is what carries
+       the colour. */
+    box-shadow: inset 3px 3px 0 0 rgb(0 0 0 / 0.38);
   }
 
   /* Error variant — solid pink baseline so the broken field reads
