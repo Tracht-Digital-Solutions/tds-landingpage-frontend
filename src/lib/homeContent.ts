@@ -64,9 +64,22 @@ export interface WhyMeContent {
   p1: string;
   p2: string;
   /**
-   * Not rendered since the 2026-09 redesign — the hero's trust card carries
-   * three facts that can be checked instead. Kept in the shape so a stored
-   * `why_me` block stays readable in the editor.
+   * Why this work, in the first person. The one thing on the page that can
+   * only come from Julian — which is why it replaced the claim tiles rather
+   * than joining them.
+   */
+  motivation: {
+    title: string;
+    /** Paragraphs. Two; a third turns a motivation into an essay. */
+    body: string[];
+  };
+  /**
+   * THREE of these four render (2026-09-29): the section used to print none,
+   * which is what made its right column look like a layout bug. "Verständlich
+   * erklärt" stays out — it is the one entry a visitor cannot check, and the
+   * two paragraphs above it are the demonstration.
+   *
+   * All four stay in the shape so a stored `why_me` block keeps loading.
    */
   reasons: Array<{
     title: string;
@@ -261,6 +274,13 @@ const content: Record<Lang, HomeContent> = {
       lead: "Du brauchst *einen Ansprechpartner* – nicht fünf Anbieter.",
       p1: "Ich übernehme bestehende Seiten und Shops, statt alles neu zu bauen.",
       p2: "Danach bleibe ich auf Wunsch dein Ansprechpartner – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
+      motivation: {
+        title: "Warum ich das mache",
+        body: [
+          "Ich habe zu oft gesehen, woran digitale Arbeit hängt: eine Tabelle hier, ein Zettel dort, ein Zugang für alle.",
+          "Das ist mein Antrieb. Ich baue, was zum Ablauf passt – und was sicher ist, ohne dass du dich darum kümmern musst.",
+        ],
+      },
       reasons: [
         {
           title: "Ich übernehme Bestehendes",
@@ -283,7 +303,7 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "Wobei ich dir",
       headlineAccent: "helfe.",
-      intro: "Vier Leistungen, *ein Ansprechpartner* – ob übernommene Seite oder neuer Aufbau.",
+      intro: "Zwei Wege, *ein Ansprechpartner*: deinen Auftritt in Form bringen – und die Abläufe dahinter digitalisieren.",
     },
     websiteDemos: {
       headline: "Beispielseiten und",
@@ -367,22 +387,27 @@ const content: Record<Lang, HomeContent> = {
       cta: "Erstgespräch vereinbaren",
     },
     pricingLogic: {
+      // Neu 2026-09-29. Die drei Schritte hießen vorher Einordnen / Abrechnen /
+      // Weiter betreuen und beschrieben den ABLAUF einer Rechnung, nicht das,
+      // was den Preis bewegt. Jetzt sagen sie es: Klarheit macht billiger,
+      // Verantwortung macht teurer, und am Ende steht eine Zahl statt einer
+      // Spanne. Keine Stundensätze, keine Bandbreiten.
       title: "So entsteht dein Preis",
       steps: [
         {
-          title: "Einordnen",
-          text: "Im Erstgespräch klären wir Ziel und Umfang.",
+          title: "Wie klar die Aufgabe ist",
+          text: "Ein fertiges Ziel ist günstiger als eine offene Idee. Im Erstgespräch machen wir daraus etwas Zählbares.",
         },
         {
-          title: "Abrechnen",
-          text: "Zum Festpreis als Paket – oder mit einem eigenen Angebot für dein Vorhaben.",
+          title: "Wie viel Verantwortung dranhängt",
+          text: "Eine Infoseite kostet weniger als ein Shop, der Geld annimmt. Wo Zahlungen oder Kundendaten im Spiel sind, wird es teurer.",
         },
         {
-          title: "Weiter betreuen",
-          text: "Für die laufende Betreuung gibt es auf Wunsch Monatsmodelle.",
+          title: "Was am Ende dasteht",
+          text: "Passt es in ein Paket, gilt der Festpreis. Sonst bekommst du ein eigenes Angebot – mit Preis und Termin, vor der Zusage.",
         },
       ],
-      note: "Der Aufwand hängt vom Umfang ab und davon, wie klar die Aufgabe ist.",
+      note: "Was ich nicht einschätzen kann, schätze ich nicht: dann sehe ich vorher hinein und sage dir danach den Preis.",
     },
   },
   en: {
@@ -403,6 +428,13 @@ const content: Record<Lang, HomeContent> = {
       lead: "You need *one point of contact* – not five suppliers.",
       p1: "I take over existing sites and shops instead of rebuilding everything.",
       p2: "After that I stay your point of contact if you want – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
+      motivation: {
+        title: "Why I do this",
+        body: [
+          "I have seen too often what digital work hangs on: a spreadsheet here, a note there, one login for everyone.",
+          "That is what drives me. I build what fits the way you work – and what is secure, without you having to think about it.",
+        ],
+      },
       reasons: [
         {
           title: "I take over what exists",
@@ -425,7 +457,7 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "How I can",
       headlineAccent: "help.",
-      intro: "Four services, *one point of contact* – whether taken over or built new.",
+      intro: "Two routes, *one point of contact*: getting your presence into shape – and digitalizing the work behind it.",
     },
     websiteDemos: {
       headline: "Example sites and",
@@ -512,19 +544,19 @@ const content: Record<Lang, HomeContent> = {
       title: "How your price comes about",
       steps: [
         {
-          title: "Assess",
-          text: "In the first conversation we clarify goal and scope.",
+          title: "How clear the task is",
+          text: "A finished goal costs less than an open idea. The first conversation turns yours into something countable.",
         },
         {
-          title: "Invoice",
-          text: "At a fixed price as a package – or with a quote of its own for your project.",
+          title: "How much responsibility it carries",
+          text: "An information page costs less than a shop that takes money. Where payments or customer data are involved, it gets more expensive.",
         },
         {
-          title: "Look after it",
-          text: "Monthly arrangements are available for ongoing support.",
+          title: "What stands at the end",
+          text: "If it fits a package, the fixed price applies. Otherwise you get a quote of its own – with a price and a date, before you commit.",
         },
       ],
-      note: "The effort depends on the scope and on how clearly the task is defined.",
+      note: "What I cannot assess, I do not estimate: then I look into it first and give you the price afterwards.",
     },
   },
 };

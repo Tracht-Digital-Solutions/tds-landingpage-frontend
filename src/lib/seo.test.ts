@@ -64,6 +64,8 @@ const DESCRIPTION_SOURCES: Record<string, string> = {
   "src/pages/en/business-card.astro": "src/components/BusinessCardPage.astro",
   "src/pages/qualifikationen.astro": "src/components/CredentialsPage.astro",
   "src/pages/en/qualifications.astro": "src/components/CredentialsPage.astro",
+  "src/pages/fragen.astro": "src/components/QuestionsPage.astro",
+  "src/pages/en/questions.astro": "src/components/QuestionsPage.astro",
 };
 
 function renderedDescriptions(rel: string): string[] {
@@ -88,6 +90,8 @@ const INDEXABLE_PAGES = [
   "src/pages/en/business-card.astro",
   "src/pages/qualifikationen.astro",
   "src/pages/en/qualifications.astro",
+  "src/pages/fragen.astro",
+  "src/pages/en/questions.astro",
   "src/pages/legal/impressum.astro",
   "src/pages/legal/datenschutz.astro",
 ] as const;

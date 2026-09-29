@@ -18,7 +18,16 @@
  */
 
 export const EXPLORER_DESKTOP_QUERY = "(min-width: 64rem)";
-export const HOVER_INTENT_MS = 140;
+/**
+ * How long a pointer has to rest on a title before its panel opens.
+ *
+ * 80ms since 2026-09-29, down from 140. The delay exists to reject a pointer
+ * that is only crossing the list on its way somewhere else, and a crossing
+ * pointer spends well under 50ms per title — 140 bought no extra rejection and
+ * spent it all on the deliberate hover, which is the one that has to feel
+ * immediate. A click never waits for this at all (see the `click` handler).
+ */
+export const HOVER_INTENT_MS = 80;
 
 /** The title a key press moves the focus to, or `null` for any other key. */
 export function nextIndex(current: number, key: string, count: number): number | null {
@@ -90,7 +99,13 @@ export function mountServiceExplorer(root: HTMLElement, options: MountOptions = 
 
   let hoverTimer = 0;
   buttons.forEach((button, index) => {
-    button.addEventListener("click", () => show(afterClick(open, index, desktop.matches), true));
+    button.addEventListener("click", () => {
+      // A click is a decision; it never waits for the hover intent, and it
+      // cancels a pending one so the timer cannot re-open what the click just
+      // closed on the accordion.
+      window.clearTimeout(hoverTimer);
+      show(afterClick(open, index, desktop.matches), true);
+    });
     button.addEventListener("keydown", (event) => {
       const target = nextIndex(index, event.key, buttons.length);
       if (target === null) return;

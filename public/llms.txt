@@ -24,18 +24,19 @@ Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.
   einer Hand: bauen, zu den Kunden bringen, dauerhaft pflegen.
   https://tracht-digital.de/leistungen/webauftritt
   (English: https://tracht-digital.de/en/services/web-presence)
-- **Beratung & Konzeption** (auf Anfrage) — digitale Vorhaben sortieren,
-  Möglichkeiten mit Kosten und Folgen zeigen, daraus einen klaren Fahrplan
-  machen.
-  https://tracht-digital.de/leistungen/beratung-konzeption
-  (English: https://tracht-digital.de/en/services/consulting-planning)
-- **Prozessoptimierung** (auf Anfrage) — tägliche Abläufe ansehen,
-  unnötige Schritte streichen, automatisieren, was Zeit spart.
+- **Abläufe digitalisieren** (auf Anfrage) — einen Ablauf durchgehen, die
+  Schritte streichen, die niemand braucht, den Rest einmal richtig einrichten.
+  Früher "Prozessoptimierung"; die Adresse ist unverändert.
   https://tracht-digital.de/leistungen/prozessoptimierung
   (English: https://tracht-digital.de/en/services/process-optimization)
+- **Beratung & Konzeption** (auf Anfrage) — digitale Vorhaben sortieren,
+  Möglichkeiten mit Kosten nennen, sagen was zuerst dran ist — auch wenn die
+  Antwort "noch nicht" lautet.
+  https://tracht-digital.de/leistungen/beratung-konzeption
+  (English: https://tracht-digital.de/en/services/consulting-planning)
 - **Individuelle Lösungen** (auf Anfrage) — vorhandene Programme
-  verbinden, passende Werkzeuge ergänzen, eigene Software nur dort bauen, wo
-  sie hilft.
+  verbinden, passende Werkzeuge ergänzen, eigene Software nur dort bauen, wo es
+  ohne nicht geht.
   https://tracht-digital.de/leistungen/individuelle-loesungen
   (English: https://tracht-digital.de/en/services/tailored-solutions)
 
@@ -70,8 +71,11 @@ nach einem eigenen Angebot, bevor die Arbeit beginnt.
 ## Weitere Seiten
 
 - Startseite: https://tracht-digital.de/ (English: https://tracht-digital.de/en/)
-- Stundensätze: https://tracht-digital.de/#preise
+- Preise: https://tracht-digital.de/#preise
 - Kontaktformular: https://tracht-digital.de/#contact
+- Häufige Fragen (alle zwölf, nach Übernahme, Preisen und Zusammenarbeit
+  gruppiert): https://tracht-digital.de/fragen
+  (English: https://tracht-digital.de/en/questions)
 - Digitale Visitenkarte: https://tracht-digital.de/visitenkarte
   (English: https://tracht-digital.de/en/business-card)
 - Qualifikationen (abgeschlossene Weiterbildungen, jedes Zertifikat im

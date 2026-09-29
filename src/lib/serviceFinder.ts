@@ -33,8 +33,14 @@
 import type { Lang } from "./i18n";
 import type { ServiceId } from "./services";
 
-/** The catalogue order — also the tie-breaker between equally strong matches. */
-export const SERVICE_ORDER: readonly ServiceId[] = ["web-presence", "consulting", "process", "solutions"];
+/**
+ * The catalogue order — also the tie-breaker between equally strong matches.
+ *
+ * A hand-kept mirror of `serviceDefinitions`, because this file is bundled into
+ * the island and may not import it at runtime (see the note above). Its drift
+ * is caught by `serviceFinder.test.ts`, which reads the real catalogue.
+ */
+export const SERVICE_ORDER: readonly ServiceId[] = ["web-presence", "process", "consulting", "solutions"];
 
 export type TopicId = ServiceId | "unsure";
 export type StageId = "clear" | "rough" | "open";

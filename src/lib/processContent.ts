@@ -37,7 +37,7 @@ const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessSt
     label: "— Vorgehen",
     headline: "So arbeiten",
     headlineAccent: "wir zusammen.",
-    body: "Vier Schritte. An jedem weißt du, was passiert und was du danach hast.",
+    body: "Vier Schritte. Nach jedem hast du etwas in der Hand – kein Zwischenstand, den nur ich lesen kann.",
     steps: [
       {
         number: "01",
@@ -50,25 +50,28 @@ const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessSt
         // standen wortgleich auf derselben Seite, 26 Zeilen auseinander. Was
         // das Erstgespräch ist, sagt das Formular nach dem Absenden; dieser
         // Schritt sagt, was daraus folgt.
-        description: "Du zeigst mir, was du hast und was dich aufhält. Ich frage nach und sage dir, was sich lohnt.",
+        //
+        // Neu formuliert 2026-09-29: jeder Satz endet bei dem, was DU danach
+        // hast, nicht bei dem, was ich tue.
+        description: "Du zeigst mir, was du hast und wo es hakt. Du gehst mit einer Einschätzung raus, was sich lohnt – und was nicht.",
       },
       {
         number: "02",
         title: "Konzept & Angebot",
         duration: "Bevor Budget fließt",
-        description: "Ich halte fest, was gebraucht wird, welcher Weg sinnvoll ist und was er kostet.",
+        description: "Du bekommst schriftlich, was gebaut wird, was es kostet und wann es fertig ist. Erst danach entscheidest du.",
       },
       {
         number: "03",
         title: "Umsetzung",
         duration: "In kurzen Schritten",
-        description: "Ich baue es und zeige dir früh Zwischenstände zum Ausprobieren.",
+        description: "Du siehst früh etwas, das du anklicken kannst – nicht erst am Ende. Was nicht passt, sagst du, solange es noch billig zu ändern ist.",
       },
       {
         number: "04",
         title: "Übergabe & Betreuung",
         duration: "Ohne Bindung",
-        description: "Übergabe mit Einweisung. Danach kümmere ich mich auf Wunsch weiter.",
+        description: "Du bekommst alle Zugänge und eine Einweisung. Danach kümmere ich mich weiter – oder du machst allein weiter.",
       },
     ],
   },
@@ -76,31 +79,31 @@ const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessSt
     label: "— Process",
     headline: "How we",
     headlineAccent: "work together.",
-    body: "Four steps. At each one you know what happens and what you have afterwards.",
+    body: "Four steps. After each one you have something in hand – not a progress report only I can read.",
     steps: [
       {
         number: "01",
         title: "First conversation",
         duration: "The way in",
-        description: "You show me what you have and what holds you up. I ask, and tell you what is worth doing.",
+        description: "You show me what you have and where it hurts. You leave with an assessment of what is worth doing – and what is not.",
       },
       {
         number: "02",
         title: "Concept & quote",
         duration: "Before any budget is spent",
-        description: "I set down what is needed, which route makes sense and what it costs.",
+        description: "You get it in writing: what gets built, what it costs and when it is done. You decide after that, not before.",
       },
       {
         number: "03",
         title: "Build",
         duration: "In short steps",
-        description: "I build it and show you work in progress early, to try out.",
+        description: "You see something you can click early on, not only at the end. What does not fit, you say while it is still cheap to change.",
       },
       {
         number: "04",
         title: "Handover & support",
         duration: "No tie-in",
-        description: "Handover with a walkthrough. After that I keep going if you want.",
+        description: "You get every login and a walkthrough. After that I keep going – or you carry on without me.",
       },
     ],
   },

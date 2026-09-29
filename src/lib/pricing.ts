@@ -57,8 +57,12 @@ export interface PricingContent {
 const defaults: Record<Lang, PricingContent> = {
   de: {
     label: "— Preise",
-    headline: "Preise ohne",
-    headlineAccent: "Überraschungen.",
+    // "Preise ohne Überraschungen." bis 2026-09-29. Eine Beteuerung, und eine,
+    // die nur jemand ausspricht, der mit Überraschungen rechnet — die drei
+    // Festpreise darunter sagen dasselbe, nur als Tatsache. Die Überschrift
+    // beantwortet jetzt die Frage, mit der jeder hierher scrollt.
+    headline: "Was es",
+    headlineAccent: "kostet.",
     sub: "Drei Pakete zum *Festpreis*. Alles andere bekommst du als eigenes Angebot.",
     notesTitle: "Gut zu wissen",
     // Festpreis and Angebot are steps of `pricing_logic` (homeContent.ts),
@@ -72,8 +76,8 @@ const defaults: Record<Lang, PricingContent> = {
   },
   en: {
     label: "— Pricing",
-    headline: "Pricing without",
-    headlineAccent: "surprises.",
+    headline: "What it",
+    headlineAccent: "costs.",
     sub: "Three packages at a *fixed price*. Everything else gets its own quote.",
     notesTitle: "Good to know",
     notes: [],

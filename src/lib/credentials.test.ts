@@ -186,7 +186,17 @@ describe("the teaser in the about section", () => {
   it("is not reachable from the CMS", () => {
     // `why_me` stays editable; a qualification is not copy. An editor able to
     // retype these could publish one that does not exist.
-    const teaser = about.slice(about.indexOf("credentials-teaser"));
+    //
+    // Comments are stripped before the slice. The anchor is a class name, and
+    // the file explains its own layout in prose above the markup — so the
+    // moment that prose mentions `.credentials-teaser` (it does, to say where
+    // the shared seam came from) an unstripped slice starts in the comment
+    // block and swallows the `cmsFor` call at the top of the frontmatter. That
+    // failed on a documentation edit while the invariant held.
+    const code = about
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    const teaser = code.slice(code.indexOf("credentials-teaser"));
     expect(teaser).not.toContain("cmsFor");
   });
 });

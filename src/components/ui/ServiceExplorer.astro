@@ -437,9 +437,13 @@ const panelRows = "1 / -1";
       border-radius: 6px;
       background: var(--color-surface-navy);
       box-shadow: var(--tds-shadow-hard-sm);
+      /* 260ms, down from 380 (2026-09-29). The marker is the fastest signal
+         that the click landed, so it must not be the slowest thing on screen —
+         it now settles before the panel's own spring does. The bounce still
+         reads at this length; below ~200ms it flattens into a slide. */
       transition:
-        translate 380ms var(--lp-ease-bounce, var(--tds-ease-out)),
-        height 380ms var(--tds-ease-out);
+        translate 260ms var(--lp-ease-bounce, var(--tds-ease-out)),
+        height 260ms var(--tds-ease-out);
     }
   }
 
@@ -457,21 +461,60 @@ const panelRows = "1 / -1";
   import { mountServiceExplorer } from "~/lib/serviceExplorer";
   import { lessMotion } from "~/lib/a11yPrefs";
 
+  /**
+   * Motion, WARMED BEFORE THE FIRST SWITCH RATHER THAN DURING IT.
+   *
+   * It used to be imported inside `onOpen`, which is what made the switch feel
+   * late (reported 2026-09-29). `show()` unhides the panel synchronously, so
+   * the content was already on screen by the time the module arrived — and the
+   * animation then started from `opacity: 0` and faded the visible panel in a
+   * second time, one network round trip after the click. The durations were the
+   * smaller half of the problem.
+   *
+   * So: warm it on the first sign of interest, and if it still has not arrived
+   * when a panel opens, animate NOTHING. A panel that simply appears reads as
+   * instant; a panel that appears and then fades in reads as broken.
+   */
+  type MotionDom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
+  let motion: MotionDom | null = null;
+  let warming = false;
+
+  const warmMotion = () => {
+    if (motion || warming || lessMotion()) return;
+    warming = true;
+    void import("@tracht-digital-solutions/tds-shared/motion/dom")
+      .then((module) => {
+        motion = module;
+      })
+      .catch(() => {
+        // Stays null, so every switch is a plain unhide. Nothing to report.
+      });
+  };
+
   document.querySelectorAll<HTMLElement>("[data-service-explorer]").forEach((root) => {
+    // Interest, in the three ways it can arrive. `once` on each: the module is
+    // fetched one time and cached in `motion` from then on.
+    root.addEventListener("pointerenter", warmMotion, { once: true });
+    root.addEventListener("focusin", warmMotion, { once: true });
+    root.addEventListener("touchstart", warmMotion, { once: true, passive: true });
+
     mountServiceExplorer(root, {
       onOpen: (panel) => {
         if (lessMotion()) return;
-        // The panel's content arrives on a short spring — the photo settles
-        // from a hair larger, the text rises. Motion is loaded on the first
-        // switch, never before.
-        void import("@tracht-digital-solutions/tds-shared/motion/dom")
-          .then(({ animate }) => {
-            const shot = panel.querySelector<HTMLElement>("[data-explorer-shot] img");
-            const body = panel.querySelector<HTMLElement>("[data-explorer-body]");
-            if (shot) void animate(shot, { scale: [1.06, 1], opacity: [0.4, 1] }, { type: "spring", bounce: 0, visualDuration: 0.5 });
-            if (body) void animate(body, { y: [14, 0], opacity: [0, 1] }, { type: "spring", bounce: 0.25, visualDuration: 0.4 });
-          })
-          .catch(() => {});
+        // Not loaded yet (a click inside the first few hundred milliseconds, or
+        // a failed fetch): leave the panel as it is. See the note above.
+        if (!motion) {
+          warmMotion();
+          return;
+        }
+        // The photo settles from a hair larger, the text rises. Short: this is
+        // a control responding, not content arriving — the panel's photo is
+        // server-rendered and was already on screen a moment ago.
+        const { animate } = motion;
+        const shot = panel.querySelector<HTMLElement>("[data-explorer-shot] img");
+        const body = panel.querySelector<HTMLElement>("[data-explorer-body]");
+        if (shot) void animate(shot, { scale: [1.04, 1], opacity: [0.55, 1] }, { type: "spring", bounce: 0, visualDuration: 0.3 });
+        if (body) void animate(body, { y: [10, 0], opacity: [0, 1] }, { type: "spring", bounce: 0.2, visualDuration: 0.24 });
       },
     });
   });

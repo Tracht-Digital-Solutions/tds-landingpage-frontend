@@ -176,9 +176,9 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Webauftritt",
         summary:
-          "Bestehende Website oder Shop übernehmen, reparieren und pflegen – oder neu bauen, wenn sich das nicht mehr lohnt.",
+          "Ich übernehme deine Website oder deinen Shop, bringe sie in Ordnung und pflege sie weiter – auch fremd gebaute.",
         intro:
-          "Meistens muss nichts neu gebaut werden. Ich übernehme, *was trägt* – und ersetze nur, was sich nicht mehr retten lässt.",
+          "Meistens muss nichts neu gebaut werden. Ich sehe mir an, *was trägt*, und ersetze nur, was dich aufhält. Danach bleibt die Seite in Ordnung, ohne dass du an Updates denken musst.",
         situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Deine Website ist veraltet und schwer zu pflegen.",
@@ -224,9 +224,9 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Web Presence",
         summary:
-          "Taking over, repairing and maintaining an existing website or shop – or building new where that no longer pays off.",
+          "I take over your website or shop, put it right and keep it maintained – including one somebody else built.",
         intro:
-          "Usually nothing has to be rebuilt. I take over *what holds up* – and replace only what cannot be saved.",
+          "Usually nothing has to be rebuilt. I look at *what holds up* and replace only what is holding you back. After that the site stays in order without you thinking about updates.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "Your website is outdated and hard to maintain.",
@@ -271,8 +271,122 @@ export const serviceDefinitions = [
     },
   },
   {
-    id: "consulting",
+    id: "process",
     number: "02",
+    cmsKey: "service_process",
+    // The SLUG still says "prozessoptimierung" while the title says "Abläufe
+    // digitalisieren", and that is on purpose: the rename (2026-09-29) was
+    // about the word a customer reads, not about the URL. Changing the slug
+    // would cost a redirect and every inbound link for a word nobody types
+    // into a browser bar anyway. `Prozessoptimierung` survives as a keyword
+    // chip and inside the title, because it IS what people search for.
+    slug: { de: "prozessoptimierung", en: "process-optimization" },
+    seoTitle: {
+      de: "Abläufe digitalisieren: Prozesse automatisieren — Tracht Digital",
+      en: "Digitalizing Workflows & Automating Processes — Tracht Digital",
+    },
+    updatedAt: "2026-09-29",
+    keywords: {
+      de: ["Abläufe", "Prozessoptimierung", "Automatisierung", "Weniger Handarbeit"],
+      en: ["Workflows", "Process optimization", "Automation", "Less manual work"],
+    },
+    image: "/images/services/02-prozesse.webp",
+    fallback: {
+      de: {
+        label: "Alle Leistungen",
+        title: "Abläufe digitalisieren",
+        summary:
+          "Nenn mir einen Ablauf, der dich jede Woche Zeit kostet. Ich baue ihn so um, dass die Arbeit von selbst passiert.",
+        intro:
+          "Digitalisierung heißt nicht, alles neu zu machen. Ich gehe einen Ablauf mit dir durch, streiche die Schritte, die niemand braucht, und richte den Rest *einmal richtig* ein. Wo eine Tabelle nur ein Behelf war, steht danach etwas, das zu deiner Arbeit passt.",
+        situationsTitle: "Kommt dir das bekannt vor?",
+        situations: [
+          "Dieselben Daten werden mehrfach eingetippt.",
+          "Freigaben und Rückfragen kosten jedes Mal Zeit.",
+          "Bei Routinearbeiten schleichen sich Fehler ein.",
+        ],
+        responsibilitiesTitle: "Das übernehme ich",
+        responsibilities: [
+          "Den heutigen Ablauf mit deinem Team durchgehen",
+          "Zeitfresser und Fehlerquellen finden",
+          "Einen einfacheren Weg einrichten – mit passender Automatisierung",
+        ],
+        outcomesTitle: "Das erreichst du",
+        outcomes: [
+          "Du tippst Daten nicht mehr doppelt",
+          "Weniger Fehler durch Handarbeit",
+          "Mehr Zeit für deine eigentliche Arbeit",
+        ],
+        boundariesTitle: "Was nicht dazugehört",
+        boundaries: [
+          "Nicht jeder Sonderfall lohnt eine Automatisierung.",
+          "Änderungen stimmen wir mit deinem Team ab.",
+        ],
+        processTitle: "So gehen wir vor",
+        process: [
+          "Ablauf mitverfolgen und aufschreiben",
+          "Die größten Zeitfresser zuerst angehen",
+          "Einführen und bei Bedarf nachbessern",
+        ],
+        priceLabel: "Preis",
+        priceText: "Auf Anfrage. Sobald Ablauf und Ziel klar sind, bekommst du einen Festpreis.",
+        referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
+        referencesHeadline: "Einblicke aus der Praxis",
+        references: [],
+        ctaTitle: "Welcher Ablauf kostet dich jede Woche Zeit?",
+        ctaText: "Beschreib ihn kurz. Wir prüfen, ob sich eine Vereinfachung lohnt.",
+        ctaButton: "Erstgespräch vereinbaren",
+      },
+      en: {
+        label: "All services",
+        title: "Digitalizing Workflows",
+        summary:
+          "Name a routine that costs you time every week. I rebuild it so the work happens on its own from then on.",
+        intro:
+          "Digitalizing does not mean starting over. I walk one routine through with you, cut the steps nobody needs, and set the rest up *once, properly*. Where a spreadsheet was only a workaround, something that fits the way you work stands instead.",
+        situationsTitle: "Does this sound familiar?",
+        situations: [
+          "The same data gets typed in more than once.",
+          "Approvals and follow-up questions cost time every time.",
+          "Mistakes creep into routine work.",
+        ],
+        responsibilitiesTitle: "What I take care of",
+        responsibilities: [
+          "Walk through the current workflow with your team",
+          "Find the time sinks and error sources",
+          "Set up a simpler way – with the right automation",
+        ],
+        outcomesTitle: "What you achieve",
+        outcomes: [
+          "You stop typing the same data twice",
+          "Fewer mistakes from manual work",
+          "More time for the actual work",
+        ],
+        boundariesTitle: "What this does not cover",
+        boundaries: [
+          "Not every exception is worth automating.",
+          "Changes are agreed with your team.",
+        ],
+        processTitle: "How we proceed",
+        process: [
+          "Follow the workflow and write it down",
+          "Tackle the biggest time sinks first",
+          "Roll it out and refine it",
+        ],
+        priceLabel: "Price",
+        priceText: "On request. Once the workflow and the goal are clear, you get a fixed price.",
+        referencesLabel: "Published only with the client's approval.",
+        referencesHeadline: "Examples from practice",
+        references: [],
+        ctaTitle: "Which routine costs you time every week?",
+        ctaText: "Describe it briefly. We check whether simplifying it is worth it.",
+        ctaButton: "Arrange an initial consultation",
+      },
+    },
+  },
+  {
+    id: "consulting",
+    number: "03",
     cmsKey: "service_consulting",
     slug: { de: "beratung-konzeption", en: "consulting-planning" },
     seoTitle: {
@@ -290,9 +404,9 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Beratung & Konzeption",
         summary:
-          "Ich sortiere deine digitalen Vorhaben, zeige dir Möglichkeiten mit Kosten und mache daraus einen klaren Fahrplan.",
+          "Ich sortiere deine digitalen Vorhaben, nenne dir Möglichkeiten mit Kosten und sage dir, was zuerst dran ist.",
         intro:
-          "Nicht alles, was technisch geht, lohnt sich. Wir klären zuerst, *was du erreichen willst*.",
+          "Nicht alles, was technisch geht, lohnt sich. Wir klären zuerst, *was du erreichen willst* – danach sage ich dir, was es kostet und was ich an deiner Stelle zuerst anfassen würde. Auch dann, wenn die Antwort lautet: noch nicht.",
         situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Es gibt viele Ideen, aber keine Reihenfolge.",
@@ -335,9 +449,9 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Consulting & Planning",
         summary:
-          "I sort out your digital plans, show you the options and their costs, and turn that into a clear roadmap.",
+          "I sort out your digital plans, name the options with their costs and tell you what to tackle first.",
         intro:
-          "Not everything that is technically possible is worth it. We first work out *what you want to achieve*.",
+          "Not everything that is technically possible is worth it. We first work out *what you want to achieve* – then I tell you what it costs and what I would touch first in your position. Including when the answer is: not yet.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "There are plenty of ideas, but no order to them.",
@@ -379,114 +493,6 @@ export const serviceDefinitions = [
     },
   },
   {
-    id: "process",
-    number: "03",
-    cmsKey: "service_process",
-    slug: { de: "prozessoptimierung", en: "process-optimization" },
-    seoTitle: {
-      de: "Prozessoptimierung & Automatisierung — Tracht Digital",
-      en: "Process Optimization & Automation — Tracht Digital",
-    },
-    updatedAt: "2026-09-15",
-    keywords: {
-      de: ["Abläufe", "Automatisierung", "Weniger Handarbeit"],
-      en: ["Workflows", "Automation", "Less manual work"],
-    },
-    image: "/images/services/02-prozesse.webp",
-    fallback: {
-      de: {
-        label: "Alle Leistungen",
-        title: "Prozessoptimierung",
-        summary:
-          "Ich schaue mir deine täglichen Abläufe an, streiche unnötige Schritte und automatisiere, was spürbar Zeit spart.",
-        intro:
-          "Gute Digitalisierung beginnt mit einem ehrlichen Blick auf deinen Alltag. *Erst verstehen, dann vereinfachen.*",
-        situationsTitle: "Kommt dir das bekannt vor?",
-        situations: [
-          "Dieselben Daten werden mehrfach eingetippt.",
-          "Freigaben und Rückfragen kosten jedes Mal Zeit.",
-          "Bei Routinearbeiten schleichen sich Fehler ein.",
-        ],
-        responsibilitiesTitle: "Das übernehme ich",
-        responsibilities: [
-          "Den heutigen Ablauf mit deinem Team durchgehen",
-          "Zeitfresser und Fehlerquellen finden",
-          "Einen einfacheren Weg einrichten – mit passender Automatisierung",
-        ],
-        outcomesTitle: "Das erreichst du",
-        outcomes: [
-          "Du tippst Daten nicht mehr doppelt",
-          "Weniger Fehler durch Handarbeit",
-          "Mehr Zeit für deine eigentliche Arbeit",
-        ],
-        boundariesTitle: "Was nicht dazugehört",
-        boundaries: [
-          "Nicht jeder Sonderfall lohnt eine Automatisierung.",
-          "Änderungen stimmen wir mit deinem Team ab.",
-        ],
-        processTitle: "So gehen wir vor",
-        process: [
-          "Ablauf mitverfolgen und aufschreiben",
-          "Die größten Zeitfresser zuerst angehen",
-          "Einführen und bei Bedarf nachbessern",
-        ],
-        priceLabel: "Preis",
-        priceText: "Auf Anfrage. Sobald Ablauf und Ziel klar sind, bekommst du einen Festpreis.",
-        referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
-        referencesHeadline: "Einblicke aus der Praxis",
-        references: [],
-        ctaTitle: "Welcher Ablauf kostet dich jede Woche Zeit?",
-        ctaText: "Beschreib ihn kurz. Wir prüfen, ob sich eine Vereinfachung lohnt.",
-        ctaButton: "Erstgespräch vereinbaren",
-      },
-      en: {
-        label: "All services",
-        title: "Process Optimization",
-        summary:
-          "I look at your day-to-day workflows, remove the steps nobody needs and automate what noticeably saves time.",
-        intro:
-          "Good digital work starts with an honest look at your daily routine. *Understand first, then simplify.*",
-        situationsTitle: "Does this sound familiar?",
-        situations: [
-          "The same data gets typed in more than once.",
-          "Approvals and follow-up questions cost time every time.",
-          "Mistakes creep into routine work.",
-        ],
-        responsibilitiesTitle: "What I take care of",
-        responsibilities: [
-          "Walk through the current workflow with your team",
-          "Find the time sinks and error sources",
-          "Set up a simpler way – with the right automation",
-        ],
-        outcomesTitle: "What you achieve",
-        outcomes: [
-          "You stop typing the same data twice",
-          "Fewer mistakes from manual work",
-          "More time for the actual work",
-        ],
-        boundariesTitle: "What this does not cover",
-        boundaries: [
-          "Not every exception is worth automating.",
-          "Changes are agreed with your team.",
-        ],
-        processTitle: "How we proceed",
-        process: [
-          "Follow the workflow and write it down",
-          "Tackle the biggest time sinks first",
-          "Roll it out and refine it",
-        ],
-        priceLabel: "Price",
-        priceText: "On request. Once the workflow and the goal are clear, you get a fixed price.",
-        referencesLabel: "Published only with the client's approval.",
-        referencesHeadline: "Examples from practice",
-        references: [],
-        ctaTitle: "Which routine costs you time every week?",
-        ctaText: "Describe it briefly. We check whether simplifying it is worth it.",
-        ctaButton: "Arrange an initial consultation",
-      },
-    },
-  },
-  {
     id: "solutions",
     number: "04",
     cmsKey: "service_solutions",
@@ -506,9 +512,9 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Individuelle Lösungen",
         summary:
-          "Ich verbinde deine vorhandenen Programme, ergänze passende Werkzeuge und baue eigene Software nur dort, wo sie hilft.",
+          "Ich bringe deine Programme dazu, miteinander zu reden – und baue eigene Software nur da, wo es ohne nicht geht.",
         intro:
-          "Manchmal reicht ein einzelnes Programm nicht. Dann nutze ich deine vorhandene Technik weiter und *ergänze nur, was fehlt*.",
+          "Manchmal reicht ein einzelnes Programm nicht. Dann nutze ich deine vorhandene Technik weiter und *ergänze nur, was fehlt*. Eigene Software ist die letzte Antwort, nicht die erste – sie muss gepflegt werden, und das kostet dich Geld.",
         situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Mehrere Programme arbeiten nicht zusammen.",
@@ -551,9 +557,9 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Tailored Solutions",
         summary:
-          "I connect the programs you already use, add the right tools and build custom software only where it helps.",
+          "I get the programs you already use talking to each other – and build custom software only where nothing else will do.",
         intro:
-          "Sometimes one program is not enough. Then I keep your existing technology and *add only what is missing*.",
+          "Sometimes one program is not enough. Then I keep your existing technology and *add only what is missing*. Custom software is the last answer, not the first — it has to be maintained, and that costs you money.",
         situationsTitle: "Does this sound familiar?",
         situations: [
           "Several programs do not work together.",

@@ -1,0 +1,206 @@
+---
+/**
+ * Häufige Fragen — every question, in three groups.
+ *
+ * ### Why a page of its own
+ *
+ * The home page's budget is six questions (`HOME_FAQ_COUNT`), and twelve there
+ * would have buried the contact section under a screen of accordions. So the
+ * section shows the six a visitor most often arrives with and links here.
+ *
+ * This is also the SEO half of the answer: a page whose whole subject is
+ * questions can rank for them, where six answers buried mid-scroll on the home
+ * page compete with everything else on it.
+ *
+ * ### The structured data
+ *
+ * `FAQPage` over ALL items, because this page shows all of them. The home page
+ * marks up only its six. Marking up an answer a page does not display is the
+ * one thing Google's FAQPage guidance rules out, and the reason the split
+ * exists at all — see the note in `lib/faq.ts`.
+ *
+ * ### Groups
+ *
+ * `FAQ_GROUPS`, in order, and `groupedFaqItems` drops an empty one. Nothing
+ * here sorts: the order inside a group is catalogue order, decided once.
+ */
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
+import FaqAccordion from "~/components/ui/FaqAccordion.astro";
+import { cmsFor } from "~/lib/cms";
+import {
+  faqPageHref,
+  getFaqContent,
+  getFaqPageCopy,
+  groupedFaqItems,
+} from "~/lib/faq";
+import { localizePath, type Lang } from "~/lib/i18n";
+import { asGraph, faqPageSchema, organizationSchema } from "~/lib/jsonld";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// Both wrappers are three-line files around this component, so the meta
+// descriptions live here. The NAME is load-bearing: `seo.test.ts` reads this
+// literal off disk to hold every indexable page inside one length budget.
+const pageDescriptions = {
+  de: "Antworten zu Übernahme bestehender Seiten, Festpreisen, Dauer, Zugängen und Betreuung. Zwölf Fragen, kurz beantwortet, ohne Fachsprache.",
+  en: "Answers on taking over existing sites, fixed prices, timelines, logins and support. Twelve questions, answered briefly, without the jargon.",
+};
+
+// Same CMS block the home page section reads, so an admin edit shows up in both
+// places. `cms.ts` memoises the fetch.
+const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
+const ui = getFaqPageCopy(lang);
+const sections = groupedFaqItems(content);
+
+const homeHref = localizePath("/", lang);
+const contactHref = `${homeHref}#contact`;
+---
+
+<Layout
+  title={ui.seoTitle}
+  description={pageDescriptions[lang]}
+  lang={lang}
+  alternates={{
+    de: faqPageHref("de"),
+    en: faqPageHref("en"),
+  }}
+  jsonLd={asGraph(faqPageSchema(content.items), organizationSchema())}
+>
+  <Header />
+
+  <main id="main">
+    <section class="relative pt-36 pb-12 md:pt-44 md:pb-16" aria-labelledby="questions-title">
+      {/* The page has ONE ground (`.page-ground` in `Layout.astro`); this is
+          only the constructed geometry every detail page opens with. */}
+      <div class="tds-decor" aria-hidden="true">
+        <span
+          class="tds-shape tds-shape--quarter-tl tds-shape--navy"
+          style="right: -8rem; bottom: -11rem; width: 29rem; height: 29rem; --tds-decor-shape-alpha: 0.12;"
+        ></span>
+      </div>
+
+      <div class="relative lp-container">
+        <nav aria-label={lang === "de" ? "Seitenpfad" : "Breadcrumb"} class="mb-10">
+          <a
+            href={homeHref}
+            class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors group [@media(pointer:coarse)]:min-h-11"
+          >
+            <svg
+              aria-hidden="true"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-transform group-hover:-translate-x-0.5"
+            >
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            {ui.backLabel}
+          </a>
+        </nav>
+
+        <div class="max-w-3xl">
+          <h1
+            id="questions-title"
+            class="display text-4xl sm:text-5xl md:text-6xl text-[var(--color-black)] leading-[1.04] mb-6"
+          >
+            {ui.headline}{" "}
+            <AccentLetters text={ui.headlineAccent} />
+          </h1>
+          <span aria-hidden="true" class="tds-brandbar mb-8"></span>
+          <p class="lead text-[var(--color-muted)] mb-5">{ui.intro}</p>
+        </div>
+      </div>
+    </section>
+
+    {
+      sections.map((section) => (
+        <section class="pb-12 md:pb-16" aria-labelledby={`questions-${section.group}`}>
+          <div class="lp-container">
+            <div class="questions-group">
+              <h2
+                id={`questions-${section.group}`}
+                class="display text-2xl md:text-3xl text-[var(--color-black)]"
+              >
+                {ui.groups[section.group]}
+              </h2>
+              {/* A `name` per group, so the rows are exclusive WITHIN a group
+                  and not across the whole page: opening a pricing question
+                  should not shut the takeover one a reader left open above it.
+                  `open={i === 0}` inside the accordion then opens the first row
+                  of each group rather than one row on the page. */}
+              <div class="questions-list">
+                <FaqAccordion items={section.items} name={`faq-${section.group}`} />
+              </div>
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    <section class="pb-20 md:pb-28" aria-labelledby="questions-cta">
+      <div class="lp-container">
+        <div class="questions-cta">
+          <div>
+            <h2 id="questions-cta" class="display text-2xl text-[var(--color-black)]">
+              {ui.ctaTitle}
+            </h2>
+            <p class="questions-cta__text">{ui.ctaText}</p>
+          </div>
+          <a class="btn btn-primary" href={contactHref}>{ui.ctaButton}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* Heading and list as one block per group, with the list indented from `md`
+     so the three group headings form a readable spine down the left. */
+  .questions-group {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .questions-list {
+    display: grid;
+    /* Room for each row's hard shadow and its hover lift (6 + 2 px). */
+    gap: 0.875rem;
+  }
+  @media (min-width: 64rem) {
+    .questions-group {
+      grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+      column-gap: 4rem;
+      align-items: start;
+    }
+  }
+
+  .questions-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 2rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-accent-pink) 16%, var(--color-paper));
+  }
+  .questions-cta__text {
+    margin: 0.5rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+  }
+</style>
