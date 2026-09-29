@@ -288,7 +288,7 @@ const content: Record<Lang, HomeContent> = {
     websiteDemos: {
       headline: "Beispielseiten und",
       headlineAccent: "Designstudien.",
-      intro: "Eigene Demos und Entwürfe – *keine Kundenaufträge*. Die Demos laufen live im Netz.",
+      intro: "Eigene Demos und Entwürfe – *keine Kundenaufträge*.",
       serviceIntro: "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*.",
       headlineSingle: "Eine Beispielseite zum",
       introSingle: "Eine eigene Beispielseite – *kein Kundenauftrag*. Klick dich einfach durch.",
@@ -602,15 +602,32 @@ export function demosCopy(
   variant: "home" | "service",
 ): DemosCopy {
   const single = count === 1;
+  const intro = single
+    ? variant === "service"
+      ? content.serviceIntroSingle
+      : content.introSingle
+    : variant === "service"
+      ? content.serviceIntro
+      : content.intro;
   return {
     headline: single ? content.headlineSingle : content.headline,
     headlineAccent: content.headlineAccent,
-    intro: single
-      ? variant === "service"
-        ? content.serviceIntroSingle
-        : content.introSingle
-      : variant === "service"
-        ? content.serviceIntro
-        : content.intro,
+    intro: dropRetiredSentences(intro),
   };
+}
+
+/**
+ * Sentences the section no longer says, removed from whatever arrives here.
+ *
+ * A render-side removal rather than only an edit to the strings above, and the
+ * same arrangement the "Wieso ich?" section uses: `content` is the committed
+ * copy MERGED WITH a CMS block, so a block an editor saved before today would
+ * otherwise put the sentence straight back — on the live site, with nothing in
+ * this repository to explain it.
+ *
+ * "Die Demos laufen live im Netz." went on 2026-09-29, asked for. The cards say
+ * where they lead; the sentence only repeated it.
+ */
+function dropRetiredSentences(intro: string): string {
+  return intro.replace(/\s*Die Demos laufen live im Netz\.\s*/g, " ").trim();
 }

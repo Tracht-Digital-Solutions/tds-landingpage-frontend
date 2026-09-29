@@ -4,8 +4,6 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { hasBannedWord } from "./copyRules";
 import {
-  credentialIssuers,
-  listSentence,
   CREDENTIAL_GROUPS,
   CREDENTIAL_GROUP_ORDER,
   CREDENTIALS_SLUG,
@@ -134,37 +132,33 @@ describe("the pictures", () => {
 
 describe("the page", () => {
   /**
-   * The sentence that keeps the Microsoft wordmark on the paper from reading
-   * as a certification. These are completed learning paths; saying so is the
-   * same standard every other number on this site is held to.
+   * The framing sentence is gone (2026-09-29, asked for), and so is the
+   * assertion that it must be there. What replaces it as the honest signal is
+   * per-card: the issuer line, and the picture of the document itself.
    */
-  it("says what these are and what they are not", () => {
-    // The PROVIDER is not asserted here any more: it is read from the catalog
-    // (`credentialIssuers()`), so a certificate from somewhere other than
-    // LinkedIn Learning changes the sentence rather than making it a lie. What
-    // is asserted is the limitation, which holds whoever issued the thing.
-    expect(page).toContain("credentialIssuers()");
-    expect(page).toMatch(/keine Herstellerprüfung und kein Hochschulabschluss/);
-    expect(page).toMatch(/not a vendor exam and not an academic degree/);
-  });
-
-  it("names the providers from the catalog, never in prose", () => {
-    const { platforms, partners } = credentialIssuers();
-    expect(platforms.length, "a platform per certificate").toBeGreaterThan(0);
-    expect(partners.length, "at least one partner").toBeGreaterThan(0);
-    // Every issuer the catalog holds has to survive the split, or the sentence
-    // silently drops one.
-    for (const entry of credentials) {
-      const [platform] = entry.issuer.split("·").map((part) => part.trim());
-      expect(platforms, entry.id).toContain(platform);
+  /**
+   * The count counts itself.
+   *
+   * Both places that state a number — the page lead and the teaser link —
+   * interpolate `credentials.length`. A literal there reads perfectly and is
+   * wrong the moment a certificate is added or removed, which is exactly the
+   * kind of mistake nobody reviews. So the number is asserted to be absent.
+   */
+  it("takes the number of records from the catalog, never from the copy", () => {
+    expect(page).toContain("${credentials.length} Nachweise");
+    expect(about).toContain("${credentials.length} Nachweise");
+    for (const source of [page, about]) {
+      expect(source).not.toMatch(/d+ Nachweise/);
+      expect(source).not.toMatch(/d+ (records|credentials)/);
     }
   });
 
-  it("joins a list the way each language does", () => {
-    expect(listSentence(["a"], "de")).toBe("a");
-    expect(listSentence(["a", "b"], "de")).toBe("a und b");
-    expect(listSentence(["a", "b", "c"], "en")).toBe("a, b and c");
-    expect(listSentence([], "de")).toBe("");
+  it("names its issuer on every card rather than once in prose", () => {
+    for (const entry of credentials) {
+      expect(entry.issuer.trim(), entry.id).not.toBe("");
+    }
+    expect(page).not.toMatch(/Herstellerpr/);
+    expect(page).not.toMatch(/vendor exam/);
   });
 
   it("is listed in the sitemap, in both languages", () => {
