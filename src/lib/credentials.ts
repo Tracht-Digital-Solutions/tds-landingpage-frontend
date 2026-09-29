@@ -308,41 +308,13 @@ export function credentialsInGroup(group: CredentialGroupId): Credential[] {
   return credentials.filter((entry) => entry.group === group);
 }
 
-/**
- * Who issued these, split into the platform and the partners whose content it
- * was — read from the catalog rather than written into the page's copy.
- *
- * `issuer` is spelled "<platform> · <partner>", and a certificate that has no
- * partner is just "<platform>". The page's framing sentence is built from this,
- * so adding a certificate from a provider that is not LinkedIn Learning changes
- * the sentence by itself. That is the point: the page had "13 abgeschlossene
- * Lernpfade bei LinkedIn Learning" written into it, which would have been wrong
- * the day the fourteenth came from somewhere else.
+/*
+ * `credentialIssuers()` and `listSentence()` lived here until 2026-09-29: they
+ * built the page's framing sentence out of the catalog, so adding a certificate
+ * from another provider rewrote it by itself. The sentence was removed on
+ * request, and with it the only caller of either. Each card still names its own
+ * issuer.
  */
-export function credentialIssuers(): { platforms: string[]; partners: string[] } {
-  const platforms = new Set<string>();
-  const partners = new Set<string>();
-  for (const entry of credentials) {
-    const [platform, partner] = entry.issuer.split("·").map((part) => part.trim());
-    if (platform) platforms.add(platform);
-    if (partner) partners.add(partner);
-  }
-  return { platforms: [...platforms], partners: [...partners] };
-}
-
-/**
- * "a, b und c" / "a, b and c" — for the framing sentence above.
- *
- * Here rather than at the call site because the page builds two of these and
- * the two languages join a list differently.
- */
-export function listSentence(items: readonly string[], lang: Lang): string {
-  if (items.length === 0) return "";
-  if (items.length === 1) return items[0]!;
-  const last = items.at(-1)!;
-  const rest = items.slice(0, -1).join(", ");
-  return `${rest} ${lang === "de" ? "und" : "and"} ${last}`;
-}
 
 /**
  * The three the "Wieso ich?" section names.
