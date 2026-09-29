@@ -258,6 +258,31 @@ const pricesHref = `${home}#preise`;
     /* `clip` on one axis needs the other to be explicit, or it resolves to
        `auto` and re-creates the scroll container this exists to prevent. */
     overflow-y: visible;
+    /* Room for what the answer cards paint OUTSIDE their own box.
+
+       The clip was tight against the content and the cards sit flush with it in
+       both columns, so the grid was cut on every side that carries something.
+       Measured at 1440px, with the track spanning 304..1136:
+
+         right card at rest  727..1136 → its 3px shadow cut away entirely
+         right card hovered  725..1134 + 5px shadow → cut by 3px
+         left card hovered   moves to 302 → cut by 2px
+         either card focused → 2px ring at 3px offset, cut
+
+       Padding with a matching negative margin, NOT `overflow-clip-margin`.
+       That property computes here (`12px` in the inspector) and Chromium
+       ignores it: it only honours a clip margin when BOTH axes clip, and this
+       element clips one. Verified by probe — with it set, the pixel beside the
+       right card's edge was still the page, `250,250,247`, while the left
+       card's shadow read `5,15,104`.
+
+       The two cancel out: the border box grows by the margins and the content
+       box lands exactly where it did, so no card changes width or position.
+       Only the CLIP edge moves outward — 8px on the left for the hover offset,
+       12px on the right for the hover shadow and the focus ring. The scrollbar
+       this clip exists to prevent stays prevented either way. */
+    margin-inline: -8px -12px;
+    padding-inline: 8px 12px;
   }
   :global(.finder__stage) {
     min-width: 0;
@@ -389,7 +414,14 @@ const pricesHref = `${home}#preise`;
     margin-top: 0.05rem;
     border-radius: 0.5rem;
     background: var(--color-paper);
-    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+    /* Two inset shadows, and they do different jobs: the first is the ring,
+       the second is the DEPTH (2026-09-29, asked for). The box now reads as
+       sunk into the card rather than drawn on it — the same inset the boxed
+       fields in the panel, the shop and the blog carry, so a checkbox means the
+       same thing wherever somebody meets one. */
+    box-shadow:
+      inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent),
+      var(--tds-shadow-inset);
     color: var(--color-surface-navy);
   }
   :global(.finder__option--radio .finder__check) {
@@ -397,7 +429,11 @@ const pricesHref = `${home}#preise`;
   }
   :global(.finder__option:has(:checked) .finder__check) {
     background: var(--color-accent-pink);
-    box-shadow: none;
+    /* Still sunk, just without the ring: a checked box that pops back out
+       would undo the whole point on the one state people look at most. The ink
+       is spelled out because the pink is darker than the paper the shared token
+       is measured against. */
+    box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.16);
   }
   :global(.finder__option-body) {
     display: grid;
