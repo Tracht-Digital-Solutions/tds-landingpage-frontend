@@ -123,15 +123,32 @@ const ICONS: Record<PropertyTabId, string[]> = {
        2. THE SPRING'S OVERSHOOT. Sliding out bounces (bounce 0.38 in
           `lib/motion/propertyTabs.ts`), which by definition carries the tab
           PAST its resting position — and past it means rightwards, off the
-          edge it is anchored to. Measured at 1440px: the left edge reached
-          +3.1px, i.e. a 3px gap at the window edge for the length of the
-          bounce.
+          edge it is anchored to.
 
-       12px covers both with room for a longer label in another language. It
-       cannot be derived from the spring at build time, so it is measured and
-       written down; `npm run audit:ux` would catch it growing into real
-       overflow. */
-    --tab-bleed: 12px;
+       This was 12px and it was not enough. The overshoot is a constant **8.3%
+       of the travel**, and travel is the tab's own width minus the peek — so
+       the LONGEST label overshoots the most, and the number that was measured
+       and written down here came from a short one. Measured across 1440, 1920
+       and 2560 (identical at all three, the strip does not scale):
+
+         Tools / Shop  137px wide → travel  89px → overshoot  7.4px
+         Journal       150px wide → travel 102px → overshoot  8.5px
+         Kundenportal  198px wide → travel 150px → overshoot 12.5px
+
+       Kundenportal's left edge reached +0.2px — past the window edge, i.e. a
+       visible gap at the left for the length of every bounce. That is the gap.
+
+       28px is derived, not guessed. The bleed widens the tab, which lengthens
+       the travel, which grows the overshoot, so it has to satisfy
+       `B ≥ 0.083·(198 + B − 12 − 48) + 5` (the 5px is the hover shadow's
+       offset from 1.) — B ≥ 17.9. 28px leaves room for a longer label in
+       another language; at 28 the widest tab peaks at 18.8px, ten to spare.
+
+       All of it lives off-screen: `.property-tabs` is `overflow: clip`, the
+       parked translate is `-100%` of the widened box, so the peek stays 3rem
+       and nothing visible moves. `npm run audit:ux` would catch it growing
+       into real overflow. */
+    --tab-bleed: 28px;
     pointer-events: auto;
     display: inline-flex;
     align-items: center;
@@ -220,10 +237,34 @@ const ICONS: Record<PropertyTabId, string[]> = {
   .property-tabs:has(li:nth-child(2) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(2) .property-tab,
   .property-tabs:has(li:nth-child(3) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(3) .property-tab,
   .property-tabs:has(li:nth-child(4) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(4) .property-tab {
-    translate: 0 0;
     background: var(--color-surface-accent);
     color: #fff;
     box-shadow: var(--tds-shadow-hard-sm-hover);
+  }
+
+  /* The twin's SLIDE, and only when Motion is not running it.
+
+     `mountPropertyTabs` animates `twinTabs` alongside the originals, so with
+     Motion on the twin already travels — and this rule cancelling its parked
+     translate as well made the two add up: +102px from Motion's transform and
+     +102px from losing the park, so the twin came to rest 102px to the right of
+     the original and the bookmark was drawn TWICE, side by side, for as long as
+     the pointer stayed on it.
+
+     It looked like a clipping bug and it was a cascade bug. The neutralisation
+     below (`:root[data-motion="on"] .property-tab`) is what keeps the ORIGINAL
+     parked in CSS while Motion drives it — at specificity 0-3-0, which the
+     original's own `:hover` (0-2-0) loses to and this `:has()` chain (0-7-2)
+     beat. So the twin kept a rule its counterpart had already given up.
+
+     Gated rather than deleted: without Motion the original still slides on the
+     CSS `:hover`, and a twin that stayed parked would leave a navy bookmark
+     sitting on a dark band — the one thing the twin exists to prevent. */
+  :global(:root:not([data-motion="on"])) .property-tabs:has(li:nth-child(1) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(1) .property-tab,
+  :global(:root:not([data-motion="on"])) .property-tabs:has(li:nth-child(2) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(2) .property-tab,
+  :global(:root:not([data-motion="on"])) .property-tabs:has(li:nth-child(3) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(3) .property-tab,
+  :global(:root:not([data-motion="on"])) .property-tabs:has(li:nth-child(4) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(4) .property-tab {
+    translate: 0 0;
   }
   .property-tabs:has(li:nth-child(1) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(1) :is(.property-tab__label, .property-tab__arrow),
   .property-tabs:has(li:nth-child(2) .property-tab:is(:hover, :focus-visible)) + .property-tabs--twin li:nth-child(2) :is(.property-tab__label, .property-tab__arrow),
