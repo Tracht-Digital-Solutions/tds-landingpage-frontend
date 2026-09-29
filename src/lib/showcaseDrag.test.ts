@@ -80,6 +80,48 @@ describe("the shelf runs on its own (2026-09-22)", () => {
   });
 
   it("never drifts under reduced motion or the site's motion switch", () => {
-    expect(source).toMatch(/if \(reduce\.matches \|\| lessMotion\(\)/);
+    // Both preferences, and the flag they produce has to reach the gate the
+    // rAF loop actually asks. Asserted as two halves rather than as one source
+    // line, because the single line this used to match was the bug below.
+    expect(source).toMatch(/const drifts\s*=\s*!reduce\.matches\s*&&\s*!lessMotion\(\)/);
+    expect(source).toMatch(/const running\s*=\s*\(\)\s*=>\s*\n?\s*drifts &&/);
+  });
+
+  it("still LOOPS when it may not drift", () => {
+    /**
+     * The white gap at the right end (2026-09-29). Clones and drift shared one
+     * `if (reduce.matches || lessMotion() || …) continue;`, so a reader who had
+     * asked for less motion got no clones at all — the track simply ended after
+     * the last real card and scrolling right ran into the paper edge.
+     *
+     * A clone is layout: it is `inert`, `aria-hidden` and moves nothing by
+     * existing. Only the per-frame `scrollLeft` write is motion.
+     *
+     * So: no `continue` may depend on either preference, and the clone builder
+     * may not consult them either.
+     */
+    for (const line of source.split("\n")) {
+      if (!line.includes("continue")) continue;
+      expect(line, `a motion preference gates this: ${line.trim()}`).not.toMatch(
+        /reduce\.matches|lessMotion\(\)/,
+      );
+    }
+    const builder = source.slice(
+      source.indexOf("const buildClones"),
+      source.indexOf("new ResizeObserver(measureLoop)"),
+    );
+    expect(builder.length).toBeGreaterThan(0);
+    expect(builder).not.toMatch(/reduce\.matches|lessMotion\(\)/);
+  });
+
+  it("wraps a hand scroll without animating the rewind", () => {
+    // `scroll-behavior: smooth` is global (tds-shared base.css) and per spec
+    // applies to a `scrollLeft` ASSIGNMENT, so the wrap has to force it off for
+    // that one write. `.is-autoplay` covers the drifting case only, and the
+    // drift may be switched off entirely — so without this the shelf visibly
+    // rewinds across a whole set for exactly the readers the fix above is for.
+    const handler = source.slice(source.indexOf('track.addEventListener(\n      "scroll"'));
+    expect(handler).toMatch(/scrollBehavior = "auto"/);
+    expect(handler).toMatch(/track\.scrollLeft -= loop/);
   });
 });

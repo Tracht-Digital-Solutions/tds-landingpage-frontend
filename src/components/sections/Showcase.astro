@@ -426,11 +426,29 @@ const ui =
     );
 
 
-    // --- Autoscroll ---------------------------------------------------------
+    // --- Endless shelf, and (separately) the drift ---------------------------
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const originals = Array.from(track.children) as HTMLElement[];
-    if (reduce.matches || lessMotion() || originals.length === 0) continue;
+    if (originals.length === 0) continue;
+    // A shelf that fits has nothing to wrap around.
     if (track.scrollWidth <= track.clientWidth + 2) continue;
+
+    /**
+     * Whether the shelf drifts ON ITS OWN. It is deliberately NOT the question
+     * of whether it LOOPS.
+     *
+     * Those two used to share one `if`, and that is the white gap at the right
+     * end (reported 2026-09-29): under `prefers-reduced-motion`, or with the
+     * site's own "Bewegung aus" switch on, the whole block was skipped — so no
+     * clones were ever appended and the track simply ended after the last real
+     * card. Scrolling right ran into the paper edge.
+     *
+     * A clone is LAYOUT. It moves nothing by existing, it is `inert` and
+     * `aria-hidden`, and a reader who has asked for less motion still expects a
+     * shelf they can push to keep going. What the preference switches off is
+     * the drift: the per-frame `scrollLeft` write below.
+     */
+    const drifts = !reduce.matches && !lessMotion();
 
     /**
      * The clones: a second, unreachable copy of the set behind the first —
@@ -487,7 +505,9 @@ const ui =
         appendCopy();
         guard -= 1;
       }
-      track.classList.add("is-autoplay");
+      // Only while it really drifts: the class turns off snapping and smooth
+      // scrolling, which a hand-scrolled shelf wants to keep.
+      if (drifts) track.classList.add("is-autoplay");
     };
     new ResizeObserver(measureLoop).observe(track);
     let position = track.scrollLeft;
@@ -499,7 +519,7 @@ const ui =
     let frame = 0;
 
     const running = () =>
-      visible && !hovered && !focused && !dragging && !document.hidden && performance.now() > touchUntil;
+      drifts && visible && !hovered && !focused && !dragging && !document.hidden && performance.now() > touchUntil;
 
     const tick = (now: number) => {
       frame = 0;
@@ -524,13 +544,26 @@ const ui =
       frame = requestAnimationFrame(tick);
     };
 
-    // A hand scroll that runs into the clones wraps back as well, so the
-    // shelf never ends while the visitor swipes it either.
+    /**
+     * A hand scroll that runs into the clones wraps back as well, so the shelf
+     * never ends while the visitor pushes it either — and since the drift may
+     * be switched off entirely, this is the ONLY thing keeping it endless for a
+     * reader who asked for less motion.
+     *
+     * `scroll-behavior` is `smooth` for the whole page and per spec applies to
+     * a `scrollLeft` assignment, so without forcing it off for this one write
+     * the wrap ANIMATES back across a whole set — a visibly rewinding shelf
+     * instead of a seamless one. `.is-autoplay` sets `auto` for the drifting
+     * case; this covers the case where that class is never added.
+     */
     track.addEventListener(
       "scroll",
       () => {
-        if (frame || loop <= 0) return;
-        if (track.scrollLeft >= loop) track.scrollLeft -= loop;
+        if (frame || loop <= 0 || track.scrollLeft < loop) return;
+        const previous = track.style.scrollBehavior;
+        track.style.scrollBehavior = "auto";
+        track.scrollLeft -= loop;
+        track.style.scrollBehavior = previous;
       },
       { passive: true },
     );
@@ -559,9 +592,26 @@ const ui =
     }, { passive: true });
     track.addEventListener("pointerup", () => window.setTimeout(resume, 0));
     document.addEventListener("visibilitychange", resume);
+    /**
+     * TWO observers, because they answer different questions and one cannot do
+     * both: with a `rootMargin`, `isIntersecting` and `intersectionRatio` are
+     * measured against the EXPANDED root, so an element 400px below the fold
+     * reports itself as intersecting. Asking one observer for both would have
+     * started the drift while the shelf was still off screen.
+     */
+    // Build early. The clones stay out of the first page load — the reason they
+    // are deferred at all is that a clone carries cloned `loading="lazy"`
+    // images — but a visitor who scrolls fast and pushes the shelf right the
+    // moment it appears no longer arrives before them.
+    new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) buildClones();
+      },
+      { rootMargin: "400px 0px" },
+    ).observe(track);
+    // Drift only while it is really on screen.
     new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
-      if (visible) buildClones();
       resume();
     }).observe(track);
   }

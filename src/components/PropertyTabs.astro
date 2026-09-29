@@ -112,6 +112,11 @@ const ICONS: Record<PropertyTabId, string[]> = {
   }
 
   .property-tab {
+    /* How much of the tab is ON SCREEN while it is parked. The icon lives in
+       exactly this strip (see `.property-tab__icon`), which is what makes it
+       the one measurement here a visitor can see.
+       ⚠ It only means that because the parked `translate` below ADDS
+       `--tab-bleed` back — see the derivation there. */
     --tab-peek: 3rem;
     /* How far the tab hangs past the left edge of the window. Two things
        have to fit inside it, and the nav's `overflow: clip` swallows the lot:
@@ -144,10 +149,29 @@ const ICONS: Record<PropertyTabId, string[]> = {
        offset from 1.) — B ≥ 17.9. 28px leaves room for a longer label in
        another language; at 28 the widest tab peaks at 18.8px, ten to spare.
 
-       All of it lives off-screen: `.property-tabs` is `overflow: clip`, the
-       parked translate is `-100%` of the widened box, so the peek stays 3rem
-       and nothing visible moves. `npm run audit:ux` would catch it growing
-       into real overflow. */
+       All of it lives off-screen: `.property-tabs` is `overflow: clip`.
+
+       ### The peek has to add the bleed back (fixed 2026-09-29)
+
+       This block used to end by claiming "the parked translate is `-100%` of
+       the widened box, so the peek stays 3rem and nothing visible moves". The
+       second half was wrong, and it cost the icons.
+
+       With W the tab's width, B the bleed and P the peek, and `margin-left:
+       -B`, the untranslated box spans `[-B, W-B]`. Parked at `-100% + P` it
+       spans `[P-W-B, P-B]`, so the strip on screen is `0 … P-B` — and that is
+       48 − 28 = **20px**, not 48. The bleed ate more than half the peek the
+       moment it grew from 12px to 28px.
+
+       The icon sits `0.875rem` (the padding) to `0.875rem + 22px` in from the
+       tab's right edge, i.e. at 14…36px. With a 20px strip only its last 6
+       pixels were on screen: four bookmarks showing a sliver of a stroke each.
+
+       So the parked translate is `-100% + P + B`, which puts the right edge at
+       P and the icon at 12…34px — fully visible, with room. `P` now means what
+       it says, and `lib/motion/propertyTabs.ts` subtracts BOTH when it measures
+       the travel it adds. `npm run audit:ux` would catch the bleed growing into
+       real overflow. */
     --tab-bleed: 28px;
     pointer-events: auto;
     display: inline-flex;
@@ -165,7 +189,7 @@ const ICONS: Record<PropertyTabId, string[]> = {
     white-space: nowrap;
     text-decoration: none;
     box-shadow: var(--tds-shadow-hard-sm);
-    translate: calc(-100% + var(--tab-peek)) 0;
+    translate: calc(-100% + var(--tab-peek) + var(--tab-bleed)) 0;
     transition:
       translate 420ms var(--lp-ease-bounce, var(--tds-ease-out)),
       background-color 200ms var(--tds-ease-out);
@@ -279,7 +303,7 @@ const ICONS: Record<PropertyTabId, string[]> = {
   :global(:root[data-motion="on"]) .property-tab,
   :global(:root[data-motion="on"]) .property-tab:hover,
   :global(:root[data-motion="on"]) .property-tab:focus-visible {
-    translate: calc(-100% + var(--tab-peek)) 0;
+    translate: calc(-100% + var(--tab-peek) + var(--tab-bleed)) 0;
     transition: background-color 200ms var(--tds-ease-out);
   }
 
