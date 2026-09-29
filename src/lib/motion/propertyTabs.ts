@@ -6,8 +6,8 @@
  * to the one under the pointer lean out a little with it — a stack of
  * bookmarks being thumbed, not four separate buttons.
  *
- * Transform only: the parked position stays the CSS `translate`, and the
- * travel Motion adds is the tab's width minus its peek, measured when it
+ * Transform only: the parked position stays the CSS `translate`, and the travel
+ * Motion adds is the tab's width minus its peek AND its bleed, measured when it
  * opens (a label can change width with the language or the font).
  */
 type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
@@ -15,6 +15,16 @@ type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 const DOCK_QUERY = "(min-width: 64rem) and (hover: hover) and (pointer: fine)";
 /** Must match `--tab-peek` in `PropertyTabs.astro`. */
 const PEEK_PX = 48;
+/**
+ * Must match `--tab-bleed` there.
+ *
+ * Both are subtracted from the travel, because the parked `translate` is
+ * `-100% + peek + bleed` — the bleed is the part of the tab that stays off the
+ * left edge of the window even when it is fully out, so it is never travelled.
+ * Adding it back to the travel would push the tab `bleed` pixels too far right
+ * and open a gap at the window edge, which is the bug the bleed exists to fix.
+ */
+const BLEED_PX = 28;
 /** How far a neighbour leans out with the open tab. */
 const NEIGHBOUR_PX = 10;
 
@@ -40,7 +50,7 @@ export function mountPropertyTabs({ animate, pointerSpring }: Dom): void {
   const twinTabs = Array.from(document.querySelectorAll<HTMLElement>(".property-tabs--twin .property-tab"));
 
   let active: HTMLElement | null = null;
-  const travel = (tab: HTMLElement) => Math.max(0, tab.offsetWidth - PEEK_PX);
+  const travel = (tab: HTMLElement) => Math.max(0, tab.offsetWidth - PEEK_PX - BLEED_PX);
 
   const show = (next: HTMLElement | null) => {
     if (next === active) return;
