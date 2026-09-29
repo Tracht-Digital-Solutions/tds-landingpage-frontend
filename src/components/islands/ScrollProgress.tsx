@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Thin reading-progress bar fixed to the top of the viewport. Tracks
+ * Thin reading-progress bar on the LOWER EDGE OF THE SITE HEADER. Tracks
  * window scroll position against documentElement.scrollHeight; uses
  * requestAnimationFrame to keep updates in the same paint cycle as
  * Lenis-driven smooth scrolling.
+ *
+ * It was `fixed` to the top of the viewport until 2026-09-29 — a separate line
+ * a few pixels above a bar that floats with its own margin, so neither ever
+ * looked like it belonged to the other. Mounted inside `Header.astro` it is
+ * `absolute` instead and inherits the bar's docking morph: it narrows from
+ * full-bleed to 56rem and lifts off the edge with it. The positioning lives
+ * here rather than in the header's stylesheet because it is this component's
+ * own box; the header only provides the containing block.
  *
  * Renders nothing until the page is actually scrollable — short pages
  * (e.g. /preise on tall viewports) would otherwise show a permanently
@@ -86,7 +94,12 @@ export default function ScrollProgress() {
   return (
     <div
       aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-50 h-[2px] pointer-events-none"
+      // `z-2`: above the header's glass (`::before`, level 0) and its nav
+      // (level 1). Inset from both ends and rounded, because the bar it sits on
+      // is a full pill — a straight line across its whole width would leave the
+      // shape at the curves. `overflow-hidden` keeps the growing fill inside
+      // that rounding.
+      className="absolute bottom-0 left-5 right-5 z-2 h-[2px] overflow-hidden rounded-full pointer-events-none"
     >
       <div
         ref={attachBar}

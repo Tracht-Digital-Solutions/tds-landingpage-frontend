@@ -369,14 +369,19 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
   /* The primary action is the one filled, dark shape in the hero — clear
      without a glow, a pulse or a countdown. */
   .hero-cta--primary {
-    background: var(--color-surface-navy);
+    /* Glass (2026-09-29): 88%, with the blur coming from the shared CTA rule in
+       global.css. It carries white type over the hero PHOTO, which is the
+       worst backdrop on the site — `npm run audit:contrast` measures this one
+       from rendered pixels, because axe cannot resolve a translucent fill and
+       files it as "incomplete" rather than as a violation. */
+    background: color-mix(in oklab, var(--color-surface-navy) 88%, transparent);
     color: #fff;
   }
   /* No hover transform here: the button's movement is Motion's (magnetic
      pull and press, lib/motion/cta.ts), and a CSS transform would fight the
      inline one it writes. */
   .hero-cta--primary:hover {
-    background: var(--color-surface-accent);
+    background: color-mix(in oklab, var(--color-surface-accent) 88%, transparent);
   }
   .hero-cta__arrow {
     margin-left: 0.5rem;

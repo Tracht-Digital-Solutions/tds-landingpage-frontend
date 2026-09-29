@@ -239,6 +239,23 @@ export default function SmoothScroll() {
     (window as unknown as { lenis?: Lenis }).lenis = lenis;
 
     /**
+     * Tell the stylesheet that a library owns the scroll now.
+     *
+     * `tds-shared/styles/base.css` sets `html { scroll-behavior: smooth }` for
+     * every site, and on this one Lenis smooths the wheel on top of it — two
+     * smoothings on one scroll. That is what the `behavior: "instant"` below
+     * (and the note at it) has been working around: a `scrollTo` whose
+     * `behavior` resolves to `auto` picks up the CSS value, so a programmatic
+     * jump was handed to the CSS engine while Lenis was already tweening it,
+     * and on a phone the jump never arrived.
+     *
+     * `global.css` reverts `scroll-behavior` to `auto` while this attribute is
+     * set, so the CSS smoothing exists exactly where nothing else is doing it:
+     * a coarse pointer, reduced motion, or no JavaScript at all.
+     */
+    document.body.dataset.lenis = "on";
+
+    /**
      * Adapt the smoothing to what the visitor is actually holding.
      *
      * A mouse wheel sends coarse notches that want a long tween to become a
@@ -324,6 +341,8 @@ export default function SmoothScroll() {
       document.removeEventListener("click", onClick);
       window.removeEventListener("wheel", onWheel);
       lenis.destroy();
+      // The CSS smoothing is the fallback again the moment Lenis is gone.
+      delete document.body.dataset.lenis;
       delete (window as unknown as { lenis?: Lenis }).lenis;
       delete window.tdsScrollTo;
     };

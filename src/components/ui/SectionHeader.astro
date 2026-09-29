@@ -48,7 +48,18 @@ const {
 const headingSpacing = bar ? "mb-5" : headingClass;
 ---
 
-<div class="text-center md:text-left">
+{/* `data-reveal` (2026-09-29): every section masthead now arrives with the
+    content under it instead of standing there while the cards below it fade in.
+    The cards, the FAQ rows and the service list were already revealed — the
+    headings were the one part that never was, which is what made the entrance
+    look like it belonged to the cards rather than to the section.
+
+    One place, seven sections. It is NEVER the hero: that is an `<h1>` outside
+    this component, it is the LCP element (`audit:perf` pins it to
+    `h1#hero-heading`), and `tds-reveal`'s own contract in tds-shared forbids it
+    there. The hidden state sits behind `html[data-reveal-active]`, which only
+    `lib/reveal.ts` sets, so with no JavaScript this renders fully visible. */}
+<div class="text-center md:text-left" data-reveal>
   <h2
     id={id}
     class:list={[

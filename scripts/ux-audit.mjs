@@ -231,12 +231,30 @@ async function runAxe(page) {
     const result = await window.axe.run(document, {
       runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"] },
     });
-    return result.violations.map((v) => ({
+    const shape = (v) => ({
       id: v.id,
       impact: v.impact,
       nodes: v.nodes.length,
       targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")),
-    }));
+    });
+    return {
+      violations: result.violations.map(shape),
+      /**
+       * INCOMPLETE, and it is reported for one specific reason (2026-09-29).
+       *
+       * axe cannot compute `color-contrast` when it cannot resolve what is
+       * behind the text — a translucent fill, a `backdrop-filter`, an image.
+       * It does not call that a violation; it files it under `incomplete`,
+       * which this function used to drop on the floor. So a change that made a
+       * button glass could take its contrast with it and still print "axe 0
+       * violations", which is exactly the silent green this repo keeps meeting.
+       *
+       * Not a hard failure: "could not tell" is not "wrong". It is printed, so
+       * the number has to be looked at by hand — and `scripts/contrast-probe.mjs`
+       * is the thing that answers it from real pixels.
+       */
+      incomplete: result.incomplete.map(shape),
+    };
   });
 }
 
@@ -356,13 +374,22 @@ try {
       }
 
       if ((width === 390 || width === 1440) && !(width === 390 && path !== "/" && path !== "/en/")) {
-        const violations = await runAxe(page);
+        const { violations, incomplete } = await runAxe(page);
         const blocking = violations.filter((v) => v.impact === "critical" || v.impact === "serious");
         for (const v of blocking) fail(`${tag}: axe ${v.impact} ${v.id} ×${v.nodes} (${v.targets.join(", ")})`);
         const other = violations.filter((v) => !blocking.includes(v));
         if (other.length > 0) info(`  axe other: ${other.map((v) => `${v.impact} ${v.id}×${v.nodes}`).join(", ")}`);
         // Said out loud, so a run in which axe never executed cannot pass for a clean one.
         if (violations.length === 0) info(`${tag}: axe 0 violations`);
+        // "Could not tell" — see the note in `runAxe`. Printed, never a failure,
+        // because the honest answer for a translucent surface comes from pixels
+        // (`npm run audit:contrast`) rather than from computed styles.
+        if (incomplete.length > 0) {
+          info(`  axe UNDECIDED: ${incomplete.map((v) => `${v.id}×${v.nodes}`).join(", ")}`);
+          for (const v of incomplete) {
+            if (v.id === "color-contrast") info(`    color-contrast: ${v.targets.join(" | ")}`);
+          }
+        }
       }
 
       if (r.languageHref && width === 1440) {
