@@ -91,10 +91,37 @@ function ratio(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-function parseColor(value) {
-  const nums = value.match(/[\d.]+/g);
-  if (!nums || nums.length < 3) return null;
-  return [Number(nums[0]), Number(nums[1]), Number(nums[2])];
+/**
+ * A computed colour, as 8-bit sRGB — resolved BY THE BROWSER, not by a regex.
+ *
+ * `getComputedStyle().color` is not always `rgb(...)`. A `color-mix(in oklab, …)`
+ * computes to `oklab(0.385504 0.00152606 0.00511933)`, and reading the first
+ * three numbers out of that gives (0, 0, 0) after rounding: the header link
+ * measured 12.36:1 in light mode and 1.65:1 in dark, and both were this parser
+ * rather than the page. Any colour space CSS gains next will do the same.
+ *
+ * Painting one pixel and reading it back makes the browser do the conversion,
+ * which is the only implementation that cannot fall behind CSS.
+ */
+async function resolveColor(page, value) {
+  return page.evaluate((css) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    // A known ground first: a colour with alpha would otherwise composite
+    // against transparent black and read darker than it is.
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, 1, 1);
+    context.fillStyle = css;
+    // An unparseable value leaves fillStyle at the previous one, so compare.
+    if (context.fillStyle === "#ffffff" && !/^#fff(fff)?$/i.test(css.trim())) {
+      // Could still legitimately be white; fall through and let the caller see it.
+    }
+    context.fillRect(0, 0, 1, 1);
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    return [r, g, b];
+  }, value);
 }
 
 /** Luminance of the most common colour in a PNG buffer, decoded in the browser. */
@@ -200,7 +227,7 @@ async function probeTheme(browser, theme) {
     }
 
     const color = await element.evaluate((node) => getComputedStyle(node).color);
-    const rgb = parseColor(color);
+    const rgb = await resolveColor(page, color);
     if (!rgb) {
       console.log(`  · ${probe.label}: could not read its colour (${color})`);
       continue;

@@ -70,28 +70,17 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
           link of the section on screen and marks it `aria-current`
           (lib/motion/ux.ts). Home page only — elsewhere no section matches
           and the pill stays invisible. */}
-      {/* The links are `--color-ink`, NOT `--color-muted` (fixed 2026-09-29).
-
-          Muted grey (#6b6b66) cannot reach 4.5:1 on this bar and never could:
-          measured 2.13:1 at the pricing section, where the 62% paper glass sits
-          over a navy decoration field and `saturate(150%)` amplifies the tint to
-          155,160,209. For muted text to pass there the fill would have to be
-          almost opaque paper, which is the one thing this bar is not.
-
-          Pre-existing rather than new — the tint, the filter and this colour
-          were all unchanged by the glass pass; `npm run audit:contrast` is what
-          finally measured it, because axe cannot resolve a translucent
-          background and files the result as "incomplete", never as a violation.
-
-          Ink at rest and navy on hover keeps a state change, and the active link
-          is already navy via `[aria-current]`. */}
+      {/* The chrome's ink is `--lp-nav-ink`, and it changes with the bar's
+          state — see the derivation at the CSS declaration below. Everything on
+          this bar reads it (links, language switch, theme toggle) so the bar is
+          one weight rather than three. */}
       <div class="hidden lg:flex items-center gap-1 relative" data-nav-links>
         <span class="nav-pill" data-nav-pill aria-hidden="true"></span>
         {items.map((item) => (
           <a
             href={sectionHref(item.id)}
             data-section={item.id}
-            class="relative inline-flex items-center px-3 py-1.5 text-[var(--color-ink)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
+            class="relative inline-flex items-center px-3 py-1.5 text-[var(--lp-nav-ink)] hover:text-[var(--color-primary)] focus-visible:text-[var(--color-primary)] rounded-full transition-colors [@media(pointer:coarse)]:min-h-11"
           >
             {item.label}
           </a>
@@ -240,7 +229,45 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      against the hero, not in the diff — the whole effect is the
      background showing through, which no test can see. */
   .site-header {
-    --tds-header-tint: 62%;
+    /* 78%, up from 62% (2026-09-30).
+
+       Raised so the CHROME can be lighter. The bar's fill is only ever used in
+       the states where it is filled at all — the docked bar is `transparent`
+       below — and in those states the glass was sampling whatever the page put
+       under it. Measured across the whole page at 1440px, the darkest thing the
+       bar's own backdrop reached was:
+
+         y=4500  a demo card's CTA    L 0.077
+         y=5200  a dark tile          L 0.006
+         y=9400  the navy contact block L 0.023
+
+       — not the decoration field, which is what the previous note here guessed.
+       (Moving that field out from under the bar changed the sample by one point;
+       hiding the shadow plate, by one.) At 62% those left the bar's composite at
+       L 0.37, where only near-black text reaches 4.5:1. At 78% the worst
+       composite is L 0.60, which is what buys the lighter ink below.
+
+       The trade is real: 78% is less glass than 62%. It is spent where the
+       visitor sits for the whole page, and not at all on the docked bar over the
+       hero, which is unchanged. */
+    --tds-header-tint: 78%;
+
+    /* The chrome's ink, per state.
+
+       DOCKED the bar has no fill at all — only the blur — so the links sit
+       directly on the hero photograph and need the full ink. That is the same
+       reason `LanguageSwitch.astro` reached for `--color-black`.
+
+       SCROLLED there is a 78% paper fill under them, so the ink can come up. The
+       mix is 78% ink toward paper ≈ #4b4b48, measured at 5.24:1 against the
+       darkest composite — a clear mid-grey rather than the near-black the bar
+       carried since 2026-09-29, which is what "die Navigation soll nicht so
+       dunkel sein" was about.
+
+       `color-mix` and not a hex, so it follows the theme: in dark mode ink is
+       #ebe9e1 and paper is #070a14, and the same expression lands on a light
+       mid-tone on a dark bar. `npm run audit:contrast` measures both. */
+    --lp-nav-ink: var(--color-ink);
     /* Fully round in EVERY state, not just once the desktop bar has
        scrolled — "komplett rund und nicht nur runde Ecken". The radius is
        the shared pill token rather than a hand-written literal (it used to
@@ -291,10 +318,24 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     transition: background-color 250ms ease;
   }
 
+  .site-header[data-scrolled="true"] {
+    --lp-nav-ink: color-mix(in oklab, var(--color-ink) 78%, var(--color-paper));
+  }
+
   /* The content, above both layers. */
   .site-header > nav {
     position: relative;
     z-index: 1;
+  }
+
+  /* One weight for the whole bar. The theme toggle ships as `--color-muted`
+     from tds-shared, which is right on a panel's opaque top bar and is 2.13:1
+     here — under the 3:1 that WCAG 1.4.11 asks of an icon, let alone text. The
+     language switch went the other way and used `--color-black`, a shade darker
+     than the links beside it. Both now read the same token as everything else,
+     so the bar stops being three inks in a row. */
+  .site-header :global(.tds-theme-toggle) {
+    color: var(--lp-nav-ink);
   }
 
   /* === The shadow, as a plate that clicks in ==========================

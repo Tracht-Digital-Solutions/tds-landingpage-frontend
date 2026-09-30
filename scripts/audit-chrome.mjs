@@ -111,6 +111,16 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   await page.goto(base, { waitUntil: "networkidle" });
+  /**
+   * Scrolled to a KNOWN-LIGHT part of the page before hovering.
+   *
+   * At the top the bar is docked and transparent over the hero photograph, which
+   * is itself dark (L 0.15 behind the bar). A preview measured there compares a
+   * dark patch against a dark ground and says almost nothing — the first run of
+   * the check below read 0.052 inside against 0.147 outside and looked like a
+   * failure. y=1600 is inside the services section, flat paper.
+   */
+  await page.evaluate(() => window.scrollTo({ top: 1600, behavior: "instant" }));
   await page.waitForTimeout(1500);
   const toggle = await page.$(".tds-theme-toggle");
   if (!toggle) {
@@ -141,6 +151,110 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
       check("preview takes no pointer", shown.pointerEvents === "none" && shown.hidden === "true");
       check("preview is positioned at the cursor", shown.x !== "" && shown.y !== "", `${shown.x} ${shown.y}`);
       check("preview clears the fixed header", Number(shown.z) > 40, `z-index ${shown.z}`);
+
+      /**
+       * The RENDERED edge, scanned out from the centre along one row.
+       *
+       * Asked for as a hard edge (2026-09-30) and drawn as a 1.5px gradient step
+       * rather than a `clip-path`, so that it looks hard without the rim
+       * staircasing and crawling as the pointer moves. Neither half of that is
+       * visible in the CSS alone: a stop written in the wrong unit, or a stray
+       * `background-size`, softens it back to the smudge this replaced and
+       * nothing else would notice.
+       *
+       * The radius has to be resolved through layout — `getPropertyValue` on a
+       * custom property returns the written `clamp(...)`, not a length.
+       */
+      const edge = await page.evaluate(() => {
+        const el = document.querySelector(".tds-theme-preview");
+        const probe = document.createElement("div");
+        probe.style.cssText =
+          "position:absolute;visibility:hidden;width:var(--tds-theme-preview-r)";
+        el.appendChild(probe);
+        const r = probe.getBoundingClientRect().width;
+        probe.remove();
+        return {
+          r,
+          x: parseFloat(el.style.getPropertyValue("--tds-theme-preview-x")),
+          y: parseFloat(el.style.getPropertyValue("--tds-theme-preview-y")),
+        };
+      });
+      const cx = Math.round(edge.x);
+      const cy = Math.round(edge.y);
+      const radius = Math.round(edge.r);
+      /**
+       * Scan toward whichever side has room for the whole radius plus a margin.
+       *
+       * The toggle sits at the right end of the bar, so the circle around it runs
+       * off the right edge of the viewport — a rightward scan never leaves the
+       * circle and reports the ground as "outside", which read as the preview
+       * being lighter outside than in. Leftward there is always the width of the
+       * page.
+       */
+      const room = 12;
+      const dir = cx + radius + room <= 1440 ? 1 : -1;
+      const x0 = dir === 1 ? cx : Math.max(0, cx - radius - room);
+      const width = dir === 1 ? Math.min(radius + room, 1440 - cx) : cx - x0;
+      if (width > radius && cy >= 1) {
+        const strip = await page.screenshot({
+          clip: { x: x0, y: cy - 1, width, height: 3 },
+        });
+        const scan = await page.evaluate(async (data) => {
+          const image = new Image();
+          await new Promise((r) => {
+            image.onload = r;
+            image.src = `data:image/png;base64,${data}`;
+          });
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext("2d", { willReadFrequently: true });
+          context.drawImage(image, 0, 0);
+          const pixels = context.getImageData(0, 1, canvas.width, 1).data;
+          const out = [];
+          for (let i = 0; i < pixels.length; i += 4) {
+            const ch = (v) => {
+              v /= 255;
+              return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+            };
+            out.push(
+              0.2126 * ch(pixels[i]) + 0.7152 * ch(pixels[i + 1]) + 0.0722 * ch(pixels[i + 2]),
+            );
+          }
+          return out;
+        }, strip.toString("base64"));
+
+        // Walk outward from the centre, in whichever direction was chosen.
+        const centre = dir === 1 ? 0 : scan.length - 1;
+        const ray = [];
+        for (let step = 0; step < scan.length; step++) {
+          ray.push(scan[centre + dir * step]);
+        }
+        const inside = ray[0];
+        const outside = ray[ray.length - 1];
+        const mid = (inside + outside) / 2;
+        let from = null;
+        let to = null;
+        for (let i = 0; i < ray.length; i++) {
+          if (from === null && ray[i] > inside + (mid - inside) * 0.1) from = i;
+          if (from !== null && ray[i] > outside - (outside - mid) * 0.1) {
+            to = i;
+            break;
+          }
+        }
+        const rim = from !== null && to !== null ? to - from : null;
+        check(
+          "preview edge is hard (≤3px)",
+          rim !== null && rim <= 3,
+          rim === null ? "no rim found" : `${rim}px at ${radius}px radius`,
+        );
+        // And the region really is the other theme's ground, not a light dim.
+        check(
+          "preview really is dark inside",
+          inside < 0.12 && outside > 0.4,
+          `L ${inside.toFixed(3)} inside → ${outside.toFixed(3)} outside`,
+        );
+      }
     }
     // Move away: it has to go.
     await page.mouse.move(700, 600);
