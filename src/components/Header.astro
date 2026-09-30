@@ -229,28 +229,49 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      against the hero, not in the diff — the whole effect is the
      background showing through, which no test can see. */
   .site-header {
-    /* 78%, up from 62% (2026-09-30).
+    /* 90%. It was 62%, then 78%, and this is the third pass at the same
+       complaint: the navigation reads too dark in light mode.
 
-       Raised so the CHROME can be lighter. The bar's fill is only ever used in
-       the states where it is filled at all — the docked bar is `transparent`
-       below — and in those states the glass was sampling whatever the page put
+       ### Why opacity is the only lever
+
+       The fill is used only where the bar is filled at all — the docked bar is
+       `transparent` below — and there the glass samples whatever the page puts
        under it. Measured across the whole page at 1440px, the darkest thing the
-       bar's own backdrop reached was:
+       backdrop reaches is L 0.006 (a journal card), 0.023 (the navy contact
+       block), 0.077 (a demo card's CTA). Two things it is NOT, both settled by
+       measurement rather than reasoning: the decoration field (moving it out from
+       under the bar changed the sample by one point) and the shadow plate (hiding
+       it, also one point).
 
-         y=4500  a demo card's CTA    L 0.077
-         y=5200  a dark tile          L 0.006
-         y=9400  the navy contact block L 0.023
+       An ADAPTIVE bar was measured before settling here — find the page's dark
+       blocks by computed background, flip the bar over them, stay glassy
+       elsewhere. It does not help. 14 of 32 scroll positions sit over a dark
+       block, so the bar would spend the page flipping; and even with every one of
+       them excluded, the worst LIGHT backdrop at 70% tint is L 0.54, where the
+       previous ink reached only 4.73:1. A translucent paper bar over any content
+       lands near L 0.5–0.6, and a light grey needs L ≥ 0.82. The fill has to
+       carry it.
 
-       — not the decoration field, which is what the previous note here guessed.
-       (Moving that field out from under the bar changed the sample by one point;
-       hiding the shadow plate, by one.) At 62% those left the bar's composite at
-       L 0.37, where only near-black text reaches 4.5:1. At 78% the worst
-       composite is L 0.60, which is what buys the lighter ink below.
+       ### What each tint buys
 
-       The trade is real: 78% is less glass than 62%. It is spent where the
-       visitor sits for the whole page, and not at all on the docked bar over the
-       hero, which is unchanged. */
-    --tds-header-tint: 78%;
+       Darkest composite over the whole page, and the lightest ink that clears
+       4.5:1 against it:
+
+         62%  L 0.37   near-black only
+         78%  L 0.60   #4b4b48  5.75:1     ← the previous pass
+         90%  L 0.69   #5a5a55  4.85:1     ← here
+         94%  L 0.71   #5a5a55  5.04:1
+
+       `--color-muted` (#6b6b66) never clears it — 3.89:1 even at 94%. That is
+       this bar's floor, and it is why "just use muted" is not available.
+
+       ### The cost, stated plainly
+
+       90% is not glass. The scrolled pill is effectively opaque, and that is the
+       price of a light navigation, asked for twice. The DOCKED bar is untouched:
+       fully transparent with only the blur, over the hero, which is where the
+       effect reads anyway. */
+    --tds-header-tint: 90%;
 
     /* The chrome's ink, per state.
 
@@ -258,11 +279,15 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        directly on the hero photograph and need the full ink. That is the same
        reason `LanguageSwitch.astro` reached for `--color-black`.
 
-       SCROLLED there is a 78% paper fill under them, so the ink can come up. The
-       mix is 78% ink toward paper ≈ #4b4b48, measured at 5.24:1 against the
-       darkest composite — a clear mid-grey rather than the near-black the bar
-       carried since 2026-09-29, which is what "die Navigation soll nicht so
-       dunkel sein" was about.
+       SCROLLED there is a 90% paper fill under them, so the ink comes up: 68% of
+       the way from paper to ink, which resolves to (89,89,86) ≈ #5a5a55 and
+       measures 4.85:1 against the darkest composite on the page. That is the
+       lightest grey this bar can carry — see the tint note above for why
+       `--color-muted` is not reachable at any opacity.
+
+       The percentage was MEASURED, not derived: `color-mix(in oklab, …)` is not
+       linear in sRGB, and 68% lands where a linear 71% would. Anything computed
+       on paper here would be a few points off.
 
        `color-mix` and not a hex, so it follows the theme: in dark mode ink is
        #ebe9e1 and paper is #070a14, and the same expression lands on a light
@@ -318,8 +343,19 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     transition: background-color 250ms ease;
   }
 
-  .site-header[data-scrolled="true"] {
-    --lp-nav-ink: color-mix(in oklab, var(--color-ink) 78%, var(--color-paper));
+  /* LIGHT MODE ONLY, and the `:not()` is the whole point.
+
+     "Richtung Papier" is a different direction in each theme: in light mode paper
+     is #fafaf7 and a lower ink share lightens the text, in dark mode paper is
+     #070a14 and the same number DARKENS it. Applied to both, 68% gave 5.46:1
+     light and 3.92:1 dark — a failure introduced by lightening the other theme by
+     accident.
+
+     Dark mode needs no lightening at all: the complaint was about light mode, and
+     the full `--color-ink` (#ebe9e1) measures 10.48:1 on the dark bar. So it
+     keeps the base value and only light mode comes up. */
+  :root:not([data-theme="dark"]) .site-header[data-scrolled="true"] {
+    --lp-nav-ink: color-mix(in oklab, var(--color-ink) 68%, var(--color-paper));
   }
 
   /* The content, above both layers. */
