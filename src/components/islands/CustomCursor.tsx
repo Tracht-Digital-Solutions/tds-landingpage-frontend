@@ -167,8 +167,29 @@ export default function CustomCursor() {
 
   return (
     <>
-      <div ref={ringRef} className="tds-cursor-ring" aria-hidden="true" />
-      <div ref={dotRef} className="tds-cursor-dot" aria-hidden="true" />
+      {/* `data-theme-preview="skip"` keeps these two out of the theme toggle's
+          hover preview, which clones the page to show the other theme inside a
+          circle (tds-shared `ThemeToggle`).
+
+          They are the one kind of element that must not be copied: a SCRIPT
+          positions them, on every `mousemove`, so a clone freezes them wherever
+          they stood when it was taken and draws a second cursor that never
+          moves. Everything else on the page is placed by layout and lands
+          correctly in the copy — the bar, the floating pill, the bookmarks all
+          sit at the same viewport position and simply appear in the other theme
+          inside the circle, which is what the preview is for. */}
+      <div
+        ref={ringRef}
+        className="tds-cursor-ring"
+        aria-hidden="true"
+        data-theme-preview="skip"
+      />
+      <div
+        ref={dotRef}
+        className="tds-cursor-dot"
+        aria-hidden="true"
+        data-theme-preview="skip"
+      />
     </>
   );
 }
