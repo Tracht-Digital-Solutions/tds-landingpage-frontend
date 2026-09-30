@@ -70,9 +70,13 @@ const label =
     min-height: 2.25rem;
     padding-inline: 0.625rem;
     border-radius: var(--tds-radius-pill, 100px);
-    /* Ink, not muted: the docked header is transparent over the hero photo,
-       and a 13px muted label over a photograph is where contrast gets lost. */
-    color: var(--color-black);
+    /* The header's own ink, with `--color-black` as the fallback for any other
+       call site. It was a flat `--color-black`, one shade darker than the links
+       beside it — the reasoning was right ("the docked header is transparent
+       over the hero photo, and a 13px muted label over a photograph is where
+       contrast gets lost") but `--lp-nav-ink` now encodes exactly that: the full
+       ink while docked, a lighter mid-grey once the bar has a fill under it. */
+    color: var(--lp-nav-ink, var(--color-black));
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.04em;
