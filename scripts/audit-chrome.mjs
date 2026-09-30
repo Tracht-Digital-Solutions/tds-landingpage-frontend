@@ -424,16 +424,33 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
     }, shot.toString("base64"));
   };
 
+  /**
+   * The theme is set BEFORE the page loads, the way the no-flash bootstrap does
+   * it, rather than with an `evaluate` afterwards.
+   *
+   * That detail is not cosmetic: setting the attribute after load leaves the
+   * component's own state on `light`, and the preview used to build its clone
+   * from that state — so this check passed while the dark→light direction was
+   * broken in the browser. It reads the attribute at hover time now, and the
+   * test seeds the preference so both agree.
+   */
   const sample = async (theme, hover) => {
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },
       colorScheme: theme,
     });
+    await context.addInitScript((t) => {
+      try {
+        localStorage.setItem("tds-theme", t);
+      } catch {
+        /* private mode — the OS preference above still applies */
+      }
+    }, theme);
     const page = await context.newPage();
     await page.goto(base, { waitUntil: "networkidle" });
-    await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
     await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), scrollTo);
     await page.waitForTimeout(900);
+    let clone = null;
     if (hover) {
       const toggle = await page.$(".tds-theme-toggle");
       if (!toggle) {
@@ -442,36 +459,64 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
       }
       await toggle.hover();
       await page.waitForTimeout(800);
+      clone = await page.evaluate(() => {
+        const page = document.querySelector(".tds-theme-preview__page");
+        return {
+          theme: page?.getAttribute("data-theme") ?? null,
+          cursors: document.querySelectorAll(
+            '.tds-theme-preview__page [data-theme-preview="skip"], .tds-theme-preview__page [class*="tds-cursor"]',
+          ).length,
+        };
+      });
     }
     const out = await histogram(page);
     await context.close();
-    return out;
+    return { ...out, clone };
   };
 
   const light = await sample("light", false);
-  const previewed = await sample("light", true);
-  const realDark = await sample("dark", false);
+  const dark = await sample("dark", false);
+  const fromLight = await sample("light", true);
+  const fromDark = await sample("dark", true);
 
-  if (!previewed || !realDark || !light) {
-    check("the preview can be compared against the real dark theme", false);
+  if (!light || !dark || !fromLight || !fromDark) {
+    check("the preview can be compared against the real themes", false);
   } else {
+    const matches = (a, b) =>
+      Math.abs(a.median - b.median) < 0.03 && Math.abs(a.p95 - b.p95) < 0.05;
+
+    // BOTH directions. The dark→light one was shipped broken once: the subtree
+    // selector re-declared only the DARK values, so a clone marked light on a
+    // dark page inherited the dark ones and the circle showed no difference.
     check(
-      "the preview region actually darkens",
-      previewed.median < light.median - 0.2,
-      `median ${light.median.toFixed(3)} → ${previewed.median.toFixed(3)}`,
+      "on a light page the circle IS the dark theme",
+      matches(fromLight, dark),
+      `circle ${fromLight.median.toFixed(3)}/${fromLight.p95.toFixed(3)} vs real dark ${dark.median.toFixed(3)}/${dark.p95.toFixed(3)}`,
     );
-    // The point of the whole feature: not merely darker, but the same as dark.
     check(
-      "the preview IS the dark theme, not a dark sheet",
-      Math.abs(previewed.median - realDark.median) < 0.03 &&
-        Math.abs(previewed.p95 - realDark.p95) < 0.05,
-      `preview median ${previewed.median.toFixed(3)}/p95 ${previewed.p95.toFixed(3)} vs real ${realDark.median.toFixed(3)}/${realDark.p95.toFixed(3)}`,
+      "on a dark page the circle IS the light theme",
+      matches(fromDark, light),
+      `circle ${fromDark.median.toFixed(3)}/${fromDark.p95.toFixed(3)} vs real light ${light.median.toFixed(3)}/${light.p95.toFixed(3)}`,
     );
-    // A flat fill cannot produce light content. This is the discriminator.
+    // A flat fill can only darken, so it could never keep light content. This is
+    // what separates a real rendering from a sheet.
     check(
-      "the region keeps the dark theme's LIGHT content",
-      previewed.p95 > previewed.median + 0.3,
-      `median ${previewed.median.toFixed(3)} but p95 ${previewed.p95.toFixed(3)}`,
+      "the dark circle keeps the dark theme's LIGHT content",
+      fromLight.p95 > fromLight.median + 0.3,
+      `median ${fromLight.median.toFixed(3)} but p95 ${fromLight.p95.toFixed(3)}`,
+    );
+    // The clone targets the OTHER theme, read from the document at hover time.
+    check(
+      "the clone targets the opposite theme in both directions",
+      fromLight.clone?.theme === "dark" && fromDark.clone?.theme === "light",
+      `from light → ${fromLight.clone?.theme}, from dark → ${fromDark.clone?.theme}`,
+    );
+    // Script-positioned chrome must not travel: a cloned custom cursor freezes
+    // where it stood and reads as a stuck pointer inside the circle.
+    check(
+      "no script-positioned chrome in the clone",
+      fromLight.clone?.cursors === 0 && fromDark.clone?.cursors === 0,
+      `${fromLight.clone?.cursors} / ${fromDark.clone?.cursors} found`,
     );
   }
 }
