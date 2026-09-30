@@ -138,7 +138,8 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
         pointerEvents: style.pointerEvents,
         hidden: el.getAttribute("aria-hidden"),
         // A gradient, never a clip — the whole antialiasing argument.
-        usesGradient: style.backgroundImage.includes("radial-gradient"),
+        // The window is a MASK over the cloned page now, not a background fill.
+        usesGradient: (style.maskImage || style.webkitMaskImage || "").includes("radial-gradient"),
         usesClip: style.clipPath !== "none",
         x: el.style.getPropertyValue("--tds-theme-preview-x"),
         y: el.style.getPropertyValue("--tds-theme-preview-y"),
@@ -147,25 +148,30 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
     });
     check("preview appears on hover", shown !== null);
     if (shown) {
-      check("preview is a gradient, not a clip", shown.usesGradient && !shown.usesClip, `gradient=${shown.usesGradient} clip=${shown.usesClip}`);
+      check("preview window is a masked gradient, not a clip", shown.usesGradient && !shown.usesClip, `mask-gradient=${shown.usesGradient} clip=${shown.usesClip}`);
       check("preview takes no pointer", shown.pointerEvents === "none" && shown.hidden === "true");
       check("preview is positioned at the cursor", shown.x !== "" && shown.y !== "", `${shown.x} ${shown.y}`);
       check("preview clears the fixed header", Number(shown.z) > 40, `z-index ${shown.z}`);
-
       /**
-       * The RENDERED edge, scanned out from the centre along one row.
+       * The RENDERED edge of the window, measured as a DIFFERENCE.
        *
-       * Asked for as a hard edge (2026-09-30) and drawn as a 1.5px gradient step
-       * rather than a `clip-path`, so that it looks hard without the rim
+       * Asked for as a hard edge (2026-09-30) and drawn as a 1.5px step in
+       * `mask-image` rather than a `clip-path`, so it looks hard without the rim
        * staircasing and crawling as the pointer moves. Neither half of that is
-       * visible in the CSS alone: a stop written in the wrong unit, or a stray
-       * `background-size`, softens it back to the smudge this replaced and
-       * nothing else would notice.
+       * visible in the CSS, and a stop in the wrong unit would soften it back.
        *
-       * The radius has to be resolved through layout — `getPropertyValue` on a
-       * custom property returns the written `clamp(...)`, not a length.
+       * Scanning luminance outward was the first attempt and it stopped working
+       * the moment the window held the real dark theme instead of a flat fill:
+       * with actual content inside, luminance along a ray is not monotonic, and
+       * the scan reported a 120px "edge" that was the content varying.
+       *
+       * So the ray is a DIFFERENCE between the same row with and without the
+       * preview. Inside the window the two disagree; outside they are identical,
+       * whatever the page happens to look like there. The width of the run where
+       * the difference falls from full to zero is the mask's edge, and it is
+       * content-independent by construction.
        */
-      const edge = await page.evaluate(() => {
+      const geometry = await page.evaluate(() => {
         const el = document.querySelector(".tds-theme-preview");
         const probe = document.createElement("div");
         probe.style.cssText =
@@ -179,65 +185,71 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
           y: parseFloat(el.style.getPropertyValue("--tds-theme-preview-y")),
         };
       });
-      const cx = Math.round(edge.x);
-      const cy = Math.round(edge.y);
-      const radius = Math.round(edge.r);
-      /**
-       * Scan toward whichever side has room for the whole radius plus a margin.
-       *
-       * The toggle sits at the right end of the bar, so the circle around it runs
-       * off the right edge of the viewport — a rightward scan never leaves the
-       * circle and reports the ground as "outside", which read as the preview
-       * being lighter outside than in. Leftward there is always the width of the
-       * page.
-       */
+      const cx = Math.round(geometry.x);
+      const cy = Math.round(geometry.y);
+      const radius = Math.round(geometry.r);
+      // Scan toward whichever side has room for the whole radius plus a margin:
+      // the toggle sits at the right end of the bar, so the circle around it
+      // often runs off the right edge of the viewport.
       const room = 12;
       const dir = cx + radius + room <= 1440 ? 1 : -1;
       const x0 = dir === 1 ? cx : Math.max(0, cx - radius - room);
       const width = dir === 1 ? Math.min(radius + room, 1440 - cx) : cx - x0;
+
       if (width > radius && cy >= 1) {
-        const strip = await page.screenshot({
-          clip: { x: x0, y: cy - 1, width, height: 3 },
+        const row = { x: x0, y: cy - 1, width, height: 3 };
+        const withPreview = await page.screenshot({ clip: row });
+        // Hide it rather than close it, so nothing else about the page moves.
+        await page.evaluate(() => {
+          const el = document.querySelector(".tds-theme-preview");
+          if (el) el.style.visibility = "hidden";
         });
-        const scan = await page.evaluate(async (data) => {
-          const image = new Image();
-          await new Promise((r) => {
-            image.onload = r;
-            image.src = `data:image/png;base64,${data}`;
-          });
-          const canvas = document.createElement("canvas");
-          canvas.width = image.width;
-          canvas.height = image.height;
-          const context = canvas.getContext("2d", { willReadFrequently: true });
-          context.drawImage(image, 0, 0);
-          const pixels = context.getImageData(0, 1, canvas.width, 1).data;
+        await page.waitForTimeout(120);
+        const without = await page.screenshot({ clip: row });
+        await page.evaluate(() => {
+          const el = document.querySelector(".tds-theme-preview");
+          if (el) el.style.visibility = "";
+        });
+        await page.waitForTimeout(120);
+
+        const diff = await page.evaluate(async ([a, b]) => {
+          const load = async (data) => {
+            const image = new Image();
+            await new Promise((r) => {
+              image.onload = r;
+              image.src = `data:image/png;base64,${data}`;
+            });
+            const canvas = document.createElement("canvas");
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const context = canvas.getContext("2d", { willReadFrequently: true });
+            context.drawImage(image, 0, 0);
+            return context.getImageData(0, 1, canvas.width, 1).data;
+          };
+          const one = await load(a);
+          const two = await load(b);
           const out = [];
-          for (let i = 0; i < pixels.length; i += 4) {
-            const ch = (v) => {
-              v /= 255;
-              return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-            };
+          for (let i = 0; i < one.length; i += 4) {
             out.push(
-              0.2126 * ch(pixels[i]) + 0.7152 * ch(pixels[i + 1]) + 0.0722 * ch(pixels[i + 2]),
+              (Math.abs(one[i] - two[i]) +
+                Math.abs(one[i + 1] - two[i + 1]) +
+                Math.abs(one[i + 2] - two[i + 2])) /
+                3,
             );
           }
           return out;
-        }, strip.toString("base64"));
+        }, [withPreview.toString("base64"), without.toString("base64")]);
 
-        // Walk outward from the centre, in whichever direction was chosen.
-        const centre = dir === 1 ? 0 : scan.length - 1;
+        // Walk outward from the centre and find where the difference dies.
+        const centre = dir === 1 ? 0 : diff.length - 1;
         const ray = [];
-        for (let step = 0; step < scan.length; step++) {
-          ray.push(scan[centre + dir * step]);
-        }
-        const inside = ray[0];
-        const outside = ray[ray.length - 1];
-        const mid = (inside + outside) / 2;
+        for (let step = 0; step < diff.length; step++) ray.push(diff[centre + dir * step]);
+        const peak = Math.max(...ray);
         let from = null;
         let to = null;
         for (let i = 0; i < ray.length; i++) {
-          if (from === null && ray[i] > inside + (mid - inside) * 0.1) from = i;
-          if (from !== null && ray[i] > outside - (outside - mid) * 0.1) {
+          if (from === null && ray[i] < peak * 0.9) from = i;
+          if (from !== null && ray[i] < peak * 0.1) {
             to = i;
             break;
           }
@@ -246,13 +258,14 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
         check(
           "preview edge is hard (≤3px)",
           rim !== null && rim <= 3,
-          rim === null ? "no rim found" : `${rim}px at ${radius}px radius`,
+          rim === null
+            ? `no edge found (peak difference ${peak.toFixed(1)})`
+            : `${rim}px at ${radius}px radius`,
         );
-        // And the region really is the other theme's ground, not a light dim.
         check(
-          "preview really is dark inside",
-          inside < 0.12 && outside > 0.4,
-          `L ${inside.toFixed(3)} inside → ${outside.toFixed(3)} outside`,
+          "the window is bounded, not the whole viewport",
+          peak > 20 && ray[ray.length - 1] < peak * 0.1,
+          `difference ${peak.toFixed(1)} at the centre, ${ray[ray.length - 1].toFixed(1)} outside`,
         );
       }
     }
@@ -353,6 +366,113 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
     });
     check("both cards are glass", glass.card.includes("blur") && glass.form.includes("blur"), `${glass.card} / ${glass.form}`);
     await context.close();
+  }
+}
+
+// ── 6. The preview IS the dark theme, not a dark sheet ──────────────────────
+/**
+ * The claim this proves, and nothing else can.
+ *
+ * "Es soll so aussehen, als wäre es der richtige Darkmode und nicht einfach eine
+ * dunkle Ebene rübergelegt" (2026-09-30). A flat dark fill and a real dark
+ * rendering both make a region darker; the only way to tell them apart is to
+ * compare the region against the SAME region with the page genuinely in the dark
+ * theme.
+ *
+ * So: one context in light mode with the toggle hovered, one in dark mode with
+ * nothing hovered, the same rectangle inside the circle in both, and the two
+ * luminance distributions compared.
+ *
+ * The 95th percentile is the discriminator. A flat sheet can only darken, so its
+ * p95 collapses with everything else; the dark theme has LIGHT content in it
+ * (ivory text on a near-black ground) and keeps a high p95. Measured on the
+ * services section: light p95 0.863, preview 0.724, real dark 0.724.
+ */
+{
+  const clip = { x: 1000, y: 60, width: 100, height: 60 };
+  const scrollTo = 2300;
+
+  const histogram = async (page) => {
+    const shot = await page.screenshot({ clip });
+    return page.evaluate(async (data) => {
+      const image = new Image();
+      await new Promise((r) => {
+        image.onload = r;
+        image.src = `data:image/png;base64,${data}`;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const values = [];
+      for (let i = 0; i < pixels.length; i += 4) {
+        const ch = (v) => {
+          v /= 255;
+          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        };
+        values.push(
+          0.2126 * ch(pixels[i]) + 0.7152 * ch(pixels[i + 1]) + 0.0722 * ch(pixels[i + 2]),
+        );
+      }
+      values.sort((a, b) => a - b);
+      return {
+        median: values[Math.floor(values.length / 2)],
+        p95: values[Math.floor(values.length * 0.95)],
+      };
+    }, shot.toString("base64"));
+  };
+
+  const sample = async (theme, hover) => {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      colorScheme: theme,
+    });
+    const page = await context.newPage();
+    await page.goto(base, { waitUntil: "networkidle" });
+    await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), scrollTo);
+    await page.waitForTimeout(900);
+    if (hover) {
+      const toggle = await page.$(".tds-theme-toggle");
+      if (!toggle) {
+        await context.close();
+        return null;
+      }
+      await toggle.hover();
+      await page.waitForTimeout(800);
+    }
+    const out = await histogram(page);
+    await context.close();
+    return out;
+  };
+
+  const light = await sample("light", false);
+  const previewed = await sample("light", true);
+  const realDark = await sample("dark", false);
+
+  if (!previewed || !realDark || !light) {
+    check("the preview can be compared against the real dark theme", false);
+  } else {
+    check(
+      "the preview region actually darkens",
+      previewed.median < light.median - 0.2,
+      `median ${light.median.toFixed(3)} → ${previewed.median.toFixed(3)}`,
+    );
+    // The point of the whole feature: not merely darker, but the same as dark.
+    check(
+      "the preview IS the dark theme, not a dark sheet",
+      Math.abs(previewed.median - realDark.median) < 0.03 &&
+        Math.abs(previewed.p95 - realDark.p95) < 0.05,
+      `preview median ${previewed.median.toFixed(3)}/p95 ${previewed.p95.toFixed(3)} vs real ${realDark.median.toFixed(3)}/${realDark.p95.toFixed(3)}`,
+    );
+    // A flat fill cannot produce light content. This is the discriminator.
+    check(
+      "the region keeps the dark theme's LIGHT content",
+      previewed.p95 > previewed.median + 0.3,
+      `median ${previewed.median.toFixed(3)} but p95 ${previewed.p95.toFixed(3)}`,
+    );
   }
 }
 
