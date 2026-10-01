@@ -762,7 +762,11 @@ html[data-motion="on"] :where([data-cta]) {
 
    `50% - 50vw` and not a fixed negative margin: the container's width moves
    with the viewport and the gutter, and this is the one expression that lands
-   on the window edge at every combination of them.
+   on the window edge at every combination of them — once the scrollbar is
+   taken out: `vw` includes a classic scrollbar, so the band overhung each edge
+   by half its width (measured −5…1915 in a 1910px page) and the 8px slots
+   showed as 3px. `--lp-scrollbar` is measured in Layout.astro; `0px` without
+   JS and on overlay scrollbars, which is the old expression.
 
    Deliberately NOT applied to the comparison table on a service page. That
    table scrolls sideways too, but it is a table inside a card — the slot says
@@ -772,7 +776,7 @@ html[data-motion="on"] :where([data-cta]) {
   position: relative;
   /* How wide the slot in the page is. */
   --lp-slit: 0.5rem;
-  margin-inline: calc(50% - 50vw);
+  margin-inline: calc(50% - 50vw + var(--lp-scrollbar, 0px) / 2);
 }
 /* Page-coloured bars at both window edges with the hard shadow falling
    INWARD, so the band visibly disappears behind the page surface. Flat colour

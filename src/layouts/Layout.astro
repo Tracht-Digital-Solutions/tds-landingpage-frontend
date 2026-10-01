@@ -290,6 +290,24 @@ const showCookieNotice = !bare;
       mountReveal();
     </script>
 
+    {/* The classic scrollbar's width, for `.lp-band` in global.css: `50vw`
+        counts the scrollbar, so the band overhung both edges by half of it.
+        A ResizeObserver on <html> also sees the scrollbar appear or go. */}
+    <script>
+      const root = document.documentElement;
+      let scrollbar = "";
+      const measureScrollbar = () => {
+        const value = `${Math.max(0, window.innerWidth - root.clientWidth)}px`;
+        if (value === scrollbar) return;
+        scrollbar = value;
+        root.style.setProperty("--lp-scrollbar", value);
+      };
+      // Once now: an observer only reports at the next rendering step, which a
+      // tab opened in the background does not reach.
+      measureScrollbar();
+      new ResizeObserver(measureScrollbar).observe(root);
+    </script>
+
     {/* The Motion layer: CTA, photos, page transitions, business card, nav
         indicator. It loads its runtime with `import()` at idle (at once only
         after an internal navigation) and nothing under reduced motion —

@@ -69,6 +69,8 @@ describe("motion on the landing page", () => {
     // The properties that need an unbroken text block to work on.
     expect(hero).toMatch(/hyphens:\s*auto/);
     expect(hero).toMatch(/overflow-wrap:\s*break-word/);
+    // Balance + hyphens split "Lösungen" on phones; short words stay whole.
+    expect(hero).toMatch(/hyphenate-limit-chars:\s*12/);
   });
 
   it("lets the hero decoration animate, but nothing it renders is read", () => {
