@@ -307,6 +307,10 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     /* A long word from the panel must break at a syllable, not overflow a
        320 px phone. */
     hyphens: auto;
+    /* …but only a LONG word. `text-wrap: balance` prefers a hyphen to two
+       uneven lines, so at 48px it set "Digitale Lösun- / gen, die passen."
+       on every phone. Under 12 characters a word is never split. */
+    hyphenate-limit-chars: 12 5 5;
     overflow-wrap: break-word;
   }
   @media (min-width: 768px) {

@@ -231,7 +231,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
   /* The height this control reserves at the bottom edge, for
      `scroll-padding-bottom` in global.css: a focused link must scroll above
-     it, not behind it. Cleared while the trunk is folded away. */
+     it, not behind it. Cleared while the trunk is folded away.
+     These are the no-JS fallback only: the script below measures the pill and
+     writes the real value inline on <html>, which wins over all of them. */
   :global(:root) {
     --lp-floating-lane: 4.75rem;
   }
@@ -487,6 +489,23 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       if (twinA11y && a11y) twinA11y.hidden = a11y.hidden;
     };
     new MutationObserver(mirror).observe(group, { attributes: true, subtree: true, attributeFilter: ["data-suppressed", "data-scrolled-down", "hidden"] });
+
+    /**
+     * The lane, MEASURED. The CSS values are a one-button guess and the pill
+     * is up to three buttons tall: on a 390px phone it covered the footer's
+     * copyright line and 18 focus stops sat partly behind it. Pill height plus
+     * its `bottom` offset — not `innerHeight - rect.bottom`, which would count
+     * the cookie notice's translate a second time (`--tds-bottom-lane` is
+     * added separately wherever the lane is used). Inline on <html>, so it
+     * overrides the CSS fallbacks above, including the `0px` ones.
+     */
+    let lane = "";
+    new ResizeObserver(() => {
+      const value = `${Math.ceil(group.offsetHeight + (parseFloat(getComputedStyle(group).bottom) || 0))}px`;
+      if (value === lane) return;
+      lane = value;
+      document.documentElement.style.setProperty("--lp-floating-lane", value);
+    }).observe(group);
 
     /** Dark bands in page coordinates; measured, never read per frame. */
     let darkRanges: Range[] = [];
