@@ -405,7 +405,13 @@ for (const url of pageUrls) {
   }
 
   const kind = PROFILE.pageKind(path);
-  for (const type of kind.requiredTypes) if (!types.has(type)) fail(path, `JSON-LD lacks ${type}`);
+  // A requirement is one type, or an array meaning "any of these" — a tool
+  // page may declare `WebApplication` or `SoftwareApplication` depending on
+  // what its pack's manifest asked for, and either is correct.
+  for (const requirement of kind.requiredTypes) {
+    const options = [].concat(requirement);
+    if (!options.some((type) => types.has(type))) fail(path, `JSON-LD lacks ${options.join(" or ")}`);
+  }
   for (const type of PROFILE.forbiddenTypes) {
     if (types.has(type)) fail(path, `JSON-LD carries ${type}, which this site refuses`);
   }
