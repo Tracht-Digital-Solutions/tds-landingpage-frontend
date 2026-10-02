@@ -8,6 +8,29 @@
  * Street address, postal code, phone, VAT ID and social URLs are all
  * the real verified data (matches the Impressum).
  */
+/**
+ * The public profile URLs, lifted out of `siteConfig` so that `socials` and
+ * `founder.sameAs` cannot be two different answers to the same question.
+ *
+ * `founder.sameAs` was an empty array with a "populated post-launch" note on
+ * it for long enough to become a small lie: the Person node fell back to
+ * reading `socials` directly, and anything that trusted `founder.sameAs` — an
+ * answer engine resolving the author of a page, for instance — was told the
+ * person has no profiles anywhere.
+ *
+ * Both profiles belong on both entities here, which is unusual and correct for
+ * this business: it is a sole proprietorship, `legalName` IS "Julian Tracht",
+ * so the person and the organisation are the same legal entity. `socials.test.ts`
+ * holds the Organization's `sameAs` to the same list the page renders.
+ *
+ * WhatsApp is deliberately absent: a `wa.me` deep link is a messenger link,
+ * not a profile, and `sameAs` means "the same entity, elsewhere".
+ */
+const PROFILES = {
+  linkedin: "https://www.linkedin.com/in/julian-tracht/",
+  github: "https://github.com/Tracht-Digital-Solutions",
+} as const;
+
 export const siteConfig = {
   /** Brand name as it should appear in search results. */
   name: "Tracht Digital Solutions",
@@ -47,7 +70,8 @@ export const siteConfig = {
     // Websites first, like the site since 2026-09-15. Shown on the business
     // card and in the vCard as well.
     jobTitle: "Webentwickler & Digitalisierungsberater",
-    sameAs: [] as string[], // populated from socials below post-launch
+    /** The same profiles `socials` renders — see `PROFILES` above. */
+    sameAs: Object.values(PROFILES) as string[],
   },
   /** Verified business address (matches the Impressum). */
   address: {
@@ -93,10 +117,7 @@ export const siteConfig = {
    * `contact.info.phone` number; it is intentionally not in
    * JSON-LD `sameAs` (which expects social-profile URLs, not
    * messenger links). */
-  socials: {
-    linkedin: "https://www.linkedin.com/in/julian-tracht/",
-    github: "https://github.com/Tracht-Digital-Solutions",
-  } as {
+  socials: { ...PROFILES } as {
     linkedin?: string;
     github?: string;
     whatsapp?: string;

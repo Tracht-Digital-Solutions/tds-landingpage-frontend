@@ -1,6 +1,6 @@
 {
   "name": "tds-landingpage-frontend",
-  "version": "0.60.4",
+  "version": "0.61.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,7 +20,7 @@
     "studies:import": "tsx scripts/design-studies.ts",
     "images:variants": "tsx scripts/image-variants.ts",
     "audit:ux": "node scripts/ux-audit.mjs",
-    "audit:seo": "node scripts/seo-audit.mjs",
+    "audit:geo": "node scripts/geo-audit.mjs",
     "audit:perf": "node scripts/perf-audit.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "audit:contrast": "node scripts/contrast-probe.mjs",

@@ -54,6 +54,15 @@
  */
 export const FAQ_PAGE_SLUG = { de: "/fragen", en: "/en/questions" } as const;
 
+/**
+ * ISO date of the last change to the committed FAQ copy. Rendered as "Stand"
+ * on the questions page, published as its `dateModified`, and the entry's
+ * `lastmod` in the sitemap — the same three uses `ServiceDefinition.updatedAt`
+ * has. Raise it only when an answer changes; a panel override does not move it,
+ * because the panel cannot say when the copy it replaced was written.
+ */
+export const FAQ_PAGE_UPDATED_AT = "2026-10-02";
+
 /** The questions page, in one language. */
 export function faqPageHref(lang: "de" | "en"): string {
   return FAQ_PAGE_SLUG[lang];
@@ -104,6 +113,11 @@ export function getFaqPageCopy(lang: "de" | "en") {
         headlineAccent: "Fragen.",
         intro:
           "Übernahme, Preise und Zusammenarbeit – die Fragen, die mir am häufigsten gestellt werden.",
+        // The answer-first paragraph: who answers, what about, for whom, where.
+        // It is the first thing an answer engine reads after the headline, and
+        // the first thing a reader needs in order to trust the rest.
+        answer:
+          "Die Fragen auf dieser Seite beantwortet Julian Tracht selbst – Inhaber von Tracht Digital Solutions in Schwarzenbek bei Hamburg, tätig für Unternehmen in ganz Deutschland. Es geht um die Übernahme einer fremd gebauten Website, darum was ein Festpreis abdeckt, wie lange eine Umsetzung dauert und wer nach der Übergabe zuständig ist.",
         seoTitle: "Häufige Fragen zu Website, Preis und Ablauf — Tracht Digital",
         description:
           "Antworten zu Übernahme bestehender Seiten, Festpreisen, Dauer, Zugängen und laufender Betreuung. Kurz beantwortet, ohne Fachsprache.",
@@ -123,6 +137,8 @@ export function getFaqPageCopy(lang: "de" | "en") {
         headlineAccent: "questions.",
         intro:
           "Takeovers, pricing and working together – the questions I am asked most often.",
+        answer:
+          "The questions on this page are answered by Julian Tracht himself – owner of Tracht Digital Solutions in Schwarzenbek near Hamburg, working with companies across Germany. They cover taking over a site somebody else built, what a fixed price includes, how long a project runs and who is responsible after handover.",
         seoTitle: "Common Questions on Websites and Pricing — Tracht Digital",
         description:
           "Answers on taking over existing sites, fixed prices, timelines, logins and ongoing support. Answered briefly, without the jargon.",
