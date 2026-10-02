@@ -129,7 +129,7 @@ problem cannot become a long-lived page.
 
 ## 6. Release artifact
 
-`scripts/pack-release.mjs` assembles a self-contained production tree:
+tds-shared's `scripts/pack-release.mjs` (the `postbuild` step) assembles a self-contained production tree:
 
 ```text
 release/

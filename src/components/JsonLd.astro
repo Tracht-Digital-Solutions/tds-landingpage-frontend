@@ -6,6 +6,8 @@
  * <script type="application/ld+json"> tag. `is:inline` keeps Astro
  * from processing the script tag's contents.
  */
+import { serializeJsonLd } from "@tracht-digital-solutions/tds-shared/site";
+
 interface Props {
   data: object | object[];
 }
@@ -18,7 +20,7 @@ const graphs = Array.isArray(data) ? data : [data];
   graphs.map((graph) => (
     <script
       type="application/ld+json"
-      set:html={JSON.stringify(graph)}
+      set:html={serializeJsonLd(graph)}
       is:inline
     />
   ))

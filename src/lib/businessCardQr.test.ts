@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
  * import it, because a prerendered route runs during `astro build` and never
  * enters the server bundle.
  *
- * `scripts/pack-release.mjs` catches the same mistake at build time and is the
+ * tds-shared's `scripts/pack-release.mjs` catches the same mistake at build time and is the
  * real guard. This suite states the rule where someone would break it — in the
  * source, next to the module — and it fails in a second rather than after a
  * full build.

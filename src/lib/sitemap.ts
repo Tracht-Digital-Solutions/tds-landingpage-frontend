@@ -22,6 +22,7 @@ import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
 import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
+import { escapeXml } from "@tracht-digital-solutions/tds-shared/site";
 
 /** One indexable page, in both languages. */
 export interface SitemapEntry {
@@ -163,13 +164,6 @@ export function absolute(path: string): string {
   return new URL(path, siteConfig.url).href;
 }
 
-function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * The `<urlset>` document listing every indexable URL in both languages.
