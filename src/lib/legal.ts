@@ -16,7 +16,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
-import { contentCache } from "./contentCache";
+import { memoisedOr } from "./contentCache";
+import { readContentJson } from "./contentFetch";
 import { contentApiBase } from "./connection";
 
 /** Metadata for one uploaded document, as `GET /content/legal` returns it. */
@@ -42,21 +43,12 @@ export type LegalDocIndex = Record<string, Record<string, LegalDocMeta>>;
 export async function fetchLegalIndex(): Promise<LegalDocIndex> {
   if (import.meta.env.PUBLIC_DEMO_MODE === "true") return {};
 
-  return contentCache.get("legal:index", async () => {
-    let docs: LegalDocIndex = {};
-    try {
-      const url = `${contentApiBase()}/legal`;
-      const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
-      assertKeyAccepted(res, url);
-      if (res.ok) {
-        const data = (await res.json()) as { docs?: LegalDocIndex };
-        docs = data.docs ?? {};
-      }
-    } catch (err) {
-      console.warn("[tds-landingpage] legal document index fetch failed, using committed fallback:", err);
-    }
-    return docs;
-  });
+  return memoisedOr(
+    "legal:index",
+    async () => (await readContentJson<{ docs?: LegalDocIndex }>(`${contentApiBase()}/legal`)).docs ?? {},
+    {},
+    "legal document index",
+  );
 }
 
 /** One document's metadata for a language, or null when none is uploaded. */
@@ -121,18 +113,9 @@ export async function legalDocBytes(key: string, lang: "de" | "en"): Promise<Uin
   return fallbackBytes(key);
 }
 
-/** Reset the memoised index. Tests only. */
-export function resetLegalCache(): void {
-  contentCache.invalidate();
-}
-
 /**
- * Page copy for the legal-document pages.
- *
- * TODO: promote to tds-shared-pkg (`t.legal`) on the next shared release —
- * kept local for now so this feature does not drag the landingpage's
- * `tds-shared` pin from ^0.14.0 across five unrelated minors. The existing
- * legal pages (impressum, datenschutz) inline their copy the same way.
+ * Page copy for the legal-document pages. Local, like the copy the impressum
+ * and datenschutz pages inline: it names this site's documents only.
  */
 export const legalCopy = {
   de: {

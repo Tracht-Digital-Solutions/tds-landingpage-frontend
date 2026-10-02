@@ -1,6 +1,6 @@
-import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { contentApiBase } from "./connection";
-import { contentCache } from "./contentCache";
+import { memoisedOr } from "./contentCache";
+import { readContentJson } from "./contentFetch";
 import { hasBannedWord } from "./copyRules";
 /**
  * Server-side fetch of editable landingpage content blocks from
@@ -9,11 +9,10 @@ import { hasBannedWord } from "./copyRules";
  * a page render fills the file-backed cache.
  *
  * Mirrors the graceful-fallback contract of `content.ts`: any failure
- * returns an empty map so the build never breaks — sections then render
+ * returns an empty map (not memoised — see `memoisedOr`) so a render never breaks — sections then render
  * their baked tds-shared / local defaults via `cmsFor()`.
  */
 
-/** Resolved at build time from env, with the production default. */
 /** Map of section key → content object, as returned by the API. */
 export type ContentBlocks = Record<string, unknown>;
 
@@ -199,28 +198,17 @@ function mergeCmsValue(fallback: unknown, candidate: unknown): MergeResult {
 export async function fetchBlocks(lang: "de" | "en"): Promise<ContentBlocks> {
   if (import.meta.env.PUBLIC_DEMO_MODE === "true") return {};
 
-  return contentCache.get(`landing:${lang}`, async () => {
-    let blocks: ContentBlocks = {};
-    try {
+  return memoisedOr(
+    `landing:${lang}`,
+    async () => {
       const url = new URL(`${contentApiBase()}/landing`);
       url.searchParams.set("lang", lang);
-      const res = await fetch(url, {
-        headers: siteKeyHeaders(),
-        signal: AbortSignal.timeout(10_000),
-      });
-      assertKeyAccepted(res, url);
-      if (res.ok) {
-        const data = (await res.json()) as { blocks?: ContentBlocks };
-        blocks = data.blocks ?? {};
-      }
-    } catch (err) {
-      console.warn(
-        "[tds-landingpage] content blocks fetch failed, using baked defaults:",
-        err,
-      );
-    }
-    return blocks;
-  });
+      const data = await readContentJson<{ blocks?: ContentBlocks }>(url);
+      return data.blocks ?? {};
+    },
+    {},
+    `content blocks (${lang})`,
+  );
 }
 
 /**
@@ -238,20 +226,4 @@ export async function cmsFor<T extends object>(
   const block = blocks[section];
   if (!isRecord(block)) return fallback;
   return mergeCmsValue(fallback, block).value as T;
-}
-
-/**
- * Whether the public cookie banner is enabled. The `cookie_banner` block is
- * language-agnostic (stored under `lang=de`, like the Journal selection), so
- * this always reads the DE block regardless of page locale. Absent block,
- * demo mode or an unreachable API all mean "off" — the safe default.
- */
-export async function cookieBannerEnabled(): Promise<boolean> {
-  const blocks = await fetchBlocks("de");
-  const block = blocks["cookie_banner"];
-  return (
-    typeof block === "object" &&
-    block !== null &&
-    (block as { enabled?: unknown }).enabled === true
-  );
 }

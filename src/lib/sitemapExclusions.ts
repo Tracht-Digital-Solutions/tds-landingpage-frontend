@@ -29,9 +29,9 @@
  * cannot be read may leave a page stale, never blank.
  */
 
-import { contentCache } from "./contentCache";
+import { memoisedOr } from "./contentCache";
 import { contentApiBase } from "./connection";
-import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
+import { readContentJson } from "./contentFetch";
 
 /** This site's id in the panel's site registry. */
 export const SITE_ID = "landingpage";
@@ -87,25 +87,12 @@ export function groupExcluded(paths: readonly string[], patterns: readonly strin
 async function load(): Promise<string[]> {
   if (DEMO_MODE) return [];
 
-  try {
-    const url = new URL(`${contentApiBase()}/sitemap-exclusions`);
-    url.searchParams.set("site", SITE_ID);
-    const res = await fetch(url, {
-      headers: siteKeyHeaders(),
-      // A HANGING api host would otherwise block a render until the job
-      // timeout, and this one sits in the Layout — it would hang every page.
-      signal: AbortSignal.timeout(10_000),
-    });
-    assertKeyAccepted(res, url);
-    if (!res.ok) return [];
-
-    const data = (await res.json()) as ExclusionsResponse;
-    if (!Array.isArray(data.paths)) return [];
-    return data.paths.filter((p): p is string => typeof p === "string" && p.trim() !== "");
-  } catch (err) {
-    console.warn("[tds-landingpage] sitemap exclusions unreachable — nothing excluded:", err);
-    return [];
-  }
+  const url = new URL(`${contentApiBase()}/sitemap-exclusions`);
+  url.searchParams.set("site", SITE_ID);
+  // Throws on failure — `exclusionPatterns` decides what that renders as.
+  const data = await readContentJson<ExclusionsResponse>(url);
+  if (!Array.isArray(data.paths)) return [];
+  return data.paths.filter((p): p is string => typeof p === "string" && p.trim() !== "");
 }
 
 /**
@@ -120,5 +107,5 @@ async function load(): Promise<string[]> {
  * table, and `cache.ts` imports this module's caller.
  */
 export function exclusionPatterns(): Promise<string[]> {
-  return contentCache.get("sitemap:exclusions", load);
+  return memoisedOr("sitemap:exclusions", load, [], "sitemap exclusions (nothing excluded)");
 }

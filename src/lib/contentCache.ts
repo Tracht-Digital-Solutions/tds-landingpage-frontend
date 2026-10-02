@@ -26,3 +26,27 @@
 import { createGenerationCache } from "@tracht-digital-solutions/tds-shared/cache";
 
 export const contentCache = createGenerationCache();
+
+/**
+ * Memoise a SUCCESSFUL read for the render generation, and answer `fallback`
+ * on a failed one without remembering it.
+ *
+ * The loaders used to catch inside the memo and resolve `{}`/`[]`. The memo
+ * only evicts a rejection, so one timeout or 5xx pinned the defaults for the
+ * whole generation — every page rendered afterwards was stored in the page
+ * cache with fallback content, until the next rebuild. Worse, a rejected site
+ * key bumped the rejection counter on the first render only; later renders read
+ * the memo, the counter stayed still, and the middleware stored their
+ * fallback pages as good ones.
+ *
+ * So `load` throws on any failure, the memo evicts it, and the next render
+ * asks again (and counts a rejected key again).
+ */
+export async function memoisedOr<T>(key: string, load: () => Promise<T>, fallback: T, label: string): Promise<T> {
+  try {
+    return await contentCache.get(key, load);
+  } catch (err) {
+    console.warn(`[tds-landingpage] ${label} unavailable — using the fallback:`, err);
+    return fallback;
+  }
+}

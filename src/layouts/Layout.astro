@@ -68,7 +68,7 @@ interface Props {
 
 const {
   title,
-  description = siteConfig.description.de,
+  description: givenDescription,
   lang = "de",
   canonical,
   alternates,
@@ -78,6 +78,10 @@ const {
   ogType = "website",
   bare = false,
 } = Astro.props;
+
+/** The page's own summary, else the site's in the PAGE language — an English
+ *  page without one used to ship the German description. */
+const description = givenDescription ?? siteConfig.description[lang];
 
 const site = Astro.site?.origin ?? siteConfig.url;
 const url = canonical ?? new URL(Astro.url.pathname, site).toString();
