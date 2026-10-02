@@ -232,4 +232,41 @@ const titles = {
   #contact {
     padding-block-start: var(--lp-rhythm-wide);
   }
+
+  /* ── The seams ───────────────────────────────────────────────────────────
+
+     A hairline at each boundary, requested 2026-10-02. The page is ONE ground
+     (`.page-ground` in `Layout.astro`), so until now the only thing marking a
+     boundary was the gap itself — and the gap comes in three sizes, which
+     reads as rhythm to whoever designed it and as "where does this end" to a
+     reader scrolling past.
+
+     `border-block-start` and not a `::before`: the rule has to sit at the
+     MIDPOINT of the gap, and the midpoint is the border-box edge, because the
+     pairs above split every gap between the two sections. A `::before` renders
+     inside the padding and would hang under the gap instead of in it. A border
+     also needs no `position: relative`, which several of these sections would
+     have to grow — and they carry absolutely positioned `.tds-decor` children
+     that are placed against the page, not against the section.
+
+     Full bleed, like the 1px seams the service catalogue and the journal's
+     colour bands already use. `--color-line` carries both themes.
+
+     Two boundaries are deliberately NOT seamed:
+
+     - hero → services. The hero is `min-h-svh` and ends with its own device;
+       a line directly under it would read as part of the hero rather than as
+       a separator, and the whole gap sits on the services side anyway.
+     - faq → contact. The contact block is navy. Where the ground changes
+       colour the colour change IS the seam, and a light hairline inside the
+       navy would be a second, competing one. */
+  #cases,
+  #process,
+  #showcase,
+  #blog,
+  #about,
+  #preise,
+  #faq {
+    border-block-start: 1px solid var(--color-line);
+  }
 </style>

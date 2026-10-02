@@ -106,6 +106,11 @@ export const siteConfig = {
     "Onlineshop für lokale Geschäfte",
     "Google Ads",
     "Suchmaschinenwerbung",
+    "Suchmaschinenoptimierung",
+    // The Webauftritt page names this as something it takes care of, and the
+    // FAQ answers what it is — so the claim is backed by a page, which is the
+    // rule this list keeps.
+    "Sichtbarkeit in KI-Antworten",
     "Lokale Sichtbarkeit",
     "Prozessautomatisierung",
     "Individualsoftware",

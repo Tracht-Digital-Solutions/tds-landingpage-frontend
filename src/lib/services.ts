@@ -166,9 +166,14 @@ export const serviceDefinitions = [
       en: "Websites and Online Shops, Built and Maintained — Tracht Digital",
     },
     updatedAt: "2026-09-15",
+    // "SEO & KI-Suche" rather than "Google Ads & SEO": being found now means
+    // two different machines reading the same page, and the second one is the
+    // search this site can speak to from its own work. Google Ads is still
+    // named in `responsibilities` below, where it belongs — it is a service,
+    // not a thing somebody types into a search box.
     keywords: {
-      de: ["Websites", "Onlineshops", "Shopsysteme & CMS", "Google Ads & SEO"],
-      en: ["Websites", "Online shops", "Shop systems & CMS", "Google Ads & SEO"],
+      de: ["Websites", "Onlineshops", "Shopsysteme & CMS", "SEO & KI-Suche"],
+      en: ["Websites", "Online shops", "Shop systems & CMS", "SEO & AI search"],
     },
     image: "/images/services/04-webauftritt.webp",
     fallback: {
@@ -191,18 +196,19 @@ export const serviceDefinitions = [
           "Onlineshop einrichten oder reparieren, z. B. WooCommerce oder Shopware 6",
           "Bestehende Seiten auf WordPress, TYPO3 oder bei STRATO übernehmen",
           "Marketing: Google Ads, Unternehmensprofil und Auffindbarkeit",
+          "Auffindbarkeit für Suchmaschinen und für KI-Antworten (SEO und GEO)",
         ],
         outcomesTitle: "Das erreichst du",
         outcomes: [
           "Besucher verstehen sofort, was du anbietest",
-          "Du wirst gefunden, wenn jemand danach sucht",
+          "Du wirst gefunden – bei Google und wenn jemand eine KI fragt",
           "Deine Seite bleibt leicht zu pflegen",
         ],
         boundariesTitle: "Was nicht dazugehört",
         boundaries: [
           "Das Werbebudget für Anzeigen zahlst du direkt an Google.",
           "Texte, Fotos und Rechtstexte brauchen deine Zuarbeit.",
-          "Platzierungen bei Google lassen sich nicht kaufen.",
+          "Platzierungen bei Google lassen sich nicht kaufen – in KI-Antworten genauso wenig.",
         ],
         processTitle: "So gehen wir vor",
         process: [
@@ -239,18 +245,19 @@ export const serviceDefinitions = [
           "Set up or repair an online shop, e.g. WooCommerce or Shopware 6",
           "Take over existing sites on WordPress, TYPO3 or at STRATO",
           "Marketing: Google Ads, business profile and findability",
+          "Findability for search engines and for AI answers (SEO and GEO)",
         ],
         outcomesTitle: "What you achieve",
         outcomes: [
           "Visitors see straight away what you offer",
-          "You are found when someone searches for it",
+          "You are found – on Google and when somebody asks an AI",
           "Your site stays easy to maintain",
         ],
         boundariesTitle: "What this does not cover",
         boundaries: [
           "The ad budget goes to Google directly.",
           "Copy, photos and legal texts need your input.",
-          "Google rankings cannot be bought.",
+          "Google rankings cannot be bought – nor can a mention in an AI answer.",
         ],
         processTitle: "How we proceed",
         process: [
