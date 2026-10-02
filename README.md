@@ -147,7 +147,7 @@ Every indexable German route has a real English counterpart with reciprocal
 canonical and hreflang links.
 
 SEO output includes per-page titles/descriptions, Open Graph/Twitter metadata,
-an explicit SSR-safe sitemap, `robots.txt`, `llms.txt` and Schema.org JSON-LD.
+an explicit SSR-safe sitemap, `robots.txt`, a generated `/llms.txt` and Schema.org JSON-LD.
 Structured data is built from the same resolved content the visitor sees.
 Retired service URLs (Auftragsprogrammierung, Marketing, Komplette IT) answer
 with a 301 to their successor rather than a 404 — the table lives in
@@ -173,7 +173,7 @@ npm run images:variants  # regenerate the committed pre-sized image copies
 npm run build        # SSR build + verified self-contained release tree
 npm run preview      # inspect the production build locally
 npm run audit:ux -- <url>  # overflow, touch targets, fixed chrome, focus, axe
-npm run audit:seo -- <url> # titles, descriptions, canonical/hreflang, JSON-LD, robots/llms
+npm run audit:geo -- <url> # titles, descriptions, canonical/hreflang, JSON-LD, robots/llms
 npm run indexnow -- --dry-run  # URLs IndexNow would be told about (manual, after a deploy)
 ```
 

@@ -335,7 +335,7 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   - **No hourly rates anywhere** (decided 2026-09-22): not in the price list,
     the service pages' price box (it links to `#preise`), the assistant, the
     JSON-LD (`priceRange` is the package span, service nodes carry no
-    `offers`) or `llms.txt`. The rate fields are gone from `PricingContent`,
+    `offers`) or `/llms.txt`. The rate fields are gone from `PricingContent`,
     so stored panel values are ignored. `pricing.test.ts`, `llmsTxt.test.ts`
     and `serviceFinder.test.ts` fail on "Stunde"/"hour" in that copy. A panel
     block (`faq_v2`, `pricing_logic`, a service's `priceText`) saved before
@@ -481,7 +481,7 @@ visual language rather than rebuilding it locally:
   `bannedWords.test.ts` scans every copy source with comments stripped plus
   the tds-shared strings; `cms.ts` REFUSES a panel string containing one
   (`lib/copyRules.ts`) and keeps the committed text, so a block saved before
-  the rule cannot bring the word back; `npm run audit:seo` scans the rendered
+  the rule cannot bring the word back; `npm run audit:geo` scans the rendered
   pages for anything else (a synced demo description).
 - **The closing bar of every example site is served from here**
   (`public/embed/tds-brand-bar.js`, 2026-09-21). demo1 (Kanzlei), demo2
@@ -855,12 +855,37 @@ process; cache fingerprinting does not replace the restart.
   checkable facts that link their original sources; a visible "Stand" date and
   a named author; the same name for the same thing everywhere. What does not
   help: extra "AI files", Markdown copies, keyword lists, bought mentions,
-  content chopped into fragments. `public/llms.txt` exists but earns little —
-  keep it true (`llmsTxt.test.ts`), do not grow it.
-- `public/robots.txt` names the search and fetch agents of OpenAI, Anthropic
-  and Perplexity, and every group repeats `Disallow: /install/`
-  (`robotsTxt.test.ts`). Blocking one of those agents removes the site from
-  that engine's answers without any error.
+  content chopped into fragments. `/llms.txt` earns little — keep it true, do
+  not grow it.
+- **`/llms.txt` is generated, not written** (`src/lib/llmsTxt.ts` +
+  `src/pages/llms.txt.ts`, `prerender = false`). It was a hand-written
+  `public/llms.txt` and it drifted: wrong prices, an old service order, no
+  platform pages. Every URL now comes from `sitemapEntries()`, every amount
+  from the resolved price list, every title from the same `resolveServiceContent`
+  the page renders, so there is nothing left to keep in step by hand.
+  - **`public/llms.txt` must stay deleted.** A static asset shadows a route of
+    the same path, so putting it back would silently stop the endpoint from
+    ever answering. `llmsTxt.test.ts` asserts the file is absent.
+  - It is NOT in `alwaysPaths` and on no cache event: the page cache stores no
+    `text/plain`, so warming it would render a document per rebuild and discard
+    it. One file, ≤ 8 KB, no `llms-full.txt`, no Markdown mirrors.
+- `public/robots.txt` names sixteen agents in three ranks — the answer engines
+  of OpenAI, Anthropic, Perplexity, Google, Apple, Meta AI, DuckDuckGo and
+  Mistral, plus two retired Anthropic names — and every group repeats
+  `Disallow: /install/` and `Disallow: /tds/` (`robotsTxt.test.ts`). Blocking
+  one of those agents removes the site from that engine's answers without any
+  error. Dataset-only crawlers (CCBot, Bytespider, Amazonbot, …) are
+  deliberately unnamed and stay under the permissive `*` group: they feed no
+  answer surface, and every named group has to repeat the whole Disallow set.
+- **`scripts/geo-audit.mjs` is the same file in all four public repos** —
+  landingpage, blog, tools, shop — and only its `PROFILE` block differs. This
+  repo is where the generic body is maintained. `src/lib/geoAudit.test.ts`
+  reads `CHECK_IDS` out of the script as text (never executing it; it fetches
+  on the first line and calls `process.exit`) and holds the shared contract, so
+  a site cannot quietly end up auditing less than its siblings. `PROFILE`
+  carries the refusals too — `SearchAction`, `HowTo`, `Review`,
+  `AggregateRating`, `openingHoursSpecification` — because prose here does not
+  stop a future graph from reintroducing one.
 - **IndexNow** (`npm run indexnow`) tells Bing and the other IndexNow engines
   which URLs changed. The key is `public/<key>.txt`. The command reads the live
   sitemap and is manual on purpose — run it after a deploy, never from the
@@ -912,9 +937,10 @@ npm run images:variants  # regenerate the committed pre-sized image copies
 npm run build        # SSR build plus deployable release assembly/verification
 npm run preview      # production-style local inspection
 npm run audit:ux -- <url>  # overflow, targets, fixed chrome, focus, axe, deep links
-npm run audit:seo -- <url> # every sitemap page: title, description, H1, canonical,
-                           # hreflang, OG image, JSON-LD, Stand/author, sources,
-                           # internal links, robots.txt, llms.txt
+npm run audit:geo -- <url> # every sitemap page: title, description, H1, canonical,
+                           # hreflang, OG image, JSON-LD (required AND refused
+                           # types, @id resolution), Stand/author, sources,
+                           # internal links, img alt, robots.txt, llms.txt
 npm run audit:perf -- <url> # LCP median of 5 + the LCP ELEMENT, CLS, TTFB,
                            # byte weight by type, decoded JS. 390px, CPU x4,
                            # cache off. Budgets in scripts/perf-budget.json;

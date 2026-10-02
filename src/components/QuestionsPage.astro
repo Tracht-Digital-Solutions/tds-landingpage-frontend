@@ -29,15 +29,18 @@ import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import FaqAccordion from "~/components/ui/FaqAccordion.astro";
+import DetailMeta from "~/components/detail/DetailMeta.astro";
 import { cmsFor } from "~/lib/cms";
 import {
+  FAQ_PAGE_UPDATED_AT,
   faqPageHref,
   getFaqContent,
   getFaqPageCopy,
   groupedFaqItems,
 } from "~/lib/faq";
 import { localizePath, type Lang } from "~/lib/i18n";
-import { asGraph, faqPageSchema, organizationSchema } from "~/lib/jsonld";
+import { asGraph, breadcrumbNode, faqPageSchema, organizationSchema, webPageNode } from "~/lib/jsonld";
+import { absolute } from "~/lib/sitemap";
 
 interface Props {
   lang: Lang;
@@ -61,6 +64,29 @@ const sections = groupedFaqItems(content);
 
 const homeHref = localizePath("/", lang);
 const contactHref = `${homeHref}#contact`;
+
+// The page as an entity, dated and authored, the way the service and platform
+// pages do it. `dateModified` is the same value the "Stand" line below shows —
+// the audit fails a date that only exists in the markup.
+const pageUrl = absolute(faqPageHref(lang));
+const breadcrumbId = `${pageUrl}#breadcrumb`;
+const graph = asGraph(
+  webPageNode({
+    url: pageUrl,
+    name: ui.title,
+    description: pageDescriptions[lang],
+    lang,
+    dateModified: FAQ_PAGE_UPDATED_AT,
+    breadcrumbId,
+  }),
+  breadcrumbNode(breadcrumbId, [
+    { name: lang === "de" ? "Startseite" : "Home", url: absolute(homeHref) },
+    { name: ui.title, url: pageUrl },
+  ]),
+  // Only the questions the page shows — all twelve here, six on the home page.
+  faqPageSchema(content.items),
+  organizationSchema(),
+);
 ---
 
 <Layout
@@ -71,7 +97,7 @@ const contactHref = `${homeHref}#contact`;
     de: faqPageHref("de"),
     en: faqPageHref("en"),
   }}
-  jsonLd={asGraph(faqPageSchema(content.items), organizationSchema())}
+  jsonLd={graph}
 >
   <Header />
 
@@ -121,6 +147,10 @@ const contactHref = `${homeHref}#contact`;
           </h1>
           <span aria-hidden="true" class="tds-brandbar mb-8"></span>
           <p class="lead text-[var(--color-muted)] mb-5">{ui.intro}</p>
+          {/* Answer first: who answers, what about, for whom, where. The same
+              shape the service and platform pages open with. */}
+          <p class="text-[var(--color-muted)] leading-relaxed">{ui.answer}</p>
+          <DetailMeta lang={lang} updatedAt={FAQ_PAGE_UPDATED_AT} />
         </div>
       </div>
     </section>

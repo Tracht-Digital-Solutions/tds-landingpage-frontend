@@ -203,6 +203,7 @@ const profileSchema = {
   lang={lang}
   alternates={{ de: businessCardHref("de"), en: businessCardHref("en") }}
   jsonLd={asGraph(personSchema(), profileSchema)}
+  ogType="profile"
   bare
 >
   {/* `.tds-wash` paints the shared brand fields at the EDGES of this element,

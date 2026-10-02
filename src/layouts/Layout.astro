@@ -56,6 +56,12 @@ interface Props {
   noindex?: boolean;
   /** Optional structured data — object, array of objects, or @graph wrapper. */
   jsonLd?: object | object[];
+  /**
+   * `og:type`. `website` for everything the site sells or explains; `profile`
+   * for the business card, whose main entity is a person rather than a page
+   * about an offer. There is no `article` here — the Journal is its own repo.
+   */
+  ogType?: "website" | "profile";
   /** Render only the slot — no floating CTA / scroll chrome. Error pages. */
   bare?: boolean;
 }
@@ -69,6 +75,7 @@ const {
   ogImage = siteConfig.defaultOgImage,
   noindex = false,
   jsonLd,
+  ogType = "website",
   bare = false,
 } = Astro.props;
 
@@ -201,7 +208,7 @@ const showCookieNotice = !bare;
     <title>{title}</title>
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={url} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
