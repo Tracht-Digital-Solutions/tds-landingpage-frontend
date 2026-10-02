@@ -67,6 +67,9 @@ const PROFILE = {
     "DuckAssistBot",
     "MistralAI-User",
   ],
+  /** Every indexable page here has a real twin by construction. */
+  hreflangRequired: true,
+
   requiredDisallow: ["/install/", "/tds/"],
 
   /**
@@ -313,8 +316,16 @@ for (const url of pageUrls) {
   if (!lang) fail(path, "html has no lang");
   if (/noindex/i.test(robots)) fail(path, "listed in the sitemap but served noindex");
 
+  // An over-long title is a hard failure only where titles are code-owned.
+  // On a site whose headlines come from an editor the fix is editorial, not a
+  // deploy — and `pageTitle` there deliberately keeps a long headline whole
+  // rather than truncating it. Reporting it is right; failing the build on
+  // somebody else.s sentence is not.
   if (!title) fail(path, "no <title>");
-  else if (title.length > PROFILE.titleMax) fail(path, `title is ${title.length} characters: ${title}`);
+  else if (title.length > PROFILE.titleMax) {
+    const say = PROFILE.titleMaxHard === false ? warn : fail;
+    say(path, `title is ${title.length} characters: ${title}`);
+  }
   const [descMin, descMax] = PROFILE.descriptionRange;
   if (!description) fail(path, "no meta description");
   else if (description.length < descMin || description.length > descMax) {
@@ -323,8 +334,16 @@ for (const url of pageUrls) {
 
   const expectedCanonical = new URL(path, SITE).href;
   if (canonical !== expectedCanonical) fail(path, `canonical is ${canonical || "missing"}`);
+  // A missing alternate is a FAILURE only where every indexable page is
+  // guaranteed a twin. On a journal a tag can exist in one language and not
+  // the other, and on a shop a product may be published in one tree only —
+  // there the honest answer is no hreflang, not a link to a 404, so the
+  // absence is a warning and the RECIPROCITY check below is what catches real
+  // breakage.
   for (const key of [...PROFILE.langs, "x-default"]) {
-    if (!alternates[key]) fail(path, `no hreflang ${key}`);
+    if (alternates[key]) continue;
+    if (PROFILE.hreflangRequired === false) warn(path, `no hreflang ${key}`);
+    else fail(path, `no hreflang ${key}`);
   }
 
   const ogImage = meta("property", "og:image");
@@ -368,7 +387,23 @@ for (const url of pageUrls) {
   const nodes = [];
   const declaredIds = new Map(); // @id -> types
   const references = []; // { id, from }
-  const PAGE_TYPES = ["WebPage", "ProfilePage", "CollectionPage", "AboutPage", "ItemPage", "ContactPage", "FAQPage"];
+  // The node that REPRESENTS the page. On an article that is the posting
+  // itself, not the bare `mainEntityOfPage` stub beside it — the stub carries
+  // no date, so looking only for `WebPage` would report every article as
+  // undated.
+  const PAGE_TYPES = [
+    "WebPage",
+    "ProfilePage",
+    "CollectionPage",
+    "AboutPage",
+    "ItemPage",
+    "ContactPage",
+    "FAQPage",
+    "BlogPosting",
+    "Article",
+    "NewsArticle",
+    "TechArticle",
+  ];
 
   for (const match of html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)) {
     try {
@@ -526,7 +561,11 @@ for (const image of imageUrls) {
     if (bytes > PROFILE.llmsBudgetBytes) {
       fail("llms.txt", `${bytes} bytes is over the ${PROFILE.llmsBudgetBytes}-byte budget`);
     }
+    // Which sitemap URLs the file has to name. Everything, unless a site
+    // says otherwise: a journal indexes its ARTICLES, and listing two dozen
+    // tag pages beside them would bury the content under its own taxonomy.
     for (const url of pageUrls) {
+      if (PROFILE.llmsCovers && !PROFILE.llmsCovers(pathOf(url))) continue;
       if (!body.includes(url)) fail("llms.txt", `does not name ${url}`);
     }
   }
