@@ -1,5 +1,5 @@
-import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { contentApiBase } from "./connection";
+import { readContentJson } from "./contentFetch";
 
 /**
  * Shared shape of a published post as returned by tds-content-api's
@@ -54,10 +54,7 @@ export async function fetchTopics(
     const url = new URL(`${contentApiBase()}/blog`);
     url.searchParams.set("limit", String(limit));
     url.searchParams.set("lang", lang);
-    const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
-    assertKeyAccepted(res, url);
-    if (!res.ok) return [];
-    const data = (await res.json()) as { posts?: ContentPost[] };
+    const data = await readContentJson<{ posts?: ContentPost[] }>(url);
     return (data.posts ?? []).map(withResolvedCover);
   } catch (err) {
     console.warn(
@@ -84,12 +81,11 @@ export async function fetchPostsBySlug(
   const results = await Promise.all(
     slugs.map(async (slug) => {
       try {
-        const url = new URL(`${contentApiBase()}/blog/${slug}`);
+        // Encoded: a curated slug is panel-entered text, and a `/` or `?` in
+        // it would otherwise address a different endpoint.
+        const url = new URL(`${contentApiBase()}/blog/${encodeURIComponent(slug)}`);
         url.searchParams.set("lang", lang);
-        const res = await fetch(url, { headers: siteKeyHeaders(), signal: AbortSignal.timeout(10_000) });
-        assertKeyAccepted(res, url);
-        if (!res.ok) return null;
-        const data = (await res.json()) as { post?: ContentPost };
+        const data = await readContentJson<{ post?: ContentPost }>(url);
         return data.post ? withResolvedCover(data.post) : null;
       } catch (err) {
         console.warn(

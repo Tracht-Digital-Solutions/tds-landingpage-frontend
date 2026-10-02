@@ -175,6 +175,9 @@ export default function ContactForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, lang }),
+        // A hanging endpoint left the form in "submitting" for good, with the
+        // button disabled and nothing to say why. 20s, then the error view.
+        signal: AbortSignal.timeout(20_000),
       });
       if (res.ok) {
         setSubmitState("success");

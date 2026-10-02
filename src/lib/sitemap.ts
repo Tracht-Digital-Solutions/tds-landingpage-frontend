@@ -34,8 +34,8 @@ export interface SitemapEntry {
   /**
    * When this page last really changed, as YYYY-MM-DD.
    *
-   * Optional, and the fallback is the render date — which is what EVERY
-   * entry used to report, on every request. A sitemap whose lastmod is
+   * Optional, and an entry without one carries NO `<lastmod>` — the render
+   * date is what every entry used to report, on every request. A sitemap whose lastmod is
    * always today tells a crawler that the whole site changed since its last
    * visit, every visit, which is the same as telling it nothing. Service and
    * platform pages carry a real `updatedAt` that already drives their
@@ -108,6 +108,13 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   })),
 ];
 
+// The home page shows every service and platform, so it last changed when the
+// newest of them did. It used to fall back to "today" on every request.
+SITEMAP_ENTRIES[0].lastmod = SITEMAP_ENTRIES.map((e) => e.lastmod)
+  .filter((d): d is string => Boolean(d))
+  .sort()
+  .at(-1);
+
 /**
  * Both URLs of the page this path belongs to.
  *
@@ -176,10 +183,11 @@ function escapeXml(value: string): string {
  * whether the panel's exclusions have been applied — and so the rendering can
  * be tested against a fixed list instead of the live inventory.
  */
-export function renderUrlset(entries: readonly SitemapEntry[], lastmod: string): string {
+export function renderUrlset(entries: readonly SitemapEntry[], fallbackLastmod?: string): string {
   const urls = entries.flatMap((entry) =>
     (["de", "en"] as const).map((lang) => {
       const loc = absolute(entry[lang]);
+      const lastmod = entry.lastmod ?? fallbackLastmod;
       const alternates = [
         `<xhtml:link rel="alternate" hreflang="de-DE" href="${escapeXml(absolute(entry.de))}"/>`,
         `<xhtml:link rel="alternate" hreflang="en-GB" href="${escapeXml(absolute(entry.en))}"/>`,
@@ -189,7 +197,7 @@ export function renderUrlset(entries: readonly SitemapEntry[], lastmod: string):
         "<url>",
         `<loc>${escapeXml(loc)}</loc>`,
         alternates,
-        `<lastmod>${escapeXml(entry.lastmod ?? lastmod)}</lastmod>`,
+        lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "",
         `<changefreq>${entry.changefreq}</changefreq>`,
         `<priority>${entry.priority.toFixed(1)}</priority>`,
         "</url>",
@@ -214,13 +222,13 @@ export function renderUrlset(entries: readonly SitemapEntry[], lastmod: string):
  * `@astrojs/sitemap` produced exactly this pair, and changing the entry point
  * would silently orphan the registered one.
  */
-export function renderSitemapIndex(lastmod: string): string {
+export function renderSitemapIndex(lastmod?: string): string {
   return (
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
     "<sitemap>" +
     `<loc>${escapeXml(absolute("/sitemap-0.xml"))}</loc>` +
-    `<lastmod>${escapeXml(lastmod)}</lastmod>` +
+    (lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "") +
     "</sitemap>" +
     "</sitemapindex>"
   );

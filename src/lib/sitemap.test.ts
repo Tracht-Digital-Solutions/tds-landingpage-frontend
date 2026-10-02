@@ -159,6 +159,18 @@ describe("renderUrlset", () => {
     expect(xml).toContain(`<lastmod>${LAST}</lastmod>`);
   });
 
+  it("omits lastmod for an undated entry instead of claiming today", () => {
+    // Every URL used to report the render date, which tells a crawler the
+    // whole site changed on every visit — the same as telling it nothing.
+    expect(renderUrlset([{ ...entry, lastmod: undefined }])).not.toContain("<lastmod>");
+  });
+
+  it("dates the home page by the newest dated page", () => {
+    const dated = SITEMAP_ENTRIES.map((e) => e.lastmod).filter(Boolean).sort();
+    expect(SITEMAP_ENTRIES[0].de).toBe("/");
+    expect(SITEMAP_ENTRIES[0].lastmod).toBe(dated.at(-1));
+  });
+
   it("escapes XML metacharacters", () => {
     // One unescaped `&` makes the document unparseable, which a crawler
     // reports as "could not read", not "page missing".
