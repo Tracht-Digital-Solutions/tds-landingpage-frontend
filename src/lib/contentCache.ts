@@ -24,6 +24,7 @@
  */
 
 import { createGenerationCache } from "@tracht-digital-solutions/tds-shared/cache";
+import { memoisedOr as sharedMemoisedOr } from "@tracht-digital-solutions/tds-shared/site";
 
 export const contentCache = createGenerationCache();
 
@@ -42,11 +43,8 @@ export const contentCache = createGenerationCache();
  * So `load` throws on any failure, the memo evicts it, and the next render
  * asks again (and counts a rejected key again).
  */
-export async function memoisedOr<T>(key: string, load: () => Promise<T>, fallback: T, label: string): Promise<T> {
-  try {
-    return await contentCache.get(key, load);
-  } catch (err) {
-    console.warn(`[tds-landingpage] ${label} unavailable — using the fallback:`, err);
-    return fallback;
-  }
+export function memoisedOr<T>(key: string, load: () => Promise<T>, fallback: T, label: string): Promise<T> {
+  return sharedMemoisedOr(contentCache, key, load, fallback, (_message, err) =>
+    console.warn(`[tds-landingpage] ${label} unavailable — using the fallback:`, err),
+  );
 }
