@@ -1,0 +1,1 @@
+import{i as e,t}from"./react.DB-4Zxce.js";var n=e(t(),1);function r(){let[e,t]=(0,n.useState)(!1);return(0,n.useEffect)(()=>{if(typeof window.matchMedia!=`function`)return;let e=window.matchMedia(`(pointer: coarse)`);t(e.matches);let n=e=>t(e.matches);return e.addEventListener(`change`,n),()=>e.removeEventListener(`change`,n)},[]),e}export{r as t};
