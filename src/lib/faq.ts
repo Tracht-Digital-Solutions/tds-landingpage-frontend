@@ -207,6 +207,16 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "takeover",
           },
           {
+            // Added 2026-10-02. The question people now arrive with, and the
+            // answer is deliberately unexciting: it is the same work as always,
+            // plus one technical freigabe. No promise of a placement — that is
+            // the boundary the Webauftritt page draws for Google and this one
+            // draws for the same reason.
+            q: "Findet ChatGPT meine Seite – und kann man das beeinflussen?",
+            a: "Ja, und ja. Antwortmaschinen lesen dieselbe Seite wie Google, achten aber auf anderes: eine klare Antwort gleich im ersten Absatz, Überschriften, die als Frage formuliert und im ersten Satz beantwortet sind, prüfbare Angaben mit Quelle, ein sichtbares Stand-Datum und einen genannten Autor. Dazu kommt eine technische Freigabe – wer die KI-Crawler aussperrt, verschwindet aus deren Antworten, ohne dass irgendwo ein Fehler erscheint. Das nennt sich GEO, und es ist kein zweites Projekt neben der Suchmaschinenoptimierung, sondern dieselbe Arbeit sauber gemacht. Eine Platzierung versprechen kann dir niemand.",
+            group: "takeover",
+          },
+          {
             q: "Kann ich Texte und Bilder selbst ändern?",
             a: "Wie du willst. Möchtest du selbst ran, richte ich dir den Zugang ein und zeige es dir. Wenn nicht, schickst du mir die Änderung – das ist Teil der Pflege, kein Aufpreis.",
             group: "cooperation",
@@ -274,6 +284,11 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           {
             q: "What does “digitalizing workflows” mean for a business like mine?",
             a: "Name a routine that costs you time every week — quotes, scheduling, invoices. I will tell you what can be automated and what is not worth the effort. Including when the answer is: leave it as it is.",
+            group: "takeover",
+          },
+          {
+            q: "Does ChatGPT find my site – and can that be influenced?",
+            a: "Yes, and yes. Answer engines read the same page Google does, but they weigh different things: a clear answer in the first paragraph, headings that are real questions, checkable facts with their sources, a visible date and a named author. On top of that comes a technical permission – shut the AI crawlers out and you disappear from their answers, with no error showing anywhere. It is called GEO, and it is not a second project beside search engine optimisation but the same work done properly. Nobody can promise you a placement.",
             group: "takeover",
           },
           {

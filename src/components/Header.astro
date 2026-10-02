@@ -308,6 +308,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        It also collapses the duplication the comment above complains about: the
        nine places that used to declare `background-color` now set one value. */
     --tds-header-fill: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
+    /* The docked fill is the `transparent` KEYWORD, i.e. black at zero alpha,
+       and that is safe here: Chrome interpolates colour premultiplied, so
+       every frame with anything painted already carries the paper hue — only
+       the invisible alpha-0 endpoint is black. Measured with
+       `scripts/nav-undock-probe.mjs`, which fails if a frame is ever darker
+       than the colour the fade ends on. */
     background-color: transparent;
     /* No rim. The fill alone separates the bar from the page — the warm
        hairline (and before it the white glass highlight) is exactly the
@@ -423,16 +429,44 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        token is a whole `box-shadow` value and cannot be split. 3px is
        `--tds-shadow-hard-sm` on the marketing surface. */
     translate: 3px 3px;
+    /* ### Why the opacity waits, and why the wait is one-directional
+
+       This plate is a SOLID fill of `--tds-shadow-ink` — navy — lying at
+       `inset: 0` directly behind the glass. In the steady state that is the
+       point: the bar is 62–68% tint, so the plate reads through it and the
+       blur softens it. During the CHANGE it was the bug.
+
+       The plate faded in over 200ms on an ease-out curve while the glass above
+       it faded in over 250ms on `ease`. Ease-out front-loads: 100ms in, the
+       plate was about 75% opaque and the glass about 35%. For a fifth of a
+       second the bar was a navy slab with a faint wash over it — "beim Scrollen
+       wird die Leiste kurz blau".
+
+       The rule is that the plate must never be visible while the glass is not.
+       The delay here makes it follow on the way IN, which is where the fault
+       was: measured with `scripts/nav-undock-probe.mjs`, the plate led the
+       glass by 0.47 on undock and by 0.00 on dock, in both themes.
+
+       A delay is symmetric, though, so on its own it would make the plate
+       linger on the way out — the same fault mirrored, in a direction that was
+       previously fine. The docked rule below therefore overrides the timing
+       rather than inheriting it. */
     transition:
       translate 320ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 200ms var(--tds-ease-out);
+      opacity 220ms ease 80ms;
   }
   /* Docked: the plate slides INTO the bar and goes. Same 320ms as the
      `max-width`/`top` morph below, so the bar shrinking and the shadow
-     retracting are one movement. */
+     retracting are one movement.
+
+     The opacity, though, LEADS: no delay and a shorter duration, so the plate
+     is gone before the glass above it has thinned enough to show it. */
   .site-header[data-scrolled="false"]::after {
     translate: 0 0;
     opacity: 0;
+    transition:
+      translate 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 140ms ease;
   }
   @media (prefers-reduced-motion: reduce) {
     .site-header::after {

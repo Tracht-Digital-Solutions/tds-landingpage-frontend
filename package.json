@@ -1,6 +1,6 @@
 {
   "name": "tds-landingpage-frontend",
-  "version": "0.61.0",
+  "version": "0.62.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -25,7 +25,8 @@
     "indexnow": "node scripts/indexnow.mjs",
     "audit:contrast": "node scripts/contrast-probe.mjs",
     "audit:chrome": "node scripts/audit-chrome.mjs",
-    "audit:prefetch": "node scripts/prefetch-probe.mjs"
+    "audit:prefetch": "node scripts/prefetch-probe.mjs",
+    "audit:nav": "node scripts/nav-undock-probe.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
