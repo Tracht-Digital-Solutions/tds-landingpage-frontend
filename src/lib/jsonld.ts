@@ -40,7 +40,10 @@ export function personSchema() {
     email: `mailto:${siteConfig.email}`,
     image: `${siteConfig.url}${portraitSrc(720)}`,
     knowsAbout: [...siteConfig.knowsAbout],
-    sameAs: Object.values(siteConfig.socials).filter(Boolean) as string[],
+    // `founder.sameAs` rather than `socials`: both are built from one list
+    // (`PROFILES` in `seo.ts`), and reading the author's own field is what
+    // anything resolving the author of a page would expect to find filled.
+    sameAs: siteConfig.founder.sameAs.filter(Boolean),
   };
 }
 

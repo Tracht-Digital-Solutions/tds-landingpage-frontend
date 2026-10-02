@@ -52,15 +52,40 @@ const groups = parse(robots);
 const groupFor = (agent: string) =>
   groups.find((group) => group.agents.some((name) => name.toLowerCase() === agent.toLowerCase()));
 
-/** Search indexes and user-triggered fetchers of the answer engines. */
+/**
+ * Every agent the file has to name, in the three ranks the file documents:
+ * answer engines whose absence removes the site from their answers, retired
+ * names kept so an old crawler reads the same rules, and the newer answer
+ * surfaces. Dataset-only crawlers are deliberately absent and stay governed by
+ * the permissive `*` group — see the comment at the top of `robots.txt`.
+ */
 const ANSWER_AGENTS = [
+  // OpenAI, Anthropic, Perplexity, Google, Apple
+  "GPTBot",
   "OAI-SearchBot",
   "ChatGPT-User",
+  "ClaudeBot",
   "Claude-SearchBot",
   "Claude-User",
   "PerplexityBot",
   "Perplexity-User",
+  "Google-Extended",
+  "Applebot-Extended",
+  // Retired names
+  "Claude-Web",
+  "anthropic-ai",
+  // Meta AI, DuckDuckGo, Mistral
+  "meta-externalagent",
+  "meta-externalfetcher",
+  "DuckAssistBot",
+  "MistralAI-User",
 ] as const;
+
+/**
+ * Closed in EVERY group. `/tds/` is token-gated host control with no index
+ * value; the prefix deliberately does not cover `/tds-runtime.json`.
+ */
+const CLOSED_PATHS = ["/install/", "/tds/"] as const;
 
 describe("robots.txt", () => {
   it("lets every other crawler in", () => {
@@ -73,9 +98,15 @@ describe("robots.txt", () => {
     expect(group?.allow, agent).toContain("/");
   });
 
-  it("keeps the setup wizard out of every group", () => {
+  it.each(CLOSED_PATHS)("keeps %s out of every group", (path) => {
     for (const group of groups) {
-      expect(group.disallow, group.agents.join(", ")).toContain("/install/");
+      expect(group.disallow, group.agents.join(", ")).toContain(path);
+    }
+  });
+
+  it("leaves /tds-runtime.json reachable", () => {
+    for (const group of groups) {
+      expect(group.disallow, group.agents.join(", ")).not.toContain("/tds-runtime.json");
     }
   });
 

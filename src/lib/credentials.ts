@@ -49,6 +49,13 @@ export function credentialsHref(lang: Lang): string {
   return CREDENTIALS_SLUG[lang];
 }
 
+/**
+ * ISO date of the last change to this page's committed copy — the "Stand"
+ * line, the `dateModified` of its `WebPage`, and the entry's `lastmod` in the
+ * sitemap. Raise it when a certificate or the surrounding copy changes.
+ */
+export const CREDENTIALS_UPDATED_AT = "2026-10-02";
+
 export type CredentialGroupId = "web" | "projects" | "operations" | "data";
 
 /**
