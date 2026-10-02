@@ -168,8 +168,26 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
     center: { x: "0%" },
     exit: (dir: 1 | -1) => ({ x: `${dir * -100}%` }),
   };
+  /**
+   * No bounce on the step slide, unlike everything else here.
+   *
+   * A bounce of 0.18 over 0.42s overshot the resting position by about 9px and
+   * then drifted back over a further third of a second — measured at 1440px,
+   * the incoming step passed its target of x=304 and sat at x=295 before
+   * easing home, with the whole move taking ~770ms.
+   *
+   * Two things go wrong at once there. `.finder__stage-track` clips at x=296,
+   * so the overshoot puts the step — and the Zurück button at its left edge —
+   * a pixel OUTSIDE the clip. And the tail is long enough to read as the
+   * buttons hanging against the edge after the slide has visibly finished,
+   * which is what it was reported as.
+   *
+   * A card may overshoot; a full-width panel carrying the controls may not,
+   * because its overshoot is the controls leaving their place. `bounce: 0` is
+   * a critically damped spring: it arrives and stops.
+   */
   const slideTransition = still ?? {
-    x: { type: "spring" as const, bounce: 0.18, visualDuration: 0.42 },
+    x: { type: "spring" as const, bounce: 0, visualDuration: 0.34 },
   };
 
 
