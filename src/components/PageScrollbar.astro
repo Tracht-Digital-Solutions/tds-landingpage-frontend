@@ -1,0 +1,130 @@
+---
+/**
+ * The page's own floating scrollbar (2026-10-05) — visible only while the
+ * pointer is near the right edge, animated with Motion. Why it exists and how
+ * it behaves: `lib/pageScrollbar.ts`; its motion: `lib/motion/pageScrollbar.ts`.
+ *
+ * `aria-hidden` and out of the tab order: keyboard, wheel and touch scroll
+ * the page natively, so this is a pointer aid, not a second control.
+ * `hidden` until the <head> script has switched the native bar off — a touch
+ * device or a page without JavaScript keeps the native bar and never shows
+ * this one.
+ */
+---
+
+<div class="page-scrollbar" data-page-scrollbar-rail data-state="hidden" aria-hidden="true">
+  <button type="button" tabindex="-1" class="page-scrollbar__arrow" data-scrollbar-up>
+    <svg data-scrollbar-arrow width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 8 6 4l4 4" />
+    </svg>
+  </button>
+  <div class="page-scrollbar__track" data-scrollbar-track>
+    <div class="page-scrollbar__thumb" data-scrollbar-thumb>
+      <span class="page-scrollbar__pill" data-scrollbar-pill></span>
+    </div>
+  </div>
+  <button type="button" tabindex="-1" class="page-scrollbar__arrow" data-scrollbar-down>
+    <svg data-scrollbar-arrow width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 4l4 4 4-4" />
+    </svg>
+  </button>
+</div>
+
+<script>
+  import { mountPageScrollbar } from "~/lib/pageScrollbar";
+
+  const rail = document.querySelector<HTMLElement>("[data-page-scrollbar-rail]");
+  if (rail) mountPageScrollbar(rail);
+</script>
+
+<style>
+  /* Only where the native bar was switched off. */
+  .page-scrollbar {
+    display: none;
+  }
+  :global(html[data-page-scrollbar]) .page-scrollbar {
+    /* Over everything that floats at the edge, under dialogs (top layer). */
+    position: fixed;
+    z-index: 60;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    right: 2px;
+    width: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--color-primary);
+    user-select: none;
+  }
+
+  /* The states without Motion — also reduced motion: no transition at all.
+     With Motion on, `lib/motion/pageScrollbar.ts` writes the same values
+     inline on springs and those win. */
+  .page-scrollbar[data-state="hidden"] {
+    opacity: 0;
+    transform: translateX(10px);
+    pointer-events: none;
+  }
+  .page-scrollbar[data-state="hidden"] .page-scrollbar__pill {
+    transform: scaleX(0.4);
+  }
+  .page-scrollbar[data-state="shown"] .page-scrollbar__pill {
+    transform: scaleX(0.5);
+  }
+  .page-scrollbar[data-state="hidden"] [data-scrollbar-arrow] {
+    transform: scale(0.6);
+  }
+  .page-scrollbar[data-state="shown"] [data-scrollbar-arrow] {
+    transform: scale(0.75);
+  }
+
+  .page-scrollbar__arrow {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.75;
+  }
+  .page-scrollbar__arrow:hover {
+    opacity: 1;
+  }
+
+  /* The track is invisible: only the thumb and the arrows are drawn. */
+  .page-scrollbar__track {
+    position: relative;
+    flex: 1;
+    width: 100%;
+  }
+  .page-scrollbar__thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    cursor: grab;
+  }
+  .page-scrollbar__thumb:active {
+    cursor: grabbing;
+  }
+  .page-scrollbar__pill {
+    width: 10px;
+    height: 100%;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-primary) 60%, transparent);
+    transform-origin: center;
+  }
+  .page-scrollbar[data-state="active"] .page-scrollbar__pill {
+    background: var(--color-primary);
+  }
+  .page-scrollbar__thumb:active .page-scrollbar__pill {
+    background: var(--color-accent);
+  }
+</style>

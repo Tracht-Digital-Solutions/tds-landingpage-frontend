@@ -951,71 +951,20 @@ html[data-motion="on"] :where([data-cta]) {
   }
 }
 
-/* --- The page scrollbar grows when the pointer comes near (2026-10-05) ---
+/* --- The native page scrollbar is off where the floating one runs ---
 
-   Julian: near the scrollbar, the THUMB and the up/down ARROWS get bigger —
-   the bar's channel does not. tds-shared draws the bar with
-   `scrollbar-width: thin` on `html`, and since Chrome 121 a standard
-   scrollbar property switches the `::-webkit-scrollbar` rules off: what
-   showed was the browser's own thin bar, whose thumb and arrows cannot be
-   sized. So in engines that HAVE the pseudo-elements (`@supports selector`
-   keeps Firefox on its thin bar) the standard properties are reset and the
-   bar is drawn here.
-
-   The channel is a fixed 14px and the track stays transparent at every
-   state — a channel that widened would change `clientWidth` and reflow the
-   whole page. Only what is drawn INSIDE it changes: the thumb's transparent
-   border shrinks (4px pill → 10px), the arrows' glyph grows (6px → 10px).
-   `data-scrollbar-near` on <html> is set by the script in `Layout.astro`.
-   The state rules name `body`: Chrome styles the VIEWPORT's bar from the
-   body's pseudo-elements, and `html[…]::-webkit-scrollbar-thumb` matched
-   nothing (measured: thumb stayed 4px). `> body` keeps inner scrollers out.
-   Scrollbar pseudo-elements do not transition, so the change is a step. */
-@supports selector(::-webkit-scrollbar) {
-  html {
-    scrollbar-width: auto;
-    scrollbar-color: auto;
-    --lp-scrollbar-arrow-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 7 5 3l4 4' fill='none' stroke='%23050f68' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --lp-scrollbar-arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' fill='none' stroke='%23050f68' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  }
-  html[data-theme="dark"] {
-    --lp-scrollbar-arrow-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 7 5 3l4 4' fill='none' stroke='%2393a7ff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --lp-scrollbar-arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' fill='none' stroke='%2393a7ff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  }
-
-  ::-webkit-scrollbar {
-    width: 14px;
-    height: 14px;
-  }
-  ::-webkit-scrollbar-thumb {
-    border-width: 5px;
-  }
-  html[data-scrollbar-near] > body::-webkit-scrollbar-thumb {
-    border-width: 2px;
-  }
-
-  /* The arrows: one at each end of the vertical bar, none on a horizontal
-     one. The button's box is the channel's width and never changes; only
-     the glyph in it grows. */
-  ::-webkit-scrollbar-button {
-    display: none;
-  }
-  ::-webkit-scrollbar-button:single-button:vertical {
-    display: block;
-    height: 14px;
-    background-color: transparent;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 6px;
-    opacity: 0.7;
-  }
-  ::-webkit-scrollbar-button:single-button:vertical:decrement {
-    background-image: var(--lp-scrollbar-arrow-up);
-  }
-  ::-webkit-scrollbar-button:single-button:vertical:increment {
-    background-image: var(--lp-scrollbar-arrow-down);
-  }
-  html[data-scrollbar-near] > body::-webkit-scrollbar-button:single-button:vertical {
-    background-size: 10px;
-  }
+   `data-page-scrollbar` is set in <head> on a device with a mouse
+   (lib/pageScrollbar.ts); `components/PageScrollbar.astro` then draws the
+   bar that only appears near the right edge. Only the VIEWPORT's bar goes:
+   Chrome reads it from `html`'s `scrollbar-width` and from `body`'s
+   pseudo-elements, Safari from `html`'s — inner scrollers keep tds-shared's
+   pill. */
+html[data-page-scrollbar] {
+  scrollbar-width: none;
+}
+html[data-page-scrollbar]::-webkit-scrollbar,
+html[data-page-scrollbar] > body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
