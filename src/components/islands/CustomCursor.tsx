@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { absorbStep, actionTarget, CURSOR_ABSORB_ATTR } from "~/lib/cursorAbsorb";
 
 /**
  * An additive custom cursor: a small dot pinned to the pointer plus a larger
@@ -8,6 +9,11 @@ import { useEffect, useRef } from "react";
  * between the brand accent (over light surfaces) and a light pink (over dark
  * ones) by sampling the background luminance under the pointer, mirroring the
  * approach in FloatingCta.astro. The native cursor stays visible underneath.
+ *
+ * Over a button that performs an action it DISAPPEARS INTO it (2026-10-05,
+ * `lib/cursorAbsorb.ts`): dot and ring fly to the button's centre and shrink
+ * to nothing on a spring, the native pointer is hidden there, and on leaving
+ * both pop back out to the pointer with a slight overshoot.
  *
  * Bails out on coarse pointers (touch) and under `prefers-reduced-motion`;
  * matching CSS hides it there too. Mounted `client:idle`.
@@ -26,6 +32,10 @@ export default function CustomCursor() {
     const ring = ringRef.current;
     const dot = dotRef.current;
     if (!ring || !dot) return;
+    // Hides the native pointer over action controls — only while this runs,
+    // so touch and reduced motion keep it.
+    const root = document.documentElement;
+    root.setAttribute(CURSOR_ABSORB_ATTR, "");
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -36,6 +46,15 @@ export default function CustomCursor() {
     let visible = false;
     let hovering = false;
     let onDark = false;
+    // The action control the pointer is in, and the absorb spring
+    // (0 = cursor out, 1 = swallowed). `centreX/Y` outlives `action`, so the
+    // way back out starts where the cursor went in.
+    let action: HTMLElement | null = null;
+    let absorb = 0;
+    let absorbV = 0;
+    let centreX = 0;
+    let centreY = 0;
+    let lastFrame = 0;
 
     const interactiveSelector =
       "a, button, [role='tab'], [role='button'], input, textarea, select, label, summary, .process-step-item";
@@ -64,18 +83,35 @@ export default function CustomCursor() {
       mouseX = e.clientX;
       mouseY = e.clientY;
       wake();
-      dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+      placeDot();
       if (!visible) {
         visible = true;
         ring.style.opacity = "1";
         dot.style.opacity = "1";
       }
       const target = e.target as Element | null;
-      const next = !!target?.closest(interactiveSelector);
+      setAction(actionTarget(target));
+      // The ring grows over links and fields; over an action it is swallowed.
+      const next = !action && !!target?.closest(interactiveSelector);
       if (next !== hovering) {
         hovering = next;
         ring.classList.toggle("is-hover", next);
       }
+    };
+
+    function setAction(next: HTMLElement | null) {
+      if (next === action) return;
+      action = next;
+      wake();
+    }
+
+    /** The dot: on the pointer, pulled into the button as it is absorbed. */
+    const placeDot = () => {
+      const pull = Math.min(1, Math.max(0, absorb));
+      const x = mouseX + (centreX - mouseX) * pull;
+      const y = mouseY + (centreY - mouseY) * pull;
+      const size = Math.max(0, 1 - absorb);
+      dot.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${size.toFixed(3)})`;
     };
 
     const onLeave = () => {
@@ -100,9 +136,23 @@ export default function CustomCursor() {
     let lastSample = -Infinity;
 
     const loop = (now: number) => {
-      // Snappy follow.
-      ringX += (mouseX - ringX) * 0.28;
-      ringY += (mouseY - ringY) * 0.28;
+      const dt = Math.min(0.032, lastFrame ? (now - lastFrame) / 1000 : 0.016);
+      lastFrame = now;
+
+      // The button's centre, re-read while the cursor is in it — the page
+      // can scroll or the button lift (hover) under a still pointer.
+      if (action) {
+        const box = action.getBoundingClientRect();
+        centreX = box.left + box.width / 2;
+        centreY = box.top + box.height / 2;
+      }
+      [absorb, absorbV] = absorbStep(absorb, absorbV, action ? 1 : 0, dt);
+
+      // Snappy follow — of the pointer, or of the button swallowing it.
+      const aimX = action ? centreX : mouseX;
+      const aimY = action ? centreY : mouseY;
+      ringX += (aimX - ringX) * 0.28;
+      ringY += (aimY - ringY) * 0.28;
 
       // Velocity → directional squash/stretch.
       const vx = ringX - prevX;
@@ -114,11 +164,17 @@ export default function CustomCursor() {
       const angle = (Math.atan2(vy, vx) * 180) / Math.PI;
       const sx = (1 + stretch).toFixed(3);
       const sy = (1 - stretch * 0.6).toFixed(3);
-      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${sx}, ${sy})`;
+      // Absorbed, the ring shrinks to nothing; on the way out the spring
+      // overshoots below 0 and the ring pops a touch larger than its size.
+      const size = Math.max(0, 1 - absorb);
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${(Number(sx) * size).toFixed(3)}, ${(Number(sy) * size).toFixed(3)})`;
+      placeDot();
 
       // Re-sample the background colour a few times a second.
       if (visible && now - lastSample >= SAMPLE_MS) {
         lastSample = now;
+        // A scroll can carry a button under a still pointer, or away.
+        setAction(actionTarget(document.elementFromPoint(mouseX, mouseY)));
         const next = sampleOnDark();
         if (next !== onDark) {
           onDark = next;
@@ -133,8 +189,10 @@ export default function CustomCursor() {
       // walk several times a second, on a decoration that is not even
       // visible until the pointer first moves. Nothing about how it looks
       // depends on the loop still spinning while everything is stationary.
-      if (Math.abs(mouseX - ringX) < SETTLED_PX && Math.abs(mouseY - ringY) < SETTLED_PX) {
+      const absorbSettled = Math.abs((action ? 1 : 0) - absorb) < 0.001 && Math.abs(absorbV) < 0.01;
+      if (absorbSettled && Math.abs(aimX - ringX) < SETTLED_PX && Math.abs(aimY - ringY) < SETTLED_PX) {
         raf = 0;
+        lastFrame = 0;
         return;
       }
       raf = requestAnimationFrame(loop);
@@ -156,6 +214,7 @@ export default function CustomCursor() {
     window.addEventListener("scroll", wake, { passive: true });
 
     return () => {
+      root.removeAttribute(CURSOR_ABSORB_ATTR);
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);

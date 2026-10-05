@@ -498,6 +498,37 @@ html:has(body[data-lenis="on"]) {
   height: 24px;
   background-color: color-mix(in srgb, var(--cursor-tint) 42%, transparent);
 }
+/* The cursor disappears into an action control (lib/cursorAbsorb.ts): while
+   the custom cursor runs, the native pointer is hidden over the same targets
+   `ACTION_SELECTOR` names, so the drawn dot and ring are the only cursor —
+   and they fly into the button. Descendants too: an icon or label inside a
+   button would otherwise bring back its own `cursor: pointer`. Keep this list
+   in step with `ACTION_SELECTOR`; `cursorAbsorb.test.ts` compares them. */
+html[data-cursor-absorb]
+  :is(
+    button:not(:disabled),
+    [role="button"],
+    input[type="submit"]:not(:disabled),
+    input[type="button"]:not(:disabled),
+    input[type="reset"]:not(:disabled),
+    summary,
+    .btn,
+    [data-cta]
+  ):not(.page-scrollbar *),
+html[data-cursor-absorb]
+  :is(
+    button:not(:disabled),
+    [role="button"],
+    input[type="submit"]:not(:disabled),
+    input[type="button"]:not(:disabled),
+    input[type="reset"]:not(:disabled),
+    summary,
+    .btn,
+    [data-cta]
+  ):not(.page-scrollbar *)
+  * {
+  cursor: none;
+}
 /* No custom cursor where there's no fine pointer or motion is reduced. */
 @media (pointer: coarse) {
   .tds-cursor-ring,

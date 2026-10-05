@@ -423,6 +423,14 @@ visual language rather than rebuilding it locally:
     the segment UNDER the pointer swells most (`--tds-brandbar-1/2/3`), the
     seams open (`--tds-brandbar-gap`) and the bar thickens (`scale`, vertical
     only), then springs back with a bounce. No `translate` lean any more.
+  - **the cursor disappears into action controls** (`lib/cursorAbsorb.ts`,
+    `islands/CustomCursor.tsx`, 2026-10-05): over a button, `[role=button]`,
+    submit, `summary`, `.btn` or `[data-cta]` the dot and ring fly to its
+    centre and shrink to nothing on a spring, and pop back out on leaving.
+    While the custom cursor runs (`data-cursor-absorb` on <html>) the native
+    pointer is `cursor: none` over the same list in `global.css` —
+    `cursorAbsorb.test.ts` keeps the two lists equal. Touch and reduced
+    motion keep the native pointer.
   - **the page scrollbar** (`pageScrollbar.ts`, 2026-10-05): with a mouse
     the native bar is switched off in <head> (`data-page-scrollbar`) and
     `components/PageScrollbar.astro` floats an arrow–thumb–arrow bar over the
