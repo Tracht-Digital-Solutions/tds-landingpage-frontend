@@ -250,6 +250,15 @@ const hiddenCount = content.items.length - shown.length;
   .faq-cta:hover {
     --lp-fill: color-mix(in srgb, var(--color-accent-pink) 24%, var(--color-paper));
   }
+  /* Dark mode: the pink tint at 16 % sank into the near-black ground
+     (1.32:1, 2026-10-05). Stronger there, so the card reads as the call to
+     action it is. */
+  :global(:root[data-theme="dark"]) .faq-cta {
+    --lp-fill: color-mix(in srgb, var(--color-accent-pink) 26%, var(--color-paper));
+  }
+  :global(:root[data-theme="dark"]) .faq-cta:hover {
+    --lp-fill: color-mix(in srgb, var(--color-accent-pink) 34%, var(--color-paper));
+  }
   /* Der Pseudo-Knopf. Kein `.btn` — die Fläche ist der Link, das hier ist nur
      seine sichtbare Handlungsaufforderung. */
   .faq-cta-pill {

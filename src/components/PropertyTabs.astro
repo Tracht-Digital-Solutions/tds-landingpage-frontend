@@ -240,15 +240,17 @@ const ICONS: Record<PropertyTabId, string[]> = {
     margin-left: 0.125rem;
   }
 
-  /* In the dark theme the navy tab would disappear into the ground. */
+  /* In the dark theme the navy tab would disappear into the ground — and a
+     card-coloured one did too (1.17:1, 2026-10-05). The bookmarks take the
+     CTAs' dark pastel pair: periwinkle, coral on hover, dark type. */
   :global(:root[data-theme="dark"]) .property-tab {
-    --lp-fill: color-mix(in oklab, var(--color-card) 88%, transparent);
-    color: var(--color-black);
+    --lp-fill: color-mix(in oklab, var(--color-primary) 92%, transparent);
+    color: var(--color-on-primary);
   }
   :global(:root[data-theme="dark"]) .property-tab:hover,
   :global(:root[data-theme="dark"]) .property-tab:focus-visible {
-    --lp-fill: color-mix(in oklab, var(--color-surface-accent) 88%, transparent);
-    color: #fff;
+    --lp-fill: color-mix(in oklab, var(--color-accent) 92%, transparent);
+    color: var(--color-on-accent);
   }
 
   /* === The inverted twin: the colour changes exactly at the band line ===
