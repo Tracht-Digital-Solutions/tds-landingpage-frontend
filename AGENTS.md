@@ -92,6 +92,11 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   custom property
   resolves where it is declared). It publishes `--lp-floating-lane` so
   `scroll-padding-bottom` keeps focused elements above it.
+- **A control's hard shadow is a dark shade of its own fill** (2026-10-05):
+  each control names its current fill `--lp-fill` (rest and hover) and the
+  `:where()` list at the end of `global.css` re-declares the shadow tokens on
+  it. A new control with a hard shadow joins that list (or takes `.lp-ink`).
+  The twins over dark bands keep their black ink.
 - **Hard 2D shadows everywhere** (2026-09-22, tds-shared ≥ 0.42): boxes take
   `--tds-shadow-hard`, controls `--tds-shadow-hard-sm` and press into it with
   `translate`. The tokens come from the marketing surface; `global.css`
@@ -423,15 +428,20 @@ visual language rather than rebuilding it locally:
     the segment UNDER the pointer swells most (`--tds-brandbar-1/2/3`), the
     seams open (`--tds-brandbar-gap`) and the bar thickens (`scale`, vertical
     only), then springs back with a bounce. No `translate` lean any more.
-  - **the cursor disappears into action controls** (`lib/cursorAbsorb.ts`,
-    `islands/CustomCursor.tsx`, 2026-10-05): over a button, `[role=button]`,
-    submit, `summary`, `.btn` or `[data-cta]` the dot and ring fly to its
-    centre and shrink to nothing on a spring, and pop back out on leaving.
-    While the custom cursor runs (`data-cursor-absorb` on <html>) the native
-    pointer is `cursor: none !important` on the WHOLE page — the drawn dot
-    is the hotspot. Dot and ring are `popover="manual"` and re-shown when a
-    dialog or popover opens, or a modal would cover the only cursor. Touch
-    and reduced motion keep the native pointer.
+  - **the drawn cursor** (`islands/CustomCursor.tsx`, `lib/cursorAbsorb.ts`,
+    2026-10-05): while it runs (`data-cursor-absorb` on <html>) the native
+    pointer is `cursor: none !important` on the WHOLE page — the dot is the
+    hotspot. Dot and ring are `popover="manual"` and re-shown when a dialog
+    or popover opens, or a modal would cover the only cursor. Over an action
+    control (button, `[role=button]`, submit, `summary`, `.btn`,
+    `[data-cta]`) it takes the control's INVERTED fill and stays on the
+    pointer (the snapping into the control was dropped the same day). It
+    listens to POINTER events: a `preventDefault()` on `pointerdown` (the
+    floating scrollbar) suppresses the mouse events for the whole press, and
+    on `mousemove` the cursor froze where a drag began. Colours are read
+    through a 1×1 canvas — computed fills come back as oklab()/color(), which
+    the old rgb() regex never read. Touch and reduced motion keep the native
+    pointer.
   - **the page scrollbar** (`pageScrollbar.ts`, 2026-10-05): with a mouse
     the native bar is switched off in <head> (`data-page-scrollbar`) and
     `components/PageScrollbar.astro` floats an arrow–thumb–arrow bar over the

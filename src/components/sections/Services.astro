@@ -87,7 +87,7 @@ const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your
           <li>
             <a
               href={platformHref(platform, lang)}
-              class="inline-flex items-center px-3 py-1 text-xs rounded-full bg-[color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] text-[var(--color-accent)] hover:bg-[color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))] transition-colors [@media(pointer:coarse)]:min-h-11"
+              class="lp-ink inline-flex items-center px-3 py-1 text-xs rounded-full [--lp-fill:color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] hover:[--lp-fill:color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))] bg-[var(--lp-fill)] text-[var(--color-accent)] transition-colors [@media(pointer:coarse)]:min-h-11"
             >
               {platform.name}
             </a>

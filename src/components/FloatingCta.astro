@@ -125,15 +125,13 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     align-items: center;
     padding: 0.25rem;
     border-radius: 9999px;
-    background-color: var(--color-surface-navy);
+    --lp-fill: var(--color-surface-navy);
+    background-color: var(--lp-fill);
     color: #fff;
-    /* Its own shadow ink, darker than the page's.
-       `--tds-shadow-ink` is navy on this surface, which is right for the light
-       cards it was made for and invisible here: the pill is navy too, so its
-       hard shadow was navy on navy and only made the pill look 6px wider.
-       Measured — the pixel 3px off the pill's right edge was `5,15,104`, the
-       same value as the pill itself. */
-    --tds-shadow-ink: rgb(0 0 0 / 0.38);
+    /* The shadow is a DARK SHADE of the pill's own fill (global.css, "Hard
+       shadows take the colour of the control", 2026-10-05) and follows the
+       pill to bordeaux on hover. Not the page's navy ink: the pill is navy
+       too, and a navy shadow on it only made the pill look 6px wider. */
     box-shadow: var(--tds-shadow-hard);
     /* Only the buttons take pointer events: the pill's padding ring never
        swallows a click meant for the page underneath. */
@@ -278,7 +276,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   @media (hover: hover) {
     /* Any part hovered: the whole shape turns bordeaux. */
     .floating-cta-group:hover {
-      background-color: var(--color-surface-accent);
+      --lp-fill: var(--color-surface-accent);
       color: #fff;
     }
     /* The receiver POPS OUT of the pill (2026-09-29, asked for).

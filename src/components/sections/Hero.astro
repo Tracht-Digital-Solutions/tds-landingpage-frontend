@@ -378,14 +378,15 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
        worst backdrop on the site — `npm run audit:contrast` measures this one
        from rendered pixels, because axe cannot resolve a translucent fill and
        files it as "incomplete" rather than as a violation. */
-    background: color-mix(in oklab, var(--color-surface-navy) 88%, transparent);
+    --lp-fill: color-mix(in oklab, var(--color-surface-navy) 88%, transparent);
+    background: var(--lp-fill);
     color: #fff;
   }
   /* No hover transform here: the button's movement is Motion's (magnetic
      pull and press, lib/motion/cta.ts), and a CSS transform would fight the
      inline one it writes. */
   .hero-cta--primary:hover {
-    background: color-mix(in oklab, var(--color-surface-accent) 88%, transparent);
+    --lp-fill: color-mix(in oklab, var(--color-surface-accent) 88%, transparent);
   }
   .hero-cta__arrow {
     margin-left: 0.5rem;
@@ -395,11 +396,12 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     transform: translateX(3px);
   }
   .hero-cta--secondary {
-    background: color-mix(in srgb, var(--color-card) 88%, transparent);
+    --lp-fill: color-mix(in srgb, var(--color-card) 88%, transparent);
+    background: var(--lp-fill);
     color: var(--color-black);
   }
   .hero-cta--secondary:hover {
-    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-card));
+    --lp-fill: color-mix(in srgb, var(--color-primary) 10%, var(--color-card));
     color: var(--color-primary);
   }
 

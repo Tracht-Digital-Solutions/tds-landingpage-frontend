@@ -243,11 +243,12 @@ const hiddenCount = content.items.length - shown.length;
      genug, um als Einladung zu lesen. Beim Hover eine Stufe kräftiger statt
      einer Bewegung. */
   .faq-cta {
-    background: color-mix(in srgb, var(--color-accent-pink) 16%, var(--color-paper));
+    --lp-fill: color-mix(in srgb, var(--color-accent-pink) 16%, var(--color-paper));
+    background: var(--lp-fill);
     transition: background-color 200ms var(--tds-ease-out);
   }
   .faq-cta:hover {
-    background: color-mix(in srgb, var(--color-accent-pink) 24%, var(--color-paper));
+    --lp-fill: color-mix(in srgb, var(--color-accent-pink) 24%, var(--color-paper));
   }
   /* Der Pseudo-Knopf. Kein `.btn` — die Fläche ist der Link, das hier ist nur
      seine sichtbare Handlungsaufforderung. */

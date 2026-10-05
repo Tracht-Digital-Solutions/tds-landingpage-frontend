@@ -1,14 +1,12 @@
 import { useEffect, useRef } from "react";
-import { absorbStep, actionTarget, CURSOR_ABSORB_ATTR } from "~/lib/cursorAbsorb";
+import { actionTarget, CURSOR_ABSORB_ATTR, invertRgb, type Rgba } from "~/lib/cursorAbsorb";
 
 /**
- * An additive custom cursor: a small dot pinned to the pointer plus a larger
- * ring that trails it. The ring squashes/stretches along the movement vector
+ * The site's cursor: a small dot pinned to the pointer plus a larger ring
+ * that trails it. The ring squashes/stretches along the movement vector
  * (faster = more stretch), grows over interactive elements and pinches on
- * click — so it reads as reactive to what the user is doing. Its colour flips
- * between the brand accent (over light surfaces) and a light pink (over dark
- * ones) by sampling the background luminance under the pointer, mirroring the
- * approach in FloatingCta.astro. The native cursor stays visible underneath.
+ * press. Its colour flips between the brand accent (over light surfaces) and
+ * a light pink (over dark ones) by sampling the background under the pointer.
  *
  * It IS the cursor (2026-10-05): while it runs the native pointer is hidden
  * on the whole page (`data-cursor-absorb` in `styles/global.css`), and the
@@ -18,10 +16,15 @@ import { absorbStep, actionTarget, CURSOR_ABSORB_ATTR } from "~/lib/cursorAbsorb
  * would otherwise cover the only visible cursor. Each time something enters
  * the top layer they are re-shown, which puts them back on top of it.
  *
- * Over a button that performs an action it DISAPPEARS INTO it (2026-10-05,
- * `lib/cursorAbsorb.ts`): dot and ring fly to the button's centre and shrink
- * to nothing on a spring, the native pointer is hidden there, and on leaving
- * both pop back out to the pointer with a slight overshoot.
+ * Over an action control it takes the control's INVERTED colour
+ * (`lib/cursorAbsorb.ts`) and stays on the pointer — it used to fly into the
+ * control and vanish, which Julian dropped.
+ *
+ * POINTER events, not mouse events. The floating scrollbar (and anything
+ * else that calls `preventDefault()` on `pointerdown`) suppresses the
+ * compatibility mouse events for the rest of that press: on `mousemove` the
+ * cursor froze where a scrollbar drag began. Pointer events keep coming, and
+ * under pointer capture they still bubble to the window.
  *
  * Bails out on coarse pointers (touch) and under `prefers-reduced-motion`;
  * matching CSS hides it there too. Mounted `client:idle`.
@@ -40,8 +43,8 @@ export default function CustomCursor() {
     const ring = ringRef.current;
     const dot = dotRef.current;
     if (!ring || !dot) return;
-    // Hides the native pointer over action controls — only while this runs,
-    // so touch and reduced motion keep it.
+    // Hides the native pointer — only while this runs, so touch and reduced
+    // motion keep it.
     const root = document.documentElement;
     root.setAttribute(CURSOR_ABSORB_ATTR, "");
 
@@ -83,72 +86,92 @@ export default function CustomCursor() {
     let visible = false;
     let hovering = false;
     let onDark = false;
-    // The action control the pointer is in, and the absorb spring
-    // (0 = cursor out, 1 = swallowed). `centreX/Y` outlives `action`, so the
-    // way back out starts where the cursor went in.
+    /** The action control under the pointer, and the tint last given for it. */
     let action: HTMLElement | null = null;
-    let absorb = 0;
-    let absorbV = 0;
-    let centreX = 0;
-    let centreY = 0;
-    let lastFrame = 0;
+    let actionTint = "";
 
     const interactiveSelector =
       "a, button, [role='tab'], [role='button'], input, textarea, select, label, summary, .process-step-item";
 
-    // --- Background luminance sampling (flip cursor colour over dark UI) ---
-    const parseRgb = (value: string): [number, number, number, number] | null => {
-      const match = value.match(/rgba?\(([^)]+)\)/);
-      if (!match) return null;
-      const [r, g, b, a = 1] = match[1].split(",").map((p) => parseFloat(p.trim()));
-      return [r, g, b, a];
+    // --- Colour reading --------------------------------------------------
+    // Computed colours come back as rgb(), oklab(), color(srgb …) — whatever
+    // the stylesheet mixed them in. A 1×1 canvas turns every one into RGBA;
+    // the old regex read only rgb() and silently judged every oklab fill
+    // "not dark". Memoised: a page has a few dozen distinct fills.
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const cache = new Map<string, Rgba | null>();
+    const toRgba = (value: string): Rgba | null => {
+      if (!ctx || !value || value === "transparent") return null;
+      const known = cache.get(value);
+      if (known !== undefined) return known;
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = "#000";
+      ctx.fillStyle = value;
+      ctx.fillRect(0, 0, 1, 1);
+      const [r = 0, g = 0, b = 0, a = 0] = ctx.getImageData(0, 0, 1, 1).data;
+      const rgba: Rgba = [r, g, b, a / 255];
+      cache.set(value, rgba);
+      return rgba;
     };
-    const isDark = (r: number, g: number, b: number) =>
-      0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
-    const sampleOnDark = (): boolean => {
+    const isDark = ([r, g, b]: Rgba) => 0.2126 * r + 0.7152 * g + 0.0722 * b < 115;
+
+    /** The first opaque fill under the pointer (from `start` if given). */
+    const fillUnderPointer = (start?: Element): Rgba | null => {
       const els = document.elementsFromPoint(mouseX, mouseY);
-      for (const el of els) {
+      const list = start ? [start, ...els] : els;
+      for (const el of list) {
         if (el === ring || el === dot) continue;
-        const rgb = parseRgb(getComputedStyle(el).backgroundColor);
-        if (rgb && rgb[3] > 0.5) return isDark(rgb[0], rgb[1], rgb[2]);
+        const rgba = toRgba(getComputedStyle(el).backgroundColor);
+        if (rgba && rgba[3] > 0.5) return rgba;
       }
-      const body = parseRgb(getComputedStyle(document.body).backgroundColor);
-      return body ? isDark(body[0], body[1], body[2]) : false;
+      return toRgba(getComputedStyle(document.body).backgroundColor);
     };
 
-    const onMove = (e: MouseEvent) => {
+    /** Over an action: the inverse of its fill (or of what shows through it). */
+    const tintForAction = () => {
+      const next = action ? invertRgb(fillUnderPointer(action) ?? [255, 255, 255, 1]) : "";
+      if (next === actionTint) return;
+      actionTint = next;
+      for (const el of [ring, dot]) {
+        if (next) el.style.setProperty("--cursor-tint", next);
+        else el.style.removeProperty("--cursor-tint");
+        el.classList.toggle("is-action", next !== "");
+      }
+    };
+    // A control's hover colour arrives on a transition: read it again while
+    // it settles, or the cursor keeps the inverse of the resting colour.
+    let retint: number[] = [];
+    const setAction = (next: HTMLElement | null) => {
+      if (next === action) return;
+      action = next;
+      for (const id of retint) window.clearTimeout(id);
+      tintForAction();
+      retint = next ? [90, 200, 360].map((ms) => window.setTimeout(tintForAction, ms)) : [];
+    };
+
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
       mouseX = e.clientX;
       mouseY = e.clientY;
       wake();
-      placeDot();
+      dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
       if (!visible) {
         visible = true;
         ring.style.opacity = "1";
         dot.style.opacity = "1";
       }
-      const target = e.target as Element | null;
+      // Under pointer capture `e.target` is the capturing element, not what
+      // is under the pointer; hit-test instead while a button is held.
+      const target = (e.buttons ? document.elementFromPoint(mouseX, mouseY) : e.target) as Element | null;
       setAction(actionTarget(target));
-      // The ring grows over links and fields; over an action it is swallowed.
-      const next = !action && !!target?.closest(interactiveSelector);
+      const next = !!target?.closest(interactiveSelector);
       if (next !== hovering) {
         hovering = next;
         ring.classList.toggle("is-hover", next);
       }
-    };
-
-    function setAction(next: HTMLElement | null) {
-      if (next === action) return;
-      action = next;
-      wake();
-    }
-
-    /** The dot: on the pointer, pulled into the button as it is absorbed. */
-    const placeDot = () => {
-      const pull = Math.min(1, Math.max(0, absorb));
-      const x = mouseX + (centreX - mouseX) * pull;
-      const y = mouseY + (centreY - mouseY) * pull;
-      const size = Math.max(0, 1 - absorb);
-      dot.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${size.toFixed(3)})`;
     };
 
     const onLeave = () => {
@@ -156,7 +179,9 @@ export default function CustomCursor() {
       ring.style.opacity = "0";
       dot.style.opacity = "0";
     };
-    const onDown = () => ring.classList.add("is-down");
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") ring.classList.add("is-down");
+    };
     const onUp = () => ring.classList.remove("is-down");
 
     // How often the background under the pointer is re-sampled. It used to be
@@ -173,23 +198,9 @@ export default function CustomCursor() {
     let lastSample = -Infinity;
 
     const loop = (now: number) => {
-      const dt = Math.min(0.032, lastFrame ? (now - lastFrame) / 1000 : 0.016);
-      lastFrame = now;
-
-      // The button's centre, re-read while the cursor is in it — the page
-      // can scroll or the button lift (hover) under a still pointer.
-      if (action) {
-        const box = action.getBoundingClientRect();
-        centreX = box.left + box.width / 2;
-        centreY = box.top + box.height / 2;
-      }
-      [absorb, absorbV] = absorbStep(absorb, absorbV, action ? 1 : 0, dt);
-
-      // Snappy follow — of the pointer, or of the button swallowing it.
-      const aimX = action ? centreX : mouseX;
-      const aimY = action ? centreY : mouseY;
-      ringX += (aimX - ringX) * 0.28;
-      ringY += (aimY - ringY) * 0.28;
+      // Snappy follow.
+      ringX += (mouseX - ringX) * 0.28;
+      ringY += (mouseY - ringY) * 0.28;
 
       // Velocity → directional squash/stretch.
       const vx = ringX - prevX;
@@ -201,18 +212,15 @@ export default function CustomCursor() {
       const angle = (Math.atan2(vy, vx) * 180) / Math.PI;
       const sx = (1 + stretch).toFixed(3);
       const sy = (1 - stretch * 0.6).toFixed(3);
-      // Absorbed, the ring shrinks to nothing; on the way out the spring
-      // overshoots below 0 and the ring pops a touch larger than its size.
-      const size = Math.max(0, 1 - absorb);
-      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${(Number(sx) * size).toFixed(3)}, ${(Number(sy) * size).toFixed(3)})`;
-      placeDot();
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${sx}, ${sy})`;
 
-      // Re-sample the background colour a few times a second.
+      // Re-sample a few times a second: a scroll can carry a dark band or a
+      // button under a still pointer.
       if (visible && now - lastSample >= SAMPLE_MS) {
         lastSample = now;
-        // A scroll can carry a button under a still pointer, or away.
         setAction(actionTarget(document.elementFromPoint(mouseX, mouseY)));
-        const next = sampleOnDark();
+        const under = fillUnderPointer();
+        const next = under ? isDark(under) : false;
         if (next !== onDark) {
           onDark = next;
           ring.classList.toggle("is-on-dark", next);
@@ -220,16 +228,10 @@ export default function CustomCursor() {
         }
       }
 
-      // Park once the ring has caught up. This loop used to run for the
-      // entire life of the page whether or not anything moved: a wake-up on
-      // every vsync, a transform write and a hit-test-plus-getComputedStyle
-      // walk several times a second, on a decoration that is not even
-      // visible until the pointer first moves. Nothing about how it looks
-      // depends on the loop still spinning while everything is stationary.
-      const absorbSettled = Math.abs((action ? 1 : 0) - absorb) < 0.001 && Math.abs(absorbV) < 0.01;
-      if (absorbSettled && Math.abs(aimX - ringX) < SETTLED_PX && Math.abs(aimY - ringY) < SETTLED_PX) {
+      // Park once the ring has caught up. Nothing about how it looks depends
+      // on the loop still spinning while everything is stationary.
+      if (Math.abs(mouseX - ringX) < SETTLED_PX && Math.abs(mouseY - ringY) < SETTLED_PX) {
         raf = 0;
-        lastFrame = 0;
         return;
       }
       raf = requestAnimationFrame(loop);
@@ -244,21 +246,24 @@ export default function CustomCursor() {
     };
     wake();
 
-    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("pointermove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
-    window.addEventListener("mousedown", onDown, { passive: true });
-    window.addEventListener("mouseup", onUp, { passive: true });
+    window.addEventListener("pointerdown", onDown, { passive: true });
+    window.addEventListener("pointerup", onUp, { passive: true });
+    window.addEventListener("pointercancel", onUp, { passive: true });
     window.addEventListener("scroll", wake, { passive: true });
 
     return () => {
       root.removeAttribute(CURSOR_ABSORB_ATTR);
       topLayerWatch.disconnect();
       document.removeEventListener("toggle", onToggle, true);
+      for (const id of retint) window.clearTimeout(id);
       cancelAnimationFrame(raf);
-      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("pointermove", onMove);
       document.removeEventListener("mouseleave", onLeave);
-      window.removeEventListener("mousedown", onDown);
-      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
       window.removeEventListener("scroll", wake);
     };
   }, []);
@@ -270,9 +275,9 @@ export default function CustomCursor() {
           circle (tds-shared `ThemeToggle`).
 
           They are the one kind of element that must not be copied: a SCRIPT
-          positions them, on every `mousemove`, so a clone freezes them wherever
-          they stood when it was taken and draws a second cursor that never
-          moves. Everything else on the page is placed by layout and lands
+          positions them, on every `pointermove`, so a clone freezes them
+          wherever they stood when it was taken and draws a second cursor that
+          never moves. Everything else on the page is placed by layout and lands
           correctly in the copy — the bar, the floating pill, the bookmarks all
           sit at the same viewport position and simply appear in the other theme
           inside the circle, which is what the preview is for. */}
