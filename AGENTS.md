@@ -428,15 +428,18 @@ visual language rather than rebuilding it locally:
     submit, `summary`, `.btn` or `[data-cta]` the dot and ring fly to its
     centre and shrink to nothing on a spring, and pop back out on leaving.
     While the custom cursor runs (`data-cursor-absorb` on <html>) the native
-    pointer is `cursor: none` over the same list in `global.css` —
-    `cursorAbsorb.test.ts` keeps the two lists equal. Touch and reduced
-    motion keep the native pointer.
+    pointer is `cursor: none !important` on the WHOLE page — the drawn dot
+    is the hotspot. Dot and ring are `popover="manual"` and re-shown when a
+    dialog or popover opens, or a modal would cover the only cursor. Touch
+    and reduced motion keep the native pointer.
   - **the page scrollbar** (`pageScrollbar.ts`, 2026-10-05): with a mouse
     the native bar is switched off in <head> (`data-page-scrollbar`) and
     `components/PageScrollbar.astro` floats an arrow–thumb–arrow bar over the
     content, invisible until the pointer is within 72 px of the right edge.
     `data-state` hidden/shown/active works in CSS alone (also reduced
-    motion); Motion slides it in and widens thumb and arrows on the bar.
+    motion); Motion slides it in and widens thumb and arrows on the bar,
+    fast (≤ 0.18 s). Navy pill with the hard shadow, bordeaux while held.
+    Hidden, it slides only to the window edge (6px) — further is overflow.
     Touch and `bare` pages keep the native bar.
   - **the generated photos** (`[data-motion-image]`, `images.ts`): settle
     from a larger scale when they scroll in, then drift ±20 px. Transform

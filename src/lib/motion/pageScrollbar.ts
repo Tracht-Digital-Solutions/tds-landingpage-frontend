@@ -19,9 +19,14 @@
  */
 type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 
-const IN = { type: "spring", bounce: 0.2, visualDuration: 0.32 } as const;
-const GROW = { type: "spring", bounce: 0.4, visualDuration: 0.36 } as const;
-const OUT = { duration: 0.22, ease: [0.4, 0, 1, 1] } as const;
+/**
+ * Fast on purpose (2026-10-05, "schneller"): the bar answers a pointer that is
+ * already on its way to it, so anything longer than ~0.2 s arrives after the
+ * pointer and reads as lag. The site's other controls settle in the same band.
+ */
+const IN = { type: "spring", bounce: 0.15, visualDuration: 0.16 } as const;
+const GROW = { type: "spring", bounce: 0.3, visualDuration: 0.18 } as const;
+const OUT = { duration: 0.12, ease: [0.4, 0, 1, 1] } as const;
 
 /** Thumb width and arrow size per state, as scales of their full size. */
 const SIZE = {
@@ -38,12 +43,12 @@ export function mountPageScrollbar({ animate }: Dom): void {
   if (!pill) return;
 
   // Start from the CURRENT state, written inline: Motion reads a start value
-  // from the inline style, and the CSS state's `translateX(10px)` would be
+  // from the inline style, and the CSS state's `translateX(6px)` would be
   // replaced by Motion's own transform at x = 0 — the first slide-in would
   // have no slide.
   let previous = (rail.dataset.state ?? "hidden") as keyof typeof SIZE;
   const now = { duration: 0 } as const;
-  void animate(rail, previous === "hidden" ? { opacity: 0, x: 10 } : { opacity: 1, x: 0 }, now);
+  void animate(rail, previous === "hidden" ? { opacity: 0, x: 6 } : { opacity: 1, x: 0 }, now);
   void animate(pill, { scaleX: SIZE[previous].pill }, now);
   for (const arrow of arrows) void animate(arrow, { scale: SIZE[previous].arrow }, now);
 
@@ -53,7 +58,7 @@ export function mountPageScrollbar({ animate }: Dom): void {
     if (state === previous) return;
     const size = SIZE[state];
     if (state === "hidden") {
-      void animate(rail, { opacity: 0, x: 10 }, OUT);
+      void animate(rail, { opacity: 0, x: 6 }, OUT);
     } else if (previous === "hidden") {
       void animate(rail, { opacity: 1, x: 0 }, IN);
     }

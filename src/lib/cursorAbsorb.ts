@@ -6,9 +6,9 @@
  * pointer has left. `islands/CustomCursor.tsx` does the drawing: its dot and
  * ring fly to the button's centre and shrink to nothing on a spring, and pop
  * back out to the pointer with a little overshoot. While the custom cursor
- * runs, the NATIVE pointer is hidden over these targets
- * (`html[data-cursor-absorb]` in `styles/global.css`) — otherwise nothing
- * would have disappeared at all.
+ * runs, the NATIVE pointer is hidden on the whole page
+ * (`html[data-cursor-absorb]` in `styles/global.css`), so the drawn cursor
+ * is the only one — and it is what disappears.
  *
  * "Does something" means a control, not navigation and not a field: buttons,
  * button roles, submit inputs, disclosure summaries, and the links that are

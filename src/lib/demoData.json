@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-09-28T15:20:58.694Z",
+  "generatedAt": "2026-10-05T13:56:49.475Z",
   "demos": {
     "demo1": {
       "status": "ok",
       "title": "Demo & Partner Rechtsanwälte",
-      "description": null,
+      "description": "Hochwertige Demonstrationsseite einer fiktiven deutschen Wirtschaftskanzlei. Keine Rechtsberatung, keine gültigen Kontaktdaten.",
       "siteLang": "de",
       "favicon": "/demos/demo1-favicon.svg",
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-28T15:20:47.261Z"
+      "checkedAt": "2026-10-05T13:56:36.970Z"
     },
     "demo2": {
       "status": "ok",
@@ -21,18 +21,18 @@
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-28T15:20:47.476Z"
+      "checkedAt": "2026-10-05T13:56:37.173Z"
     },
     "demo3": {
       "status": "ok",
       "title": "Immobilienverwaltung — Nordstern Immobilien",
       "description": "Interaktives Immobilien-Verwaltungspanel mit Beispieldaten",
       "siteLang": "de",
-      "favicon": "/demos/demo3-favicon.ico",
+      "favicon": "/demos/demo3-favicon.svg",
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-28T15:20:47.708Z"
+      "checkedAt": "2026-10-05T13:56:37.447Z"
     },
     "demo4": {
       "status": "tls-invalid",
@@ -43,7 +43,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-28T15:20:47.773Z"
+      "checkedAt": "2026-10-05T13:56:37.536Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-09-28T15:20:47.837Z"
+      "checkedAt": "2026-10-05T13:56:37.648Z"
     },
     "shop": {
       "status": "ok",
@@ -65,7 +65,7 @@
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-09-28T15:20:48.023Z"
+      "checkedAt": "2026-10-05T13:56:37.861Z"
     }
   }
 }
