@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { actionTarget, CURSOR_ABSORB_ATTR, invertRgb, type Rgba } from "~/lib/cursorAbsorb";
+import { actionTarget, CURSOR_ABSORB_ATTR, tintForFill, type Rgba } from "~/lib/cursorAbsorb";
 
 /**
  * The site's cursor: a small dot pinned to the pointer plus a larger ring
@@ -16,9 +16,9 @@ import { actionTarget, CURSOR_ABSORB_ATTR, invertRgb, type Rgba } from "~/lib/cu
  * would otherwise cover the only visible cursor. Each time something enters
  * the top layer they are re-shown, which puts them back on top of it.
  *
- * Over an action control it takes the control's INVERTED colour
- * (`lib/cursorAbsorb.ts`) and stays on the pointer — it used to fly into the
- * control and vanish, which Julian dropped.
+ * Over an action control it turns WHITE on a dark control and BLUE on a
+ * light one (`lib/cursorAbsorb.ts`) and stays on the pointer — it used to fly
+ * into the control, then took its inverted colour; Julian dropped both.
  *
  * POINTER events, not mouse events. The floating scrollbar (and anything
  * else that calls `preventDefault()` on `pointerdown`) suppresses the
@@ -130,9 +130,10 @@ export default function CustomCursor() {
       return toRgba(getComputedStyle(document.body).backgroundColor);
     };
 
-    /** Over an action: the inverse of its fill (or of what shows through it). */
+    /** Over an action: white or blue by how bright its fill (or what shows
+     *  through it) is. */
     const tintForAction = () => {
-      const next = action ? invertRgb(fillUnderPointer(action) ?? [255, 255, 255, 1]) : "";
+      const next = action ? tintForFill(fillUnderPointer(action) ?? [255, 255, 255, 1]) : "";
       if (next === actionTint) return;
       actionTint = next;
       for (const el of [ring, dot]) {
@@ -190,17 +191,20 @@ export default function CustomCursor() {
     // parking itself below.
     const SAMPLE_MS = 100;
     // Distance at which the trailing ring counts as having caught up. The
-    // follow is a 0.28 lerp, so it approaches asymptotically and never
+    // follow is a lerp, so it approaches asymptotically and never
     // arrives exactly.
     const SETTLED_PX = 0.05;
+    const FOLLOW = 0.5;
 
     let raf = 0;
     let lastSample = -Infinity;
 
     const loop = (now: number) => {
-      // Snappy follow.
-      ringX += (mouseX - ringX) * 0.28;
-      ringY += (mouseY - ringY) * 0.28;
+      // Follow. 0.5 per frame (2026-10-05, was 0.28): the ring trailed far
+      // enough behind a quick move to read as lag; at 0.5 it closes 97 % of
+      // the gap in five frames and still shows the squash of a fast stroke.
+      ringX += (mouseX - ringX) * FOLLOW;
+      ringY += (mouseY - ringY) * FOLLOW;
 
       // Velocity → directional squash/stretch.
       const vx = ringX - prevX;

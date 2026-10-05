@@ -437,8 +437,9 @@ visual language rather than rebuilding it locally:
     hotspot. Dot and ring are `popover="manual"` and re-shown when a dialog
     or popover opens, or a modal would cover the only cursor. Over an action
     control (button, `[role=button]`, submit, `summary`, `.btn`,
-    `[data-cta]`) it takes the control's INVERTED fill and stays on the
-    pointer (the snapping into the control was dropped the same day). It
+    `[data-cta]`) it turns WHITE on a dark control and the brand BLUE on a
+    light one, and stays on the pointer (snapping and an inverted colour were
+    both tried and dropped the same day). The ring follows at 0.5 per frame. It
     listens to POINTER events: a `preventDefault()` on `pointerdown` (the
     floating scrollbar) suppresses the mouse events for the whole press, and
     on `mousemove` the cursor froze where a drag began. Colours are read
