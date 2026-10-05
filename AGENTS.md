@@ -423,11 +423,14 @@ visual language rather than rebuilding it locally:
     press squeeze, one light sweep on arrival. The floating tree is NOT a
     `[data-cta]` — `floatingCta.ts` springs its spread and its trunk.
   - **the bookmarks** (`propertyTabs.ts`), see above.
-  - **the brand bars** (`brandbar.ts`, re-thought 2026-10-05): every
-    `.tds-brandbar` on screen is played like keys — within 150 px of its box
-    the segment UNDER the pointer swells most (`--tds-brandbar-1/2/3`), the
-    seams open (`--tds-brandbar-gap`) and the bar thickens (`scale`, vertical
-    only), then springs back with a bounce. No `translate` lean any more.
+  - **the brand bars** (`brandbar.ts`, third version 2026-10-05): every
+    `.tds-brandbar` is split into three `aria-hidden` key spans (coloured
+    from the bar's own computed layers; `.lp-brandbar-keys` hides the
+    layers) and played like KEYS — the key under the pointer jumps up and
+    stretches taller on a stiff spring, entering a key strikes it (a kick of
+    velocity), neighbours follow a little, all drop back with a crisp bounce.
+    Only the spans' `transform` is written. Not the fisheye or the lean of
+    the earlier versions.
   - **the drawn cursor** (`islands/CustomCursor.tsx`, `lib/cursorAbsorb.ts`,
     2026-10-05): while it runs (`data-cursor-absorb` on <html>) the native
     pointer is `cursor: none !important` on the WHOLE page — the dot is the

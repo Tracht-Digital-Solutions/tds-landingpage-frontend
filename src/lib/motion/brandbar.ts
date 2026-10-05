@@ -1,88 +1,66 @@
 /**
- * The brand bar answers the pointer (2026-09-22, rebuilt 2026-09-28, and
- * re-thought 2026-10-05).
+ * The brand bar answers the pointer — as THREE KEYS (2026-10-05, third
+ * version).
  *
- * Every `.tds-brandbar` on screen — the one under the hero's slogan and the
- * one under each section heading — is played like a row of keys: the colour
- * segment UNDER the pointer swells, its neighbours swell less, the seams
- * between them open and the whole bar thickens as the pointer comes near.
- * Running the pointer along a bar runs the swell across its three colours;
- * when the pointer leaves, everything springs back with a bounce.
+ * Every `.tds-brandbar` on screen is split into its three colour segments,
+ * and the segments are played like keys: the one under the pointer JUMPS UP
+ * and stretches taller, its neighbours follow a little, and the moment the
+ * pointer enters a key it gets a strike — a kick of velocity — so a quick
+ * sweep along the bar runs a wave through the three colours. Leaving, they
+ * drop back with a short, crisp bounce.
  *
- * What it replaced: the whole bar leaned toward the pointer and stretched all
- * three segments by fixed shares. It reacted to how NEAR the pointer was, but
- * never to WHERE along the bar it was, so a bar looked the same whichever
- * colour the pointer was over — Julian asked for something different and
- * better. The lean is gone; nothing writes `translate` any more.
+ * What it replaced, the same day: a fisheye that WIDENED the segment under
+ * the pointer, and before that (2026-09-22/28) a lean of the whole bar.
+ * Julian asked for something completely different and snappier — so this
+ * moves the keys vertically instead of stretching them sideways, and the
+ * spring is roughly three times as stiff.
  *
- * Only the bar's own tokens (`--tds-brandbar-1/2/3`, `--tds-brandbar-gap`) and
- * `scale` are written, never `transform`: the hero's bar draws itself in with
- * a transform (`hero-bar-draw` in `Hero.astro`), and the two must not fight.
- * `scale` is vertical only, so the thickening never moves the content below
- * the bar. Fine pointers only; bars off screen do not listen at all.
+ * ### How a background becomes three keys
  *
- * The cost rules of the 2026-09-28 rebuild still hold: one listener, one frame
- * loop, geometry measured only when it can change, distances taken from the
- * bar's RESTING box (the live box grows as it swells, and measuring it would
- * feed the swell back into itself), and a spring integrated in place so its
- * velocity survives from frame to frame.
+ * tds-shared draws the bar as three background layers on one element, which
+ * cannot move apart. On mount each bar gets three `aria-hidden` spans at the
+ * segments' positions, coloured from the bar's own computed layers (so the
+ * on-dark variant keeps its colours), and `.lp-brandbar-keys` hides the
+ * bar's own layers. No JavaScript, a failed import, reduced motion or a
+ * coarse pointer: no spans, and the bar is the plain tds-shared bar.
+ *
+ * Only `transform` on the spans is written per frame. The bar itself is left
+ * alone — the hero's bar draws itself in with a transform on the BAR
+ * (`hero-bar-draw` in `Hero.astro`), and the keys simply ride along.
  */
 type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 
-/** How near the pointer has to come, px from the bar's RESTING box. */
-const REACH = 150;
-/** How much a segment grows at most when the pointer is right over it, px. */
-const SWELL = 30;
-/** How much every segment grows anyway at the closest, as a share of its width. */
-const LIFT = 0.15;
-/** How far the seams open at the closest, px. */
-const SEAM = 4;
-/** How much thicker the bar gets at the closest, as a share of its height. */
-const THICKEN = 0.9;
-/**
- * How wide the swell is along the bar, as a share of the bar's length. Wide
- * enough that a neighbour still moves, narrow enough that the segment under
- * the pointer clearly leads.
- */
-const SPREAD = 0.3;
+/** How far above and below the bar the pointer still plays it, px. */
+const REACH_Y = 70;
+/** How far beside a key the pointer still moves it, px. */
+const REACH_X = 26;
+/** How high the struck key jumps, px. */
+const HOP = 7;
+/** How much taller the struck key gets, as a share of its height. */
+const STRETCH = 1.2;
+/** The strike: upward velocity a key gets when the pointer enters it, px/s. */
+const KICK = 260;
+
+/** The spring — stiff and only lightly damped: fast, with a crisp bounce. */
+const STIFFNESS = 620;
+const DAMPING = 24;
+const REST = 0.01;
+
+export interface KeyBox {
+  left: number;
+  width: number;
+}
 
 /**
- * The spring, integrated per frame.
- *
- * Underdamped on purpose — `DAMPING² < 4·STIFFNESS` is what gives the return
- * its overshoot. These two are the whole feel: stiffer follows the pointer
- * more tightly, less damping bounces longer.
+ * How much each key is played, 0..1, for a pointer `dx` px along the bar and
+ * `dy` px from its centre line. Pure, so it can be tested without a DOM.
  */
-const STIFFNESS = 210;
-const DAMPING = 16;
-/** Below this a value has arrived and the loop may stop. */
-const REST = 0.02;
-
-/** Three segment widths, the seam, and the vertical scale. */
-type Values = [number, number, number, number, number];
-
-/**
- * Where each value of a bar should go, for a pointer at `along` (0 = the
- * bar's left end, 1 = its right end, may lie outside) and `closeness` (0 out
- * of reach, 1 touching). Pure, so it can be tested without a DOM.
- */
-export function brandbarTarget(
-  base: readonly [number, number, number],
-  gap: number,
-  along: number,
-  closeness: number,
-): Values {
-  const length = base[0] + base[1] + base[2] + 2 * gap;
-  const centres = [
-    base[0] / 2,
-    base[0] + gap + base[1] / 2,
-    base[0] + base[1] + 2 * gap + base[2] / 2,
-  ].map((centre) => centre / length);
-  const swell = (i: 0 | 1 | 2) => {
-    const weight = Math.exp(-(((along - centres[i]!) / SPREAD) ** 2));
-    return base[i] * (1 + LIFT * closeness) + SWELL * weight * closeness;
-  };
-  return [swell(0), swell(1), swell(2), gap + SEAM * closeness, 1 + THICKEN * closeness];
+export function keyWeights(keys: readonly KeyBox[], dx: number, dy: number): number[] {
+  const vertical = Math.max(0, 1 - Math.abs(dy) / REACH_Y);
+  return keys.map(({ left, width }) => {
+    const outside = Math.max(left - dx, 0, dx - (left + width));
+    return vertical * Math.max(0, 1 - outside / REACH_X);
+  });
 }
 
 const px = (value: string, fontSize: number) => {
@@ -91,87 +69,85 @@ const px = (value: string, fontSize: number) => {
   return value.trim().endsWith("rem") ? number * fontSize : number;
 };
 
+/** The first colour of each `linear-gradient(...)` layer, in order. */
+function layerColours(backgroundImage: string): string[] {
+  const out: string[] = [];
+  const pattern = /linear-gradient\(\s*([a-z-]+\([^()]*\)|#[0-9a-fA-F]{3,8}|[a-z]+)/g;
+  for (const match of backgroundImage.matchAll(pattern)) out.push(match[1]!);
+  return out;
+}
+
+interface Key {
+  el: HTMLSpanElement;
+  box: KeyBox;
+  y: number;
+  vy: number;
+  s: number;
+  vs: number;
+  weight: number;
+  target: { y: number; s: number };
+}
+
 interface Bar {
   el: HTMLElement;
-  /** Resting segment widths and seam, px. */
-  base: readonly [number, number, number];
-  gap: number;
+  keys: Key[];
   /** Resting box in DOCUMENT coordinates — measured, never read per frame. */
   left: number;
-  top: number;
-  width: number;
-  height: number;
-  value: Values;
-  target: Values;
-  velocity: Values;
-  /** In the viewport, and therefore worth integrating. */
+  centreY: number;
   live: boolean;
 }
 
 export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
   if (!hasFinePointer()) return;
-  const root = document.documentElement;
-  const rootFont = Number.parseFloat(getComputedStyle(root).fontSize) || 16;
-
+  const rootFont = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const bars: Bar[] = [];
 
-  for (const el of document.querySelectorAll<HTMLElement>(".tds-brandbar")) {
-    const style = getComputedStyle(el);
-    const base = [1, 2, 3].map((n) => px(style.getPropertyValue(`--tds-brandbar-${n}`), rootFont));
+  /** Key positions from the bar's tokens, which can change per breakpoint. */
+  function layoutKeys(bar: Bar): void {
+    const style = getComputedStyle(bar.el);
+    const widths = [1, 2, 3].map((n) => px(style.getPropertyValue(`--tds-brandbar-${n}`), rootFont));
     const gap = px(style.getPropertyValue("--tds-brandbar-gap"), rootFont);
-    if (base.some((width) => width <= 0)) continue;
-    const rest = brandbarTarget(base as unknown as [number, number, number], gap, 0, 0);
-    const bar: Bar = {
-      el,
-      base: base as unknown as readonly [number, number, number],
-      gap,
-      left: 0,
-      top: 0,
-      width: 0,
-      height: 0,
-      value: [...rest],
-      target: [...rest],
-      velocity: [0, 0, 0, 0, 0],
-      live: false,
-    };
+    let left = 0;
+    bar.keys.forEach((key, i) => {
+      key.box = { left, width: widths[i]! };
+      key.el.style.left = `${left}px`;
+      key.el.style.width = `${widths[i]}px`;
+      left += widths[i]! + gap;
+    });
+  }
+
+  for (const el of document.querySelectorAll<HTMLElement>(".tds-brandbar")) {
+    const colours = layerColours(getComputedStyle(el).backgroundImage);
+    if (colours.length < 3) continue;
+    const keys: Key[] = colours.slice(0, 3).map((colour) => {
+      const span = document.createElement("span");
+      span.className = "lp-brandbar-key";
+      span.setAttribute("aria-hidden", "true");
+      span.style.background = colour;
+      el.append(span);
+      return { el: span, box: { left: 0, width: 0 }, y: 0, vy: 0, s: 1, vs: 0, weight: 0, target: { y: 0, s: 1 } };
+    });
+    el.classList.add("lp-brandbar-keys");
+    const bar: Bar = { el, keys, left: 0, centreY: 0, live: false };
+    layoutKeys(bar);
     bars.push(bar);
     inView(el, () => {
       bar.live = true;
       measure(bar);
       return () => {
         bar.live = false;
-        // Send it home rather than freezing it mid-swell off screen.
-        bar.target = brandbarTarget(bar.base, bar.gap, 0, 0);
+        for (const key of bar.keys) key.target = { y: 0, s: 1 };
         start();
       };
     });
   }
   if (bars.length === 0) return;
 
-  /**
-   * The bar's RESTING box, in document coordinates.
-   *
-   * Resting, because the box grows as the bar swells: measuring the live box
-   * made the distance depend on the swell it was supposed to produce. The
-   * width is computed from the base values, and the left edge is where the
-   * bar starts — a swelling bar grows to the right.
-   */
+  /** The bar's resting box. Keys move only by transform, so it never drifts. */
   function measure(bar: Bar): void {
     const box = bar.el.getBoundingClientRect();
     bar.left = box.left + window.scrollX;
-    bar.width = bar.base[0] + bar.base[1] + bar.base[2] + 2 * bar.gap;
-    // `scale` grows the box around its centre; take it back out.
-    bar.height = box.height / bar.value[4];
-    bar.top = box.top + box.height / 2 - bar.height / 2 + window.scrollY;
-  }
-
-  function apply(bar: Bar): void {
-    const [s1, s2, s3, gap, sy] = bar.value;
-    bar.el.style.setProperty("--tds-brandbar-1", `${s1.toFixed(2)}px`);
-    bar.el.style.setProperty("--tds-brandbar-2", `${s2.toFixed(2)}px`);
-    bar.el.style.setProperty("--tds-brandbar-3", `${s3.toFixed(2)}px`);
-    bar.el.style.setProperty("--tds-brandbar-gap", `${gap.toFixed(2)}px`);
-    bar.el.style.scale = `1 ${sy.toFixed(3)}`;
+    bar.centreY = box.top + box.height / 2 + window.scrollY;
   }
 
   let pointerX = 0;
@@ -184,50 +160,54 @@ export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
   function aim(): void {
     for (const bar of bars) {
       if (!bar.live) continue;
-      if (!hasPointer) {
-        bar.target = brandbarTarget(bar.base, bar.gap, 0, 0);
-        continue;
-      }
-      const x = pointerX + window.scrollX;
-      const y = pointerY + window.scrollY;
-      // Distance to the resting BOX, not to its centre: a long bar answers
-      // along its whole length, and the pointer right on it is distance 0.
-      const dx = Math.max(bar.left - x, 0, x - (bar.left + bar.width));
-      const dy = Math.max(bar.top - y, 0, y - (bar.top + bar.height));
-      const closeness = Math.max(0, 1 - Math.hypot(dx, dy) / REACH);
-      const along = (x - bar.left) / bar.width;
-      bar.target = brandbarTarget(bar.base, bar.gap, along, closeness);
+      const weights = hasPointer
+        ? keyWeights(
+            bar.keys.map((key) => key.box),
+            pointerX + window.scrollX - bar.left,
+            pointerY + window.scrollY - bar.centreY,
+          )
+        : bar.keys.map(() => 0);
+      bar.keys.forEach((key, i) => {
+        const weight = weights[i]!;
+        // The strike: entering a key kicks it upward, so it jumps rather
+        // than rises.
+        if (weight >= 0.5 && key.weight < 0.5) key.vy -= KICK;
+        key.weight = weight;
+        key.target = { y: -HOP * weight, s: 1 + STRETCH * weight };
+      });
     }
   }
 
   function tick(now: number): void {
     frame = 0;
     // Clamped: a tab returning from the background hands over a gap of
-    // seconds, and integrating that in one step throws the spring across the
-    // screen before it settles.
+    // seconds, and integrating that in one step throws the spring away.
     const dt = Math.min(0.032, last ? (now - last) / 1000 : 0.016);
     last = now;
 
     let moving = false;
     for (const bar of bars) {
-      let settled = true;
-      for (let i = 0; i < 5; i += 1) {
-        const distance = bar.target[i]! - bar.value[i]!;
-        const v = bar.velocity[i]! + (distance * STIFFNESS - bar.velocity[i]! * DAMPING) * dt;
-        bar.velocity[i] = v;
-        bar.value[i] = bar.value[i]! + v * dt;
-        if (Math.abs(distance) > REST || Math.abs(v) > REST) settled = false;
-      }
-      if (settled) {
-        // Land exactly, so a bar at rest carries no rounding drift.
-        for (let i = 0; i < 5; i += 1) {
-          bar.value[i] = bar.target[i]!;
-          bar.velocity[i] = 0;
+      for (const key of bar.keys) {
+        key.vy += ((key.target.y - key.y) * STIFFNESS - key.vy * DAMPING) * dt;
+        key.y += key.vy * dt;
+        key.vs += ((key.target.s - key.s) * STIFFNESS - key.vs * DAMPING) * dt;
+        key.s += key.vs * dt;
+        const settled =
+          Math.abs(key.target.y - key.y) < REST &&
+          Math.abs(key.vy) < REST &&
+          Math.abs(key.target.s - key.s) < REST / 10 &&
+          Math.abs(key.vs) < REST;
+        if (settled) {
+          key.y = key.target.y;
+          key.s = key.target.s;
+          key.vy = 0;
+          key.vs = 0;
+        } else {
+          moving = true;
         }
-      } else {
-        moving = true;
+        key.el.style.transform =
+          key.y === 0 && key.s === 1 ? "" : `translateY(${key.y.toFixed(2)}px) scaleY(${key.s.toFixed(3)})`;
       }
-      apply(bar);
     }
 
     if (moving) frame = requestAnimationFrame(tick);
@@ -256,7 +236,7 @@ export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
   );
 
   // The pointer leaving the window is not a pointermove; without this the
-  // bars stay swollen at whatever the last position was.
+  // keys stay up at whatever the last position was.
   document.addEventListener("pointerleave", () => {
     hasPointer = false;
     aim();
@@ -269,7 +249,10 @@ export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
    * scroll needs no re-measure, only a re-aim.
    */
   const remeasure = () => {
-    for (const bar of bars) if (bar.live) measure(bar);
+    for (const bar of bars) {
+      layoutKeys(bar);
+      if (bar.live) measure(bar);
+    }
     aim();
     start();
   };

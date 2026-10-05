@@ -1066,3 +1066,23 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
 .cookie-notice-btn--ghost:hover {
   --lp-fill: transparent;
 }
+
+/* === The brand bar as three keys (lib/motion/brandbar.ts, 2026-10-05) ===
+   With Motion on and a fine pointer, every `.tds-brandbar` carries three
+   spans — its colour segments — and its own background layers step aside.
+   The spans sit exactly where the layers were, so at rest nothing changes;
+   the script only ever writes their `transform`. Without the class (no JS,
+   reduced motion, touch) the plain tds-shared bar shows. */
+.tds-brandbar.lp-brandbar-keys {
+  position: relative;
+  background-image: none;
+}
+.lp-brandbar-key {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: inherit;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  pointer-events: none;
+}
