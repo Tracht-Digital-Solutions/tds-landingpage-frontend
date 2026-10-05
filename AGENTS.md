@@ -106,8 +106,10 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   transition a `box-shadow`.
 - **The services are an interactive list** (`ui/ServiceExplorer.astro`,
   `lib/serviceExplorer.ts`, 2026-09-22), not a tile mosaic: an `<h3><button
-  aria-expanded aria-controls>` per service and its panel (photo, starting
-  point, outcome, scope, a named "Details & Ablauf" link). From 64rem the
+  aria-expanded aria-controls>` per service — the title and its code-owned
+  `tagline`, what the service IS — and its panel (photo, "Das mache ich" =
+  the `summary`, starting point, outcome, scope, a named "Details & Ablauf"
+  link). From 64rem the
   titles stand left and one panel right (click, or hover with a 140 ms
   intent; a navy marker slides behind the open title); on a phone it is an
   accordion. Without JavaScript every panel shows — `hidden` is only set by
@@ -416,9 +418,11 @@ visual language rather than rebuilding it locally:
     press squeeze, one light sweep on arrival. The floating tree is NOT a
     `[data-cta]` — `floatingCta.ts` springs its spread and its trunk.
   - **the bookmarks** (`propertyTabs.ts`), see above.
-  - **the brand bars** (`brandbar.ts`): every `.tds-brandbar` on screen leans
-    toward a pointer within 260 px (`translate`, ±14 px) and stretches its
-    segments (`--tds-brandbar-1/2/3`), then springs back with a bounce.
+  - **the brand bars** (`brandbar.ts`, re-thought 2026-10-05): every
+    `.tds-brandbar` on screen is played like keys — within 150 px of its box
+    the segment UNDER the pointer swells most (`--tds-brandbar-1/2/3`), the
+    seams open (`--tds-brandbar-gap`) and the bar thickens (`scale`, vertical
+    only), then springs back with a bounce. No `translate` lean any more.
   - **the generated photos** (`[data-motion-image]`, `images.ts`): settle
     from a larger scale when they scroll in, then drift ±20 px. Transform
     only — the grounds carry their resting opacity in CSS.
@@ -542,9 +546,9 @@ A service `summary` is the detail page's lead, its `<meta name="description">`
 and the price card's text. Keep overrides between 80 and 160 characters — a
 shorter one silently degrades an indexable page's description, and only the
 committed defaults are covered by tests. The home page's service tile does not
-show it: it shows `situations[0]` (typical starting point), `outcomes[0]`
-(result), the keywords (scope) and a next step, and its link is the title,
-stretched over the tile.
+show it under the title — that is the code-owned `tagline` — but its panel
+leads with it ("Das mache ich"), then `situations[0]` (typical starting
+point), `outcomes[0]` (result), the keywords (scope) and a next step.
 
 The redesigned page-level blocks are `home_hero`, `why_me`,
 `services_overview`, `digital_responsibility`, `pricing_services` and `faq_v2`.

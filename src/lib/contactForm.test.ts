@@ -105,3 +105,11 @@ describe("the next steps moved behind the send button", () => {
     expect(section).toMatch(/nextSteps=\{\{/);
   });
 });
+
+describe("the contact card", () => {
+  it("prints the town, not the street address (2026-10-05)", () => {
+    // The Impressum and the JSON-LD carry the full address; the contact
+    // section does not.
+    expect(code(section)).not.toMatch(/streetAddress|postalCode/);
+  });
+});

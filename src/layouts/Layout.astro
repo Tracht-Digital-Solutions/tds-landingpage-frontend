@@ -30,6 +30,7 @@ import latoLcpFont from "@fontsource/lato/files/lato-latin-400-normal.woff2?url"
 import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import CustomCursor from "~/components/islands/CustomCursor.tsx";
+import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import FloatingCta from "~/components/FloatingCta.astro";
 import PropertyTabs from "~/components/PropertyTabs.astro";
 import JsonLd from "~/components/JsonLd.astro";
@@ -269,6 +270,9 @@ const showCookieNotice = !bare;
         and React) among the requests a phone waited on before the headline. */}
     {!bare && <SmoothScroll client:idle />}
     {!bare && <CustomCursor client:idle />}
+    {/* The reading progress sits on the top edge of the window again
+        (2026-10-05, on Julian's word) — not on the header's lower edge. */}
+    {!bare && <ScrollProgress client:idle />}
     <slot />
     {!bare && <FloatingCta />}
     {!bare && <PropertyTabs />}

@@ -9,7 +9,6 @@ import { cmsFor } from "~/lib/cms";
 // is a devDependency and is not in the release tree, and reaching for it from a
 // page answered 500 on the host. `businessCardQr.test.ts` keeps that.
 import { businessCardHref } from "~/lib/businessCard";
-import { siteConfig } from "~/lib/seo";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
@@ -326,17 +325,13 @@ const ui =
         </ul>
 
         <div class="contact-card__foot">
-          {/* The NAP, in the same words the Impressum and the JSON-LD use — all
-              three read `siteConfig`, so they cannot drift apart. A local
-              business that states the same address everywhere is the whole
-              point of printing it twice. */}
+          {/* The town only — no street address in the contact section
+              (2026-10-05, on Julian's word). The full address stays where the
+              law and the search engines need it: the Impressum and the
+              JSON-LD, both read from `siteConfig`. */}
           <p class="contact-card__where">
             <span class="contact-card__label">{t.contact.info.locationLabel}</span>
             <span>{contact.location}</span>
-            <span class="contact-card__address">
-              {siteConfig.address.streetAddress}, {siteConfig.address.postalCode}{" "}
-              {siteConfig.address.addressLocality}
-            </span>
           </p>
 
           <div class="contact-card__actions">
@@ -894,10 +889,6 @@ const ui =
     font-size: 0.9375rem;
     line-height: 1.45;
     color: #fff;
-  }
-  #contact .contact-card__address {
-    display: block;
-    color: rgb(255 255 255 / 0.62);
   }
 
   /* Two buttons, side by side, wrapping on a narrow column. Not `.btn`:
