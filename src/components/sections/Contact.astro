@@ -1097,13 +1097,14 @@ const ui =
      markup, animated via Tailwind on the inner span. */
   .submit-button {
     color: var(--color-surface-navy);
-    background-color: var(--color-accent-pink);
+    --lp-fill: var(--color-accent-pink);
+    background-color: var(--lp-fill);
     isolation: isolate;
     transition:
       color 220ms ease,
       translate 200ms var(--tds-ease-out);
-    /* The site's hard 2D offset (global.css); on the navy tone its ink is
-       black. */
+    /* The site's hard 2D offset, in a dark shade of the button's own pink
+       (global.css, "Hard shadows take the colour of the control"). */
     box-shadow: var(--tds-shadow-hard-sm);
   }
   .submit-button::before {

@@ -164,7 +164,8 @@ const contactHref = `${localizePath("/", lang)}#contact`;
     min-height: 3rem;
     padding: 0.75rem 1.5rem;
     border-radius: var(--tds-radius-pill, 100px);
-    background: var(--color-surface-navy);
+    --lp-fill: var(--color-surface-navy);
+    background: var(--lp-fill);
     color: #fff;
     font-size: 0.9375rem;
     font-weight: 600;
@@ -172,7 +173,7 @@ const contactHref = `${localizePath("/", lang)}#contact`;
     transition: background-color 200ms var(--tds-ease-out);
   }
   .first-call__cta:hover {
-    background: var(--color-surface-accent);
+    --lp-fill: var(--color-surface-accent);
   }
 
   /* Above a form on a phone, every line pushes the form further down. */

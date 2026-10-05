@@ -1,22 +1,23 @@
 /**
- * The cursor disappears INTO a button that does something (2026-10-05).
+ * What the drawn cursor does over a control (2026-10-05).
  *
- * Julian: when the pointer hovers a button that performs an action, the
- * cursor vanishes into it, animated, and reappears, animated, once the
- * pointer has left. `islands/CustomCursor.tsx` does the drawing: its dot and
- * ring fly to the button's centre and shrink to nothing on a spring, and pop
- * back out to the pointer with a little overshoot. While the custom cursor
- * runs, the NATIVE pointer is hidden on the whole page
- * (`html[data-cursor-absorb]` in `styles/global.css`), so the drawn cursor
- * is the only one — and it is what disappears.
+ * First version, same day: the cursor flew into an action control and shrank
+ * to nothing. Julian dropped the snapping the same afternoon — the cursor now
+ * STAYS on the pointer and takes the INVERTED colour of the control under it
+ * (`islands/CustomCursor.tsx`). A navy button gets a pale yellow cursor, a
+ * pink one a green-teal one: always the opposite of what it is on, so it
+ * never sinks into the button it is pressing.
  *
- * "Does something" means a control, not navigation and not a field: buttons,
- * button roles, submit inputs, disclosure summaries, and the links that are
- * DRAWN as buttons (`.btn`, the CTAs). Plain text links keep the ring growing
- * over them; text fields keep their caret.
+ * The native pointer is hidden on the whole page while the drawn cursor runs
+ * (`html[data-cursor-absorb]` in `styles/global.css`); the attribute keeps
+ * its name because the CSS and the docs key on it.
+ *
+ * "Control" means something that does an action, not navigation and not a
+ * field: buttons, button roles, submit inputs, disclosure summaries, and the
+ * links that are DRAWN as buttons (`.btn`, the CTAs).
  */
 
-/** The attribute on <html> while the custom cursor runs and absorbs. */
+/** The attribute on <html> while the drawn cursor is the only cursor. */
 export const CURSOR_ABSORB_ATTR = "data-cursor-absorb";
 
 export const ACTION_SELECTOR = [
@@ -30,33 +31,14 @@ export const ACTION_SELECTOR = [
   "[data-cta]",
 ].join(", ");
 
-/**
- * Bars that are themselves a pointer instrument stay out: the floating page
- * scrollbar's arrows are 16px targets at the window edge, and swallowing the
- * cursor there would leave nothing to aim with.
- */
-const EXCLUDED = ".page-scrollbar";
-
 /** The action control the pointer is over, or null. */
 export function actionTarget(el: Element | null): HTMLElement | null {
-  const hit = el?.closest<HTMLElement>(ACTION_SELECTOR) ?? null;
-  if (!hit || hit.closest(EXCLUDED)) return null;
-  return hit;
+  return el?.closest<HTMLElement>(ACTION_SELECTOR) ?? null;
 }
 
-/**
- * One step of the absorb spring. `value` 0 = the cursor is out, 1 = it is
- * inside the button. Underdamped, so the way OUT overshoots below 0 — the
- * cursor comes back a touch larger than its size and settles: the "pop".
- */
-export function absorbStep(
-  value: number,
-  velocity: number,
-  target: number,
-  dt: number,
-): [value: number, velocity: number] {
-  const STIFFNESS = 320;
-  const DAMPING = 20;
-  const v = velocity + ((target - value) * STIFFNESS - velocity * DAMPING) * dt;
-  return [value + v * dt, v];
+export type Rgba = [r: number, g: number, b: number, a: number];
+
+/** The inverse of a colour, alpha dropped — the cursor is always opaque. */
+export function invertRgb([r, g, b]: Rgba): string {
+  return `rgb(${255 - r} ${255 - g} ${255 - b})`;
 }
