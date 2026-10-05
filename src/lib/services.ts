@@ -115,6 +115,13 @@ export interface ServiceDefinition {
    */
   keywords: Record<Lang, readonly string[]>;
   /**
+   * WHAT the service is, in a few words — the line under its title in the
+   * home page's services list (2026-10-05). It used to be the first
+   * `outcomes` entry, which told a visitor what they would get but never
+   * what the service was. Code-owned like `keywords`, for the same reason.
+   */
+  tagline: Record<Lang, string>;
+  /**
    * Optional background image for the card and the detail hero, as a path
    * under `/images/services/`.
    *
@@ -165,7 +172,7 @@ export const serviceDefinitions = [
       de: "Website & Onlineshop erstellen lassen — Tracht Digital",
       en: "Websites and Online Shops, Built and Maintained — Tracht Digital",
     },
-    updatedAt: "2026-09-15",
+    updatedAt: "2026-10-05",
     // "SEO & KI-Suche" rather than "Google Ads & SEO": being found now means
     // two different machines reading the same page, and the second one is the
     // search this site can speak to from its own work. Google Ads is still
@@ -175,19 +182,23 @@ export const serviceDefinitions = [
       de: ["Websites", "Onlineshops", "Shopsysteme & CMS", "SEO & KI-Suche"],
       en: ["Websites", "Online shops", "Shop systems & CMS", "SEO & AI search"],
     },
+    tagline: {
+      de: "Website und Shop übernehmen, reparieren, pflegen",
+      en: "Take over, fix and maintain your site or shop",
+    },
     image: "/images/services/04-webauftritt.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
         title: "Webauftritt",
         summary:
-          "Ich übernehme deine Website oder deinen Shop, bringe sie in Ordnung und pflege sie weiter – auch fremd gebaute.",
+          "Ich übernehme deine bestehende Website oder deinen Shop, behebe Fehler und halte alles aktuell – auch wenn jemand anderes sie gebaut hat.",
         intro:
           "Meistens muss nichts neu gebaut werden. Ich sehe mir an, *was trägt*, und ersetze nur, was dich aufhält. Danach bleibt die Seite in Ordnung, ohne dass du an Updates denken musst.",
         situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
           "Deine Website ist veraltet und schwer zu pflegen.",
-          "Dein Shop auf WooCommerce, Shopware oder einem Baukasten macht Probleme.",
+          "Dein Shop auf WooCommerce, Shopware oder einem Baukasten macht Ärger.",
           "Die Seite sieht gut aus, aber kaum jemand fragt an.",
         ],
         responsibilitiesTitle: "Das übernehme ich",
@@ -200,9 +211,9 @@ export const serviceDefinitions = [
         ],
         outcomesTitle: "Das erreichst du",
         outcomes: [
+          "Deine Seite ist aktuell und läuft zuverlässig",
           "Besucher verstehen sofort, was du anbietest",
-          "Du wirst gefunden – bei Google und wenn jemand eine KI fragt",
-          "Deine Seite bleibt leicht zu pflegen",
+          "Du wirst gefunden – bei Google und in KI-Antworten",
         ],
         boundariesTitle: "Was nicht dazugehört",
         boundaries: [
@@ -230,7 +241,7 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Web Presence",
         summary:
-          "I take over your website or shop, put it right and keep it maintained – including one somebody else built.",
+          "I take over your existing website or shop, fix what is broken and keep it up to date – even if somebody else built it.",
         intro:
           "Usually nothing has to be rebuilt. I look at *what holds up* and replace only what is holding you back. After that the site stays in order without you thinking about updates.",
         situationsTitle: "Does this sound familiar?",
@@ -249,9 +260,9 @@ export const serviceDefinitions = [
         ],
         outcomesTitle: "What you achieve",
         outcomes: [
+          "Your site is up to date and runs reliably",
           "Visitors see straight away what you offer",
-          "You are found – on Google and when somebody asks an AI",
-          "Your site stays easy to maintain",
+          "You are found – on Google and in AI answers",
         ],
         boundariesTitle: "What this does not cover",
         boundaries: [
@@ -292,10 +303,14 @@ export const serviceDefinitions = [
       de: "Abläufe digitalisieren: Prozesse automatisieren — Tracht Digital",
       en: "Digitalizing Workflows & Automating Processes — Tracht Digital",
     },
-    updatedAt: "2026-09-29",
+    updatedAt: "2026-10-05",
     keywords: {
       de: ["Abläufe", "Prozessoptimierung", "Automatisierung", "Weniger Handarbeit"],
       en: ["Workflows", "Process optimization", "Automation", "Less manual work"],
+    },
+    tagline: {
+      de: "Wiederkehrende Arbeit vereinfachen und automatisieren",
+      en: "Simplify and automate recurring work",
     },
     image: "/images/services/02-prozesse.webp",
     fallback: {
@@ -303,7 +318,7 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Abläufe digitalisieren",
         summary:
-          "Nenn mir einen Ablauf, der dich jede Woche Zeit kostet. Ich baue ihn so um, dass die Arbeit von selbst passiert.",
+          "Ich nehme mir einen Ablauf vor, der dich jede Woche Zeit kostet, streiche unnötige Schritte und automatisiere den Rest.",
         intro:
           "Digitalisierung heißt nicht, alles neu zu machen. Ich gehe einen Ablauf mit dir durch, streiche die Schritte, die niemand braucht, und richte den Rest *einmal richtig* ein. Wo eine Tabelle nur ein Behelf war, steht danach etwas, das zu deiner Arbeit passt.",
         situationsTitle: "Kommt dir das bekannt vor?",
@@ -348,7 +363,7 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Digitalizing Workflows",
         summary:
-          "Name a routine that costs you time every week. I rebuild it so the work happens on its own from then on.",
+          "I take a routine that costs you time every week, cut the steps nobody needs and automate the rest.",
         intro:
           "Digitalizing does not mean starting over. I walk one routine through with you, cut the steps nobody needs, and set the rest up *once, properly*. Where a spreadsheet was only a workaround, something that fits the way you work stands instead.",
         situationsTitle: "Does this sound familiar?",
@@ -400,10 +415,14 @@ export const serviceDefinitions = [
       de: "Digitalisierungsberatung & Konzept — Tracht Digital",
       en: "Digital Consulting & Planning — Tracht Digital",
     },
-    updatedAt: "2026-09-15",
+    updatedAt: "2026-10-05",
     keywords: {
       de: ["Einordnung", "Optionen & Kosten", "Konzept", "Fahrplan"],
       en: ["Assessment", "Options & costs", "Concept", "Roadmap"],
+    },
+    tagline: {
+      de: "Klären, was sich lohnt – mit Kosten und Reihenfolge",
+      en: "Work out what pays off – with costs and an order",
     },
     image: "/images/services/01-beratung.webp",
     fallback: {
@@ -411,7 +430,7 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Beratung & Konzeption",
         summary:
-          "Ich sortiere deine digitalen Vorhaben, nenne dir Möglichkeiten mit Kosten und sage dir, was zuerst dran ist.",
+          "Ich ordne deine digitalen Vorhaben, vergleiche die Möglichkeiten mit ihren Kosten und sage dir klar, womit du anfängst.",
         intro:
           "Nicht alles, was technisch geht, lohnt sich. Wir klären zuerst, *was du erreichen willst* – danach sage ich dir, was es kostet und was ich an deiner Stelle zuerst anfassen würde. Auch dann, wenn die Antwort lautet: noch nicht.",
         situationsTitle: "Kommt dir das bekannt vor?",
@@ -428,7 +447,7 @@ export const serviceDefinitions = [
         ],
         outcomesTitle: "Das erreichst du",
         outcomes: [
-          "Du weißt, was zuerst dran ist",
+          "Du weißt, womit du anfängst",
           "Du kennst die Kosten, bevor du entscheidest",
           "Du sparst dir teure Fehlentscheidungen",
         ],
@@ -456,7 +475,7 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Consulting & Planning",
         summary:
-          "I sort out your digital plans, name the options with their costs and tell you what to tackle first.",
+          "I put your digital plans in order, compare the options with their costs and tell you plainly where to start.",
         intro:
           "Not everything that is technically possible is worth it. We first work out *what you want to achieve* – then I tell you what it costs and what I would touch first in your position. Including when the answer is: not yet.",
         situationsTitle: "Does this sound familiar?",
@@ -473,7 +492,7 @@ export const serviceDefinitions = [
         ],
         outcomesTitle: "What you achieve",
         outcomes: [
-          "You know what comes first",
+          "You know where to start",
           "You know the costs before you decide",
           "You avoid expensive wrong turns",
         ],
@@ -508,10 +527,14 @@ export const serviceDefinitions = [
       de: "Individuelle Software & Schnittstellen — Tracht Digital",
       en: "Custom Software & Integrations — Tracht Digital",
     },
-    updatedAt: "2026-09-15",
+    updatedAt: "2026-10-05",
     keywords: {
       de: ["Systeme verbinden", "Schnittstellen", "Eigene Software", "Auftragsentwicklung"],
       en: ["Connected systems", "Integrations", "Custom software", "Contract development"],
+    },
+    tagline: {
+      de: "Programme verbinden, Fehlendes selbst bauen",
+      en: "Connect your programs, build what is missing",
     },
     image: "/images/services/03-loesungen.webp",
     fallback: {
@@ -519,7 +542,7 @@ export const serviceDefinitions = [
         label: "Alle Leistungen",
         title: "Individuelle Lösungen",
         summary:
-          "Ich bringe deine Programme dazu, miteinander zu reden – und baue eigene Software nur da, wo es ohne nicht geht.",
+          "Ich verbinde die Programme, die du schon nutzt, und baue eigene Software nur dort, wo keine fertige Lösung passt.",
         intro:
           "Manchmal reicht ein einzelnes Programm nicht. Dann nutze ich deine vorhandene Technik weiter und *ergänze nur, was fehlt*. Eigene Software ist die letzte Antwort, nicht die erste – sie muss gepflegt werden, und das kostet dich Geld.",
         situationsTitle: "Kommt dir das bekannt vor?",
@@ -564,7 +587,7 @@ export const serviceDefinitions = [
         label: "All services",
         title: "Tailored Solutions",
         summary:
-          "I get the programs you already use talking to each other – and build custom software only where nothing else will do.",
+          "I connect the programs you already use and build custom software only where no ready-made product fits.",
         intro:
           "Sometimes one program is not enough. Then I keep your existing technology and *add only what is missing*. Custom software is the last answer, not the first — it has to be maintained, and that costs you money.",
         situationsTitle: "Does this sound familiar?",

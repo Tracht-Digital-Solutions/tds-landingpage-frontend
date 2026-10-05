@@ -303,7 +303,7 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "Wobei ich dir",
       headlineAccent: "helfe.",
-      intro: "Zwei Wege, *ein Ansprechpartner*: deinen Auftritt in Form bringen – und die Abläufe dahinter digitalisieren.",
+      intro: "Vier Leistungen, *ein Ansprechpartner*: von deiner Website bis zur Software, die dir Arbeit abnimmt.",
     },
     websiteDemos: {
       headline: "Beispielseiten und",
@@ -457,7 +457,7 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "How I can",
       headlineAccent: "help.",
-      intro: "Two routes, *one point of contact*: getting your presence into shape – and digitalizing the work behind it.",
+      intro: "Four services, *one point of contact*: from your website to the software that takes work off your hands.",
     },
     websiteDemos: {
       headline: "Example sites and",

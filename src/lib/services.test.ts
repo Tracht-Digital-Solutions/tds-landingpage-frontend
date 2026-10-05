@@ -256,3 +256,15 @@ describe("validateServiceReferences", () => {
     ).toEqual([{ ...complete, metric: "" }]);
   });
 });
+
+describe("service taglines (2026-10-05)", () => {
+  it("say in a few words what each service is, in both languages", () => {
+    for (const definition of serviceDefinitions) {
+      for (const lang of ["de", "en"] as const) {
+        const tagline = definition.tagline[lang];
+        expect(tagline.trim().length, `${definition.id}/${lang}`).toBeGreaterThan(10);
+        expect(tagline.length, `${definition.id}/${lang}`).toBeLessThanOrEqual(60);
+      }
+    }
+  });
+});

@@ -145,6 +145,18 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
   };
 
   /**
+   * How far a step travels, in percent of its own width — MORE than 100.
+   *
+   * The clip of `.finder__stage-track` is wider than a step: it reaches 8px
+   * left and 12px right past the content so the cards' hard shadows and focus
+   * rings are not cut (see `ServiceAssistant.astro`). A step moved by exactly
+   * 100% therefore stopped with its edge and its shadow still INSIDE that
+   * margin — the old step never fully left the view (reported 2026-10-05).
+   * 115% clears it at every width: about 40px on a phone, 125px on desktop.
+   */
+  const SLIDE_TRAVEL = 115;
+
+  /**
    * A step SWIPES: the next one comes in from the right while the one before
    * it leaves to the left, and neither fades (2026-09-28, asked for).
    *
@@ -164,9 +176,9 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
    * on screen together without the incoming one being pushed down the page.
    */
   const slide = {
-    enter: (dir: 1 | -1) => ({ x: `${dir * 100}%` }),
+    enter: (dir: 1 | -1) => ({ x: `${dir * SLIDE_TRAVEL}%` }),
     center: { x: "0%" },
-    exit: (dir: 1 | -1) => ({ x: `${dir * -100}%` }),
+    exit: (dir: 1 | -1) => ({ x: `${dir * -SLIDE_TRAVEL}%` }),
   };
   /**
    * No bounce on the step slide, unlike everything else here.
