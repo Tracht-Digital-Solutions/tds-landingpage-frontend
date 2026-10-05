@@ -502,8 +502,8 @@ html:has(body[data-lenis="on"]) {
    the native pointer is hidden on the whole page, descendants and
    pseudo-elements included — `!important` because components set their own
    `cursor` (grab, pointer, text) and every one of them would bring the
-   arrow back. Over an action control the drawn cursor takes the control's
-   inverted colour (lib/cursorAbsorb.ts). Without popover support the drawn cursor cannot
+   arrow back. Over an action control the drawn cursor turns white or blue
+   by the control's brightness (lib/cursorAbsorb.ts). Without popover support the drawn cursor cannot
    rise above a modal, so there the native pointer stays while one is open. */
 html[data-cursor-absorb],
 html[data-cursor-absorb] *,
@@ -540,9 +540,9 @@ html[data-cursor-absorb] *::after {
 .tds-cursor-dot[popover] {
   background-color: var(--cursor-tint);
 }
-/* Over an action control the tint is the control's INVERTED colour (set
-   inline by CustomCursor.tsx) and the ring is fuller, so the inverse reads
-   against the button instead of washing out at 30 %. */
+/* Over an action control the tint is white (dark control) or the brand blue
+   (light control), set inline by CustomCursor.tsx, and the ring is fuller so
+   it reads against the button instead of washing out at 30 %. */
 .tds-cursor-ring[popover].is-action {
   background-color: color-mix(in srgb, var(--cursor-tint) 55%, transparent);
 }
