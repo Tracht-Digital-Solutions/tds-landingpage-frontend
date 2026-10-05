@@ -323,6 +323,31 @@ const showCookieNotice = !bare;
       new ResizeObserver(measureScrollbar).observe(root);
     </script>
 
+    {/* The page scrollbar's thumb and arrows grow while a mouse is near the
+        right edge (2026-10-05; the styles are at the end of global.css).
+        Near = within 48px of the bar. A pointer ON the bar sends no
+        pointermove, so the last move before it — inside the band — keeps
+        the state; leaving the window clears it. */}
+    <script>
+      const html = document.documentElement;
+      const NEAR = 48;
+      let near = false;
+      const setNear = (next: boolean) => {
+        if (next === near) return;
+        near = next;
+        html.toggleAttribute("data-scrollbar-near", next);
+      };
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          if (event.pointerType !== "mouse") return;
+          setNear(event.clientX >= html.clientWidth - NEAR);
+        },
+        { passive: true },
+      );
+      document.addEventListener("pointerleave", () => setNear(false));
+    </script>
+
     {/* The Motion layer: CTA, photos, page transitions, business card, nav
         indicator. It loads its runtime with `import()` at idle (at once only
         after an internal navigation) and nothing under reduced motion —
