@@ -48,7 +48,9 @@
     z-index: 60;
     top: 0.5rem;
     bottom: 0.5rem;
-    right: 2px;
+    /* Off the very edge by the shadow's offset, so the hard shadow is not
+       cut by the window. */
+    right: 6px;
     width: 16px;
     display: flex;
     flex-direction: column;
@@ -63,7 +65,9 @@
      inline on springs and those win. */
   .page-scrollbar[data-state="hidden"] {
     opacity: 0;
-    transform: translateX(10px);
+    /* 6px = the rail's distance from the edge: hidden, it ends exactly AT the
+       edge. Any further and it is horizontal overflow (audit:ux). */
+    transform: translateX(6px);
     pointer-events: none;
   }
   .page-scrollbar[data-state="hidden"] .page-scrollbar__pill {
@@ -94,6 +98,7 @@
   }
   .page-scrollbar__arrow:hover {
     opacity: 1;
+    color: var(--color-accent);
   }
 
   /* The track is invisible: only the thumb and the arrows are drawn. */
@@ -114,15 +119,17 @@
   .page-scrollbar__thumb:active {
     cursor: grabbing;
   }
+  /* The site's control language (2026-10-05): a solid navy pill with the
+     hard 2D offset every control on the page carries, turning bordeaux while
+     it is held — the floating pill's hover colour. No blur, no transition on
+     the shadow. */
   .page-scrollbar__pill {
     width: 10px;
     height: 100%;
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-primary) 60%, transparent);
-    transform-origin: center;
-  }
-  .page-scrollbar[data-state="active"] .page-scrollbar__pill {
     background: var(--color-primary);
+    box-shadow: var(--tds-shadow-hard-sm);
+    transform-origin: center;
   }
   .page-scrollbar__thumb:active .page-scrollbar__pill {
     background: var(--color-accent);

@@ -2,22 +2,13 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { ACTION_SELECTOR, absorbStep } from "./cursorAbsorb";
+import { absorbStep } from "./cursorAbsorb";
 
 const css = readFileSync(resolve(process.cwd(), "src/styles/global.css"), "utf8");
 
 describe("the cursor disappearing into action controls (2026-10-05)", () => {
-  it("hides the native pointer over exactly the targets the island absorbs into", () => {
-    const block = css.slice(css.indexOf("html[data-cursor-absorb]"), css.indexOf("cursor: none;"));
-    const lists = [...block.matchAll(/:is\(([\s\S]*?)\)\s*:not/g)].map((match) =>
-      match[1]!
-        .split(",")
-        .map((part) => part.trim().replace(/"/g, "'"))
-        .filter(Boolean),
-    );
-    const expected = ACTION_SELECTOR.split(",").map((part) => part.trim());
-    expect(lists).toHaveLength(2);
-    for (const list of lists) expect(list).toEqual(expected);
+  it("hides the native pointer on the whole page while the drawn cursor runs", () => {
+    expect(css).toMatch(/html\[data-cursor-absorb\] \*,[\s\S]*?cursor: none !important;/);
   });
 
   it("swallows the cursor and lets it pop back out past its size", () => {

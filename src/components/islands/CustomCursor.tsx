@@ -10,6 +10,14 @@ import { absorbStep, actionTarget, CURSOR_ABSORB_ATTR } from "~/lib/cursorAbsorb
  * ones) by sampling the background luminance under the pointer, mirroring the
  * approach in FloatingCta.astro. The native cursor stays visible underneath.
  *
+ * It IS the cursor (2026-10-05): while it runs the native pointer is hidden
+ * on the whole page (`data-cursor-absorb` in `styles/global.css`), and the
+ * dot — pinned to the pointer, so it is the hotspot — is what the visitor
+ * aims with. Ring and dot are MANUAL POPOVERS so they live in the top layer:
+ * a modal dialog or the accessibility popover is in the top layer too and
+ * would otherwise cover the only visible cursor. Each time something enters
+ * the top layer they are re-shown, which puts them back on top of it.
+ *
  * Over a button that performs an action it DISAPPEARS INTO it (2026-10-05,
  * `lib/cursorAbsorb.ts`): dot and ring fly to the button's centre and shrink
  * to nothing on a spring, the native pointer is hidden there, and on leaving
@@ -36,6 +44,35 @@ export default function CustomCursor() {
     // so touch and reduced motion keep it.
     const root = document.documentElement;
     root.setAttribute(CURSOR_ABSORB_ATTR, "");
+
+    // Into the top layer, and back on top whenever a dialog or popover opens
+    // after them. No popover support: they stay ordinary fixed elements, and
+    // the CSS keeps the native pointer over a modal (see global.css).
+    const canPopover = typeof ring.showPopover === "function";
+    const raise = () => {
+      if (!canPopover) return;
+      for (const el of [ring, dot]) {
+        try {
+          if (el.matches(":popover-open")) el.hidePopover();
+          el.showPopover();
+        } catch {
+          // A popover that is mid-transition or detached refuses; harmless.
+        }
+      }
+    };
+    raise();
+    // A modal opened with showModal() sets `open`; popovers fire `toggle`,
+    // which does not bubble — hence capture.
+    const topLayerWatch = new MutationObserver((records) => {
+      if (records.some((r) => r.target instanceof HTMLDialogElement && r.target.open)) raise();
+    });
+    topLayerWatch.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"] });
+    const onToggle = (event: Event) => {
+      const target = event.target;
+      if (target === ring || target === dot) return;
+      if ((event as ToggleEvent).newState === "open") raise();
+    };
+    document.addEventListener("toggle", onToggle, true);
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -215,6 +252,8 @@ export default function CustomCursor() {
 
     return () => {
       root.removeAttribute(CURSOR_ABSORB_ATTR);
+      topLayerWatch.disconnect();
+      document.removeEventListener("toggle", onToggle, true);
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
@@ -239,12 +278,14 @@ export default function CustomCursor() {
           inside the circle, which is what the preview is for. */}
       <div
         ref={ringRef}
+        popover="manual"
         className="tds-cursor-ring"
         aria-hidden="true"
         data-theme-preview="skip"
       />
       <div
         ref={dotRef}
+        popover="manual"
         className="tds-cursor-dot"
         aria-hidden="true"
         data-theme-preview="skip"
