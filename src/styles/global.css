@@ -1062,6 +1062,12 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
 .cookie-notice-btn:hover {
   --lp-fill: color-mix(in srgb, var(--color-surface-navy) 88%, #fff);
 }
+:root[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost) {
+  --lp-fill: var(--color-primary);
+}
+:root[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost):hover {
+  --lp-fill: var(--color-accent);
+}
 .cookie-notice-btn--ghost,
 .cookie-notice-btn--ghost:hover {
   --lp-fill: transparent;
