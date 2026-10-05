@@ -31,6 +31,8 @@ import "~/styles/global.css";
 import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
 import CustomCursor from "~/components/islands/CustomCursor.tsx";
 import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
+import PageScrollbar from "~/components/PageScrollbar.astro";
+import { PAGE_SCROLLBAR_BOOT_SCRIPT } from "~/lib/pageScrollbar";
 import FloatingCta from "~/components/FloatingCta.astro";
 import PropertyTabs from "~/components/PropertyTabs.astro";
 import JsonLd from "~/components/JsonLd.astro";
@@ -175,6 +177,10 @@ const showCookieNotice = !bare;
         on <html> by the time CSS resolves. `set:html` (not a template body —
         that would leak literal braces into dist/). */}
     <script is:inline set:html={themeBootstrapScript} />
+    {/* With a mouse the native scrollbar goes before the first paint and the
+        floating one (PageScrollbar) takes over — switching it later would
+        reflow the page once. `bare` pages draw no bar of their own. */}
+    {!bare && <script is:inline set:html={PAGE_SCROLLBAR_BOOT_SCRIPT} />}
     {hidden && <meta name="robots" content="noindex,nofollow" />}
 
     <link rel="icon" type="image/png" href="/favicon.png" sizes="any" />
@@ -273,6 +279,7 @@ const showCookieNotice = !bare;
     {/* The reading progress sits on the top edge of the window again
         (2026-10-05, on Julian's word) — not on the header's lower edge. */}
     {!bare && <ScrollProgress client:idle />}
+    {!bare && <PageScrollbar />}
     <slot />
     {!bare && <FloatingCta />}
     {!bare && <PropertyTabs />}
@@ -323,30 +330,6 @@ const showCookieNotice = !bare;
       new ResizeObserver(measureScrollbar).observe(root);
     </script>
 
-    {/* The page scrollbar's thumb and arrows grow while a mouse is near the
-        right edge (2026-10-05; the styles are at the end of global.css).
-        Near = within 48px of the bar. A pointer ON the bar sends no
-        pointermove, so the last move before it — inside the band — keeps
-        the state; leaving the window clears it. */}
-    <script>
-      const html = document.documentElement;
-      const NEAR = 48;
-      let near = false;
-      const setNear = (next: boolean) => {
-        if (next === near) return;
-        near = next;
-        html.toggleAttribute("data-scrollbar-near", next);
-      };
-      window.addEventListener(
-        "pointermove",
-        (event) => {
-          if (event.pointerType !== "mouse") return;
-          setNear(event.clientX >= html.clientWidth - NEAR);
-        },
-        { passive: true },
-      );
-      document.addEventListener("pointerleave", () => setNear(false));
-    </script>
 
     {/* The Motion layer: CTA, photos, page transitions, business card, nav
         indicator. It loads its runtime with `import()` at idle (at once only

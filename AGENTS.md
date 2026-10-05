@@ -423,6 +423,13 @@ visual language rather than rebuilding it locally:
     the segment UNDER the pointer swells most (`--tds-brandbar-1/2/3`), the
     seams open (`--tds-brandbar-gap`) and the bar thickens (`scale`, vertical
     only), then springs back with a bounce. No `translate` lean any more.
+  - **the page scrollbar** (`pageScrollbar.ts`, 2026-10-05): with a mouse
+    the native bar is switched off in <head> (`data-page-scrollbar`) and
+    `components/PageScrollbar.astro` floats an arrow–thumb–arrow bar over the
+    content, invisible until the pointer is within 72 px of the right edge.
+    `data-state` hidden/shown/active works in CSS alone (also reduced
+    motion); Motion slides it in and widens thumb and arrows on the bar.
+    Touch and `bare` pages keep the native bar.
   - **the generated photos** (`[data-motion-image]`, `images.ts`): settle
     from a larger scale when they scroll in, then drift ±20 px. Transform
     only — the grounds carry their resting opacity in CSS.
