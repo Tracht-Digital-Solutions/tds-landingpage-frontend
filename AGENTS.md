@@ -1019,3 +1019,10 @@ invalidation, sitemap/hreflang, JSON-LD, keyboard focus and responsive layout.
   the case; see IMAGES.md.
 - Do not put secrets in source, `PUBLIC_*` variables, browser code or generated
   runtime JSON.
+
+- **2026-10-06:** sectioned sitemap — `sitemap-{pages,services,platforms}.xml`
+  (src/lib/sitemapSections.ts), service pages with their photo as
+  `image:image`; the index is server-rendered now (the panel's exclusions
+  decide which sections exist). `.htaccess` compresses. `makeTwin` turns links
+  in the dark-split copy into spans: an `<a>` without href is "not crawlable"
+  to Lighthouse.

@@ -16,6 +16,7 @@ import { CREDENTIALS_SLUG } from "./credentials";
 import { FAQ_PAGE_SLUG, faqPageHref } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
 import { serviceDefinitions, serviceHref } from "./services";
+import { SITEMAP_PATHS } from "./sitemapSections";
 
 export { contentCache } from "./contentCache";
 
@@ -112,8 +113,7 @@ export const cacheEvents: EventMap = {
   sitemap: (event) =>
     forLanguages(event, (lang) => [
       ...contentPages(lang),
-      "/sitemap-0.xml",
-      "/sitemap-index.xml",
+      ...SITEMAP_PATHS,
     ]),
 };
 
@@ -149,6 +149,5 @@ export const alwaysPaths = [
   CREDENTIALS_SLUG.en,
   FAQ_PAGE_SLUG.de,
   FAQ_PAGE_SLUG.en,
-  "/sitemap-0.xml",
-  "/sitemap-index.xml",
+  ...SITEMAP_PATHS,
 ];
