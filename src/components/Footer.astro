@@ -170,8 +170,19 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
      these links under the notice when they took keyboard focus (WCAG 2.4.11 —
      measured at 720×450 and 390×844). Both lanes are 0px while their element
      is absent, so the clearance goes away with the notice. */
+  /* Since 2026-10-06 the floating control's lane is NOT added any more: it
+     put up to 168px of empty paper under the footer on a phone. The control
+     is a ~48px column on the RIGHT edge, so instead of reserving its whole
+     height under the full width, the centred legal row keeps clear of it
+     sideways (below). The cookie notice spans the full width and keeps its
+     lane. */
   .site-footer {
-    padding-bottom: calc(2.5rem + var(--tds-bottom-lane, 0px) + var(--lp-floating-lane, 0px));
+    padding-bottom: calc(2rem + var(--tds-bottom-lane, 0px) + env(safe-area-inset-bottom, 0px));
+  }
+  /* Symmetric, so the row stays centred: 3.75rem clears the control's
+     48px column plus its 1rem offset from the edge, at every width. */
+  .footer-bottom {
+    padding-inline: 3.75rem;
   }
 
   .footer-bottom {
