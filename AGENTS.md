@@ -91,7 +91,12 @@ Use current code, configuration and tests as the source of truth. Keep setup in
   (its shadow ink is black — the tokens are re-declared there, `var()` in a
   custom property
   resolves where it is declared). It publishes `--lp-floating-lane` so
-  `scroll-padding-bottom` keeps focused elements above it.
+  `scroll-padding-bottom` keeps focused elements above it. The receiver can
+  also be SWIPED UP like answering a call (`lib/receiverSwipe.ts`,
+  2026-10-06): a tap still follows the link, a drag past 40px opens the
+  form, a shorter one springs back. Capture starts only after the slop, so
+  the buttons above never get the pointer; `touch-action: none` sits on the
+  receiver alone.
 - **A control's hard shadow is a dark shade of its own fill** (2026-10-05):
   each control names its current fill `--lp-fill` (rest and hover) and the
   `:where()` list at the end of `global.css` re-declares the shadow tokens on

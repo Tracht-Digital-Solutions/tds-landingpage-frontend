@@ -76,7 +76,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
   <div class="tree-slot tree-slot--trunk">
     <div class="tree-slot__inner">
-      <a href={href} class="floating-cta" aria-label={label}>
+      <a href={href} class="floating-cta" aria-label={label} draggable="false">
         {/* The telephone receiver. */}
         <svg
           aria-hidden="true"
@@ -352,6 +352,59 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     background: var(--color-surface-navy);
     color: #fff;
   }
+  /* --- Swipe up to pick up (`lib/receiverSwipe.ts`, 2026-10-06) ------
+     A tap follows the link; a drag up lifts the receiver out of the pill and,
+     released past the threshold, opens the form. `transform`, not
+     `translate`: the hover pop already owns `translate` and `scale`, and the
+     two compose instead of taking turns. `touch-action: none` on the receiver
+     alone, so a finger's swipe moves it instead of scrolling the page; the
+     other buttons keep their own gestures. */
+  .floating-cta {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .tree-slot__inner > .floating-cta {
+    transition:
+      opacity 200ms ease,
+      visibility 0s linear 0s,
+      background-color 200ms ease,
+      scale 220ms var(--lp-ease-bounce, var(--tds-ease-out)),
+      transform 300ms var(--lp-ease-bounce, var(--tds-ease-out));
+  }
+  .floating-cta-group[data-swipe] .floating-cta {
+    transform: translateY(calc(-1 * var(--lp-swipe, 0px)));
+    box-shadow: 3px 3px 0 0 rgb(0 0 0 / 0.42);
+    z-index: 1;
+    cursor: grabbing;
+  }
+  /* Following the finger: no easing in between. */
+  .floating-cta-group:is([data-swipe="drag"], [data-swipe="armed"]) .tree-slot__inner > .floating-cta {
+    transition:
+      background-color 200ms ease,
+      scale 220ms var(--lp-ease-bounce, var(--tds-ease-out));
+  }
+  /* The receiver tilts as it is lifted, the way a handset comes off its
+     cradle; the ring wobble would fight the finger. */
+  .floating-cta-group[data-swipe] .floating-cta__icon {
+    animation: none;
+    rotate: calc(var(--lp-swipe-progress, 0) * -24deg);
+  }
+  /* Past the threshold, or picked up: the disc turns navy like a hover. */
+  .floating-cta-group:is([data-swipe="armed"], [data-swipe="answered"]) .floating-cta {
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  .floating-cta-group[data-swipe="answered"] .floating-cta {
+    transform: translateY(calc(-1 * var(--lp-swipe, 0px) - 0.75rem));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tree-slot__inner > .floating-cta {
+      transition: none;
+    }
+  }
+
   /* The twin pops with it, or the white copy stays the old size over a dark
      band and the two disagree along the band's line. */
   @media (hover: hover) {
@@ -480,6 +533,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
 <script>
   import { makeTwin, measureDarkRanges, splitClip, type Range } from "~/lib/darkSplit";
+  import { mountReceiverSwipe } from "~/lib/receiverSwipe";
 
   const group = document.querySelector<HTMLElement>(".floating-cta-group");
   const topBtn = group?.querySelector<HTMLElement>(".floating-cta-top");
@@ -612,6 +666,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       attributes: true,
       attributeFilter: ["data-theme"],
     });
+
+    // The receiver can also be swiped up, like answering a call.
+    mountReceiverSwipe(group, twin);
 
     topBtn?.addEventListener("click", () => {
       const reduce = window.matchMedia(
