@@ -76,6 +76,23 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
   <div class="tree-slot tree-slot--trunk">
     <div class="tree-slot__inner">
+      {/* The slide track, shown while the receiver is held. */}
+      <span class="floating-cta-track" aria-hidden="true">
+        <svg
+          class="floating-cta-track__chevrons"
+          width="18"
+          height="22"
+          viewBox="0 0 18 22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 8 9 2 15 8" />
+          <polyline points="3 18 9 12 15 18" />
+        </svg>
+      </span>
       <a href={href} class="floating-cta" aria-label={label} draggable="false">
         {/* The telephone receiver. */}
         <svg
@@ -353,8 +370,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     color: #fff;
   }
   /* --- Swipe up to pick up (`lib/receiverSwipe.ts`, 2026-10-06) ------
-     A tap follows the link; a drag up lifts the receiver out of the pill and,
-     released past the threshold, opens the form. `transform`, not
+     A tap follows the link. Held, the receiver shows a slide track up to the
+     pill's top edge (over the buttons above it); dragged to the top it opens
+     the form at once, released earlier it springs back. `transform`, not
      `translate`: the hover pop already owns `translate` and `scale`, and the
      two compose instead of taking turns. `touch-action: none` on the receiver
      alone, so a finger's swipe moves it instead of scrolling the page; the
@@ -364,6 +382,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
+  }
+  .tree-slot--trunk .tree-slot__inner {
+    position: relative;
   }
   .tree-slot__inner > .floating-cta {
     transition:
@@ -380,7 +401,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     cursor: grabbing;
   }
   /* Following the finger: no easing in between. */
-  .floating-cta-group:is([data-swipe="drag"], [data-swipe="armed"]) .tree-slot__inner > .floating-cta {
+  .floating-cta-group[data-swipe="drag"] .tree-slot__inner > .floating-cta {
     transition:
       background-color 200ms ease,
       scale 220ms var(--lp-ease-bounce, var(--tds-ease-out));
@@ -391,17 +412,95 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     animation: none;
     rotate: calc(var(--lp-swipe-progress, 0) * -24deg);
   }
-  /* Past the threshold, or picked up: the disc turns navy like a hover. */
-  .floating-cta-group:is([data-swipe="armed"], [data-swipe="answered"]) .floating-cta {
+  /* Picked up: the disc turns navy like a hover. */
+  .floating-cta-group[data-swipe="answered"] .floating-cta {
     background: var(--color-surface-navy);
     color: #fff;
   }
-  .floating-cta-group[data-swipe="answered"] .floating-cta {
-    transform: translateY(calc(-1 * var(--lp-swipe, 0px) - 0.75rem));
+
+  /* The track: a groove from the receiver's resting place up to the top,
+     filled pink behind the receiver as it climbs, with a ring where it has
+     to go and chevrons pointing there. Hidden until the press is held. */
+  .floating-cta-track {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    z-index: 0;
+    width: 3rem;
+    height: calc(3rem + var(--lp-swipe-travel, 3rem));
+    margin-left: -1.5rem;
+    border-radius: 9999px;
+    /* Opaque: it lies over the buttons above, and their icons showing
+       through read as part of the track. A darker shade of the pill. */
+    background: color-mix(in srgb, var(--lp-fill) 70%, #000);
+    box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.35);
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: bottom center;
+    scale: 1 0.4;
+  }
+  .tree-slot__inner > .floating-cta-track {
+    transition:
+      opacity 160ms ease,
+      scale 220ms var(--tds-ease-out);
+  }
+  .floating-cta-group--twin .floating-cta-track {
+    background: #dfe2ee;
+    box-shadow: inset 0 2px 4px rgb(5 15 104 / 0.18);
+  }
+  .floating-cta-group[data-swipe] .floating-cta-track {
+    opacity: 1;
+    scale: 1;
+  }
+  .floating-cta-track::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: calc(3rem + var(--lp-swipe, 0px));
+    border-radius: inherit;
+    background: color-mix(in srgb, var(--color-accent-pink) 45%, transparent);
+  }
+  .floating-cta-track::after {
+    content: "";
+    position: absolute;
+    top: 0.25rem;
+    left: 0.25rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: 2px dashed currentColor;
+    opacity: 0.75;
+  }
+  .floating-cta-group[data-swipe="answered"] .floating-cta-track::after {
+    border-style: solid;
+    opacity: 1;
+  }
+  .floating-cta-track__chevrons {
+    position: absolute;
+    left: 50%;
+    bottom: 3rem;
+    margin-left: -9px;
+    opacity: calc(0.9 - var(--lp-swipe-progress, 0));
+    animation: floating-cta-chevrons 900ms ease-in-out infinite alternate;
+  }
+  /* Translate only: the opacity above fades the chevrons as the receiver
+     climbs, and a keyframed opacity would override it. */
+  @keyframes floating-cta-chevrons {
+    0% {
+      translate: 0 4px;
+    }
+    100% {
+      translate: 0 -6px;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
-    .tree-slot__inner > .floating-cta {
+    .tree-slot__inner > .floating-cta,
+    .tree-slot__inner > .floating-cta-track {
       transition: none;
+    }
+    .floating-cta-track__chevrons {
+      animation: none;
     }
   }
 
