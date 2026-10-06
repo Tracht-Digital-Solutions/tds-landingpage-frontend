@@ -120,9 +120,12 @@ describe("the page frame", () => {
     // scroll-padding cannot scroll past the end of a page: the footer's legal
     // row stayed under the notice at 720×450 and under the floating button at
     // 390×844 until the footer made room for both lanes.
-    expect(read("src/components/Footer.astro")).toMatch(
-      /padding-bottom:\s*calc\([^;]*--tds-bottom-lane[^;]*--lp-floating-lane/,
-    );
+    // Since 2026-10-06 the floating control's lane is cleared SIDEWAYS (the
+    // control is a narrow column on the right), not with up to 168px of
+    // empty paper under the whole footer.
+    const footer = read("src/components/Footer.astro");
+    expect(footer).toMatch(/padding-bottom:\s*calc\([^;]*--tds-bottom-lane/);
+    expect(footer).toMatch(/\.footer-bottom\s*\{\s*padding-inline:\s*3\.75rem/);
   });
 
   it("does not keep the header fixed on a short viewport", () => {
