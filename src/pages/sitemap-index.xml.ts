@@ -1,17 +1,17 @@
 import type { APIRoute } from "astro";
-import { renderSitemapIndex } from "~/lib/sitemap";
+import { renderSectionIndex, sitemapEntries } from "~/lib/sitemap";
 
 /**
- * The entry point `public/robots.txt` advertises and Search Console already
- * knows. `@astrojs/sitemap` produced this exact pair of filenames; keeping
- * them means the migration off the integration is invisible from outside.
+ * The entry point `public/robots.txt` advertises and Search Console knows.
+ *
+ * Since 2026-10-06 it names one child per section (src/lib/sitemapSections.ts)
+ * with the newest date inside each. Server-rendered now, no longer
+ * prerendered: the panel's exclusions decide which sections exist, and the
+ * page cache rebuilds it with the others (cache.ts, SITEMAP_PATHS).
  */
-export const prerender = true;
+export const prerender = false;
 
-// No `<lastmod>`: this file is prerendered, so a date here would be the BUILD
-// date, while the sitemap it names is rendered on demand and changes without
-// a deploy. An omitted field is honest; a frozen one is not.
-export const GET: APIRoute = () =>
-  new Response(renderSitemapIndex(), {
+export const GET: APIRoute = async () =>
+  new Response(renderSectionIndex(await sitemapEntries()), {
     headers: { "content-type": "application/xml; charset=utf-8" },
   });

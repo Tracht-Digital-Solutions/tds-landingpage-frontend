@@ -22,7 +22,8 @@ import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
 import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
-import { escapeXml } from "@tracht-digital-solutions/tds-shared/site";
+import { escapeXml, newestDay, renderSectionedSitemapIndex } from "@tracht-digital-solutions/tds-shared/site";
+import { SITEMAP_SECTIONS, sectionPath, type SitemapSection } from "./sitemapSections";
 
 /** One indexable page, in both languages. */
 export interface SitemapEntry {
@@ -32,6 +33,10 @@ export interface SitemapEntry {
   en: string;
   changefreq: "weekly" | "monthly";
   priority: number;
+  /** Which child sitemap lists it. Optional: an entry without one is a general page. */
+  section?: SitemapSection;
+  /** A photo of the page (a service's own image), for image search. */
+  image?: { loc: string; title: Record<"de" | "en", string> };
   /**
    * When this page last really changed, as YYYY-MM-DD.
    *
@@ -94,6 +99,10 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   ...serviceDefinitions.map((service) => ({
     de: serviceHref(service, "de"),
     en: serviceHref(service, "en"),
+    section: "services" as const,
+    ...(service.image
+      ? { image: { loc: service.image, title: { de: service.fallback.de.title, en: service.fallback.en.title } } }
+      : {}),
     changefreq: "monthly" as const,
     priority: 0.8,
     lastmod: service.updatedAt,
@@ -103,6 +112,7 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
   ...platformDefinitions.map((platform) => ({
     de: platformHref(platform, "de"),
     en: platformHref(platform, "en"),
+    section: "platforms" as const,
     changefreq: "monthly" as const,
     priority: 0.7,
     lastmod: platform.updatedAt,
@@ -187,10 +197,15 @@ export function renderUrlset(entries: readonly SitemapEntry[], fallbackLastmod?:
         `<xhtml:link rel="alternate" hreflang="en-GB" href="${escapeXml(absolute(entry.en))}"/>`,
         `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(absolute(entry.de))}"/>`,
       ].join("");
+      const image = entry.image
+        ? `<image:image><image:loc>${escapeXml(absolute(entry.image.loc))}</image:loc>` +
+          `<image:title>${escapeXml(entry.image.title[lang])}</image:title></image:image>`
+        : "";
       return [
         "<url>",
         `<loc>${escapeXml(loc)}</loc>`,
         alternates,
+        image,
         lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "",
         `<changefreq>${entry.changefreq}</changefreq>`,
         `<priority>${entry.priority.toFixed(1)}</priority>`,
@@ -202,7 +217,8 @@ export function renderUrlset(entries: readonly SitemapEntry[], fallbackLastmod?:
   return (
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" ' +
-    'xmlns:xhtml="http://www.w3.org/1999/xhtml">' +
+    'xmlns:xhtml="http://www.w3.org/1999/xhtml" ' +
+    'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' +
     urls +
     "</urlset>"
   );
@@ -225,5 +241,24 @@ export function renderSitemapIndex(lastmod?: string): string {
     (lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "") +
     "</sitemap>" +
     "</sitemapindex>"
+  );
+}
+
+/** The section an entry belongs to — general pages carry none. */
+export function sectionOf(entry: SitemapEntry): SitemapSection {
+  return entry.section ?? "pages";
+}
+
+/**
+ * The sectioned index (2026-10-06): one child per non-empty section, each with
+ * the newest real date inside it (none when nothing there carries one).
+ */
+export function renderSectionIndex(entries: readonly SitemapEntry[]): string {
+  return renderSectionedSitemapIndex(
+    SITEMAP_SECTIONS.flatMap((section) => {
+      const inSection = entries.filter((e) => sectionOf(e) === section);
+      if (inSection.length === 0) return [];
+      return [{ loc: absolute(sectionPath(section)), lastmod: newestDay(inSection.map((e) => e.lastmod)) }];
+    }),
   );
 }

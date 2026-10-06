@@ -96,6 +96,16 @@ export function makeTwin<T extends HTMLElement>(source: T, twinClass: string): T
     }
     if (node.tabIndex >= 0 && node !== twin) node.tabIndex = -1;
   }
+  // A link without an href is not a link — Lighthouse reports every such
+  // `<a>` as "not crawlable" (the twin's copy of the floating CTA cost the
+  // home page its SEO 100). The copy only has to LOOK the same, so each `<a>`
+  // becomes a `<span>` with the same attributes and children.
+  for (const anchor of Array.from(twin.querySelectorAll("a"))) {
+    const span = document.createElement("span");
+    for (const attr of Array.from(anchor.attributes)) span.setAttribute(attr.name, attr.value);
+    while (anchor.firstChild) span.appendChild(anchor.firstChild);
+    anchor.replaceWith(span);
+  }
   // A popover that is closed is display: none; the copy of the a11y panel is
   // not needed at all.
   twin.querySelectorAll(".a11y-panel").forEach((panel) => panel.remove());
