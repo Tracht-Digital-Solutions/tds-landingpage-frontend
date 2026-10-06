@@ -251,17 +251,18 @@ interface HomeContent {
 const content: Record<Lang, HomeContent> = {
   de: {
     hero: {
-      // Die Ausgangslage statt einer Zielgruppenliste. Wer hier landet, hat
-      // in aller Regel schon eine Seite — und sucht nicht "Digitalisierung",
-      // sondern jemanden, der die vorhandene endlich in Ordnung bringt.
-      eyebrow: "Für Betriebe, deren Website schon läuft – nur nicht gut",
-      // Der Umbruch ist echt: Zeile eins benennt die Lage, der Akzentteil
+      // Seit 2026-10-06: das eigene Panel und die Digitalisierung vorn. Die
+      // Ausgangslage, die hier abgeholt wird, ist die Arbeit, die in Tabellen,
+      // Mails und Zetteln verteilt liegt — nicht mehr die kaputte Website
+      // (die steht weiter als Leistung „Webauftritt“ zur Verfügung).
+      eyebrow: "Für Betriebe, die digital besser arbeiten wollen",
+      // Der Umbruch ist gewollt: Zeile eins benennt das Ziel, der Akzentteil
       // beginnt Zeile zwei. `text-wrap: balance` zöge das Akzentwort sonst
       // nach oben.
-      headline: "Deine Website läuft schon.",
-      headlineAccent: "Ich bringe sie",
-      headlineSuffix: "in Form.",
-      sub: "Übernehmen, reparieren, pflegen – auch bei WordPress, Shopware oder TYPO3. Ich bleibe *dein fester Ansprechpartner*.",
+      headline: "Alles an einem Ort.",
+      headlineAccent: "Dein eigenes",
+      headlineSuffix: "Panel.",
+      sub: "Aufträge, Kunden und Termine in einem Kundenportal – dazu Abläufe, die *digital und ohne Umwege* laufen. Ich bleibe dein fester Ansprechpartner.",
       cta1: "Erstgespräch vereinbaren",
       cta2: "Leistungen ansehen",
       ctaNote:
@@ -272,7 +273,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Wieso",
       headlineAccent: "ich?",
       lead: "Du brauchst *einen Ansprechpartner* – nicht fünf Anbieter.",
-      p1: "Ich übernehme bestehende Seiten und Shops, statt alles neu zu bauen.",
+      p1: "Ich baue auf dem auf, was du schon hast, statt alles neu zu machen.",
       p2: "Danach bleibe ich auf Wunsch dein Ansprechpartner – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
       motivation: {
         title: "Warum ich das mache",
@@ -303,7 +304,7 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "Wobei ich dir",
       headlineAccent: "helfe.",
-      intro: "Vier Leistungen, *ein Ansprechpartner*: von deiner Website bis zur Software, die dir Arbeit abnimmt.",
+      intro: "Fünf Leistungen, *ein Ansprechpartner*: vom eigenen Panel über digitale Abläufe bis zu deiner Website.",
     },
     websiteDemos: {
       headline: "Beispielseiten und",
@@ -328,8 +329,8 @@ const content: Record<Lang, HomeContent> = {
         "Digitale Themen bleiben liegen, weil niemand zuständig ist. Ich übernehme die Zuständigkeit.",
       points: [
         "Sagen, was zuerst dran ist – verständlich",
+        "Arbeit und Daten in einem Panel bündeln",
         "Vorhandene Systeme übernehmen statt ersetzen",
-        "Den Auftritt sichtbar halten und pflegen",
       ],
       primaryCta: "Erstgespräch vereinbaren",
       secondaryCta: "Preise ansehen",
@@ -412,11 +413,11 @@ const content: Record<Lang, HomeContent> = {
   },
   en: {
     hero: {
-      eyebrow: "For businesses whose website already runs – just not well",
-      headline: "Your website already runs.",
-      headlineAccent: "I get it back",
-      headlineSuffix: "into shape.",
-      sub: "Take over, repair, maintain – WordPress, Shopware and TYPO3 included. I stay *your single point of contact*.",
+      eyebrow: "For businesses that want to work better digitally",
+      headline: "Everything in one place.",
+      headlineAccent: "Your own",
+      headlineSuffix: "panel.",
+      sub: "Orders, customers and appointments in one customer portal – plus workflows that run *digitally, without detours*. I stay your single point of contact.",
       cta1: "Arrange an initial consultation",
       cta2: "View services",
       ctaNote: "Costs only arise once we agree on an assignment. I usually reply within 24 hours.",
@@ -426,7 +427,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Why",
       headlineAccent: "me?",
       lead: "You need *one point of contact* – not five suppliers.",
-      p1: "I take over existing sites and shops instead of rebuilding everything.",
+      p1: "I build on what you already have instead of starting from scratch.",
       p2: "After that I stay your point of contact if you want – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
       motivation: {
         title: "Why I do this",
@@ -457,7 +458,7 @@ const content: Record<Lang, HomeContent> = {
     servicesOverview: {
       headline: "How I can",
       headlineAccent: "help.",
-      intro: "Four services, *one point of contact*: from your website to the software that takes work off your hands.",
+      intro: "Five services, *one point of contact*: from your own panel and digital workflows to your website.",
     },
     websiteDemos: {
       headline: "Example sites and",
@@ -482,8 +483,8 @@ const content: Record<Lang, HomeContent> = {
         "Digital work stalls because nobody owns it. I take that ownership on.",
       points: [
         "Say what comes first — in plain terms",
+        "Bring work and data together in one panel",
         "Take existing systems over rather than replace them",
-        "Keep the presence visible and maintained",
       ],
       primaryCta: "Arrange an initial consultation",
       secondaryCta: "View pricing",

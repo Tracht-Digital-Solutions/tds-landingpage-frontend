@@ -9,9 +9,12 @@ import {
 } from "./services";
 
 describe("service catalog", () => {
-  it("pins the four services in the agreed display order", () => {
-    // Webauftritt first since 2026-09-15 — the site leads with websites and
-    // shops, and the hero says so ("Deine Website läuft schon").
+  it("pins the five services in the agreed display order", () => {
+    // Kundenportale & Verwaltungspanels first since 2026-10-06 — the site leads
+    // with the business's own panel and with digitalization, and the hero says
+    // so ("Alles an einem Ort. Dein eigenes Panel."). The web presence, first
+    // from 2026-09-15, moved to the end; its id, CMS key and slugs did not
+    // change, so no URL and no saved panel block changed with it.
     //
     // `process` moved up to second on 2026-09-29, when it was renamed from
     // "Prozessoptimierung" to "Abläufe digitalisieren": digitalization is the
@@ -20,16 +23,18 @@ describe("service catalog", () => {
     // keys and slugs are unchanged, so no URL and no saved panel block changed
     // with either pass.
     expect(serviceDefinitions.map((service) => service.id)).toEqual([
-      "web-presence",
+      "panels",
       "process",
       "consulting",
       "solutions",
+      "web-presence",
     ]);
     expect(serviceDefinitions.map((service) => service.cmsKey)).toEqual([
-      "service_web_presence",
+      "service_panels",
       "service_process",
       "service_consulting",
       "service_solutions",
+      "service_web_presence",
     ]);
   });
 
@@ -41,7 +46,7 @@ describe("service catalog", () => {
     // invisible until two services swap places on one surface but not another.
     const numbers = serviceDefinitions.map((service) => service.number);
     expect(new Set(numbers).size).toBe(numbers.length);
-    expect(numbers).toEqual(["01", "02", "03", "04"]);
+    expect(numbers).toEqual(["01", "02", "03", "04", "05"]);
   });
 
   it("keeps ids, CMS keys and localized slugs unique", () => {

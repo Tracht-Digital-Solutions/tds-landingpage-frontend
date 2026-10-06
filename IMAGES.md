@@ -239,6 +239,18 @@ The shopfront, seen from the owner's side.
 > the lower third is calm and mostly empty. Backlit, airy, slightly
 > overexposed towards the window. No people, no readable screen. 16:10.
 
+### 0 · Kundenportale & Verwaltungspanels — `services/00-panels.webp` (OPEN)
+
+One place for everything — added 2026-10-06, still without a photo; the
+service sets `image: null` until it exists.
+
+> A tidy desk in the back office of a small trade business. A laptop open at an
+> angle so the screen is NOT readable, a phone lying beside it, and on the wall
+> behind a row of empty, labelled hooks and one clean shelf — order where there
+> used to be paper. Soft daylight from the left. Subject in the upper two
+> thirds, the lower third empty desk surface. No people, no readable screen.
+> 16:10.
+
 ### 5 · „Wieso ich" section ground — `sections/why-me.webp`
 
 Behind the reasons column. Very quiet. Rendered with `object-left`, so the

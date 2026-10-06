@@ -47,12 +47,14 @@ const contact = await cmsFor("contact", lang, {
    * incoming items against. Ship `[]` here and every edit Julian makes in the
    * panel is discarded in silence, for good.
    *
-   * The entries lead with the takeover the site is written for and end with a
-   * way out, so nobody has to misfile their request to send it.
+   * The entries lead with the panel the site is written for (since
+   * 2026-10-06), then the takeover, and end with a way out, so nobody has to
+   * misfile their request to send it.
    */
   reasons:
     lang === "de"
       ? [
+          "Kundenportal oder Verwaltungspanel",
           "Bestehende Website übernehmen",
           "Onlineshop übernehmen oder reparieren",
           "Fehler auf einer laufenden Seite",
@@ -61,6 +63,7 @@ const contact = await cmsFor("contact", lang, {
           "Etwas anderes",
         ]
       : [
+          "Customer portal or admin panel",
           "Take over an existing website",
           "Take over or repair an online shop",
           "A fault on a live site",
@@ -90,9 +93,10 @@ const contact = await cmsFor("contact", lang, {
  * instead of a wrong one (the form checks the value is actually an option).
  */
 const reasonForService: Partial<Record<ServiceId, number>> = {
-  "web-presence": 0,
-  process: 4,
-  solutions: 4,
+  panels: 0,
+  "web-presence": 1,
+  process: 5,
+  solutions: 5,
 };
 const assistantReasons = Object.fromEntries(
   Object.entries(reasonForService)
