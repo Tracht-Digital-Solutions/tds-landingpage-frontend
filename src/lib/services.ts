@@ -6,12 +6,14 @@ import type { Lang } from "./i18n";
 import { referencesForService } from "./references";
 
 export type ServiceId =
+  | "panels"
   | "consulting"
   | "process"
   | "solutions"
   | "web-presence";
 
 export type ServiceCmsKey =
+  | "service_panels"
   | "service_consulting"
   | "service_process"
   | "service_solutions"
@@ -139,12 +141,13 @@ export interface ServiceDefinition {
  * `references.ts`; no customer story is published until a real, approved case
  * exists there.
  *
- * ### The order (since 2026-09-15)
+ * ### The order (since 2026-10-06)
  *
- * Webauftritt first: the site's focus is web presence and digitalization, and
- * the web presence is what most visitors arrive asking about — it is also the
- * service the shop system and CMS pages belong to. The other three are the
- * digitalization half, in the order a project runs: sort, simplify, build.
+ * Kundenportale & Verwaltungspanels first: the site's focus moved to building
+ * a business its own panel, and to digitalization in general. Then the
+ * digitalization services — simplify, sort, build — and the web presence
+ * last. It stays the service the shop system and CMS pages belong to; it is
+ * simply no longer the headline (it stood first from 2026-09-15 to 10-05).
  *
  * ### Copy rules
  *
@@ -157,133 +160,118 @@ export interface ServiceDefinition {
  */
 export const serviceDefinitions = [
   {
-    // The broadest of the four, and deliberately so: a site, a shop and the
-    // marketing that brings people to them are one job, not three. Marketing
-    // was briefly its own service; splitting it made the visitor choose
-    // between building a presence and being found through it, which is not a
-    // choice a small business has. The ad-budget sentence in `boundaries`
-    // came from that entry and has to stay — a fixed price on its own
-    // understates what running ads actually costs.
-    id: "web-presence",
+    // The headline service since 2026-10-06: one panel per business — orders,
+    // customers, appointments and reports in one place, with logins for the
+    // team and a portal for the customers. It is built on the same panel
+    // platform this studio runs itself (admin + customer portal), which is
+    // why the copy may say "a proven base" without inventing a reference.
+    id: "panels",
     number: "01",
-    cmsKey: "service_web_presence",
-    slug: { de: "webauftritt", en: "web-presence" },
+    cmsKey: "service_panels",
+    slug: { de: "kundenportale", en: "customer-portals" },
     seoTitle: {
-      de: "Website & Onlineshop erstellen lassen — Tracht Digital",
-      en: "Websites and Online Shops, Built and Maintained — Tracht Digital",
+      de: "Kundenportal & Verwaltungspanel erstellen lassen — Tracht Digital",
+      en: "Customer Portal & Admin Panel Development — Tracht Digital",
     },
-    updatedAt: "2026-10-05",
-    // "SEO & KI-Suche" rather than "Google Ads & SEO": being found now means
-    // two different machines reading the same page, and the second one is the
-    // search this site can speak to from its own work. Google Ads is still
-    // named in `responsibilities` below, where it belongs — it is a service,
-    // not a thing somebody types into a search box.
+    updatedAt: "2026-10-06",
     keywords: {
-      de: ["Websites", "Onlineshops", "Shopsysteme & CMS", "SEO & KI-Suche"],
-      en: ["Websites", "Online shops", "Shop systems & CMS", "SEO & AI search"],
+      de: ["Kundenportal", "Verwaltungspanel", "Logins fürs Team", "Auswertungen"],
+      en: ["Customer portal", "Admin panel", "Team logins", "Reports"],
     },
     tagline: {
-      de: "Website und Shop übernehmen, reparieren, pflegen",
-      en: "Take over, fix and maintain your site or shop",
+      de: "Dein Betrieb in einem Panel – im Browser und auf dem Handy",
+      en: "Your business in one panel – in the browser and on the phone",
     },
-    image: "/images/services/04-webauftritt.webp",
+    image: null,
     fallback: {
       de: {
         label: "Alle Leistungen",
-        title: "Webauftritt",
+        title: "Kundenportale & Verwaltungspanels",
         summary:
-          "Ich übernehme deine bestehende Website oder deinen Shop, behebe Fehler und halte alles aktuell – auch wenn jemand anderes sie gebaut hat.",
+          "Ich baue dir ein eigenes Panel: Aufträge, Kunden, Termine und Auswertungen an einem Ort – mit Zugängen für Team und Kunden.",
         intro:
-          "Meistens muss nichts neu gebaut werden. Ich sehe mir an, *was trägt*, und ersetze nur, was dich aufhält. Danach bleibt die Seite in Ordnung, ohne dass du an Updates denken musst.",
+          "Viele Betriebe arbeiten mit Tabellen, Mails und Zetteln nebeneinander. Ein Panel bündelt das *an einem Ort*: dein Team sieht, was zu tun ist, und deine Kunden finden ihre Unterlagen selbst. Ich baue es auf einer bewährten Grundlage, die ich selbst einsetze – nicht jedes Mal von null.",
         situationsTitle: "Kommt dir das bekannt vor?",
         situations: [
-          "Deine Website ist veraltet und schwer zu pflegen.",
-          "Dein Shop auf WooCommerce, Shopware oder einem Baukasten macht Ärger.",
-          "Die Seite sieht gut aus, aber kaum jemand fragt an.",
+          "Aufträge und Kundendaten liegen in Tabellen, Mails und Ordnern verteilt.",
+          "Kunden fragen nach, was sie selbst nachsehen könnten.",
+          "Niemand sieht auf einen Blick, wie es gerade läuft.",
         ],
         responsibilitiesTitle: "Das übernehme ich",
         responsibilities: [
-          "Website bauen – für Handy und Bildschirm",
-          "Onlineshop einrichten oder reparieren, z. B. WooCommerce oder Shopware 6",
-          "Bestehende Seiten auf WordPress, TYPO3 oder bei STRATO übernehmen",
-          "Marketing: Google Ads, Unternehmensprofil und Auffindbarkeit",
-          "Auffindbarkeit für Suchmaschinen und für KI-Antworten (SEO und GEO)",
+          "Klären, was das Panel können muss – und was nicht",
+          "Das Panel mit Rollen und sicheren Logins bauen",
+          "Daten übernehmen, einführen und weiter betreuen",
         ],
         outcomesTitle: "Das erreichst du",
         outcomes: [
-          "Deine Seite ist aktuell und läuft zuverlässig",
-          "Besucher verstehen sofort, was du anbietest",
-          "Du wirst gefunden – bei Google und in KI-Antworten",
+          "Alles Wichtige an einem Ort, auch unterwegs",
+          "Kunden erledigen Anfragen selbst im Portal",
+          "Du siehst auf einen Blick, wie es läuft",
         ],
         boundariesTitle: "Was nicht dazugehört",
         boundaries: [
-          "Das Werbebudget für Anzeigen zahlst du direkt an Google.",
-          "Texte, Fotos und Rechtstexte brauchen deine Zuarbeit.",
-          "Platzierungen bei Google lassen sich nicht kaufen – in KI-Antworten genauso wenig.",
+          "Buchhaltung und Lohn bleiben in den Programmen, die dafür gemacht sind.",
+          "Was ein fertiges Programm gut kann, baue ich nicht nach.",
         ],
         processTitle: "So gehen wir vor",
         process: [
-          "Ziele und Inhalte klären",
-          "Seite oder Shop bauen und gemeinsam durchgehen",
-          "Online stellen und sichtbar machen",
+          "Abläufe und Rollen erfassen",
+          "Mit dem Wichtigsten starten, dann erweitern",
+          "Einführen, erklären und weiter betreuen",
         ],
         priceLabel: "Preis",
-        priceText:
-          "Festpreise ab 390 € netto, alles andere auf Anfrage.",
+        priceText: "Auf Anfrage. Bei festem Umfang gibt es Festpreise für einzelne Ausbaustufen.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
-        ctaTitle: "Soll deine Website mehr für dich tun?",
-        ctaText: "Erzähl mir, was sie leisten soll. Wir klären den sinnvollen Umfang.",
+        ctaTitle: "Zu viel liegt verteilt herum?",
+        ctaText: "Zeig mir, wie ihr heute arbeitet. Ich zeige dir, wie ein Panel dafür aussieht.",
         ctaButton: "Erstgespräch vereinbaren",
       },
       en: {
         label: "All services",
-        title: "Web Presence",
+        title: "Customer Portals & Admin Panels",
         summary:
-          "I take over your existing website or shop, fix what is broken and keep it up to date – even if somebody else built it.",
+          "I build you your own panel: orders, customers, appointments and reports in one place – with logins for your team and customers.",
         intro:
-          "Usually nothing has to be rebuilt. I look at *what holds up* and replace only what is holding you back. After that the site stays in order without you thinking about updates.",
+          "Many businesses juggle spreadsheets, emails and notes side by side. A panel brings it together *in one place*: your team sees what needs doing, and your customers find their documents themselves. I build it on a proven base that I use myself – not from scratch every time.",
         situationsTitle: "Does this sound familiar?",
         situations: [
-          "Your website is outdated and hard to maintain.",
-          "Your shop on WooCommerce, Shopware or a site builder is causing problems.",
-          "The site looks good, but hardly anyone gets in touch.",
+          "Orders and customer data are spread across spreadsheets, emails and folders.",
+          "Customers ask about things they could look up themselves.",
+          "Nobody sees at a glance how things are going.",
         ],
         responsibilitiesTitle: "What I take care of",
         responsibilities: [
-          "Build the website – for phones and screens",
-          "Set up or repair an online shop, e.g. WooCommerce or Shopware 6",
-          "Take over existing sites on WordPress, TYPO3 or at STRATO",
-          "Marketing: Google Ads, business profile and findability",
-          "Findability for search engines and for AI answers (SEO and GEO)",
+          "Work out what the panel must do – and what not",
+          "Build the panel with roles and secure logins",
+          "Move your data over, roll it out and keep supporting it",
         ],
         outcomesTitle: "What you achieve",
         outcomes: [
-          "Your site is up to date and runs reliably",
-          "Visitors see straight away what you offer",
-          "You are found – on Google and in AI answers",
+          "Everything important in one place, on the go too",
+          "Customers handle requests themselves in the portal",
+          "You see at a glance how things are going",
         ],
         boundariesTitle: "What this does not cover",
         boundaries: [
-          "The ad budget goes to Google directly.",
-          "Copy, photos and legal texts need your input.",
-          "Google rankings cannot be bought – nor can a mention in an AI answer.",
+          "Accounting and payroll stay in the programs made for them.",
+          "What a ready-made program does well, I do not rebuild.",
         ],
         processTitle: "How we proceed",
         process: [
-          "Clarify goals and content",
-          "Build the site or shop and walk through it together",
-          "Put it online and make it visible",
+          "Capture workflows and roles",
+          "Start with what matters most, then extend",
+          "Roll out, explain and keep supporting it",
         ],
         priceLabel: "Price",
-        priceText:
-          "Fixed prices from €390 net, everything else on request.",
+        priceText: "On request. Once the scope is set, fixed prices for single stages.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],
-        ctaTitle: "Should your website do more for you?",
-        ctaText: "Tell me what it needs to do. We work out a sensible scope.",
+        ctaTitle: "Too much is scattered around?",
+        ctaText: "Show me how you work today. I will show you what a panel for it looks like.",
         ctaButton: "Arrange an initial consultation",
       },
     },
@@ -626,6 +614,138 @@ export const serviceDefinitions = [
         references: [],
         ctaTitle: "Your tools do not fit together?",
         ctaText: "Show me how it works today. We work out what can stay.",
+        ctaButton: "Arrange an initial consultation",
+      },
+    },
+  },
+  {
+    // The broadest of the five, and deliberately so: a site, a shop and the
+    // marketing that brings people to them are one job, not three. Marketing
+    // was briefly its own service; splitting it made the visitor choose
+    // between building a presence and being found through it, which is not a
+    // choice a small business has. The ad-budget sentence in `boundaries`
+    // came from that entry and has to stay — a fixed price on its own
+    // understates what running ads actually costs.
+    id: "web-presence",
+    number: "05",
+    cmsKey: "service_web_presence",
+    slug: { de: "webauftritt", en: "web-presence" },
+    seoTitle: {
+      de: "Website & Onlineshop erstellen lassen — Tracht Digital",
+      en: "Websites and Online Shops, Built and Maintained — Tracht Digital",
+    },
+    updatedAt: "2026-10-05",
+    // "SEO & KI-Suche" rather than "Google Ads & SEO": being found now means
+    // two different machines reading the same page, and the second one is the
+    // search this site can speak to from its own work. Google Ads is still
+    // named in `responsibilities` below, where it belongs — it is a service,
+    // not a thing somebody types into a search box.
+    keywords: {
+      de: ["Websites", "Onlineshops", "Shopsysteme & CMS", "SEO & KI-Suche"],
+      en: ["Websites", "Online shops", "Shop systems & CMS", "SEO & AI search"],
+    },
+    tagline: {
+      de: "Website und Shop übernehmen, reparieren, pflegen",
+      en: "Take over, fix and maintain your site or shop",
+    },
+    image: "/images/services/04-webauftritt.webp",
+    fallback: {
+      de: {
+        label: "Alle Leistungen",
+        title: "Webauftritt",
+        summary:
+          "Ich übernehme deine bestehende Website oder deinen Shop, behebe Fehler und halte alles aktuell – auch wenn jemand anderes sie gebaut hat.",
+        intro:
+          "Meistens muss nichts neu gebaut werden. Ich sehe mir an, *was trägt*, und ersetze nur, was dich aufhält. Danach bleibt die Seite in Ordnung, ohne dass du an Updates denken musst.",
+        situationsTitle: "Kommt dir das bekannt vor?",
+        situations: [
+          "Deine Website ist veraltet und schwer zu pflegen.",
+          "Dein Shop auf WooCommerce, Shopware oder einem Baukasten macht Ärger.",
+          "Die Seite sieht gut aus, aber kaum jemand fragt an.",
+        ],
+        responsibilitiesTitle: "Das übernehme ich",
+        responsibilities: [
+          "Website bauen – für Handy und Bildschirm",
+          "Onlineshop einrichten oder reparieren, z. B. WooCommerce oder Shopware 6",
+          "Bestehende Seiten auf WordPress, TYPO3 oder bei STRATO übernehmen",
+          "Marketing: Google Ads, Unternehmensprofil und Auffindbarkeit",
+          "Auffindbarkeit für Suchmaschinen und für KI-Antworten (SEO und GEO)",
+        ],
+        outcomesTitle: "Das erreichst du",
+        outcomes: [
+          "Deine Seite ist aktuell und läuft zuverlässig",
+          "Besucher verstehen sofort, was du anbietest",
+          "Du wirst gefunden – bei Google und in KI-Antworten",
+        ],
+        boundariesTitle: "Was nicht dazugehört",
+        boundaries: [
+          "Das Werbebudget für Anzeigen zahlst du direkt an Google.",
+          "Texte, Fotos und Rechtstexte brauchen deine Zuarbeit.",
+          "Platzierungen bei Google lassen sich nicht kaufen – in KI-Antworten genauso wenig.",
+        ],
+        processTitle: "So gehen wir vor",
+        process: [
+          "Ziele und Inhalte klären",
+          "Seite oder Shop bauen und gemeinsam durchgehen",
+          "Online stellen und sichtbar machen",
+        ],
+        priceLabel: "Preis",
+        priceText:
+          "Festpreise ab 390 € netto, alles andere auf Anfrage.",
+        referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
+        referencesHeadline: "Einblicke aus der Praxis",
+        references: [],
+        ctaTitle: "Soll deine Website mehr für dich tun?",
+        ctaText: "Erzähl mir, was sie leisten soll. Wir klären den sinnvollen Umfang.",
+        ctaButton: "Erstgespräch vereinbaren",
+      },
+      en: {
+        label: "All services",
+        title: "Web Presence",
+        summary:
+          "I take over your existing website or shop, fix what is broken and keep it up to date – even if somebody else built it.",
+        intro:
+          "Usually nothing has to be rebuilt. I look at *what holds up* and replace only what is holding you back. After that the site stays in order without you thinking about updates.",
+        situationsTitle: "Does this sound familiar?",
+        situations: [
+          "Your website is outdated and hard to maintain.",
+          "Your shop on WooCommerce, Shopware or a site builder is causing problems.",
+          "The site looks good, but hardly anyone gets in touch.",
+        ],
+        responsibilitiesTitle: "What I take care of",
+        responsibilities: [
+          "Build the website – for phones and screens",
+          "Set up or repair an online shop, e.g. WooCommerce or Shopware 6",
+          "Take over existing sites on WordPress, TYPO3 or at STRATO",
+          "Marketing: Google Ads, business profile and findability",
+          "Findability for search engines and for AI answers (SEO and GEO)",
+        ],
+        outcomesTitle: "What you achieve",
+        outcomes: [
+          "Your site is up to date and runs reliably",
+          "Visitors see straight away what you offer",
+          "You are found – on Google and in AI answers",
+        ],
+        boundariesTitle: "What this does not cover",
+        boundaries: [
+          "The ad budget goes to Google directly.",
+          "Copy, photos and legal texts need your input.",
+          "Google rankings cannot be bought – nor can a mention in an AI answer.",
+        ],
+        processTitle: "How we proceed",
+        process: [
+          "Clarify goals and content",
+          "Build the site or shop and walk through it together",
+          "Put it online and make it visible",
+        ],
+        priceLabel: "Price",
+        priceText:
+          "Fixed prices from €390 net, everything else on request.",
+        referencesLabel: "Published only with the client's approval.",
+        referencesHeadline: "Examples from practice",
+        references: [],
+        ctaTitle: "Should your website do more for you?",
+        ctaText: "Tell me what it needs to do. We work out a sensible scope.",
         ctaButton: "Arrange an initial consultation",
       },
     },

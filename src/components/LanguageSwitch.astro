@@ -112,11 +112,16 @@ const label =
 </style>
 
 <script>
+  import { rememberLocale } from "@tracht-digital-solutions/tds-shared/prefs";
+
   // Keep the visitor's place across the switch: `/#preise` → `/en/#preise`.
   // The page is server-rendered and cached, so the hash is only known here.
+  // And remember the choice for every Tracht Digital site (tds-shared/prefs).
   for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-lang-switch]")) {
     link.addEventListener("click", () => {
       if (location.hash) link.hash = location.hash;
+      const target = link.getAttribute("hreflang");
+      if (target === "de" || target === "en") rememberLocale(target);
     });
   }
 </script>

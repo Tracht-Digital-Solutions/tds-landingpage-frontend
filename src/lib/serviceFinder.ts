@@ -1,6 +1,6 @@
 /**
  * Leistungsassistent — three questions that point a visitor at one or more of
- * the four services, with what each costs, and the copy for them.
+ * the five services, with what each costs, and the copy for them.
  *
  * ### Why it exists
  *
@@ -40,7 +40,7 @@ import type { ServiceId } from "./services";
  * the island and may not import it at runtime (see the note above). Its drift
  * is caught by `serviceFinder.test.ts`, which reads the real catalogue.
  */
-export const SERVICE_ORDER: readonly ServiceId[] = ["web-presence", "process", "consulting", "solutions"];
+export const SERVICE_ORDER: readonly ServiceId[] = ["panels", "process", "consulting", "solutions", "web-presence"];
 
 export type TopicId = ServiceId | "unsure";
 export type StageId = "clear" | "rough" | "open";
@@ -141,6 +141,7 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     topicsQuestion: "Worum geht es dir vor allem?",
     topicsHelp: "Mehrfachauswahl möglich.",
     topics: {
+      panels: { label: "Alles an einem Ort: ein eigenes Panel" },
       "web-presence": { label: "Website, Shop oder Sichtbarkeit" },
       consulting: { label: "Erst klären, was sinnvoll ist" },
       process: { label: "Abläufe kosten zu viel Zeit" },
@@ -188,6 +189,7 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     topicsQuestion: "What matters most to you?",
     topicsHelp: "Choose as many as apply.",
     topics: {
+      panels: { label: "Everything in one place: your own panel" },
       "web-presence": { label: "Website, online shop or visibility" },
       consulting: { label: "Work out first what makes sense" },
       process: { label: "Workflows take too much time" },
@@ -272,8 +274,10 @@ export const FINDER_SECTION: Record<
  * The starting points offered in step two.
  *
  * Those of the chosen services, or a couple of every service when the visitor
- * chose none (only "not sure yet"). Never more than eight: four services with
- * four sentences each is a wall nobody reads on a phone.
+ * chose none (only "not sure yet"). Never more than eight: five services with
+ * four sentences each is a wall nobody reads on a phone. So the per-service
+ * count shrinks with the number of services shown — four for one or two, two
+ * for three or four, one each when all five are in play.
  */
 export function situationOptions(
   topics: readonly TopicId[],
@@ -281,7 +285,7 @@ export function situationOptions(
 ): SituationChoice[] {
   const chosen = SERVICE_ORDER.filter((id) => topics.includes(id));
   const ids = chosen.length > 0 ? chosen : SERVICE_ORDER;
-  const perService = ids.length <= 2 ? 4 : 2;
+  const perService = Math.min(4, Math.max(1, Math.floor(8 / ids.length)));
   return ids.flatMap((id) => {
     const service = services.find((candidate) => candidate.id === id);
     return (service?.situations ?? [])

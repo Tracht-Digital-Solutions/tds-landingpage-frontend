@@ -54,8 +54,10 @@ export const siteConfig = {
    * those.
    */
   description: {
-    de: "Webseiten und Onlineshops übernehmen, reparieren, pflegen – Festpreise ab 390 €. Digitalisierung für Unternehmen aus Schwarzenbek bei Hamburg.",
-    en: "Taking over, repairing and maintaining websites and online shops – fixed prices from €390. Digitalization for businesses from Schwarzenbek near Hamburg.",
+    // Since 2026-10-06: the own panel and digitalization first, the web
+    // presence after them — the same order as the services.
+    de: "Kundenportale, Verwaltungspanels und Digitalisierung für Unternehmen – dazu Websites ab 390 €. Aus Schwarzenbek bei Hamburg.",
+    en: "Customer portals, admin panels and digitalization for businesses – plus websites from €390. From Schwarzenbek near Hamburg.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",

@@ -94,9 +94,10 @@ export function renderLlmsTxt(input: LlmsInput): string {
 
   out(`# ${siteConfig.name}`);
   out();
-  out("> Webseiten, Onlineshops und Digitalisierung für Unternehmen. Julian Tracht");
-  out("> plant, baut und pflegt Websites und Shops – auch mit WordPress, WooCommerce,");
-  out("> Shopware 6, TYPO3 und STRATO – und vereinfacht Abläufe. Ein fester");
+  out("> Kundenportale, Verwaltungspanels und Digitalisierung für Unternehmen.");
+  out("> Julian Tracht baut Betrieben ein eigenes Panel für Aufträge, Kunden und");
+  out("> Termine, vereinfacht Abläufe und betreut Websites und Shops – auch mit");
+  out("> WordPress, WooCommerce, Shopware 6, TYPO3 und STRATO. Ein fester");
   out("> Ansprechpartner aus Schwarzenbek bei Hamburg, für Unternehmen in ganz");
   out("> Deutschland.");
   out();
