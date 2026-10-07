@@ -395,6 +395,12 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       transform 300ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
   .floating-cta-group[data-swipe] .floating-cta {
+    /* Centred on the track: the hover pop (scale 1.18, 2px down-right) stays
+       on while a mouse drags, so the disc sat off-centre and wider than the
+       track. `!important` because the twin's mirrored hover rule reaches it
+       through `:has()` with a heavier selector than any written here. */
+    scale: 1 !important;
+    translate: 0 0 !important;
     transform: translateY(calc(-1 * var(--lp-swipe, 0px)));
     box-shadow: 3px 3px 0 0 rgb(0 0 0 / 0.42);
     z-index: 1;
