@@ -170,6 +170,7 @@ const panelRows = "1 / -1";
     border: none;
     border-radius: 6px;
     --lp-fill: var(--lp-surface-card);
+    --lp-shade: initial;
     background: var(--lp-fill);
     box-shadow: var(--tds-shadow-hard-sm);
     color: var(--color-black);
@@ -326,6 +327,7 @@ const panelRows = "1 / -1";
     padding: 0 1.25rem;
     border-radius: 9999px;
     --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
     background: var(--lp-fill);
     box-shadow: var(--tds-shadow-hard-sm);
     color: #fff;
@@ -338,6 +340,7 @@ const panelRows = "1 / -1";
   }
   .svc-explorer__more:hover {
     --lp-fill: var(--color-surface-accent);
+    --lp-shade: initial;
   }
   /* Dark mode (2026-10-05): navy on the near-black ground measured 1.3–1.6:1
      against it — the button was barely there. The CTA takes the dark
@@ -346,10 +349,12 @@ const panelRows = "1 / -1";
      nothing here applies. */
   :global(:root[data-theme="dark"]) .svc-explorer__more {
     --lp-fill: var(--color-primary);
+    --lp-shade: var(--color-accent-pink);
     color: var(--color-on-primary);
   }
   :global(:root[data-theme="dark"]) .svc-explorer__more:hover {
     --lp-fill: var(--color-accent);
+    --lp-shade: initial;
     color: var(--color-on-accent);
   }
   .svc-explorer__more:is(:hover, :focus-visible):not(:active) {
@@ -460,7 +465,8 @@ const panelRows = "1 / -1";
       translate: 0 var(--marker-y, 0px);
       border-radius: 6px;
       background: var(--color-surface-navy);
-      box-shadow: var(--tds-shadow-hard-sm);
+      /* Navy fill, so a coral offset — never the navy ink (tds-shared rule). */
+      box-shadow: 3px 3px 0 0 var(--color-accent-pink);
       /* 260ms, down from 380 (2026-09-29). The marker is the fastest signal
          that the click landed, so it must not be the slowest thing on screen —
          it now settles before the panel's own spring does. The bounce still

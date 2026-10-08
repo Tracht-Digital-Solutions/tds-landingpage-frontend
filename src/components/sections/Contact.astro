@@ -539,9 +539,10 @@ const ui =
   }
   .contact-field:focus {
     background-color: rgb(0 0 0 / 0.28) !important;
-    /* Deeper, so focus reads as pressed further in rather than as a different
-       kind of highlight. The growing accent rule under the row is what carries
-       the colour. */
+    /* Deeper, so focus reads as pressed further in. On keyboard and click
+       focus tds-shared's field rule takes over the well and colours it (coral
+       on this navy tone) in place of a focus ring; this value is the
+       fallback for a programmatic focus that is not `:focus-visible`. */
     box-shadow: inset 3px 3px 0 0 rgb(0 0 0 / 0.38);
   }
 
@@ -1102,6 +1103,7 @@ const ui =
   .submit-button {
     color: var(--color-surface-navy);
     --lp-fill: var(--color-accent-pink);
+    --lp-shade: initial;
     background-color: var(--lp-fill);
     isolation: isolate;
     transition:

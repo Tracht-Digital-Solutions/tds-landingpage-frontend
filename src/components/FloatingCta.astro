@@ -143,6 +143,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     padding: 0.25rem;
     border-radius: 9999px;
     --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
     background-color: var(--lp-fill);
     color: #fff;
     /* The shadow is a DARK SHADE of the pill's own fill (global.css, "Hard
@@ -292,6 +293,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
      nothing here applies. */
   :global(:root[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin) {
     --lp-fill: var(--color-primary);
+    --lp-shade: var(--color-accent-pink);
     color: var(--color-on-primary);
   }
   :global(:root[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin) .floating-cta-top:hover {
@@ -300,6 +302,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   @media (hover: hover) {
     :global(:root[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin):hover {
       --lp-fill: var(--color-accent);
+      --lp-shade: initial;
       color: var(--color-on-accent);
     }
   }
@@ -312,6 +315,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     /* Any part hovered: the whole shape turns bordeaux. */
     .floating-cta-group:hover {
       --lp-fill: var(--color-surface-accent);
+      --lp-shade: initial;
       color: #fff;
     }
     /* The receiver POPS OUT of the pill (2026-09-29, asked for).
