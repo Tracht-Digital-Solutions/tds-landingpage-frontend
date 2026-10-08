@@ -892,8 +892,7 @@ html[data-motion="on"] :where([data-cta]) {
   .first-call__cta,
   .faq-cta-pill,
   .submit-button,
-  .showcase-nav__btn,
-  .vat-switch
+  .showcase-nav__btn
 ) {
   box-shadow: var(--tds-shadow-hard-sm);
 }

@@ -241,6 +241,9 @@ const ui =
     padding: 0.25rem;
     border-radius: var(--tds-radius-pill, 100px);
     background: var(--lp-surface-card);
+    /* A switch is a control you reach into: its track is pressed IN, never
+       lifted by the outer offset the buttons take. */
+    box-shadow: var(--tds-shadow-inset);
   }
   .vat-switch[hidden] {
     display: none;
