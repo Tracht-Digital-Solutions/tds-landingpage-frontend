@@ -50,6 +50,8 @@ Every section, the header and footer sit in `.lp-container`: full width, gutter
   hover), and the `:where()` list at the end of `global.css` re-declares the shadow tokens on it. A new control
   joins that list (or takes `.lp-ink`). Twins over dark bands keep black ink.
 - **Never transition a `box-shadow`.**
+- **Form controls are pressed in, not lifted:** fields, checkboxes, radios and switch tracks (`.vat-switch`) take an
+  inset (`--tds-shadow-inset`), never the outer offset. Only buttons and boxes join the `:where()` lists.
 
 ## The floating pill (`FloatingCta.astro`)
 
