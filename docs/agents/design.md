@@ -49,6 +49,12 @@ Every section, the header and footer sit in `.lp-container`: full width, gutter
 - **A control's hard shadow is a dark shade of its own fill:** each control names its fill `--lp-fill` (rest and
   hover), and the `:where()` list at the end of `global.css` re-declares the shadow tokens on it. A new control
   joins that list (or takes `.lp-ink`). Twins over dark bands keep black ink.
+- **No navy shadow under a navy fill** (0.73.0): navy 45 % into black is still navy. Every navy-family
+  `--lp-fill` (surface-navy, primary and its mixes) sets `--lp-shade: var(--color-accent-pink)`; every other
+  fill sets `--lp-shade: initial` so no coral leaks down from an ancestor. In the dark theme an unshaded fill
+  takes the dark ink (`rgb(147 167 255 / .32)`), never a darker copy of a dark fill.
+- **Focused fields show no ring**; tds-shared colours their pressed-in well (coral in the navy contact
+  section). **Errors shake** through tds-shared's `errorBounceScript` in `Layout.astro`.
 - **Never transition a `box-shadow`.**
 - **Form controls are pressed in, not lifted:** fields, checkboxes, radios and switch tracks (`.vat-switch`) take an
   inset (`--tds-shadow-inset`), never the outer offset. Only buttons and boxes join the `:where()` lists.
