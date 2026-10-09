@@ -17,6 +17,7 @@ import Layout from "~/layouts/Layout.astro";
 import "~/styles/prose.css";
 import { renderMarkdown } from "@tracht-digital-solutions/tds-shared/markdown";
 import { cmsFor } from "~/lib/cms";
+import AnalyticsControls from "~/components/islands/AnalyticsControls";
 
 // A single markdown field rather than a structured block: legal text is
 // long-form prose whose headings and lists are part of the text, not a schema
@@ -44,7 +45,23 @@ const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdo
       >
         Datenschutzerklärung
       </h1>
-      <p class="text-sm text-[var(--color-muted)] mb-12">Stand: Juli 2026</p>
+      <p class="text-sm text-[var(--color-muted)] mb-12">Stand: Oktober 2026</p>
+
+      {/* Outside the CMS/fallback switch on purpose: an edited policy text
+          must not remove the visitor's way to withdraw and erase. */}
+      <section class="mb-12" aria-label="Statistik-Einstellungen">
+        <AnalyticsControls
+          client:idle
+          copy={{
+            settings: "Cookie- und Statistik-Einstellungen öffnen",
+            erase: "Meine Statistikdaten löschen",
+            done: "Erledigt: Die Daten zu Ihrer Kennung sind gelöscht, die Einwilligung ist widerrufen.",
+            failed:
+              "Das Löschen hat nicht geklappt. Bitte versuchen Sie es später erneut oder schreiben Sie an kontakt@tracht-digital.de.",
+            noId: "In diesem Browser ist auf tracht-digital.de keine Statistik-Kennung gespeichert.",
+          }}
+        />
+      </section>
 
       {
         html ? (
@@ -85,10 +102,11 @@ const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdo
               3. Cookies
             </h2>
             <p class="text-[var(--color-muted)] leading-relaxed">
-              Diese Website (tracht-digital.de) verwendet keine Cookies, die der Trackingeinwilligung
-              bedürfen. Es werden lediglich technisch notwendige Informationen im lokalen Speicher des
-              Browsers abgelegt (z.&nbsp;B. Sprach-/Designeinstellung sowie die Bestätigung eines
-              eingeblendeten Hinweisbanners), die keine personenbezogenen Daten enthalten.
+              Ohne Ihre Einwilligung legt diese Website (tracht-digital.de) nur technisch notwendige
+              Informationen im lokalen Speicher des Browsers ab (z.&nbsp;B. Sprach-/Designeinstellung sowie
+              Ihre Auswahl im Einwilligungsbanner). Sie enthalten keine personenbezogenen Daten
+              (§&nbsp;25 Abs. 2 Nr. 2 TDDDG). Erst wenn Sie der Kategorie „Statistik“ zustimmen, speichert
+              Ihr Browser zusätzlich eine zufällige Kennung für unsere eigene Reichweitenmessung (Ziffer 3b).
             </p>
             <p class="text-[var(--color-muted)] leading-relaxed mt-3">
               Auf unserem Blog (blog.tracht-digital.de) können – sofern dort aktiviert – Anzeigen über
@@ -119,6 +137,51 @@ const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdo
             </p>
           </section>
   
+          <section>
+            <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
+              3b. Reichweitenmessung (eigene Statistik, nur mit Einwilligung)
+            </h2>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              Auf tracht-digital.de sowie auf blog., tools., shop. und auth.tracht-digital.de messen wir
+              mit einer selbst betriebenen Statistik, welche Seiten gelesen werden, woher Besucher kommen,
+              welche Schaltflächen genutzt werden und an welcher Stelle Besuche oder Formulare abbrechen.
+              Das geschieht <strong>nur, wenn Sie im Einwilligungsbanner der jeweiligen Seite der Kategorie
+              „Statistik“ zugestimmt haben</strong> (Art. 6 Abs. 1 lit. a DSGVO i.&nbsp;V.&nbsp;m.
+              §&nbsp;25 Abs. 1 TDDDG). Ohne Einwilligung wird nichts gesendet und nichts gespeichert. Ein im
+              Browser aktiviertes „Global Privacy Control“-Signal beachten wir auch nach einer Einwilligung.
+            </p>
+            <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+              <strong>Was gespeichert wird:</strong> eine zufällige Besucherkennung (im lokalen Speicher
+              Ihres Browsers, läuft nach 30 Tagen ab) und eine Sitzungskennung (endet mit dem Tab bzw.
+              nach 30 Minuten Inaktivität); die aufgerufenen Seitenpfade ohne Parameter; die Domain der
+              verweisenden Seite und UTM-Kampagnenangaben eines Links; Klicks auf gekennzeichnete
+              Schaltflächen und die Zieldomain externer Links; die Scrolltiefe; bei Formularen nur, dass
+              eines begonnen oder abgeschickt wurde und der <em>Name</em> des zuletzt ausgefüllten Feldes –
+              niemals Ihre Eingaben; die Verweildauer; Sprache, Geräteklasse sowie Browser- und
+              Betriebssystemfamilie ohne Versionsnummern; das Land.
+            </p>
+            <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+              <strong>Was nicht gespeichert wird:</strong> Ihre IP-Adresse und die vollständige
+              Browserkennung. Die IP-Adresse wird nur im Moment der Anfrage verwendet, um das Land in einer
+              lokal auf unserem Server liegenden Datenbank nachzuschlagen (Länderdaten: DB-IP.com, CC BY
+              4.0), und als verschlüsselter Hashwert für einen kurzzeitigen Missbrauchsschutz; danach wird
+              sie verworfen. Es gibt keine Weitergabe an Dritte und keine Verknüpfung mit Ihrem Kundenkonto
+              oder Ihren Formulareingaben. Die Daten liegen auf unserem Server in Deutschland.
+            </p>
+            <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+              <strong>Speicherdauer:</strong> Einzelne Besuche speichern wir 90 Tage. Danach werden sie zu
+              anonymen Tagessummen (z.&nbsp;B. „120 Besuche über Suchmaschinen“) zusammengefasst und
+              gelöscht; die Summen lassen keinen Rückschluss auf einzelne Besucher zu.
+            </p>
+            <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+              <strong>Widerruf und Löschung:</strong> Sie können Ihre Einwilligung jederzeit über
+              „Cookie-Einstellungen“ im Fußbereich der jeweiligen Seite widerrufen; die Kennung wird dann
+              sofort aus Ihrem Browser gelöscht. Mit der Schaltfläche unten löschen Sie zusätzlich alle zu
+              Ihrer Kennung auf tracht-digital.de gespeicherten Daten. Für die anderen Seiten genügt eine
+              E-Mail an kontakt@tracht-digital.de.
+            </p>
+          </section>
+
           <section>
             <h2 class="text-xl font-[var(--font-display)] font-medium mb-3">
               4. Kontaktformular
