@@ -129,11 +129,10 @@ const enAltUrl = alternates
  * not a content decision, and it is not one an unreachable API should make. The
  * same reasoning removed the equivalent gate on the journal and the tools site.
  *
- * No `categories`: this site sets nothing optional — no analytics, no
- * advertising, no embeds — so the banner states that fact and offers one
- * acknowledgement rather than soliciting a consent nobody needs. The day
- * something optional ships, adding it here turns the same component into a real
- * gate.
+ * One category: `analytics`, the site's own audience measurement
+ * (tds-shared/analytics → the panel's Besucher-Statistik). Nothing else is
+ * optional here — no advertising, no embeds. Without a "Statistik" consent the
+ * beacon below sends nothing and stores nothing.
  */
 const showCookieNotice = !bare;
 ---
@@ -243,7 +242,7 @@ const showCookieNotice = !bare;
 
     <slot name="head" />
   </head>
-  <body>
+  <body data-bare={bare ? "" : undefined}>
     {/* The page's ONE ground.
 
         The sections used to alternate paper and sand and each washed section
@@ -289,6 +288,7 @@ const showCookieNotice = !bare;
       <ConsentBanner
         client:idle
         lang={lang}
+        categories={["analytics"]}
         privacyUrl="/legal/datenschutz"
         imprintUrl="/legal/impressum"
       />
@@ -341,6 +341,23 @@ const showCookieNotice = !bare;
       import { bootMotion } from "~/lib/motion/boot";
 
       bootMotion();
+    </script>
+
+    {/* Besucher-Statistik. Starts only once the visitor has agreed to
+        "Statistik" in the banner above, and stops — deleting its ids — when
+        they withdraw. CTAs carry `data-track`, forms `data-track-form`.
+        Not inside `{!bare && …}`: Astro leaves a script in an expression
+        unbundled, so the import would reach the browser as a bare specifier.
+        A bare page (embeds, previews) says so on <body> instead. */}
+    <script>
+      import { startAnalytics } from "@tracht-digital-solutions/tds-shared/analytics";
+
+      if (import.meta.env.PUBLIC_DEMO_MODE !== "true" && !document.body.hasAttribute("data-bare")) {
+        startAnalytics({
+          site: "landing",
+          lang: document.documentElement.lang.startsWith("en") ? "en" : "de",
+        });
+      }
     </script>
 
     {/* Dynamic document.title — observes every <section id="…"> on

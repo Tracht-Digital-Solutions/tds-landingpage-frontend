@@ -105,11 +105,11 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
           them the site's jump when it is there. The primary one is Motion's
           CTA (`data-cta`, lib/motion/cta.ts). */}
       <div class="hero-actions hero-rise">
-        <a href="#contact" class="hero-cta hero-cta--primary" data-cta>
+        <a href="#contact" class="hero-cta hero-cta--primary" data-cta data-track="hero-primary">
           {cta1}
           <span aria-hidden="true" class="hero-cta__arrow">→</span>
         </a>
-        <a href="#services" class="hero-cta hero-cta--secondary">{cta2}</a>
+        <a href="#services" class="hero-cta hero-cta--secondary" data-track="hero-secondary">{cta2}</a>
       </div>
     </div>
   </div>
