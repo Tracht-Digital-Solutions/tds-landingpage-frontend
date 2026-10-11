@@ -13,6 +13,12 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 - **Nothing a visitor reads animates from `opacity: 0`.** The headline rises as one block; a per-word split once
   fragmented the H1 and stole the LCP element.
 - Every JS motion path also respects the site's motion switch (`lessMotion()` / `data-a11y-motion`).
+- **Nothing runs off screen** (2026-10-11). Endless CSS/Web Animations are paused by tds-shared's
+  `offscreenAnimationScript` (inline in `Layout.astro`). JavaScript loops gate themselves: the hero's Motion loops
+  and its pointer listener stop when `#hero` leaves the viewport, the Lenis loop in `SmoothScroll.tsx` runs only
+  while Lenis scrolls (parks after 30 still frames; `lenis.time = 0` before a wake), the showcase drift and the
+  brand-bar keys use `inView`, the cursor parks when settled, the pill's chevrons loop only while the swipe track
+  shows. Check: count `requestAnimationFrame` calls over 2 s at the page bottom — it must be 0.
 - The shared React motion entry re-exports only `m` and `AnimatePresence`; a bare `motion` import is forbidden.
 
 ## What moves
@@ -22,7 +28,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | CTAs (`[data-cta]`) | `cta.ts` | Magnetic pull (14 px) under a fine pointer with a bouncing return, press squeeze, one light sweep on arrival. The floating pill is **not** a `[data-cta]` |
 | Floating pill | `floatingCta.ts` | Springs its slots |
 | Bookmarks | `propertyTabs.ts` | Slide-in springs, neighbours lean |
-| Brand bars | `brandbar.ts` | Each `.tds-brandbar` is split into three `aria-hidden` key spans coloured from the bar's computed layers (`.lp-brandbar-keys` hides the layers) and played like keys: the key under the pointer jumps and stretches on a stiff spring, neighbours follow, all drop back with a crisp bounce. Only the spans' `transform` is written |
+| Brand bars | `brandbar.ts` | Each `.tds-brandbar` is split into three `aria-hidden` key spans coloured from the bar's computed layers (`.lp-brandbar-keys` hides the layers) and played like keys: the key under the pointer jumps and stretches on a stiff spring, neighbours follow, all drop back with a crisp bounce. Only the spans' `transform` and `height` are written (height, not `scaleY`, so every key stays a pill) |
 | Cards in depth (`[data-motion-tilt]`) | `tilt.ts` | Price packages and showcase cards lean up to 6° toward a fine pointer (`rotateX`/`rotateY`, perspective 900 px) and spring back flat with a light bounce. Delegated from `document`, so showcase clones tilt too; flat while the shelf is dragged. Composes with the packages' `y` lift; no glare, no shadow animation. Never on a seam mosaic cell (service tiles): the tilted cell tears the 1 px seams |
 | Drawn cursor | `islands/CustomCursor.tsx`, `lib/cursorAbsorb.ts` | See below |
 | Page scroll bar | `pageScrollbar.ts`, `components/PageScrollbar.astro` | See below |

@@ -1106,18 +1106,23 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
    With Motion on and a fine pointer, every `.tds-brandbar` carries three
    spans — its colour segments — and its own background layers step aside.
    The spans sit exactly where the layers were, so at rest nothing changes;
-   the script only ever writes their `transform`. Without the class (no JS,
+   the script only writes their `transform` and `height`. Without the class (no JS,
    reduced motion, touch) the plain tds-shared bar shows. */
 .tds-brandbar.lp-brandbar-keys {
   position: relative;
   background-image: none;
+  /* The keys are pills of their own; the bar's segment mask would cut off a
+     key the moment it hops. */
+  -webkit-mask: none;
+  mask: none;
 }
+/* A key is a pill at every height: it stretches by its HEIGHT (anchored at
+   the bottom), never by `scaleY`, which flattened its round ends. */
 .lp-brandbar-key {
   position: absolute;
-  top: 0;
+  bottom: 0;
   height: 100%;
-  border-radius: inherit;
-  transform-origin: 50% 100%;
+  border-radius: var(--tds-radius-pill);
   will-change: transform;
   pointer-events: none;
 }

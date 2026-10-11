@@ -105,7 +105,7 @@ Decoration lives only in the hero's negative space, never behind the copy or the
 on short screens (`max-height: 46rem` below 80rem) none. Scroll drift and the conduit stay desktop-only (80rem).
 Depth (2026-10-11, second pass): no floor grid. Each shape is a 3D body — a filled face plus six outline rings
 behind it (`.hero-shape__layer`, `translateZ` steps in `transform-style: preserve-3d`), turned by the island.
-Outline rings, not filled layers: stacked translucent fills darken the face. No box-shadow on `.hero-shape`. Under the slogan a `.tds-brandbar` draws itself (transform only) and the copy drifts up on scroll-out. Motion
+Outline rings, not filled layers: stacked translucent fills darken the face. No box-shadow on `.hero-shape`. Under the slogan a `.tds-brandbar` draws itself by a round `clip-path` (never a scale: every brand-bar segment stays a pill, tds-shared ≥ 0.54) and the copy drifts up on scroll-out. Motion
 details: [motion.md](motion.md#hero).
 
 ## Dialogs and semantics

@@ -322,21 +322,43 @@ export default function SmoothScroll() {
         force: true,
         onComplete: () => inputLock.release(),
       });
+      wake();
     };
     window.tdsScrollTo = tdsScrollTo;
 
     const onClick = makeAnchorClickHandler(tdsScrollTo);
     document.addEventListener("click", onClick);
 
-    let rafId: number;
+    /**
+     * Lenis only needs frames while it is moving the page (2026-10-11). The
+     * loop used to run every frame for the whole visit, scrolling or not —
+     * a page sitting still kept the main thread awake 60 times a second.
+     * Now a wheel, a scroll or a jump wakes it, and it parks itself once
+     * Lenis has been still for half a second. `lenis.time = 0` before a wake:
+     * Lenis advances by `time - this.time`, and after a pause that gap would
+     * finish a fresh wheel tween in one frame.
+     */
+    let rafId = 0;
+    let stillFrames = 0;
     const raf = (time: number) => {
       lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
+      stillFrames = lenis.isScrolling ? 0 : stillFrames + 1;
+      rafId = stillFrames > 30 ? 0 : requestAnimationFrame(raf);
     };
-    rafId = requestAnimationFrame(raf);
+    function wake() {
+      stillFrames = 0;
+      if (rafId) return;
+      lenis.time = 0;
+      rafId = requestAnimationFrame(raf);
+    }
+    window.addEventListener("wheel", wake, { passive: true });
+    window.addEventListener("scroll", wake, { passive: true });
+    wake();
 
     return () => {
       cancelAnimationFrame(rafId);
+      window.removeEventListener("wheel", wake);
+      window.removeEventListener("scroll", wake);
       inputLock.destroy();
       document.removeEventListener("click", onClick);
       window.removeEventListener("wheel", onWheel);

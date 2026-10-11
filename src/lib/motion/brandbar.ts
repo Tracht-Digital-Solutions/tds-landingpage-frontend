@@ -24,8 +24,9 @@
  * bar's own layers. No JavaScript, a failed import, reduced motion or a
  * coarse pointer: no spans, and the bar is the plain tds-shared bar.
  *
- * Only `transform` on the spans is written per frame. The bar itself is left
- * alone — the hero's bar draws itself in with a transform on the BAR
+ * Only `transform` and `height` on the spans are written per frame (a height,
+ * not a `scaleY`, so a stretched key stays a pill). The bar itself is left
+ * alone — the hero's bar draws itself in with a clip on the BAR
  * (`hero-bar-draw` in `Hero.astro`), and the keys simply ride along.
  */
 type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
@@ -205,8 +206,11 @@ export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
         } else {
           moving = true;
         }
-        key.el.style.transform =
-          key.y === 0 && key.s === 1 ? "" : `translateY(${key.y.toFixed(2)}px) scaleY(${key.s.toFixed(3)})`;
+        // The stretch is a HEIGHT, not a `scaleY`: a scaled pill has flattened
+        // ends, and the key must stay round at every size. One absolutely
+        // positioned span per key, so the layout it costs is its own.
+        key.el.style.transform = key.y === 0 ? "" : `translateY(${key.y.toFixed(2)}px)`;
+        key.el.style.height = key.s === 1 ? "" : `${(key.s * 100).toFixed(1)}%`;
       }
     }
 
