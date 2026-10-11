@@ -103,9 +103,9 @@ from tds-shared, the portal from `siteConfig.portalUrl`).
 Decoration lives only in the hero's negative space, never behind the copy or the fixed header
 (`npm run audit:ux` measures overlap). On a phone: a quarter in the top band and a capsule in the bottom band;
 on short screens (`max-height: 46rem` below 80rem) none. Scroll drift and the conduit stay desktop-only (80rem).
-Depth (2026-10-11): a perspective floor grid (`.hero-depth`, from 48rem) lies under the photo's right half, masked
-away from the copy and the horizon, and the two shapes carry two stepped hard offsets in their own tint
-(extrusion, never transitioned). Under the slogan a `.tds-brandbar` draws itself (transform only) and the copy drifts up on scroll-out. Motion
+Depth (2026-10-11, second pass): no floor grid. Each shape is a 3D body — a filled face plus six outline rings
+behind it (`.hero-shape__layer`, `translateZ` steps in `transform-style: preserve-3d`), turned by the island.
+Outline rings, not filled layers: stacked translucent fills darken the face. No box-shadow on `.hero-shape`. Under the slogan a `.tds-brandbar` draws itself (transform only) and the copy drifts up on scroll-out. Motion
 details: [motion.md](motion.md#hero).
 
 ## Dialogs and semantics

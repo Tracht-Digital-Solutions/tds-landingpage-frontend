@@ -14,7 +14,8 @@
  * Three things fixed it, and only the third is about spacing:
  *
  * 1. The column has CONTENT now — `motivation`, the one block on this page
- *    that can only come from Julian, plus three of the four `reasons`.
+ *    that can only come from Julian, plus three of the four `reasons` (titles
+ *    only, as tiles, since 2026-10-11).
  * 2. `items-start`, so the short column stops floating in the middle of the
  *    tall one.
  * 3. The blocks are separated by the 1px seam `.credentials-teaser` already
@@ -185,15 +186,15 @@ const credentialsUi =
           }
         </div>
 
-        {/* Three of four (see the top). Same drawn marker as the certificates
-            below, so the column does not carry two bullet styles. */}
+        {/* Three of four (see the top), titles only since 2026-10-11 (the
+            `description` stays in the shape), side by side where the column
+            has room — the same tiles as the certificates below. */}
         <div class="about-block">
-          <ul class="about-reasons">
+          <ul class="about-tiles">
             {
               renderedReasons.map((reason) => (
-                <li>
-                  <span class="about-reasons__title">{reason.title}</span>
-                  <span class="about-reasons__text">{reason.description}</span>
+                <li class="about-tile">
+                  <span class="about-tile__title">{reason.title}</span>
                 </li>
               ))
             }
@@ -202,12 +203,12 @@ const credentialsUi =
 
         <div class="about-block credentials-teaser">
           <p class="eyebrow credentials-teaser__label">{credentialsUi.label}</p>
-          <ul class="credentials-teaser__list">
+          <ul class="about-tiles credentials-teaser__list">
             {
               featured.map((entry) => (
-                <li>
-                  <span class="credentials-teaser__name">{shortTitle(entry)}</span>
-                  <span class="credentials-teaser__issuer">{entry.issuer}</span>
+                <li class="about-tile">
+                  <span class="about-tile__title">{shortTitle(entry)}</span>
+                  <span class="about-tile__meta">{entry.issuer}</span>
                 </li>
               ))
             }
@@ -333,92 +334,59 @@ const credentialsUi =
     margin-bottom: 0;
   }
 
-  /* The reasons. Title and line stacked per row, same drawn marker as the
-     certificates below — a second bullet style in one column is the kind of
-     detail that reads as carelessness without anyone being able to name it. */
-  .about-reasons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
+  /* The reasons and the certificates: small tiles side by side where the
+     column has room, stacked where it has not (2026-10-11). `auto-fit` with a
+     floor rather than a breakpoint: the column's width is half the page from
+     `md`, so the viewport says little about it. One drawn marker for both
+     lists, so the column does not carry two bullet styles. */
+  .about-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+    gap: 0.625rem;
+    width: 100%;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  .about-reasons li {
+  .about-tile {
     position: relative;
-    padding-left: 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.875rem 0.875rem 0.875rem 1.875rem;
+    border-radius: 6px;
+    background: var(--lp-surface-card);
     text-align: left;
   }
-  .about-reasons li::before {
+  .about-tile::before {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0.5em;
+    left: 0.875rem;
+    top: calc(0.875rem + 0.5em);
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 100px;
     background: var(--color-accent);
   }
-  .about-reasons__title {
-    display: block;
+  .about-tile__title {
     font-weight: 600;
     font-size: 0.9375rem;
     line-height: 1.35;
     color: var(--color-black);
   }
-  .about-reasons__text {
-    display: block;
-    font-size: 0.875rem;
-    line-height: 1.4;
+  .about-tile__meta {
+    font-size: 0.8125rem;
+    line-height: 1.35;
     color: var(--color-muted);
   }
 
-  /* The certificates, as a caption under the prose rather than as a fourth
-     paragraph. It is a LIST of documents: three names, the issuer under each,
-     and one way to all of them. Its seam and top spacing now come from
-     `.about-block`. */
+  /* The certificates: the label, the tiles and one way to all of them. Its
+     seam and top spacing come from `.about-block`. */
   .credentials-teaser__label {
     margin: 0 0 0.75rem;
   }
   .credentials-teaser__list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-    margin: 0 0 1rem;
-    padding: 0;
-    list-style: none;
-  }
-  .credentials-teaser__list li {
-    /* The marker is drawn rather than listed: a real `list-style` marker sits
-       outside the box and would hang into the gutter on the centred phone
-       layout. */
-    position: relative;
-    padding-left: 1.125rem;
-    line-height: 1.35;
-    /* The column is centred below `md` (the whole text block is), so the
-       hanging marker has to come back inside. */
-    text-align: left;
-  }
-  .credentials-teaser__list li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0.5em;
-    width: 0.375rem;
-    height: 0.375rem;
-    border-radius: 100px;
-    background: var(--color-accent);
-  }
-  .credentials-teaser__name {
-    display: block;
-    font-weight: 600;
-    font-size: 0.9375rem;
-    color: var(--color-black);
-  }
-  .credentials-teaser__issuer {
-    display: block;
-    font-size: 0.8125rem;
-    color: var(--color-muted);
+    margin-bottom: 1rem;
   }
   .credentials-teaser__link {
     display: inline-flex;
@@ -458,9 +426,8 @@ const credentialsUi =
       flex-direction: column;
       align-items: center;
     }
-    .credentials-teaser__list,
-    .about-reasons {
-      align-self: center;
+    .about-tiles {
+      align-self: stretch;
     }
     /* Prose stays centred with the rest of the column — it has no marker to
        hang, so a left edge of its own would look like a mistake. */

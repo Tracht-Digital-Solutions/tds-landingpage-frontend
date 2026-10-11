@@ -39,6 +39,14 @@ export interface ContactFormCopy {
    * placeholder untouched.
    */
   messageHint: string;
+  /**
+   * The emergency checkbox (2026-10-11). Ticked, the request is sent with
+   * `urgentSubject` in front of its subject, so it arrives marked in the
+   * panel without a new field in tds-shared's `ContactSchema`.
+   */
+  urgentLabel: string;
+  urgentHint: string;
+  urgentSubject: string;
 }
 
 export function contactFormCopy(lang: Lang): ContactFormCopy {
@@ -53,6 +61,9 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
       reasonEmpty: "Please choose",
       messageHint:
         "Two or three sentences are enough: what is not working, since when, and the address of the site.",
+      urgentLabel: "Emergency – I need help at short notice",
+      urgentHint: "Your request arrives marked as an emergency. Faster still: call me.",
+      urgentSubject: "Emergency",
     };
   }
   return {
@@ -65,6 +76,9 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
     reasonEmpty: "Bitte auswählen",
     messageHint:
       "Zwei, drei Sätze genügen: was nicht funktioniert, seit wann, und die Adresse der Seite.",
+    urgentLabel: "Notfall – ich brauche kurzfristig Hilfe",
+    urgentHint: "Deine Anfrage kommt als Notfall markiert an. Noch schneller geht es telefonisch.",
+    urgentSubject: "Notfall",
     errors: {
       ...t.errors,
       name: "Bitte gib deinen Namen an.",

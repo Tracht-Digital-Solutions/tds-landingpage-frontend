@@ -86,6 +86,9 @@ export default function ContactForm({
   const copy = contactFormCopy(lang);
 
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  // The emergency checkbox. Not a form field: `ContactSchema` knows no such
+  // key and zodResolver would drop it. It marks the subject instead (below).
+  const [urgent, setUrgent] = useState(false);
   const [shake, setShake] = useState(false);
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -164,6 +167,13 @@ export default function ContactForm({
     shakeTimerRef.current = setTimeout(() => setShake(false), 600);
   };
 
+  /** The chosen reason, marked as an emergency when the box is ticked. */
+  const subjectFor = (subject: string | undefined) => {
+    const reason = String(subject ?? "").trim();
+    if (!urgent) return reason || undefined;
+    return (reason ? `${copy.urgentSubject} – ${reason}` : copy.urgentSubject).slice(0, 200);
+  };
+
   const onSubmit = async (data: ContactFormData) => {
     setSubmitState("submitting");
     try {
@@ -174,7 +184,7 @@ export default function ContactForm({
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, lang }),
+        body: JSON.stringify({ ...data, subject: subjectFor(data.subject), lang }),
         // A hanging endpoint left the form in "submitting" for good, with the
         // button disabled and nothing to say why. 20s, then the error view.
         signal: AbortSignal.timeout(20_000),
@@ -359,6 +369,25 @@ export default function ContactForm({
           </div>
         )}
         </div>
+
+        {/* Short-notice emergencies are taken (2026-10-11). The same round box
+            as the consent below, in a row that turns pink when ticked. */}
+        <label className="contact-urgent-toggle">
+          <input
+            type="checkbox"
+            className="contact-consent-input"
+            checked={urgent}
+            onChange={(event) => setUrgent(event.target.checked)}
+            aria-describedby="contact-urgent-hint"
+          />
+          <span className="contact-consent-box" aria-hidden="true" />
+          <span>
+            <span className="contact-urgent-toggle__title">{copy.urgentLabel}</span>
+            <span id="contact-urgent-hint" className="contact-urgent-toggle__hint">
+              {copy.urgentHint}
+            </span>
+          </span>
+        </label>
 
         <div className={rowClass("message")}>
           <label htmlFor="message" className="contact-field-label">

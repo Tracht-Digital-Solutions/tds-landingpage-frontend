@@ -3,8 +3,8 @@
  * The services as an INTERACTIVE LIST (2026-09-22) — the home page's
  * services section, replacing the four-tile mosaic.
  *
- * Left, the four titles, each with a few words on what the service IS
- * (`tagline`, 2026-10-05); right, one panel: the photo, what I do (the
+ * Left, the titles alone (the `tagline` under each went on 2026-10-11; the
+ * prop stays for callers); right, one panel: the photo, what I do (the
  * service's `summary`), the typical starting point, the outcome, the scope
  * and the way to the service page. On a phone the same markup is an
  * accordion. Behaviour and its reasons: `lib/serviceExplorer.ts`.
@@ -71,7 +71,6 @@ const panelRows = "1 / -1";
             data-explorer-button
           >
             <span class="svc-explorer__title">{service.title}</span>
-            {service.tagline && <span class="svc-explorer__teaser">{service.tagline}</span>}
             <span class="svc-explorer__chevron" aria-hidden="true">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 6 15 12 9 18" />
@@ -202,16 +201,9 @@ const panelRows = "1 / -1";
     font-weight: 500;
     line-height: 1.2;
   }
-  .svc-explorer__teaser {
-    grid-column: 1;
-    margin-top: 0.25rem;
-    font-size: 0.9375rem;
-    line-height: 1.45;
-    color: var(--color-muted);
-  }
   .svc-explorer__chevron {
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -230,9 +222,6 @@ const panelRows = "1 / -1";
     background: var(--color-surface-navy);
     color: #fff;
   }
-  .svc-explorer__button[aria-expanded="true"] .svc-explorer__teaser {
-    color: rgb(255 255 255 / 0.78);
-  }
   .svc-explorer__button[aria-expanded="true"] .svc-explorer__chevron {
     background: rgb(255 255 255 / 0.16);
     color: #fff;
@@ -244,9 +233,6 @@ const panelRows = "1 / -1";
   }
   /* Before the script: every panel shows, so no title claims to be the one
      that is open. */
-  .svc-explorer:not([data-enhanced]) .svc-explorer__teaser {
-    color: var(--color-muted);
-  }
   .svc-explorer:not([data-enhanced]) .svc-explorer__chevron {
     display: none;
   }

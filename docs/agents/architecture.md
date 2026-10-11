@@ -30,12 +30,16 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   contact block; two in a row collapse to one.
 - **Kundenprojekte** shows the heading and the cards only; the `references_home` intro and consent line stay
   in the content shape but don't render.
-- **Vorgehen is a stepper** (`sections/Process.astro`): only the step titles in a column, each a
-  `<button aria-expanded aria-controls>`; the open step's text shows beside it (hover with 140 ms intent, focus,
-  tap, arrow keys). Without JavaScript every panel shows; on a phone it is an accordion. `FirstCall` sits
-  beside it from `xl`, below it otherwise.
-- **One primary CTA per section**, "Erstgespräch vereinbaren" (hero, beside the process steps via
-  `ui/FirstCall.astro`, the contact form); under the prices "Individuelle Lösungen – auf Anfrage".
+- **Vorgehen is a horizontal stepper** (`sections/Process.astro`, 2026-10-11): only the step titles, side by side
+  on one rail from 48rem, each a `<button aria-expanded aria-controls>`; the open step's card shows under the row
+  with a notch at its step (hover with 140 ms intent, focus, tap, arrow keys). Without JavaScript every panel
+  shows; on a phone it is an accordion. No lead sentence and no `FirstCall` card any more: step 01's card carries
+  "Erstgespräch vereinbaren" to `#contact`.
+- **One primary CTA per section**, "Erstgespräch vereinbaren" (hero, in the first process step, the contact
+  form); under the prices "Individuelle Lösungen – auf Anfrage" with the price calculator's button beside it.
+- **Not rendered, fields kept** (2026-10-11) so stored blocks load: `pricing.sub`, package `description` (still in
+  the JSON-LD offers), `servicesOverview.intro`, the explorer's `tagline`, the showcase `intro`, `process.body`,
+  the `why_me` reasons' `description`, `footer.tagline`.
 
 ## Hero (`sections/Hero.astro`)
 
@@ -102,12 +106,21 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - The message field is guided by an element tied with `aria-describedby` (not a placeholder).
 - The four "what happens next" points are the confirmation's content. `ui/FirstCall.astro` keeps its `contact`
   variant for stored blocks but has no caller on the home page.
+- **Emergencies** (2026-10-11): a code-owned "Notfall?" line under the sub (with a `tel:` link), an "Auch für
+  Notfälle" badge on the phone row and a "Notfall" checkbox in the form. The checkbox is local state, not a form
+  field (`ContactSchema` has no such key and zodResolver drops unknown ones): ticked, the request goes out with
+  `subject` = "Notfall – <reason>" (max 200). Copy in `lib/contactCopy.ts`.
+- The contact card is four labelled groups with one icon-disc style: ways (e-mail, phone, WhatsApp), Standort,
+  Zum Mitnehmen (business card, .vcf), profiles.
+- **Footer contact** shows icon + label per line; "21493 Schwarzenbek" is a button that opens a bubble (hover,
+  focus, tap; Escape closes) with `ui/PlaceMap.astro`, a drawn SVG map — no map tiles, so no third-party request.
 - `contactForm.test.ts` holds all of this. The form uses `src/lib/connection.ts`.
 
 ## Prices (`#preise`, `sections/Pricing.astro`)
 
-"Webseitenpreise zum Festpreis" with a Netto/Brutto switch, the price calculator's row, then "Individuelle
-Lösungen – auf Anfrage". "So entsteht dein Preis" (`pricing_logic`) no longer renders; its content stays so a
+"Webseitenpreise zum Festpreis" with a Netto/Brutto switch, then "Individuelle Lösungen – auf Anfrage" with the
+request button and the price calculator's button (slot `cta-actions` in `PricingList.astro`). No sub under the
+heading, no description on the package cards (2026-10-11). "So entsteht dein Preis" (`pricing_logic`) no longer renders; its content stays so a
 stored block loads, and the notes box renders only with notes.
 
 - **Price calculator** (`components/PriceCalculator.astro`, native `<dialog id="preisrechner">`, plain script):

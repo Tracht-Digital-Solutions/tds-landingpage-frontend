@@ -144,9 +144,9 @@ const ui =
                     {ui.net}
                   </span>
                 </p>
-                {pkg.description && (
-                  <p class="pricing-packages__text">{pkg.description}</p>
-                )}
+                {/* `pkg.description` no longer renders (2026-10-11): the
+                    title and the list say it. It still feeds the JSON-LD
+                    offer. */}
                 {pkg.includes.length > 0 && (
                   <ul class="pricing-packages__includes">
                     {pkg.includes.map((entry) => (
@@ -217,15 +217,19 @@ const ui =
         {pricing.ctaTitle}
       </SectionHeading>
       <p class="text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">{pricing.ctaSub}</p>
-      <a
-        href={contactHref}
-        data-cta
-        data-track="pricing-cta"
-        class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
-      >
-        {pricing.ctaButton}
-        <span aria-hidden="true" class="group-hover:translate-x-0.5 transition-transform">→</span>
-      </a>
+      <div class="pricing-cta__actions">
+        <a
+          href={contactHref}
+          data-cta
+          data-track="pricing-cta"
+          class="inline-flex items-center gap-2 bg-white text-[var(--color-surface-navy)] px-7 py-3.5 rounded-[100px] text-sm font-medium hover:bg-white/85 transition-colors group"
+        >
+          {pricing.ctaButton}
+          <span aria-hidden="true" class="group-hover:translate-x-0.5 transition-transform">→</span>
+        </a>
+        {/* The caller's second button (the home page: the price calculator). */}
+        <slot name="cta-actions" />
+      </div>
     </div>
   </section>
 </div>
@@ -398,11 +402,16 @@ const ui =
     line-height: 1.1;
     color: var(--color-primary);
   }
-  .pricing-packages__text {
-    margin: 0 0 1rem;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: var(--color-muted);
+  .pricing-packages__price {
+    margin-bottom: 1.25rem;
+  }
+
+  .pricing-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem 1rem;
   }
   .pricing-packages__includes {
     display: grid;
