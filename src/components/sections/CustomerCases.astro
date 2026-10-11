@@ -31,7 +31,6 @@ import { referenceCases, articleUrl } from "~/lib/references";
 import { getReferencePreviews } from "~/lib/referencePreviews";
 import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
-import Emphasis from "~/components/ui/Emphasis.astro";
 import ReferenceCard from "~/components/ui/ReferenceCard.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -67,16 +66,16 @@ const badge = lang === "de" ? "Kundenprojekt" : "Client project";
     <section id="cases" class="section-spacing" aria-labelledby="cases-heading">
       <div class="lp-container">
         <div class="max-w-2xl mx-auto md:mx-0">
+          {/* Heading only (2026-10-11): the intro ("Abgeschlossene Projekte –
+              und was sie gebracht haben.") and the consent line no longer
+              render. Both fields stay in the shape so a stored
+              `references_home` block keeps loading. */}
           <SectionHeader
             headline={content.headline}
             headlineAccent={content.headlineAccent}
             id="cases-heading"
-            headingClass="mb-6"
+            headingClass="mb-0"
           />
-          <p class="text-[var(--color-muted)] leading-relaxed mb-3 text-center md:text-left">
-            <Emphasis text={content.intro} />
-          </p>
-          <p class="text-sm text-[var(--color-muted)] text-center md:text-left">{content.label}</p>
         </div>
 
         <div class="cases-grid">

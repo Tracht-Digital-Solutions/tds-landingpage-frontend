@@ -25,6 +25,15 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   in `CustomerCases` (badge "Kundenprojekt"); demos, design studies and the business card render in
   `Showcase` with an origin badge (`DEMO_ORIGINS`). No origin label may name a client, not even to deny one
   (`demos.test.ts`). `CustomerCases` renders nothing without a case; `Showcase` always has the business card.
+- **Seams between sections** are `ui/SectionSeam.astro` elements in `HomePage.astro` (content width, faded
+  ends, the small brand bar in the middle), not borders on the sections. None under the hero or above the navy
+  contact block; two in a row collapse to one.
+- **Kundenprojekte** shows the heading and the cards only; the `references_home` intro and consent line stay
+  in the content shape but don't render.
+- **Vorgehen is a stepper** (`sections/Process.astro`): only the step titles in a column, each a
+  `<button aria-expanded aria-controls>`; the open step's text shows beside it (hover with 140 ms intent, focus,
+  tap, arrow keys). Without JavaScript every panel shows; on a phone it is an accordion. `FirstCall` sits
+  beside it from `xl`, below it otherwise.
 - **One primary CTA per section**, "Erstgespräch vereinbaren" (hero, beside the process steps via
   `ui/FirstCall.astro`, the contact form); under the prices "Individuelle Lösungen – auf Anfrage".
 
@@ -85,6 +94,9 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - A reason dropdown above the message posts as `subject` (declared in tds-shared's `ContactSchema`, because
   `zodResolver` forwards only known keys). Reasons come from `contact.reasons` and ship committed. Optional on
   purpose.
+- Layout (2026-10-11): name/e-mail and company/reason are pairs (`.contact-form-pair`, two columns from 40rem);
+  every field is a rounded, pressed-in dark well with no underline; the send button is a solid pink pill. Form
+  card and contact card share one solid lifted navy with a hard coral offset (no glass).
 - The closed dropdown wears the text fields' class (`fieldClass` + `.contact-select`); only the open list keeps
   its frosted `::picker(select)`.
 - The message field is guided by an element tied with `aria-describedby` (not a placeholder).
@@ -94,7 +106,15 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 
 ## Prices (`#preise`, `sections/Pricing.astro`)
 
-"Festpreise" with a Netto/Brutto switch, "So entsteht dein Preis", then "Individuelle Lösungen – auf Anfrage".
+"Webseitenpreise zum Festpreis" with a Netto/Brutto switch, the price calculator's row, then "Individuelle
+Lösungen – auf Anfrage". "So entsteht dein Preis" (`pricing_logic`) no longer renders; its content stays so a
+stored block loads, and the notes box renders only with notes.
+
+- **Price calculator** (`components/PriceCalculator.astro`, native `<dialog id="preisrechner">`, plain script):
+  it only ADDS the packages the cards show (same `getPricingContent` list) and lists code-owned extras (shop,
+  language, panel, care) as "individuelles Angebot" — no other figure, no estimate or range. It follows and
+  sets `tds-price-mode`. "Mit dieser Auswahl anfragen" hands the selection to the form via `contactDraft`
+  (`service: "web-presence"`), sends nothing. The trigger (`[data-calc-open]`) ships `hidden`.
 
 - **No hourly rates anywhere** (price list, service price box, assistant, JSON-LD, `/llms.txt`). The rate fields
   are gone from `PricingContent`; `pricing.test.ts`, `llmsTxt.test.ts` and `serviceFinder.test.ts` fail on

@@ -63,7 +63,7 @@ const defaults: Record<Lang, PricingContent> = {
     // beantwortet jetzt die Frage, mit der jeder hierher scrollt.
     headline: "Was es",
     headlineAccent: "kostet.",
-    sub: "Drei Pakete zum *Festpreis*. Alles andere bekommst du als eigenes Angebot.",
+    sub: "Webseitenpreise: drei Pakete zum *Festpreis*. Alles andere bekommst du als eigenes Angebot.",
     notesTitle: "Gut zu wissen",
     // Festpreis and Angebot are steps of `pricing_logic` (homeContent.ts),
     // rendered in the same box as these notes — listing them here as well
@@ -78,7 +78,7 @@ const defaults: Record<Lang, PricingContent> = {
     label: "— Pricing",
     headline: "What it",
     headlineAccent: "costs.",
-    sub: "Three packages at a *fixed price*. Everything else gets its own quote.",
+    sub: "Website prices: three packages at a *fixed price*. Everything else gets its own quote.",
     notesTitle: "Good to know",
     notes: [],
     ctaTitle: "Custom solutions",

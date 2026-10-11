@@ -70,7 +70,9 @@ const vatPercent = Math.round(VAT_RATE * 100);
 const ui =
   lang === "de"
     ? {
-        packagesTitle: "Festpreise",
+        // "Webseitenpreise" (2026-10-11): the packages are all about a
+        // website, and the heading has to say so before anyone reads a card.
+        packagesTitle: "Webseitenpreise zum Festpreis",
         net: "netto",
         gross: `inkl. ${vatPercent} % MwSt.`,
         switchLabel: "Preise anzeigen",
@@ -78,7 +80,7 @@ const ui =
         grossOption: "Brutto",
       }
     : {
-        packagesTitle: "Fixed prices",
+        packagesTitle: "Website prices, fixed",
         net: "net",
         gross: `incl. ${vatPercent} % VAT`,
         switchLabel: "Show prices",
@@ -166,6 +168,13 @@ const ui =
     )
   }
 
+  {/* The caller's own row under the packages (the home page puts the price
+      calculator's button here). */}
+  <slot name="after-packages" />
+
+  {/* The facts box renders only with content: "So entsteht dein Preis" left
+      the home page on 2026-10-11, and no notes are committed. */}
+  {(hasFacts || pricing.notes.length > 0) && (
   <section
     class="rounded-[6px] p-6 md:p-8 mb-10 bg-[var(--color-soft)]"
     aria-labelledby="pricing-notes-heading"
@@ -191,6 +200,7 @@ const ui =
       </ul>
     )}
   </section>
+  )}
 
   {/* Everything that is not a package: "Individuelle Lösungen auf Anfrage". */}
   <section

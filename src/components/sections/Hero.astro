@@ -66,6 +66,15 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     </picture>
     <span class="hero-photo-scrim hidden md:block absolute inset-0"></span>
 
+    {/* Depth (2026-10-11, "mehr 3D"): a constructed floor grid laid back in
+        perspective under the photo's right half, so the ground reads as a
+        room rather than a flat print. A ground like the photo, not a shape:
+        masked away from the copy column, transform-free at rest, and only
+        its background moves (scroll-linked, below). */}
+    <span class="hero-depth hidden md:block" aria-hidden="true">
+      <span class="hero-depth__floor"></span>
+    </span>
+
     {/* Die konstruierte Geometrie — große Kapsel links unten angeschnitten,
         Viertelkreis unten rechts über beide Ränder hinaus. Sie liegen alle
         in der echten Negativfläche
@@ -152,6 +161,57 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     );
   }
 
+  /* === Tiefe: ein perspektivischer Boden ==============================
+     Ein Raster, um 66° nach hinten gekippt, mit dem Fluchtpunkt rechts von der
+     Copy. Nur im unteren Drittel; die Maske nimmt es links (Copy) und zum
+     Horizont hin weg, daher liegt nichts davon hinter dem Slogan. Linien in Primaerfarbe, leise. */
+  .hero-depth {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 46%;
+    overflow: hidden;
+    perspective: 34rem;
+    perspective-origin: 72% 0%;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 46%, #000 82%);
+    mask-image: linear-gradient(to right, transparent 46%, #000 82%);
+  }
+  .hero-depth__floor {
+    --hero-grid: color-mix(in srgb, var(--color-primary) 22%, transparent);
+    position: absolute;
+    left: -60%;
+    right: -60%;
+    top: 0;
+    height: 240%;
+    transform-origin: 50% 0;
+    transform: rotateX(66deg);
+    background-image:
+      linear-gradient(to right, var(--hero-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--hero-grid) 1px, transparent 1px);
+    background-size: 3.5rem 3.5rem;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
+  }
+  :global(:root[data-theme="dark"]) .hero-depth__floor {
+    --hero-grid: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
+  /* Beim Wegscrollen laeuft der Boden auf den Betrachter zu. Nur die
+     Hintergrundposition, kein Layout; ohne Scroll-Timeline steht er still. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .hero-depth__floor {
+        animation: hero-floor-run linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 100%;
+      }
+    }
+  }
+  @keyframes hero-floor-run {
+    to {
+      background-position: 0 7rem;
+    }
+  }
+
   /* === Die Formen der Dekorationsebene =============================
 
      Position und Groesse stehen HIER, nicht in `islands/HeroDecor.tsx`, und
@@ -168,6 +228,12 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     pointer-events: none;
     /* Eigene Ebene, damit Drift und Parallaxe nicht jedes Frame neu rastern. */
     will-change: transform;
+    /* Extrudiert statt flach (2026-10-11): zwei harte, gestufte Kanten in der
+       eigenen Toenung — dieselbe 2D-Schattensprache wie die Karten, nur
+       zweimal, damit die Form Dicke bekommt. Nie transitioniert. */
+    box-shadow:
+      0.5rem 0.5rem 0 rgb(var(--tds-shape-tint) / calc(var(--tds-decor-shape-alpha) * 0.7)),
+      1rem 1rem 0 rgb(var(--tds-shape-tint) / calc(var(--tds-decor-shape-alpha) * 0.4));
   }
   /* Until 2026-09-22 the two large shapes were not drawn below 80rem: with
      the trust card in the hero, the only free bands on a phone were 100 px
