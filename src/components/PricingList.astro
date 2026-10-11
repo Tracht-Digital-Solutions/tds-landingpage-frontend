@@ -122,7 +122,7 @@ const ui =
         <div class="pricing-packages__scroller" data-packages-scroller role="group" aria-label={ui.packagesTitle} tabindex="0">
           <ul class="pricing-packages__grid" data-motion-cards>
             {pricing.packages.map((pkg) => (
-              <li class="pricing-packages__card">
+              <li class="pricing-packages__card" data-motion-tilt>
                 <p class="pricing-packages__title">{pkg.title}</p>
                 <p class="pricing-packages__price">
                   <span

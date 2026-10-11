@@ -46,7 +46,7 @@ export function bootMotion(): void {
       root.removeAttribute(PAGE_ENTER_ATTR);
       return;
     }
-    const [page, cta, images, card, ux, tabs, floating, brandbar, scrollbar] = await Promise.all([
+    const [page, cta, images, card, ux, tabs, floating, brandbar, scrollbar, tilt] = await Promise.all([
       import("./pageTransition"),
       import("./cta"),
       import("./images"),
@@ -56,6 +56,7 @@ export function bootMotion(): void {
       import("./floatingCta"),
       import("./brandbar"),
       import("./pageScrollbar"),
+      import("./tilt"),
     ]);
     root.dataset.motion = "on";
     page.mountPageTransition(dom);
@@ -67,6 +68,7 @@ export function bootMotion(): void {
     floating.mountFloatingCta(dom);
     brandbar.mountBrandbars(dom);
     scrollbar.mountPageScrollbar(dom);
+    tilt.mountTilt(dom);
   };
 
   if (root.hasAttribute(PAGE_ENTER_ATTR)) void load();
