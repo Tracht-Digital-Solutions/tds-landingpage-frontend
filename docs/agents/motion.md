@@ -61,7 +61,10 @@ within 72 px of the right edge.
 ## Hero
 
 - The hero's **copy** stays plain Astro. Its decorative geometry is `islands/HeroDecor.tsx` (`client:idle`).
-- The decoration arrives visibly, drifts at about 5–10 px/s and follows the pointer about 60 px.
+- The decoration arrives visibly, drifts at about 5–10 px/s and follows the pointer about 60 px. The bodies tilt
+  toward the pointer (16–20°, springs on the outer span, `transformPerspective` 900) and sway on their own (inner
+  `.hero-shape__body`, 14–17 s loops), so the depth shows on a phone too. Reduced motion renders one fixed turned
+  pose in CSS (`.hero-shape--still`).
 - The scroll-linked part is CSS (`animation-timeline: view()`), not a hook.
 - **On a phone the shapes keep to measured bands:** smaller, less drift (`narrow` in `HeroDecor.tsx`, never in
   `initial`, which is server-rendered; a width-dependent start state was a hydration mismatch), no scroll drift.

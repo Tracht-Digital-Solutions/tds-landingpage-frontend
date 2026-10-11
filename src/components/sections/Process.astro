@@ -2,17 +2,18 @@
 /**
  * Vorgehen — how a working relationship runs, and what the first step is.
  *
- * ### A stepper (2026-10-11)
+ * ### A horizontal stepper (2026-10-11)
  *
- * The four steps used to be four full cards in a column, each with its text
- * and outcome. Now only the TITLES form the stepper; the text of a step
- * appears beside it when the pointer rests on it (140 ms intent, like the
- * services list), when it takes keyboard focus, or when it is tapped.
+ * Only the step TITLES form the stepper, and from 48rem they run side by side
+ * along one rail. The card under the row shows the open step's text: it
+ * changes when the pointer rests on a step (140 ms intent, like the services
+ * list), when a step takes keyboard focus, or when it is tapped. A small notch
+ * on the card points at the step it belongs to.
  *
  * - Each title is a `<button aria-expanded aria-controls>`; its panel is the
  *   next element in the same `<li>`. That one DOM serves both layouts: from
  *   48rem the `<ol>` is a grid, every `<li>` is `display: contents`, the
- *   buttons fill the first column and all panels share one cell in the
+ *   buttons fill the first row and all panels share one cell spanning the
  *   second; below 48rem it is an accordion with the panel under its title.
  * - **Without JavaScript every panel shows**, as a plain list: `hidden` is
  *   only ever set by the script, and the grid needs `[data-enhanced]`.
@@ -21,25 +22,29 @@
  *   stop that announced nothing in front of text a screen reader never
  *   reached.
  *
- * Beside the stepper, from `xl`, the card that answers what the FIRST step
- * actually is (`ui/FirstCall.astro`) with the section's one primary call to
- * action; below `xl` it follows underneath.
+ * The section's lead sentence and the "Das Erstgespräch" card beside the
+ * stepper went on 2026-10-11. The first step's card carries the section's one
+ * call to action instead: "Erstgespräch vereinbaren", to the contact form.
  *
  * The home page's process is the one place on the site that still numbers its
  * steps, deliberately (see AGENTS.md).
  */
-import { resolveLang } from "~/lib/i18n";
-import SectionHeader from "~/components/ui/SectionHeader.astro";
+import { localizePath, resolveLang } from "~/lib/i18n";
 import ProcessIcon from "~/components/ui/ProcessIcon.astro";
-import FirstCall from "~/components/ui/FirstCall.astro";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
 import { getProcessContent } from "~/lib/processContent";
+import { getHomeContent } from "~/lib/homeContent";
 import { cmsFor } from "~/lib/cms";
 
 const lang = resolveLang(Astro.currentLocale);
 
 // Default = the local process copy (`lib/processContent.ts`). An admin-edited
-// "process" block overrides it (cmsFor); the shape is unchanged.
+// "process" block overrides it (cmsFor); the shape is unchanged. `body` stays
+// in the shape but no longer renders.
 const process = await cmsFor("process", lang, getProcessContent(lang));
+// The button label in the first step: the same field the old card used.
+const firstCall = await cmsFor("first_call", lang, getHomeContent(lang).firstCall);
+const contactHref = `${localizePath("/", lang)}#contact`;
 
 /**
  * A stored block may still carry the old "Ergebnis: …" / "Outcome: …" prefix,
@@ -66,67 +71,67 @@ const labels = lang === "en"
       headline={process.headline}
       headlineAccent={process.headlineAccent}
       id="process-heading"
-      headingClass="mb-6"
+      headingClass="mb-10 md:mb-12"
       bar
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-12 text-center md:text-left mx-auto md:mx-0">
-      {process.body}
-    </p>
 
-    <div class="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:gap-x-14 xl:items-start">
-      <div class="process-stepper" data-process-stepper>
-        <ol class="process-stepper__list">
-          {
-            steps.map((step, index) => (
-              <li class="process-stepper__item">
-                <button
-                  type="button"
-                  class="process-stepper__step"
-                  id={`process-step-${step.number}`}
-                  aria-controls={`process-panel-${step.number}`}
-                  aria-expanded={index === 0 ? "true" : "false"}
-                  data-process-step
-                >
-                  <span aria-hidden="true" class="process-stepper__dot">
-                    <ProcessIcon number={step.number} />
-                  </span>
-                  <span class="process-stepper__text">
-                    {/* The order is carried by the `<ol>`; the numeral is for the eye. */}
-                    <span aria-hidden="true" class="process-stepper__number">{step.number}</span>
-                    <span class="process-stepper__title">{step.title}</span>
-                    <span class="process-stepper__duration">{step.duration}</span>
-                  </span>
-                </button>
+    <div class="process-stepper" data-process-stepper style={`--steps: ${steps.length}`}>
+      <ol class="process-stepper__list">
+        {
+          steps.map((step, index) => (
+            <li class="process-stepper__item">
+              <button
+                type="button"
+                class="process-stepper__step"
+                id={`process-step-${step.number}`}
+                aria-controls={`process-panel-${step.number}`}
+                aria-expanded={index === 0 ? "true" : "false"}
+                data-process-step
+              >
+                <span aria-hidden="true" class="process-stepper__dot">
+                  <ProcessIcon number={step.number} />
+                </span>
+                <span class="process-stepper__text">
+                  {/* The order is carried by the `<ol>`; the numeral is for the eye. */}
+                  <span aria-hidden="true" class="process-stepper__number">{step.number}</span>
+                  <span class="process-stepper__title">{step.title}</span>
+                  <span class="process-stepper__duration">{step.duration}</span>
+                </span>
+              </button>
 
-                <div
-                  class="process-stepper__panel"
-                  id={`process-panel-${step.number}`}
-                  role="region"
-                  aria-labelledby={`process-step-${step.number}`}
-                  data-process-panel
-                >
-                  <div class="process-stepper__body">
-                    <p class="eyebrow process-stepper__label">{labels.what}</p>
-                    <p class="process-stepper__description">{step.description}</p>
-                  </div>
+              <div
+                class="process-stepper__panel"
+                id={`process-panel-${step.number}`}
+                role="region"
+                aria-labelledby={`process-step-${step.number}`}
+                style={`--step: ${index}`}
+                data-process-panel
+              >
+                <div class="process-stepper__body">
+                  <p class="eyebrow process-stepper__label">{labels.what}</p>
+                  <p class="process-stepper__description">{step.description}</p>
                   {
-                    step.outcome && (
-                      <div class="process-stepper__result">
-                        <p class="eyebrow process-stepper__label">{labels.result}</p>
-                        <p class="process-stepper__outcome">{step.outcome}</p>
-                      </div>
+                    index === 0 && (
+                      <a href={contactHref} class="process-stepper__cta lp-ink" data-cta data-track="process-first-call">
+                        {firstCall.cta}
+                        <span aria-hidden="true">→</span>
+                      </a>
                     )
                   }
                 </div>
-              </li>
-            ))
-          }
-        </ol>
-      </div>
-
-      <div class="xl:sticky xl:top-28">
-        <FirstCall variant="process" />
-      </div>
+                {
+                  step.outcome && (
+                    <div class="process-stepper__result">
+                      <p class="eyebrow process-stepper__label">{labels.result}</p>
+                      <p class="process-stepper__outcome">{step.outcome}</p>
+                    </div>
+                  )
+                }
+              </div>
+            </li>
+          ))
+        }
+      </ol>
     </div>
   </div>
 </section>
@@ -168,11 +173,14 @@ const labels = lang === "en"
         timer = window.setTimeout(() => open(index), INTENT_MS);
       });
       button.addEventListener("pointerleave", () => window.clearTimeout(timer));
-      // Arrow keys walk the stepper, like a vertical tab list.
+      // Arrow keys walk the stepper in either axis: left/right along the row,
+      // up/down in the phone's column.
       button.addEventListener("keydown", (event) => {
-        const step = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
-        if (!step) return;
+        const forward = event.key === "ArrowRight" || event.key === "ArrowDown";
+        const back = event.key === "ArrowLeft" || event.key === "ArrowUp";
+        if (!forward && !back) return;
         event.preventDefault();
+        const step = forward ? 1 : -1;
         buttons[(index + step + buttons.length) % buttons.length]!.focus();
       });
     });
@@ -219,7 +227,8 @@ const labels = lang === "en"
     outline-offset: 3px;
   }
 
-  /* The rail: a line through the dots, from the first to the last. */
+  /* The rail: a line through the dots, from the first to the last. On a
+     phone it runs down the column. */
   .process-stepper__item {
     position: relative;
   }
@@ -285,8 +294,8 @@ const labels = lang === "en"
 
   /* --- The panel: what the step means ------------------------------------ */
   .process-stepper__panel {
+    position: relative;
     border-radius: 6px;
-    overflow: hidden;
     background: var(--color-soft);
     margin: 0.5rem 0 1.25rem 3.5rem;
   }
@@ -309,6 +318,7 @@ const labels = lang === "en"
     padding: 1rem 1.5rem 1.125rem;
     border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
     background: color-mix(in srgb, var(--color-black) 3%, transparent);
+    border-radius: 0 0 6px 6px;
   }
   .process-stepper__outcome {
     margin: 0;
@@ -318,21 +328,53 @@ const labels = lang === "en"
     color: var(--color-accent);
   }
 
+  /* The way from the first step to the contact form. A navy pill: navy fill,
+     so a coral shade (design.md). */
+  .process-stepper__cta {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 1.375rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .process-stepper__cta:hover {
+    --lp-fill: var(--color-surface-accent);
+    --lp-shade: initial;
+  }
+  .process-stepper__cta:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  :global(:root[data-theme="dark"]) .process-stepper__cta {
+    --lp-fill: var(--color-primary);
+    color: var(--color-on-primary);
+  }
+
   /* Enhanced, phone: an accordion — closed steps keep a small gap. */
   [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
     margin-top: 0.5rem;
   }
 
-  /* Enhanced, from 48rem: titles left, the open step's text right beside
-     them. Every panel sits in the same cell; only the open one is shown. */
+  /* Enhanced, from 48rem: the steps in one row along a horizontal rail, the
+     open step's card under the whole row. Every panel sits in the same cell;
+     only the open one is shown. */
   @media (min-width: 48rem) {
     [data-process-stepper][data-enhanced] .process-stepper__list {
       display: grid;
-      grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
-      grid-auto-rows: auto;
-      column-gap: 2rem;
-      row-gap: 0.5rem;
-      align-items: start;
+      grid-template-columns: repeat(var(--steps, 4), minmax(0, 1fr));
+      column-gap: 1rem;
+      row-gap: 1.75rem;
+      align-items: stretch;
     }
     [data-process-stepper][data-enhanced] .process-stepper__item {
       display: contents;
@@ -341,34 +383,67 @@ const labels = lang === "en"
       margin-top: 0;
     }
     [data-process-stepper][data-enhanced] .process-stepper__step {
-      grid-column: 1;
+      grid-row: 1;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 0.75rem 1.125rem;
+      text-align: center;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__text {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__duration {
+      flex-basis: auto;
+    }
+    /* The rail runs from this dot's centre to the next one's, across the
+       column gap: one button width plus the gap, minus a dot. */
+    [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child) .process-stepper__step::after {
+      left: calc(50% + 1.375rem + 0.25rem);
+      top: calc(1rem + 1.375rem - 0.5px);
+      width: calc(100% + 1rem - 2.75rem - 0.5rem);
+      height: 1px;
     }
     [data-process-stepper][data-enhanced] .process-stepper__panel {
-      grid-column: 2;
-      grid-row: 1 / span 4;
-      align-self: stretch;
+      grid-row: 2;
+      grid-column: 1 / -1;
       margin: 0;
       box-shadow: var(--tds-shadow-hard);
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     }
     [data-process-stepper][data-enhanced] .process-stepper__panel[hidden] {
       display: none;
     }
+    /* The notch: a small square turned 45°, under the middle of the open
+       step's column. Pure geometry, same fill as the card. */
+    [data-process-stepper][data-enhanced] .process-stepper__panel::before {
+      content: "";
+      position: absolute;
+      top: -0.5rem;
+      left: calc((var(--step) + 0.5) / var(--steps, 4) * 100% - 0.5rem);
+      width: 1rem;
+      height: 1rem;
+      background: var(--color-soft);
+      rotate: 45deg;
+      border-radius: 2px 0 0 0;
+    }
     [data-process-stepper][data-enhanced] .process-stepper__body {
-      flex: 1;
       padding: 1.75rem 2rem;
     }
     [data-process-stepper][data-enhanced] .process-stepper__description {
       font-size: 1.125rem;
     }
     [data-process-stepper][data-enhanced] .process-stepper__result {
-      padding: 1.25rem 2rem 1.5rem;
-    }
-    /* The rail between dots, now a fixed gap of 0.5rem between buttons. */
-    [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child) .process-stepper__step::after {
-      top: calc(50% + 1.375rem);
-      height: calc(100% - 2.75rem + 0.5rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 1.75rem 2rem;
+      border-top: 0;
+      border-left: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+      border-radius: 0 6px 6px 0;
     }
   }
 
@@ -384,7 +459,8 @@ const labels = lang === "en"
   }
   @media (prefers-reduced-motion: reduce) {
     .process-stepper__step,
-    .process-stepper__dot {
+    .process-stepper__dot,
+    .process-stepper__cta {
       transition: none;
     }
   }

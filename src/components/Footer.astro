@@ -9,6 +9,7 @@ import { platformDefinitions, platformHref } from "~/lib/platforms";
 import { siteConfig } from "~/lib/seo";
 import { socialLinks } from "~/lib/socials";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
+import PlaceMap from "~/components/ui/PlaceMap.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -50,6 +51,10 @@ const navItems = [
 // The shop system and CMS pages, from every page of the site: the one place a
 // crawler — and a reader who scrolled to the end — reaches all of them at once.
 const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
+const placeCaption =
+  lang === "de"
+    ? "Schwarzenbek bei Hamburg · Kreis Herzogtum Lauenburg"
+    : "Schwarzenbek near Hamburg · District of Herzogtum Lauenburg";
 ---
 
 {/* Fast Schwarz / sehr dunkles Navy, with the page tokens re-mapped by
@@ -73,9 +78,8 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
         <p class="font-[var(--font-display)] italic text-[var(--color-accent-pink)] text-base mb-4">
           {footer.slogan}
         </p>
-        <p class="text-white/70 text-sm leading-relaxed max-w-xs">
-          {footer.tagline}
-        </p>
+        {/* `footer.tagline` no longer renders (2026-10-11); the field stays
+            so a stored block loads. */}
       </div>
 
       <nav aria-labelledby="footer-nav-title">
@@ -117,22 +121,72 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
         <p class="eyebrow text-white/60 mb-4">
           {footer.contactTitle}
         </p>
-        <ul class="space-y-2 text-sm">
-          <li>
-            <a href={`mailto:${contact.email}`} class="footer-link text-white/80 hover:text-white">
-              {contact.email}
-            </a>
+        {/* Each line says what it is (2026-10-11): an icon and a label per
+            way, so the address, the number and the town do not read as three
+            loose strings. */}
+        <ul class="footer-contact text-sm">
+          <li class="footer-contact__row">
+            <span class="footer-contact__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m2 7 10 6 10-6" />
+              </svg>
+            </span>
+            <span class="footer-contact__text">
+              <span class="footer-contact__label">{t.contact.info.emailLabel}</span>
+              <a href={`mailto:${contact.email}`} class="footer-link text-white/85 hover:text-white">
+                {contact.email}
+              </a>
+            </span>
           </li>
-          <li>
-            <a href={telHref} class="footer-link text-white/80 hover:text-white">
-              {contact.phone}
-            </a>
+          <li class="footer-contact__row">
+            <span class="footer-contact__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </span>
+            <span class="footer-contact__text">
+              <span class="footer-contact__label">{t.contact.info.phoneLabel}</span>
+              <a href={telHref} class="footer-link text-white/85 hover:text-white">
+                {contact.phone}
+              </a>
+            </span>
           </li>
           {/* Visible NAP for local SEO: postal code + locality from siteConfig
               (not the CMS string) so it always matches the Impressum and the
-              PostalAddress in JSON-LD. Street stays Impressum-only. */}
-          <li class="text-white/70">
-            {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
+              PostalAddress in JSON-LD. Street stays Impressum-only.
+
+              Hover, focus or a tap opens a bubble with a drawn map of the
+              area (`ui/PlaceMap.astro`). Without the script, hover and
+              focus-within show it; with it, `data-open` does, so Escape and a
+              second tap can close it. The bubble is hoverable itself, so the
+              pointer can move onto it (WCAG 1.4.13). */}
+          <li class="footer-contact__row">
+            <span class="footer-contact__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
+            <span class="footer-contact__text">
+              <span class="footer-contact__label">{t.contact.info.locationLabel}</span>
+              <span class="footer-place" data-footer-place>
+                <button
+                  type="button"
+                  class="footer-place__trigger footer-link"
+                  aria-expanded="false"
+                  aria-controls="footer-place-bubble"
+                >
+                  {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
+                </button>
+                <span class="footer-place__bubble" id="footer-place-bubble">
+                  <span class="footer-place__card">
+                    <PlaceMap lang={lang} />
+                    <span class="footer-place__caption">{placeCaption}</span>
+                  </span>
+                </span>
+              </span>
+            </span>
           </li>
         </ul>
       </div>
@@ -163,7 +217,193 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
   </div>
 </footer>
 
+<script>
+  /**
+   * The location bubble: open on hover (fine pointer), keyboard focus or a
+   * tap; closed on leaving, blur, a second tap or Escape.
+   */
+  document.querySelectorAll<HTMLElement>("[data-footer-place]").forEach((place) => {
+    const trigger = place.querySelector<HTMLButtonElement>(".footer-place__trigger");
+    if (!trigger) return;
+    const set = (open: boolean) => {
+      place.toggleAttribute("data-open", open);
+      trigger.setAttribute("aria-expanded", String(open));
+    };
+    place.setAttribute("data-enhanced", "");
+    const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
+    // A click right after the pointer opened it must not close it again.
+    let openedByHover = false;
+    place.addEventListener("pointerenter", () => {
+      if (!hoverable.matches) return;
+      openedByHover = true;
+      set(true);
+    });
+    place.addEventListener("pointerleave", () => {
+      openedByHover = false;
+      if (hoverable.matches && !place.contains(document.activeElement)) set(false);
+    });
+    trigger.addEventListener("focus", () => {
+      if (trigger.matches(":focus-visible")) set(true);
+    });
+    place.addEventListener("focusout", (event) => {
+      if (!place.contains(event.relatedTarget as Node | null)) set(false);
+    });
+    trigger.addEventListener("click", () => {
+      if (openedByHover) {
+        openedByHover = false;
+        set(true);
+        return;
+      }
+      set(!place.hasAttribute("data-open"));
+    });
+    place.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !place.hasAttribute("data-open")) return;
+      set(false);
+      trigger.focus();
+    });
+  });
+</script>
+
 <style>
+  /* --- Contact column: icon, label, value ------------------------------ */
+  .footer-contact {
+    display: grid;
+    gap: 0.875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .footer-contact__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .footer-contact__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.08);
+    color: var(--color-accent-pink);
+  }
+  .footer-contact__text {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.0625rem;
+  }
+  .footer-contact__label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.6);
+  }
+  .footer-contact__text a {
+    overflow-wrap: anywhere;
+  }
+
+  /* --- The location bubble ---------------------------------------------- */
+  .footer-place {
+    position: relative;
+    display: inline-block;
+  }
+  .footer-place__trigger {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: rgb(255 255 255 / 0.85);
+    font: inherit;
+    text-align: left;
+    text-decoration: underline dotted rgb(255 255 255 / 0.45);
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+  }
+  .footer-place__trigger:hover {
+    color: #fff;
+  }
+  .footer-place__trigger:focus-visible {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+  /* Above the trigger. The bubble's own bottom padding bridges the gap, so the
+     pointer can travel onto it without it closing. Anchored to the trigger's
+     left edge on a phone (the column starts at the gutter) and to its right
+     edge from `md`, where the column sits at the right of the page. */
+  .footer-place__bubble {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    z-index: 20;
+    width: min(18rem, calc(100vw - 3rem));
+    padding-bottom: 0.75rem;
+    visibility: hidden;
+    opacity: 0;
+    translate: 0 0.5rem;
+    transition:
+      opacity 180ms var(--tds-ease-out),
+      translate 180ms var(--tds-ease-out),
+      visibility 0s linear 180ms;
+  }
+  @media (min-width: 768px) {
+    .footer-place__bubble {
+      left: auto;
+      right: 0;
+    }
+  }
+  .footer-place:not([data-enhanced]):is(:hover, :focus-within) .footer-place__bubble,
+  .footer-place[data-open] .footer-place__bubble {
+    visibility: visible;
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity 180ms var(--tds-ease-out),
+      translate 180ms var(--tds-ease-out),
+      visibility 0s;
+  }
+  .footer-place__card {
+    position: relative;
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.625rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, #fff 7%, var(--color-surface-navy));
+    box-shadow: 6px 6px 0 0 var(--color-accent-pink);
+  }
+  /* The tail, pointing down at the trigger. */
+  .footer-place__card::after {
+    content: "";
+    position: absolute;
+    bottom: -0.375rem;
+    left: 1.5rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: inherit;
+    rotate: 45deg;
+  }
+  @media (min-width: 768px) {
+    .footer-place__card::after {
+      left: auto;
+      right: 1.5rem;
+    }
+  }
+  .footer-place__caption {
+    padding: 0 0.25rem 0.125rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: rgb(255 255 255 / 0.75);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .footer-place__bubble {
+      translate: none;
+      transition: none;
+    }
+  }
+
   /* The legal row is the last thing on every page, and the cookie notice and
      the floating call to action are fixed over the bottom of the viewport. A
      page cannot scroll past its own end, so `scroll-padding-bottom` alone left

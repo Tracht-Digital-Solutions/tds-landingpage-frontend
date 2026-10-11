@@ -141,12 +141,22 @@ const ui =
         messengerLabel: "Messenger",
         businessCard: "Visitenkarte",
         saveContact: "Kontakt speichern",
+        takeAway: "Zum Mitnehmen",
+        urgentBadge: "Auch für Notfälle",
+        urgentTitle: "Notfall?",
+        urgentText: "Ich nehme auch kurzfristige Notfälle an. Kreuz im Formular „Notfall“ an oder",
+        urgentCall: "ruf direkt an",
       }
     : {
         reachTitle: "Reach me directly",
         messengerLabel: "Messenger",
         businessCard: "Business card",
         saveContact: "Save contact",
+        takeAway: "To take away",
+        urgentBadge: "Emergencies too",
+        urgentTitle: "Emergency?",
+        urgentText: "I also take on emergencies at short notice. Tick “Emergency” in the form or",
+        urgentCall: "call me directly",
       };
 ---
 
@@ -204,7 +214,22 @@ const ui =
       aria-hidden="true"
       class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-6"
     ></span>
-    <p class="text-white/75 max-w-lg mb-8 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
+    <p class="text-white/75 max-w-lg mb-6 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
+
+    {/* Short-notice emergencies are taken (2026-10-11): said here, marked on
+        the phone row and offered as a checkbox in the form. Code-owned copy,
+        like the card's labels. */}
+    <p class="contact-urgent">
+      <span class="contact-urgent__icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+      </span>
+      <span>
+        <strong>{ui.urgentTitle}</strong> {ui.urgentText}{" "}
+        <a href={`tel:${phoneHref}`} data-track="contact-urgent-call">{ui.urgentCall}</a>.
+      </span>
+    </p>
 
     {/* The "what happens next" card that used to stand here is gone. It said
         the same four things as the process section, verbatim, one screen
@@ -227,44 +252,28 @@ const ui =
         />
       </div>
 
-      {/* ONE card, not six stacked blocks (2026-09-29).
-
-          What stood here was a `space-y-8` column of six sibling `<div>`s —
-          e-mail, phone, location, socials, a .vcf pill and a mini business
-          card — each with its own eyebrow. Six labels down a column read as six
-          unrelated facts, and the two things a visitor actually wants to press
-          were the fourth and fifth of them.
-
-          Now it is a card with two zones. The top zone is the three ways to
-          reach a person, each a full-width link; the bottom zone is where
-          somebody is and what they can take away. One seam between them, which
-          is the section's own language (see `About.astro`).
+      {/* ONE card in four labelled groups (2026-10-11, reordered from the
+          2026-09-29 card): the three ways to reach a person, the town, what
+          a visitor can take away, and the profiles. Every row starts with the
+          same round icon disc, so the column reads as one system instead of
+          rows, pills and icons each in their own style.
 
           WhatsApp appears ONCE, as a way — not again among the social buttons.
           `lib/socials.ts` makes the same distinction in its own docblock: it is
           a messenger deep link, not a profile, which is why it is absent from
           `sameAs`. So the social row is profiles only. */}
-      <aside class="contact-card">
-        <p class="eyebrow contact-card__title">{ui.reachTitle}</p>
+      <aside class="contact-card" aria-labelledby="contact-card-title">
+        <p id="contact-card-title" class="eyebrow contact-card__title">{ui.reachTitle}</p>
 
         <ul class="contact-ways">
           <li>
             <a class="contact-way" href={`mailto:${contact.email}`}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                class="contact-way__icon"
-              >
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="m2 7 10 6 10-6" />
-              </svg>
+              <span class="contact-disc" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m2 7 10 6 10-6" />
+                </svg>
+              </span>
               <span class="contact-way__text">
                 <span class="contact-way__label">{t.contact.info.emailLabel}</span>
                 <span class="contact-way__value">{contact.email}</span>
@@ -275,24 +284,16 @@ const ui =
 
           <li>
             <a class="contact-way" href={`tel:${phoneHref}`}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                class="contact-way__icon"
-              >
-                <path
-                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"
-                />
-              </svg>
+              <span class="contact-disc" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
               <span class="contact-way__text">
-                <span class="contact-way__label">{t.contact.info.phoneLabel}</span>
+                <span class="contact-way__label">
+                  {t.contact.info.phoneLabel}
+                  <span class="contact-way__badge">{ui.urgentBadge}</span>
+                </span>
                 <span class="contact-way__value">{phoneDisplay}</span>
               </span>
               <span aria-hidden="true" class="contact-way__go">→</span>
@@ -308,9 +309,11 @@ const ui =
               target="_blank"
               rel="noopener noreferrer"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="contact-way__icon">
-                <path d={WHATSAPP_ICON} />
-              </svg>
+              <span class="contact-disc" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d={WHATSAPP_ICON} />
+                </svg>
+              </span>
               <span class="contact-way__text">
                 <span class="contact-way__label">{ui.messengerLabel}</span>
                 <span class="contact-way__value">WhatsApp</span>
@@ -320,22 +323,31 @@ const ui =
           </li>
         </ul>
 
-        <div class="contact-card__foot">
-          {/* The town only — no street address in the contact section
-              (2026-10-05, on Julian's word). The full address stays where the
-              law and the search engines need it: the Impressum and the
-              JSON-LD, both read from `siteConfig`. */}
+        {/* The town only — no street address in the contact section
+            (2026-10-05, on Julian's word). The full address stays where the
+            law and the search engines need it: the Impressum and the JSON-LD,
+            both read from `siteConfig`. */}
+        <div class="contact-card__group">
+          <p class="contact-card__label">{t.contact.info.locationLabel}</p>
           <p class="contact-card__where">
-            <span class="contact-card__label">{t.contact.info.locationLabel}</span>
+            <span class="contact-disc" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
             <span>{contact.location}</span>
           </p>
+        </div>
 
+        {/* The business card page and the .vcf, side by side and doing
+            different jobs: the file lands in a phone's address book (the
+            text/vcard MIME is set in `public/.htaccess`), the page is what a
+            person can be shown, scan or forward.
+            TODO: promote the .vcf to tds-shared contact.vcard */}
+        <div class="contact-card__group">
+          <p class="contact-card__label">{ui.takeAway}</p>
           <div class="contact-card__actions">
-            {/* The business card page and the .vcf, side by side and doing
-                different jobs: the file lands in a phone's address book (the
-                text/vcard MIME is set in `public/.htaccess`), the page is what
-                a person can be shown, scan or forward.
-                TODO: promote the .vcf to tds-shared contact.vcard */}
             <a class="contact-action" href={businessCardHref(lang)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -354,14 +366,14 @@ const ui =
               {ui.saveContact}
             </a>
           </div>
-
-          {profileLinks.length > 0 && (
-            <div class="contact-card__social">
-              <span class="contact-card__label">{t.contact.info.socialLabel}</span>
-              <SocialLinks links={profileLinks} />
-            </div>
-          )}
         </div>
+
+        {profileLinks.length > 0 && (
+          <div class="contact-card__group contact-card__group--row">
+            <p class="contact-card__label">{t.contact.info.socialLabel}</p>
+            <SocialLinks links={profileLinks} />
+          </div>
+        )}
       </aside>
     </div>
   </div>
@@ -698,27 +710,44 @@ const ui =
 
   /* === The contact card ==============================================
 
-     ONE surface holding the three ways to reach a person and the two things
-     they can take away, replacing six stacked sibling blocks (2026-09-29).
+     Four labelled groups on one surface (2026-10-11): the ways to reach a
+     person, the town, the two things to take away, the profiles. One label
+     style, one icon disc, one hairline between groups — the earlier card mixed
+     rows, pills and loose icons and read as unfinished.
 
      Its surface is shared with the form card (see above). */
 
   #contact .contact-card__title {
-    margin: 0 0 1rem;
+    margin: 0 0 0.75rem;
     color: rgb(255 255 255 / 0.55);
+  }
+
+  /* The round disc every row starts with. White at 8 % on the card; it turns
+     pink with a navy glyph when its row is hovered or focused. */
+  #contact .contact-disc {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.08);
+    color: rgb(255 255 255 / 0.8);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out);
   }
 
   /* The three ways. A SEAM between rows rather than a gap: the rows are one
      list of one kind of thing, and air between them would make three cards
-     inside a card. Same decision as the three blocks in `About.astro`. */
+     inside a card. */
   #contact .contact-ways {
+    display: grid;
+    gap: 0.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid rgb(255 255 255 / 0.14);
-  }
-  #contact .contact-ways li + li .contact-way {
-    border-top: 1px solid rgb(255 255 255 / 0.14);
   }
 
   /* The whole row is the link — not just the value on it. A 2px-tall text
@@ -728,8 +757,10 @@ const ui =
     display: flex;
     align-items: center;
     gap: 0.875rem;
-    min-height: 3rem;
-    padding: 0.625rem 0.25rem;
+    min-height: 3.5rem;
+    padding: 0.5rem 0.625rem 0.5rem 0.5rem;
+    margin-inline: -0.5rem;
+    border-radius: 10px;
     color: #fff;
     text-decoration: none;
     transition: background-color 200ms var(--tds-ease-out);
@@ -740,32 +771,43 @@ const ui =
   #contact .contact-way:focus-visible {
     outline: 2px solid var(--color-accent-pink);
     outline-offset: 2px;
-    border-radius: 3px;
   }
-  #contact .contact-way__icon {
-    flex: none;
-    color: rgb(255 255 255 / 0.65);
-    transition: color 200ms var(--tds-ease-out);
-  }
-  #contact .contact-way:hover .contact-way__icon {
-    color: var(--color-accent-pink);
+  #contact .contact-way:is(:hover, :focus-visible) .contact-disc {
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
   }
   #contact .contact-way__text {
     display: flex;
     min-width: 0;
     flex-direction: column;
-    gap: 0.0625rem;
+    gap: 0.125rem;
   }
   #contact .contact-way__label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
     font-size: 0.6875rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.5);
+    color: rgb(255 255 255 / 0.55);
+  }
+  /* "Auch für Notfälle" on the phone row: the one place a visitor in a hurry
+     looks. Pink on navy, measured ≥ 6:1 like the form's other pink cues. */
+  #contact .contact-way__badge {
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent-pink) 18%, transparent);
+    color: var(--color-accent-pink);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
   }
   /* The value can be a long address on a narrow column; it wraps rather than
      pushing the arrow out of the row. */
   #contact .contact-way__value {
     font-size: 0.9375rem;
+    font-weight: 500;
     line-height: 1.3;
     overflow-wrap: anywhere;
   }
@@ -782,47 +824,58 @@ const ui =
     transform: translateX(2px);
   }
 
-  /* Below the seam: where somebody is, and what can be taken away. A heavier
-     line than the row seams, because this is the card's one real division. */
-  #contact .contact-card__foot {
+  /* The groups under the ways, each with its label, separated by one hairline. */
+  #contact .contact-card__group {
     margin-top: 1.25rem;
     padding-top: 1.25rem;
-    border-top: 1px solid rgb(255 255 255 / 0.28);
-    display: grid;
-    gap: 1.25rem;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
   }
   #contact .contact-card__label {
-    display: block;
+    margin: 0 0 0.75rem;
     font-size: 0.6875rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: rgb(255 255 255 / 0.5);
-    margin-bottom: 0.375rem;
+    color: rgb(255 255 255 / 0.55);
   }
   #contact .contact-card__where {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
     margin: 0;
     font-size: 0.9375rem;
-    line-height: 1.45;
+    font-weight: 500;
+    line-height: 1.4;
     color: #fff;
   }
-
-  /* Two buttons, side by side, wrapping on a narrow column. Not `.btn`:
-     unlayered tds-shared beats every Tailwind utility, and these need a fill
-     the navy ground does not provide. */
-  #contact .contact-card__actions {
+  /* The profiles: label and icons on one line where they fit. */
+  #contact .contact-card__group--row {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+  }
+  #contact .contact-card__group--row .contact-card__label {
+    margin: 0;
+  }
+
+  /* Two equal buttons, side by side, stacked on a very narrow column. Not
+     `.btn`: unlayered tds-shared beats every Tailwind utility, and these need a
+     fill the navy ground does not provide. */
+  #contact .contact-card__actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
     gap: 0.625rem;
   }
   #contact .contact-action {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     min-height: 2.75rem;
-    padding: 0 1.125rem;
+    padding: 0 1rem;
     border-radius: var(--tds-radius-pill);
-    background: rgb(255 255 255 / 0.12);
-    backdrop-filter: blur(8px);
+    background: rgb(255 255 255 / 0.1);
     color: #fff;
     font-size: 0.875rem;
     font-weight: 500;
@@ -838,6 +891,87 @@ const ui =
   #contact .contact-action:focus-visible {
     outline: 2px solid var(--color-accent-pink);
     outline-offset: 3px;
+  }
+
+  /* === The emergency line under the sub ============================ */
+  #contact .contact-urgent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    max-width: 40rem;
+    margin: 0 auto 2.5rem;
+    padding: 0.875rem 1.125rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-accent-pink) 14%, var(--color-surface-navy));
+    box-shadow: 4px 4px 0 0 var(--color-accent-pink);
+    color: rgb(255 255 255 / 0.85);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    text-align: left;
+  }
+  @media (min-width: 48rem) {
+    #contact .contact-urgent {
+      margin-inline: 0;
+    }
+  }
+  #contact .contact-urgent__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+  }
+  #contact .contact-urgent strong {
+    color: #fff;
+    font-weight: 700;
+  }
+  #contact .contact-urgent a {
+    color: var(--color-accent-pink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  #contact .contact-urgent a:hover {
+    text-decoration: none;
+  }
+
+  /* === Contact form: the emergency checkbox =========================
+
+     The consent checkbox's round box, in a row of its own that turns pink when
+     it is ticked, so the choice is visible from across the form. */
+  .contact-urgent-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 10px;
+    background: rgb(0 0 0 / 0.2);
+    box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.32);
+    cursor: pointer;
+    transition: background-color 200ms ease;
+  }
+  .contact-urgent-toggle .contact-consent-box {
+    margin-top: 0.125rem;
+  }
+  .contact-urgent-toggle:has(.contact-consent-input:checked) {
+    background: color-mix(in srgb, var(--color-accent-pink) 22%, transparent);
+  }
+  .contact-urgent-toggle__title {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  .contact-urgent-toggle__hint {
+    display: block;
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.65);
   }
 
   /* === Contact form: what happens next ==============================

@@ -10,7 +10,6 @@ import {
 } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import ServiceExplorer from "~/components/ui/ServiceExplorer.astro";
-import Emphasis from "~/components/ui/Emphasis.astro";
 import AssistantCard from "~/components/ui/AssistantCard.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -42,12 +41,11 @@ const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your
       headline={servicesContent.headline}
       headlineAccent={servicesContent.headlineAccent}
       id="services-heading"
-      headingClass="mb-6"
+      headingClass="mb-10"
       bar
     />
-    <p class="max-w-2xl text-[var(--color-muted)] leading-relaxed mb-10 text-center md:text-left mx-auto md:mx-0">
-      <Emphasis text={servicesContent.intro} />
-    </p>
+    {/* `servicesOverview.intro` no longer renders (2026-10-11); the field
+        stays so a stored block loads. */}
 
     {/* An interactive list since 2026-09-22 (`ui/ServiceExplorer.astro`):
         the four titles on the left, one open panel on the right, an

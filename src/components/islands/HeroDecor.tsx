@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { MotionScope, m, useCoarsePointer } from "@tracht-digital-solutions/tds-shared/motion/react";
 
 /**
@@ -47,6 +47,16 @@ import { MotionScope, m, useCoarsePointer } from "@tracht-digital-solutions/tds-
  * neither, runs on the compositor, and degrades to no movement where it is
  * unsupported.
  *
+ * ### 2026-10-11: depth instead of a floor grid
+ *
+ * The perspective floor grid under the photo is gone. The depth is in the
+ * shapes themselves now: each is a filled front face with a stack of outline
+ * rings behind it (`translateZ`, inside `transform-style: preserve-3d`), so the
+ * shape reads as an extruded body drawn in construction lines. The body sways
+ * slowly on its own and tilts toward the pointer, which is what makes the
+ * rings visible as depth. Outlines rather than filled layers: translucent
+ * fills stacked behind the face would darken it.
+ *
  * Geometry (position and size, including the phone arrangement) lives in CSS
  * as well. An island's DOM never receives Astro's scoped-style attribute, so
  * those rules are `:global()` in the hero's style block — and keeping size
@@ -55,9 +65,37 @@ import { MotionScope, m, useCoarsePointer } from "@tracht-digital-solutions/tds-
  */
 
 /**
- * How far each shape follows the pointer, in px at the screen's edge.
+ * How far each shape follows the pointer, in px at the screen's edge, and how
+ * far it tilts toward it, in degrees.
  */
 const PARALLAX = { capsule: 60, quarter: 42 } as const;
+const TILT = { capsule: 16, quarter: 20 } as const;
+
+/** Outline rings behind each face; the step between them is CSS. */
+const DEPTH_LAYERS = 6;
+
+type ShapeKind = "capsule" | "quarter";
+
+const SHAPE_CLASS: Record<ShapeKind, string> = {
+  capsule: "tds-shape--capsule tds-shape--navy",
+  quarter: "tds-shape--quarter-tl tds-shape--bordeaux",
+};
+
+/** The rings and the face in front of them. Static markup; only the body turns. */
+function Layers({ kind }: { kind: ShapeKind }) {
+  return (
+    <>
+      {Array.from({ length: DEPTH_LAYERS }, (_, index) => (
+        <span
+          key={index}
+          className={`hero-shape__layer tds-shape tds-shape--outline ${SHAPE_CLASS[kind]}`}
+          style={{ "--z": DEPTH_LAYERS - index } as CSSProperties}
+        />
+      ))}
+      <span className={`hero-shape__layer hero-shape__face tds-shape ${SHAPE_CLASS[kind]}`} />
+    </>
+  );
+}
 
 export default function HeroDecor() {
   const coarse = useCoarsePointer();
@@ -119,13 +157,22 @@ export default function HeroDecor() {
     return () => window.removeEventListener("pointermove", onMove);
   }, [reduced, coarse]);
 
-  // Reduced motion: the finished picture, no motion values, no listener, no
-  // animation frames. Not a zero duration — nothing starts at all.
+  // Reduced motion: the finished picture, turned once in CSS so the depth
+  // still shows — no motion values, no listener, no animation frames. Not a
+  // zero duration: nothing starts at all.
   if (reduced) {
     return (
       <>
-        <span className="hero-shape hero-shape--capsule tds-shape tds-shape--capsule tds-shape--navy" />
-        <span className="hero-shape hero-shape--quarter tds-shape tds-shape--quarter-tl tds-shape--bordeaux" />
+        <span className="hero-shape hero-shape--capsule hero-shape--still">
+          <span className="hero-shape__body">
+            <Layers kind="capsule" />
+          </span>
+        </span>
+        <span className="hero-shape hero-shape--quarter hero-shape--still">
+          <span className="hero-shape__body">
+            <Layers kind="quarter" />
+          </span>
+        </span>
       </>
     );
   }
@@ -133,41 +180,71 @@ export default function HeroDecor() {
   return (
     <MotionScope>
       {/* The navy capsule — cut by the left edge, so it arrives from there
-          and leans furthest into the pointer: it is the nearest of the three. */}
+          and leans furthest into the pointer: it is the nearest of the two. */}
       <m.span
-        className="hero-shape hero-shape--capsule tds-shape tds-shape--capsule tds-shape--navy"
-        initial={{ opacity: 0, x: -180 }}
+        className="hero-shape hero-shape--capsule"
+        style={{ transformPerspective: 900 }}
+        initial={{ opacity: 0, x: -180, rotateX: 0, rotateY: 0 }}
         animate={{
           opacity: 1,
           x: pointer.x * PARALLAX.capsule,
           // A shorter drift on a narrow screen: the bands there are tight.
           y: narrow ? [0, -16, 0] : [0, -44, 0],
+          rotateX: pointer.y * -TILT.capsule,
+          rotateY: pointer.x * TILT.capsule,
         }}
         transition={{
           opacity: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
           x: { type: "spring", stiffness: 46, damping: 16, mass: 1.1 },
           y: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+          rotateX: { type: "spring", stiffness: 60, damping: 14 },
+          rotateY: { type: "spring", stiffness: 60, damping: 14 },
         }}
-      />
+      >
+        {/* The body sways on its own, so the depth shows without a pointer
+            (on a phone, too). */}
+        <m.span
+          className="hero-shape__body"
+          initial={{ rotateX: 0, rotateY: 0 }}
+          animate={{ rotateX: [16, 4, 16], rotateY: [-26, 20, -26] }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Layers kind="capsule" />
+        </m.span>
+      </m.span>
 
       {/* The bordeaux quarter circle — cut by the lower right corner, moving
-          against the capsule so the two never travel as one block. */}
+          and turning against the capsule so the two never travel as one block. */}
       <m.span
-        className="hero-shape hero-shape--quarter tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
+        className="hero-shape hero-shape--quarter"
+        style={{ transformPerspective: 900 }}
         // `initial` is server-rendered, so it must not depend on `narrow` —
         // a horizontal arrival reads right in both arrangements.
-        initial={{ opacity: 0, x: 160, y: 0 }}
+        initial={{ opacity: 0, x: 160, y: 0, rotateX: 0, rotateY: 0 }}
         animate={{
           opacity: 1,
           x: pointer.x * -PARALLAX.quarter,
           y: narrow ? [0, 14, 0] : [0, 36, 0],
+          rotateX: pointer.y * TILT.quarter,
+          rotateY: pointer.x * -TILT.quarter,
         }}
         transition={{
           opacity: { duration: 0.55, delay: 0.1, ease: [0.22, 1, 0.36, 1] },
           x: { type: "spring", stiffness: 40, damping: 18, mass: 1.2 },
           y: { duration: 11, repeat: Infinity, ease: "easeInOut", delay: 0.1 },
+          rotateX: { type: "spring", stiffness: 50, damping: 16 },
+          rotateY: { type: "spring", stiffness: 50, damping: 16 },
         }}
-      />
+      >
+        <m.span
+          className="hero-shape__body"
+          initial={{ rotateX: 0, rotateY: 0, rotateZ: 0 }}
+          animate={{ rotateX: [-14, 10, -14], rotateY: [24, -18, 24], rotateZ: [0, -6, 0] }}
+          transition={{ duration: 17, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+        >
+          <Layers kind="quarter" />
+        </m.span>
+      </m.span>
     </MotionScope>
   );
 }
