@@ -160,7 +160,7 @@ describe("motion on the landing page", () => {
     expect(boot).toContain('import("@tracht-digital-solutions/tds-shared/motion/dom")');
     expect(boot).not.toMatch(/^import .*motion\/dom/m);
     expect(boot).toContain("prefers-reduced-motion: reduce");
-    for (const file of ["boot", "cta", "images", "pageTransition", "businessCard", "ux"]) {
+    for (const file of ["boot", "cta", "images", "pageTransition", "businessCard", "ux", "tilt"]) {
       const code = src(`lib/motion/${file}.ts`);
       expect(code, file).not.toMatch(/from ["'](motion|framer-motion)["']/);
     }
@@ -180,6 +180,22 @@ describe("motion on the landing page", () => {
     // Start states come from JS, off screen only — never from the markup.
     expect(src("lib/motion/images.ts")).toContain("onScreen(image)");
     expect(src("lib/motion/ux.ts")).toContain("onScreen(group)");
+  });
+
+  it("tilts the interactive cards in depth, under a fine pointer only", () => {
+    for (const file of [
+      "components/PricingList.astro",
+      "components/ui/DemoCard.astro",
+      "components/ui/StudyCard.astro",
+      "components/ui/BusinessCardTile.astro",
+    ]) {
+      expect(src(file), file).toContain("data-motion-tilt");
+    }
+    const tilt = src("lib/motion/tilt.ts");
+    expect(tilt).toContain("hasFinePointer()");
+    // Transform only: a transitioned box-shadow is ruled out in design.md.
+    expect(tilt).not.toMatch(/boxShadow|box-shadow:/);
+    expect(src("lib/motion/boot.ts")).toContain('import("./tilt")');
   });
 
   it("animates the contact form only through the shared primitives", () => {
