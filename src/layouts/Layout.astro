@@ -38,7 +38,11 @@ import PropertyTabs from "~/components/PropertyTabs.astro";
 import JsonLd from "~/components/JsonLd.astro";
 import { LiveChatCta } from "@tracht-digital-solutions/tds-shared/components";
 import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
-import { errorBounceScript, themeBootstrapScript } from "@tracht-digital-solutions/tds-shared/astro";
+import {
+  errorBounceScript,
+  offscreenAnimationScript,
+  themeBootstrapScript,
+} from "@tracht-digital-solutions/tds-shared/astro";
 import { PAGE_ENTER_SCRIPT } from "~/lib/motion/constants";
 import { A11Y_BOOT_SCRIPT } from "~/lib/a11yPrefs";
 import { siteConfig } from "~/lib/seo";
@@ -178,6 +182,8 @@ const showCookieNotice = !bare;
     <script is:inline set:html={themeBootstrapScript} />
     {/* Errors shake: a refused field, an alert appearing, the button that sent it (tds-shared). */}
     <script is:inline set:html={errorBounceScript} />
+    {/* Endless animations rest while they are off screen (tds-shared ≥ 0.54). */}
+    <script is:inline set:html={offscreenAnimationScript} />
     {/* With a mouse the native scrollbar goes before the first paint and the
         floating one (PageScrollbar) takes over — switching it later would
         reflow the page once. `bare` pages draw no bar of their own. */}

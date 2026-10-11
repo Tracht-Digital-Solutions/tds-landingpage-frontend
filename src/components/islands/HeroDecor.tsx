@@ -112,6 +112,24 @@ export default function HeroDecor() {
     typeof window === "undefined" ? false : window.matchMedia("(max-width: 79.999rem)").matches,
   );
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  /**
+   * Whether the hero is on screen (2026-10-11). The drift and the sway are
+   * endless and run on Motion's own frame loop, which the shared off-screen
+   * watcher in tds-shared cannot reach — so they stop here once the hero has
+   * scrolled away, and the pointer listener (a React render per move) with
+   * them. Starts `true`: the hero is the first screen.
+   */
+  const [onScreen, setOnScreen] = useState(true);
+
+  useEffect(() => {
+    const hero = document.getElementById("hero");
+    if (!hero || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(([entry]) => setOnScreen(entry!.isIntersecting), {
+      rootMargin: "64px",
+    });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 79.999rem)");
@@ -138,7 +156,7 @@ export default function HeroDecor() {
   }, []);
 
   useEffect(() => {
-    if (reduced || coarse) return;
+    if (reduced || coarse || !onScreen) return;
     /**
      * Listener on the window, not on the hero: the shapes bleed past the
      * section's edges, and a pointer that leaves the section should keep
@@ -155,7 +173,13 @@ export default function HeroDecor() {
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
-  }, [reduced, coarse]);
+  }, [reduced, coarse, onScreen]);
+
+  /** An endless loop on screen; off screen, one short settle and then nothing. */
+  const loop = (duration: number, delay = 0) =>
+    onScreen
+      ? { duration, repeat: Infinity, ease: "easeInOut" as const, delay }
+      : { duration: 0.4, ease: "easeOut" as const };
 
   // Reduced motion: the finished picture, turned once in CSS so the depth
   // still shows — no motion values, no listener, no animation frames. Not a
@@ -189,14 +213,14 @@ export default function HeroDecor() {
           opacity: 1,
           x: pointer.x * PARALLAX.capsule,
           // A shorter drift on a narrow screen: the bands there are tight.
-          y: narrow ? [0, -16, 0] : [0, -44, 0],
+          y: !onScreen ? 0 : narrow ? [0, -16, 0] : [0, -44, 0],
           rotateX: pointer.y * -TILT.capsule,
           rotateY: pointer.x * TILT.capsule,
         }}
         transition={{
           opacity: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
           x: { type: "spring", stiffness: 46, damping: 16, mass: 1.1 },
-          y: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+          y: loop(9),
           rotateX: { type: "spring", stiffness: 60, damping: 14 },
           rotateY: { type: "spring", stiffness: 60, damping: 14 },
         }}
@@ -206,8 +230,8 @@ export default function HeroDecor() {
         <m.span
           className="hero-shape__body"
           initial={{ rotateX: 0, rotateY: 0 }}
-          animate={{ rotateX: [16, 4, 16], rotateY: [-26, 20, -26] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          animate={onScreen ? { rotateX: [16, 4, 16], rotateY: [-26, 20, -26] } : { rotateX: 16, rotateY: -26 }}
+          transition={loop(14)}
         >
           <Layers kind="capsule" />
         </m.span>
@@ -224,14 +248,14 @@ export default function HeroDecor() {
         animate={{
           opacity: 1,
           x: pointer.x * -PARALLAX.quarter,
-          y: narrow ? [0, 14, 0] : [0, 36, 0],
+          y: !onScreen ? 0 : narrow ? [0, 14, 0] : [0, 36, 0],
           rotateX: pointer.y * TILT.quarter,
           rotateY: pointer.x * -TILT.quarter,
         }}
         transition={{
           opacity: { duration: 0.55, delay: 0.1, ease: [0.22, 1, 0.36, 1] },
           x: { type: "spring", stiffness: 40, damping: 18, mass: 1.2 },
-          y: { duration: 11, repeat: Infinity, ease: "easeInOut", delay: 0.1 },
+          y: loop(11, 0.1),
           rotateX: { type: "spring", stiffness: 50, damping: 16 },
           rotateY: { type: "spring", stiffness: 50, damping: 16 },
         }}
@@ -239,8 +263,12 @@ export default function HeroDecor() {
         <m.span
           className="hero-shape__body"
           initial={{ rotateX: 0, rotateY: 0, rotateZ: 0 }}
-          animate={{ rotateX: [-14, 10, -14], rotateY: [24, -18, 24], rotateZ: [0, -6, 0] }}
-          transition={{ duration: 17, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+          animate={
+            onScreen
+              ? { rotateX: [-14, 10, -14], rotateY: [24, -18, 24], rotateZ: [0, -6, 0] }
+              : { rotateX: -14, rotateY: 24, rotateZ: 0 }
+          }
+          transition={loop(17, 0.4)}
         >
           <Layers kind="quarter" />
         </m.span>

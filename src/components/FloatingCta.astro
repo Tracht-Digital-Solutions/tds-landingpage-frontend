@@ -492,6 +492,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     bottom: 3rem;
     margin-left: -9px;
     opacity: calc(0.9 - var(--lp-swipe-progress, 0));
+  }
+  /* Only while the track is shown (a held receiver, `[data-swipe]`): the track
+     is transparent the rest of the visit, and an endless loop nobody can see
+     kept a layer animating on every page (2026-10-11). */
+  .floating-cta-group[data-swipe] .floating-cta-track__chevrons {
     animation: floating-cta-chevrons 900ms ease-in-out infinite alternate;
   }
   /* Translate only: the opacity above fades the chevrons as the receiver
@@ -509,7 +514,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     .tree-slot__inner > .floating-cta-track {
       transition: none;
     }
-    .floating-cta-track__chevrons {
+    .floating-cta-group[data-swipe] .floating-cta-track__chevrons {
       animation: none;
     }
   }
