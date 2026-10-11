@@ -192,8 +192,8 @@ export default function ContactForm({
   };
 
   // Each field is wrapped in a `.contact-field-row` <div> so the
-  // focus-within styles in Contact.astro can light up the label and underline
-  // together when the visitor lands on the input. The wrapper family is
+  // focus-within styles in Contact.astro can light up the label when the
+  // visitor lands on the input. The wrapper family is
   // deliberately `contact-field-*`, not `field-*`: tds-shared's primitives.css
   // owns a `.field` class for the *input element*.
   const fieldClass = [
@@ -257,7 +257,7 @@ export default function ContactForm({
           arrive one after another as the form scrolls in (lib/motion/ux.ts,
           vanilla Motion on this markup, off screen only). The honeypot is
           `aria-hidden` and skipped, or the fade would reveal it. */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8" noValidate data-motion-stagger data-track-form="contact">
+      <form onSubmit={handleSubmit(onSubmit)} className="contact-form space-y-6" noValidate data-motion-stagger data-track-form="contact">
         <div
           style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}
           aria-hidden="true"
@@ -266,6 +266,10 @@ export default function ContactForm({
           <input id="website" type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
         </div>
 
+        {/* Pairs side by side from `sm` (2026-10-11): name and e-mail, then
+            company and reason — the form is half as tall and reads as one
+            card rather than a ladder of rows. */}
+        <div className="contact-form-pair">
         <div className={rowClass("name")}>
           <label htmlFor="name" className="contact-field-label">
             {copy.form.name}
@@ -280,7 +284,6 @@ export default function ContactForm({
             {...a11yFor("name")}
             {...register("name")}
           />
-          <span className="contact-field-line" aria-hidden="true" />
           <Collapse open={Boolean(errors.name)}>
             <p id={errorId("name")} className="contact-field-error text-xs mt-2">
               {copy.errors.name}
@@ -302,7 +305,6 @@ export default function ContactForm({
             {...a11yFor("email")}
             {...register("email")}
           />
-          <span className="contact-field-line" aria-hidden="true" />
           <Collapse open={Boolean(errors.email)}>
             <p id={errorId("email")} className="contact-field-error text-xs mt-2">
               {copy.errors.email}
@@ -310,6 +312,9 @@ export default function ContactForm({
           </Collapse>
         </div>
 
+        </div>
+
+        <div className="contact-form-pair">
         <div className={rowClass()}>
           <label htmlFor="company" className="contact-field-label">
             {copy.form.company}
@@ -322,7 +327,6 @@ export default function ContactForm({
             className={fieldClass}
             {...register("company")}
           />
-          <span className="contact-field-line" aria-hidden="true" />
         </div>
 
         {/* The reason for getting in touch. Optional on purpose: making it
@@ -352,9 +356,9 @@ export default function ContactForm({
                 </option>
               ))}
             </select>
-            <span className="contact-field-line" aria-hidden="true" />
           </div>
         )}
+        </div>
 
         <div className={rowClass("message")}>
           <label htmlFor="message" className="contact-field-label">
@@ -383,7 +387,6 @@ export default function ContactForm({
             }
             {...register("message")}
           />
-          <span className="contact-field-line" aria-hidden="true" />
           <Collapse open={Boolean(errors.message)}>
             <p id={errorId("message")} className="contact-field-error text-xs mt-2">
               {copy.errors.message}
@@ -437,7 +440,7 @@ export default function ContactForm({
         <button
           type="submit"
           disabled={submitting}
-          className="submit-button group relative w-full min-h-[3.25rem] py-4 text-sm font-medium rounded-full overflow-hidden flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+          className="submit-button group relative w-full sm:w-auto min-h-[3.25rem] px-8 py-4 text-[0.9375rem] font-semibold rounded-full flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           <span className="relative z-10 inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-0.5">
             {submitting ? copy.form.submitting : copy.form.submit}

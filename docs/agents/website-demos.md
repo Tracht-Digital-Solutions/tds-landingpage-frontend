@@ -33,7 +33,7 @@ down disappears at the next rebuild of the pages it appears on.
 
 Everything a visitor reads on a demo card comes from the demo, with **two exceptions**:
 
-- `DemoDefinition.origin`, the badge on the screenshot ("Demo · fiktives Beispiel", or "Eigenes Projekt" for the
+- `DemoDefinition.origin`, the badge on the screenshot ("Demo", "Designstudie", or "Eigenes Projekt" for the
   shop). Closed vocabulary; never "Kunde" / "client".
 - `DemoDefinition.kind`, the genre label (`DEMO_KINDS`: Webseite · Landingpage · Onlineshop). Closed vocabulary,
   names the genre never the subject; adding one means adding it in both languages. `demos.test.ts` holds it.
@@ -49,11 +49,14 @@ lone card into a poster).
 
 Seven studies (`lib/designStudies.ts`, `ui/StudyCard.astro`) follow the demos on the shelf: invented brands, no
 host, no URL. Captures carry "DESIGNSTUDIE · eigenständig erstellt · kein Kundenauftrag" as a watermark and the
-card repeats it as a badge. Built to `DemoCard`'s measurements (16:10 band), shows the sector, no magnifier: the
+card's badge says only "Designstudie". Built to `DemoCard`'s measurements (16:10 band), shows the sector, no magnifier: the
 bar's call to action opens the enlargement. Not in `sections/WebsiteDemos.astro`. `npm run studies:import`
 writes the WebP; PNG originals stay out of the repo.
 
 ## Card structure
+
+- **The screenshot never zooms on hover** (demo, study and business-card tiles, 2026-10-11); the card answers
+  with its fill and title colour only.
 
 - **The card is not a wrapper `<a>`.** It carries a magnifier that opens the 1440 × 900 capture in
   `ui/PreviewLightbox.astro` (one native `<dialog>` per section); a `<button>` inside an `<a>` is invalid.

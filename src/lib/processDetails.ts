@@ -8,7 +8,7 @@
  * step renders `outcome`.
  *
  * The lines carry NO "Ergebnis:" / "Outcome:" prefix any more (2026-09-28):
- * the step labels the row itself, so the prefix read twice. `ProcessStep`
+ * the step labels the row itself, so the prefix read twice. `sections/Process.astro`
  * strips a leading one anyway, for blocks saved before the change.
  */
 

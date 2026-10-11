@@ -8,7 +8,7 @@
  * pixels off is visible as a broken row. Four things differ, and each of them
  * is a fact about what a study IS:
  *
- * 1. The origin pill says "Designstudie · eigenständig erstellt". A visitor
+ * 1. The origin pill says "Designstudie". A visitor
  *    judging this business by its work has to be able to tell a running site
  *    from a drawing before they read anything else. (The captures carry the
  *    same statement as a watermark, which is belt and braces.)
@@ -185,11 +185,6 @@ const fit = cover.height > cover.width ? "tall" : "cover";
        showing, and the enlargement is one press away for the rest. */
     object-fit: cover;
     object-position: top center;
-    transition: transform 700ms var(--lp-ease-soft);
-  }
-  .study-card:hover .study-card__shot img,
-  .study-card:focus-within .study-card__shot img {
-    transform: scale(1.03);
   }
 
   /* Pinned to the picture's top left. No magnifier owns the top right here, so
@@ -291,13 +286,4 @@ const fit = cover.height > cover.width ? "tall" : "cover";
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .study-card__shot img {
-      transition: none;
-    }
-    .study-card:hover .study-card__shot img,
-    .study-card:focus-within .study-card__shot img {
-      transform: none;
-    }
-  }
 </style>

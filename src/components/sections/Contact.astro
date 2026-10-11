@@ -211,20 +211,12 @@ const ui =
         further down — and it pushed the form itself below the fold. The form's
         confirmation carries it now, which is where it is actually an answer. */}
 
-    <div class="grid md:grid-cols-2 gap-10 md:gap-16 lg:gap-24">
-      {/* A glass card around the form (2026-09-29, asked for: the form should
-          read like the site header — translucent over a blur).
-
-          A WRAPPER here rather than a class inside the island: the island has
-          two roots, the form and the success view, and both belong on the same
-          surface. It also keeps the island untouched.
-
-          The fields themselves stay underline fields on this card — no fill of
-          their own. That is what keeps the contrast measurement unchanged: the
-          white type sits on navy plus a 7% white veil, not on a translucent
-          panel showing the damped photo underneath. The section's own rule
-          ("keine konkurrierenden Farbverläufe hinter dem Formular") is about
-          exactly that, and a flat veil is not a gradient. */}
+    <div class="grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-10 lg:gap-12 items-start">
+      {/* A card around the form: solid lifted navy with a hard coral offset
+          (2026-10-11; it was a glass veil before). A WRAPPER here rather than
+          a class inside the island: the island has two roots, the form and
+          the success view, and both belong on the same surface. Form 3 parts,
+          contact card 2 parts from `lg`. */}
       <div class="contact-form-card">
         <ContactForm
           client:visible
@@ -398,115 +390,43 @@ const ui =
 
   /* === Contact form: field + focus state ============================ */
 
-  /* Each input/textarea sits inside a `.contact-field-row` wrapper. The wrapper
-     paints the static baseline rule and an animated overlay rule
-     (`.contact-field-line`) that grows from the centre on focus-within. The
-     label and rules share the focus-within trigger so the entire
-     row "lights up" at once. */
+  /* Each field sits in a `.contact-field-row`: label above, the pressed-in
+     well below (2026-10-11). The underline rules that used to run along each
+     well's bottom are gone — a well with a line under it drew a second edge
+     that read as a misaligned border. */
   .contact-field-row {
     position: relative;
-    padding-bottom: 1px; /* leaves room for the .contact-field-line absolute layer */
   }
 
-  /* Static baseline rule along the bottom of every field — always
-     visible so a blank form still has visual structure. */
-  .contact-field-row::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background-color: rgb(255 255 255 / 0.22);
-    transition: background-color 200ms ease;
+  /* Two fields side by side from `sm`. */
+  .contact-form-pair {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 40rem) {
+    .contact-form-pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
   }
 
-  /* Hover gives an immediate "this is interactive" cue before the
-     visitor even clicks: the baseline brightens and the field lifts a
-     hair on a faint wash (the wash itself lives on .contact-field). */
-  .contact-field-row:hover::after {
-    background-color: rgb(255 255 255 / 0.5);
-  }
-
-  /* Animated brand-accent overlay rule. Scales from 0 → 1 on
-     focus-within. Kept slim (1px) and at 50 % alpha so the focus
-     state reads as a soft highlight rather than a hard underline
-     fighting the field copy. */
-  .contact-field-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 2px;
-    border-radius: 2px;
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--color-accent-pink) 40%, transparent),
-      var(--color-accent-pink) 50%,
-      color-mix(in srgb, var(--color-accent-pink) 40%, transparent)
-    );
-    transform: scaleX(0);
-    transform-origin: center;
-    transition:
-      transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 200ms ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  /* Hover: the accent line peeks in from the centre as a preview of
-     the focus state. */
-  .contact-field-row:hover:not(:focus-within) .contact-field-line {
-    transform: scaleX(0.3);
-    opacity: 0.6;
-  }
-
-  /* Label baseline. The focus-within rule lifts it to accent-pink
-     and tightens the tracking a hair so it reads as "active". */
+  /* The label: the site's eyebrow on navy. */
   .contact-field-label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     line-height: 1;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: rgb(255 255 255 / 0.6);
-    /* Match the input's horizontal padding (px-3) so the eyebrow aligns
-       with the value text now that the field has internal margin. */
-    padding-left: 0.75rem;
-    margin-bottom: 0.5rem;
-    transform-origin: left;
-    transition:
-      color 200ms ease,
-      letter-spacing 200ms ease,
-      transform 200ms ease;
+    letter-spacing: 0.12em;
+    color: rgb(255 255 255 / 0.65);
+    margin-bottom: 0.625rem;
+    transition: color 200ms ease;
   }
-
   .contact-field-row:hover .contact-field-label {
-    color: rgb(255 255 255 / 0.78);
+    color: rgb(255 255 255 / 0.8);
   }
-
-  /* Label brightens to near-white on focus (no accent-pink shift —
-     the previous pink looked like a "border lighting up", which is
-     exactly the cue the user asked us to remove). Letter-spacing
-     tightens a hair so the eye still picks up the focus state. */
   .contact-field-row:focus-within .contact-field-label {
-    color: rgb(255 255 255 / 0.92);
-    letter-spacing: 0.2em;
-    transform: translateY(-1px);
-  }
-  /* Focused state — the baseline rule becomes a clean, opaque
-     white underline and the animated brand line stays collapsed.
-     Paired with the brighter white wash on `.contact-field:focus`
-     below so the field reads as "lit up", not "outlined". */
-  .contact-field-row:focus-within::after {
-    background-color: rgb(255 255 255 / 0.35);
-  }
-  /* Focus: the accent underline sweeps out from the centre to full
-     width — the headline interaction of the field. */
-  .contact-field-row:focus-within .contact-field-line {
-    transform: scaleX(1);
-    opacity: 1;
+    color: var(--color-accent-pink);
   }
 
   /* The field is PRESSED INTO the block (2026-09-29, asked for).
@@ -527,9 +447,10 @@ const ui =
   .contact-field {
     position: relative;
     z-index: 1;
-    border-radius: 4px;
-    background-color: rgb(0 0 0 / 0.16) !important;
-    box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.3);
+    border-radius: 10px;
+    padding: 0.875rem 1rem !important;
+    background-color: rgb(0 0 0 / 0.2) !important;
+    box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.32);
     transition:
       background-color 220ms ease,
       box-shadow 220ms ease;
@@ -549,18 +470,18 @@ const ui =
   /* Error variant — solid pink baseline so the broken field reads
      immediately. The accent line still grows on focus, but it sits
      on top of the same colour so the underline keeps depth. */
-  .contact-field-row--error::after {
-    background-color: var(--color-accent-pink);
+  .contact-field-row--error .contact-field {
+    box-shadow:
+      inset 2px 2px 0 0 rgb(0 0 0 / 0.32),
+      inset 0 0 0 1.5px var(--color-accent-pink);
   }
   .contact-field-row--error .contact-field-label {
     color: var(--color-accent-pink);
   }
 
-  /* The input itself — just text + caret. All chrome lives on the
-     wrapper. Forced transparent against the navy section so Safari /
-     Firefox-on-macOS don't paint a light UA background. */
+  /* Text and caret on the dark well (its fill is the rule above, which also
+     keeps Safari / Firefox-on-macOS from painting a light UA background). */
   .contact-field {
-    background-color: transparent !important;
     caret-color: var(--color-accent-pink);
     color-scheme: dark;
   }
@@ -757,15 +678,21 @@ const ui =
   /* The form's own glass, same recipe as the card beside it so the two read as
      one pair rather than a panel next to bare fields. A touch lighter: it holds
      input text, and the card holds links. */
-  #contact .contact-form-card {
+  /* Both cards (2026-10-11): a solid lifted navy with the site's hard offset
+     in coral — the card language every other box on the page speaks, instead
+     of a glass veil that let the photo through unevenly. Navy fill, so coral
+     shade, never a navy one (design.md). */
+  #contact .contact-form-card,
+  #contact .contact-card {
     border-radius: 6px;
     padding: 1.5rem;
-    background: rgb(255 255 255 / 0.05);
-    backdrop-filter: blur(14px);
+    background: color-mix(in srgb, #fff 7%, var(--color-surface-navy));
+    box-shadow: 6px 6px 0 0 var(--color-accent-pink);
   }
   @media (min-width: 48rem) {
-    #contact .contact-form-card {
-      padding: 1.75rem;
+    #contact .contact-form-card,
+    #contact .contact-card {
+      padding: 2rem;
     }
   }
 
@@ -774,25 +701,8 @@ const ui =
      ONE surface holding the three ways to reach a person and the two things
      they can take away, replacing six stacked sibling blocks (2026-09-29).
 
-     Glass, like the site header: a translucent fill over a blur, so the navy
-     ground and its very damped photo stay visible through it instead of being
-     covered by a second opaque panel beside the form.
+     Its surface is shared with the form card (see above). */
 
-     `backdrop-filter` is authored UNPREFIXED, and only unprefixed.
-     lightningcss adds the `-webkit-` form at build time from
-     `vite.build.cssTarget` (set by `tdsViteBuild`); a hand-written pair gets
-     collapsed to the `-webkit-` form ALONE and the blur dies in Firefox. */
-  #contact .contact-card {
-    border-radius: 6px;
-    padding: 1.5rem;
-    background: rgb(255 255 255 / 0.07);
-    backdrop-filter: blur(14px);
-  }
-  @media (min-width: 48rem) {
-    #contact .contact-card {
-      padding: 1.75rem;
-    }
-  }
   #contact .contact-card__title {
     margin: 0 0 1rem;
     color: rgb(255 255 255 / 0.55);
@@ -996,11 +906,11 @@ const ui =
   #contact .contact-select {
     appearance: none;
     cursor: pointer;
-    padding-right: 2.25rem;
+    padding-right: 2.75rem !important;
     color-scheme: dark;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-opacity='0.7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.75rem center;
+    background-position: right 1rem center;
   }
   /* The resting option is a prompt, not an answer — dimmed like the text
      fields' placeholders so an unanswered dropdown does not read as a choice
@@ -1087,8 +997,7 @@ const ui =
 
   /* The line under the message label that says what belongs in the field. */
   #contact .contact-field-hint {
-    margin: 0 0 0.5rem;
-    padding-inline: 0.75rem;
+    margin: -0.25rem 0 0.625rem;
     font-size: 0.75rem;
     line-height: 1.5;
     color: rgb(255 255 255 / 0.55);
@@ -1096,47 +1005,30 @@ const ui =
 
   /* === Contact form: send button ==================================== */
 
-  /* Animated gradient pill. The gradient lives on a pseudo-element
-     so we can pan it on hover without re-rendering the button
-     background colour itself. The arrow icon is in the button
-     markup, animated via Tailwind on the inner span. */
+  /* The send button: a solid pink pill with the site's hard offset — the
+     white sheen that swept across it is gone (2026-10-11); no other control
+     on the site glints. Hover lifts it like every other button. */
   .submit-button {
     color: var(--color-surface-navy);
     --lp-fill: var(--color-accent-pink);
     --lp-shade: initial;
     background-color: var(--lp-fill);
-    isolation: isolate;
     transition:
-      color 220ms ease,
-      translate 200ms var(--tds-ease-out);
-    /* The site's hard 2D offset, in a dark shade of the button's own pink
-       (global.css, "Hard shadows take the colour of the control"). */
+      background-color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
     box-shadow: var(--tds-shadow-hard-sm);
   }
-  .submit-button::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(
-      120deg,
-      var(--color-accent-pink) 0%,
-      var(--color-accent-pink) 40%,
-      #ffffff 50%,
-      var(--color-accent-pink) 60%,
-      var(--color-accent-pink) 100%
-    );
-    background-size: 240% 100%;
-    background-position: 100% 0;
-    transition: background-position 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    z-index: 0;
-    opacity: 0.85;
-  }
-  .submit-button:hover:not(:disabled)::before {
-    background-position: 0% 0;
+  .submit-button:hover:not(:disabled) {
+    --lp-fill: #fff;
+    translate: -2px -2px;
   }
   .submit-button:active:not(:disabled) {
     translate: 2px 2px;
     box-shadow: var(--tds-shadow-hard-press);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .submit-button {
+      transition: none;
+    }
   }
 </style>

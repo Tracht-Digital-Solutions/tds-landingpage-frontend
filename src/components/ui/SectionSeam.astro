@@ -1,0 +1,50 @@
+---
+/**
+ * The seam between two home-page sections (2026-10-11).
+ *
+ * It replaces a full-bleed `border-block-start` on each section, which ran
+ * edge to edge through the gutters and the bookmarks and read as a leftover
+ * table rule rather than as part of the design. The seam keeps to the content
+ * width (`.lp-container`), fades out at both ends and carries the brand's
+ * three-part bar in the middle — the same mark the headings use, at its small
+ * size.
+ *
+ * It is rendered BETWEEN sections, so it sits exactly at the boundary, i.e.
+ * at the midpoint of the gap both sections share. It takes no height of its
+ * own, so the rhythm in `HomePage.astro` is unchanged. Two seams in a row
+ * (a section that rendered nothing, like `CustomerCases` without a case)
+ * collapse to one.
+ */
+---
+
+<div class="lp-seam lp-container" aria-hidden="true">
+  <span class="lp-seam__line"></span>
+  <span class="tds-brandbar tds-brandbar--sm lp-seam__mark"></span>
+  <span class="lp-seam__line lp-seam__line--end"></span>
+</div>
+
+<style>
+  .lp-seam {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 0;
+    pointer-events: none;
+  }
+  .lp-seam + .lp-seam {
+    display: none;
+  }
+  .lp-seam__line {
+    flex: 1 1 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-line) 40%);
+  }
+  .lp-seam__line--end {
+    background: linear-gradient(to left, transparent, var(--color-line) 40%);
+  }
+  .lp-seam__mark {
+    flex: none;
+  }
+</style>

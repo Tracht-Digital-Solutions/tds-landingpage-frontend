@@ -143,11 +143,6 @@ const href = businessCardHref(lang);
     height: 100%;
     object-fit: cover;
     object-position: top center;
-    transition: transform 700ms var(--lp-ease-soft);
-  }
-  .bc-tile:hover .bc-tile__shot img,
-  .bc-tile:focus-within .bc-tile__shot img {
-    transform: scale(1.03);
   }
 
   .bc-tile__body {
@@ -197,13 +192,4 @@ const href = businessCardHref(lang);
     overflow: hidden;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .bc-tile__shot img {
-      transition: none;
-    }
-    .bc-tile:hover .bc-tile__shot img,
-    .bc-tile:focus-within .bc-tile__shot img {
-      transform: none;
-    }
-  }
 </style>

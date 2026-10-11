@@ -118,7 +118,10 @@ const credentialsUi =
         (a 3:4 portrait against a text column) and centring the shorter one
         splits its slack above AND below it. See the note at the top. */}
     <div class="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-start">
-      <div class="max-w-sm mx-auto md:mx-0 w-full">
+      {/* Centred in the left column (2026-10-11), both ways: `mx-auto` in the
+          half-width column and `self-center` against the taller text column,
+          so the portrait no longer hangs at the top-left corner of its half. */}
+      <div class="max-w-sm mx-auto w-full md:self-center">
         {/* A CARD, like every other box on this site since 0.42 (2026-09-28).
             It used to be a masked cut-out dissolving into a coral rectangle
             that dissolved with it — the last piece of the old soft language,

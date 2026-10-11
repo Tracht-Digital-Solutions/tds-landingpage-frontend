@@ -2,35 +2,57 @@
 /**
  * Vorgehen — how a working relationship runs, and what the first step is.
  *
- * Two columns from `lg`: the four steps on the left, and beside them the card
- * that answers what the FIRST of them actually is (`ui/FirstCall.astro`),
- * carrying the section's one primary call to action. Stacked below `lg`.
+ * ### A stepper (2026-10-11)
  *
- * What it replaced: a sticky detail panel that swapped its content as the
- * pointer hovered a step, or when a step's `<li>` took keyboard focus — each
- * one carried `tabindex="0"` with no role, i.e. a focus stop that announced
- * nothing — and the panel itself was `aria-hidden`, so its text never reached
- * a screen reader. Its one piece of real content, each step's outcome, is part
- * of the step now (`ui/ProcessStep.astro`).
+ * The four steps used to be four full cards in a column, each with its text
+ * and outcome. Now only the TITLES form the stepper; the text of a step
+ * appears beside it when the pointer rests on it (140 ms intent, like the
+ * services list), when it takes keyboard focus, or when it is tapped.
+ *
+ * - Each title is a `<button aria-expanded aria-controls>`; its panel is the
+ *   next element in the same `<li>`. That one DOM serves both layouts: from
+ *   48rem the `<ol>` is a grid, every `<li>` is `display: contents`, the
+ *   buttons fill the first column and all panels share one cell in the
+ *   second; below 48rem it is an accordion with the panel under its title.
+ * - **Without JavaScript every panel shows**, as a plain list: `hidden` is
+ *   only ever set by the script, and the grid needs `[data-enhanced]`.
+ * - The panel is NOT `aria-hidden` and the titles are real buttons — the
+ *   reason the older hover panel was removed in 2026-09 was exactly a focus
+ *   stop that announced nothing in front of text a screen reader never
+ *   reached.
+ *
+ * Beside the stepper, from `xl`, the card that answers what the FIRST step
+ * actually is (`ui/FirstCall.astro`) with the section's one primary call to
+ * action; below `xl` it follows underneath.
  *
  * The home page's process is the one place on the site that still numbers its
  * steps, deliberately (see AGENTS.md).
  */
 import { resolveLang } from "~/lib/i18n";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
-import ProcessStep from "~/components/ui/ProcessStep.astro";
+import ProcessIcon from "~/components/ui/ProcessIcon.astro";
 import FirstCall from "~/components/ui/FirstCall.astro";
 import { getProcessContent } from "~/lib/processContent";
 import { cmsFor } from "~/lib/cms";
 
 const lang = resolveLang(Astro.currentLocale);
 
-// Default = the local process copy (`lib/processContent.ts`; it came from
-// tds-shared's `translations.process` until the site switched to "du"). An
-// admin-edited "process" block overrides it (cmsFor); the shape is unchanged,
-// so the rendering below is source-agnostic.
+// Default = the local process copy (`lib/processContent.ts`). An admin-edited
+// "process" block overrides it (cmsFor); the shape is unchanged.
 const process = await cmsFor("process", lang, getProcessContent(lang));
-const steps = process.steps;
+
+/**
+ * A stored block may still carry the old "Ergebnis: …" / "Outcome: …" prefix,
+ * from when the line had no label of its own. The label says it now.
+ */
+const steps = process.steps.map((step) => ({
+  ...step,
+  outcome: (step.outcome ?? "").replace(/^\s*(Ergebnis|Outcome)\s*:\s*/i, ""),
+}));
+
+const labels = lang === "en"
+  ? { what: "What happens", result: "What you have afterwards" }
+  : { what: "Was passiert", result: "Was du danach hast" };
 ---
 
 {/* Ground: `.page-ground` in the layout, once for the whole page. */}
@@ -51,85 +73,319 @@ const steps = process.steps;
       {process.body}
     </p>
 
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-x-14 lg:items-start">
-      <div class="relative">
-        <span
-          aria-hidden="true"
-          class="absolute left-[1.375rem] md:left-6 top-6 bottom-6 w-px bg-gradient-to-b from-[var(--color-accent)]/40 via-[var(--color-line)] to-[var(--color-accent)]/20"
-        ></span>
-        {/* The spine fills in as the steps scroll past (2026-09-22) — a CSS
-            scroll timeline, transform only; without one it stays empty and
-            the grey spine above carries the sequence alone. */}
-        <span
-          aria-hidden="true"
-          class="process-spine-fill absolute left-[1.375rem] md:left-6 top-6 bottom-6 w-0.5 -translate-x-1/4 bg-[var(--color-accent)]"
-        ></span>
-
-        {/* Start cap — small accent dot anchoring the top of the spine. */}
-        <span
-          aria-hidden="true"
-          class="absolute left-[1.375rem] md:left-6 -translate-x-1/2 top-5 w-2.5 h-2.5 rounded-full bg-[var(--color-accent)] ring-4 ring-[var(--color-paper)]"
-        ></span>
-
-        <ol class="relative pt-6 pb-6">
+    <div class="grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:gap-x-14 xl:items-start">
+      <div class="process-stepper" data-process-stepper>
+        <ol class="process-stepper__list">
           {
-            steps.map((step) => (
-              <li>
-                <ProcessStep
-                  number={step.number}
-                  title={step.title}
-                  duration={step.duration}
-                  description={step.description}
-                  outcome={step.outcome}
-                />
+            steps.map((step, index) => (
+              <li class="process-stepper__item">
+                <button
+                  type="button"
+                  class="process-stepper__step"
+                  id={`process-step-${step.number}`}
+                  aria-controls={`process-panel-${step.number}`}
+                  aria-expanded={index === 0 ? "true" : "false"}
+                  data-process-step
+                >
+                  <span aria-hidden="true" class="process-stepper__dot">
+                    <ProcessIcon number={step.number} />
+                  </span>
+                  <span class="process-stepper__text">
+                    {/* The order is carried by the `<ol>`; the numeral is for the eye. */}
+                    <span aria-hidden="true" class="process-stepper__number">{step.number}</span>
+                    <span class="process-stepper__title">{step.title}</span>
+                    <span class="process-stepper__duration">{step.duration}</span>
+                  </span>
+                </button>
+
+                <div
+                  class="process-stepper__panel"
+                  id={`process-panel-${step.number}`}
+                  role="region"
+                  aria-labelledby={`process-step-${step.number}`}
+                  data-process-panel
+                >
+                  <div class="process-stepper__body">
+                    <p class="eyebrow process-stepper__label">{labels.what}</p>
+                    <p class="process-stepper__description">{step.description}</p>
+                  </div>
+                  {
+                    step.outcome && (
+                      <div class="process-stepper__result">
+                        <p class="eyebrow process-stepper__label">{labels.result}</p>
+                        <p class="process-stepper__outcome">{step.outcome}</p>
+                      </div>
+                    )
+                  }
+                </div>
               </li>
             ))
           }
         </ol>
-
-        {/* End cap — primary-filled dot signalling the arc terminates. */}
-        <span
-          aria-hidden="true"
-          class="absolute left-[1.375rem] md:left-6 -translate-x-1/2 bottom-5 w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] ring-4 ring-[var(--color-paper)]"
-        ></span>
       </div>
 
-      <div class="lg:sticky lg:top-28">
+      <div class="xl:sticky xl:top-28">
         <FirstCall variant="process" />
       </div>
     </div>
   </div>
 </section>
 
+<script>
+  /**
+   * Hover with intent, focus or a tap opens a step; exactly one is open.
+   * Everything is visible until this runs (`hidden` is only set here).
+   */
+  const INTENT_MS = 140;
+
+  document.querySelectorAll<HTMLElement>("[data-process-stepper]").forEach((root) => {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-process-step]")];
+    const panels = buttons.map((button) =>
+      document.getElementById(button.getAttribute("aria-controls") ?? ""),
+    );
+    if (buttons.length === 0 || panels.some((panel) => !panel)) return;
+
+    let timer = 0;
+    const open = (index: number) => {
+      window.clearTimeout(timer);
+      buttons.forEach((button, i) => {
+        const active = i === index;
+        button.setAttribute("aria-expanded", active ? "true" : "false");
+        panels[i]!.hidden = !active;
+      });
+    };
+
+    open(Math.max(0, buttons.findIndex((b) => b.getAttribute("aria-expanded") === "true")));
+    root.setAttribute("data-enhanced", "");
+
+    const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
+    buttons.forEach((button, index) => {
+      button.addEventListener("click", () => open(index));
+      button.addEventListener("focus", () => open(index));
+      button.addEventListener("pointerenter", () => {
+        if (!hoverable.matches) return;
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => open(index), INTENT_MS);
+      });
+      button.addEventListener("pointerleave", () => window.clearTimeout(timer));
+      // Arrow keys walk the stepper, like a vertical tab list.
+      button.addEventListener("keydown", (event) => {
+        const step = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        buttons[(index + step + buttons.length) % buttons.length]!.focus();
+      });
+    });
+  });
+</script>
+
 <style>
-  .process-spine-fill {
-    transform-origin: top center;
-    transform: scaleY(0);
-    border-radius: 1px;
+  .process-stepper__list {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-  @supports not (animation-timeline: view()) {
-    .process-spine-fill {
+
+  /* --- The steps: titles only ------------------------------------------- */
+  .process-stepper__step {
+    --lp-fill: transparent;
+    --lp-shade: initial;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 0.75rem;
+    border: 0;
+    border-radius: 6px;
+    background: var(--lp-fill);
+    color: var(--color-black);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
+  }
+  .process-stepper__step:hover {
+    --lp-fill: color-mix(in srgb, var(--color-primary) 5%, var(--color-soft));
+  }
+  .process-stepper__step[aria-expanded="true"] {
+    --lp-fill: var(--color-soft);
+    box-shadow: var(--tds-shadow-hard-sm);
+  }
+  .process-stepper__step:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  /* The rail: a line through the dots, from the first to the last. */
+  .process-stepper__item {
+    position: relative;
+  }
+  .process-stepper__item:not(:last-child) .process-stepper__step::after {
+    content: "";
+    position: absolute;
+    left: calc(0.75rem + 1.375rem - 0.5px);
+    top: calc(50% + 1.375rem);
+    height: calc(100% - 2.75rem + 0.5rem);
+    width: 1px;
+    background: var(--color-line);
+  }
+
+  .process-stepper__dot {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 100px;
+    background: var(--color-card);
+    color: var(--color-accent);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out);
+  }
+  .process-stepper__step[aria-expanded="true"] .process-stepper__dot {
+    background: var(--color-accent);
+    color: var(--color-on-accent, #fff);
+  }
+
+  .process-stepper__text {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.125rem 0.625rem;
+    min-width: 0;
+  }
+  .process-stepper__number {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .process-stepper__title {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .process-stepper__step[aria-expanded="true"] .process-stepper__title {
+    color: var(--color-accent);
+  }
+  .process-stepper__duration {
+    flex-basis: 100%;
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+
+  /* --- The panel: what the step means ------------------------------------ */
+  .process-stepper__panel {
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--color-soft);
+    margin: 0.5rem 0 1.25rem 3.5rem;
+  }
+  .process-stepper__panel[hidden] {
+    display: none;
+  }
+  .process-stepper__body {
+    padding: 1.25rem 1.5rem;
+  }
+  .process-stepper__label {
+    margin: 0 0 0.375rem;
+  }
+  .process-stepper__description {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-black);
+  }
+  .process-stepper__result {
+    padding: 1rem 1.5rem 1.125rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+    background: color-mix(in srgb, var(--color-black) 3%, transparent);
+  }
+  .process-stepper__outcome {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--color-accent);
+  }
+
+  /* Enhanced, phone: an accordion — closed steps keep a small gap. */
+  [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
+    margin-top: 0.5rem;
+  }
+
+  /* Enhanced, from 48rem: titles left, the open step's text right beside
+     them. Every panel sits in the same cell; only the open one is shown. */
+  @media (min-width: 48rem) {
+    [data-process-stepper][data-enhanced] .process-stepper__list {
+      display: grid;
+      grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+      grid-auto-rows: auto;
+      column-gap: 2rem;
+      row-gap: 0.5rem;
+      align-items: start;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__item {
+      display: contents;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
+      margin-top: 0;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__step {
+      grid-column: 1;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__panel {
+      grid-column: 2;
+      grid-row: 1 / span 4;
+      align-self: stretch;
+      margin: 0;
+      box-shadow: var(--tds-shadow-hard);
+      display: flex;
+      flex-direction: column;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__panel[hidden] {
       display: none;
     }
+    [data-process-stepper][data-enhanced] .process-stepper__body {
+      flex: 1;
+      padding: 1.75rem 2rem;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__description {
+      font-size: 1.125rem;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__result {
+      padding: 1.25rem 2rem 1.5rem;
+    }
+    /* The rail between dots, now a fixed gap of 0.5rem between buttons. */
+    [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child) .process-stepper__step::after {
+      top: calc(50% + 1.375rem);
+      height: calc(100% - 2.75rem + 0.5rem);
+    }
   }
+
   @media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-      .process-spine-fill {
-        animation: process-spine-fill linear both;
-        animation-timeline: view();
-        animation-range: entry 30% cover 65%;
-      }
+    .process-stepper__panel:not([hidden]) {
+      animation: process-panel-in 220ms var(--tds-ease-out);
     }
   }
-  /* Reduced motion: the finished line, not an empty one. */
+  @keyframes process-panel-in {
+    from {
+      translate: 0 0.5rem;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .process-spine-fill {
-      transform: none;
-    }
-  }
-  @keyframes process-spine-fill {
-    to {
-      transform: scaleY(1);
+    .process-stepper__step,
+    .process-stepper__dot {
+      transition: none;
     }
   }
 </style>

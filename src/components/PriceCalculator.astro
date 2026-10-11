@@ -1,0 +1,686 @@
+---
+/**
+ * The price calculator (2026-10-11): a native modal `<dialog>` opened from the
+ * pricing section.
+ *
+ * ### What it may say
+ *
+ * It ADDS fixed prices, nothing more. The packages are the same list the
+ * cards show (`getPricingContent`, panel-editable), so the calculator can never
+ * quote a figure the page does not. Everything that is not a package — a
+ * shop, a second language, a panel, ongoing care — has no figure here: it is
+ * listed as "individuelles Angebot". No estimate, no range, no hourly rate
+ * (see `pricing.ts` and AGENTS.md).
+ *
+ * ### How it behaves
+ *
+ * - Plain script, no island: a few checkboxes and a sum do not need React.
+ *   The trigger ships `hidden` and is revealed once `showModal` exists.
+ * - Net/gross follows the price list's switch (`tds-price-mode`) and can be
+ *   changed inside; the choice is shared with the list.
+ * - "Mit dieser Auswahl anfragen" writes the selection into the contact form
+ *   as a draft (`lib/contactDraft.ts`), closes and moves focus to the form —
+ *   it sends nothing.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { getPricingContent, grossPrice, VAT_RATE } from "~/lib/pricing";
+
+const lang = resolveLang(Astro.currentLocale);
+const pricing = await getPricingContent(lang);
+const locale = lang === "de" ? "de-DE" : "en-IE";
+const vatPercent = Math.round(VAT_RATE * 100);
+
+/** Code-owned: the things that never get a figure here. */
+const extras =
+  lang === "de"
+    ? [
+        { id: "shop", label: "Onlineshop oder Shop-Anbindung" },
+        { id: "languages", label: "Weitere Sprache" },
+        { id: "panel", label: "Kundenportal oder Verwaltungspanel" },
+        { id: "care", label: "Laufende Betreuung" },
+      ]
+    : [
+        { id: "shop", label: "Online shop or shop integration" },
+        { id: "languages", label: "Another language" },
+        { id: "panel", label: "Customer portal or admin panel" },
+        { id: "care", label: "Ongoing care" },
+      ];
+
+const ui =
+  lang === "de"
+    ? {
+        title: "Preisrechner",
+        intro: "Wähl aus, was du brauchst. Du siehst sofort deinen Webseitenpreis.",
+        packages: "Pakete zum Festpreis",
+        extras: "Dazu",
+        extrasHint: "individuelles Angebot",
+        mode: "Preise anzeigen",
+        net: "Netto",
+        gross: "Brutto",
+        netSuffix: "netto",
+        grossSuffix: `inkl. ${vatPercent} % MwSt.`,
+        total: "Dein Festpreis",
+        empty: "Wähl mindestens ein Paket oder ein Extra.",
+        onRequest: "Plus individuelles Angebot für:",
+        onlyRequest: "Dafür bekommst du ein individuelles Angebot.",
+        cta: "Mit dieser Auswahl anfragen",
+        close: "Preisrechner schließen",
+        draftIntro: "Auswahl aus dem Preisrechner:",
+        draftTotal: "Festpreis",
+        draftExtras: "Individuell anfragen",
+      }
+    : {
+        title: "Price calculator",
+        intro: "Pick what you need. You see your website price right away.",
+        packages: "Fixed-price packages",
+        extras: "On top",
+        extrasHint: "custom quote",
+        mode: "Show prices",
+        net: "Net",
+        gross: "Gross",
+        netSuffix: "net",
+        grossSuffix: `incl. ${vatPercent} % VAT`,
+        total: "Your fixed price",
+        empty: "Pick at least one package or extra.",
+        onRequest: "Plus a custom quote for:",
+        onlyRequest: "You get a custom quote for this.",
+        cta: "Request with this selection",
+        close: "Close the price calculator",
+        draftIntro: "Selection from the price calculator:",
+        draftTotal: "Fixed price",
+        draftExtras: "Custom request",
+      };
+
+const formatPrice = (value: number) =>
+  new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+---
+
+<dialog
+  id="preisrechner"
+  class="calc"
+  data-calc-dialog
+  data-lenis-prevent
+  data-locale={locale}
+  aria-labelledby="calc-title"
+>
+  <form class="calc__frame" method="dialog" data-calc-form>
+    <div class="calc__head">
+      <span class="calc__icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+          <line x1="8" y1="7" x2="16" y2="7"></line>
+          <line x1="8.5" y1="11" x2="8.5" y2="11"></line>
+          <line x1="12" y1="11" x2="12" y2="11"></line>
+          <line x1="15.5" y1="11" x2="15.5" y2="11"></line>
+          <line x1="8.5" y1="14.5" x2="8.5" y2="14.5"></line>
+          <line x1="12" y1="14.5" x2="12" y2="14.5"></line>
+          <line x1="15.5" y1="14.5" x2="15.5" y2="17.5"></line>
+          <line x1="8.5" y1="17.5" x2="12" y2="17.5"></line>
+        </svg>
+      </span>
+      <div>
+        <h2 id="calc-title" class="calc__title">{ui.title}</h2>
+        <p class="calc__intro">{ui.intro}</p>
+      </div>
+      <button type="button" class="calc__close" data-calc-close>
+        <span class="sr-only">{ui.close}</span>
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="calc__grid">
+      <div class="calc__choices">
+        <fieldset class="calc__group">
+          <legend class="eyebrow calc__legend">{ui.packages}</legend>
+          {
+            pricing.packages.map((pkg, index) => (
+              <label class="calc__option">
+                <input
+                  type="checkbox"
+                  name="package"
+                  value={String(index)}
+                  data-calc-package
+                  data-title={pkg.title}
+                  data-net={pkg.price}
+                  data-gross={grossPrice(pkg.price)}
+                />
+                <span class="calc__option-text">
+                  <span class="calc__option-title">{pkg.title}</span>
+                  {pkg.description && <span class="calc__option-desc">{pkg.description}</span>}
+                </span>
+                <span class="calc__option-price tabular-nums" data-calc-price data-net={pkg.price} data-gross={grossPrice(pkg.price)}>
+                  {formatPrice(pkg.price)}
+                </span>
+              </label>
+            ))
+          }
+        </fieldset>
+
+        <fieldset class="calc__group">
+          <legend class="eyebrow calc__legend">{ui.extras}</legend>
+          {
+            extras.map((extra) => (
+              <label class="calc__option calc__option--extra">
+                <input type="checkbox" name="extra" value={extra.id} data-calc-extra data-title={extra.label} />
+                <span class="calc__option-text">
+                  <span class="calc__option-title">{extra.label}</span>
+                </span>
+                <span class="calc__option-price calc__option-price--request">{ui.extrasHint}</span>
+              </label>
+            ))
+          }
+        </fieldset>
+      </div>
+
+      <div class="calc__result tds-tone-navy">
+        <div class="calc__mode" role="group" aria-label={ui.mode}>
+          <button type="button" class="calc__mode-option" data-calc-mode="net" aria-pressed="true">{ui.net}</button>
+          <button type="button" class="calc__mode-option" data-calc-mode="gross" aria-pressed="false">{ui.gross}</button>
+        </div>
+        <p class="eyebrow calc__total-label">{ui.total}</p>
+        {/* Announced politely on every change. The key/label pair lives on one
+            element so a screen reader reads the whole sentence. */}
+        <output class="calc__total" data-calc-output aria-live="polite">
+          <span class="calc__total-figure tabular-nums" data-calc-total>{formatPrice(0)}</span>
+          <span class="calc__total-suffix" data-calc-suffix data-net={ui.netSuffix} data-gross={ui.grossSuffix}>{ui.netSuffix}</span>
+        </output>
+        <ul class="calc__lines" data-calc-lines></ul>
+        <p class="calc__note" data-calc-note data-empty={ui.empty} data-request={ui.onRequest} data-only-request={ui.onlyRequest}>
+          {ui.empty}
+        </p>
+        <ul class="calc__requests" data-calc-requests></ul>
+        <a
+          href="#contact"
+          class="calc__cta"
+          data-calc-cta
+          data-track="price-calculator"
+          data-draft-intro={ui.draftIntro}
+          data-draft-total={ui.draftTotal}
+          data-draft-extras={ui.draftExtras}
+          aria-disabled="true"
+        >
+          {ui.cta}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import { handOffContactDraft } from "~/lib/contactDraft";
+  import { animatedDialog } from "~/lib/motion/dialog";
+
+  const MODE_KEY = "tds-price-mode";
+  const dialog = document.querySelector<HTMLDialogElement>("[data-calc-dialog]");
+
+  if (dialog && typeof dialog.showModal === "function") {
+    const modal = animatedDialog(dialog);
+    const locale = dialog.dataset.locale ?? "de-DE";
+    const packages = [...dialog.querySelectorAll<HTMLInputElement>("[data-calc-package]")];
+    const extras = [...dialog.querySelectorAll<HTMLInputElement>("[data-calc-extra]")];
+    const prices = [...dialog.querySelectorAll<HTMLElement>("[data-calc-price]")];
+    const modeButtons = [...dialog.querySelectorAll<HTMLButtonElement>("[data-calc-mode]")];
+    const total = dialog.querySelector<HTMLElement>("[data-calc-total]")!;
+    const suffix = dialog.querySelector<HTMLElement>("[data-calc-suffix]")!;
+    const lines = dialog.querySelector<HTMLUListElement>("[data-calc-lines]")!;
+    const note = dialog.querySelector<HTMLElement>("[data-calc-note]")!;
+    const requests = dialog.querySelector<HTMLUListElement>("[data-calc-requests]")!;
+    const cta = dialog.querySelector<HTMLAnchorElement>("[data-calc-cta]")!;
+    let opener: HTMLElement | null = null;
+    let restoreFocus = true;
+
+    const format = (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: "EUR",
+        minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+        maximumFractionDigits: 2,
+      }).format(value);
+
+    const readMode = (): "net" | "gross" => {
+      try {
+        return window.localStorage.getItem(MODE_KEY) === "gross" ? "gross" : "net";
+      } catch {
+        return "net";
+      }
+    };
+    let mode = readMode();
+
+    const listItem = (text: string, price?: string) => {
+      const li = document.createElement("li");
+      const label = document.createElement("span");
+      label.textContent = text;
+      li.append(label);
+      if (price) {
+        const figure = document.createElement("span");
+        figure.className = "tabular-nums";
+        figure.textContent = price;
+        li.append(figure);
+      }
+      return li;
+    };
+
+    const update = () => {
+      modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.calcMode === mode)));
+      prices.forEach((el) => {
+        el.textContent = format(Number(el.dataset[mode]));
+      });
+      const chosen = packages.filter((input) => input.checked);
+      const asked = extras.filter((input) => input.checked);
+      const sum = chosen.reduce((acc, input) => acc + Number(input.dataset[mode]), 0);
+      total.textContent = format(Math.round(sum * 100) / 100);
+      suffix.textContent = suffix.dataset[mode] ?? "";
+      lines.replaceChildren(...chosen.map((input) => listItem(input.dataset.title ?? "", format(Number(input.dataset[mode])))));
+      requests.replaceChildren(...asked.map((input) => listItem(input.dataset.title ?? "")));
+      note.textContent =
+        chosen.length === 0 && asked.length === 0
+          ? note.dataset.empty ?? ""
+          : asked.length === 0
+            ? ""
+            : chosen.length === 0
+              ? note.dataset.onlyRequest ?? ""
+              : note.dataset.request ?? "";
+      note.hidden = note.textContent === "";
+      const empty = chosen.length === 0 && asked.length === 0;
+      cta.setAttribute("aria-disabled", String(empty));
+      dialog.toggleAttribute("data-empty", empty);
+    };
+
+    [...packages, ...extras].forEach((input) => input.addEventListener("change", update));
+    modeButtons.forEach((button) =>
+      button.addEventListener("click", () => {
+        mode = button.dataset.calcMode === "gross" ? "gross" : "net";
+        try {
+          window.localStorage.setItem(MODE_KEY, mode);
+        } catch {
+          // Storage blocked: the choice lasts while the dialog is open.
+        }
+        update();
+      }),
+    );
+
+    cta.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (cta.getAttribute("aria-disabled") === "true") return;
+      const chosen = packages.filter((input) => input.checked);
+      const asked = extras.filter((input) => input.checked);
+      const parts = [cta.dataset.draftIntro ?? ""];
+      chosen.forEach((input) => parts.push(`– ${input.dataset.title} (${format(Number(input.dataset[mode]))} ${suffix.dataset[mode]})`));
+      if (chosen.length > 0) parts.push(`${cta.dataset.draftTotal}: ${total.textContent} ${suffix.textContent}`);
+      if (asked.length > 0) parts.push(`${cta.dataset.draftExtras}: ${asked.map((input) => input.dataset.title).join(", ")}`);
+      handOffContactDraft({ message: parts.join("\n"), service: "web-presence" });
+      restoreFocus = false;
+      modal.close();
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-calc-open]")) {
+      button.hidden = false;
+      button.addEventListener("click", () => {
+        if (dialog.open) return;
+        opener = button;
+        restoreFocus = true;
+        mode = readMode();
+        update();
+        modal.open();
+      });
+    }
+
+    dialog.querySelector<HTMLButtonElement>("[data-calc-close]")?.addEventListener("click", () => modal.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) modal.close();
+    });
+    dialog.addEventListener("close", () => {
+      if (restoreFocus) {
+        opener?.focus();
+      } else {
+        const contact = document.getElementById("contact");
+        if (contact) {
+          if (!contact.hasAttribute("tabindex")) {
+            contact.setAttribute("tabindex", "-1");
+            contact.style.outline = "none";
+          }
+          contact.focus({ preventScroll: true });
+        }
+      }
+      opener = null;
+    });
+
+    update();
+  }
+</script>
+
+<style>
+  :global([data-calc-open][hidden]) {
+    display: none;
+  }
+
+  .calc {
+    /* Tailwind's preflight resets `margin: 0`; without this the modal opens in
+       the top left corner (see `previewLightbox.test.ts`). */
+    margin: auto;
+    width: min(96vw, 60rem);
+    max-width: none;
+    max-height: 92vh;
+    padding: 0;
+    border: none;
+    border-radius: 1.75rem;
+    --tds-shadow-ink: rgb(0 0 0 / 0.5);
+    box-shadow: 10px 10px 0 0 var(--tds-shadow-ink);
+    background: var(--color-paper);
+    color: var(--color-black);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .calc::backdrop {
+    background: var(--color-surface-navy);
+    opacity: 0.9;
+    transition: opacity 300ms var(--tds-ease-out);
+  }
+  .calc[data-closing]::backdrop {
+    opacity: 0;
+  }
+  .calc__frame {
+    margin: 0;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+  .calc__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .calc__head > div {
+    flex: 1;
+    min-width: 0;
+  }
+  .calc__icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 999px;
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+    box-shadow: var(--tds-shadow-hard-sm);
+  }
+  .calc__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+    line-height: 1.2;
+  }
+  .calc__intro {
+    margin: 0.5rem 0 0;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+  .calc__close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: none;
+    border-radius: 100px;
+    background: none;
+    color: var(--color-black);
+    cursor: pointer;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .calc__close:hover {
+    color: var(--color-accent);
+  }
+  .calc__close:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .calc__grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 48rem) {
+    .calc__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+      align-items: start;
+    }
+  }
+
+  .calc__group {
+    margin: 0 0 1.25rem;
+    padding: 0;
+    border: 0;
+  }
+  .calc__legend {
+    margin-bottom: 0.625rem;
+    padding: 0;
+  }
+  .calc__option {
+    --lp-fill: var(--color-soft);
+    --lp-shade: initial;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border-radius: 6px;
+    background: var(--lp-fill);
+    cursor: pointer;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .calc__option + .calc__option {
+    margin-top: 0.5rem;
+  }
+  .calc__option:hover {
+    --lp-fill: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+  }
+  .calc__option:has(input:checked) {
+    --lp-fill: color-mix(in srgb, var(--color-accent) 9%, var(--color-soft));
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+  .calc__option:has(input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .calc__option input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-accent);
+  }
+  .calc__option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .calc__option-title {
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .calc__option-desc {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+  .calc__option-price {
+    font-family: var(--font-display);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .calc__option-price--request {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  /* On a phone the extras' hint goes under the title instead of squeezing it. */
+  @media (max-width: 30rem) {
+    .calc__option-price--request {
+      grid-column: 2;
+      margin-top: -0.5rem;
+    }
+  }
+
+  /* The result: the navy block, like the "Individuelle Lösungen" box. */
+  .calc__result {
+    position: sticky;
+    top: 0;
+    padding: 1.5rem;
+    border-radius: 6px;
+    background: var(--color-surface-navy);
+    color: #fff;
+  }
+  .calc__mode {
+    display: inline-flex;
+    gap: 0.25rem;
+    margin-bottom: 1.25rem;
+    padding: 0.25rem;
+    border-radius: 100px;
+    background: rgb(255 255 255 / 0.1);
+  }
+  .calc__mode-option {
+    min-height: 2.25rem;
+    padding: 0.25rem 0.875rem;
+    border: 0;
+    border-radius: 100px;
+    background: none;
+    color: rgb(255 255 255 / 0.8);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .calc__mode-option[aria-pressed="true"] {
+    background: #fff;
+    color: var(--color-surface-navy);
+  }
+  .calc__mode-option:focus-visible {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 2px;
+  }
+  .calc__total-label {
+    margin: 0 0 0.25rem;
+    color: var(--color-accent-pink);
+  }
+  .calc__total {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.5rem;
+  }
+  .calc__total-figure {
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 1.8rem + 1.6vw, 3rem);
+    font-weight: 600;
+    line-height: 1.05;
+  }
+  .calc__total-suffix {
+    font-size: 0.8125rem;
+    color: rgb(255 255 255 / 0.75);
+  }
+  .calc__lines,
+  .calc__requests {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+  }
+  .calc__lines:empty,
+  .calc__requests:empty {
+    display: none;
+  }
+  .calc__lines :global(li),
+  .calc__requests :global(li) {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.375rem 0;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+  }
+  .calc__requests :global(li)::before {
+    content: "+";
+    color: var(--color-accent-pink);
+    font-weight: 700;
+  }
+  .calc__requests :global(li) {
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+  .calc__note {
+    margin: 1rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.85);
+  }
+  .calc__cta {
+    --lp-fill: var(--color-accent-pink);
+    --lp-shade: initial;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 3rem;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    color: var(--color-surface-navy);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    box-shadow: 4px 4px 0 0 rgb(0 0 0 / 0.45);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
+  }
+  .calc__cta:hover {
+    --lp-fill: #fff;
+    translate: -2px -2px;
+  }
+  .calc__cta:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+  .calc__cta[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    translate: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .calc[open]::backdrop {
+      animation: calcBackdropIn 220ms var(--tds-ease-out);
+    }
+  }
+  @keyframes calcBackdropIn {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .calc__option,
+    .calc__cta,
+    .calc__close {
+      transition: none;
+    }
+  }
+</style>

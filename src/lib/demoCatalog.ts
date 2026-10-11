@@ -57,13 +57,13 @@ export type DemoKind = keyof typeof DEMO_KINDS;
  *
  * - `demo` — a sample site about a business that does not exist (the law firm,
  *   the streetwear label, the property manager). Their own descriptions say
- *   so; the badge says it before anybody has to read.
+ *   so; the badge says "Demo", one word (2026-10-11: no "fiktiv" on the card).
  * - `own` — a real site of Tracht Digital Solutions itself. The shop is one:
  *   it sells for real, so calling it "fictional" would be the opposite lie.
  * - `study` — a design study: a picture of a page that was never built and is
  *   not hosted anywhere (`designStudies.ts`). It shares this shelf because it
- *   is the same kind of evidence, and "eigenständig erstellt" is the phrase
- *   the captures themselves carry as a watermark.
+ *   is the same kind of evidence; the captures carry the long form as a
+ *   watermark, the badge only "Designstudie".
  *
  * Closed, like `DEMO_KINDS`, and for the same reason. No label may ever name a
  * client — not even to deny one, which is why the study says what it IS rather
@@ -71,9 +71,9 @@ export type DemoKind = keyof typeof DEMO_KINDS;
  * with its own consent rules.
  */
 export const DEMO_ORIGINS = {
-  demo: { de: "Demo · fiktives Beispiel", en: "Demo · fictional example" },
+  demo: { de: "Demo", en: "Demo" },
   own: { de: "Eigenes Projekt", en: "Own project" },
-  study: { de: "Designstudie · eigenständig erstellt", en: "Design study · self-initiated" },
+  study: { de: "Designstudie", en: "Design study" },
 } as const;
 
 export type DemoOrigin = keyof typeof DEMO_ORIGINS;
