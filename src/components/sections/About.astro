@@ -52,18 +52,11 @@ import AccentLetters from "~/components/ui/AccentLetters.astro";
 const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
 
-/**
- * Three of the four reasons. Index 2 is the committed "Verständlich erklärt" /
- * "Explained plainly" — the one entry a visitor has no way to check, and the
- * two motivation paragraphs above are the demonstration of it anyway.
- *
- * By POSITION, not by matching the title: the titles are CMS-editable, so a
- * text match would silently start rendering four again the first time somebody
- * rephrases one. An editor who replaces the whole list gets their own third
- * entry dropped instead, which is visible in the editor and theirs to fix. The
- * cap is what keeps a longer stored list from stretching the column.
+/*
+ * The reasons ("Ich übernehme Bestehendes" …) are NOT rendered (2026-10-12, on
+ * Julian's word); they stay in the content shape so a stored `why_me` block
+ * keeps loading.
  */
-const renderedReasons = about.reasons.filter((_, index) => index !== 2).slice(0, 3);
 
 /**
  * The certificates, teased where the person is introduced.
@@ -177,14 +170,21 @@ const credentialsUi =
         {/* See the note at the top for what is NOT rendered here and why. */}
         <p class="text-lg font-medium text-[var(--color-black)] leading-relaxed">{about.p2}</p>
 
-        {/* Two facts, figure first (2026-10-12). A <dl>: each figure is the
-            term, its sentence the description. */}
+        {/* Two facts: a one-word heading and the figure (2026-10-12). The figure
+            counts up as the tile scrolls into view (script below). The markup
+            always holds the final value; the visible figure is `aria-hidden`
+            and the sentence beside it is what a screen reader hears. */}
         <dl class="about-facts">
           {
             facts.map((fact) => (
               <div class="about-fact">
-                <dt class="about-fact__value">{fact.value}</dt>
-                <dd class="about-fact__label">{fact.label}</dd>
+                <dt class="about-fact__label">{fact.label}</dt>
+                <dd class="about-fact__value">
+                  <span aria-hidden="true">
+                    <span data-count-to={fact.value} data-count-from={fact.from}>{fact.value}</span>{fact.unit}
+                  </span>
+                  <span class="sr-only">{fact.sr}</span>
+                </dd>
               </div>
             ))
           }
@@ -200,21 +200,6 @@ const credentialsUi =
               <p class="about-motivation__text">{paragraph}</p>
             ))
           }
-        </div>
-
-        {/* Three of four (see the top), titles only since 2026-10-11 (the
-            `description` stays in the shape), side by side where the column
-            has room — the same tiles as the certificates below. */}
-        <div class="about-block">
-          <ul class="about-tiles">
-            {
-              renderedReasons.map((reason) => (
-                <li class="about-tile">
-                  <span class="about-tile__title">{reason.title}</span>
-                </li>
-              ))
-            }
-          </ul>
         </div>
 
         <div class="about-block credentials-teaser">
@@ -238,6 +223,59 @@ const credentialsUi =
     </div>
   </div>
 </section>
+
+<script>
+  import { lessMotion } from "~/lib/a11yPrefs";
+
+  /**
+   * The facts count up when they scroll into view (2026-10-12) — the same
+   * Motion count and curve as the prices' net/gross switch, a little longer.
+   *
+   * The start value is written ONLY onto a figure that is off screen when
+   * this runs (docs/agents/motion.md); one already on screen keeps its final
+   * value. Nothing counts under reduced motion or the site's motion switch.
+   */
+  const figures = Array.from(document.querySelectorAll<HTMLElement>("[data-count-to]"));
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (figures.length > 0 && !reduce && !lessMotion() && "IntersectionObserver" in window) {
+    const count = (figure: HTMLElement) => {
+      const to = Number(figure.dataset.countTo);
+      const from = Number(figure.dataset.countFrom);
+      void import("@tracht-digital-solutions/tds-shared/motion/dom")
+        .then(({ animate }) => {
+          animate(from, to, {
+            duration: 1.1,
+            ease: [0.2, 0.8, 0.2, 1],
+            onUpdate: (value: number) => {
+              figure.textContent = String(Math.round(value));
+            },
+            onComplete: () => {
+              figure.textContent = String(to);
+            },
+          });
+        })
+        .catch(() => {
+          figure.textContent = String(to);
+        });
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          count(entry.target as HTMLElement);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    for (const figure of figures) {
+      const box = figure.getBoundingClientRect();
+      if (box.bottom > 0 && box.top < window.innerHeight) continue; // on screen: leave it
+      figure.textContent = figure.dataset.countFrom ?? figure.textContent;
+      observer.observe(figure);
+    }
+  }
+</script>
 
 <style>
   /* Ein GRUND, keine Abbildung — dieser Abschnitt ist der ruhigste der Seite.
@@ -412,18 +450,22 @@ const credentialsUi =
     background: var(--lp-surface-card);
     text-align: left;
   }
+  .about-fact__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
   .about-fact__value {
+    margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.75rem;
-    line-height: 1.1;
+    font-size: 2.25rem;
+    line-height: 1.05;
+    /* Figures of equal width, so the count does not wobble the line. */
+    font-variant-numeric: tabular-nums;
     color: var(--color-black);
-  }
-  .about-fact__label {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: var(--color-muted);
   }
 
   /* The certificates: the label, the tiles and one way to all of them. Its
