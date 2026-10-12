@@ -101,5 +101,5 @@ within 72 px of the right edge.
 See [website-demos.md](website-demos.md#the-showcase-shelf).
 
 - Hero carousel (2026-10-12): front card `--hc-focus` 0.18 (cos⁸ bump), flatter rim (`--hc-ry` 80svh,
-  `--hc-tilt` 0.1), slower (`--hc-turn` 3000ms = `TURN_MS`, rest 8 s); shots are 16:10 and width-fitted, never `cover`-cropped. The left neighbour rises
+  `--hc-tilt` 0.1), snappy turn (`--hc-turn` 1400ms = `TURN_MS`, rest 11 s); shots are 16:10 and width-fitted, never `cover`-cropped. The left neighbour rises
   under the slogan on the flat rim, so it rests at opacity 0.3 (`data-side`).
