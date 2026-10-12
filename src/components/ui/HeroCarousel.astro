@@ -229,6 +229,25 @@ const ui =
       });
     };
 
+    /**
+     * Turn by several cards ONE STEP AT A TIME (2026-10-12). Turned in one go,
+     * every card that has to round the back of the wheel jumped there without
+     * a transition — fine for the card already hidden at the back, but with a
+     * throw of two or three cards the jumpers included cards still in front:
+     * they vanished on the spot or hung where they were. Step by step, only
+     * the hidden back card ever jumps, and each step's transition picks up
+     * from the angle the previous one has reached, so the motion stays one.
+     */
+    const STEP_MS = 180;
+    let steps = 0;
+    const turnBy = (by: number) => {
+      window.clearTimeout(steps);
+      if (by === 0) return;
+      const sign = Math.sign(by);
+      turn(sign);
+      if (Math.abs(by) > 1) steps = window.setTimeout(() => turnBy(by - sign), STEP_MS);
+    };
+
     const running = () => onScreen && !hovered && !focused && !dragging && !document.hidden && !lessMotion();
     const schedule = () => {
       window.clearTimeout(timer);
@@ -248,6 +267,7 @@ const ui =
     wheel.addEventListener("pointerdown", (event) => {
       if (event.button !== 0 || !(event.target as Element).closest("[data-hero-card]")) return;
       press = { id: event.pointerId, x: event.clientX, t: event.timeStamp, lastT: event.timeStamp };
+      window.clearTimeout(steps);
       tracker.reset();
       tracker.push(event.clientX, event.timeStamp);
     });
@@ -287,7 +307,7 @@ const ui =
       delete root.dataset.dragging;
       root.style.setProperty("--hc-drag", "0deg");
       // Dragging right brings the left-hand cards forward.
-      turn(-by);
+      turnBy(-by);
       schedule();
     };
     wheel.addEventListener("pointerup", release);
@@ -306,7 +326,7 @@ const ui =
         const slot = slots[cards.indexOf(card)] ?? 0;
         if (slot === 0) return; // The front card is a link.
         event.preventDefault();
-        turn(slot);
+        turnBy(slot);
         schedule();
       },
       true,
@@ -358,7 +378,8 @@ const ui =
     .hero-carousel {
       /* The wheel's measurements: one card width, the step between two slots
          on the rim, and the rim's two radii (wider than tall: a flat arc). */
-      --hc-card: clamp(15rem, 21vw, 25rem);
+      /* Larger since 2026-10-12 (21vw → 24vw, front bump 0.18 → 0.2). */
+      --hc-card: clamp(15rem, 24vw, 30rem);
       --hc-step: 34deg;
       /* A steep arc, as in the sketch: the neighbours drop far enough that
          the left one lies under the hero's buttons, never beside the slogan
@@ -373,12 +394,13 @@ const ui =
       /* The front card's extra size: a bump that is 1 + focus at the top of
          the wheel and has all but vanished one slot away (cos⁸ of 34° ≈ 0.22,
          so a neighbour gains under 5%). */
-      --hc-focus: 0.18;
+      --hc-focus: 0.2;
       /* One turn (2026-10-12: 1.5 s → 2.1 s → 3 s, then snappier at 1.4 s with
          a longer rest of 11 s on each example).
          TURN_MS in the script matches. */
       --hc-turn: 1400ms;
-      --hc-center: 78%;
+      /* Further right with the larger card, so it clears the slogan. */
+      --hc-center: 80%;
       position: absolute;
       inset: 0;
       /* Behind the copy: a card swinging past the slogan's last letters
@@ -402,12 +424,15 @@ const ui =
     --hc-angle: calc(var(--slot, 0) * var(--hc-step) + var(--hc-drag, 0deg));
     --hc-cos: cos(var(--hc-angle));
     position: absolute;
-    /* The top of the wheel: right of the slogan, a little above the middle. */
+    /* The top of the wheel: right of the slogan, its front card centred on the
+       section's vertical middle (2026-10-12; it sat at 24 %, too high). The
+       first `translate` lifts the card by half its own height. */
     left: calc(var(--hc-center, 70%) - var(--hc-card) / 2);
-    top: var(--hc-top, 24%);
+    top: var(--hc-top, 50%);
     width: var(--hc-card);
     transform-origin: 50% 50%;
     transform:
+      translate(0, -50%)
       translate(
         calc(sin(var(--hc-angle)) * var(--hc-rx)),
         calc((1 - cos(var(--hc-angle))) * var(--hc-ry))
@@ -485,7 +510,7 @@ const ui =
 
   @media (min-width: 80rem) {
     .hero-carousel {
-      --hc-center: 74%;
+      --hc-center: 77%;
     }
   }
 
