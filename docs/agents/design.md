@@ -108,10 +108,31 @@ behind it (`.hero-shape__layer`, `translateZ` steps in `transform-style: preserv
 Outline rings, not filled layers: stacked translucent fills darken the face. No box-shadow on `.hero-shape`. Under the slogan a `.tds-brandbar` draws itself by a round `clip-path` (never a scale: every brand-bar segment stays a pill, tds-shared ≥ 0.54) and the copy drifts up on scroll-out. Motion
 details: [motion.md](motion.md#hero).
 
+## Header: two islands (2026-10-12)
+
+`Header.astro` is a click-through frame (`pointer-events: none`) holding two `.site-island` pills: the logo on
+the left, links + theme + language (+ burger on a phone) on the right, aligned to the page gutter. Each island
+paints its own glass (`::before`) and hard-shadow plate (`::after`); docked at the top both are transparent,
+scrolled they fill and the plate clicks in (`audit:nav` samples the first island). The island's content needs
+`position: relative; z-index: 1` through `:global` — child components and `<astro-island>` (`display:
+contents`) otherwise paint under the glass and vanish.
+
+## Section offsets (2026-10-12)
+
+A section jump lands with the section's top edge on the top of the screen, not under the header: `main
+section[id]` has `scroll-margin-top: calc(-1 * var(--lp-header-clearance))`, which cancels the header's
+`scroll-padding-top` for sections only (focused links keep it). `SmoothScroll.tsx` adds a target's
+`scroll-margin-top`, so jumps, the section snap and fragment links land on the same pixel. Every home section's
+upper padding is at least `--lp-section-top` (header + 1rem, `HomePage.astro`), so its heading clears the
+header.
+
 ## Dialogs and semantics
 
 - **A `<dialog>` needs `margin: auto` spelled out**; Tailwind's preflight resets `margin: 0`, and the dialog opens
   top left. `previewLightbox.test.ts` checks every `.astro` file with a `<dialog>`.
+- **An open modal owns the scroll** (2026-10-12): `lib/motion/dialog.ts` sets `html[data-modal-open]`
+  (`overflow: hidden`, dialogs `overscroll-behavior: contain`) and clears it on `close`; Lenis' `prevent`
+  skips every wheel while it is set. Before, Lenis turned the wheel inside a dialog into a scroll of the page.
 - Keep `SectionHeader` and `AccentLetters` semantics; accent letters need one accessible label and stop
   transforming under reduced motion.
 - Test desktop, 375 px, both themes and reduced motion. Overflow can be clipped invisibly; measure the rendered

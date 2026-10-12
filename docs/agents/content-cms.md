@@ -5,10 +5,16 @@
 - **Short and clear:** one statement per sentence, about three points per list, four questions on a platform
   page, six on the home page, no filler. Cut before adding. SEO duties stay: summaries 81–160 characters, an
   answer-first paragraph (who, what, where), question headings, sources for facts.
-- **The site says "du"**, lowercase, in every text addressing the visitor. Only the legal register stays formal
-  (Impressum, Datenschutzerklärung, AGB, tds-shared's consent dialog). Formal sentences shipped by tds-shared
-  are overridden locally (`lib/contactCopy.ts`, `lib/processContent.ts`). `addressForm.test.ts` fails on
-  "Sie/Ihnen/Ihr…" outside `pages/legal/`. Panel blocks saved before the switch override defaults until cleared.
+- **No direct address** (2026-10-12, replacing the "du" of 2026-09-15): the copy is about Tracht Digital
+  Solutions and the work ("Tracht Digital Solutions übernimmt …", "Die Auswahl landet …"), never "du" or
+  "Sie". FAQ questions are phrased the way a search asks them ("Übernimmt Tracht Digital Solutions …?") and
+  answered in the first sentence. Only the legal register stays formal (Impressum, Datenschutzerklärung, AGB,
+  tds-shared's consent dialog). Formal sentences shipped by tds-shared are overridden locally
+  (`lib/contactCopy.ts`, `lib/processContent.ts`). `addressForm.test.ts` fails on "Sie/Ihnen/Ihr…" anywhere
+  and on "du/dein/dir/dich" inside string literals outside `pages/legal/`. Panel blocks saved before the switch
+  override defaults until cleared. The About section's motivation stays in Julian's first person.
+- **Vorgehen cards** carry three to four sentences each (2026-10-12): what happens in the step at Tracht
+  Digital Solutions and what stands afterwards, quotable on their own. The step titles stay short.
 - **"echt" and "wirklich" never appear**, in any inflection. `bannedWords.test.ts` scans copy sources and the
   tds-shared strings; `cms.ts` refuses a panel string containing one (`lib/copyRules.ts`); `npm run audit:geo`
   scans rendered pages.
@@ -93,4 +99,4 @@ The home framing is the `references_home` block (defaults in `homeContent.ts`); 
 rebuild home and service pages for any block id.
 - Service pages (2026-10-12, Julian): neutral, professional voice — no "du", no "Sie", little "ich";
   section headings "Typische Ausgangslagen / Leistungsumfang / Ergebnis / Nicht enthalten / Vorgehen".
-  The rest of the site (home, FAQ) still says "du" until decided otherwise.
+  Since 2026-10-12 the whole site, platform pages included, uses this voice and these headings.

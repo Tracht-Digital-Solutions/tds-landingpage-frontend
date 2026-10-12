@@ -72,7 +72,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | UX cues | `ux.ts` | A pill glides behind the header link of the section on screen (`aria-current="location"`); price cards arrive staggered and never rise on hover (2026-10-12; they only lean, `tilt.ts`); contact form rows arrive as one staggered group (`[data-motion-stagger]`, honeypot skipped) |
 | Process stepper | `sections/Process.astro` (CSS + a small script) | One round pill glides behind the open step and the card's notch glides with it (`--lp-ease-spring`); the dot pops; the new card swings in from the chosen step's side while the old one leaves. All cards stay laid out in one cell, so the section never changes height; on a phone the accordion folds (`grid-template-rows`) |
 | Hero carousel | `ui/HeroCarousel.astro` (CSS + a small script) | See [Hero](#hero) |
-| Modals | `dialog.ts` | Bounce in and out (Escape included; `cancel` is intercepted), always ending in `dialog.close()` behind a timeout. One flat navy backdrop, one flat dialog colour, a bare close cross |
+| Modals | `dialog.ts` | Bounce in and out (Escape included; `cancel` is intercepted), always ending in `dialog.close()` behind a timeout. One flat navy backdrop, one flat dialog colour, a bare close cross. While open, `html[data-modal-open]` locks the page and Lenis lets the wheel through to the dialog ([design.md](design.md#dialogs-and-semantics)) |
 
 Scroll reveal stays `lib/reveal.ts` (`[data-reveal]`).
 

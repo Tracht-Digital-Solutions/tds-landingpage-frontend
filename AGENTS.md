@@ -25,7 +25,7 @@ Full list and what each audit checks: [docs/agents/verification.md](docs/agents/
 - Resolve copy through `tFor()`; never hard-code a locale in a shared component.
 - Route ids, slugs and destinations are code-owned; never accept them from the CMS.
 - Never publish fabricated references, metrics or promises; anonymised by default, named only with approval.
-- The site says **"du"** (legal pages excepted); no "echt"/"wirklich"; no hourly rates; no free or timed first conversation.
+- The site **addresses no one directly** — no "du", no "Sie" (legal pages excepted); copy is about the company; no "echt"/"wirklich"; no hourly rates; no free or timed first conversation.
 - Nothing a visitor reads ships at `opacity: 0`; above-the-fold islands need a measured reason for `client:load`.
 - Shared tokens and primitives belong in tds-shared; local styles only compose.
 - Every `<dialog>` spells out `margin: auto`.
