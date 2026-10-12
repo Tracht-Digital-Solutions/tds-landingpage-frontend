@@ -32,6 +32,12 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
   `[1, loop + 1)`, so it runs backwards from the start too. Clones are NOT `inert` (that killed hover after the
   wrap); they stay `aria-hidden` with `tabindex="-1"`. While dragged and coasting, cards take no pointer, and
   `tilt.ts` lays a leaning card flat on any scroll.
+- **Hero scroll timelines are live** (2026-10-12): `#hero` is `overflow: clip` (was `hidden`, a scroll
+  container, so every `view()` inside sat at progress 0), and so is its `.tds-decor` layer. The copy and the
+  carousel share one named timeline (`--hero-copy`, `timeline-scope` on the section), so they leave together.
+  Never put `overflow: hidden` on an ancestor of a `view()` subject.
+- **About facts count up** on scroll-in (Motion `animate`, 1.1 s, the prices' curve); the start value is
+  written only onto an off-screen figure, the markup holds the final one.
 - **The hero wheel turns several cards one step at a time** (`turnBy`, 180 ms apart): turned in one go, cards
   still in front rounded the back by jumping.
 
