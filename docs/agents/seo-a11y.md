@@ -92,3 +92,6 @@ Every rule was broken on the live site once, silently:
 - Touch targets ≥ 44 px on `pointer: coarse` (footer links, card bars, breadcrumb, language link, trust links);
   process steps are not focus stops; the contact form ties each error to its field and never renders fields
   invisible before hydration.
+
+- Service pages carry three code-owned questions each (`src/lib/serviceFaq.ts`, 2026-10-12), rendered by
+  `detail/DetailFaq.astro` and emitted as the page's `FAQPage` node; first sentence answers on its own.
