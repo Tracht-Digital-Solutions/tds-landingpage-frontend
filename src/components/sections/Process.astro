@@ -253,13 +253,9 @@ const labels = lang === "en"
       background-color 200ms var(--tds-ease-out),
       translate 160ms var(--tds-ease-out);
   }
-  .process-stepper__step:hover {
-    --lp-fill: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
-  }
-  .process-stepper__step[aria-expanded="true"] {
-    --lp-fill: var(--color-soft);
-    box-shadow: var(--tds-shadow-hard-sm);
-  }
+  /* No fill around a step (2026-10-12): the open, hovered and passed states
+     live on the DOT alone — colour and its hard offset — not on a pill that
+     wrapped the whole step. */
   .process-stepper__step:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
@@ -302,9 +298,14 @@ const labels = lang === "en"
     border-radius: 100px;
     background: var(--color-card);
     color: var(--color-accent);
+    /* Every point carries the site's hard offset; the open one a larger one. */
+    box-shadow: var(--tds-shadow-hard-press);
     transition:
       background-color 200ms var(--tds-ease-out),
       color 200ms var(--tds-ease-out);
+  }
+  .process-stepper__step:hover .process-stepper__dot {
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-card));
   }
   .process-stepper__dot :global(svg) {
     width: 1.75rem;
@@ -317,6 +318,7 @@ const labels = lang === "en"
   .process-stepper__step[aria-expanded="true"] .process-stepper__dot {
     background: var(--color-accent);
     color: var(--color-on-accent, #fff);
+    box-shadow: var(--tds-shadow-hard-sm);
   }
 
   .process-stepper__text {
@@ -463,12 +465,6 @@ const labels = lang === "en"
       padding: 1rem 1.5rem 1.375rem;
       text-align: center;
     }
-    /* The open fill is the gliding pill below; the button itself stays
-       clear, so the fill can travel from step to step. */
-    [data-process-stepper][data-enhanced] .process-stepper__step[aria-expanded="true"] {
-      --lp-fill: transparent;
-      box-shadow: none;
-    }
     [data-process-stepper][data-enhanced] .process-stepper__text {
       flex-direction: column;
       align-items: center;
@@ -486,21 +482,6 @@ const labels = lang === "en"
         auto;
     }
 
-    /* The gliding pill: a grid item of its own (a pseudo-element of the
-       grid), one column wide, shifted to the open column. */
-    [data-process-stepper][data-enhanced] .process-stepper__list::before {
-      --lp-col: calc((100% - (var(--steps, 4) - 1) * 1rem) / var(--steps, 4));
-      content: "";
-      grid-row: 1;
-      grid-column: 1 / -1;
-      justify-self: start;
-      width: var(--lp-col);
-      margin-left: calc(var(--active, 0) * (var(--lp-col) + 1rem));
-      border-radius: var(--tds-radius-pill, 100px);
-      background: var(--color-soft);
-      box-shadow: var(--tds-shadow-hard-sm);
-      pointer-events: none;
-    }
     /* The notch: a small square turned 45°, under the middle of the open
        column, on the card's top edge. Same fill as the card. */
     [data-process-stepper][data-enhanced] .process-stepper__list::after {
@@ -584,9 +565,6 @@ const labels = lang === "en"
   }
 
   @media (min-width: 48rem) and (prefers-reduced-motion: no-preference) {
-    [data-process-stepper][data-enhanced] .process-stepper__list::before {
-      transition: margin-left 620ms var(--lp-ease-spring);
-    }
     [data-process-stepper][data-enhanced] .process-stepper__list::after {
       transition: margin-left 620ms var(--lp-ease-spring);
     }
