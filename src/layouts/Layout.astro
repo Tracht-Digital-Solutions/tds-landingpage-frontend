@@ -91,7 +91,10 @@ const {
 const description = givenDescription ?? siteConfig.description[lang];
 
 const site = Astro.site?.origin ?? siteConfig.url;
-const url = canonical ?? new URL(Astro.url.pathname, site).toString();
+// One spelling per page (public/.htaccess rule 0a): no trailing slash except
+// on the two roots, so the canonical and hreflang URLs match the sitemap.
+const pathname = Astro.url.pathname.replace(/(.)\/+$/, "$1").replace(/^\/en$/, "/en/");
+const url = canonical ?? new URL(pathname, site).toString();
 const ogImageAbs = ogImage.startsWith("http")
   ? ogImage
   : new URL(ogImage, site).toString();
@@ -104,13 +107,13 @@ const altOgLocale = lang === "de" ? "en_GB" : "de_DE";
 // `noindex` beside an alternate tells it to follow a link it is simultaneously
 // told to disregard. `noindex` (the prop) stays the local override for pages
 // that are never public — the legal texts, `/install`, the error pages.
-const hidden = noindex || (await isExcluded(Astro.url.pathname));
+const hidden = noindex || (await isExcluded(pathname));
 
 // Compute hreflang alternates. The neutral path is the URL without
 // the /en prefix; the EN alternate is /en + the neutral path. Skip
 // alternates entirely when the page opts out of search via
 // `noindex` (legal pages are DE-only by regulation, no EN sibling).
-const neutralPath = Astro.url.pathname.replace(/^\/en\/?/, "/") || "/";
+const neutralPath = pathname.replace(/^\/en\/?/, "/") || "/";
 const absoluteUrl = (value: string) =>
   value.startsWith("http") ? value : new URL(value, site).toString();
 const deAltUrl = alternates

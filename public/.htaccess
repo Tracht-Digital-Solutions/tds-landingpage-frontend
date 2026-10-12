@@ -51,6 +51,29 @@ Options -Indexes
   RewriteCond %{THE_REQUEST} "\s/+_tds-cache[/\s?]" [NC]
   RewriteRule ^ - [F,END]
 
+  # (0w) One host. www.tracht-digital.de answered with the same pages, and
+  #      Search Console indexed /qualifikationen and /leistungen/* under both
+  #      hosts. Every canonical names the bare domain; www answers 301 to it.
+  RewriteCond %{HTTP_HOST} ^www\.tracht-digital\.de$ [NC]
+  RewriteRule ^(.*)$ https://tracht-digital.de/$1 [R=301,L]
+
+  # (0a) One spelling per page. trailingSlash is "ignore", so /preise and
+  #      /preise/ both answer 200 — and each page's canonical used to name the
+  #      spelling it was asked for, so Search Console listed both as separate
+  #      pages and split their impressions. The sitemap, the canonical and the
+  #      hreflang links all use the spelling WITHOUT the slash (only the two
+  #      roots "/" and "/en/" keep theirs); every other spelling answers 301.
+  #      A real directory without an index.html (_astro/, og/) is left alone —
+  #      Apache's DirectorySlash would send it straight back. GET/HEAD only: a
+  #      redirected POST loses its body.
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+  RewriteRule ^en$ /en/ [R=301,L]
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+  RewriteCond %{REQUEST_URI} !^/en/$
+  RewriteCond %{DOCUMENT_ROOT}/$1 !-d [OR]
+  RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.+?)/+$ /$1 [R=301,L]
+
   # Tag the hashed asset directory so the immutable header below applies only
   # to content whose filename changes when its bytes do.
   RewriteRule ^_astro/ - [E=TDS_IMMUTABLE:1]
@@ -134,6 +157,13 @@ Options -Indexes
   <FilesMatch "\.html$">
     Header set Cache-Control "public, max-age=0, must-revalidate"
     Header append Vary "Accept-Encoding"
+  </FilesMatch>
+
+  # The AGB PDF is served from the page cache, so the X-Robots-Tag its route
+  # sets never reaches a cache hit. FilesMatch sees the mapped file name, which
+  # covers both the cache entry and a live render.
+  <FilesMatch "^agb\.pdf$">
+    Header set X-Robots-Tag "noindex"
   </FilesMatch>
 </IfModule>
 
