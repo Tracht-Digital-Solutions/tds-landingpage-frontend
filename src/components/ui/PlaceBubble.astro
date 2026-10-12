@@ -27,16 +27,42 @@ interface Props {
    * column at the right of the page, `start` for a trigger at a card's left.
    */
   anchor?: "start" | "end";
+  /**
+   * The map itself, shown in place, with no trigger and no bubble (the contact
+   * card, 2026-10-12). The live map still loads only on the first hover, focus
+   * or tap of the map, so nothing goes to OpenStreetMap before that.
+   */
+  inline?: boolean;
   class?: string;
 }
 
-const { lang, id, anchor = "start", class: className } = Astro.props;
+const { lang, id, anchor = "start", inline = false, class: className } = Astro.props;
+const inlineLabel =
+  lang === "de"
+    ? "Karte: Schwarzenbek und Umgebung. Berühren oder fokussieren lädt die interaktive Karte."
+    : "Map: Schwarzenbek and surroundings. Touch or focus it to load the interactive map.";
 const placeCaption =
   lang === "de"
     ? "Schwarzenbek bei Hamburg · Kreis Herzogtum Lauenburg"
     : "Schwarzenbek near Hamburg · District of Herzogtum Lauenburg";
 ---
 
+{inline ? (
+  <span
+    class={`place place--inline${className ? ` ${className}` : ""}`}
+    data-place
+    data-place-inline
+    id={id}
+    tabindex="0"
+    role="group"
+    aria-label={inlineLabel}
+  >
+    <span class="place__map">
+      <PlaceMap lang={lang} />
+      <span class="place__live" data-place-live></span>
+    </span>
+  </span>
+) : (
 <span class={`place place--${anchor}${className ? ` ${className}` : ""}`} data-place>
   <button
     type="button"
@@ -59,6 +85,7 @@ const placeCaption =
     </span>
   </span>
 </span>
+)}
 
 <script>
   import type { LiveMap } from "~/lib/placeMap";
@@ -72,7 +99,6 @@ const placeCaption =
     const trigger = place.querySelector<HTMLButtonElement>(".place__trigger");
     const live = place.querySelector<HTMLElement>("[data-place-live]");
     const bubble = place.querySelector<HTMLElement>(".place__bubble");
-    if (!trigger) return;
     let map: Promise<LiveMap> | null = null;
     const ensureMap = () => {
       if (!live) return;
@@ -86,6 +112,15 @@ const placeCaption =
       }
       void map?.then((m) => m.refresh());
     };
+    // The map shown in place: the first touch of it loads the live one.
+    if (place.hasAttribute("data-place-inline")) {
+      const load = () => ensureMap();
+      for (const type of ["pointerenter", "pointerdown", "focusin"]) {
+        place.addEventListener(type, load, { once: true });
+      }
+      return;
+    }
+    if (!trigger) return;
     let busy = () => false;
     const set = (open: boolean) => {
       place.toggleAttribute("data-open", open);
@@ -291,6 +326,15 @@ const placeCaption =
   }
   .place__live :global(.place-live__label::before) {
     border-top-color: var(--color-surface-navy);
+  }
+  /* In place (the contact card): no bubble, no tail, no plate; the map is the card. */
+  .place--inline {
+    display: block;
+    border-radius: 6px;
+  }
+  .place--inline:focus-visible {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 3px;
   }
   .place__caption {
     padding: 0 0.25rem 0.125rem;
