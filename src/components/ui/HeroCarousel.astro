@@ -45,6 +45,7 @@ import type { Lang } from "~/lib/i18n";
 import { localizePath } from "~/lib/i18n";
 import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
 import { mediaSrc } from "~/lib/mediaSrc";
+import { shuffled } from "~/lib/shuffle";
 
 interface Props {
   lang: Lang;
@@ -67,7 +68,7 @@ interface Example {
 }
 
 const demos = await getDemos();
-const pool: Example[] = [
+const pool: Example[] = shuffled<Example>([
   ...demos.map((demo) => ({
     key: `demo-${demo.definition.id}`,
     title: demo.title,
@@ -91,14 +92,10 @@ const pool: Example[] = [
       height: cover.height,
     };
   }),
-];
+]);
 
-// Fisher–Yates, then the first COUNT. With fewer than COUNT the wheel shows
-// what there is; below three it would not be a wheel, so it stays out.
-for (let i = pool.length - 1; i > 0; i--) {
-  const j = Math.floor(Math.random() * (i + 1));
-  [pool[i], pool[j]] = [pool[j]!, pool[i]!];
-}
+// Shuffled, then the first COUNT. With fewer than COUNT the wheel shows what
+// there is; below three it would not be a wheel, so it stays out.
 const sample = pool.slice(0, COUNT);
 const half = Math.floor(sample.length / 2);
 /** Slot of card i, in list order around the rim: the first card in front,
@@ -129,6 +126,7 @@ const ui =
               class="hero-carousel__card"
               style={`--slot: ${slot}`}
               data-depth={Math.min(Math.abs(slot), 3)}
+              data-side={slot < 0 ? "left" : slot > 0 ? "right" : undefined}
               aria-hidden={slot !== 0 ? "true" : undefined}
               data-hero-card
             >
@@ -173,9 +171,9 @@ const ui =
   import { lessMotion } from "~/lib/a11yPrefs";
 
   /** How long the front card rests before the wheel turns on its own. */
-  const REST_MS = 5200;
-  /** The turn's own length — the same number as the CSS transition. */
-  const TURN_MS = 1500;
+  const REST_MS = 6500;
+  /** The turn's own length — the same number as `--hc-turn` in the CSS. */
+  const TURN_MS = 2100;
   /** Pointer travel before a press becomes a drag (a click stays a click). */
   const SLOP_PX = 6;
 
@@ -200,6 +198,8 @@ const ui =
     const place = (card: HTMLElement, slot: number) => {
       card.style.setProperty("--slot", String(slot));
       card.dataset.depth = String(Math.min(Math.abs(slot), 3));
+      if (slot === 0) delete card.dataset.side;
+      else card.dataset.side = slot < 0 ? "left" : "right";
       const front = slot === 0;
       card.querySelector("a")?.setAttribute("tabindex", front ? "0" : "-1");
       if (front) card.removeAttribute("aria-hidden");
@@ -356,9 +356,18 @@ const ui =
          the left one lies under the hero's buttons, never beside the slogan
          (measured at 1024, 1280, 1440 and 1920). The second pair is below
          the fold; it only shows while it swings in. */
-      /* Flatter since 2026-10-12: a wider, shallower rim. */
+      /* Flatter since 2026-10-12: a wider, shallower rim — and flatter again
+         the same night (130svh → 80svh, the tilt from 22% to 10% of the
+         angle): the neighbours sink less and lean less. */
       --hc-rx: 44vw;
-      --hc-ry: 130svh;
+      --hc-ry: 80svh;
+      --hc-tilt: 0.1;
+      /* The front card's extra size: a bump that is 1 + focus at the top of
+         the wheel and has all but vanished one slot away (cos⁸ of 34° ≈ 0.22,
+         so a neighbour gains under 5%). */
+      --hc-focus: 0.18;
+      /* One turn, slower since 2026-10-12. TURN_MS in the script matches. */
+      --hc-turn: 2100ms;
       --hc-center: 78%;
       position: absolute;
       inset: 0;
@@ -381,6 +390,7 @@ const ui =
   .hero-carousel__card {
     /* `--hc-drag` is the hand's share while the wheel is dragged. */
     --hc-angle: calc(var(--slot, 0) * var(--hc-step) + var(--hc-drag, 0deg));
+    --hc-cos: cos(var(--hc-angle));
     position: absolute;
     /* The top of the wheel: right of the slogan, a little above the middle. */
     left: calc(var(--hc-center, 70%) - var(--hc-card) / 2);
@@ -392,13 +402,18 @@ const ui =
         calc(sin(var(--hc-angle)) * var(--hc-rx)),
         calc((1 - cos(var(--hc-angle))) * var(--hc-ry))
       )
-      rotate(calc(var(--hc-angle) * 0.22))
-      scale(calc(0.5 + 0.5 * cos(var(--hc-angle))));
+      rotate(calc(var(--hc-angle) * var(--hc-tilt, 0.22)))
+      scale(
+        calc(
+          (0.5 + 0.5 * var(--hc-cos)) *
+            (1 + var(--hc-focus, 0) * pow(max(var(--hc-cos), 0), 8))
+        )
+      );
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition:
-      --hc-angle 1500ms var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
       opacity 700ms var(--tds-ease-out),
       visibility 0s linear 520ms;
   }
@@ -408,7 +423,7 @@ const ui =
     visibility: visible;
     pointer-events: auto;
     transition:
-      --hc-angle 1500ms var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
       opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
@@ -418,16 +433,21 @@ const ui =
     visibility: visible;
     pointer-events: auto;
     transition:
-      --hc-angle 1500ms var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
       opacity 700ms var(--tds-ease-out),
       visibility 0s;
+  }
+  /* On the flatter rim the left neighbour rises to the slogan's height and
+     passes under its last words: fainter there, so the copy stays calm. */
+  .hero-carousel__card[data-depth="1"][data-side="left"] {
+    opacity: 0.3;
   }
   .hero-carousel__card[data-depth="2"] {
     z-index: 2;
     opacity: 0.18;
     visibility: visible;
     transition:
-      --hc-angle 1500ms var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
       opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }

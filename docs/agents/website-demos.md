@@ -89,3 +89,7 @@ Each demo embeds only `<tds-brand-bar lang="…">` with a fallback link plus
 - One knob: `--tds-brand-bar-pad-bottom` for a host with a floating button over the bar.
 - `.htaccess` caches `/embed/` for an hour.
 - `brandBar.test.ts` holds the contract. **Edit the bar here, never in a demo.**
+
+- Order is drawn per render (2026-10-12, `src/lib/shuffle.ts`): the showcase shuffles demos among
+  demos and studies among studies (running sites still lead); the hero carousel samples from both.
+  The page cache keeps one draw until it renders again — at the latest the next day (daily gate).

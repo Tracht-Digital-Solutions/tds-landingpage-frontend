@@ -43,6 +43,7 @@ import { cmsFor } from "~/lib/cms";
 import { demosCopy, getHomeContent } from "~/lib/homeContent";
 import { getDemos } from "~/lib/demos";
 import { designStudies } from "~/lib/designStudies";
+import { shuffled } from "~/lib/shuffle";
 import { getServiceById, serviceHref } from "~/lib/services";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import DemoCard from "~/components/ui/DemoCard.astro";
@@ -98,10 +99,14 @@ type Slide =
  * card two tracks wide from `lg`; Julian asked for equal widths, so the shelf
  * reads as a row of peers. All three card families answer the width through
  * their own container query.
+ *
+ * Drawn anew on every render (2026-10-12): demos among demos, studies among
+ * studies, so running sites still lead. The page cache keeps one order until
+ * it renders again — at the latest the next day.
  */
 const slides: Slide[] = [
-  ...demos.map((demo): Slide => ({ kind: "demo", key: `demo:${demo.definition.id}`, demo })),
-  ...designStudies.map((study): Slide => ({ kind: "study", key: `study:${study.id}`, study })),
+  ...shuffled(demos).map((demo): Slide => ({ kind: "demo", key: `demo:${demo.definition.id}`, demo })),
+  ...shuffled(designStudies).map((study): Slide => ({ kind: "study", key: `study:${study.id}`, study })),
   { kind: "business-card", key: "business-card" },
 ];
 

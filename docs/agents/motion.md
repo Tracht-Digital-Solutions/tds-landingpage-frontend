@@ -99,3 +99,7 @@ within 72 px of the right edge.
 ## Showcase drift
 
 See [website-demos.md](website-demos.md#the-showcase-shelf).
+
+- Hero carousel (2026-10-12): front card `--hc-focus` 0.18 (cos⁸ bump), flatter rim (`--hc-ry` 80svh,
+  `--hc-tilt` 0.1), slower (`--hc-turn` 2100ms = `TURN_MS`, rest 6.5 s). The left neighbour rises
+  under the slogan on the flat rim, so it rests at opacity 0.3 (`data-side`).
