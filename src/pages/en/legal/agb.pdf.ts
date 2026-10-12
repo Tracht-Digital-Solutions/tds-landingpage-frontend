@@ -19,6 +19,9 @@ export const GET: APIRoute = async () => {
   return new Response(new Uint8Array(bytes), {
     headers: {
       "Content-Type": "application/pdf",
+      // The AGB page around it is noindex; the bare PDF was still listed for
+      // brand searches (Search Console 2026-10), taking a result slot.
+      "X-Robots-Tag": "noindex",
       "Content-Disposition": 'inline; filename="terms-tracht-digital-solutions.pdf"',
     },
   });
