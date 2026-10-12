@@ -289,6 +289,12 @@ const ui =
       cursor: grabbing;
       user-select: none;
     }
+    /* While dragged AND while it coasts after the release (the class stays
+       until the glide rests), the cards take no hover: the card that was under
+       the hand would otherwise keep its hover look while it slid away. */
+    .showcase__track.is-dragging > :global(*) {
+      pointer-events: none;
+    }
   }
   /* While the shelf runs on its own, snapping and smooth scrolling would
      fight every frame it writes; both return when it stops for good. */
@@ -307,7 +313,7 @@ const ui =
    * arrow buttons are gone.
    *
    * - **Autoscroll:** the track drifts left at `SPEED` px/s. The cards are
-   *   cloned once behind the originals — the clones `aria-hidden`, `inert`,
+   *   cloned once behind the originals — the clones `aria-hidden`,
    *   without ids and out of the tab order — so the drift loops without a
    *   seam: past the width of the original set, the position wraps back.
    * - **It stops** while the pointer rests on the shelf, while focus is
@@ -347,6 +353,19 @@ const ui =
     let loop = 0;
     /** Restarts the drift; replaced below once the shelf can drift at all. */
     let resume = () => {};
+    /**
+     * Fold a scroll position into `[1, loop + 1)` — the shelf has NO ends,
+     * backwards included (2026-10-12). `scrollLeft` cannot go below 0, so a
+     * position at the left edge is moved one set further right, onto the
+     * identical copy, before the browser can clamp it; the window there always
+     * has a copy to its left. Unchanged until the clones exist (`loop` 0).
+     */
+    const wrap = (value: number) => {
+      if (loop <= 0) return value;
+      while (value < 1) value += loop;
+      while (value >= loop + 1) value -= loop;
+      return value;
+    };
 
     let dragging = false;
     let moved = false;
@@ -386,11 +405,10 @@ const ui =
         (delta) => {
           // Someone else moved it (the endless wrap below): follow.
           if (Math.abs(track.scrollLeft - position) > 2) position = track.scrollLeft;
-          position += delta;
-          if (loop > 0 && position >= loop) position -= loop;
+          position = wrap(position + delta);
           track.scrollLeft = position;
-          // The start of the shelf is a hard edge; stop there.
-          return position > 0;
+          // Before the clones exist the start is still a hard edge.
+          return loop > 0 || position > 0;
         },
         () => {
           stopGlide = null;
@@ -446,7 +464,12 @@ const ui =
         track.setPointerCapture?.(event.pointerId);
       }
 
-      track.scrollLeft = startScroll - dx;
+      // Wrapped, and the anchor moves with it, so the next move continues from
+      // the copy instead of jumping back to the clamped edge.
+      const wanted = startScroll - dx;
+      const wrapped = wrap(wanted);
+      startScroll += wrapped - wanted;
+      track.scrollLeft = wrapped;
     });
 
     for (const type of ["pointerup", "pointercancel", "pointerleave"]) {
@@ -491,7 +514,7 @@ const ui =
      * clones were ever appended and the track simply ended after the last real
      * card. Scrolling right ran into the paper edge.
      *
-     * A clone is LAYOUT. It moves nothing by existing, it is `inert` and
+     * A clone is LAYOUT. It moves nothing by existing, it is out of the tab order and
      * `aria-hidden`, and a reader who has asked for less motion still expects a
      * shelf they can push to keep going. What the preference switches off is
      * the drift: the per-frame `scrollLeft` write below.
@@ -515,7 +538,10 @@ const ui =
       const clone = slide.cloneNode(true) as HTMLElement;
       clone.classList.add("showcase__slide--clone");
       clone.setAttribute("aria-hidden", "true");
-      clone.setAttribute("inert", "");
+      // NOT `inert` (2026-10-12): after the wrap the visitor is looking at
+      // clones, and `inert` switched their hover, tilt and links off until the
+      // originals came round again. `aria-hidden` plus `tabindex="-1"` on every
+      // focusable keeps them out of assistive tech and the tab order.
       for (const node of [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))]) {
         node.removeAttribute("id");
         if (node.tabIndex >= 0) node.tabIndex = -1;
@@ -633,10 +659,12 @@ const ui =
     track.addEventListener(
       "scroll",
       () => {
-        if (frame || loop <= 0 || track.scrollLeft < loop) return;
+        if (frame || dragging || stopGlide || loop <= 0) return;
+        const next = wrap(track.scrollLeft);
+        if (next === track.scrollLeft) return;
         const previous = track.style.scrollBehavior;
         track.style.scrollBehavior = "auto";
-        track.scrollLeft -= loop;
+        track.scrollLeft = next;
         track.style.scrollBehavior = previous;
       },
       { passive: true },
