@@ -34,7 +34,7 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
     "03": {
       detail:
         "Gebaut wird in kurzen, sichtbaren Schritten. Du siehst früh Zwischenstände zum Ausprobieren – nachsteuern ist unterwegs günstig, hinterher teuer.",
-      outcome: "Du siehst unterwegs, wie es wird — nicht erst am Ende.",
+      outcome: "Keine Überraschung zum Start.",
     },
     "04": {
       detail:
@@ -56,7 +56,7 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
     "03": {
       detail:
         "It gets built in short, visible steps. You see work in progress early — changing course is cheap along the way and expensive afterwards.",
-      outcome: "You see it taking shape along the way, not at the end.",
+      outcome: "No surprises at launch.",
     },
     "04": {
       detail:

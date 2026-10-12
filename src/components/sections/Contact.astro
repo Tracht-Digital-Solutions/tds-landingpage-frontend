@@ -941,37 +941,40 @@ const ui =
 
   /* === Contact form: the emergency checkbox =========================
 
-     The consent checkbox's round box, in a row of its own that turns pink when
-     it is ticked, so the choice is visible from across the form. */
+     The consent checkbox's round box, in a row of its own. Unticked the row is
+     a well pressed into the navy; ticked it is FILLED (2026-10-12): solid
+     pink, no inset shadow, navy type, and the box turns navy so its tick
+     still shows on the pink. */
   .contact-urgent-toggle {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.75rem;
     padding: 0.875rem 1rem;
     border-radius: 10px;
     background: rgb(0 0 0 / 0.2);
     box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.32);
     cursor: pointer;
-    transition: background-color 200ms ease;
-  }
-  .contact-urgent-toggle .contact-consent-box {
-    margin-top: 0.125rem;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
   }
   .contact-urgent-toggle:has(.contact-consent-input:checked) {
-    background: color-mix(in srgb, var(--color-accent-pink) 22%, transparent);
+    background: var(--color-accent-pink);
+    box-shadow: none;
+  }
+  .contact-urgent-toggle .contact-consent-input:checked + .contact-consent-box {
+    background-color: var(--color-surface-navy);
+    border-color: var(--color-surface-navy);
   }
   .contact-urgent-toggle__title {
     display: block;
     font-size: 0.9375rem;
     font-weight: 600;
     color: #fff;
+    transition: color 200ms ease;
   }
-  .contact-urgent-toggle__hint {
-    display: block;
-    margin-top: 0.125rem;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    color: rgb(255 255 255 / 0.65);
+  .contact-urgent-toggle:has(.contact-consent-input:checked) .contact-urgent-toggle__title {
+    color: var(--color-surface-navy);
   }
 
   /* === Contact form: what happens next ==============================

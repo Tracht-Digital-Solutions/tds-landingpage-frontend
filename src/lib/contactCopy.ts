@@ -45,7 +45,6 @@ export interface ContactFormCopy {
    * panel without a new field in tds-shared's `ContactSchema`.
    */
   urgentLabel: string;
-  urgentHint: string;
   urgentSubject: string;
 }
 
@@ -61,8 +60,7 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
       reasonEmpty: "Please choose",
       messageHint:
         "Two or three sentences are enough: what is not working, since when, and the address of the site.",
-      urgentLabel: "Emergency – I need help at short notice",
-      urgentHint: "Your request arrives marked as an emergency. Faster still: call me.",
+      urgentLabel: "Emergency",
       urgentSubject: "Emergency",
     };
   }
@@ -76,8 +74,7 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
     reasonEmpty: "Bitte auswählen",
     messageHint:
       "Zwei, drei Sätze genügen: was nicht funktioniert, seit wann, und die Adresse der Seite.",
-    urgentLabel: "Notfall – ich brauche kurzfristig Hilfe",
-    urgentHint: "Deine Anfrage kommt als Notfall markiert an. Noch schneller geht es telefonisch.",
+    urgentLabel: "Notfall",
     urgentSubject: "Notfall",
     errors: {
       ...t.errors,

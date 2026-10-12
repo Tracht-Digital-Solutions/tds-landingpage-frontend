@@ -112,8 +112,11 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   `subject` = "Notfall – <reason>" (max 200). Copy in `lib/contactCopy.ts`.
 - The contact card is four labelled groups with one icon-disc style: ways (e-mail, phone, WhatsApp), Standort,
   Zum Mitnehmen (business card, .vcf), profiles.
-- **Footer contact** shows icon + label per line; "21493 Schwarzenbek" is a button that opens a bubble (hover,
-  focus, tap; Escape closes) with `ui/PlaceMap.astro`, a drawn SVG map — no map tiles, so no third-party request.
+- **Footer contact** shows an icon per line, no labels (2026-10-12); "21493 Schwarzenbek" is a button that opens a
+  bubble (hover, focus, tap; Escape closes). The first open loads Leaflet and **OpenStreetMap tiles**
+  (`lib/placeMap.ts`, asked for on hover without a consent step; the privacy policy names it under "Externe
+  Dienste" — an edited policy in the CMS needs the same paragraph). Draggable and zoomable, a pin on Schwarzenbek,
+  the dashed area reaching Bergedorf. The drawn `ui/PlaceMap.astro` stays underneath as the no-JS picture.
 - `contactForm.test.ts` holds all of this. The form uses `src/lib/connection.ts`.
 
 ## Prices (`#preise`, `sections/Pricing.astro`)

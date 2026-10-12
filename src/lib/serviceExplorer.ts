@@ -86,11 +86,18 @@ export function mountServiceExplorer(root: HTMLElement, options: MountOptions = 
 
   const show = (next: number | null, animate: boolean) => {
     const changed = next !== open;
+    // Which way the switch went, for the card's entrance (CSS `--dir`).
+    if (changed && open !== null && next !== null) root.style.setProperty("--dir", next > open ? "1" : "-1");
     open = next;
     buttons.forEach((button, index) => {
       const expanded = index === open;
       button.setAttribute("aria-expanded", String(expanded));
-      panels[index]!.hidden = !expanded;
+      // From 64rem a closed panel stays laid out (`data-closed`, invisible in
+      // CSS) so the card keeps one height; `hidden` would take it out of the
+      // layout — Tailwind's preflight makes `[hidden]` `display: none
+      // !important`. The accordion keeps `hidden`.
+      panels[index]!.hidden = !expanded && !desktop.matches;
+      panels[index]!.toggleAttribute("data-closed", !expanded);
     });
     root.dataset.open = open === null ? "" : String(open);
     placeMarker();

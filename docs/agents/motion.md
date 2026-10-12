@@ -29,13 +29,13 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | Floating pill | `floatingCta.ts` | Springs its slots |
 | Bookmarks | `propertyTabs.ts` | Slide-in springs, neighbours lean |
 | Brand bars | `brandbar.ts` | Each `.tds-brandbar` is split into three `aria-hidden` key spans coloured from the bar's computed layers (`.lp-brandbar-keys` hides the layers) and played like keys: the key under the pointer jumps and stretches on a stiff spring, neighbours follow, all drop back with a crisp bounce. Only the spans' `transform` and `height` are written (height, not `scaleY`, so every key stays a pill) |
-| Cards in depth (`[data-motion-tilt]`) | `tilt.ts` | Price packages and showcase cards lean up to 6° toward a fine pointer (`rotateX`/`rotateY`, perspective 900 px) and spring back flat with a light bounce. Delegated from `document`, so showcase clones tilt too; flat while the shelf is dragged. Composes with the packages' `y` lift; no glare, no shadow animation. Never on a seam mosaic cell (service tiles): the tilted cell tears the 1 px seams |
+| Cards in depth (`[data-motion-tilt]`) | `tilt.ts` | Price packages and showcase cards lean up to 6° toward a fine pointer (`rotateX`/`rotateY`, perspective 900 px) and spring back flat with a light bounce. Delegated from `document`, so showcase clones tilt too; flat while the shelf is dragged. No glare, no shadow animation. Never on a seam mosaic cell (service tiles): the tilted cell tears the 1 px seams |
 | Drawn cursor | `islands/CustomCursor.tsx`, `lib/cursorAbsorb.ts` | See below |
 | Page scroll bar | `pageScrollbar.ts`, `components/PageScrollbar.astro` | See below |
 | Generated photos (`[data-motion-image]`) | `images.ts` | Settle from a larger scale on scroll-in, then drift ±20 px; transform only |
 | Page transitions | `pageTransition.ts` | `<main>` animates out on a same-site click and the next `<main>` in. The header is fixed outside `<main>`. Hand-over via a sessionStorage flag read by an inline head script (`PAGE_ENTER_SCRIPT`), CSS failsafe after 1.5 s; a first visit never carries it. The native cross-document View Transition was removed |
 | Business card | `businessCard.ts` | Docked card spring |
-| UX cues | `ux.ts` | A pill glides behind the header link of the section on screen (`aria-current="location"`); price cards arrive staggered and lift on hover; contact form rows arrive as one staggered group (`[data-motion-stagger]`, honeypot skipped) |
+| UX cues | `ux.ts` | A pill glides behind the header link of the section on screen (`aria-current="location"`); price cards arrive staggered and never rise on hover (2026-10-12; they only lean, `tilt.ts`); contact form rows arrive as one staggered group (`[data-motion-stagger]`, honeypot skipped) |
 | Process stepper | `sections/Process.astro` (CSS + a small script) | One round pill glides behind the open step and the card's notch glides with it (`--lp-ease-spring`); the dot pops; the new card swings in from the chosen step's side while the old one leaves. All cards stay laid out in one cell, so the section never changes height; on a phone the accordion folds (`grid-template-rows`) |
 | Hero carousel | `ui/HeroCarousel.astro` (CSS + a small script) | See [Hero](#hero) |
 | Modals | `dialog.ts` | Bounce in and out (Escape included; `cancel` is intercepted), always ending in `dialog.close()` behind a timeout. One flat navy backdrop, one flat dialog colour, a bare close cross |
@@ -75,12 +75,15 @@ within 72 px of the right edge.
   pose in CSS (`.hero-shape--still`).
 - The scroll-linked part is CSS (`animation-timeline: view()`), not a hook.
 - **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render from the demos and
-  design studies, on a steep wheel right of the slogan — front card on top, neighbours under the buttons at
-  50 % / 18 % opacity, the rest hidden. A turn every 3.6 s changes `--slot`; the registered `--hc-angle`
-  derived from it transitions with `--lp-ease-swing`, and position, scale and tilt are `sin()`/`cos()` of that
-  angle, so cards travel the arc and swing past their place. Plain Astro, no island; it sits behind the copy
-  (only the hero's links take the pointer). Pauses under the pointer, with focus inside, off screen, in a hidden
-  tab, under reduced motion and the motion switch. Only the front card is reachable (the others are `inert`).
+  design studies, on a flat wheel right of the slogan (2026-10-12: flatter, slower, larger cards) — front card on
+  top, neighbours lower at 50 % / 18 % opacity, the rest hidden. A turn every 5.2 s changes `--slot`; the
+  registered `--hc-angle` derived from it transitions with `--lp-ease-swing` (1.5 s), and position, scale and tilt
+  are `sin()`/`cos()` of that angle, so cards travel the arc and swing past their place. **Dragging** turns it with
+  the hand (`--hc-drag`, capture only after a 6 px slop) and springs onto the nearest card on release, a flick one
+  further; a click on a neighbour brings it forward. Plain Astro, no island; it sits behind the copy (only the
+  hero's links take the pointer). Pauses under the pointer, with focus inside, while dragged, off screen, in a hidden
+  tab, under reduced motion and the motion switch. Only the front card's link is in the tab order; the others are
+  `aria-hidden` with `tabindex="-1"` but stay clickable.
 - **On a phone the shapes keep to measured bands:** smaller, less drift (`narrow` in `HeroDecor.tsx`, never in
   `initial`, which is server-rendered; a width-dependent start state was a hydration mismatch), no scroll drift.
   `audit:ux` at 360 × 740 is the tightest case.

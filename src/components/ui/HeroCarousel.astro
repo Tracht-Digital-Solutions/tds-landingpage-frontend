@@ -32,8 +32,11 @@
  * an angle, so a card swings past the top and settles. The fade is a separate
  * property with a plain ease (never an overshoot on opacity).
  *
- * Only the front card is reachable: the others are `inert`. Every card leads
- * to the showcase section, where the same examples can be opened.
+ * The wheel answers the pointer (2026-10-12): drag it and it turns with the
+ * hand, let go and it springs onto the nearest card (a flick carries one
+ * further); click a neighbour and it comes to the front. Only the front card
+ * is a link a keyboard reaches; the others are `aria-hidden` and out of the
+ * tab order, but stay clickable. Every card leads to the showcase section.
  */
 import { getDemos } from "~/lib/demos";
 import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
@@ -126,16 +129,22 @@ const ui =
               class="hero-carousel__card"
               style={`--slot: ${slot}`}
               data-depth={Math.min(Math.abs(slot), 3)}
-              inert={slot !== 0}
               aria-hidden={slot !== 0 ? "true" : undefined}
               data-hero-card
             >
-              <a class="hero-carousel__link" href={href} data-track="hero-carousel">
+              <a
+                class="hero-carousel__link"
+                href={href}
+                tabindex={slot !== 0 ? -1 : undefined}
+                draggable="false"
+                data-track="hero-carousel"
+              >
                 <span class="hero-carousel__shot">
                   <img
                     src={example.src}
                     srcset={example.srcset}
-                    sizes="21rem"
+                    sizes="25rem"
+                    draggable="false"
                     width={example.width}
                     height={example.height}
                     alt=""
@@ -163,10 +172,12 @@ const ui =
 <script>
   import { lessMotion } from "~/lib/a11yPrefs";
 
-  /** How long the front card rests before the wheel turns. */
-  const REST_MS = 3600;
-  /** The transition's own length, from the CSS — the hidden wrap waits it out. */
-  const TURN_MS = 1100;
+  /** How long the front card rests before the wheel turns on its own. */
+  const REST_MS = 5200;
+  /** The turn's own length — the same number as the CSS transition. */
+  const TURN_MS = 1500;
+  /** Pointer travel before a press becomes a drag (a click stays a click). */
+  const SLOP_PX = 6;
 
   document.querySelectorAll<HTMLElement>("[data-hero-carousel]").forEach((root) => {
     const cards = [...root.querySelectorAll<HTMLElement>("[data-hero-card]")];
@@ -174,29 +185,37 @@ const ui =
     if (n < 3) return;
     const half = Math.floor(n / 2);
     let slots = cards.map((card) => Number(card.style.getPropertyValue("--slot")) || 0);
+    const wheel = root.querySelector<HTMLElement>(".hero-carousel__wheel")!;
+    /** The angle between two slots, read from the CSS (`--hc-step`). */
+    const step = () => parseFloat(getComputedStyle(root).getPropertyValue("--hc-step")) || 34;
+    /** Degrees of turn per pixel dragged: one card per fifth of the hero. */
+    const degPerPx = () => step() / Math.max(160, wheel.clientWidth * 0.2);
 
     let onScreen = false;
     let hovered = false;
     let focused = false;
+    let dragging = false;
     let timer = 0;
 
     const place = (card: HTMLElement, slot: number) => {
       card.style.setProperty("--slot", String(slot));
       card.dataset.depth = String(Math.min(Math.abs(slot), 3));
       const front = slot === 0;
-      card.inert = !front;
+      card.querySelector("a")?.setAttribute("tabindex", front ? "0" : "-1");
       if (front) card.removeAttribute("aria-hidden");
       else card.setAttribute("aria-hidden", "true");
     };
 
-    const turn = () => {
+    /** Turn the wheel by `by` cards; positive brings the right-hand ones forward. */
+    const turn = (by: number) => {
+      if (by === 0) return;
       slots = slots.map((slot, i) => {
-        let next = slot - 1;
+        const raw = slot - by;
+        const next = ((((raw + half) % n) + n) % n) - half;
         const card = cards[i]!;
-        if (next < -half) {
-          // Off the left rim, onto the right one: a jump, made while the
-          // card is at the hidden back of the wheel, so without a transition.
-          next += n;
+        if (next !== raw) {
+          // Round the back of the wheel: a jump, made while the card is out
+          // of sight, so without a transition.
           card.dataset.wrap = "";
           place(card, next);
           void card.offsetWidth;
@@ -208,16 +227,82 @@ const ui =
       });
     };
 
-    const running = () => onScreen && !hovered && !focused && !document.hidden && !lessMotion();
+    const running = () => onScreen && !hovered && !focused && !dragging && !document.hidden && !lessMotion();
     const schedule = () => {
       window.clearTimeout(timer);
       if (!running()) return;
       // The rest is counted from the end of the previous turn.
       timer = window.setTimeout(() => {
-        turn();
+        turn(1);
         timer = window.setTimeout(schedule, TURN_MS);
       }, REST_MS);
     };
+
+    // --- The pointer: drag to turn, click a neighbour to bring it forward.
+    let press: { id: number; x: number; t: number; lastT: number } | null = null;
+    let swallowClick = false;
+
+    wheel.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || !(event.target as Element).closest("[data-hero-card]")) return;
+      press = { id: event.pointerId, x: event.clientX, t: event.timeStamp, lastT: event.timeStamp };
+    });
+    wheel.addEventListener("pointermove", (event) => {
+      if (!press || event.pointerId !== press.id) return;
+      const dx = event.clientX - press.x;
+      if (!dragging) {
+        if (Math.abs(dx) < SLOP_PX) return;
+        // Capture only past the slop: captured from the press, a plain click
+        // would never reach the card.
+        dragging = true;
+        wheel.setPointerCapture(event.pointerId);
+        root.dataset.dragging = "";
+        window.clearTimeout(timer);
+      }
+      root.style.setProperty("--hc-drag", `${dx * degPerPx()}deg`);
+      press.lastT = event.timeStamp;
+    });
+    const release = (event: PointerEvent) => {
+      if (!press || event.pointerId !== press.id) return;
+      const dx = event.clientX - press.x;
+      const moving = event.timeStamp - press.lastT < 80;
+      const velocity = moving ? dx / Math.max(1, event.timeStamp - press.t) : 0;
+      press = null;
+      if (!dragging) return;
+      dragging = false;
+      swallowClick = true;
+      const turned = (dx * degPerPx()) / step();
+      // The nearest card; a quick flick carries the wheel one further.
+      let by = Math.round(Math.abs(velocity) > 0.6 ? turned + Math.sign(velocity) * 0.6 : turned);
+      by = Math.max(-half, Math.min(half, by));
+      // In one frame: the hand lets go and the slots move, so the spring
+      // starts where the hand left the cards.
+      delete root.dataset.dragging;
+      root.style.setProperty("--hc-drag", "0deg");
+      // Dragging right brings the left-hand cards forward.
+      turn(-by);
+      schedule();
+    };
+    wheel.addEventListener("pointerup", release);
+    wheel.addEventListener("pointercancel", release);
+
+    wheel.addEventListener(
+      "click",
+      (event) => {
+        if (swallowClick) {
+          swallowClick = false;
+          event.preventDefault();
+          return;
+        }
+        const card = (event.target as Element).closest<HTMLElement>("[data-hero-card]");
+        if (!card) return;
+        const slot = slots[cards.indexOf(card)] ?? 0;
+        if (slot === 0) return; // The front card is a link.
+        event.preventDefault();
+        turn(slot);
+        schedule();
+      },
+      true,
+    );
 
     root.addEventListener("pointerenter", () => {
       hovered = true;
@@ -265,14 +350,15 @@ const ui =
     .hero-carousel {
       /* The wheel's measurements: one card width, the step between two slots
          on the rim, and the rim's two radii (wider than tall: a flat arc). */
-      --hc-card: clamp(13rem, 19vw, 23rem);
-      --hc-step: 44deg;
+      --hc-card: clamp(15rem, 21vw, 25rem);
+      --hc-step: 34deg;
       /* A steep arc, as in the sketch: the neighbours drop far enough that
          the left one lies under the hero's buttons, never beside the slogan
          (measured at 1024, 1280, 1440 and 1920). The second pair is below
          the fold; it only shows while it swings in. */
-      --hc-rx: 40vw;
-      --hc-ry: 185svh;
+      /* Flatter since 2026-10-12: a wider, shallower rim. */
+      --hc-rx: 44vw;
+      --hc-ry: 130svh;
       --hc-center: 78%;
       position: absolute;
       inset: 0;
@@ -293,7 +379,8 @@ const ui =
   }
 
   .hero-carousel__card {
-    --hc-angle: calc(var(--slot, 0) * var(--hc-step));
+    /* `--hc-drag` is the hand's share while the wheel is dragged. */
+    --hc-angle: calc(var(--slot, 0) * var(--hc-step) + var(--hc-drag, 0deg));
     position: absolute;
     /* The top of the wheel: right of the slogan, a little above the middle. */
     left: calc(var(--hc-center, 70%) - var(--hc-card) / 2);
@@ -311,8 +398,8 @@ const ui =
     visibility: hidden;
     pointer-events: none;
     transition:
-      --hc-angle 1100ms var(--lp-ease-swing),
-      opacity 520ms var(--tds-ease-out),
+      --hc-angle 1500ms var(--lp-ease-swing),
+      opacity 700ms var(--tds-ease-out),
       visibility 0s linear 520ms;
   }
   .hero-carousel__card[data-depth="0"] {
@@ -321,17 +408,18 @@ const ui =
     visibility: visible;
     pointer-events: auto;
     transition:
-      --hc-angle 1100ms var(--lp-ease-swing),
-      opacity 520ms var(--tds-ease-out),
+      --hc-angle 1500ms var(--lp-ease-swing),
+      opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
   .hero-carousel__card[data-depth="1"] {
     z-index: 3;
     opacity: 0.5;
     visibility: visible;
+    pointer-events: auto;
     transition:
-      --hc-angle 1100ms var(--lp-ease-swing),
-      opacity 520ms var(--tds-ease-out),
+      --hc-angle 1500ms var(--lp-ease-swing),
+      opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
   .hero-carousel__card[data-depth="2"] {
@@ -339,12 +427,30 @@ const ui =
     opacity: 0.18;
     visibility: visible;
     transition:
-      --hc-angle 1100ms var(--lp-ease-swing),
-      opacity 520ms var(--tds-ease-out),
+      --hc-angle 1500ms var(--lp-ease-swing),
+      opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
   .hero-carousel__card[data-wrap] {
     transition: none;
+  }
+  /* The hand turns it: the cards follow the pointer without lag, and fade
+     with their depth as usual. */
+  .hero-carousel[data-dragging] .hero-carousel__card {
+    transition:
+      opacity 700ms var(--tds-ease-out),
+      visibility 0s;
+  }
+  .hero-carousel__wheel {
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .hero-carousel__card[data-depth="1"] {
+    cursor: pointer;
+  }
+  .hero-carousel[data-dragging],
+  .hero-carousel[data-dragging] * {
+    cursor: grabbing;
   }
 
   @media (min-width: 80rem) {

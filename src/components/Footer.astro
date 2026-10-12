@@ -121,9 +121,9 @@ const placeCaption =
         <p class="eyebrow text-white/60 mb-4">
           {footer.contactTitle}
         </p>
-        {/* Each line says what it is (2026-10-11): an icon and a label per
-            way, so the address, the number and the town do not read as three
-            loose strings. */}
+        {/* Each line says what it is by its icon (2026-10-11). The small
+            labels above the values went on 2026-10-12, asked for: the icon
+            and the value say it. */}
         <ul class="footer-contact text-sm">
           <li class="footer-contact__row">
             <span class="footer-contact__icon" aria-hidden="true">
@@ -133,7 +133,6 @@ const placeCaption =
               </svg>
             </span>
             <span class="footer-contact__text">
-              <span class="footer-contact__label">{t.contact.info.emailLabel}</span>
               <a href={`mailto:${contact.email}`} class="footer-link text-white/85 hover:text-white">
                 {contact.email}
               </a>
@@ -146,7 +145,6 @@ const placeCaption =
               </svg>
             </span>
             <span class="footer-contact__text">
-              <span class="footer-contact__label">{t.contact.info.phoneLabel}</span>
               <a href={telHref} class="footer-link text-white/85 hover:text-white">
                 {contact.phone}
               </a>
@@ -156,8 +154,10 @@ const placeCaption =
               (not the CMS string) so it always matches the Impressum and the
               PostalAddress in JSON-LD. Street stays Impressum-only.
 
-              Hover, focus or a tap opens a bubble with a drawn map of the
-              area (`ui/PlaceMap.astro`). Without the script, hover and
+              Hover, focus or a tap opens a bubble with a map of the area:
+              OpenStreetMap through Leaflet, draggable and zoomable, loaded on
+              the first open (`lib/placeMap.ts`, 2026-10-12), over the drawn
+              map (`ui/PlaceMap.astro`) that stands in until then. Without the script, hover and
               focus-within show it; with it, `data-open` does, so Escape and a
               second tap can close it. The bubble is hoverable itself, so the
               pointer can move onto it (WCAG 1.4.13). */}
@@ -169,7 +169,6 @@ const placeCaption =
               </svg>
             </span>
             <span class="footer-contact__text">
-              <span class="footer-contact__label">{t.contact.info.locationLabel}</span>
               <span class="footer-place" data-footer-place>
                 <button
                   type="button"
@@ -181,7 +180,13 @@ const placeCaption =
                 </button>
                 <span class="footer-place__bubble" id="footer-place-bubble">
                   <span class="footer-place__card">
-                    <PlaceMap lang={lang} />
+                    {/* The drawn map is the picture without JavaScript and
+                        while tiles load; the live map (`lib/placeMap.ts`)
+                        mounts over it on the first open. */}
+                    <span class="footer-place__map">
+                      <PlaceMap lang={lang} />
+                      <span class="footer-place__live" data-place-live></span>
+                    </span>
                     <span class="footer-place__caption">{placeCaption}</span>
                   </span>
                 </span>
@@ -218,16 +223,38 @@ const placeCaption =
 </footer>
 
 <script>
+  import type { LiveMap } from "~/lib/placeMap";
+
   /**
    * The location bubble: open on hover (fine pointer), keyboard focus or a
-   * tap; closed on leaving, blur, a second tap or Escape.
+   * tap; closed on leaving, blur, a second tap or Escape. The first open
+   * mounts the live map; it stays open while the map is dragged.
    */
   document.querySelectorAll<HTMLElement>("[data-footer-place]").forEach((place) => {
     const trigger = place.querySelector<HTMLButtonElement>(".footer-place__trigger");
+    const live = place.querySelector<HTMLElement>("[data-place-live]");
     if (!trigger) return;
+    let map: Promise<LiveMap> | null = null;
+    const ensureMap = () => {
+      if (!live) return;
+      if (!map) {
+        const lang = document.documentElement.lang.startsWith("en") ? "en" : "de";
+        map = import("~/lib/placeMap").then(({ mountLiveMap }) => mountLiveMap(live, lang));
+        map.then(() => place.setAttribute("data-live", "")).catch(() => {
+          // No map service: the drawn map stays.
+          map = null;
+        });
+      }
+      void map?.then((m) => m.refresh());
+    };
+    let busy = () => false;
     const set = (open: boolean) => {
       place.toggleAttribute("data-open", open);
       trigger.setAttribute("aria-expanded", String(open));
+      if (open) {
+        ensureMap();
+        void map?.then((m) => (busy = m.busy));
+      }
     };
     place.setAttribute("data-enhanced", "");
     const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -240,6 +267,17 @@ const placeCaption =
     });
     place.addEventListener("pointerleave", () => {
       openedByHover = false;
+      // A drag on the map may leave the bubble; it closes when the hand lets go outside.
+      if (busy()) {
+        window.addEventListener(
+          "pointerup",
+          (event) => {
+            if (!place.contains(document.elementFromPoint(event.clientX, event.clientY))) set(false);
+          },
+          { once: true },
+        );
+        return;
+      }
       if (hoverable.matches && !place.contains(document.activeElement)) set(false);
     });
     trigger.addEventListener("focus", () => {
@@ -296,12 +334,6 @@ const placeCaption =
     align-items: flex-start;
     gap: 0.0625rem;
   }
-  .footer-contact__label {
-    font-size: 0.6875rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: rgb(255 255 255 / 0.6);
-  }
   .footer-contact__text a {
     overflow-wrap: anywhere;
   }
@@ -339,7 +371,7 @@ const placeCaption =
     bottom: 100%;
     left: 0;
     z-index: 20;
-    width: min(18rem, calc(100vw - 3rem));
+    width: min(22rem, calc(100vw - 3rem));
     padding-bottom: 0.75rem;
     visibility: hidden;
     opacity: 0;
@@ -390,6 +422,54 @@ const placeCaption =
       left: auto;
       right: 1.5rem;
     }
+  }
+  /* The live map lies exactly over the drawn one (same 4:3 box). */
+  .footer-place__map {
+    position: relative;
+    display: block;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .footer-place__live {
+    position: absolute;
+    inset: 0;
+    display: block;
+    visibility: hidden;
+    background: transparent;
+  }
+  .footer-place[data-live] .footer-place__live {
+    visibility: visible;
+  }
+  /* Leaflet's DOM is created at runtime, so these reach it with :global(). The
+     tiles are muted toward the site's palette; the controls take its shapes. */
+  .footer-place__live :global(.leaflet-tile-pane) {
+    filter: grayscale(0.55) contrast(0.95) brightness(1.03);
+  }
+  .footer-place__live :global(.leaflet-control-zoom) {
+    border: 0;
+    box-shadow: 3px 3px 0 0 var(--color-accent-pink);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .footer-place__live :global(.leaflet-control-zoom a) {
+    color: var(--color-surface-navy);
+  }
+  .footer-place__live :global(.leaflet-control-attribution) {
+    font-size: 9px;
+  }
+  .footer-place__live :global(.place-live__label) {
+    padding: 2px 8px;
+    border: 0;
+    border-radius: 9999px;
+    background: var(--color-surface-navy);
+    box-shadow: none;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .footer-place__live :global(.place-live__label::before) {
+    border-top-color: var(--color-surface-navy);
   }
   .footer-place__caption {
     padding: 0 0.25rem 0.125rem;
