@@ -75,7 +75,8 @@ const towns = [
     ))}
 
     {/* Schwarzenbek: the surroundings, the town area, the pin. */}
-    <circle class="place-map__halo" cx="188" cy="135" r="26" />
+    {/* The dashed area reaches Bergedorf (93,145): r = its distance, plus a hair. */}
+    <circle class="place-map__halo" cx="188" cy="135" r="98" />
     <path class="place-map__area" d="M180 126 L190 123.5 L198.5 128.5 L199.5 139 L192.5 146 L182 145.5 L176.5 137.5 Z" />
     <circle class="place-map__pin" cx="188" cy="135" r="3.5" />
     <text class="place-map__label place-map__label--home" x="188" y="174" text-anchor="middle">Schwarzenbek</text>

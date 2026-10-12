@@ -102,14 +102,16 @@ const labels = lang === "en"
                 id={`process-step-${step.number}`}
                 aria-controls={`process-panel-${step.number}`}
                 aria-expanded={index === 0 ? "true" : "false"}
+                data-state={index === 0 ? "current" : "todo"}
                 data-process-step
               >
                 <span aria-hidden="true" class="process-stepper__dot">
                   <ProcessIcon number={step.number} />
                 </span>
+                {/* The title alone (2026-10-12): `duration` stays in the content
+                    shape for the CMS block, it is no longer shown. */}
                 <span class="process-stepper__text">
                   <span class="process-stepper__title">{step.title}</span>
-                  <span class="process-stepper__duration">{step.duration}</span>
                 </span>
               </button>
 
@@ -184,6 +186,8 @@ const labels = lang === "en"
       buttons.forEach((button, i) => {
         const active = i === index;
         button.setAttribute("aria-expanded", active ? "true" : "false");
+        // The way so far fills in: done steps and their rail take the accent.
+        button.dataset.state = active ? "current" : i < index ? "done" : "todo";
         const panel = panels[i]!;
         panel.toggleAttribute("data-open", active);
         panel.toggleAttribute("data-leaving", i === current && !active);
@@ -266,14 +270,24 @@ const labels = lang === "en"
   .process-stepper__item {
     position: relative;
   }
+  /* It fills with the accent up to the open step — the further along, the
+     fuller the stepper (2026-10-12). One gradient layer over the line, sized
+     by `--rail-fill`, so the fill can run along it. */
   .process-stepper__item:not(:last-child) .process-stepper__step::after {
     content: "";
     position: absolute;
-    left: calc(0.625rem + 1.375rem - 0.5px);
-    top: calc(50% + 1.375rem);
-    height: calc(100% - 2.75rem + 0.5rem);
-    width: 1px;
-    background: var(--color-line);
+    left: calc(0.625rem + 1.75rem - 1px);
+    top: calc(50% + 1.75rem);
+    height: calc(100% - 3.5rem + 0.5rem);
+    width: 2px;
+    border-radius: 2px;
+    background:
+      linear-gradient(var(--color-accent), var(--color-accent)) 0 0 / 100% var(--rail-fill, 0%) no-repeat,
+      var(--color-line);
+    transition: background-size 560ms var(--lp-ease-soft);
+  }
+  .process-stepper__step[data-state="done"] {
+    --rail-fill: 100%;
   }
 
   .process-stepper__dot {
@@ -283,14 +297,22 @@ const labels = lang === "en"
     flex: none;
     align-items: center;
     justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3.5rem;
+    height: 3.5rem;
     border-radius: 100px;
     background: var(--color-card);
     color: var(--color-accent);
     transition:
       background-color 200ms var(--tds-ease-out),
       color 200ms var(--tds-ease-out);
+  }
+  .process-stepper__dot :global(svg) {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  /* A step already passed keeps a tinted dot; the open one is solid. */
+  .process-stepper__step[data-state="done"] .process-stepper__dot {
+    background: color-mix(in srgb, var(--color-accent) 18%, var(--color-card));
   }
   .process-stepper__step[aria-expanded="true"] .process-stepper__dot {
     background: var(--color-accent);
@@ -314,11 +336,6 @@ const labels = lang === "en"
   .process-stepper__step[aria-expanded="true"] .process-stepper__title {
     color: var(--color-accent);
   }
-  .process-stepper__duration {
-    flex-basis: 100%;
-    font-size: 0.8125rem;
-    color: var(--color-muted);
-  }
 
   /* --- The panel: what the step means ------------------------------------ */
   .process-stepper__panel {
@@ -328,7 +345,7 @@ const labels = lang === "en"
     position: relative;
     border-radius: 6px;
     background: var(--color-soft);
-    margin: 0.5rem 0 1.25rem 3.5rem;
+    margin: 0.5rem 0 1.25rem 4.25rem;
   }
   .process-stepper__body {
     padding: 1.25rem 1.5rem;
@@ -457,16 +474,16 @@ const labels = lang === "en"
       align-items: center;
       gap: 0.25rem;
     }
-    [data-process-stepper][data-enhanced] .process-stepper__duration {
-      flex-basis: auto;
-    }
     /* The rail runs from this dot's centre to the next one's, across the
        column gap: one button width plus the gap, minus a dot. */
     [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child) .process-stepper__step::after {
-      left: calc(50% + 1.375rem + 0.25rem);
-      top: calc(1rem + 1.375rem - 0.5px);
-      width: calc(100% + 1rem - 2.75rem - 0.5rem);
-      height: 1px;
+      left: calc(50% + 1.75rem + 0.25rem);
+      top: calc(1rem + 1.75rem - 1px);
+      width: calc(100% + 1rem - 3.5rem - 0.5rem);
+      height: 2px;
+      background-size:
+        var(--rail-fill, 0%) 100%,
+        auto;
     }
 
     /* The gliding pill: a grid item of its own (a pseudo-element of the

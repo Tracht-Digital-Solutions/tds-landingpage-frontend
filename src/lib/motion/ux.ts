@@ -5,8 +5,9 @@
  * 1. **Where am I?** A pill glides behind the header link of the section on
  *    screen (home page, desktop bar only). The link also gets
  *    `aria-current="location"`, so the answer is not visual alone.
- * 2. **What can I pick?** Price and package cards arrive one after another
- *    and lift on a spring under the pointer.
+ * 2. **What can I pick?** Price and package cards arrive one after another.
+ *    They do NOT rise under the pointer (asked 2026-10-12); the lean toward
+ *    it is `tilt.ts`.
  * 3. **Where do I start?** The contact form's rows — the reason dropdown
  *    with them — arrive as one staggered group (`[data-motion-stagger]`).
  */
@@ -59,9 +60,8 @@ function mountNavIndicator({ animate, pointerSpring }: Dom) {
   sections.forEach((s) => observer.observe(s));
 }
 
-function mountCards({ animate, inView, hover, stagger, pointerSpring, hasFinePointer }: Dom) {
+function mountCards({ animate, inView, stagger }: Dom) {
   const groups = document.querySelectorAll<HTMLElement>("[data-motion-cards]");
-  const fine = hasFinePointer();
   groups.forEach((group) => {
     const cards = Array.from(group.children) as HTMLElement[];
     if (cards.length === 0) return;
@@ -74,14 +74,6 @@ function mountCards({ animate, inView, hover, stagger, pointerSpring, hasFinePoi
         },
         { amount: 0.2 },
       );
-    }
-    if (fine) {
-      for (const card of cards) {
-        hover(card, () => {
-          void animate(card, { y: -6 }, pointerSpring);
-          return () => void animate(card, { y: 0 }, pointerSpring);
-        });
-      }
     }
   });
 }

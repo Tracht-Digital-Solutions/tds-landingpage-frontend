@@ -371,22 +371,17 @@ export default function ContactForm({
         </div>
 
         {/* Short-notice emergencies are taken (2026-10-11). The same round box
-            as the consent below, in a row that turns pink when ticked. */}
+            as the consent below, in a row that fills pink when ticked. Just the
+            word, no description (2026-10-12). */}
         <label className="contact-urgent-toggle">
           <input
             type="checkbox"
             className="contact-consent-input"
             checked={urgent}
             onChange={(event) => setUrgent(event.target.checked)}
-            aria-describedby="contact-urgent-hint"
           />
           <span className="contact-consent-box" aria-hidden="true" />
-          <span>
-            <span className="contact-urgent-toggle__title">{copy.urgentLabel}</span>
-            <span id="contact-urgent-hint" className="contact-urgent-toggle__hint">
-              {copy.urgentHint}
-            </span>
-          </span>
+          <span className="contact-urgent-toggle__title">{copy.urgentLabel}</span>
         </label>
 
         <div className={rowClass("message")}>
