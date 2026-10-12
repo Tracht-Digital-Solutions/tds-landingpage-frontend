@@ -233,6 +233,7 @@ const placeCaption =
   document.querySelectorAll<HTMLElement>("[data-footer-place]").forEach((place) => {
     const trigger = place.querySelector<HTMLButtonElement>(".footer-place__trigger");
     const live = place.querySelector<HTMLElement>("[data-place-live]");
+    const bubble = place.querySelector<HTMLElement>(".footer-place__bubble");
     if (!trigger) return;
     let map: Promise<LiveMap> | null = null;
     const ensureMap = () => {
@@ -251,6 +252,12 @@ const placeCaption =
     const set = (open: boolean) => {
       place.toggleAttribute("data-open", open);
       trigger.setAttribute("aria-expanded", String(open));
+      if (open && bubble) {
+        // Keep the bubble on screen: measured once it is displayed.
+        bubble.style.removeProperty("--place-shift");
+        const over = bubble.getBoundingClientRect().right - (document.documentElement.clientWidth - 12);
+        if (over > 0) bubble.style.setProperty("--place-shift", `${-Math.ceil(over)}px`);
+      }
       if (open) {
         ensureMap();
         void map?.then((m) => (busy = m.busy));
@@ -372,14 +379,22 @@ const placeCaption =
     left: 0;
     z-index: 20;
     width: min(22rem, calc(100vw - 3rem));
+    /* Pulled back inside the screen when the trigger sits too far right for
+       the bubble's width (set by the script on open; a phone overflowed by
+       28px). */
+    margin-left: var(--place-shift, 0px);
     padding-bottom: 0.75rem;
-    visibility: hidden;
+    /* `display: none` while closed, not `visibility: hidden`: a hidden box
+       still counts toward the page's scroll width, and on a phone this one
+       made every page with the footer 28px wider than the screen. The fade
+       survives through `allow-discrete` and `@starting-style`. */
+    display: none;
     opacity: 0;
     translate: 0 0.5rem;
     transition:
       opacity 180ms var(--tds-ease-out),
       translate 180ms var(--tds-ease-out),
-      visibility 0s linear 180ms;
+      display 180ms allow-discrete;
   }
   @media (min-width: 768px) {
     .footer-place__bubble {
@@ -389,13 +404,16 @@ const placeCaption =
   }
   .footer-place:not([data-enhanced]):is(:hover, :focus-within) .footer-place__bubble,
   .footer-place[data-open] .footer-place__bubble {
-    visibility: visible;
+    display: block;
     opacity: 1;
     translate: 0 0;
-    transition:
-      opacity 180ms var(--tds-ease-out),
-      translate 180ms var(--tds-ease-out),
-      visibility 0s;
+  }
+  @starting-style {
+    .footer-place:not([data-enhanced]):is(:hover, :focus-within) .footer-place__bubble,
+    .footer-place[data-open] .footer-place__bubble {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
   }
   .footer-place__card {
     position: relative;
