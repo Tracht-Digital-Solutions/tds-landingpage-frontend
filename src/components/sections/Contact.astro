@@ -209,22 +209,8 @@ const ui =
         bordeaux segment sinks into the navy at its light value. */}
     <span
       aria-hidden="true"
-      class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-6"
+      class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-8"
     ></span>
-    {/* Short-notice emergencies are taken (2026-10-11): said here, marked on
-        the phone row and offered as a checkbox in the form. Code-owned copy,
-        like the card's labels. */}
-    <p class="contact-urgent">
-      <span class="contact-urgent__icon" aria-hidden="true">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-        </svg>
-      </span>
-      <span>
-        <strong>{ui.urgentTitle}</strong> {ui.urgentText}{" "}
-        <a href={`tel:${phoneHref}`} data-track="contact-urgent-call">{ui.urgentCall}</a>.
-      </span>
-    </p>
 
     {/* The "what happens next" card that used to stand here is gone. It said
         the same four things as the process section, verbatim, one screen
@@ -238,6 +224,21 @@ const ui =
         inside the island: the island has two roots, the form and the success
         view, and both belong on the same surface. Form 3 parts, contacts 2. */}
     <div class="contact-panel">
+      {/* Short-notice emergencies are taken (2026-10-11): said here, marked on
+          the phone row and offered as a checkbox in the form. Code-owned copy,
+          like the card's labels. The first row of the card since 2026-10-12,
+          across both halves and parted from them by a horizontal seam. */}
+      <p class="contact-urgent">
+        <span class="contact-urgent__icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </span>
+        <span>
+          <strong>{ui.urgentTitle}</strong> {ui.urgentText}{" "}
+          <a href={`tel:${phoneHref}`} data-track="contact-urgent-call">{ui.urgentCall}</a>.
+        </span>
+      </p>
       <div class="contact-panel__form">
         <ContactForm
           client:visible
@@ -340,23 +341,14 @@ const ui =
           </div>
         </div>
 
-        {/* The town only, with the footer's map bubble on hover, focus or a
-            tap (2026-10-12). Postal code and town from `siteConfig`, so no
-            "nähe Hamburg" here; the full address stays where the law and the
-            search engines need it: the Impressum and the JSON-LD. */}
+        {/* The location as the map itself (2026-10-12), not a line of text
+            with a pin: the drawn map, and the live OpenStreetMap over it from
+            the first hover, focus or tap (`ui/PlaceBubble.astro`, `inline`).
+            The full address stays where the law and the search engines need
+            it: the Impressum and the JSON-LD. */}
         <div class="contact-card__group">
-          <p class="contact-card__where">
-            <span class="contact-disc" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-            </span>
-            <span class="contact-card__where-text">
-              <span class="contact-way__label">{t.contact.info.locationLabel}</span>
-              <PlaceBubble lang={lang} id="contact-place-bubble" anchor="start" />
-            </span>
-          </p>
+          <p class="contact-way__label contact-card__where-label">{t.contact.info.locationLabel}</p>
+          <PlaceBubble lang={lang} id="contact-place-map" inline />
         </div>
       </aside>
     </div>
@@ -699,6 +691,11 @@ const ui =
       padding: 2rem;
     }
   }
+  @media (min-width: 48rem) {
+    #contact .contact-urgent {
+      padding-inline: 2rem;
+    }
+  }
   /* Side by side from `lg`; the seam turns vertical. */
   @media (min-width: 64rem) {
     #contact .contact-panel {
@@ -843,21 +840,8 @@ const ui =
     padding-top: 1.25rem;
     border-top: 1px solid rgb(255 255 255 / 0.14);
   }
-  #contact .contact-card__where {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    margin: 0;
-    font-size: 0.9375rem;
-    font-weight: 500;
-    line-height: 1.4;
-    color: #fff;
-  }
-  #contact .contact-card__where-text {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
+  #contact .contact-card__where-label {
+    margin: 0 0 0.625rem;
   }
   /* WhatsApp and the profile icons on one line where they fit. */
   #contact .contact-card__social {
@@ -904,18 +888,20 @@ const ui =
     outline-offset: 3px;
   }
 
-  /* === The emergency line under the sub ============================ */
+  /* === The emergency line: the card's first row ===================== */
   #contact .contact-urgent {
     display: flex;
-    /* Full width, so the note runs on to the right in one line where the
-       screen allows instead of wrapping inside a narrow box (2026-10-12). */
+    /* Across both halves, so the note runs on to the right in one line where
+       the screen allows (2026-10-12). A pink-tinted band at the top of the
+       card, parted from the form and the contacts by a horizontal seam. */
+    grid-column: 1 / -1;
     align-items: center;
     gap: 0.75rem;
-    margin: 0 0 2.5rem;
-    padding: 0.875rem 1.125rem;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--color-accent-pink) 14%, var(--color-surface-navy));
-    box-shadow: 4px 4px 0 0 var(--color-accent-pink);
+    margin: 0;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 6px 6px 0 0;
+    background: color-mix(in srgb, var(--color-accent-pink) 10%, transparent);
     color: rgb(255 255 255 / 0.85);
     font-size: 0.9375rem;
     line-height: 1.5;
