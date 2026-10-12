@@ -318,6 +318,14 @@ body {
    components publish themselves, so the clearance follows the notice from
    one line on a desktop to three on a phone, and drops to zero once it is
    dismissed. */
+/* Read on <html> only, so it does not inherit (2026-10-12): the floating pill
+   writes it inline on <html> after each fold, and as an inherited property
+   every write recalculated the style of all ~1,700 elements of the page. */
+@property --lp-floating-lane {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
 html {
   scroll-padding-top: 5rem;
   scroll-padding-bottom: calc(

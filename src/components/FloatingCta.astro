@@ -36,9 +36,11 @@ const topLabel = lang === "en" ? "Back to top" : "Nach oben";
 const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 ---
 
-{/* No `data-suppressed` in the markup on purpose — see the rules below: on a
-    page with a hero the trunk starts folded until the script has measured
-    that the hero is gone, so it never flashes over the hero's own button. */}
+{/* No `data-suppressed` in the markup on purpose: on a page with a hero the
+    trunk starts folded until the script has measured that the hero is gone,
+    so it never flashes over the hero's own button. The inline script right
+    after the pill marks that state while the page is still parsing (the hero
+    comes first in the document). */}
 <aside
   class="floating-cta-group"
   aria-label={regionLabel}
@@ -118,6 +120,16 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       reads as something arriving from the page, not as a caption. The button
       grows instead, and its accessible name still says where it leads. */}
 </aside>
+{/* Was `body:has(#hero)` in CSS until 2026-10-12. A `:has()` on <body> is
+    re-checked on EVERY insertion anywhere in the page, and each time it
+    recalculated the style of the whole document: the showcase clones, lazy
+    islands and reveals all paid ~25 ms (100 ms at CPU ×4) per insertion. */}
+<script is:inline>
+  (function () {
+    var group = document.currentScript && document.currentScript.previousElementSibling;
+    if (group && document.getElementById("hero")) group.setAttribute("data-hero-start", "");
+  })();
+</script>
 
 <style>
   /* The pill. */
@@ -220,18 +232,18 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
      assistive tech (`visibility`), after the fold has played. */
   .floating-cta-group[data-scrolled-down="false"] .tree-slot--top,
   .floating-cta-group[data-suppressed="true"] .tree-slot--trunk,
-  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) .tree-slot--trunk {
+  .floating-cta-group[data-hero-start]:not([data-suppressed]) .tree-slot--trunk {
     grid-template-rows: 0fr;
   }
   /* The wrapper shrinks with the row, so the button is never cut. */
   .floating-cta-group[data-scrolled-down="false"] .tree-slot--top .tree-slot__inner,
   .floating-cta-group[data-suppressed="true"] .tree-slot--trunk .tree-slot__inner,
-  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) .tree-slot--trunk .tree-slot__inner {
+  .floating-cta-group[data-hero-start]:not([data-suppressed]) .tree-slot--trunk .tree-slot__inner {
     scale: 0;
   }
   .floating-cta-group[data-scrolled-down="false"] .tree-slot--top .tree-slot__inner > :global(*),
   .floating-cta-group[data-suppressed="true"] .tree-slot--trunk .tree-slot__inner > :global(*),
-  :global(body:has(#hero)) .floating-cta-group:not([data-suppressed]) .tree-slot--trunk .tree-slot__inner > :global(*) {
+  .floating-cta-group[data-hero-start]:not([data-suppressed]) .tree-slot--trunk .tree-slot__inner > :global(*) {
     opacity: 0;
     visibility: hidden;
     transition:
@@ -252,9 +264,16 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
   /* The height this control reserves at the bottom edge, for
      `scroll-padding-bottom` in global.css: a focused link must scroll above
-     it, not behind it. Cleared while the trunk is folded away.
+     it, not behind it.
      These are the no-JS fallback only: the script below measures the pill and
-     writes the real value inline on <html>, which wins over all of them. */
+     writes the real value inline on <html>, which wins over all of them.
+
+     No `:root:has(.floating-cta-group[data-suppressed="true"])` here any more
+     (2026-10-12). Only the script sets `data-suppressed`, so the rule could
+     never apply without it — but every fold of the trunk during a scroll
+     re-ran the `:has()` on <html> and recalculated the style of the whole
+     document (~1,700 elements, 300 ms at CPU ×4). The measured lane already
+     follows the fold. */
   :global(:root) {
     --lp-floating-lane: 4.75rem;
   }
@@ -262,9 +281,6 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     :global(:root) {
       --lp-floating-lane: 5.25rem;
     }
-  }
-  :global(:root:has(.floating-cta-group[data-suppressed="true"])) {
-    --lp-floating-lane: 0px;
   }
   @media (max-height: 44rem) {
     :global(:root:has(.cookie-notice)) {
@@ -687,13 +703,25 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
      * the cookie notice's translate a second time (`--tds-bottom-lane` is
      * added separately wherever the lane is used). Inline on <html>, so it
      * overrides the CSS fallbacks above, including the `0px` ones.
+     *
+     * Written once the pill has SETTLED, not on every resize (2026-10-12). Its
+     * slots fold with a 320 ms `grid-template-rows` transition, so the box
+     * changes size every frame of a fold — and an inherited custom property on
+     * <html> invalidates the style of the whole document. That was a full
+     * style recalculation per frame (~300 ms each at CPU ×4) every time the
+     * pill folded during a scroll: the worst jank on the page.
      */
     let lane = "";
+    let laneTimer = 0;
+    const LANE_SETTLE_MS = 180;
     new ResizeObserver(() => {
-      const value = `${Math.ceil(group.offsetHeight + (parseFloat(getComputedStyle(group).bottom) || 0))}px`;
-      if (value === lane) return;
-      lane = value;
-      document.documentElement.style.setProperty("--lp-floating-lane", value);
+      window.clearTimeout(laneTimer);
+      laneTimer = window.setTimeout(() => {
+        const value = `${Math.ceil(group.offsetHeight + (parseFloat(getComputedStyle(group).bottom) || 0))}px`;
+        if (value === lane) return;
+        lane = value;
+        document.documentElement.style.setProperty("--lp-floating-lane", value);
+      }, LANE_SETTLE_MS);
     }).observe(group);
 
     /** Dark bands in page coordinates; measured, never read per frame. */
@@ -762,9 +790,20 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    /**
+     * Coalesced into the next frame: both observers below fire during a fold
+     * and while lazy content changes the page height, and measuring inside the
+     * observer callback forced a synchronous style + layout pass on top of the
+     * frame's own.
+     */
+    let measureFrame = 0;
     const remeasure = () => {
-      measure();
-      update();
+      if (measureFrame) return;
+      measureFrame = requestAnimationFrame(() => {
+        measureFrame = 0;
+        measure();
+        update();
+      });
     };
 
     measure();

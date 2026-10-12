@@ -157,6 +157,7 @@ export default function CustomCursor() {
       if (e.pointerType !== "mouse") return;
       mouseX = e.clientX;
       mouseY = e.clientY;
+      moved = true;
       wake();
       dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
       if (!visible) {
@@ -165,8 +166,14 @@ export default function CustomCursor() {
         dot.style.opacity = "1";
       }
       // Under pointer capture `e.target` is the capturing element, not what
-      // is under the pointer; hit-test instead while a button is held.
-      const target = (e.buttons ? document.elementFromPoint(mouseX, mouseY) : e.target) as Element | null;
+      // is under the pointer. While a button is held (a drag) the hit test is
+      // left to the post-frame sample below: `elementFromPoint` here forced a
+      // layout on every move of every drag (2026-10-12).
+      if (e.buttons) {
+        moved = true;
+        return;
+      }
+      const target = e.target as Element | null;
       setAction(actionTarget(target));
       const next = !!target?.closest(interactiveSelector);
       if (next !== hovering) {
@@ -198,6 +205,21 @@ export default function CustomCursor() {
 
     let raf = 0;
     let lastSample = -Infinity;
+    /** Whether the pointer or the page moved since the last sample. */
+    let moved = true;
+    let sampleQueued = false;
+    const sample = () => {
+      sampleQueued = false;
+      if (!visible) return;
+      setAction(actionTarget(document.elementFromPoint(mouseX, mouseY)));
+      const under = fillUnderPointer();
+      const next = under ? isDark(under) : false;
+      if (next !== onDark) {
+        onDark = next;
+        ring.classList.toggle("is-on-dark", next);
+        dot.classList.toggle("is-on-dark", next);
+      }
+    };
 
     const loop = (now: number) => {
       // Follow. 0.5 per frame (2026-10-05, was 0.28): the ring trailed far
@@ -219,17 +241,16 @@ export default function CustomCursor() {
       ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%) rotate(${angle}deg) scale(${sx}, ${sy})`;
 
       // Re-sample a few times a second: a scroll can carry a dark band or a
-      // button under a still pointer.
-      if (visible && now - lastSample >= SAMPLE_MS) {
+      // button under a still pointer. Only after the pointer moved or the page
+      // scrolled, and AFTER the frame (a task queued from here runs once it is
+      // painted): inside rAF the hit test and `getComputedStyle` forced a full
+      // style + layout pass while the hero's animations had just dirtied it —
+      // 30+ ms per frame at CPU ×4 under a moving pointer (2026-10-12).
+      if (visible && moved && !sampleQueued && now - lastSample >= SAMPLE_MS) {
         lastSample = now;
-        setAction(actionTarget(document.elementFromPoint(mouseX, mouseY)));
-        const under = fillUnderPointer();
-        const next = under ? isDark(under) : false;
-        if (next !== onDark) {
-          onDark = next;
-          ring.classList.toggle("is-on-dark", next);
-          dot.classList.toggle("is-on-dark", next);
-        }
+        moved = false;
+        sampleQueued = true;
+        window.setTimeout(sample, 0);
       }
 
       // Park once the ring has caught up. Nothing about how it looks depends
@@ -255,7 +276,11 @@ export default function CustomCursor() {
     window.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("pointerup", onUp, { passive: true });
     window.addEventListener("pointercancel", onUp, { passive: true });
-    window.addEventListener("scroll", wake, { passive: true });
+    const onScroll = () => {
+      moved = true;
+      wake();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
       root.removeAttribute(CURSOR_ABSORB_ATTR);
@@ -268,7 +293,7 @@ export default function CustomCursor() {
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
-      window.removeEventListener("scroll", wake);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
