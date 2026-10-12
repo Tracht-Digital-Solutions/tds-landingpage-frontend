@@ -171,9 +171,9 @@ const ui =
   import { lessMotion } from "~/lib/a11yPrefs";
 
   /** How long the front card rests before the wheel turns on its own. */
-  const REST_MS = 6500;
+  const REST_MS = 8000;
   /** The turn's own length — the same number as `--hc-turn` in the CSS. */
-  const TURN_MS = 2100;
+  const TURN_MS = 3000;
   /** Pointer travel before a press becomes a drag (a click stays a click). */
   const SLOP_PX = 6;
 
@@ -366,8 +366,9 @@ const ui =
          the wheel and has all but vanished one slot away (cos⁸ of 34° ≈ 0.22,
          so a neighbour gains under 5%). */
       --hc-focus: 0.18;
-      /* One turn, slower since 2026-10-12. TURN_MS in the script matches. */
-      --hc-turn: 2100ms;
+      /* One turn, slower since 2026-10-12 (1.5 s → 2.1 s → 3 s, rest 8 s).
+         TURN_MS in the script matches. */
+      --hc-turn: 3000ms;
       --hc-center: 78%;
       position: absolute;
       inset: 0;
@@ -506,15 +507,20 @@ const ui =
   .hero-carousel__shot {
     position: relative;
     display: block;
-    aspect-ratio: 4 / 3.4;
+    /* 16:10, the demos' own format (1440×900). The frame used to be 4:3.4
+       with `object-fit: cover`, which cut a quarter off each wide screenshot
+       and read as zoomed in. */
+    aspect-ratio: 16 / 10;
     overflow: hidden;
     background: var(--color-card);
   }
+  /* Always the full width of the shot, never more: a tall full-page study
+     shows its top, a wider image leaves a strip of card below — neither is
+     enlarged beyond the frame. */
   .hero-carousel__shot img {
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
+    height: auto;
   }
   .hero-carousel__origin {
     position: absolute;
