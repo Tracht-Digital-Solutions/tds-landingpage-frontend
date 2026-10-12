@@ -190,13 +190,13 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "pricing",
           },
           {
-            q: "Wie lange dauert es, bis meine Seite läuft?",
+            q: "Wie lange dauert ein Projekt?",
             a: "Das hängt vom Umfang ab, deshalb nenne ich keine Pauschale. Im Angebot steht ein verbindlicher Termin – vor der Zusage, nicht danach.",
             group: "pricing",
           },
           {
-            q: "Wem gehören die Seite und die Zugänge?",
-            a: "Dir. Du bekommst alle Zugänge, und bei der Übergabe gehört dir alles, was zur Seite gehört. Wechselst du später, nimmst du alles mit.",
+            q: "Wem gehören Daten und Zugänge?",
+            a: "Dir. Du bekommst alle Zugänge, und bei der Übergabe gehört dir alles, was zum Projekt gehört. Wechselst du später, nimmst du alles mit.",
             group: "cooperation",
           },
 
@@ -298,13 +298,13 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "pricing",
           },
           {
-            q: "How long until my site is live?",
+            q: "How long does a project take?",
             a: "That depends on the scope, so I do not quote a blanket figure. The quote carries a binding date — before you commit, not after.",
             group: "pricing",
           },
           {
-            q: "Who owns the site and the logins?",
-            a: "You do. You get every login, and at handover everything belonging to the site belongs to you. If you switch later, you take all of it with you.",
+            q: "Who owns the data and the logins?",
+            a: "You do. You get every login, and at handover everything belonging to the project belongs to you. If you switch later, you take all of it with you.",
             group: "cooperation",
           },
 
