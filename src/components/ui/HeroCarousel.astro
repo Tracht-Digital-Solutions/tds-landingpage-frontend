@@ -34,8 +34,8 @@
  * property with a plain ease (never an overshoot on opacity).
  *
  * The wheel answers the pointer (2026-10-12): drag it and it turns with the
- * hand, let go and it springs onto the nearest card (a flick carries one
- * further); click a neighbour and it comes to the front. Only the front card
+ * hand, let go and it springs onto the nearest card (a throw coasts on with
+ * its speed, `lib/momentum.ts`); click a neighbour and it comes to the front. Only the front card
  * is a link a keyboard reaches; the others are `aria-hidden` and out of the
  * tab order, but stay clickable. Every card leads to the showcase section.
  */
@@ -170,6 +170,7 @@ const ui =
 
 <script>
   import { lessMotion } from "~/lib/a11yPrefs";
+  import { projectedDistance, velocityTracker } from "~/lib/momentum";
 
   /** How long the front card rests before the wheel turns on its own. */
   const REST_MS = 11000;
@@ -241,11 +242,14 @@ const ui =
 
     // --- The pointer: drag to turn, click a neighbour to bring it forward.
     let press: { id: number; x: number; t: number; lastT: number } | null = null;
+    const tracker = velocityTracker();
     let swallowClick = false;
 
     wheel.addEventListener("pointerdown", (event) => {
       if (event.button !== 0 || !(event.target as Element).closest("[data-hero-card]")) return;
       press = { id: event.pointerId, x: event.clientX, t: event.timeStamp, lastT: event.timeStamp };
+      tracker.reset();
+      tracker.push(event.clientX, event.timeStamp);
     });
     wheel.addEventListener("pointermove", (event) => {
       if (!press || event.pointerId !== press.id) return;
@@ -261,19 +265,22 @@ const ui =
       }
       root.style.setProperty("--hc-drag", `${dx * degPerPx()}deg`);
       press.lastT = event.timeStamp;
+      tracker.push(event.clientX, event.timeStamp);
     });
     const release = (event: PointerEvent) => {
       if (!press || event.pointerId !== press.id) return;
       const dx = event.clientX - press.x;
-      const moving = event.timeStamp - press.lastT < 80;
-      const velocity = moving ? dx / Math.max(1, event.timeStamp - press.t) : 0;
+      // The speed of the last moments of the drag, not the gesture's average
+      // (2026-10-12): the wheel coasts on as far as that throw would carry a
+      // native scroller, then springs onto the nearest card there.
+      const velocity = tracker.release(event.timeStamp);
       press = null;
       if (!dragging) return;
       dragging = false;
       swallowClick = true;
-      const turned = (dx * degPerPx()) / step();
-      // The nearest card; a quick flick carries the wheel one further.
-      let by = Math.round(Math.abs(velocity) > 0.6 ? turned + Math.sign(velocity) * 0.6 : turned);
+      const coast = lessMotion() ? 0 : projectedDistance(velocity);
+      const turned = ((dx + coast) * degPerPx()) / step();
+      let by = Math.round(turned);
       by = Math.max(-half, Math.min(half, by));
       // In one frame: the hand lets go and the slots move, so the spring
       // starts where the hand left the cards.
