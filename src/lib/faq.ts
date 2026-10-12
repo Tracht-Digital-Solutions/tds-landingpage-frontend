@@ -13,7 +13,9 @@
  *   answered in the first sentence — a question an answer engine lifts has to
  *   stand on its own.
  * - Each answered in one to three short sentences.
- * - "du", no free and no timed first conversation, no price range — the one
+ * - No direct address (since 2026-10-12): questions as a search asks them
+ *   ("Übernimmt Tracht Digital …?"), answers about the company. No free and
+ *   no timed first conversation, no price range — the one
  *   sentence about the first conversation's cost is fixed
  *   (`homeContent.test.ts`).
  *
@@ -112,7 +114,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
         headline: "Alle",
         headlineAccent: "Fragen.",
         intro:
-          "Übernahme, Preise und Zusammenarbeit – die Fragen, die mir am häufigsten gestellt werden.",
+          "Übernahme, Preise und Zusammenarbeit – die Fragen, die Tracht Digital Solutions am häufigsten gestellt werden.",
         // The answer-first paragraph: who answers, what about, for whom, where.
         // It is the first thing an answer engine reads after the headline, and
         // the first thing a reader needs in order to trust the rest.
@@ -127,16 +129,16 @@ export function getFaqPageCopy(lang: "de" | "en") {
           cooperation: "Zusammenarbeit",
         } satisfies Record<FaqGroup, string>,
         backLabel: "Zurück zur Startseite",
-        ctaTitle: "Deine Frage war nicht dabei?",
-        ctaText: "Schreib mir direkt – Antwort in der Regel innerhalb von 24 Stunden.",
-        ctaButton: "Schreib mir",
+        ctaTitle: "Eine Frage ist offen geblieben?",
+        ctaText: "Eine kurze Nachricht genügt – Antwort in der Regel innerhalb von 24 Stunden.",
+        ctaButton: "Nachricht schreiben",
       }
     : {
         title: "Common questions",
         headline: "All",
         headlineAccent: "questions.",
         intro:
-          "Takeovers, pricing and working together – the questions I am asked most often.",
+          "Takeovers, pricing and working together – the questions Tracht Digital Solutions is asked most often.",
         answer:
           "The questions on this page are answered by Julian Tracht himself – owner of Tracht Digital Solutions in Schwarzenbek near Hamburg, working with companies across Germany. They cover websites and custom software, fixed prices and timelines, the use of AI and support after launch.",
         seoTitle: "Common Questions on Websites and Pricing — Tracht Digital",
@@ -148,9 +150,9 @@ export function getFaqPageCopy(lang: "de" | "en") {
           cooperation: "Working together",
         } satisfies Record<FaqGroup, string>,
         backLabel: "Back to the home page",
-        ctaTitle: "Your question was not here?",
-        ctaText: "Write to me directly – I usually reply within 24 hours.",
-        ctaButton: "Write to me",
+        ctaTitle: "A question still open?",
+        ctaText: "A short message is enough – replies usually within 24 hours.",
+        ctaButton: "Send a message",
       };
 }
 
@@ -168,8 +170,8 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           // Auftritte zugespitzt ist: das ist die Frage, mit der die meisten
           // hier ankommen, und sie steht damit über der Preisfrage.
           {
-            q: "Kannst du meine bestehende Website oder meinen Shop übernehmen?",
-            a: "Ja – auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Ich behebe Fehler und übernehme die Pflege.",
+            q: "Übernimmt Tracht Digital Solutions bestehende Websites und Shops?",
+            a: "Ja – auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Tracht Digital Solutions behebt Fehler und übernimmt die laufende Pflege.",
             group: "takeover",
           },
           {
@@ -179,7 +181,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Für drei Pakete gilt ein Festpreis – sie stehen bei den Preisen. Alles andere bekommst du als eigenes Angebot.",
+            a: "Für drei Pakete gilt ein Festpreis – sie stehen bei den Preisen. Alles andere wird als eigenes Angebot kalkuliert.",
             group: "pricing",
           },
           {
@@ -191,19 +193,19 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Wie lange dauert ein Projekt?",
-            a: "Das hängt vom Umfang ab, deshalb nenne ich keine Pauschale. Im Angebot steht ein verbindlicher Termin – vor der Zusage, nicht danach.",
+            a: "Das hängt vom Umfang ab, deshalb gibt es keine Pauschale. Im Angebot steht ein verbindlicher Termin – vor der Zusage, nicht danach.",
             group: "pricing",
           },
           {
             q: "Wem gehören Daten und Zugänge?",
-            a: "Dir. Du bekommst alle Zugänge, und bei der Übergabe gehört dir alles, was zum Projekt gehört. Wechselst du später, nimmst du alles mit.",
+            a: "Dem Kunden. Bei der Übergabe gehen alle Zugänge und alles, was zum Projekt gehört, an den Betrieb. Bei einem späteren Wechsel geht alles mit.",
             group: "cooperation",
           },
 
           // --- Only on /fragen ------------------------------------------
           {
-            q: "Was heißt „Abläufe digitalisieren“ bei einem Betrieb wie meinem?",
-            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Nenn mir einen Ablauf, der dich jede Woche Zeit kostet – ich sage dir, was sich lohnt. Manchmal lautet die Antwort auch: so lassen.",
+            q: "Was heißt „Abläufe digitalisieren“ für einen kleinen Betrieb?",
+            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Den Anfang macht ein Ablauf, der jede Woche Zeit kostet. Manchmal lautet die ehrliche Antwort auch: so lassen.",
             group: "takeover",
           },
           {
@@ -213,59 +215,59 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             // the boundary the Webauftritt page draws for Google and this one
             // draws for the same reason.
             q: "Findet ChatGPT meine Seite – und kann man das beeinflussen?",
-            a: "Ja, und ja. KI-Suchen lesen dieselbe Seite wie Google, achten aber auf anderes: eine klare Antwort im ersten Absatz, Fragen als Überschriften, prüfbare Angaben mit Quelle, Datum und Autor. Außerdem dürfen die KI-Crawler nicht ausgesperrt sein. Das nennt sich GEO – eine Platzierung kann dir trotzdem niemand versprechen.",
+            a: "Ja, und ja. KI-Suchen lesen dieselbe Seite wie Google, achten aber auf anderes: eine klare Antwort im ersten Absatz, Fragen als Überschriften, prüfbare Angaben mit Quelle, Datum und Autor. Außerdem dürfen die KI-Crawler nicht ausgesperrt sein. Das nennt sich GEO – eine Platzierung kann trotzdem niemand versprechen.",
             group: "takeover",
           },
           {
             // Added 2026-10-12, with the Webauftritt page's new lead: the
             // question behind "nach Maß", answered without a slogan.
-            q: "Baust du Websites aus Vorlagen?",
-            a: "Nein. Gestaltung, Aufbau und Texte entstehen für deinen Betrieb: passend zu deinem Firmenbild und zu dem, was deine Kunden suchen. Eine Vorlage mit ausgetauschtem Logo bekommst du von mir nicht.",
+            q: "Baut Tracht Digital Solutions Websites aus Vorlagen?",
+            a: "Nein. Gestaltung, Aufbau und Texte entstehen für jeden Betrieb neu: passend zum Firmenbild und zu dem, was seine Kunden suchen. Eine Vorlage mit ausgetauschtem Logo gibt es nicht.",
             group: "takeover",
           },
           {
             // Added 2026-10-12 at Julian's request: AI is a tool here, not the
             // one doing the job. Stated plainly, without claiming it is never
             // used — it is.
-            q: "Wie gehst du mit KI um?",
-            a: "Als Werkzeug, nicht als Ersatz für meine Arbeit. KI hilft mir beim Recherchieren, Prüfen und bei Routineschritten. Was du bekommst, entscheide, gestalte und prüfe ich selbst – ungeprüfte KI-Texte gehen bei mir nicht online.",
+            q: "Wie nutzt Tracht Digital Solutions KI?",
+            a: "Als Werkzeug, nicht als Ersatz für die Arbeit. KI hilft beim Recherchieren, Prüfen und bei Routineschritten. Entscheidungen, Gestaltung und Prüfung bleiben in Menschenhand – ungeprüfte KI-Texte gehen nicht online.",
             group: "cooperation",
           },
           {
             // Added 2026-10-12 with the "Individuelle Lösungen" lead.
-            q: "Programmierst du auch im Auftrag?",
-            a: "Ja. Ich schreibe Tools und Skripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen. Du beschreibst den Ablauf, ich sage dir, was sich lohnt – bei festem Umfang zum Festpreis pro Etappe.",
+            q: "Bietet Tracht Digital Solutions Auftragsprogrammierung an?",
+            a: "Ja. Es entstehen Tools und Skripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen. Bei festem Umfang gilt ein Festpreis pro Etappe.",
             group: "takeover",
           },
           {
             // Added 2026-10-12 with the "Abläufe digitalisieren" lead.
-            q: "Hilfst du bei der Umstellung auf digitale Buchführung?",
-            a: "Ja, bei der Technik. Ich binde das Buchhaltungsprogramm ein, richte den Weg von Belegen und Rechnungen bis zur Kanzlei ein und erkläre ihn deinem Team. Die Buchführung selbst und die Steuerberatung bleiben bei deiner Kanzlei.",
+            q: "Hilft Tracht Digital Solutions bei der Umstellung auf digitale Buchführung?",
+            a: "Ja, bei der Technik. Tracht Digital Solutions bindet das Buchhaltungsprogramm ein, richtet den Weg von Belegen und Rechnungen bis zur Kanzlei ein und erklärt ihn dem Team. Die Buchführung selbst und die Steuerberatung bleiben bei der Kanzlei.",
             group: "takeover",
           },
           {
-            q: "Kann ich Texte und Bilder selbst ändern?",
-            a: "Ja, wenn du willst. Ich richte dir den Zugang ein und zeige dir, wie es geht. Oder du schickst mir die Änderung – das ist Teil der Pflege, kein Aufpreis.",
+            q: "Lassen sich Texte und Bilder selbst ändern?",
+            a: "Ja. Zur Übergabe gehören ein eigener Zugang und eine Einweisung. Alternativ genügt eine kurze Nachricht mit der Änderung – das ist Teil der Pflege, kein Aufpreis.",
             group: "cooperation",
           },
           {
             q: "Was ist, wenn die Seite ausfällt?",
-            a: "Dann kümmere ich mich – bei einem Ausfall auch am Wochenende. Alles andere beantworte ich werktags, in der Regel am selben Tag.",
+            a: "Bei einem Ausfall kümmert sich Tracht Digital Solutions sofort, auch am Wochenende. Alle anderen Anfragen werden werktags beantwortet, in der Regel am selben Tag.",
             group: "cooperation",
           },
           {
-            q: "Was brauchst du von mir?",
-            a: "Erst einmal nur, was du schon hast: Texte, Bilder, Zugänge. Fehlt etwas, sage ich dir, was noch gebraucht wird – Texte kann ich auch schreiben.",
+            q: "Was wird für den Projektstart gebraucht?",
+            a: "Erst einmal nur, was schon vorhanden ist: Texte, Bilder, Zugänge. Fehlt etwas, kommt eine klare Liste – Texte schreibt Tracht Digital Solutions auf Wunsch auch selbst.",
             group: "cooperation",
           },
           {
-            q: "Arbeitest du mit meinen bisherigen Anbietern weiter?",
+            q: "Funktioniert die Zusammenarbeit mit bisherigen Anbietern weiter?",
             a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt.",
             group: "cooperation",
           },
           {
-            q: "Bleibst du nach dem Start dabei?",
-            a: "Auf Wunsch ja – nach Bedarf oder als festes Monatsmodell.",
+            q: "Gibt es Betreuung nach dem Start?",
+            a: "Ja, auf Wunsch – nach Bedarf oder als festes Monatsmodell mit Wartung, Updates und Weiterentwicklung.",
             group: "cooperation",
           },
         ],
@@ -278,8 +280,8 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           "The key questions about working together, ownership and pricing — answered briefly.",
         items: [
           {
-            q: "Can you take over my existing website or shop?",
-            a: "Yes – including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. I fix errors and take over the maintenance.",
+            q: "Does Tracht Digital Solutions take over existing websites and shops?",
+            a: "Yes – including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. Tracht Digital Solutions fixes errors and takes over ongoing maintenance.",
             group: "takeover",
           },
           {
@@ -299,68 +301,68 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "How long does a project take?",
-            a: "That depends on the scope, so I do not quote a blanket figure. The quote carries a binding date — before you commit, not after.",
+            a: "That depends on the scope, so there is no blanket figure. The quote carries a binding date — before any commitment, not after.",
             group: "pricing",
           },
           {
             q: "Who owns the data and the logins?",
-            a: "You do. You get every login, and at handover everything belonging to the project belongs to you. If you switch later, you take all of it with you.",
+            a: "The client does. At handover every login and everything belonging to the project goes to the business. A later switch takes all of it along.",
             group: "cooperation",
           },
 
           {
-            q: "What does “digitalizing workflows” mean for a business like mine?",
-            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. Name a routine that costs you time every week — I will tell you what is worth it. Sometimes the answer is: leave it as it is.",
+            q: "What does “digitalizing workflows” mean for a small business?",
+            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. It starts with one routine that costs time every week. Sometimes the honest answer is: leave it as it is.",
             group: "takeover",
           },
           {
             q: "Does ChatGPT find my site – and can that be influenced?",
-            a: "Yes, and yes. AI search reads the same page Google does, but weighs different things: a clear answer in the first paragraph, questions as headings, checkable facts with sources, a date and an author. And the AI crawlers must not be shut out. It is called GEO – but nobody can promise you a placement.",
+            a: "Yes, and yes. AI search reads the same page Google does, but weighs different things: a clear answer in the first paragraph, questions as headings, checkable facts with sources, a date and an author. And the AI crawlers must not be shut out. It is called GEO – but nobody can promise a placement.",
             group: "takeover",
           },
           {
-            q: "Do you build websites from templates?",
-            a: "No. Design, structure and copy are made for your business: true to your brand and to what your customers look for. You will not get a template with your logo swapped in.",
+            q: "Does Tracht Digital Solutions build websites from templates?",
+            a: "No. Design, structure and copy are made for each business: true to its brand and to what its customers look for. There is no template with a swapped-in logo.",
             group: "takeover",
           },
           {
-            q: "How do you use AI?",
-            a: "As a tool, not as a substitute for my work. AI helps me with research, checking and routine steps. What you get is decided, designed and checked by me – unchecked AI copy does not go online.",
+            q: "How does Tracht Digital Solutions use AI?",
+            a: "As a tool, not as a substitute for the work. AI helps with research, checking and routine steps. Decisions, design and review stay with a person – unchecked AI copy does not go online.",
             group: "cooperation",
           },
           {
-            q: "Do you also do contract programming?",
-            a: "Yes. I write tools and scripts for work that is done by hand today: moving data, matching lists, building reports. You describe the process, I tell you what is worth it – with a fixed scope at a fixed price per stage.",
+            q: "Does Tracht Digital Solutions offer contract programming?",
+            a: "Yes. It builds tools and scripts for work that is done by hand today: moving data, matching lists, building reports. A fixed scope gets a fixed price per stage.",
             group: "takeover",
           },
           {
-            q: "Do you help with the switch to digital bookkeeping?",
-            a: "Yes, with the technology. I integrate the accounting software, set up the path from receipts and invoices to your accountant and explain it to your team. The bookkeeping itself and tax advice stay with your accountant.",
+            q: "Does Tracht Digital Solutions help with the switch to digital bookkeeping?",
+            a: "Yes, with the technology. Tracht Digital Solutions integrates the accounting software, sets up the path from receipts and invoices to the accountant and explains it to the team. The bookkeeping itself and tax advice stay with the accountant.",
             group: "takeover",
           },
           {
-            q: "Can I change text and images myself?",
-            a: "Yes, if you want to. I set up your access and show you how. Or you send me the change — that is part of maintenance, not an extra.",
+            q: "Can text and images be changed in-house?",
+            a: "Yes. Handover includes a login and a walkthrough. Alternatively a short message with the change is enough — that is part of maintenance, not an extra.",
             group: "cooperation",
           },
           {
             q: "What happens if the site goes down?",
-            a: "Then I deal with it – at the weekend too if the site is down. Everything else I answer on weekdays, usually the same day.",
+            a: "If the site is down, Tracht Digital Solutions deals with it straight away, at the weekend too. All other requests are answered on weekdays, usually the same day.",
             group: "cooperation",
           },
           {
-            q: "What do you need from me?",
-            a: "To begin with, only what you already have: text, images, logins. If something is missing, I tell you what is still needed — and I can write the text as well.",
+            q: "What is needed to start a project?",
+            a: "To begin with, only what already exists: text, images, logins. If something is missing, a clear list follows — and Tracht Digital Solutions can write the text as well.",
             group: "cooperation",
           },
           {
-            q: "Will you keep working with my current suppliers?",
+            q: "Does the work continue alongside current suppliers?",
             a: "Where it makes sense, yes. What works stays.",
             group: "cooperation",
           },
           {
-            q: "Do you stay involved after launch?",
-            a: "If you want — as needed, or as a fixed monthly arrangement.",
+            q: "Is there support after launch?",
+            a: "Yes, on request — as needed, or as a fixed monthly arrangement covering maintenance, updates and further development.",
             group: "cooperation",
           },
         ],

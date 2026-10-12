@@ -47,9 +47,10 @@ type FieldName = "name" | "email" | "message" | "consent";
  *   form, which asks a screen reader to announce every change inside it.
  * - **Success takes focus.** The form is replaced by the confirmation; focus
  *   would otherwise fall back to `<body>` and the confirmation go unheard.
- * - **The words come from `lib/contactCopy.ts`** (2026-09-15): the site says
- *   "du", the shared bundle says "Sie", and the sentences that address the
- *   visitor — errors, success, the failure message — are overridden there.
+ * - **The words come from `lib/contactCopy.ts`** (2026-09-15): the site
+ *   addresses no one directly (2026-10-12), the shared bundle says "Sie", and
+ *   the sentences that would address the visitor — errors, success, the
+ *   failure message — are overridden there.
  * - **A reason dropdown, and the next steps AFTER sending** (2026-09-21). The
  *   chosen reason travels as `subject`, so the request arrives in the panel
  *   under a heading instead of as one more untitled message. And the four

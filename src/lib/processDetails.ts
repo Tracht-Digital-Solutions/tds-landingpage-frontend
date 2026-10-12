@@ -23,45 +23,45 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
   de: {
     "01": {
       detail:
-        "Du erzählst mir, was dich aufhält – die Liste, die dreimal geführt wird, die Seite, über die niemand anfragt. Ich frage nach und sage dir, ob es sich lohnt.",
-      outcome: "Klarheit, ob und woran wir arbeiten.",
+        "Im Erstgespräch geht es um das, was im Betrieb aufhält – die Liste, die dreimal geführt wird, die Seite, über die niemand anfragt. Danach ist klar, ob sich ein Projekt lohnt.",
+      outcome: "Klarheit, ob und woran gearbeitet wird.",
     },
     "02": {
       detail:
-        "Daraus wird eine Grundlage, die du lesen und entscheiden kannst: was gebraucht wird, welcher Weg sinnvoll ist, was er kostet, wie lange er dauert.",
+        "Daraus wird eine Grundlage, die sich lesen und entscheiden lässt: was gebraucht wird, welcher Weg sinnvoll ist, was er kostet, wie lange er dauert.",
       outcome: "Plan, Zeitrahmen und ein Budget mit Obergrenze.",
     },
     "03": {
       detail:
-        "Gebaut wird in kurzen, sichtbaren Schritten. Du siehst früh Zwischenstände zum Ausprobieren – nachsteuern ist unterwegs günstig, hinterher teuer.",
+        "Gebaut wird in kurzen, sichtbaren Schritten mit frühen Zwischenständen zum Ausprobieren – nachsteuern ist unterwegs günstig, hinterher teuer.",
       outcome: "Keine Überraschung zum Start.",
     },
     "04": {
       detail:
-        "Übergabe mit Einweisung, damit du Inhalte selbst pflegen kannst. Auf Wunsch kümmere ich mich weiter – gebunden bist du nicht.",
-      outcome: "Du kannst selbst damit arbeiten.",
+        "Übergabe mit Einweisung, damit Inhalte selbst gepflegt werden können. Auf Wunsch geht die Betreuung weiter – ohne Bindung.",
+      outcome: "Ein System, mit dem der Betrieb selbst arbeitet.",
     },
   },
   en: {
     "01": {
       detail:
-        "You tell me what holds you up — the list kept in three places, the page nobody gets in touch through. I ask questions and tell you whether it's worth it.",
-      outcome: "Clarity on whether, and on what, we work.",
+        "The first conversation is about what holds the business up — the list kept in three places, the page nobody gets in touch through. Afterwards it is clear whether a project is worth it.",
+      outcome: "Clarity on whether, and on what, to work.",
     },
     "02": {
       detail:
-        "That turns into something you can read and decide on: what is needed, which route makes sense, roughly what it costs and how long it takes.",
+        "That turns into something to read and decide on: what is needed, which route makes sense, roughly what it costs and how long it takes.",
       outcome: "A plan, a timeline and a budget with a ceiling.",
     },
     "03": {
       detail:
-        "It gets built in short, visible steps. You see work in progress early — changing course is cheap along the way and expensive afterwards.",
+        "It gets built in short, visible steps with early work in progress to try out — changing course is cheap along the way and expensive afterwards.",
       outcome: "No surprises at launch.",
     },
     "04": {
       detail:
-        "Handover with a walkthrough, so you can maintain content yourself. If you want, I keep looking after it — you aren't tied to it.",
-      outcome: "You can work with it yourself.",
+        "Handover with a walkthrough, so content can be maintained in-house. Support continues on request — with no tie-in.",
+      outcome: "A system the business runs itself.",
     },
   },
 };

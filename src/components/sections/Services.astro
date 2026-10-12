@@ -25,7 +25,7 @@ const services = await Promise.all(
     content: await resolveServiceContent(definition, lang),
   })),
 );
-const systemsLabel = lang === "de" ? "Hilfe für dein System:" : "Help with your system:";
+const systemsLabel = lang === "de" ? "Hilfe für das eingesetzte System:" : "Help with the system in use:";
 ---
 
 {/* No ground of its own. The page has ONE ground now — `.page-ground` in

@@ -6,9 +6,10 @@ import { getProcessDetails } from "./processDetails";
  * copy.
  *
  * It used to come from tds-shared (`translations.process`), which is shared
- * with every site and addressed the reader formally. Since 2026-09-15 this site
- * says "du", and changing the shared bundle for one site's tone would have
- * meant a shared release and a repin across every consumer. The copy is
+ * with every site and addressed the reader formally. This site addresses no
+ * one directly (since 2026-10-12; "du" before), and changing the shared bundle
+ * for one site's tone would have meant a shared release and a repin across
+ * every consumer. The copy is
  * landing-only, so it lives here — in exactly the shape of the `process` CMS
  * block, which `sections/Process.astro` still merges over it with `cmsFor`.
  *
@@ -33,45 +34,43 @@ export interface ProcessContent {
 }
 
 const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessStepContent, "detail" | "outcome">[] }> = {
+  // Seit 2026-10-12 ohne direkte Anrede und mit längeren Beschreibungen: jede
+  // Karte beantwortet für sich, was in dem Schritt bei Tracht Digital
+  // Solutions passiert und was danach vorliegt — so lässt sie sich auch
+  // einzeln zitieren (Suchmaschinen und KI-Antworten).
   de: {
     label: "— Vorgehen",
     headline: "So arbeiten",
     headlineAccent: "wir zusammen.",
-    body: "Vier Schritte. Nach jedem hast du etwas in der Hand – kein Zwischenstand, den nur ich lesen kann.",
+    body: "Ein Projekt mit Tracht Digital Solutions läuft in vier Schritten. Nach jedem liegt etwas Greifbares vor – kein Zwischenstand, den nur der Entwickler lesen kann.",
     steps: [
       {
         number: "01",
         title: "Erstgespräch",
-        // Die Zeile sagt jetzt, WANN der Schritt liegt, statt "je nach Umfang"
-        // zu achselzucken — vier Schulterzucken untereinander waren der Grund,
-        // warum die Liste unstrukturiert wirkte.
         duration: "Der Einstieg",
-        // Bewusst NICHT der Satz aus `homeContent.firstCall.items[0]`. Beide
-        // standen wortgleich auf derselben Seite, 26 Zeilen auseinander. Was
-        // das Erstgespräch ist, sagt das Formular nach dem Absenden; dieser
-        // Schritt sagt, was daraus folgt.
-        //
-        // Neu formuliert 2026-09-29: jeder Satz endet bei dem, was DU danach
-        // hast, nicht bei dem, was ich tue.
-        description: "Du erzählst mir, wo es hakt. Ich schaue mir an, was schon da ist. Danach weißt du, was sich lohnt – und was nicht.",
+        description:
+          "Jedes Projekt bei Tracht Digital Solutions beginnt mit einem Gespräch per Telefon, Video oder vor Ort im Raum Hamburg. Gemeinsam wird geklärt, wo es im Betrieb hakt: bei der Website, im Shop, in Tabellen oder in wiederkehrender Handarbeit. Julian Tracht sieht sich an, was schon vorhanden ist, und sagt offen, was sich lohnt – und was nicht. Kosten entstehen erst, wenn wir einen Auftrag vereinbaren.",
       },
       {
         number: "02",
         title: "Konzept & Angebot",
         duration: "Bevor Budget fließt",
-        description: "Du bekommst schwarz auf weiß, was entsteht, was es kostet und wann es fertig ist. Dann entscheidest du in Ruhe.",
+        description:
+          "Aus dem Gespräch entsteht ein schriftliches Konzept mit Festpreis oder Budgetobergrenze. Es beschreibt, was gebaut wird, welche Systeme angebunden werden, was ausdrücklich nicht dazugehört und bis wann es fertig ist. Bestehende Websites, Shops und Programme werden weitergenutzt, wo es sinnvoll ist. Die Entscheidung fällt in Ruhe und ohne Zeitdruck.",
       },
       {
         number: "03",
         title: "Umsetzung",
         duration: "In kurzen Schritten",
-        description: "Ich baue in kurzen Etappen. Du siehst früh erste Ergebnisse und sagst, was passt. So bleiben Änderungen schnell und günstig.",
+        description:
+          "Die Umsetzung erfolgt in kurzen Etappen mit frühen, testbaren Zwischenständen in einer eigenen Vorschau. Rückmeldungen fließen direkt in den nächsten Schritt ein, so bleiben Änderungen schnell und günstig. Datenschutz, Barrierefreiheit und Suchmaschinenoptimierung gehören von Anfang an dazu, nicht erst kurz vor dem Start.",
       },
       {
         number: "04",
         title: "Übergabe & Betreuung",
         duration: "Ohne Bindung",
-        description: "Du bekommst alle Zugänge und eine kurze Einweisung. Danach betreue ich weiter – oder du übernimmst selbst.",
+        description:
+          "Zum Abschluss gibt es alle Zugänge, eine verständliche Dokumentation und eine kurze Einweisung, damit Inhalte im Alltag selbst gepflegt werden können. Auf Wunsch übernimmt Tracht Digital Solutions danach Wartung, Updates und Weiterentwicklung. Eine Vertragsbindung gibt es nicht: Code, Daten und Zugänge bleiben jederzeit beim Kunden.",
       },
     ],
   },
@@ -79,31 +78,35 @@ const base: Record<Lang, Omit<ProcessContent, "steps"> & { steps: Omit<ProcessSt
     label: "— Process",
     headline: "How we",
     headlineAccent: "work together.",
-    body: "Four steps. After each one you have something in hand – not a progress report only I can read.",
+    body: "A project with Tracht Digital Solutions runs in four steps. Each one ends with something tangible – not a progress report only the developer can read.",
     steps: [
       {
         number: "01",
         title: "First conversation",
         duration: "The way in",
-        description: "You tell me where things get stuck. I look at what is already there. Afterwards you know what is worth doing – and what is not.",
+        description:
+          "Every project at Tracht Digital Solutions starts with a conversation by phone, video or in person around Hamburg. Together we find out where the business gets stuck: the website, the shop, spreadsheets or recurring manual work. Julian Tracht looks at what already exists and says openly what is worth doing – and what is not. Costs only arise once we agree on an assignment.",
       },
       {
         number: "02",
         title: "Concept & quote",
         duration: "Before any budget is spent",
-        description: "You get it in black and white: what gets built, what it costs and when it is done. Then you decide in your own time.",
+        description:
+          "The conversation turns into a written concept with a fixed price or a budget ceiling. It sets out what gets built, which systems are connected, what is explicitly not included and when it is done. Existing websites, shops and software stay in use wherever that makes sense. The decision is made calmly and without time pressure.",
       },
       {
         number: "03",
         title: "Build",
         duration: "In short steps",
-        description: "I build in short stages. You see first results early and say what works. That keeps changes quick and cheap.",
+        description:
+          "The build runs in short stages with early, testable work in progress on a separate preview. Feedback goes straight into the next step, which keeps changes quick and cheap. Data protection, accessibility and search engine optimisation are part of the work from the start, not an add-on shortly before launch.",
       },
       {
         number: "04",
         title: "Handover & support",
         duration: "No tie-in",
-        description: "You get every login and a short walkthrough. After that I keep looking after it – or you take over yourself.",
+        description:
+          "At the end come every login, clear documentation and a short walkthrough, so content can be maintained in day-to-day work. On request, Tracht Digital Solutions then takes on maintenance, updates and further development. There is no lock-in: code, data and logins stay with the client at all times.",
       },
     ],
   },

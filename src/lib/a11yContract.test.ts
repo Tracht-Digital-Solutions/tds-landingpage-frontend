@@ -190,14 +190,14 @@ describe("the rest of the home page", () => {
     expect(form).toMatch(/role="alert"/);
   });
 
-  it("addresses the visitor with du, also when something fails", () => {
+  it("addresses no one directly, also when something fails", () => {
     // The shared bundle still says "Sie" for every other site, so the sentences
     // that address the visitor come from this site's own copy module.
     const form = code(read("src/components/islands/ContactForm.tsx"));
     expect(form).toMatch(/contactFormCopy\(lang\)/);
     const copy = code(read("src/lib/contactCopy.ts"));
-    expect(copy).toMatch(/Bitte versuch es später noch einmal oder schreib mir direkt/);
-    expect(copy).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre)\b/);
+    expect(copy).toMatch(/Bitte später noch einmal versuchen oder direkt per E-Mail schreiben/);
+    expect(copy).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre|du|dein\w*|dir|dich)\b/);
   });
 
   it("gives the service tiles a name, not a paragraph", () => {
