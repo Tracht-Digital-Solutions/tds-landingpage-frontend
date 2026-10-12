@@ -34,6 +34,23 @@ const reduced = () => lessMotion();
 /** The bounce: a spring that overshoots once and settles. */
 const BOUNCE_IN = { type: "spring", bounce: 0.42, visualDuration: 0.42 } as const;
 
+/**
+ * Page lock while a modal is open (2026-10-12). The wheel used to scroll the
+ * page behind a dialog: Lenis hijacks it on window, and a dialog scrolled to
+ * its end chained the rest to the document. `html[data-modal-open]` stops both
+ * (`overflow: hidden` in global.css, Lenis' `prevent` in SmoothScroll.tsx).
+ * An attribute, not `html:has(dialog[open])`: :has() on the root recalculates
+ * the whole page on every DOM change.
+ */
+function lockPage(): void {
+  document.documentElement.setAttribute("data-modal-open", "");
+}
+
+function unlockPageIfNoModal(): void {
+  if (document.querySelector("dialog:modal")) return;
+  document.documentElement.removeAttribute("data-modal-open");
+}
+
 export interface AnimatedDialog {
   open(): void;
   close(): void;
@@ -60,6 +77,7 @@ export function animatedDialog(dialog: HTMLDialogElement): AnimatedDialog {
     if (dialog.open) return;
     reset();
     dialog.showModal();
+    lockPage();
     if (reduced()) return;
     void load().then((dom) => {
       if (!dom || !dialog.open || closing) return;
@@ -98,6 +116,8 @@ export function animatedDialog(dialog: HTMLDialogElement): AnimatedDialog {
         });
     });
   };
+
+  dialog.addEventListener("close", unlockPageIfNoModal);
 
   dialog.addEventListener("cancel", (event) => {
     event.preventDefault();

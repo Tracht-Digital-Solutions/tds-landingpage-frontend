@@ -166,6 +166,10 @@ const titles = {
     the unlayered class from tds-shared — and NOT `:is(:global(…))`, which
     scopes the wrong half of the selector. */}
 <style is:global>
+  /* Every section's upper padding is at least `--lp-section-top` (global.css,
+     2026-10-12): a section lands with its edge on the top of the screen, so
+     its heading has to clear the floating header by itself. */
+
   /* hero → services: WIDE, and the whole gap is on services. The hero is
      `min-h-svh` with no bottom padding of its own, so there is no upper half to
      add — this is the one boundary where one side carries all of it. */
@@ -180,7 +184,7 @@ const titles = {
     padding-block-end: var(--lp-rhythm-tight);
   }
   #cases {
-    padding-block-start: var(--lp-rhythm-tight);
+    padding-block-start: max(var(--lp-rhythm-tight), var(--lp-section-top));
   }
 
   /* cases → process: NORMAL. */
@@ -188,7 +192,7 @@ const titles = {
     padding-block-end: var(--lp-rhythm-normal);
   }
   #process {
-    padding-block-start: var(--lp-rhythm-normal);
+    padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));
   }
 
   /* process → showcase: WIDE. "How we work" ends the argument about working
@@ -197,7 +201,7 @@ const titles = {
     padding-block-end: var(--lp-rhythm-wide);
   }
   #showcase {
-    padding-block-start: var(--lp-rhythm-wide);
+    padding-block-start: max(var(--lp-rhythm-wide), var(--lp-section-top));
   }
 
   /* showcase → blog → about: NORMAL throughout. `#blog` is the one section
@@ -207,10 +211,10 @@ const titles = {
     padding-block-end: var(--lp-rhythm-normal);
   }
   #blog {
-    padding-block: var(--lp-rhythm-normal);
+    padding-block: max(var(--lp-rhythm-normal), var(--lp-section-top)) var(--lp-rhythm-normal);
   }
   #about {
-    padding-block-start: var(--lp-rhythm-normal);
+    padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));
   }
 
   /* about → preise: WIDE. Between the person and the money is the biggest
@@ -219,7 +223,7 @@ const titles = {
     padding-block-end: var(--lp-rhythm-wide);
   }
   #preise {
-    padding-block-start: var(--lp-rhythm-wide);
+    padding-block-start: max(var(--lp-rhythm-wide), var(--lp-section-top));
   }
 
   /* preise → faq: NORMAL. The questions are mostly about the prices above. */
@@ -227,7 +231,7 @@ const titles = {
     padding-block-end: var(--lp-rhythm-normal);
   }
   #faq {
-    padding-block-start: var(--lp-rhythm-normal);
+    padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));
   }
 
   /* faq → contact: WIDE. The navy block is the end of the page; it gets air
@@ -237,7 +241,7 @@ const titles = {
     padding-block-end: var(--lp-rhythm-wide);
   }
   #contact {
-    padding-block-start: var(--lp-rhythm-wide);
+    padding-block-start: max(var(--lp-rhythm-wide), var(--lp-section-top));
   }
 
   /* ── The seams ───────────────────────────────────────────────────────────

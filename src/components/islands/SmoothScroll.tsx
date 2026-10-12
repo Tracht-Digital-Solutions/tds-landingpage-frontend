@@ -51,6 +51,16 @@ function headerClearance(): number {
   return Number.isFinite(px) ? px : 0;
 }
 
+/**
+ * Clearance for one target: the header's, plus the target's own
+ * `scroll-margin-top`. Sections carry a negative margin that cancels the
+ * header's (global.css), so they land with their top edge on the screen's.
+ */
+function clearanceFor(node: HTMLElement): number {
+  const margin = Number.parseFloat(getComputedStyle(node).scrollMarginTop);
+  return headerClearance() + (Number.isFinite(margin) ? margin : 0);
+}
+
 /** Furthest the document can scroll. */
 function maxScrollY(): number {
   const doc = document.documentElement;
@@ -63,11 +73,10 @@ function maxScrollY(): number {
  * never per frame.
  */
 function sectionStarts(): number[] {
-  const clearance = headerClearance();
   const y = window.scrollY;
   return Array.from(document.querySelectorAll<HTMLElement>("main section[id]"))
     .filter((section) => !section.parentElement?.closest("main section[id]"))
-    .map((section) => y + section.getBoundingClientRect().top - clearance);
+    .map((section) => y + section.getBoundingClientRect().top - clearanceFor(section));
 }
 
 /**
@@ -84,7 +93,7 @@ function planFor(target: ScrollTarget) {
     typeof node === "number"
       ? node
       : node instanceof HTMLElement
-        ? startY + node.getBoundingClientRect().top - headerClearance()
+        ? startY + node.getBoundingClientRect().top - clearanceFor(node)
         : startY;
 
   return { startY, ...planJump({ startY, targetY, maxY: maxScrollY() }) };
@@ -331,6 +340,11 @@ export default function SmoothScroll() {
       // Plain expo ease-out for wheel scrolling — smooth, no overshoot.
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
+      // While a modal is open the wheel belongs to it (2026-10-12): Lenis
+      // listens on window and used to turn every wheel inside a dialog into a
+      // scroll of the page behind it. Prevented events scroll natively; the
+      // page itself is locked by `html[data-modal-open]` (lib/motion/dialog.ts).
+      prevent: () => document.documentElement.hasAttribute("data-modal-open"),
     });
 
     (window as unknown as { lenis?: Lenis }).lenis = lenis;

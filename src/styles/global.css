@@ -327,15 +327,29 @@ body {
   initial-value: 0px;
 }
 html {
-  scroll-padding-top: 5rem;
+  --lp-header-clearance: 5rem;
+  scroll-padding-top: var(--lp-header-clearance);
   scroll-padding-bottom: calc(
     var(--tds-bottom-lane, 0px) + var(--lp-floating-lane, 0px) + 1rem
   );
 }
 @media (min-width: 64rem) {
   html {
-    scroll-padding-top: 5.5rem;
+    --lp-header-clearance: 5.5rem;
   }
+}
+/* Sections land with their top edge on the top of the screen, not under the
+   header (2026-10-12): the negative margin cancels the clearance for a
+   section target only, so focused links and fields keep it. SmoothScroll.tsx
+   adds a target's `scroll-margin-top` to the clearance, so its jumps and the
+   section snap land on the same pixel as a fragment link. */
+main section[id] {
+  scroll-margin-top: calc(-1 * var(--lp-header-clearance));
+}
+/* The least upper padding a home section takes, so its heading clears the
+   header once the section sits at the top edge (HomePage.astro). */
+html {
+  --lp-section-top: calc(var(--lp-header-clearance) + 1rem);
 }
 
 /* ONE smoothing at a time (2026-09-29).
@@ -354,6 +368,15 @@ html {
    in-app motion switch further down already forces `auto` on its own. */
 html:has(body[data-lenis="on"]) {
   scroll-behavior: auto;
+}
+
+/* An open modal owns the scroll (2026-10-12): the page behind it stays put.
+   Set and cleared by lib/motion/dialog.ts. */
+html[data-modal-open] {
+  overflow: hidden;
+}
+html[data-modal-open] dialog {
+  overscroll-behavior: contain;
 }
 
 /* (The About portrait's mask and its coral rectangle lived here. It is a
