@@ -7,12 +7,18 @@ describe("about facts", () => {
     expect(yearsSince(2018, new Date("2027-01-01"))).toBe(9);
   });
 
-  it("states the years and self-employment in both languages", () => {
+  it("shows a one-word heading and a figure", () => {
     const now = new Date("2026-10-12");
-    expect(aboutFacts("de", now)).toEqual([
-      { value: "8 Jahre", label: "Programmiererfahrung seit 2018" },
-      { value: "Seit 2024", label: "selbstständig mit Tracht Digital Solutions" },
-    ]);
-    expect(aboutFacts("en", now).map((fact) => fact.value)).toEqual(["8 years", "Since 2024"]);
+    const de = aboutFacts("de", now);
+    expect(de.map((fact) => fact.label)).toEqual(["Programmiererfahrung", "Selbstständig"]);
+    for (const fact of [...de, ...aboutFacts("en", now)]) expect(fact.label).not.toMatch(/\s/);
+    expect(de.map((fact) => `${fact.value}${fact.unit}`)).toEqual(["8 Jahre", "2024"]);
+    expect(de[1]!.sr).toBe("Selbstständig seit 2024");
+  });
+
+  it("counts the founding year up from the year programming began", () => {
+    const [years, founded] = aboutFacts("de", new Date("2026-10-12"));
+    expect(years!.from).toBe(0);
+    expect(founded!.from).toBe(2018);
   });
 });
