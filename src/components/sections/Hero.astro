@@ -50,7 +50,7 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
 
 <section
   id="hero"
-  class="hero relative min-h-svh flex flex-col justify-center overflow-hidden"
+  class="hero relative min-h-svh flex flex-col justify-center overflow-clip"
   aria-labelledby="hero-heading"
   lang={lang === "en" ? "en" : undefined}
 >
@@ -302,6 +302,12 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
      zu addieren, und Drift wie Parallaxe waeren beim Scrollen tot. */
   /* From 80rem only: on a phone the shapes sit in tight bands under the
      header, and a 3 rem drift carried the quarter onto it (`audit:ux`). */
+  /* The shared `.tds-decor` layer is `overflow: hidden`, i.e. a scroll
+     container, so the shapes' `view()` measured that layer and never moved
+     (2026-10-12). `clip` cuts the same edge without being a scroll container. */
+  #hero > :global(.tds-decor) {
+    overflow: clip;
+  }
   @media (prefers-reduced-motion: no-preference) and (min-width: 80rem) {
     @supports (animation-timeline: view()) {
       :global(.hero-shape--capsule),
@@ -521,10 +527,26 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     /* Scrolling away, the copy drifts up a little faster than the page and
        the bar stretches — transform only, on the compositor, and nothing at
        all where scroll timelines are missing. */
+    /* Live since 2026-10-12. Until then none of the hero's scroll timelines
+       ever ran: the section was `overflow: hidden`, which makes it a SCROLL
+       CONTAINER, so every `view()` inside it measured the hero itself — a box
+       that never scrolls — and stayed at progress 0. `overflow: clip` clips
+       the same way without becoming a scroll container.
+
+       ONE timeline for the copy AND the carousel: the copy's box names it, the
+       section shares it (`timeline-scope`), so the cards leave by exactly the
+       copy's amount and the slogan never slides across them. */
     @supports (animation-timeline: view()) {
+      .hero {
+        timeline-scope: --hero-copy;
+      }
       .hero-body {
+        view-timeline-name: --hero-copy;
+      }
+      .hero-body,
+      :global(.hero-carousel) {
         animation: hero-copy-leave linear both;
-        animation-timeline: view();
+        animation-timeline: --hero-copy;
         animation-range: exit 0% exit 100%;
       }
     }
