@@ -56,6 +56,19 @@ export function mountTilt({ animate, pointerSpring, hasFinePointer }: Dom): void
     { passive: true },
   );
 
+  // Content that scrolls under a still pointer (a shelf coasting after a throw,
+  // its drift) never fires a pointermove: lay the card flat once anything
+  // scrolls, or it stays leaning while it slides away (2026-10-12).
+  document.addEventListener(
+    "scroll",
+    () => {
+      if (!current) return;
+      flatten(current);
+      current = null;
+    },
+    { passive: true, capture: true },
+  );
+
   // The pointer leaving the window over a card never reaches another target.
   document.documentElement.addEventListener("pointerleave", () => {
     if (current) flatten(current);

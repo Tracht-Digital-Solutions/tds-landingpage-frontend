@@ -75,7 +75,9 @@ describe("the shelf runs on its own (2026-09-22)", () => {
 
   it("clones the cards only as unreachable copies", () => {
     expect(source).toMatch(/clone\.setAttribute\("aria-hidden", "true"\)/);
-    expect(source).toMatch(/clone\.setAttribute\("inert", ""\)/);
+    // Not inert: clones are what the visitor sees after the wrap, and must hover.
+    expect(source).not.toMatch(/clone\.setAttribute\("inert"/);
+    expect(source).toMatch(/node\.tabIndex = -1/);
     expect(source).toMatch(/node\.removeAttribute\("id"\)/);
   });
 
@@ -94,7 +96,7 @@ describe("the shelf runs on its own (2026-09-22)", () => {
      * asked for less motion got no clones at all — the track simply ended after
      * the last real card and scrolling right ran into the paper edge.
      *
-     * A clone is layout: it is `inert`, `aria-hidden` and moves nothing by
+     * A clone is layout: it is `aria-hidden`, out of the tab order and moves nothing by
      * existing. Only the per-frame `scrollLeft` write is motion.
      *
      * So: no `continue` may depend on either preference, and the clone builder
@@ -122,6 +124,8 @@ describe("the shelf runs on its own (2026-09-22)", () => {
     // rewinds across a whole set for exactly the readers the fix above is for.
     const handler = source.slice(source.indexOf('track.addEventListener(\n      "scroll"'));
     expect(handler).toMatch(/scrollBehavior = "auto"/);
-    expect(handler).toMatch(/track\.scrollLeft -= loop/);
+    // Both ways since 2026-10-12: `wrap()` folds the position into one set.
+    expect(handler).toMatch(/const next = wrap\(track\.scrollLeft\)/);
+    expect(source).toMatch(/while \(value < 1\) value \+= loop/);
   });
 });
