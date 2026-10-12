@@ -27,10 +27,14 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 
 <header
   id="site-header"
-  class="site-header fixed top-3 left-3 right-3 z-40 px-3 py-2.5 lg:px-5"
+  class="site-header fixed top-3 left-3 right-3 z-40"
   data-scrolled="false"
 >
+  {/* Split since 2026-10-12: two islands, the logo on the left and the links
+      with the controls on the right. The header itself is an invisible,
+      click-through frame; each island carries its own glass and plate. */}
   <nav aria-label={navLabel} class="flex items-center justify-between gap-2 text-sm lg:gap-5">
+    <div class="site-island">
     <a
       id="logo-link"
       href={homeHref}
@@ -59,12 +63,13 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         class="site-logo h-6 lg:h-7 w-auto"
       />
     </a>
+    </div>
 
     {/* Links + controls live in one connected cluster so the nav reads
         as a single unit. The theme/language controls used to be set apart
         by a hairline divider; with the borderless pass that separation is
         carried by the wider gap alone. */}
-    <div class="flex items-center gap-1 lg:gap-3">
+    <div class="site-island flex items-center gap-1 lg:gap-3">
       {/* `data-nav-links` + the pill: Motion glides the pill behind the
           link of the section on screen and marks it `aria-current`
           (lib/motion/ux.ts). Home page only — elsewhere no section matches
@@ -324,7 +329,26 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      `z-index: 0` and not `auto`: it has to be a positioned box with a stacking
      level, so the nav above it (level 1) and the plate below it (level -1) sort
      around it predictably. */
-  .site-header::before {
+  /* The header is only a frame since the split (2026-10-12): it takes no
+     pointer, and each island is its own pill with the glass and the plate
+     below. Custom properties set on `.site-header` still reach both. */
+  .site-header {
+    pointer-events: none;
+  }
+  .site-island {
+    pointer-events: auto;
+    position: relative;
+    isolation: isolate;
+    border-radius: var(--tds-radius-pill);
+    padding: 0.375rem 0.5rem;
+  }
+  @media (min-width: 1024px) {
+    .site-island {
+      padding: 0.5rem 0.75rem;
+    }
+  }
+
+  .site-island::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -351,7 +375,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
   }
 
   /* The content, above both layers. */
-  .site-header > nav {
+  /* `:global` because the theme toggle's island and the language switch are
+     other components: a scoped `> *` never reaches them, and they painted
+     under the glass. `<astro-island>` is `display: contents`, so the toggle
+     inside it needs the level itself. */
+  .site-island > :global(*),
+  .site-island > :global(astro-island > *) {
     position: relative;
     z-index: 1;
   }
@@ -404,7 +433,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      and `global.css` makes translucent on this surface — so the dark bar and the
      see-through shadow both come for free, which is what six hand-written
      `box-shadow` declarations used to do between them. */
-  .site-header::after {
+  .site-island::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -442,12 +471,12 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       opacity 220ms ease 80ms;
   }
   /* Docked: the plate slides INTO the bar and goes. Same 320ms as the
-     `max-width`/`top` morph below, so the bar shrinking and the shadow
+     `top` move below, so the islands settling and the shadow
      retracting are one movement.
 
      The opacity, though, LEADS: no delay and a shorter duration, so the plate
      is gone before the glass above it has thinned enough to show it. */
-  .site-header[data-scrolled="false"]::after {
+  .site-header[data-scrolled="false"] .site-island::after {
     translate: 0 0;
     opacity: 0;
     transition:
@@ -455,7 +484,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
       opacity 140ms ease;
   }
   @media (prefers-reduced-motion: reduce) {
-    .site-header::after {
+    .site-island::after {
       transition: none;
     }
   }
@@ -508,38 +537,28 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     }
   }
 
-  /* Desktop ( >=lg / 1024px ) — the bar morphs between two states as
-     the user scrolls. The header spans the full viewport (left/right 0)
-     and `margin-inline: auto` keeps it centred once it is constrained by
-     max-width, so the same element can animate from an edge-to-edge dock
-     to a compact centred pill purely by tweening max-width + top. The
-     radius no longer tweens: both states are the full pill now, so there
-     is nothing left to interpolate between.
-
-     At the top of the page (data-scrolled="false") it is DOCKED: flush
-     against the top edge, full-bleed and fully transparent, so only the
-     heavy frosted blur reads. The blur stays very strong in both states. */
+  /* Desktop ( >=lg / 1024px ) — two islands in the corners (2026-10-12):
+     the logo on the left, links and controls on the right, nothing between.
+     DOCKED at the top they are transparent, only the blur reads; scrolled,
+     each island fills and its plate clicks in. The old morph into one
+     centred 56rem pill is gone. */
   @media (min-width: 1024px) {
     .site-header {
-      left: 0;
-      right: 0;
+      /* The islands' content lines up with the page gutter (.lp-container). */
+      left: calc(clamp(1.5rem, 1rem + 3vw, 5rem) - 0.75rem);
+      right: calc(clamp(1.5rem, 1rem + 3vw, 5rem) - 0.75rem);
       transform: none;
-      margin-inline: auto;
 
       top: 0.75rem;
-      max-width: 100%;
       --tds-header-fill: transparent;
-      /* Only the geometry transitions on the element now. The fill fades on
-         `::before`, which owns it, and leaving `background-color` listed here
-         would name a property this element no longer changes. */
-      transition:
-        max-width 320ms cubic-bezier(0.4, 0, 0.2, 1),
-        top 320ms cubic-bezier(0.4, 0, 0.2, 1);
+      /* Only the offset transitions on the element now. The fill fades on
+         each island's `::before`, which owns it. */
+      transition: top 320ms cubic-bezier(0.4, 0, 0.2, 1);
     }
     /* A heavier blur on the desktop bar — on `::before`, or it would be applied
        twice: once by the layer that paints the glass and once by the element
        behind it. */
-    .site-header::before {
+    .site-island::before {
       backdrop-filter: blur(24px) saturate(150%);
     }
 
@@ -560,7 +579,6 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        sliding under it. Do not take the plate away along with the opacity. */
     .site-header[data-scrolled="true"] {
       top: 1rem;
-      max-width: 56rem;
       --tds-header-fill: color-mix(in srgb, var(--color-paper) var(--tds-header-tint), transparent);
     }
   }

@@ -5,7 +5,7 @@
  *
  * ### What it is for
  *
- * `.site-header::after` is a solid navy plate lying directly behind the glass
+ * `.site-island::after` is a solid navy plate lying directly behind the glass
  * bar. In the steady state that is deliberate — the bar is 62–68% tint, so the
  * plate reads through it as a hard shadow. During the transition it is a trap:
  * if the plate's opacity outruns the glass fill above it, the bar is briefly a
@@ -73,7 +73,7 @@ for (const theme of ["light", "dark"]) {
     await page.waitForTimeout(600);
 
     const samples = await page.evaluate(async (y) => {
-      const header = document.querySelector(".site-header");
+      const header = document.querySelector(".site-header .site-island");
       const read = () => ({
         t: performance.now(),
         plate: getComputedStyle(header, "::after").opacity,
