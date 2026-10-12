@@ -36,6 +36,8 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | Page transitions | `pageTransition.ts` | `<main>` animates out on a same-site click and the next `<main>` in. The header is fixed outside `<main>`. Hand-over via a sessionStorage flag read by an inline head script (`PAGE_ENTER_SCRIPT`), CSS failsafe after 1.5 s; a first visit never carries it. The native cross-document View Transition was removed |
 | Business card | `businessCard.ts` | Docked card spring |
 | UX cues | `ux.ts` | A pill glides behind the header link of the section on screen (`aria-current="location"`); price cards arrive staggered and lift on hover; contact form rows arrive as one staggered group (`[data-motion-stagger]`, honeypot skipped) |
+| Process stepper | `sections/Process.astro` (CSS + a small script) | One round pill glides behind the open step and the card's notch glides with it (`--lp-ease-spring`); the dot pops; the new card swings in from the chosen step's side while the old one leaves. All cards stay laid out in one cell, so the section never changes height; on a phone the accordion folds (`grid-template-rows`) |
+| Hero carousel | `ui/HeroCarousel.astro` (CSS + a small script) | See [Hero](#hero) |
 | Modals | `dialog.ts` | Bounce in and out (Escape included; `cancel` is intercepted), always ending in `dialog.close()` behind a timeout. One flat navy backdrop, one flat dialog colour, a bare close cross |
 
 Scroll reveal stays `lib/reveal.ts` (`[data-reveal]`).
@@ -72,6 +74,13 @@ within 72 px of the right edge.
   `.hero-shape__body`, 14–17 s loops), so the depth shows on a phone too. Reduced motion renders one fixed turned
   pose in CSS (`.hero-shape--still`).
 - The scroll-linked part is CSS (`animation-timeline: view()`), not a hook.
+- **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render from the demos and
+  design studies, on a steep wheel right of the slogan — front card on top, neighbours under the buttons at
+  50 % / 18 % opacity, the rest hidden. A turn every 3.6 s changes `--slot`; the registered `--hc-angle`
+  derived from it transitions with `--lp-ease-swing`, and position, scale and tilt are `sin()`/`cos()` of that
+  angle, so cards travel the arc and swing past their place. Plain Astro, no island; it sits behind the copy
+  (only the hero's links take the pointer). Pauses under the pointer, with focus inside, off screen, in a hidden
+  tab, under reduced motion and the motion switch. Only the front card is reachable (the others are `inert`).
 - **On a phone the shapes keep to measured bands:** smaller, less drift (`narrow` in `HeroDecor.tsx`, never in
   `initial`, which is server-rendered; a width-dependent start state was a hydration mismatch), no scroll drift.
   `audit:ux` at 360 × 740 is the tightest case.

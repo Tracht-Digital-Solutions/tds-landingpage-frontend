@@ -14,9 +14,9 @@ This site uses tds-shared's `marketing` surface. Preserve its language rather th
   Never remove a focus ring.
 - Avoid generic SaaS styling, new palettes, glows, organic blobs, blurred shadows, strong gradients, gratuitous
   motion and tech-stack diagrams.
-- **Subpages carry no numbering.** Service pages and pricing cards show no chapter number; the process stepper
-  uses dots (the `<ol>` and connector carry the sequence). `ServiceDefinition.number` orders the catalog but
-  isn't display text. The home page's Process section is the one place that numbers.
+- **Nothing is numbered.** Service pages and pricing cards show no chapter number; both process steppers (home
+  and detail) use icon dots (the `<ol>` and the rail carry the sequence; since 2026-10-12 the home page too).
+  `ServiceDefinition.number` orders the catalog but isn't display text.
 
 ## One ground
 

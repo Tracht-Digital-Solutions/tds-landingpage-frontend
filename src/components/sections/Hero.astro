@@ -15,7 +15,9 @@
  *   `opacity:0` start state, the hero was blank until hydration and the
  *   cookie notice became the mobile LCP at 4.1 s. The H1 is plain Astro and
  *   paints with the first frame; its entrance is a transform-only CSS rise.
- * - **No showcase slider, no scroll hint.**
+ * - **No scroll hint.** The showcase slider that once stood here was a
+ *   React island; its successor (2026-10-12) is `ui/HeroCarousel.astro`, plain
+ *   markup that renders in its resting pose, right of the slogan from 64rem.
  *
  * ### Decoration
  *
@@ -33,6 +35,7 @@
 import type { Lang } from "~/lib/i18n";
 import CircuitRun from "~/components/ui/CircuitRun.astro";
 import HeroDecor from "~/components/islands/HeroDecor.tsx";
+import HeroCarousel from "~/components/ui/HeroCarousel.astro";
 
 interface Props {
   lang: Lang;
@@ -88,9 +91,14 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     <HeroDecor client:idle />
     {/* Cut by the section's lower edge, with its box inside the bottom padding:
         since the note under the actions the copy column reaches down to where
-        the conduit used to start (overlap measured at 1280 and 1440). */}
-    <CircuitRun class="hidden xl:block -bottom-14 left-[20%] w-[15rem] h-[8rem]" />
+        the conduit used to start (overlap measured at 1280 and 1440). At 6 %
+        since 2026-10-12: from 20 % it ran under the carousel's left card. */}
+    <CircuitRun class="hidden xl:block -bottom-14 left-[6%] w-[15rem] h-[8rem]" />
   </div>
+
+  {/* A random handful of our own examples on a turning wheel, right of the
+      slogan from 64rem. Plain Astro: it paints in its resting pose. */}
+  <HeroCarousel lang={lang} />
 
   <div class="hero-body relative lp-container">
     <div class="hero-copy">
@@ -274,6 +282,15 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     }
   }
 
+  /* Where the carousel turns (`ui/HeroCarousel.astro`, same query), the
+     quarter would lie on its cards: the wheel takes the right side, the
+     capsule keeps the left (`audit:ux` measured the overlap, 2026-10-12). */
+  @media (min-width: 64rem) and (min-height: 36rem) {
+    :global(.hero-shape--quarter) {
+      display: none;
+    }
+  }
+
   /* Die scrollgesteuerte Szene. CSS, kein JavaScript: `animation-timeline`
      laeuft auf dem Compositor, braucht keinen Scroll-Listener und keinen
      Hook aus einer Bibliothek, die die geteilte Motion-Schicht gar nicht
@@ -314,6 +331,17 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     to {
       transform: translateY(-3rem);
     }
+  }
+
+  /* The copy's container spans the hero's full width over the carousel
+     (`ui/HeroCarousel.astro`), and the H1's box (18ch of a 7.5rem face)
+     reaches far past its last letter. Only the two actions take the
+     pointer, so the carousel's front card stays reachable beside them. */
+  .hero-body {
+    pointer-events: none;
+  }
+  .hero-body a {
+    pointer-events: auto;
   }
 
   .hero-copy {

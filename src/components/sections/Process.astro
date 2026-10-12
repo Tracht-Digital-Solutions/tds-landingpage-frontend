@@ -15,8 +15,24 @@
  *   48rem the `<ol>` is a grid, every `<li>` is `display: contents`, the
  *   buttons fill the first row and all panels share one cell spanning the
  *   second; below 48rem it is an accordion with the panel under its title.
- * - **Without JavaScript every panel shows**, as a plain list: `hidden` is
- *   only ever set by the script, and the grid needs `[data-enhanced]`.
+ * - **Without JavaScript every panel shows**, as a plain list: the open state
+ *   (`data-open`) is only ever set by the script, and the grid and the folds
+ *   need `[data-enhanced]`.
+ * - **The section never changes height on a switch** (2026-10-12). From 48rem
+ *   every panel stays laid out in the one shared cell, so the cell is as tall
+ *   as the longest card; a closed one is only `visibility: hidden`. Before,
+ *   closed panels were `display: none` and the page below jumped by the
+ *   difference on every hover. On a phone the accordion folds with
+ *   `grid-template-rows` instead of snapping.
+ *
+ * ### Motion (2026-10-12)
+ *
+ * The site's spring, in CSS: one round pill glides behind the open step (a
+ * grid pseudo-element, so it needs no markup), the notch glides along the
+ * card's edge, the dot pops, and the new card swings in from the side of the
+ * step that was chosen while the old one leaves toward the other. Overshoot
+ * on `translate` and `margin` only, never on `opacity`. Reduced motion: every
+ * change is instant.
  * - The panel is NOT `aria-hidden` and the titles are real buttons — the
  *   reason the older hover panel was removed in 2026-09 was exactly a focus
  *   stop that announced nothing in front of text a screen reader never
@@ -26,8 +42,8 @@
  * stepper went on 2026-10-11. The first step's card carries the section's one
  * call to action instead: "Erstgespräch vereinbaren", to the contact form.
  *
- * The home page's process is the one place on the site that still numbers its
- * steps, deliberately (see AGENTS.md).
+ * No step is numbered any more (2026-10-12): the `<ol>` carries the order for
+ * assistive technology, the rail and the icons carry it for the eye.
  */
 import { localizePath, resolveLang } from "~/lib/i18n";
 import ProcessIcon from "~/components/ui/ProcessIcon.astro";
@@ -75,11 +91,11 @@ const labels = lang === "en"
       bar
     />
 
-    <div class="process-stepper" data-process-stepper style={`--steps: ${steps.length}`}>
+    <div class="process-stepper" data-process-stepper style={`--steps: ${steps.length}; --active: 0; --dir: 1`}>
       <ol class="process-stepper__list">
         {
           steps.map((step, index) => (
-            <li class="process-stepper__item">
+            <li class="process-stepper__item" style={`--col: ${index + 1}`}>
               <button
                 type="button"
                 class="process-stepper__step"
@@ -92,8 +108,6 @@ const labels = lang === "en"
                   <ProcessIcon number={step.number} />
                 </span>
                 <span class="process-stepper__text">
-                  {/* The order is carried by the `<ol>`; the numeral is for the eye. */}
-                  <span aria-hidden="true" class="process-stepper__number">{step.number}</span>
                   <span class="process-stepper__title">{step.title}</span>
                   <span class="process-stepper__duration">{step.duration}</span>
                 </span>
@@ -104,29 +118,34 @@ const labels = lang === "en"
                 id={`process-panel-${step.number}`}
                 role="region"
                 aria-labelledby={`process-step-${step.number}`}
-                style={`--step: ${index}`}
                 data-process-panel
               >
-                <div class="process-stepper__body">
-                  <p class="eyebrow process-stepper__label">{labels.what}</p>
-                  <p class="process-stepper__description">{step.description}</p>
-                  {
-                    index === 0 && (
-                      <a href={contactHref} class="process-stepper__cta lp-ink" data-cta data-track="process-first-call">
-                        {firstCall.cta}
-                        <span aria-hidden="true">→</span>
-                      </a>
-                    )
-                  }
-                </div>
-                {
-                  step.outcome && (
-                    <div class="process-stepper__result">
-                      <p class="eyebrow process-stepper__label">{labels.result}</p>
-                      <p class="process-stepper__outcome">{step.outcome}</p>
+                {/* The fold: on a phone it clips the card while the row
+                    height opens; from 48rem it is a plain box. */}
+                <div class="process-stepper__fold">
+                  <div class="process-stepper__card">
+                    <div class="process-stepper__body">
+                      <p class="eyebrow process-stepper__label">{labels.what}</p>
+                      <p class="process-stepper__description">{step.description}</p>
+                      {
+                        index === 0 && (
+                          <a href={contactHref} class="process-stepper__cta lp-ink" data-cta data-track="process-first-call">
+                            {firstCall.cta}
+                            <span aria-hidden="true">→</span>
+                          </a>
+                        )
+                      }
                     </div>
-                  )
-                }
+                    {
+                      step.outcome && (
+                        <div class="process-stepper__result">
+                          <p class="eyebrow process-stepper__label">{labels.result}</p>
+                          <p class="process-stepper__outcome">{step.outcome}</p>
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
               </div>
             </li>
           ))
@@ -139,7 +158,12 @@ const labels = lang === "en"
 <script>
   /**
    * Hover with intent, focus or a tap opens a step; exactly one is open.
-   * Everything is visible until this runs (`hidden` is only set here).
+   * Everything is visible until this runs (`data-open` is only set here).
+   *
+   * The root carries the open index (`--active`, for the gliding pill and the
+   * notch) and the direction of the last move (`--dir`), so the new card
+   * swings in from the side of the chosen step and the old one leaves toward
+   * the other.
    */
   const INTENT_MS = 140;
 
@@ -151,13 +175,20 @@ const labels = lang === "en"
     if (buttons.length === 0 || panels.some((panel) => !panel)) return;
 
     let timer = 0;
+    let current = -1;
     const open = (index: number) => {
       window.clearTimeout(timer);
+      if (index === current) return;
+      if (current >= 0) root.style.setProperty("--dir", index > current ? "1" : "-1");
+      root.style.setProperty("--active", String(index));
       buttons.forEach((button, i) => {
         const active = i === index;
         button.setAttribute("aria-expanded", active ? "true" : "false");
-        panels[i]!.hidden = !active;
+        const panel = panels[i]!;
+        panel.toggleAttribute("data-open", active);
+        panel.toggleAttribute("data-leaving", i === current && !active);
       });
+      current = index;
     };
 
     open(Math.max(0, buttons.findIndex((b) => b.getAttribute("aria-expanded") === "true")));
@@ -196,17 +227,20 @@ const labels = lang === "en"
   }
 
   /* --- The steps: titles only ------------------------------------------- */
+  /* Round: the hover fill and the open fill are pills, like every other
+     control on the site. */
   .process-stepper__step {
     --lp-fill: transparent;
     --lp-shade: initial;
     position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 1rem;
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 0.75rem;
+    padding: 0.625rem 1.25rem 0.625rem 0.625rem;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--tds-radius-pill, 100px);
     background: var(--lp-fill);
     color: var(--color-black);
     text-align: left;
@@ -216,7 +250,7 @@ const labels = lang === "en"
       translate 160ms var(--tds-ease-out);
   }
   .process-stepper__step:hover {
-    --lp-fill: color-mix(in srgb, var(--color-primary) 5%, var(--color-soft));
+    --lp-fill: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
   }
   .process-stepper__step[aria-expanded="true"] {
     --lp-fill: var(--color-soft);
@@ -235,7 +269,7 @@ const labels = lang === "en"
   .process-stepper__item:not(:last-child) .process-stepper__step::after {
     content: "";
     position: absolute;
-    left: calc(0.75rem + 1.375rem - 0.5px);
+    left: calc(0.625rem + 1.375rem - 0.5px);
     top: calc(50% + 1.375rem);
     height: calc(100% - 2.75rem + 0.5rem);
     width: 1px;
@@ -270,18 +304,12 @@ const labels = lang === "en"
     gap: 0.125rem 0.625rem;
     min-width: 0;
   }
-  .process-stepper__number {
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    color: var(--color-muted);
-    font-variant-numeric: tabular-nums;
-  }
   .process-stepper__title {
     font-family: var(--font-display);
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.25;
+    transition: color 200ms var(--tds-ease-out);
   }
   .process-stepper__step[aria-expanded="true"] .process-stepper__title {
     color: var(--color-accent);
@@ -295,12 +323,12 @@ const labels = lang === "en"
   /* --- The panel: what the step means ------------------------------------ */
   .process-stepper__panel {
     position: relative;
+  }
+  .process-stepper__card {
+    position: relative;
     border-radius: 6px;
     background: var(--color-soft);
     margin: 0.5rem 0 1.25rem 3.5rem;
-  }
-  .process-stepper__panel[hidden] {
-    display: none;
   }
   .process-stepper__body {
     padding: 1.25rem 1.5rem;
@@ -360,14 +388,38 @@ const labels = lang === "en"
     color: var(--color-on-primary);
   }
 
-  /* Enhanced, phone: an accordion — closed steps keep a small gap. */
+  /* Enhanced, phone: an accordion that folds. The row height opens from
+     0fr to 1fr, so the steps below slide instead of jumping; a closed panel
+     is hidden only once its fold has shut. */
   [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
     margin-top: 0.5rem;
   }
+  [data-process-stepper][data-enhanced] .process-stepper__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+      grid-template-rows 360ms var(--lp-ease-soft),
+      visibility 0s linear 360ms;
+  }
+  [data-process-stepper][data-enhanced] .process-stepper__panel[data-open] {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition:
+      grid-template-rows 420ms var(--lp-ease-soft),
+      visibility 0s;
+  }
+  [data-process-stepper][data-enhanced] .process-stepper__fold {
+    min-height: 0;
+    overflow: hidden;
+    /* Room for the card's hard shadow inside the clip. */
+    padding-right: 0.5rem;
+  }
 
   /* Enhanced, from 48rem: the steps in one row along a horizontal rail, the
-     open step's card under the whole row. Every panel sits in the same cell;
-     only the open one is shown. */
+     open step's card under the whole row. Every panel sits in the same cell
+     and stays laid out there, so the cell keeps the height of the tallest
+     card and nothing below moves on a switch. */
   @media (min-width: 48rem) {
     [data-process-stepper][data-enhanced] .process-stepper__list {
       display: grid;
@@ -382,13 +434,23 @@ const labels = lang === "en"
     [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
       margin-top: 0;
     }
+    /* Each step names its column: the gliding pill below occupies the whole
+       first row as well, and auto-placement would push the steps into new
+       implicit columns beside it. */
     [data-process-stepper][data-enhanced] .process-stepper__step {
       grid-row: 1;
+      grid-column: var(--col);
       flex-direction: column;
       align-items: center;
       gap: 0.75rem;
-      padding: 1rem 0.75rem 1.125rem;
+      padding: 1rem 1.5rem 1.375rem;
       text-align: center;
+    }
+    /* The open fill is the gliding pill below; the button itself stays
+       clear, so the fill can travel from step to step. */
+    [data-process-stepper][data-enhanced] .process-stepper__step[aria-expanded="true"] {
+      --lp-fill: transparent;
+      box-shadow: none;
     }
     [data-process-stepper][data-enhanced] .process-stepper__text {
       flex-direction: column;
@@ -406,29 +468,59 @@ const labels = lang === "en"
       width: calc(100% + 1rem - 2.75rem - 0.5rem);
       height: 1px;
     }
-    [data-process-stepper][data-enhanced] .process-stepper__panel {
+
+    /* The gliding pill: a grid item of its own (a pseudo-element of the
+       grid), one column wide, shifted to the open column. */
+    [data-process-stepper][data-enhanced] .process-stepper__list::before {
+      --lp-col: calc((100% - (var(--steps, 4) - 1) * 1rem) / var(--steps, 4));
+      content: "";
+      grid-row: 1;
+      grid-column: 1 / -1;
+      justify-self: start;
+      width: var(--lp-col);
+      margin-left: calc(var(--active, 0) * (var(--lp-col) + 1rem));
+      border-radius: var(--tds-radius-pill, 100px);
+      background: var(--color-soft);
+      box-shadow: var(--tds-shadow-hard-sm);
+      pointer-events: none;
+    }
+    /* The notch: a small square turned 45°, under the middle of the open
+       column, on the card's top edge. Same fill as the card. */
+    [data-process-stepper][data-enhanced] .process-stepper__list::after {
+      content: "";
+      position: relative;
+      z-index: 2;
       grid-row: 2;
       grid-column: 1 / -1;
+      justify-self: start;
+      align-self: start;
+      width: 1rem;
+      height: 1rem;
+      margin-top: -0.5rem;
+      margin-left: calc((var(--active, 0) + 0.5) / var(--steps, 4) * 100% - 0.5rem);
+      background: var(--color-soft);
+      rotate: 45deg;
+      border-radius: 2px 0 0 0;
+      pointer-events: none;
+    }
+
+    [data-process-stepper][data-enhanced] .process-stepper__panel,
+    [data-process-stepper][data-enhanced] .process-stepper__panel[data-open] {
+      grid-row: 2;
+      grid-column: 1 / -1;
+      display: block;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__fold {
+      overflow: visible;
+      padding: 0;
+      height: 100%;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__card {
+      height: 100%;
       margin: 0;
       box-shadow: var(--tds-shadow-hard);
       display: grid;
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__panel[hidden] {
-      display: none;
-    }
-    /* The notch: a small square turned 45°, under the middle of the open
-       step's column. Pure geometry, same fill as the card. */
-    [data-process-stepper][data-enhanced] .process-stepper__panel::before {
-      content: "";
-      position: absolute;
-      top: -0.5rem;
-      left: calc((var(--step) + 0.5) / var(--steps, 4) * 100% - 0.5rem);
-      width: 1rem;
-      height: 1rem;
-      background: var(--color-soft);
-      rotate: 45deg;
-      border-radius: 2px 0 0 0;
     }
     [data-process-stepper][data-enhanced] .process-stepper__body {
       padding: 1.75rem 2rem;
@@ -445,22 +537,71 @@ const labels = lang === "en"
       border-left: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
       border-radius: 0 6px 6px 0;
     }
-  }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .process-stepper__panel:not([hidden]) {
-      animation: process-panel-in 220ms var(--tds-ease-out);
+    /* The cards cross: a closed card waits on the side the next move comes
+       from, the leaving one slides toward the other side. */
+    [data-process-stepper][data-enhanced] .process-stepper__panel {
+      opacity: 0;
+      translate: calc(var(--dir, 1) * 2.5rem) 0;
+      transition:
+        opacity 160ms var(--tds-ease-out),
+        translate 0s linear 260ms,
+        visibility 0s linear 260ms;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__panel[data-leaving] {
+      translate: calc(var(--dir, 1) * -2.5rem) 0;
+      transition:
+        opacity 160ms var(--tds-ease-out),
+        translate 260ms var(--tds-ease-out),
+        visibility 0s linear 260ms;
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__panel[data-open] {
+      z-index: 1;
+      opacity: 1;
+      translate: 0 0;
+      transition:
+        opacity 220ms var(--tds-ease-out) 40ms,
+        translate 640ms var(--lp-ease-spring) 40ms,
+        visibility 0s;
     }
   }
-  @keyframes process-panel-in {
+
+  @media (min-width: 48rem) and (prefers-reduced-motion: no-preference) {
+    [data-process-stepper][data-enhanced] .process-stepper__list::before {
+      transition: margin-left 620ms var(--lp-ease-spring);
+    }
+    [data-process-stepper][data-enhanced] .process-stepper__list::after {
+      transition: margin-left 620ms var(--lp-ease-spring);
+    }
+  }
+
+  /* The dot of the step that opens pops once. Transform only. */
+  @media (prefers-reduced-motion: no-preference) {
+    .process-stepper__step[aria-expanded="true"] .process-stepper__dot {
+      animation: process-dot-pop 520ms var(--lp-ease-bounce);
+    }
+    .process-stepper__step:not([aria-expanded="true"]):hover .process-stepper__dot {
+      scale: 1.06;
+    }
+    .process-stepper__dot {
+      transition:
+        background-color 200ms var(--tds-ease-out),
+        color 200ms var(--tds-ease-out),
+        scale 240ms var(--lp-ease-bounce);
+    }
+  }
+  @keyframes process-dot-pop {
     from {
-      translate: 0 0.5rem;
+      scale: 0.72;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .process-stepper__step,
     .process-stepper__dot,
-    .process-stepper__cta {
+    .process-stepper__cta,
+    [data-process-stepper][data-enhanced] .process-stepper__panel,
+    [data-process-stepper][data-enhanced] .process-stepper__panel[data-open],
+    [data-process-stepper][data-enhanced] .process-stepper__panel[data-leaving] {
       transition: none;
     }
   }
