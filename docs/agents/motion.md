@@ -24,6 +24,16 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
   decays exponentially (τ 325 ms, like a native fling); a hold before letting go throws nothing. The showcase shelf
   glides with snap off, then snaps; the hero wheel adds the projected distance before it picks the card. A press
   catches a coasting shelf. Touch keeps its native momentum.
+- **Gentle section snap** (2026-10-12, `lib/sectionSnap.ts`, both paths in `SmoothScroll.tsx`): a scroll that
+  comes to rest within min(140 px, 16 % vh) of a top-level `main section[id]` start settles onto it in 520 ms;
+  anywhere else the page stays. Not after a click-jump, while a pointer is held, a dialog is open, a field has
+  focus, or under reduced motion. No CSS root `scroll-snap-type` (it would fight Lenis).
+- **The shelf has no ends** (2026-10-12): `wrap()` in `Showcase.astro` folds drag, glide and hand scroll into
+  `[1, loop + 1)`, so it runs backwards from the start too. Clones are NOT `inert` (that killed hover after the
+  wrap); they stay `aria-hidden` with `tabindex="-1"`. While dragged and coasting, cards take no pointer, and
+  `tilt.ts` lays a leaning card flat on any scroll.
+- **The hero wheel turns several cards one step at a time** (`turnBy`, 180 ms apart): turned in one go, cards
+  still in front rounded the back by jumping.
 
 ## Jank rules (measured 2026-10-12, CPU ×4)
 
@@ -118,6 +128,8 @@ within 72 px of the right edge.
 
 See [website-demos.md](website-demos.md#the-showcase-shelf).
 
-- Hero carousel (2026-10-12): front card `--hc-focus` 0.18 (cos⁸ bump), flatter rim (`--hc-ry` 80svh,
+- Hero carousel (2026-10-12): front card 24vw (`--hc-focus` 0.2), centred on the section's vertical middle
+  (`top: 50%` + `translate(0, -50%)`), `--hc-center` 80 % / 77 % from 80rem (≥ 21 px clear of the slogan at
+  1024–1920); earlier: `--hc-focus` 0.18 (cos⁸ bump), flatter rim (`--hc-ry` 80svh,
   `--hc-tilt` 0.1), snappy turn (`--hc-turn` 1400ms = `TURN_MS`, rest 11 s); shots are 16:10 and width-fitted, never `cover`-cropped. The left neighbour rises
   under the slogan on the flat rim, so it rests at opacity 0.3 (`data-side`).
