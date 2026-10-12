@@ -21,7 +21,9 @@ import { serviceDefinitions } from "./services";
  */
 describe("withdrawn offers stay withdrawn", () => {
   const LANGS = ["de", "en"] as const;
-  const retired = [/komplette\s+IT/i, /complete\s+IT/i, /Auftragsprogrammierung/i];
+  // "Auftragsprogrammierung" was on this list until 2026-10-12, when Julian put
+  // contract programming back on offer under "Individuelle Lösungen".
+  const retired = [/komplette\s+IT/i, /complete\s+IT/i];
 
   function prose(lang: (typeof LANGS)[number]): string {
     const home = getHomeContent(lang);

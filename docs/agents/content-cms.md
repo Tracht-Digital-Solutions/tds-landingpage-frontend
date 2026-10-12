@@ -16,7 +16,7 @@
   "kostenfrei", "gratis", minutes); the one sentence about its cost is "Kosten entstehen erst, wenn wir einen
   Auftrag vereinbaren."; no project price ranges, only the cost logic; no hourly rates.
 - **No opening hours** on the page or in the schema (work is by arrangement; `jsonld.test.ts`).
-- Don't reintroduce Komplette IT or Auftragsprogrammierung as offers (a test greps the prose).
+- Don't reintroduce Komplette IT as an offer (a test greps the prose). Auftragsprogrammierung is offered again since 2026-10-12, inside "Individuelle Lösungen" (its old URL still redirects there).
 
 ## How CMS content is read
 
@@ -91,3 +91,6 @@ Asymmetries:
 
 The home framing is the `references_home` block (defaults in `homeContent.ts`); `block` cache events already
 rebuild home and service pages for any block id.
+- Service pages (2026-10-12, Julian): neutral, professional voice — no "du", no "Sie", little "ich";
+  section headings "Typische Ausgangslagen / Leistungsumfang / Ergebnis / Nicht enthalten / Vorgehen".
+  The rest of the site (home, FAQ) still says "du" until decided otherwise.

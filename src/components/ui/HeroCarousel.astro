@@ -28,8 +28,9 @@
  * registered `<angle>` property derived from the slot, so a slot change
  * TRANSITIONS the angle, and position, scale and turn are trigonometry of that
  * angle: the card travels along the arc, not across a chord. The transition
- * uses `--lp-ease-swing`, a sampled spring with two swings — the overshoot is
- * an angle, so a card swings past the top and settles. The fade is a separate
+ * uses `--lp-ease-swing`, a well-damped sampled spring (since 2026-10-12 about
+ * 1.5 % past, no swing back; it was two swings before) — the overshoot is
+ * an angle, so a card eases onto the top and settles. The fade is a separate
  * property with a plain ease (never an overshoot on opacity).
  *
  * The wheel answers the pointer (2026-10-12): drag it and it turns with the

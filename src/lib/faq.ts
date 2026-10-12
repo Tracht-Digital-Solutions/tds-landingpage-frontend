@@ -61,7 +61,7 @@ export const FAQ_PAGE_SLUG = { de: "/fragen", en: "/en/questions" } as const;
  * has. Raise it only when an answer changes; a panel override does not move it,
  * because the panel cannot say when the copy it replaced was written.
  */
-export const FAQ_PAGE_UPDATED_AT = "2026-10-02";
+export const FAQ_PAGE_UPDATED_AT = "2026-10-12";
 
 /** The questions page, in one language. */
 export function faqPageHref(lang: "de" | "en"): string {
@@ -217,6 +217,33 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "takeover",
           },
           {
+            // Added 2026-10-12, with the Webauftritt page's new lead: the
+            // question behind "nach Maß", answered without a slogan.
+            q: "Baust du Websites aus Vorlagen?",
+            a: "Nein. Gestaltung, Aufbau und Texte entstehen für deinen Betrieb: passend zu deinem Firmenbild und zu dem, was deine Kunden suchen. Eine Vorlage mit ausgetauschtem Logo bekommst du von mir nicht.",
+            group: "takeover",
+          },
+          {
+            // Added 2026-10-12 at Julian's request: AI is a tool here, not the
+            // one doing the job. Stated plainly, without claiming it is never
+            // used — it is.
+            q: "Wie gehst du mit KI um?",
+            a: "Ich nutze KI als Werkzeug, nicht als Dienstleister, der die Arbeit für mich erledigt. KI hilft mir beim Recherchieren, beim Prüfen und bei Routineschritten. Was du bekommst, entscheide, gestalte und prüfe ich selbst. Ungeprüfte KI-Texte oder eine von KI zusammengesetzte Website gehen bei mir nicht online.",
+            group: "cooperation",
+          },
+          {
+            // Added 2026-10-12 with the "Individuelle Lösungen" lead.
+            q: "Programmierst du auch im Auftrag?",
+            a: "Ja. Ich schreibe Tools und Automatisierungsskripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen, immer gleiche Klicks im Browser. Du beschreibst den Ablauf, ich sage dir, was sich lohnt. Bei festem Umfang gibt es einen Festpreis pro Etappe.",
+            group: "takeover",
+          },
+          {
+            // Added 2026-10-12 with the "Abläufe digitalisieren" lead.
+            q: "Hilfst du bei der Umstellung auf digitale Buchführung?",
+            a: "Ja, bei der Technik. Ich binde das Buchhaltungsprogramm ein, richte den Weg von Belegen und Rechnungen bis zur Kanzlei ein und erkläre ihn deinem Team. Die Buchführung selbst und die Steuerberatung bleiben bei deiner Kanzlei.",
+            group: "takeover",
+          },
+          {
             q: "Kann ich Texte und Bilder selbst ändern?",
             a: "Wie du willst. Möchtest du selbst ran, richte ich dir den Zugang ein und zeige es dir. Wenn nicht, schickst du mir die Änderung – das ist Teil der Pflege, kein Aufpreis.",
             group: "cooperation",
@@ -289,6 +316,26 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           {
             q: "Does ChatGPT find my site – and can that be influenced?",
             a: "Yes, and yes. Answer engines read the same page Google does, but they weigh different things: a clear answer in the first paragraph, headings that are real questions, checkable facts with their sources, a visible date and a named author. On top of that comes a technical permission – shut the AI crawlers out and you disappear from their answers, with no error showing anywhere. It is called GEO, and it is not a second project beside search engine optimisation but the same work done properly. Nobody can promise you a placement.",
+            group: "takeover",
+          },
+          {
+            q: "Do you build websites from templates?",
+            a: "No. Design, structure and copy are made for your business: true to your brand and to what your customers look for. You will not get a template with your logo swapped in.",
+            group: "takeover",
+          },
+          {
+            q: "How do you use AI?",
+            a: "I use AI as a tool, not as a service that does the work for me. It helps with research, with checking and with routine steps. What you get is decided, designed and checked by me. Unchecked AI copy or a site assembled by an AI does not go online.",
+            group: "cooperation",
+          },
+          {
+            q: "Do you also do contract programming?",
+            a: "Yes. I write tools and automation scripts for work that is done by hand today: moving data, matching lists, building reports, the same clicks in a browser again and again. You describe the process, I tell you what is worth it. With a fixed scope there is a fixed price per stage.",
+            group: "takeover",
+          },
+          {
+            q: "Do you help with the switch to digital bookkeeping?",
+            a: "Yes, with the technology. I integrate the accounting software, set up the path from receipts and invoices to your accountant and explain it to your team. The bookkeeping itself and tax advice stay with your accountant.",
             group: "takeover",
           },
           {
