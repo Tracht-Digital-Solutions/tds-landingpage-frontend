@@ -20,6 +20,24 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
   brand-bar keys use `inView`, the cursor parks when settled, the pill's chevrons loop only while the swipe track
   shows. Check: count `requestAnimationFrame` calls over 2 s at the page bottom — it must be 0.
 - The shared React motion entry re-exports only `m` and `AnimatePresence`; a bare `motion` import is forbidden.
+- **Mouse drags coast on release** (2026-10-12, `lib/momentum.ts`): the speed of the last 100 ms carries on and
+  decays exponentially (τ 325 ms, like a native fling); a hold before letting go throws nothing. The showcase shelf
+  glides with snap off, then snaps; the hero wheel adds the projected distance before it picks the card. A press
+  catches a coasting shelf. Touch keeps its native momentum.
+
+## Jank rules (measured 2026-10-12, CPU ×4)
+
+- **No `:has()` on `html`/`body`/`:root` for state that changes.** `body:has(#hero)` re-ran on every DOM insertion
+  (showcase clones, islands) and each time recalculated all ~1,700 elements (~100 ms at CPU ×4); a
+  `:root:has([data-suppressed])` did the same on every fold of the pill. Mark the state with an attribute instead
+  (`data-hero-start` is set by an inline script while parsing).
+- **Never write an inherited custom property on `<html>` per frame.** `--lp-floating-lane` is registered
+  `inherits: false` and written once the pill has settled (180 ms), not on every resize of its fold.
+- Layout reads (`elementsFromPoint`, `getComputedStyle`, `getBoundingClientRect`) don't run inside rAF or an
+  observer callback: the cursor samples in a task after the frame, only after movement; the pill's remeasure is
+  coalesced into one frame; showcase clones are built in idle slices.
+- Profile with LoAF + a trace with `disabled-by-default-devtools.timeline.invalidationTracking`; "Affected by
+  :has()" on `HTML` is the signature of the first rule.
 
 ## What moves
 
@@ -79,8 +97,8 @@ within 72 px of the right edge.
   top, neighbours lower at 50 % / 18 % opacity, the rest hidden. A turn every 5.2 s changes `--slot`; the
   registered `--hc-angle` derived from it transitions with `--lp-ease-swing` (1.5 s), and position, scale and tilt
   are `sin()`/`cos()` of that angle, so cards travel the arc and swing past their place. **Dragging** turns it with
-  the hand (`--hc-drag`, capture only after a 6 px slop) and springs onto the nearest card on release, a flick one
-  further; a click on a neighbour brings it forward. Plain Astro, no island; it sits behind the copy (only the
+  the hand (`--hc-drag`, capture only after a 6 px slop) and springs onto the nearest card on release; a throw
+  coasts on by its speed (`lib/momentum.ts`); a click on a neighbour brings it forward. Plain Astro, no island; it sits behind the copy (only the
   hero's links take the pointer). Pauses under the pointer, with focus inside, while dragged, off screen, in a hidden
   tab, under reduced motion and the motion switch. Only the front card's link is in the tab order; the others are
   `aria-hidden` with `tabindex="-1"` but stay clickable.

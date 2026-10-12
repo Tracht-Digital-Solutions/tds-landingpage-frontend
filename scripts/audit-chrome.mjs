@@ -340,7 +340,9 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
     await page.waitForTimeout(600);
     const rows = await page.evaluate(() => {
       const card = document.querySelector("#contact .contact-card");
-      const cardWidth = card.getBoundingClientRect().width;
+      // The content box: the card's padding is its own, not the row's to fill.
+      const cs = getComputedStyle(card);
+      const cardWidth = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       return [...card.querySelectorAll(".contact-way")].map((a) => {
         const r = a.getBoundingClientRect();
         return {
@@ -351,7 +353,7 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
         };
       });
     });
-    check("three ways to reach a person", rows.length === 3, rows.map((r) => r.href).join(", "));
+    check("e-mail and phone as full rows", rows.length === 2, rows.map((r) => r.href).join(", "));
     for (const row of rows) {
       check(
         `row is the whole link: ${row.href}`,
@@ -359,12 +361,15 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
         `${row.width}×${row.height}px, ${Math.round(row.share * 100)}% of the card`,
       );
     }
-    const glass = await page.evaluate(() => {
-      const s = getComputedStyle(document.querySelector("#contact .contact-card"));
-      const f = getComputedStyle(document.querySelector("#contact .contact-form-card"));
-      return { card: s.backdropFilter, form: f.backdropFilter };
+    // One panel: the form and the contacts parted by a vertical seam (2026-10-12).
+    const seam = await page.evaluate(() => {
+      const card = document.querySelector("#contact .contact-card");
+      return {
+        inPanel: !!card.closest(".contact-panel"),
+        border: getComputedStyle(card).borderLeftWidth,
+      };
     });
-    check("both cards are glass", glass.card.includes("blur") && glass.form.includes("blur"), `${glass.card} / ${glass.form}`);
+    check("form and contacts share one card with a vertical seam", seam.inPanel && seam.border === "1px", JSON.stringify(seam));
     await context.close();
   }
 }
