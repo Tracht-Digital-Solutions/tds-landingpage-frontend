@@ -262,7 +262,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Alles an einem Ort.",
       headlineAccent: "Dein eigenes",
       headlineSuffix: "Panel.",
-      sub: "Aufträge, Kunden und Termine in einem Kundenportal – dazu Abläufe, die *digital und ohne Umwege* laufen. Ich bleibe dein fester Ansprechpartner.",
+      sub: "Aufträge, Kunden und Termine in einem System – für dein Team und deine Kunden. Wiederkehrende Arbeit läuft *automatisch*. Und du hast einen festen Ansprechpartner.",
       cta1: "Erstgespräch vereinbaren",
       cta2: "Leistungen ansehen",
       ctaNote:
@@ -274,12 +274,12 @@ const content: Record<Lang, HomeContent> = {
       headlineAccent: "ich?",
       lead: "Du brauchst *einen Ansprechpartner* – nicht fünf Anbieter.",
       p1: "Ich baue auf dem auf, was du schon hast, statt alles neu zu machen.",
-      p2: "Danach bleibe ich auf Wunsch dein Ansprechpartner – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
+      p2: "Tracht Digital Solutions, das bin ich – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
       motivation: {
         title: "Warum ich das mache",
         body: [
-          "Ich habe zu oft gesehen, woran digitale Arbeit hängt: eine Tabelle hier, ein Zettel dort, ein Zugang für alle.",
-          "Das ist mein Antrieb. Ich baue, was zum Ablauf passt – und was sicher ist, ohne dass du dich darum kümmern musst.",
+          "Zu oft hängt digitale Arbeit an Behelfen: eine Tabelle hier, ein Zettel dort, ein Passwort für alle.",
+          "Das will ich ändern. Ich baue, was zu deinem Ablauf passt – und sicher ist, ohne dass du dich darum kümmern musst.",
         ],
       },
       reasons: [
@@ -338,7 +338,7 @@ const content: Record<Lang, HomeContent> = {
     contactHeading: {
       headline: "Womit fangen",
       headlineAccent: "wir an?",
-      sub: "Schreib mir kurz, wo es hakt. Ich antworte in der Regel innerhalb von 24 Stunden.",
+      sub: "Schreib mir kurz, worum es geht. Ich antworte in der Regel innerhalb von 24 Stunden.",
     },
     journalHeading: {
       headline: "Wissen für",
@@ -370,7 +370,7 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Ziel",
-          text: "Du erzählst, wo es hakt. Ich sage dir ehrlich, ob ich helfen kann.",
+          text: "Du erzählst, wo es hakt. Ich sage dir, ob und wie ich helfen kann.",
         },
         {
           label: "Vorbereitung",
@@ -397,18 +397,18 @@ const content: Record<Lang, HomeContent> = {
       steps: [
         {
           title: "Wie klar die Aufgabe ist",
-          text: "Ein fertiges Ziel ist günstiger als eine offene Idee. Im Erstgespräch machen wir daraus etwas Zählbares.",
+          text: "Ein klares Ziel kostet weniger als eine offene Idee. Im Erstgespräch machen wir aus der Idee eine klare Aufgabe.",
         },
         {
           title: "Wie viel Verantwortung dranhängt",
-          text: "Eine Infoseite kostet weniger als ein Shop, der Geld annimmt. Wo Zahlungen oder Kundendaten im Spiel sind, wird es teurer.",
+          text: "Eine Infoseite kostet weniger als ein Shop, der Geld annimmt. Zahlungen und Kundendaten brauchen mehr Sorgfalt – das kostet mehr.",
         },
         {
-          title: "Was am Ende dasteht",
-          text: "Passt es in ein Paket, gilt der Festpreis. Sonst bekommst du ein eigenes Angebot – mit Preis und Termin, vor der Zusage.",
+          title: "Was du am Ende bekommst",
+          text: "Passt es in ein Paket, gilt der Festpreis. Sonst bekommst du ein eigenes Angebot mit Preis und Termin – bevor du zusagst.",
         },
       ],
-      note: "Was ich nicht einschätzen kann, schätze ich nicht: dann sehe ich vorher hinein und sage dir danach den Preis.",
+      note: "Kann ich etwas nicht einschätzen, rate ich nicht. Ich sehe es mir erst an und nenne dir dann den Preis.",
     },
   },
   en: {
@@ -417,7 +417,7 @@ const content: Record<Lang, HomeContent> = {
       headline: "Everything in one place.",
       headlineAccent: "Your own",
       headlineSuffix: "panel.",
-      sub: "Orders, customers and appointments in one customer portal – plus workflows that run *digitally, without detours*. I stay your single point of contact.",
+      sub: "Orders, customers and appointments in one system – for your team and your customers. Recurring work runs *automatically*. And you have one steady point of contact.",
       cta1: "Arrange an initial consultation",
       cta2: "View services",
       ctaNote: "Costs only arise once we agree on an assignment. I usually reply within 24 hours.",
@@ -428,12 +428,12 @@ const content: Record<Lang, HomeContent> = {
       headlineAccent: "me?",
       lead: "You need *one point of contact* – not five suppliers.",
       p1: "I build on what you already have instead of starting from scratch.",
-      p2: "After that I stay your point of contact if you want – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
+      p2: "Tracht Digital Solutions is me – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
       motivation: {
         title: "Why I do this",
         body: [
-          "I have seen too often what digital work hangs on: a spreadsheet here, a note there, one login for everyone.",
-          "That is what drives me. I build what fits the way you work – and what is secure, without you having to think about it.",
+          "Too often digital work hangs on stopgaps: a spreadsheet here, a note there, one password for everyone.",
+          "I want to change that. I build what fits the way you work – and is secure, without you having to think about it.",
         ],
       },
       reasons: [
@@ -492,7 +492,7 @@ const content: Record<Lang, HomeContent> = {
     contactHeading: {
       headline: "Where shall we",
       headlineAccent: "start?",
-      sub: "Tell me briefly where things get stuck. I usually reply within 24 hours.",
+      sub: "Tell me briefly what it is about. I usually reply within 24 hours.",
     },
     journalHeading: {
       headline: "Know-how for",
@@ -524,7 +524,7 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Goal",
-          text: "You tell me where things get stuck. I say honestly whether I can help.",
+          text: "You tell me where things get stuck. I tell you whether and how I can help.",
         },
         {
           label: "Preparation",
@@ -546,18 +546,18 @@ const content: Record<Lang, HomeContent> = {
       steps: [
         {
           title: "How clear the task is",
-          text: "A finished goal costs less than an open idea. The first conversation turns yours into something countable.",
+          text: "A clear goal costs less than an open idea. The first conversation turns the idea into a clear task.",
         },
         {
           title: "How much responsibility it carries",
-          text: "An information page costs less than a shop that takes money. Where payments or customer data are involved, it gets more expensive.",
+          text: "An information page costs less than a shop that takes money. Payments and customer data need more care – and that costs more.",
         },
         {
-          title: "What stands at the end",
-          text: "If it fits a package, the fixed price applies. Otherwise you get a quote of its own – with a price and a date, before you commit.",
+          title: "What you get at the end",
+          text: "If it fits a package, the fixed price applies. Otherwise you get a quote of its own with a price and a date – before you commit.",
         },
       ],
-      note: "What I cannot assess, I do not estimate: then I look into it first and give you the price afterwards.",
+      note: "If I cannot assess something, I do not guess. I look at it first and then give you the price.",
     },
   },
 };

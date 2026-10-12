@@ -23,7 +23,7 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
   de: {
     "01": {
       detail:
-        "Du erzählst mir, was dich aufhält – die Liste, die dreimal geführt wird, die Seite, über die niemand anfragt. Ich frage nach und sage dir ehrlich, ob es sich lohnt.",
+        "Du erzählst mir, was dich aufhält – die Liste, die dreimal geführt wird, die Seite, über die niemand anfragt. Ich frage nach und sage dir, ob es sich lohnt.",
       outcome: "Klarheit, ob und woran wir arbeiten.",
     },
     "02": {
@@ -38,14 +38,14 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
     },
     "04": {
       detail:
-        "Übergabe mit Einweisung, damit du Inhalte und Preise selbst pflegen kannst. Danach kümmere ich mich auf Wunsch weiter – gebunden bist du nicht.",
+        "Übergabe mit Einweisung, damit du Inhalte selbst pflegen kannst. Auf Wunsch kümmere ich mich weiter – gebunden bist du nicht.",
       outcome: "Du kannst selbst damit arbeiten.",
     },
   },
   en: {
     "01": {
       detail:
-        "You tell me what holds you up — the list kept in three places, the page nobody gets in touch through. I keep asking, and say honestly whether it's worth it.",
+        "You tell me what holds you up — the list kept in three places, the page nobody gets in touch through. I ask questions and tell you whether it's worth it.",
       outcome: "Clarity on whether, and on what, we work.",
     },
     "02": {
@@ -60,7 +60,7 @@ const details: Record<"de" | "en", Record<string, ProcessDetail>> = {
     },
     "04": {
       detail:
-        "Handover with a walkthrough, so you can maintain content and prices yourself. After that I'll keep going if you want — you aren't tied to it.",
+        "Handover with a walkthrough, so you can maintain content yourself. If you want, I keep looking after it — you aren't tied to it.",
       outcome: "You can work with it yourself.",
     },
   },
