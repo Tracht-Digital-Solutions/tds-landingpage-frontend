@@ -300,6 +300,7 @@ const ui =
 
 <script>
   import { lessMotion } from "~/lib/a11yPrefs";
+  import { glide, velocityTracker } from "~/lib/momentum";
 
   /**
    * The showcase shelf runs ON ITS OWN and is swiped (2026-09-22) — the
@@ -341,30 +342,74 @@ const ui =
      */
     /** Past this many pixels a press is a drag and no longer a click. */
     const DRAG_THRESHOLD = 6;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    /** One set's width (see the endless shelf below); 0 until the clones exist. */
+    let loop = 0;
+    /** Restarts the drift; replaced below once the shelf can drift at all. */
+    let resume = () => {};
 
     let dragging = false;
     let moved = false;
     let startX = 0;
     let startScroll = 0;
+    /** The release speed is read from the last moments of the drag. */
+    const tracker = velocityTracker();
+    /** Cancels a running release glide; set while the shelf coasts. */
+    let stopGlide: (() => void) | null = null;
 
-    const endDrag = () => {
-      if (!dragging) return;
-      dragging = false;
+    /**
+     * Hand the track back to the browser: snapping is what puts a card on the
+     * edge again, and it can only do that once it owns the scroll position.
+     * Restoring these AFTER the gesture (and after its glide) is what makes a
+     * release settle instead of stopping wherever the cursor was.
+     */
+    const restoreTrack = () => {
       track.classList.remove("is-dragging");
-      // Hand the track back to the browser: snapping is what puts a card on
-      // the edge again, and it can only do that once it owns the scroll
-      // position. Restoring these AFTER the gesture is what makes a release
-      // settle instead of stopping wherever the cursor was.
       track.style.scrollSnapType = "";
       track.style.scrollBehavior = "";
     };
 
+    const endDrag = (event: Event) => {
+      if (!dragging) return;
+      dragging = false;
+      const speed =
+        moved && !lessMotion() && !reduce.matches
+          ? -tracker.release((event as PointerEvent).timeStamp)
+          : 0;
+      // Release momentum (2026-10-12): the shelf coasts on at the speed the
+      // hand let go with and decays like a native fling, then snaps. Snap and
+      // smooth scrolling stay off until it comes to rest — either would fight
+      // the per-frame writes exactly as they would fight the drag itself.
+      let position = track.scrollLeft;
+      stopGlide = glide(
+        speed,
+        (delta) => {
+          // Someone else moved it (the endless wrap below): follow.
+          if (Math.abs(track.scrollLeft - position) > 2) position = track.scrollLeft;
+          position += delta;
+          if (loop > 0 && position >= loop) position -= loop;
+          track.scrollLeft = position;
+          // The start of the shelf is a hard edge; stop there.
+          return position > 0;
+        },
+        () => {
+          stopGlide = null;
+          restoreTrack();
+          resume();
+        },
+      );
+    };
+
     track.addEventListener("pointerdown", (event) => {
       if (event.pointerType !== "mouse" || event.button !== 0) return;
+      // A press catches a coasting shelf, like a hand on a spinning wheel.
+      stopGlide?.();
       dragging = true;
       moved = false;
       startX = event.clientX;
       startScroll = track.scrollLeft;
+      tracker.reset();
+      tracker.push(event.clientX, event.timeStamp);
       // RULE 1: no `setPointerCapture` here. While an element holds the
       // pointer the browser retargets the compatibility mouse events — CLICK
       // included — at the capture element, so every link inside the cards
@@ -378,6 +423,7 @@ const ui =
     track.addEventListener("pointermove", (event) => {
       if (!dragging) return;
       const dx = event.clientX - startX;
+      tracker.push(event.clientX, event.timeStamp);
 
       if (!moved) {
         if (Math.abs(dx) < DRAG_THRESHOLD) return;
@@ -430,7 +476,6 @@ const ui =
 
 
     // --- Endless shelf, and (separately) the drift ---------------------------
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const originals = Array.from(track.children) as HTMLElement[];
     if (originals.length === 0) continue;
     // A shelf that fits has nothing to wrap around.
@@ -462,27 +507,48 @@ const ui =
      * up front pulled every demo screenshot into the first page load and put
      * it 210 KB over the weight budget (`npm run audit:perf`).
      */
-    let loop = 0;
     let firstClone: HTMLElement | null = null;
     const measureLoop = () => {
       if (firstClone) loop = firstClone.offsetLeft - originals[0]!.offsetLeft;
     };
-    const appendCopy = () => {
-      for (const slide of originals) {
-        const clone = slide.cloneNode(true) as HTMLElement;
-        clone.classList.add("showcase__slide--clone");
-        clone.setAttribute("aria-hidden", "true");
-        clone.setAttribute("inert", "");
-        for (const node of [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))]) {
-          node.removeAttribute("id");
-          if (node.tabIndex >= 0) node.tabIndex = -1;
-        }
-        track.append(clone);
+    const appendClone = (slide: HTMLElement) => {
+      const clone = slide.cloneNode(true) as HTMLElement;
+      clone.classList.add("showcase__slide--clone");
+      clone.setAttribute("aria-hidden", "true");
+      clone.setAttribute("inert", "");
+      for (const node of [clone, ...Array.from(clone.querySelectorAll<HTMLElement>("*"))]) {
+        node.removeAttribute("id");
+        if (node.tabIndex >= 0) node.tabIndex = -1;
       }
+      track.append(clone);
     };
+    /**
+     * Built in idle slices, a few cards at a time (2026-10-12). One set of
+     * clones in a single callback was a 350 ms task (CPU ×4) that landed in
+     * the middle of a scroll — the shelf's 400 px look-ahead fires exactly
+     * while the visitor is scrolling towards it.
+     */
+    const idle: (step: (deadline: { timeRemaining(): number }) => void) => void =
+      "requestIdleCallback" in window
+        ? (step) => window.requestIdleCallback(step, { timeout: 500 })
+        : (step) => window.setTimeout(() => step({ timeRemaining: () => 8 }), 16);
+    const appendSet = (done: () => void) => {
+      const queue = [...originals];
+      const step = (deadline: { timeRemaining(): number }) => {
+        do appendClone(queue.shift()!);
+        while (queue.length > 0 && deadline.timeRemaining() > 6);
+        if (queue.length > 0) idle(step);
+        else done();
+      };
+      idle(step);
+    };
+    let building = false;
     const buildClones = () => {
-      if (firstClone) return;
-      appendCopy();
+      if (building) return;
+      building = true;
+      appendSet(afterFirstSet);
+    };
+    const afterFirstSet = () => {
       firstClone = track.children[originals.length] as HTMLElement;
       measureLoop();
       /**
@@ -504,13 +570,17 @@ const ui =
        * measurement of zero, not a budget.
        */
       let guard = 6;
-      while (loop > 0 && track.scrollWidth < loop + track.clientWidth && guard > 0) {
-        appendCopy();
-        guard -= 1;
-      }
-      // Only while it really drifts: the class turns off snapping and smooth
-      // scrolling, which a hand-scrolled shelf wants to keep.
-      if (drifts) track.classList.add("is-autoplay");
+      const more = () => {
+        if (loop > 0 && track.scrollWidth < loop + track.clientWidth && guard > 0) {
+          guard -= 1;
+          appendSet(more);
+          return;
+        }
+        // Only while it really drifts: the class turns off snapping and smooth
+        // scrolling, which a hand-scrolled shelf wants to keep.
+        if (drifts) track.classList.add("is-autoplay");
+      };
+      more();
     };
     new ResizeObserver(measureLoop).observe(track);
     let position = track.scrollLeft;
@@ -522,7 +592,8 @@ const ui =
     let frame = 0;
 
     const running = () =>
-      drifts && visible && !hovered && !focused && !dragging && !document.hidden && performance.now() > touchUntil;
+      drifts && visible && !hovered && !focused && !dragging && !stopGlide && !document.hidden &&
+      performance.now() > touchUntil;
 
     const tick = (now: number) => {
       frame = 0;
@@ -538,7 +609,7 @@ const ui =
       last = now;
       frame = requestAnimationFrame(tick);
     };
-    const resume = () => {
+    resume = () => {
       if (frame || !running()) return;
       // Pick up wherever a swipe or a drag left the shelf.
       position = track.scrollLeft;
