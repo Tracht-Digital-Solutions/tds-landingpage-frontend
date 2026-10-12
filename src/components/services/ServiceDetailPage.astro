@@ -23,7 +23,9 @@ import DetailOutcomes from "~/components/detail/DetailOutcomes.astro";
 import DetailProcess from "~/components/detail/DetailProcess.astro";
 import DetailReferences from "~/components/detail/DetailReferences.astro";
 import DetailCta from "~/components/detail/DetailCta.astro";
-import { asGraph, breadcrumbNode, serviceNode, webPageNode } from "~/lib/jsonld";
+import DetailFaq from "~/components/detail/DetailFaq.astro";
+import { serviceFaq } from "~/lib/serviceFaq";
+import { asGraph, breadcrumbNode, faqPageSchema, serviceNode, webPageNode } from "~/lib/jsonld";
 import { localizePath, type Lang } from "~/lib/i18n";
 import { siteConfig } from "~/lib/seo";
 import { businessCardCopy } from "~/lib/businessCard";
@@ -83,6 +85,9 @@ const platformHub =
 // No `offers`: the site publishes no hourly rates (2026-09-22). The price box
 // links to the packages instead, like the platform pages do.
 const breadcrumbId = `${canonical}#breadcrumb`;
+/** The page's own questions (2026-10-12): visible below and the FAQPage node. */
+const faq = serviceFaq(service.id, lang);
+const faqTitle = lang === "de" ? `Häufige Fragen: ${content.title}` : `Common questions: ${content.title}`;
 const jsonLd = asGraph(
   webPageNode({
     url: canonical,
@@ -104,6 +109,7 @@ const jsonLd = asGraph(
     { name: ui.home, url: `${siteConfig.url}${homeHref}` },
     { name: content.title, url: canonical },
   ]),
+  ...(faq.length > 0 ? [faqPageSchema(faq)] : []),
 );
 ---
 
@@ -220,6 +226,8 @@ const jsonLd = asGraph(
         </div>
       </section>
     )}
+
+    <DetailFaq title={faqTitle} items={faq} />
 
     <DetailCta
       title={content.ctaTitle}

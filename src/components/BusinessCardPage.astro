@@ -777,6 +777,15 @@ const profileSchema = {
   .card__pitch-cta {
     color: var(--color-accent);
   }
+  /* A link on its own line, 21px high on a phone (2026-10-12 audit): lifted
+     to a 44px target on touch, the desktop line stays as it is. */
+  @media (pointer: coarse) {
+    .card__pitch-cta {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
 
   .card__legal {
     margin-top: 3rem;
