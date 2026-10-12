@@ -1,0 +1,432 @@
+---
+/**
+ * The hero's carousel (2026-10-12): a random handful of our own examples —
+ * demos and design studies — as cards on a wheel. The front card stands at
+ * the top of the arc; its neighbours sit lower, smaller and more transparent;
+ * every few seconds the wheel turns one card on, with a spring that carries
+ * each card past its place and back.
+ *
+ * ### What it is, and what it must never become
+ *
+ * - **Plain Astro, no island.** The hero's copy must never wait on
+ *   hydration (`motion.test.ts`); the wheel is markup the server lays out in
+ *   its first pose, and a small script only turns it.
+ * - **Never behind the copy.** It lives right of the slogan from 64rem and is
+ *   absent below that: on a phone there is no free band large enough for a
+ *   card.
+ * - **No opacity start state.** The cards render where they rest; the wheel
+ *   only fades what is moving to the back.
+ * - **WCAG 2.2.2:** it turns only while on screen and in a visible tab, stops
+ *   under the pointer and with focus inside, and never under reduced motion
+ *   or the site's motion switch.
+ * - **Sampled per render.** The page cache keeps one sample per generation;
+ *   the next rebuild draws a new one. That is the "Stichprobe": no favourite.
+ *
+ * ### How the wheel turns
+ *
+ * Each card has a slot (`--slot`, …-1, 0, 1, …). Its angle on the wheel is a
+ * registered `<angle>` property derived from the slot, so a slot change
+ * TRANSITIONS the angle, and position, scale and turn are trigonometry of that
+ * angle: the card travels along the arc, not across a chord. The transition
+ * uses `--lp-ease-swing`, a sampled spring with two swings — the overshoot is
+ * an angle, so a card swings past the top and settles. The fade is a separate
+ * property with a plain ease (never an overshoot on opacity).
+ *
+ * Only the front card is reachable: the others are `inert`. Every card leads
+ * to the showcase section, where the same examples can be opened.
+ */
+import { getDemos } from "~/lib/demos";
+import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
+import { coverView, designStudies } from "~/lib/designStudies";
+import type { Lang } from "~/lib/i18n";
+import { localizePath } from "~/lib/i18n";
+import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
+import { mediaSrc } from "~/lib/mediaSrc";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+/** Seven slots: front, two pairs visible, one hidden pair to turn through. */
+const COUNT = 7;
+
+interface Example {
+  key: string;
+  title: string;
+  kind: string;
+  origin: string;
+  src: string;
+  srcset: string;
+  width: number;
+  height: number;
+}
+
+const demos = await getDemos();
+const pool: Example[] = [
+  ...demos.map((demo) => ({
+    key: `demo-${demo.definition.id}`,
+    title: demo.title,
+    kind: DEMO_KINDS[demo.definition.kind][lang],
+    origin: DEMO_ORIGINS[demo.definition.origin][lang],
+    src: mediaSrc(demo.preview),
+    srcset: srcsetFor(demo.preview, PREVIEW_VARIANT_WIDTHS, demo.previewWidth, mediaSrc),
+    width: demo.previewWidth,
+    height: demo.previewHeight,
+  })),
+  ...designStudies.map((study) => {
+    const cover = coverView(study);
+    return {
+      key: `study-${study.id}`,
+      title: study.title,
+      kind: DEMO_KINDS[study.kind][lang],
+      origin: DEMO_ORIGINS.study[lang],
+      src: mediaSrc(cover.src),
+      srcset: srcsetFor(cover.src, PREVIEW_VARIANT_WIDTHS, cover.width, mediaSrc),
+      width: cover.width,
+      height: cover.height,
+    };
+  }),
+];
+
+// Fisher–Yates, then the first COUNT. With fewer than COUNT the wheel shows
+// what there is; below three it would not be a wheel, so it stays out.
+for (let i = pool.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [pool[i], pool[j]] = [pool[j]!, pool[i]!];
+}
+const sample = pool.slice(0, COUNT);
+const half = Math.floor(sample.length / 2);
+/** Slot of card i, in list order around the rim: the first card in front,
+    the next ones to its right, the last ones to its left. */
+const slotOf = (index: number) => (((index + half) % sample.length) + sample.length) % sample.length - half;
+
+const href = `${localizePath("/", lang)}#showcase`;
+const ui =
+  lang === "en"
+    ? { label: "Examples of our work", roledescription: "carousel", open: "See the examples" }
+    : { label: "Beispiele aus unserer Arbeit", roledescription: "Karussell", open: "Beispiele ansehen" };
+---
+
+{
+  sample.length >= 3 && (
+    <div
+      class="hero-carousel"
+      role="group"
+      aria-roledescription={ui.roledescription}
+      aria-label={ui.label}
+      data-hero-carousel
+    >
+      <ul class="hero-carousel__wheel">
+        {sample.map((example, index) => {
+          const slot = slotOf(index);
+          return (
+            <li
+              class="hero-carousel__card"
+              style={`--slot: ${slot}`}
+              data-depth={Math.min(Math.abs(slot), 3)}
+              inert={slot !== 0}
+              aria-hidden={slot !== 0 ? "true" : undefined}
+              data-hero-card
+            >
+              <a class="hero-carousel__link" href={href} data-track="hero-carousel">
+                <span class="hero-carousel__shot">
+                  <img
+                    src={example.src}
+                    srcset={example.srcset}
+                    sizes="21rem"
+                    width={example.width}
+                    height={example.height}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="hero-carousel__origin">{example.origin}</span>
+                </span>
+                <span class="hero-carousel__meta">
+                  <span class="hero-carousel__title">{example.title}</span>
+                  <span class="hero-carousel__kind">
+                    {example.kind}
+                    <span class="sr-only"> – {example.origin}. {ui.open}</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )
+}
+
+<script>
+  import { lessMotion } from "~/lib/a11yPrefs";
+
+  /** How long the front card rests before the wheel turns. */
+  const REST_MS = 3600;
+  /** The transition's own length, from the CSS — the hidden wrap waits it out. */
+  const TURN_MS = 1100;
+
+  document.querySelectorAll<HTMLElement>("[data-hero-carousel]").forEach((root) => {
+    const cards = [...root.querySelectorAll<HTMLElement>("[data-hero-card]")];
+    const n = cards.length;
+    if (n < 3) return;
+    const half = Math.floor(n / 2);
+    let slots = cards.map((card) => Number(card.style.getPropertyValue("--slot")) || 0);
+
+    let onScreen = false;
+    let hovered = false;
+    let focused = false;
+    let timer = 0;
+
+    const place = (card: HTMLElement, slot: number) => {
+      card.style.setProperty("--slot", String(slot));
+      card.dataset.depth = String(Math.min(Math.abs(slot), 3));
+      const front = slot === 0;
+      card.inert = !front;
+      if (front) card.removeAttribute("aria-hidden");
+      else card.setAttribute("aria-hidden", "true");
+    };
+
+    const turn = () => {
+      slots = slots.map((slot, i) => {
+        let next = slot - 1;
+        const card = cards[i]!;
+        if (next < -half) {
+          // Off the left rim, onto the right one: a jump, made while the
+          // card is at the hidden back of the wheel, so without a transition.
+          next += n;
+          card.dataset.wrap = "";
+          place(card, next);
+          void card.offsetWidth;
+          window.setTimeout(() => delete card.dataset.wrap, 32);
+        } else {
+          place(card, next);
+        }
+        return next;
+      });
+    };
+
+    const running = () => onScreen && !hovered && !focused && !document.hidden && !lessMotion();
+    const schedule = () => {
+      window.clearTimeout(timer);
+      if (!running()) return;
+      // The rest is counted from the end of the previous turn.
+      timer = window.setTimeout(() => {
+        turn();
+        timer = window.setTimeout(schedule, TURN_MS);
+      }, REST_MS);
+    };
+
+    root.addEventListener("pointerenter", () => {
+      hovered = true;
+      schedule();
+    });
+    root.addEventListener("pointerleave", () => {
+      hovered = false;
+      schedule();
+    });
+    root.addEventListener("focusin", () => {
+      focused = true;
+      schedule();
+    });
+    root.addEventListener("focusout", (event) => {
+      if (root.contains(event.relatedTarget as Node | null)) return;
+      focused = false;
+      schedule();
+    });
+    document.addEventListener("visibilitychange", schedule);
+    new MutationObserver(schedule).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-a11y-motion"],
+    });
+    new IntersectionObserver((entries) => {
+      onScreen = entries.some((entry) => entry.isIntersecting);
+      schedule();
+    }).observe(root);
+  });
+</script>
+
+<style>
+  /* The angle every card's pose is computed from. Registered, so a change of
+     `--slot` interpolates it, and the card travels along the arc. */
+  @property --hc-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  .hero-carousel {
+    display: none;
+  }
+
+  @media (min-width: 64rem) and (min-height: 36rem) {
+    .hero-carousel {
+      /* The wheel's measurements: one card width, the step between two slots
+         on the rim, and the rim's two radii (wider than tall: a flat arc). */
+      --hc-card: clamp(13rem, 19vw, 23rem);
+      --hc-step: 44deg;
+      /* A steep arc, as in the sketch: the neighbours drop far enough that
+         the left one lies under the hero's buttons, never beside the slogan
+         (measured at 1024, 1280, 1440 and 1920). The second pair is below
+         the fold; it only shows while it swings in. */
+      --hc-rx: 40vw;
+      --hc-ry: 185svh;
+      --hc-center: 78%;
+      position: absolute;
+      inset: 0;
+      /* Behind the copy: a card swinging past the slogan's last letters
+         passes under them. The copy's container lets the pointer through
+         (`Hero.astro`), so the front card stays clickable. */
+      display: block;
+      pointer-events: none;
+    }
+  }
+
+  .hero-carousel__wheel {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hero-carousel__card {
+    --hc-angle: calc(var(--slot, 0) * var(--hc-step));
+    position: absolute;
+    /* The top of the wheel: right of the slogan, a little above the middle. */
+    left: calc(var(--hc-center, 70%) - var(--hc-card) / 2);
+    top: var(--hc-top, 24%);
+    width: var(--hc-card);
+    transform-origin: 50% 50%;
+    transform:
+      translate(
+        calc(sin(var(--hc-angle)) * var(--hc-rx)),
+        calc((1 - cos(var(--hc-angle))) * var(--hc-ry))
+      )
+      rotate(calc(var(--hc-angle) * 0.22))
+      scale(calc(0.5 + 0.5 * cos(var(--hc-angle))));
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      --hc-angle 1100ms var(--lp-ease-swing),
+      opacity 520ms var(--tds-ease-out),
+      visibility 0s linear 520ms;
+  }
+  .hero-carousel__card[data-depth="0"] {
+    z-index: 4;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      --hc-angle 1100ms var(--lp-ease-swing),
+      opacity 520ms var(--tds-ease-out),
+      visibility 0s;
+  }
+  .hero-carousel__card[data-depth="1"] {
+    z-index: 3;
+    opacity: 0.5;
+    visibility: visible;
+    transition:
+      --hc-angle 1100ms var(--lp-ease-swing),
+      opacity 520ms var(--tds-ease-out),
+      visibility 0s;
+  }
+  .hero-carousel__card[data-depth="2"] {
+    z-index: 2;
+    opacity: 0.18;
+    visibility: visible;
+    transition:
+      --hc-angle 1100ms var(--lp-ease-swing),
+      opacity 520ms var(--tds-ease-out),
+      visibility 0s;
+  }
+  .hero-carousel__card[data-wrap] {
+    transition: none;
+  }
+
+  @media (min-width: 80rem) {
+    .hero-carousel {
+      --hc-center: 74%;
+    }
+  }
+
+  .hero-carousel__link {
+    display: flex;
+    flex-direction: column;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--color-soft);
+    color: var(--color-black);
+    text-decoration: none;
+    box-shadow: var(--tds-shadow-hard);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out);
+  }
+  .hero-carousel__card[data-depth="0"] .hero-carousel__link:hover,
+  .hero-carousel__link:focus-visible {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+    box-shadow: var(--tds-shadow-hard-hover, var(--tds-shadow-hard));
+    translate: -2px -2px;
+  }
+  .hero-carousel__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .hero-carousel__shot {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3.4;
+    overflow: hidden;
+    background: var(--color-card);
+  }
+  .hero-carousel__shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+  .hero-carousel__origin {
+    position: absolute;
+    left: 0.75rem;
+    top: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: var(--color-surface-navy);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .hero-carousel__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.875rem 1.125rem 1rem;
+  }
+  .hero-carousel__title {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hero-carousel__kind {
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-carousel__card,
+    .hero-carousel__card[data-depth],
+    .hero-carousel__link {
+      transition: none;
+    }
+  }
+</style>
