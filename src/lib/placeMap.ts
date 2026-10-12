@@ -33,8 +33,29 @@ export interface LiveMap {
   busy: () => boolean;
 }
 
+/**
+ * Leaflet's stylesheet, as a STRING injected once (2026-10-12).
+ *
+ * A plain dynamic import of `leaflet/dist/leaflet.css` never worked in the build: the
+ * site inlines its stylesheets (`inlineStylesheets: "always"`), so the CSS
+ * chunk of a dynamic import was never written to `_astro/`, while Vite's
+ * preload helper still asked for it — a 404, "Unable to preload CSS", the
+ * import rejected and the bubble kept the drawn map for good. `?inline` turns
+ * the file into a string inside the JS chunk, so there is no file to miss.
+ */
+const LEAFLET_STYLE_ID = "leaflet-css";
+async function ensureLeafletCss(): Promise<void> {
+  if (document.getElementById(LEAFLET_STYLE_ID)) return;
+  const { default: css } = await import("leaflet/dist/leaflet.css?inline");
+  if (document.getElementById(LEAFLET_STYLE_ID)) return;
+  const style = document.createElement("style");
+  style.id = LEAFLET_STYLE_ID;
+  style.textContent = css;
+  document.head.append(style);
+}
+
 export async function mountLiveMap(container: HTMLElement, lang: Lang): Promise<LiveMap> {
-  const [{ default: L }] = await Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")]);
+  const [{ default: L }] = await Promise.all([import("leaflet"), ensureLeafletCss()]);
   const pink = getComputedStyle(document.documentElement).getPropertyValue("--color-accent-pink").trim() || "#f28cb1";
 
   const map = L.map(container, {
