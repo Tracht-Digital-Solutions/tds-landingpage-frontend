@@ -172,9 +172,9 @@ const ui =
   import { lessMotion } from "~/lib/a11yPrefs";
 
   /** How long the front card rests before the wheel turns on its own. */
-  const REST_MS = 8000;
+  const REST_MS = 11000;
   /** The turn's own length — the same number as `--hc-turn` in the CSS. */
-  const TURN_MS = 3000;
+  const TURN_MS = 1400;
   /** Pointer travel before a press becomes a drag (a click stays a click). */
   const SLOP_PX = 6;
 
@@ -367,9 +367,10 @@ const ui =
          the wheel and has all but vanished one slot away (cos⁸ of 34° ≈ 0.22,
          so a neighbour gains under 5%). */
       --hc-focus: 0.18;
-      /* One turn, slower since 2026-10-12 (1.5 s → 2.1 s → 3 s, rest 8 s).
+      /* One turn (2026-10-12: 1.5 s → 2.1 s → 3 s, then snappier at 1.4 s with
+         a longer rest of 11 s on each example).
          TURN_MS in the script matches. */
-      --hc-turn: 3000ms;
+      --hc-turn: 1400ms;
       --hc-center: 78%;
       position: absolute;
       inset: 0;
