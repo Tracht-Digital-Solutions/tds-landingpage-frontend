@@ -107,13 +107,15 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - The message field is guided by an element tied with `aria-describedby` (not a placeholder).
 - The four "what happens next" points are the confirmation's content. `ui/FirstCall.astro` keeps its `contact`
   variant for stored blocks but has no caller on the home page.
-- **Emergencies** (2026-10-11): a code-owned full-width "Notfall?" line under the heading (one line on desktop,
-  with a `tel:` link), an "Auch für Notfälle" badge beside the phone number and a "Notfall" checkbox in the form. The checkbox is local state, not a form
+- **Emergencies** (2026-10-11): a code-owned "Notfall?" line as the card's FIRST ROW across both halves,
+  parted by a horizontal seam (2026-10-12; one line on desktop, with a `tel:` link), an "Auch für Notfälle" badge beside the phone number and a "Notfall" checkbox in the form. The checkbox is local state, not a form
   field (`ContactSchema` has no such key and zodResolver drops unknown ones): ticked, the request goes out with
   `subject` = "Notfall – <reason>" (max 200). Copy in `lib/contactCopy.ts`.
 - The contact half, top to bottom (2026-10-12): e-mail and phone as full rows; WhatsApp pill and profile icons
-  side by side; business card and .vcf; Standort as `ui/PlaceBubble.astro` ("21493 Schwarzenbek" from
-  `siteConfig`, no "nähe Hamburg") — the same bubble component the footer uses (ids per instance).
+  side by side; business card and .vcf; Standort as the map itself (`ui/PlaceBubble.astro` with `inline`: the drawn
+  map, the live OSM map over it from the first hover, focus or tap). The footer uses the same component as a
+  bubble behind "21493 Schwarzenbek". Leaflet's CSS is imported `?inline` (`lib/placeMap.ts`): a dynamic CSS
+  chunk is never emitted under `inlineStylesheets: "always"` and 404'd.
 - **Footer contact** shows an icon per line, no labels (2026-10-12); "21493 Schwarzenbek" is a button that opens a
   bubble (hover, focus, tap; Escape closes). The first open loads Leaflet and **OpenStreetMap tiles**
   (`lib/placeMap.ts`, asked for on hover without a consent step; the privacy policy names it under "Externe
