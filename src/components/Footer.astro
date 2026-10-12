@@ -9,7 +9,7 @@ import { platformDefinitions, platformHref } from "~/lib/platforms";
 import { siteConfig } from "~/lib/seo";
 import { socialLinks } from "~/lib/socials";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
-import PlaceMap from "~/components/ui/PlaceMap.astro";
+import PlaceBubble from "~/components/ui/PlaceBubble.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 const t = tFor(Astro.currentLocale);
@@ -51,10 +51,6 @@ const navItems = [
 // The shop system and CMS pages, from every page of the site: the one place a
 // crawler — and a reader who scrolled to the end — reaches all of them at once.
 const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
-const placeCaption =
-  lang === "de"
-    ? "Schwarzenbek bei Hamburg · Kreis Herzogtum Lauenburg"
-    : "Schwarzenbek near Hamburg · District of Herzogtum Lauenburg";
 ---
 
 {/* Fast Schwarz / sehr dunkles Navy, with the page tokens re-mapped by
@@ -169,28 +165,7 @@ const placeCaption =
               </svg>
             </span>
             <span class="footer-contact__text">
-              <span class="footer-place" data-footer-place>
-                <button
-                  type="button"
-                  class="footer-place__trigger footer-link"
-                  aria-expanded="false"
-                  aria-controls="footer-place-bubble"
-                >
-                  {siteConfig.address.postalCode} {siteConfig.address.addressLocality}
-                </button>
-                <span class="footer-place__bubble" id="footer-place-bubble">
-                  <span class="footer-place__card">
-                    {/* The drawn map is the picture without JavaScript and
-                        while tiles load; the live map (`lib/placeMap.ts`)
-                        mounts over it on the first open. */}
-                    <span class="footer-place__map">
-                      <PlaceMap lang={lang} />
-                      <span class="footer-place__live" data-place-live></span>
-                    </span>
-                    <span class="footer-place__caption">{placeCaption}</span>
-                  </span>
-                </span>
-              </span>
+              <PlaceBubble lang={lang} id="footer-place-bubble" anchor="end" />
             </span>
           </li>
         </ul>
@@ -221,93 +196,6 @@ const placeCaption =
     </div>
   </div>
 </footer>
-
-<script>
-  import type { LiveMap } from "~/lib/placeMap";
-
-  /**
-   * The location bubble: open on hover (fine pointer), keyboard focus or a
-   * tap; closed on leaving, blur, a second tap or Escape. The first open
-   * mounts the live map; it stays open while the map is dragged.
-   */
-  document.querySelectorAll<HTMLElement>("[data-footer-place]").forEach((place) => {
-    const trigger = place.querySelector<HTMLButtonElement>(".footer-place__trigger");
-    const live = place.querySelector<HTMLElement>("[data-place-live]");
-    const bubble = place.querySelector<HTMLElement>(".footer-place__bubble");
-    if (!trigger) return;
-    let map: Promise<LiveMap> | null = null;
-    const ensureMap = () => {
-      if (!live) return;
-      if (!map) {
-        const lang = document.documentElement.lang.startsWith("en") ? "en" : "de";
-        map = import("~/lib/placeMap").then(({ mountLiveMap }) => mountLiveMap(live, lang));
-        map.then(() => place.setAttribute("data-live", "")).catch(() => {
-          // No map service: the drawn map stays.
-          map = null;
-        });
-      }
-      void map?.then((m) => m.refresh());
-    };
-    let busy = () => false;
-    const set = (open: boolean) => {
-      place.toggleAttribute("data-open", open);
-      trigger.setAttribute("aria-expanded", String(open));
-      if (open && bubble) {
-        // Keep the bubble on screen: measured once it is displayed.
-        bubble.style.removeProperty("--place-shift");
-        const over = bubble.getBoundingClientRect().right - (document.documentElement.clientWidth - 12);
-        if (over > 0) bubble.style.setProperty("--place-shift", `${-Math.ceil(over)}px`);
-      }
-      if (open) {
-        ensureMap();
-        void map?.then((m) => (busy = m.busy));
-      }
-    };
-    place.setAttribute("data-enhanced", "");
-    const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
-    // A click right after the pointer opened it must not close it again.
-    let openedByHover = false;
-    place.addEventListener("pointerenter", () => {
-      if (!hoverable.matches) return;
-      openedByHover = true;
-      set(true);
-    });
-    place.addEventListener("pointerleave", () => {
-      openedByHover = false;
-      // A drag on the map may leave the bubble; it closes when the hand lets go outside.
-      if (busy()) {
-        window.addEventListener(
-          "pointerup",
-          (event) => {
-            if (!place.contains(document.elementFromPoint(event.clientX, event.clientY))) set(false);
-          },
-          { once: true },
-        );
-        return;
-      }
-      if (hoverable.matches && !place.contains(document.activeElement)) set(false);
-    });
-    trigger.addEventListener("focus", () => {
-      if (trigger.matches(":focus-visible")) set(true);
-    });
-    place.addEventListener("focusout", (event) => {
-      if (!place.contains(event.relatedTarget as Node | null)) set(false);
-    });
-    trigger.addEventListener("click", () => {
-      if (openedByHover) {
-        openedByHover = false;
-        set(true);
-        return;
-      }
-      set(!place.hasAttribute("data-open"));
-    });
-    place.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape" || !place.hasAttribute("data-open")) return;
-      set(false);
-      trigger.focus();
-    });
-  });
-</script>
 
 <style>
   /* --- Contact column: icon, label, value ------------------------------ */
@@ -343,163 +231,6 @@ const placeCaption =
   }
   .footer-contact__text a {
     overflow-wrap: anywhere;
-  }
-
-  /* --- The location bubble ---------------------------------------------- */
-  .footer-place {
-    position: relative;
-    display: inline-block;
-  }
-  .footer-place__trigger {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: rgb(255 255 255 / 0.85);
-    font: inherit;
-    text-align: left;
-    text-decoration: underline dotted rgb(255 255 255 / 0.45);
-    text-underline-offset: 0.25em;
-    cursor: pointer;
-  }
-  .footer-place__trigger:hover {
-    color: #fff;
-  }
-  .footer-place__trigger:focus-visible {
-    outline: 2px solid var(--color-accent-pink);
-    outline-offset: 3px;
-    border-radius: 3px;
-  }
-  /* Above the trigger. The bubble's own bottom padding bridges the gap, so the
-     pointer can travel onto it without it closing. Anchored to the trigger's
-     left edge on a phone (the column starts at the gutter) and to its right
-     edge from `md`, where the column sits at the right of the page. */
-  .footer-place__bubble {
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    z-index: 20;
-    width: min(22rem, calc(100vw - 3rem));
-    /* Pulled back inside the screen when the trigger sits too far right for
-       the bubble's width (set by the script on open; a phone overflowed by
-       28px). */
-    margin-left: var(--place-shift, 0px);
-    padding-bottom: 0.75rem;
-    /* `display: none` while closed, not `visibility: hidden`: a hidden box
-       still counts toward the page's scroll width, and on a phone this one
-       made every page with the footer 28px wider than the screen. The fade
-       survives through `allow-discrete` and `@starting-style`. */
-    display: none;
-    opacity: 0;
-    translate: 0 0.5rem;
-    transition:
-      opacity 180ms var(--tds-ease-out),
-      translate 180ms var(--tds-ease-out),
-      display 180ms allow-discrete;
-  }
-  @media (min-width: 768px) {
-    .footer-place__bubble {
-      left: auto;
-      right: 0;
-    }
-  }
-  .footer-place:not([data-enhanced]):is(:hover, :focus-within) .footer-place__bubble,
-  .footer-place[data-open] .footer-place__bubble {
-    display: block;
-    opacity: 1;
-    translate: 0 0;
-  }
-  @starting-style {
-    .footer-place:not([data-enhanced]):is(:hover, :focus-within) .footer-place__bubble,
-    .footer-place[data-open] .footer-place__bubble {
-      opacity: 0;
-      translate: 0 0.5rem;
-    }
-  }
-  .footer-place__card {
-    position: relative;
-    display: grid;
-    gap: 0.5rem;
-    padding: 0.625rem;
-    border-radius: 6px;
-    background: color-mix(in srgb, #fff 7%, var(--color-surface-navy));
-    box-shadow: 6px 6px 0 0 var(--color-accent-pink);
-  }
-  /* The tail, pointing down at the trigger. */
-  .footer-place__card::after {
-    content: "";
-    position: absolute;
-    bottom: -0.375rem;
-    left: 1.5rem;
-    width: 0.75rem;
-    height: 0.75rem;
-    background: inherit;
-    rotate: 45deg;
-  }
-  @media (min-width: 768px) {
-    .footer-place__card::after {
-      left: auto;
-      right: 1.5rem;
-    }
-  }
-  /* The live map lies exactly over the drawn one (same 4:3 box). */
-  .footer-place__map {
-    position: relative;
-    display: block;
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .footer-place__live {
-    position: absolute;
-    inset: 0;
-    display: block;
-    visibility: hidden;
-    background: transparent;
-  }
-  .footer-place[data-live] .footer-place__live {
-    visibility: visible;
-  }
-  /* Leaflet's DOM is created at runtime, so these reach it with :global(). The
-     tiles are muted toward the site's palette; the controls take its shapes. */
-  .footer-place__live :global(.leaflet-tile-pane) {
-    filter: grayscale(0.55) contrast(0.95) brightness(1.03);
-  }
-  .footer-place__live :global(.leaflet-control-zoom) {
-    border: 0;
-    box-shadow: 3px 3px 0 0 var(--color-accent-pink);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .footer-place__live :global(.leaflet-control-zoom a) {
-    color: var(--color-surface-navy);
-  }
-  .footer-place__live :global(.leaflet-control-attribution) {
-    font-size: 9px;
-  }
-  .footer-place__live :global(.place-live__label) {
-    padding: 2px 8px;
-    border: 0;
-    border-radius: 9999px;
-    background: var(--color-surface-navy);
-    box-shadow: none;
-    color: #fff;
-    font-family: var(--font-display);
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .footer-place__live :global(.place-live__label::before) {
-    border-top-color: var(--color-surface-navy);
-  }
-  .footer-place__caption {
-    padding: 0 0.25rem 0.125rem;
-    font-size: 0.75rem;
-    line-height: 1.4;
-    color: rgb(255 255 255 / 0.75);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .footer-place__bubble {
-      translate: none;
-      transition: none;
-    }
   }
 
   /* The legal row is the last thing on every page, and the cookie notice and

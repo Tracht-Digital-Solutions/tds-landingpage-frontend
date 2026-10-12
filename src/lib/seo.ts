@@ -67,8 +67,12 @@ export const siteConfig = {
   legalName: "Julian Tracht",
   /** USt-IdNr. gemäß § 27a UStG — verified, matches the Impressum. */
   vatID: "DE450639725",
+  /** Self-employed since this year (the business's founding). Shown under "Wieso ich?". */
+  foundingYear: 2024,
   founder: {
     name: "Julian Tracht",
+    /** Programming since this year; the page shows the years computed from it. */
+    codingSince: 2018,
     // Websites first, like the site since 2026-09-15. Shown on the business
     // card and in the vCard as well.
     jobTitle: "Webentwickler & Digitalisierungsberater",

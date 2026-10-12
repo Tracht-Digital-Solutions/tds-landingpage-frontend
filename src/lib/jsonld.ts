@@ -67,6 +67,8 @@ export function organizationSchema() {
     email: `mailto:${siteConfig.email}`,
     telephone: siteConfig.telephone,
     founder: { "@id": `${siteConfig.url}/#person` },
+    // Shown in "Wieso ich?" as "selbstständig seit …"; JSON-LD follows the page.
+    foundingDate: String(siteConfig.foundingYear),
     areaServed: siteConfig.areaServed.map((a) => ({ "@type": "Place", name: a })),
     address: {
       "@type": "PostalAddress",

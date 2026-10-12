@@ -46,6 +46,7 @@ import {
 import { getHomeContent } from "~/lib/homeContent";
 import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
 import { siteConfig } from "~/lib/seo";
+import { aboutFacts } from "~/lib/aboutFacts";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -78,6 +79,8 @@ const renderedReasons = about.reasons.filter((_, index) => index !== 2).slice(0,
  * somebody reorders one of them.
  */
 const featured = featuredCredentials();
+/** Years of programming (computed) and self-employed since — code-owned, see `lib/aboutFacts.ts`. */
+const facts = aboutFacts(lang);
 const credentialsUi =
   lang === "de"
     ? { label: "Nachweise", all: `Alle ${credentials.length} Nachweise ansehen` }
@@ -173,6 +176,19 @@ const credentialsUi =
 
         {/* See the note at the top for what is NOT rendered here and why. */}
         <p class="text-lg font-medium text-[var(--color-black)] leading-relaxed">{about.p2}</p>
+
+        {/* Two facts, figure first (2026-10-12). A <dl>: each figure is the
+            term, its sentence the description. */}
+        <dl class="about-facts">
+          {
+            facts.map((fact) => (
+              <div class="about-fact">
+                <dt class="about-fact__value">{fact.value}</dt>
+                <dd class="about-fact__label">{fact.label}</dd>
+              </div>
+            ))
+          }
+        </dl>
 
         {/* The motivation. First person, and the only block on this page a
             competitor could not write — which is why it stands above the
@@ -377,6 +393,36 @@ const credentialsUi =
   .about-tile__meta {
     font-size: 0.8125rem;
     line-height: 1.35;
+    color: var(--color-muted);
+  }
+
+  /* The facts: two figures side by side, the same card fill as the tiles. */
+  .about-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: 0.625rem;
+    margin: 1.5rem 0 0;
+  }
+  .about-fact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 1.125rem;
+    border-radius: 6px;
+    background: var(--lp-surface-card);
+    text-align: left;
+  }
+  .about-fact__value {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    color: var(--color-black);
+  }
+  .about-fact__label {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
     color: var(--color-muted);
   }
 

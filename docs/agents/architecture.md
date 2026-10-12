@@ -99,19 +99,21 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   `zodResolver` forwards only known keys). Reasons come from `contact.reasons` and ship committed. Optional on
   purpose.
 - Layout (2026-10-11): name/e-mail and company/reason are pairs (`.contact-form-pair`, two columns from 40rem);
-  every field is a rounded, pressed-in dark well with no underline; the send button is a solid pink pill. Form
-  card and contact card share one solid lifted navy with a hard coral offset (no glass).
+  every field is a rounded, pressed-in dark well with no underline; the send button is a solid pink pill.
+  Since 2026-10-12 form and contacts are **one card** (`.contact-panel`, lifted navy, hard coral offset), side by
+  side from `lg` with a vertical 1px seam (horizontal when stacked). `contact.sub` is no longer rendered.
 - The closed dropdown wears the text fields' class (`fieldClass` + `.contact-select`); only the open list keeps
   its frosted `::picker(select)`.
 - The message field is guided by an element tied with `aria-describedby` (not a placeholder).
 - The four "what happens next" points are the confirmation's content. `ui/FirstCall.astro` keeps its `contact`
   variant for stored blocks but has no caller on the home page.
-- **Emergencies** (2026-10-11): a code-owned "Notfall?" line under the sub (with a `tel:` link), an "Auch für
-  Notfälle" badge on the phone row and a "Notfall" checkbox in the form. The checkbox is local state, not a form
+- **Emergencies** (2026-10-11): a code-owned full-width "Notfall?" line under the heading (one line on desktop,
+  with a `tel:` link), an "Auch für Notfälle" badge beside the phone number and a "Notfall" checkbox in the form. The checkbox is local state, not a form
   field (`ContactSchema` has no such key and zodResolver drops unknown ones): ticked, the request goes out with
   `subject` = "Notfall – <reason>" (max 200). Copy in `lib/contactCopy.ts`.
-- The contact card is four labelled groups with one icon-disc style: ways (e-mail, phone, WhatsApp), Standort,
-  Zum Mitnehmen (business card, .vcf), profiles.
+- The contact half, top to bottom (2026-10-12): e-mail and phone as full rows; WhatsApp pill and profile icons
+  side by side; business card and .vcf; Standort as `ui/PlaceBubble.astro` ("21493 Schwarzenbek" from
+  `siteConfig`, no "nähe Hamburg") — the same bubble component the footer uses (ids per instance).
 - **Footer contact** shows an icon per line, no labels (2026-10-12); "21493 Schwarzenbek" is a button that opens a
   bubble (hover, focus, tap; Escape closes). The first open loads Leaflet and **OpenStreetMap tiles**
   (`lib/placeMap.ts`, asked for on hover without a consent step; the privacy policy names it under "Externe
@@ -151,7 +153,9 @@ stored block loads, and the notes box renders only with notes.
   LinkedIn Learning paths shown as the rendered PDF (`object-fit: contain`, never cropped). Catalog, priority
   and groups are decided once in `lib/credentials.ts`; titles aren't translated. **The sentence under the lead
   stays** (learning paths, not vendor exams or a degree; `credentials.test.ts`). `sections/About.astro` teases
-  the first three in code, not via `cmsFor("why_me", …)`. `npm run certificates:render` rebuilds the images.
+  the first three in code, not via `cmsFor("why_me", …)`. Above the motivation it shows two code-owned facts
+  (`lib/aboutFacts.ts`): years of programming COMPUTED from `founder.codingSince` (2018) and self-employed since
+  `foundingYear` (2024, also the Organization's `foundingDate`). `npm run certificates:render` rebuilds the images.
 - **Digital business card** `/visitenkarte`, `/en/business-card` (`components/BusinessCardPage.astro`): the one
   `bare` route (no header, footer, floating CTA, cursor, scroll bar or live chat), reached by a phone camera.
   It draws a link hub, a language switch, a theme switch and **its own legal links**

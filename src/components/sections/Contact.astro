@@ -13,6 +13,7 @@ import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
+import PlaceBubble from "~/components/ui/PlaceBubble.astro";
 import { socialLinks, whatsappHref } from "~/lib/socials";
 import type { ServiceId } from "~/lib/services";
 
@@ -138,10 +139,8 @@ const ui =
   lang === "de"
     ? {
         reachTitle: "Direkt erreichbar",
-        messengerLabel: "Messenger",
         businessCard: "Visitenkarte",
         saveContact: "Kontakt speichern",
-        takeAway: "Zum Mitnehmen",
         urgentBadge: "Auch für Notfälle",
         urgentTitle: "Notfall?",
         urgentText: "Ich nehme auch kurzfristige Notfälle an. Kreuz im Formular „Notfall“ an oder",
@@ -149,10 +148,8 @@ const ui =
       }
     : {
         reachTitle: "Reach me directly",
-        messengerLabel: "Messenger",
         businessCard: "Business card",
         saveContact: "Save contact",
-        takeAway: "To take away",
         urgentBadge: "Emergencies too",
         urgentTitle: "Emergency?",
         urgentText: "I also take on emergencies at short notice. Tick “Emergency” in the form or",
@@ -214,8 +211,6 @@ const ui =
       aria-hidden="true"
       class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-6"
     ></span>
-    <p class="text-white/75 max-w-lg mb-6 leading-relaxed text-center md:text-left mx-auto md:mx-0">{contact.sub}</p>
-
     {/* Short-notice emergencies are taken (2026-10-11): said here, marked on
         the phone row and offered as a checkbox in the form. Code-owned copy,
         like the card's labels. */}
@@ -236,13 +231,14 @@ const ui =
         further down — and it pushed the form itself below the fold. The form's
         confirmation carries it now, which is where it is actually an answer. */}
 
-    <div class="grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-10 lg:gap-12 items-start">
-      {/* A card around the form: solid lifted navy with a hard coral offset
-          (2026-10-11; it was a glass veil before). A WRAPPER here rather than
-          a class inside the island: the island has two roots, the form and
-          the success view, and both belong on the same surface. Form 3 parts,
-          contact card 2 parts from `lg`. */}
-      <div class="contact-form-card">
+    {/* ONE card (2026-10-12): the form and the ways to reach a person, side
+        by side from `lg` and parted by a vertical seam (a horizontal one when
+        stacked). Solid lifted navy with the hard coral offset, the card
+        language of the page. The form sits in a WRAPPER rather than a class
+        inside the island: the island has two roots, the form and the success
+        view, and both belong on the same surface. Form 3 parts, contacts 2. */}
+    <div class="contact-panel">
+      <div class="contact-panel__form">
         <ContactForm
           client:visible
           lang={lang}
@@ -252,16 +248,13 @@ const ui =
         />
       </div>
 
-      {/* ONE card in four labelled groups (2026-10-11, reordered from the
-          2026-09-29 card): the three ways to reach a person, the town, what
-          a visitor can take away, and the profiles. Every row starts with the
-          same round icon disc, so the column reads as one system instead of
-          rows, pills and icons each in their own style.
+      {/* Top to bottom (2026-10-12): e-mail and phone as full rows, one under
+          the other; WhatsApp and the profiles side by side; the business card
+          and the .vcf; the town with its map bubble last.
 
-          WhatsApp appears ONCE, as a way — not again among the social buttons.
-          `lib/socials.ts` makes the same distinction in its own docblock: it is
-          a messenger deep link, not a profile, which is why it is absent from
-          `sameAs`. So the social row is profiles only. */}
+          WhatsApp appears ONCE, as a messenger, not again among the profile
+          icons. `lib/socials.ts` makes the same distinction: it is a deep
+          link, not a profile, which is why it is absent from `sameAs`. */}
       <aside class="contact-card" aria-labelledby="contact-card-title">
         <p id="contact-card-title" class="eyebrow contact-card__title">{ui.reachTitle}</p>
 
@@ -290,54 +283,34 @@ const ui =
                 </svg>
               </span>
               <span class="contact-way__text">
-                <span class="contact-way__label">
-                  {t.contact.info.phoneLabel}
+                <span class="contact-way__label">{t.contact.info.phoneLabel}</span>
+                {/* "Auch für Notfälle" beside the number itself (2026-10-12):
+                    the one place a visitor in a hurry looks. */}
+                <span class="contact-way__value-row">
+                  <span class="contact-way__value">{phoneDisplay}</span>
                   <span class="contact-way__badge">{ui.urgentBadge}</span>
                 </span>
-                <span class="contact-way__value">{phoneDisplay}</span>
-              </span>
-              <span aria-hidden="true" class="contact-way__go">→</span>
-            </a>
-          </li>
-
-          <li>
-            {/* `target`/`rel` because it leaves for a messenger, like every
-                link in `SocialLinks`. */}
-            <a
-              class="contact-way"
-              href={whatsappHref(contact.phone)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span class="contact-disc" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d={WHATSAPP_ICON} />
-                </svg>
-              </span>
-              <span class="contact-way__text">
-                <span class="contact-way__label">{ui.messengerLabel}</span>
-                <span class="contact-way__value">WhatsApp</span>
               </span>
               <span aria-hidden="true" class="contact-way__go">→</span>
             </a>
           </li>
         </ul>
 
-        {/* The town only — no street address in the contact section
-            (2026-10-05, on Julian's word). The full address stays where the
-            law and the search engines need it: the Impressum and the JSON-LD,
-            both read from `siteConfig`. */}
-        <div class="contact-card__group">
-          <p class="contact-card__label">{t.contact.info.locationLabel}</p>
-          <p class="contact-card__where">
-            <span class="contact-disc" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-            </span>
-            <span>{contact.location}</span>
-          </p>
+        <div class="contact-card__group contact-card__social">
+          {/* `target`/`rel` because it leaves for a messenger, like every
+              link in `SocialLinks`. */}
+          <a
+            class="contact-action contact-action--whatsapp"
+            href={whatsappHref(contact.phone)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d={WHATSAPP_ICON} />
+            </svg>
+            WhatsApp
+          </a>
+          {profileLinks.length > 0 && <SocialLinks links={profileLinks} />}
         </div>
 
         {/* The business card page and the .vcf, side by side and doing
@@ -346,7 +319,6 @@ const ui =
             person can be shown, scan or forward.
             TODO: promote the .vcf to tds-shared contact.vcard */}
         <div class="contact-card__group">
-          <p class="contact-card__label">{ui.takeAway}</p>
           <div class="contact-card__actions">
             <a class="contact-action" href={businessCardHref(lang)}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -368,12 +340,24 @@ const ui =
           </div>
         </div>
 
-        {profileLinks.length > 0 && (
-          <div class="contact-card__group contact-card__group--row">
-            <p class="contact-card__label">{t.contact.info.socialLabel}</p>
-            <SocialLinks links={profileLinks} />
-          </div>
-        )}
+        {/* The town only, with the footer's map bubble on hover, focus or a
+            tap (2026-10-12). Postal code and town from `siteConfig`, so no
+            "nähe Hamburg" here; the full address stays where the law and the
+            search engines need it: the Impressum and the JSON-LD. */}
+        <div class="contact-card__group">
+          <p class="contact-card__where">
+            <span class="contact-disc" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
+            <span class="contact-card__where-text">
+              <span class="contact-way__label">{t.contact.info.locationLabel}</span>
+              <PlaceBubble lang={lang} id="contact-place-bubble" anchor="start" />
+            </span>
+          </p>
+        </div>
       </aside>
     </div>
   </div>
@@ -694,17 +678,39 @@ const ui =
      in coral — the card language every other box on the page speaks, instead
      of a glass veil that let the photo through unevenly. Navy fill, so coral
      shade, never a navy one (design.md). */
-  #contact .contact-form-card,
-  #contact .contact-card {
+  #contact .contact-panel {
+    display: grid;
     border-radius: 6px;
-    padding: 1.5rem;
     background: color-mix(in srgb, #fff 7%, var(--color-surface-navy));
     box-shadow: 6px 6px 0 0 var(--color-accent-pink);
   }
+  #contact .contact-panel__form,
+  #contact .contact-card {
+    min-width: 0;
+    padding: 1.5rem;
+  }
+  /* The seam between the two halves: horizontal while stacked. */
+  #contact .contact-card {
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+  }
   @media (min-width: 48rem) {
-    #contact .contact-form-card,
+    #contact .contact-panel__form,
     #contact .contact-card {
       padding: 2rem;
+    }
+  }
+  /* Side by side from `lg`; the seam turns vertical. */
+  @media (min-width: 64rem) {
+    #contact .contact-panel {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+    #contact .contact-panel__form {
+      padding-right: 2.5rem;
+    }
+    #contact .contact-card {
+      border-top: 0;
+      border-left: 1px solid rgb(255 255 255 / 0.14);
+      padding-left: 2.5rem;
     }
   }
 
@@ -792,9 +798,16 @@ const ui =
     text-transform: uppercase;
     color: rgb(255 255 255 / 0.55);
   }
-  /* "Auch für Notfälle" on the phone row: the one place a visitor in a hurry
-     looks. Pink on navy, measured ≥ 6:1 like the form's other pink cues. */
+  #contact .contact-way__value-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+  }
+  /* "Auch für Notfälle" beside the number. Pink on navy, measured ≥ 6:1 like
+     the form's other pink cues. */
   #contact .contact-way__badge {
+    white-space: nowrap;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
     background: color-mix(in srgb, var(--color-accent-pink) 18%, transparent);
@@ -830,13 +843,6 @@ const ui =
     padding-top: 1.25rem;
     border-top: 1px solid rgb(255 255 255 / 0.14);
   }
-  #contact .contact-card__label {
-    margin: 0 0 0.75rem;
-    font-size: 0.6875rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: rgb(255 255 255 / 0.55);
-  }
   #contact .contact-card__where {
     display: flex;
     align-items: center;
@@ -847,16 +853,21 @@ const ui =
     line-height: 1.4;
     color: #fff;
   }
-  /* The profiles: label and icons on one line where they fit. */
-  #contact .contact-card__group--row {
+  #contact .contact-card__where-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.125rem;
+  }
+  /* WhatsApp and the profile icons on one line where they fit. */
+  #contact .contact-card__social {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: 0.75rem 1rem;
   }
-  #contact .contact-card__group--row .contact-card__label {
-    margin: 0;
+  #contact .contact-action--whatsapp {
+    flex: none;
   }
 
   /* Two equal buttons, side by side, stacked on a very narrow column. Not
@@ -896,10 +907,11 @@ const ui =
   /* === The emergency line under the sub ============================ */
   #contact .contact-urgent {
     display: flex;
-    align-items: flex-start;
+    /* Full width, so the note runs on to the right in one line where the
+       screen allows instead of wrapping inside a narrow box (2026-10-12). */
+    align-items: center;
     gap: 0.75rem;
-    max-width: 40rem;
-    margin: 0 auto 2.5rem;
+    margin: 0 0 2.5rem;
     padding: 0.875rem 1.125rem;
     border-radius: 6px;
     background: color-mix(in srgb, var(--color-accent-pink) 14%, var(--color-surface-navy));
@@ -908,11 +920,6 @@ const ui =
     font-size: 0.9375rem;
     line-height: 1.5;
     text-align: left;
-  }
-  @media (min-width: 48rem) {
-    #contact .contact-urgent {
-      margin-inline: 0;
-    }
   }
   #contact .contact-urgent__icon {
     display: inline-flex;
