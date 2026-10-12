@@ -102,6 +102,8 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   every field is a rounded, pressed-in dark well with no underline; the send button is a solid pink pill.
   Since 2026-10-12 form and contacts are **one card** (`.contact-panel`, lifted navy, hard coral offset), side by
   side from `lg` with a vertical 1px seam (horizontal when stacked). `contact.sub` is no longer rendered.
+  From `lg` the message field grows to fill the form column down to the contacts' height (every wrapper
+  between the column and the form, `<astro-island>` included, is a flex column).
 - The closed dropdown wears the text fields' class (`fieldClass` + `.contact-select`); only the open list keeps
   its frosted `::picker(select)`.
 - The message field is guided by an element tied with `aria-describedby` (not a placeholder).
@@ -156,8 +158,9 @@ stored block loads, and the notes box renders only with notes.
   and groups are decided once in `lib/credentials.ts`; titles aren't translated. **The sentence under the lead
   stays** (learning paths, not vendor exams or a degree; `credentials.test.ts`). `sections/About.astro` teases
   the first three in code, not via `cmsFor("why_me", …)`. Above the motivation it shows two code-owned facts
-  (`lib/aboutFacts.ts`): years of programming COMPUTED from `founder.codingSince` (2018) and self-employed since
-  `foundingYear` (2024, also the Organization's `foundingDate`). `npm run certificates:render` rebuilds the images.
+  (`lib/aboutFacts.ts`), each a one-word heading and a figure that counts up on scroll-in: years of programming
+  COMPUTED from `founder.codingSince` (2018) and self-employed since `foundingYear` (2024, counted up from 2018;
+  also the Organization's `foundingDate`). The `why_me.reasons` tiles are no longer rendered (2026-10-12). `npm run certificates:render` rebuilds the images.
 - **Digital business card** `/visitenkarte`, `/en/business-card` (`components/BusinessCardPage.astro`): the one
   `bare` route (no header, footer, floating CTA, cursor, scroll bar or live chat), reached by a phone camera.
   It draws a link hub, a language switch, a theme switch and **its own legal links**
