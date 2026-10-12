@@ -9,6 +9,7 @@ import {
   type WheelSample,
 } from "~/lib/wheelKind";
 import { createScrollLock } from "~/lib/scrollLock";
+import { SNAP_DURATION_MS, SNAP_IDLE_MS, settleEasing, snapTarget } from "~/lib/sectionSnap";
 
 type ScrollTarget = number | HTMLElement | string;
 
@@ -54,6 +55,19 @@ function headerClearance(): number {
 function maxScrollY(): number {
   const doc = document.documentElement;
   return Math.max(0, doc.scrollHeight - doc.clientHeight);
+}
+
+/**
+ * Where each top-level section of `<main>` starts, as a scroll position (its
+ * top minus the header clearance). Measured when a scroll has come to rest,
+ * never per frame.
+ */
+function sectionStarts(): number[] {
+  const clearance = headerClearance();
+  const y = window.scrollY;
+  return Array.from(document.querySelectorAll<HTMLElement>("main section[id]"))
+    .filter((section) => !section.parentElement?.closest("main section[id]"))
+    .map((section) => y + section.getBoundingClientRect().top - clearance);
 }
 
 /**
@@ -114,6 +128,40 @@ export default function SmoothScroll() {
     const inputLock = createScrollLock({
       maxDurationMs: JUMP_DURATION_MS + 600,
     });
+
+    /**
+     * Gentle section snap (2026-10-12, `lib/sectionSnap.ts`): once a scroll
+     * has been still for a moment near the start of a section, the page
+     * settles onto it. Never after a click-jump (it chose its own target),
+     * never while a pointer holds the page (the floating scroll bar), a
+     * dialog is open or someone is typing, and not under reduced motion.
+     */
+    let skipNextSnap = false;
+    let pointerHeld = false;
+    const onPointerDown = () => (pointerHeld = true);
+    const onPointerUp = () => (pointerHeld = false);
+    window.addEventListener("pointerdown", onPointerDown, { passive: true, capture: true });
+    window.addEventListener("pointerup", onPointerUp, { passive: true, capture: true });
+    window.addEventListener("pointercancel", onPointerUp, { passive: true, capture: true });
+    const snapBlocked = () =>
+      prefersReduce() ||
+      pointerHeld ||
+      document.querySelector("dialog[open]") !== null ||
+      document.activeElement?.matches("input, textarea, select, [contenteditable]") === true;
+    /** The position to settle on now, or null. Consumes the click-jump flag. */
+    const settleTarget = (): number | null => {
+      if (skipNextSnap) {
+        skipNextSnap = false;
+        return null;
+      }
+      if (snapBlocked()) return null;
+      return snapTarget(window.scrollY, sectionStarts(), window.innerHeight, maxScrollY());
+    };
+    const removeSnapListeners = () => {
+      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("pointerup", onPointerUp, true);
+      window.removeEventListener("pointercancel", onPointerUp, true);
+    };
 
     // Delegated handler factory: in-page anchor links (nav, footer, CTAs)
     // bounce-jump through `scrollTo` instead of the browser's instant/native
@@ -181,6 +229,8 @@ export default function SmoothScroll() {
 
       const tdsScrollTo: Window["tdsScrollTo"] = (target, opts) => {
         cancelTween();
+        cancelSettle();
+        skipNextSnap = true;
         const { startY, destY, distance, easing } = planFor(target);
 
         if ((opts?.immediate ?? prefersReduce()) || distance === 0) {
@@ -220,10 +270,57 @@ export default function SmoothScroll() {
       const onClick = makeAnchorClickHandler(tdsScrollTo);
       document.addEventListener("click", onClick);
 
+      // The settle: after native scrolling (momentum included) has been still
+      // for a moment and no finger is on the glass. A new touch cancels it.
+      let settleRaf = 0;
+      let settleTimer = 0;
+      let touching = false;
+      function cancelSettle() {
+        if (settleRaf) cancelAnimationFrame(settleRaf);
+        settleRaf = 0;
+        window.clearTimeout(settleTimer);
+      }
+      const settle = () => {
+        if (touching || rafId || settleRaf) return;
+        const destY = settleTarget();
+        if (destY === null) return;
+        const startY = window.scrollY;
+        const start = performance.now();
+        const step = (now: number) => {
+          const t = Math.min(1, (now - start) / SNAP_DURATION_MS);
+          jumpTo(startY + (destY - startY) * settleEasing(t));
+          settleRaf = t < 1 ? requestAnimationFrame(step) : 0;
+        };
+        settleRaf = requestAnimationFrame(step);
+      };
+      const onScroll = () => {
+        if (settleRaf || rafId) return;
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(settle, SNAP_IDLE_MS);
+      };
+      const onTouchStart = () => {
+        touching = true;
+        cancelSettle();
+      };
+      const onTouchEnd = () => {
+        touching = false;
+        onScroll();
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("touchend", onTouchEnd, { passive: true });
+      window.addEventListener("touchcancel", onTouchEnd, { passive: true });
+
       return () => {
         cancelTween();
+        cancelSettle();
         inputLock.destroy();
+        removeSnapListeners();
         document.removeEventListener("click", onClick);
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("touchstart", onTouchStart);
+        window.removeEventListener("touchend", onTouchEnd);
+        window.removeEventListener("touchcancel", onTouchEnd);
         delete window.tdsScrollTo;
       };
     }
@@ -293,6 +390,8 @@ export default function SmoothScroll() {
     window.addEventListener("wheel", onWheel, { passive: true });
 
     const tdsScrollTo: Window["tdsScrollTo"] = (target, opts) => {
+      window.clearTimeout(settleTimer);
+      skipNextSnap = true;
       const { destY, distance, easing } = planFor(target);
       const immediate = opts?.immediate ?? prefersReduce();
       const animated = !immediate && distance !== 0;
@@ -329,6 +428,34 @@ export default function SmoothScroll() {
     const onClick = makeAnchorClickHandler(tdsScrollTo);
     document.addEventListener("click", onClick);
 
+    // The settle: Lenis reports every frame of a scroll (wheel, keys, the
+    // floating bar); once it has been still for a moment, settle near a
+    // section start with a short ease-out through Lenis itself.
+    let settleTimer = 0;
+    let settling = false;
+    const settle = () => {
+      if (lenis.isScrolling) return;
+      const destY = settleTarget();
+      if (destY === null) return;
+      settling = true;
+      lenis.scrollTo(destY, {
+        duration: SNAP_DURATION_MS / 1000,
+        easing: settleEasing,
+      });
+      // A timer, not `onComplete`: a settle interrupted by a key or the
+      // scroll bar never completes, and the flag would stay up for good.
+      window.setTimeout(() => (settling = false), SNAP_DURATION_MS + 120);
+      wake();
+    };
+    const offScroll = lenis.on("scroll", () => {
+      if (settling) return;
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settle, SNAP_IDLE_MS);
+    });
+    // A new wheel turn takes the page back from a running settle.
+    const onWheelDuringSettle = () => (settling = false);
+    window.addEventListener("wheel", onWheelDuringSettle, { passive: true });
+
     /**
      * Lenis only needs frames while it is moving the page (2026-10-11). The
      * loop used to run every frame for the whole visit, scrolling or not —
@@ -357,6 +484,10 @@ export default function SmoothScroll() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      window.clearTimeout(settleTimer);
+      offScroll();
+      removeSnapListeners();
+      window.removeEventListener("wheel", onWheelDuringSettle);
       window.removeEventListener("wheel", wake);
       window.removeEventListener("scroll", wake);
       inputLock.destroy();
