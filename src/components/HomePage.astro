@@ -112,14 +112,13 @@ const jsonLd = asGraph(
 // The search term first, then the brand. At most 60 characters; the local
 // qualifier lives in the description, the schema's address and the footer.
 //
-// "übernehmen" leads since the page was sharpened to businesses that already
-// HAVE a site — that is the search someone in this situation actually types.
-// "Digitalisierung" stays in the same line because it is the Germany-wide
-// keyword target named in the root CLAUDE.md, and `seo.test.ts` holds it in
-// the description.
+// Since 2026-10-12 the title follows the hero and the service order: the own
+// portal first, digitalization second, websites third. "Digitalisierung" is
+// the Germany-wide keyword target named in the root CLAUDE.md, and
+// `seo.test.ts` holds the full phrase in the description.
 const titles = {
-  de: "Website übernehmen & Digitalisierung — Tracht Digital",
-  en: "Website takeover & digitalization — Tracht Digital",
+  de: "Kundenportale, Digitalisierung, Websites — Tracht Digital",
+  en: "Customer portals, digitalization, websites — Tracht Digital",
 };
 ---
 
