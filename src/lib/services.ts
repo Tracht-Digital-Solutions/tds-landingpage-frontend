@@ -192,7 +192,7 @@ export const serviceDefinitions = [
         summary:
           "Ein eigenes Panel, das den Betrieb strukturiert: von Projektmanagement über Kunden und Aufträge bis zu Automatisierungen.",
         intro:
-          "In vielen Betrieben laufen Tabellen, Mails und Notizen nebeneinander. Ein Panel bringt *Struktur* hinein: Projekte, Aufgaben, Kunden und Unterlagen an einem Ort, wiederkehrende Schritte laufen automatisch. Das Team sieht, was zu tun ist, Kunden finden ihre Unterlagen selbst. Grundlage ist ein bewährtes, im eigenen Betrieb eingesetztes System – kein Neubau von null.",
+          "In vielen Betrieben laufen Tabellen, Mails und Notizen nebeneinander. Ein Panel bringt *Struktur* hinein: Projekte, Aufgaben, Kunden und Unterlagen an einem Ort, wiederkehrende Schritte laufen automatisch. Das Team sieht, was zu tun ist, Kunden finden ihre Unterlagen selbst. Grundlage ist ein erprobtes System, das Tracht Digital Solutions selbst einsetzt – kein Neubau von null.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Aufträge und Kundendaten liegen verteilt in Tabellen, Mails und Ordnern.",
@@ -201,7 +201,6 @@ export const serviceDefinitions = [
         ],
         responsibilitiesTitle: "Leistungsumfang",
         responsibilities: [
-          "Struktur klären: welche Projekte, Abläufe und Rollen das Panel abbildet",
           "Projektmanagement, Kunden, Aufträge und Unterlagen in einem System",
           "Automatisierungen für wiederkehrende Schritte, z. B. Erinnerungen und Status-Mails",
           "Rollen und sichere Logins für Team und Kunden",
@@ -209,10 +208,9 @@ export const serviceDefinitions = [
         ],
         outcomesTitle: "Ergebnis",
         outcomes: [
-          "Eine klare Struktur für den ganzen Betrieb",
+          "Eine klare Struktur: der aktuelle Stand auf einen Blick",
           "Alle wichtigen Informationen an einem Ort, auch mobil",
           "Kunden erledigen Anfragen selbst im Portal",
-          "Der aktuelle Stand ist auf einen Blick sichtbar",
         ],
         boundariesTitle: "Nicht enthalten",
         boundaries: [
@@ -240,7 +238,7 @@ export const serviceDefinitions = [
         summary:
           "A panel of its own that structures the business: from project management through customers and orders to automation.",
         intro:
-          "Many businesses run spreadsheets, emails and notes side by side. A panel brings *structure*: projects, tasks, customers and documents in one place, recurring steps run automatically. The team sees what needs doing, customers find their documents themselves. It is built on a proven system in daily use – not from scratch.",
+          "Many businesses run spreadsheets, emails and notes side by side. A panel brings *structure*: projects, tasks, customers and documents in one place, recurring steps run automatically. The team sees what needs doing, customers find their documents themselves. It is built on a proven system that Tracht Digital Solutions runs itself – not from scratch.",
         situationsTitle: "Typical situations",
         situations: [
           "Orders and customer data are spread across spreadsheets, emails and folders.",
@@ -249,7 +247,6 @@ export const serviceDefinitions = [
         ],
         responsibilitiesTitle: "Scope of services",
         responsibilities: [
-          "Set the structure: which projects, workflows and roles the panel maps",
           "Project management, customers, orders and documents in one system",
           "Automation for recurring steps, e.g. reminders and status emails",
           "Roles and secure logins for team and customers",
@@ -257,10 +254,9 @@ export const serviceDefinitions = [
         ],
         outcomesTitle: "Results",
         outcomes: [
-          "A clear structure for the whole business",
+          "A clear structure: where things stand at a glance",
           "All important information in one place, on mobile too",
           "Customers handle requests themselves in the portal",
-          "Where things stand is visible at a glance",
         ],
         boundariesTitle: "Not included",
         boundaries: [
@@ -318,20 +314,18 @@ export const serviceDefinitions = [
         summary:
           "Digitale Werkzeuge im Betrieb einbinden, zum Beispiel digitale Buchführung oder ein Projektmanagementsystem, samt passender Abläufe.",
         intro:
-          "Digitalisierung heißt nicht, alles neu zu machen. Oft fehlt ein passendes Werkzeug, *richtig eingebunden*: Belege und Rechnungen laufen digital in die Buchführung, Projekte und Aufgaben stehen in einem System statt in Mails. Auswahl, Einrichtung und die Einführung im Team gehören dazu.",
+          "Digitalisierung heißt nicht, alles neu zu machen. Oft fehlt nur ein passendes Werkzeug, *richtig eingebunden*: Belege und Rechnungen laufen digital in die Buchführung, Projekte und Aufgaben stehen in einem System statt in Mails. Auswahl, Einrichtung und die Einführung im Team gehören dazu.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Belege und Rechnungen wandern auf Papier oder per Mail hin und her.",
           "Projekte und Aufgaben stehen in Mails, auf Zetteln und in Köpfen.",
           "Dieselben Daten werden mehrfach eingetippt.",
-          "Bei Routinearbeiten schleichen sich Fehler ein.",
         ],
         responsibilitiesTitle: "Leistungsumfang",
         responsibilities: [
           "Digitale Buchführung einbinden: Belege, Rechnungen, Übergabe an die Kanzlei",
           "Projektmanagementsystem auswählen, einrichten und im Team einführen",
-          "Bestehende Abläufe gemeinsam mit dem Team aufnehmen",
-          "Zeitfresser und Fehlerquellen finden",
+          "Bestehende Abläufe mit dem Team aufnehmen, Zeitfresser und Fehlerquellen finden",
           "Einen einfacheren Ablauf einrichten – mit passender Automatisierung",
         ],
         outcomesTitle: "Ergebnis",
@@ -344,7 +338,6 @@ export const serviceDefinitions = [
         boundaries: [
           "Die Buchführung selbst und die Steuerberatung bleiben bei der Kanzlei.",
           "Nicht jeder Sonderfall lohnt eine Automatisierung.",
-          "Änderungen werden mit dem Team abgestimmt.",
         ],
         processTitle: "Vorgehen",
         process: [
@@ -367,20 +360,18 @@ export const serviceDefinitions = [
         summary:
           "Bringing digital tools into the business, for example digital bookkeeping or a project management system, with the workflows to match.",
         intro:
-          "Digitalizing does not mean starting over. Often a fitting tool is missing, *properly integrated*: receipts and invoices flow digitally into the bookkeeping, projects and tasks live in one system instead of in emails. Selection, setup and team onboarding are part of it.",
+          "Digitalizing does not mean starting over. Often all that is missing is a fitting tool, *properly integrated*: receipts and invoices flow digitally into the bookkeeping, projects and tasks live in one system instead of in emails. Selection, setup and team onboarding are part of it.",
         situationsTitle: "Typical situations",
         situations: [
           "Receipts and invoices travel back and forth on paper or by email.",
           "Projects and tasks live in emails, on notes and in people's heads.",
           "The same data gets typed in more than once.",
-          "Mistakes creep into routine work.",
         ],
         responsibilitiesTitle: "Scope of services",
         responsibilities: [
           "Integrate digital bookkeeping: receipts, invoices, hand-over to the accountant",
           "Choose a project management system, set it up and introduce it to the team",
-          "Map existing workflows together with the team",
-          "Find time sinks and error sources",
+          "Map existing workflows with the team, find time sinks and error sources",
           "Set up a simpler workflow – with the right automation",
         ],
         outcomesTitle: "Results",
@@ -393,7 +384,6 @@ export const serviceDefinitions = [
         boundaries: [
           "The bookkeeping itself and tax advice stay with the accountant.",
           "Not every exception is worth automating.",
-          "Changes are agreed with the team.",
         ],
         processTitle: "Approach",
         process: [
@@ -562,7 +552,6 @@ export const serviceDefinitions = [
           "Daten werden abgetippt oder jeden Tag dieselben Schritte geklickt.",
           "Mehrere Programme arbeiten nicht zusammen.",
           "Die Standardsoftware kann eine Besonderheit des Betriebs nicht.",
-          "Daten sollen zuverlässig von einem Werkzeug ins andere fließen.",
         ],
         responsibilitiesTitle: "Leistungsumfang",
         responsibilities: [
@@ -576,7 +565,6 @@ export const serviceDefinitions = [
         outcomes: [
           "Stumpfe Handarbeit erledigt ein Skript",
           "Die Programme arbeiten zusammen",
-          "Genau das Werkzeug, das fehlt",
           "Lesbarer, dokumentierter Quellcode",
         ],
         boundariesTitle: "Nicht enthalten",
@@ -611,7 +599,6 @@ export const serviceDefinitions = [
           "Data is typed over or the same steps are clicked every day.",
           "Several programs do not work together.",
           "Standard software cannot handle a quirk of the business.",
-          "Data should move reliably from one tool to the next.",
         ],
         responsibilitiesTitle: "Scope of services",
         responsibilities: [
@@ -625,7 +612,6 @@ export const serviceDefinitions = [
         outcomes: [
           "A script does the dull manual work",
           "The programs work together",
-          "Exactly the tool that is missing",
           "Readable, documented source code",
         ],
         boundariesTitle: "Not included",
@@ -691,19 +677,17 @@ export const serviceDefinitions = [
         summary:
           "Websites und Shops nach Maß: ausgerichtet auf die Kunden und passend zum Firmenbild, ohne Baukasten-Vorlage und ohne KI-Einheitstext.",
         intro:
-          "Viele Websites sehen gleich aus: dieselbe Vorlage, dieselben Floskeln, oft von einer KI geschrieben. Eine Website von Tracht Digital Solutions sieht nach dem Betrieb aus, für den sie gebaut ist. Am Anfang steht die Frage, *wer die Kunden sind* und was sie suchen. Gestaltung, Texte und Funktionen entstehen darum herum. Bestehende Seiten werden ebenfalls übernommen; ersetzt wird nur, was im Weg steht.",
+          "Viele Websites sehen gleich aus: dieselbe Vorlage, dieselben Floskeln, oft von einer KI geschrieben. Eine Website von Tracht Digital Solutions sieht nach dem Betrieb aus, für den sie gebaut ist. Am Anfang steht die Frage, *wer die Kunden sind* und was sie suchen – Gestaltung, Texte und Funktionen folgen daraus. Bestehende Seiten werden auch übernommen; ersetzt wird nur, was im Weg steht.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
-          "Die Website sieht aus wie viele andere, nicht wie der eigene Betrieb.",
-          "Texte und Bilder wirken austauschbar oder nach KI.",
+          "Die Website sieht aus wie viele andere – Texte und Bilder wirken austauschbar.",
           "Die Seite ist veraltet oder der Shop macht Ärger.",
           "Die Seite sieht gut aus, aber kaum jemand fragt an.",
         ],
         responsibilitiesTitle: "Leistungsumfang",
         responsibilities: [
-          "Gestaltung passend zum Firmenbild: Farben, Schrift, Bildsprache",
+          "Gestaltung passend zum Firmenbild, für Handy und Bildschirm",
           "Aufbau und Texte aus Sicht der Kunden, nicht aus einer Vorlage",
-          "Websites für Handy und Bildschirm",
           "Onlineshops einrichten oder reparieren, z. B. WooCommerce oder Shopware 6",
           "Übernahme bestehender Seiten auf WordPress, TYPO3 oder bei STRATO",
           "Marketing: Auffindbarkeit bei Google und in KI-Antworten (SEO und GEO), Google Ads und Unternehmensprofil",
@@ -716,7 +700,6 @@ export const serviceDefinitions = [
         ],
         boundariesTitle: "Nicht enthalten",
         boundaries: [
-          "Keine fertige Vorlage mit ausgetauschtem Logo und keine ungeprüften KI-Texte.",
           "Das Werbebudget für Anzeigen geht direkt an Google.",
           "Texte, Fotos und Rechtstexte brauchen Zuarbeit aus dem Betrieb.",
           "Platzierungen bei Google lassen sich nicht kaufen – in KI-Antworten genauso wenig.",
@@ -743,19 +726,17 @@ export const serviceDefinitions = [
         summary:
           "Made-to-measure websites and shops: built around the customers and true to the brand, without site-builder templates or generic AI copy.",
         intro:
-          "Many websites look the same: the same template, the same phrases, often written by an AI. A website by Tracht Digital Solutions looks like the business it is built for. It starts with *who the customers are* and what they look for. Design, copy and features are built around that. Existing sites are taken over too; only what stands in the way is replaced.",
+          "Many websites look the same: the same template, the same phrases, often written by an AI. A website by Tracht Digital Solutions looks like the business it is built for. It starts with *who the customers are* and what they look for – design, copy and features follow from that. Existing sites are taken over too; only what stands in the way is replaced.",
         situationsTitle: "Typical situations",
         situations: [
-          "The website looks like many others, not like the business.",
-          "Copy and images feel interchangeable or machine-made.",
+          "The website looks like many others – copy and images feel interchangeable.",
           "The site is outdated or the shop is causing problems.",
           "The site looks good, but hardly anyone gets in touch.",
         ],
         responsibilitiesTitle: "Scope of services",
         responsibilities: [
-          "Design true to the brand: colours, type, imagery",
+          "Design true to the brand, for phones and screens",
           "Structure and copy from the customers' point of view, not a template",
-          "Websites for phones and screens",
           "Set up or repair online shops, e.g. WooCommerce or Shopware 6",
           "Take over existing sites on WordPress, TYPO3 or at STRATO",
           "Marketing: findability on Google and in AI answers (SEO and GEO), Google Ads and business profile",
@@ -768,7 +749,6 @@ export const serviceDefinitions = [
         ],
         boundariesTitle: "Not included",
         boundaries: [
-          "No ready-made template with a swapped logo and no unchecked AI copy.",
           "The ad budget goes to Google directly.",
           "Copy, photos and legal texts need input from the business.",
           "Google rankings cannot be bought – nor can a mention in an AI answer.",

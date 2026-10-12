@@ -117,10 +117,10 @@ export function getFaqPageCopy(lang: "de" | "en") {
         // It is the first thing an answer engine reads after the headline, and
         // the first thing a reader needs in order to trust the rest.
         answer:
-          "Die Fragen auf dieser Seite beantwortet Julian Tracht selbst – Inhaber von Tracht Digital Solutions in Schwarzenbek bei Hamburg, tätig für Unternehmen in ganz Deutschland. Es geht um die Übernahme einer fremd gebauten Website, darum was ein Festpreis abdeckt, wie lange eine Umsetzung dauert und wer nach der Übergabe zuständig ist.",
+          "Die Fragen auf dieser Seite beantwortet Julian Tracht selbst – Inhaber von Tracht Digital Solutions in Schwarzenbek bei Hamburg, tätig für Unternehmen in ganz Deutschland. Es geht um Websites und eigene Software, um Festpreise und Dauer, um den Umgang mit KI und um die Betreuung nach dem Start.",
         seoTitle: "Häufige Fragen zu Website, Preis und Ablauf — Tracht Digital",
         description:
-          "Antworten zu Übernahme bestehender Seiten, Festpreisen, Dauer, Zugängen und laufender Betreuung. Kurz beantwortet, ohne Fachsprache.",
+          "Antworten zu Websites, eigener Software, Festpreisen, Dauer, KI und Betreuung – kurz beantwortet, ohne Fachsprache.",
         groups: {
           takeover: "Übernahme und Umsetzung",
           pricing: "Preise und Dauer",
@@ -138,10 +138,10 @@ export function getFaqPageCopy(lang: "de" | "en") {
         intro:
           "Takeovers, pricing and working together – the questions I am asked most often.",
         answer:
-          "The questions on this page are answered by Julian Tracht himself – owner of Tracht Digital Solutions in Schwarzenbek near Hamburg, working with companies across Germany. They cover taking over a site somebody else built, what a fixed price includes, how long a project runs and who is responsible after handover.",
+          "The questions on this page are answered by Julian Tracht himself – owner of Tracht Digital Solutions in Schwarzenbek near Hamburg, working with companies across Germany. They cover websites and custom software, fixed prices and timelines, the use of AI and support after launch.",
         seoTitle: "Common Questions on Websites and Pricing — Tracht Digital",
         description:
-          "Answers on taking over existing sites, fixed prices, timelines, logins and ongoing support. Answered briefly, without the jargon.",
+          "Answers on websites, custom software, fixed prices, timelines, AI and ongoing support – answered briefly, without the jargon.",
         groups: {
           takeover: "Takeover and build",
           pricing: "Pricing and timelines",
@@ -169,7 +169,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           // hier ankommen, und sie steht damit über der Preisfrage.
           {
             q: "Kannst du meine bestehende Website oder meinen Shop übernehmen?",
-            a: "Ja, auch mit WordPress, WooCommerce, Shopware, TYPO3 oder bei STRATO. Ich behebe Fehler und pflege sie weiter.",
+            a: "Ja – auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Ich behebe Fehler und übernehme die Pflege.",
             group: "takeover",
           },
           {
@@ -179,7 +179,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Drei Pakete haben einen Festpreis, sie stehen bei den Preisen. Alles andere bekommst du als eigenes Angebot.",
+            a: "Für drei Pakete gilt ein Festpreis – sie stehen bei den Preisen. Alles andere bekommst du als eigenes Angebot.",
             group: "pricing",
           },
           {
@@ -196,14 +196,14 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Wem gehören die Seite und die Zugänge?",
-            a: "Dir. Du bekommst alle Zugänge, und bei der Übergabe gehört dir alles, was zur Seite gehört. Wenn du später zu jemand anderem willst, nimmst du es vollständig mit.",
+            a: "Dir. Du bekommst alle Zugänge, und bei der Übergabe gehört dir alles, was zur Seite gehört. Wechselst du später, nimmst du alles mit.",
             group: "cooperation",
           },
 
           // --- Only on /fragen ------------------------------------------
           {
             q: "Was heißt „Abläufe digitalisieren“ bei einem Betrieb wie meinem?",
-            a: "Nenn mir einen Ablauf, der dich jede Woche Zeit kostet – Angebote, Terminvergabe, Rechnungen. Ich sage dir, was sich automatisieren lässt und was den Aufwand nicht wert ist. Auch wenn die Antwort lautet: so lassen.",
+            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Nenn mir einen Ablauf, der dich jede Woche Zeit kostet – ich sage dir, was sich lohnt. Manchmal lautet die Antwort auch: so lassen.",
             group: "takeover",
           },
           {
@@ -213,7 +213,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             // the boundary the Webauftritt page draws for Google and this one
             // draws for the same reason.
             q: "Findet ChatGPT meine Seite – und kann man das beeinflussen?",
-            a: "Ja, und ja. Antwortmaschinen lesen dieselbe Seite wie Google, achten aber auf anderes: eine klare Antwort gleich im ersten Absatz, Überschriften, die als Frage formuliert und im ersten Satz beantwortet sind, prüfbare Angaben mit Quelle, ein sichtbares Stand-Datum und einen genannten Autor. Dazu kommt eine technische Freigabe – wer die KI-Crawler aussperrt, verschwindet aus deren Antworten, ohne dass irgendwo ein Fehler erscheint. Das nennt sich GEO, und es ist kein zweites Projekt neben der Suchmaschinenoptimierung, sondern dieselbe Arbeit sauber gemacht. Eine Platzierung versprechen kann dir niemand.",
+            a: "Ja, und ja. KI-Suchen lesen dieselbe Seite wie Google, achten aber auf anderes: eine klare Antwort im ersten Absatz, Fragen als Überschriften, prüfbare Angaben mit Quelle, Datum und Autor. Außerdem dürfen die KI-Crawler nicht ausgesperrt sein. Das nennt sich GEO – eine Platzierung kann dir trotzdem niemand versprechen.",
             group: "takeover",
           },
           {
@@ -228,13 +228,13 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             // one doing the job. Stated plainly, without claiming it is never
             // used — it is.
             q: "Wie gehst du mit KI um?",
-            a: "Ich nutze KI als Werkzeug, nicht als Dienstleister, der die Arbeit für mich erledigt. KI hilft mir beim Recherchieren, beim Prüfen und bei Routineschritten. Was du bekommst, entscheide, gestalte und prüfe ich selbst. Ungeprüfte KI-Texte oder eine von KI zusammengesetzte Website gehen bei mir nicht online.",
+            a: "Als Werkzeug, nicht als Ersatz für meine Arbeit. KI hilft mir beim Recherchieren, Prüfen und bei Routineschritten. Was du bekommst, entscheide, gestalte und prüfe ich selbst – ungeprüfte KI-Texte gehen bei mir nicht online.",
             group: "cooperation",
           },
           {
             // Added 2026-10-12 with the "Individuelle Lösungen" lead.
             q: "Programmierst du auch im Auftrag?",
-            a: "Ja. Ich schreibe Tools und Automatisierungsskripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen, immer gleiche Klicks im Browser. Du beschreibst den Ablauf, ich sage dir, was sich lohnt. Bei festem Umfang gibt es einen Festpreis pro Etappe.",
+            a: "Ja. Ich schreibe Tools und Skripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen. Du beschreibst den Ablauf, ich sage dir, was sich lohnt – bei festem Umfang zum Festpreis pro Etappe.",
             group: "takeover",
           },
           {
@@ -245,17 +245,17 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Kann ich Texte und Bilder selbst ändern?",
-            a: "Wie du willst. Möchtest du selbst ran, richte ich dir den Zugang ein und zeige es dir. Wenn nicht, schickst du mir die Änderung – das ist Teil der Pflege, kein Aufpreis.",
+            a: "Ja, wenn du willst. Ich richte dir den Zugang ein und zeige dir, wie es geht. Oder du schickst mir die Änderung – das ist Teil der Pflege, kein Aufpreis.",
             group: "cooperation",
           },
           {
             q: "Was ist, wenn die Seite ausfällt?",
-            a: "Melde dich, ich kümmere mich. Eine Seite, die offline ist, sehe ich mir auch am Wochenende an. Alles andere beantworte ich werktags, in der Regel am selben Tag.",
+            a: "Dann kümmere ich mich – bei einem Ausfall auch am Wochenende. Alles andere beantworte ich werktags, in der Regel am selben Tag.",
             group: "cooperation",
           },
           {
             q: "Was brauchst du von mir?",
-            a: "Erst einmal nur das, was du schon hast: Texte, Bilder, Zugänge. Fehlt etwas, sage ich dir welches Material gebraucht wird – schreiben kann ich es auch.",
+            a: "Erst einmal nur, was du schon hast: Texte, Bilder, Zugänge. Fehlt etwas, sage ich dir, was noch gebraucht wird – Texte kann ich auch schreiben.",
             group: "cooperation",
           },
           {
@@ -279,7 +279,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         items: [
           {
             q: "Can you take over my existing website or shop?",
-            a: "Yes, including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. I fix errors and keep it maintained.",
+            a: "Yes – including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. I fix errors and take over the maintenance.",
             group: "takeover",
           },
           {
@@ -304,18 +304,18 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Who owns the site and the logins?",
-            a: "You do. You get every login, and at handover everything belonging to the site belongs to you. If you move to someone else later, you take all of it with you.",
+            a: "You do. You get every login, and at handover everything belonging to the site belongs to you. If you switch later, you take all of it with you.",
             group: "cooperation",
           },
 
           {
             q: "What does “digitalizing workflows” mean for a business like mine?",
-            a: "Name a routine that costs you time every week — quotes, scheduling, invoices. I will tell you what can be automated and what is not worth the effort. Including when the answer is: leave it as it is.",
+            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. Name a routine that costs you time every week — I will tell you what is worth it. Sometimes the answer is: leave it as it is.",
             group: "takeover",
           },
           {
             q: "Does ChatGPT find my site – and can that be influenced?",
-            a: "Yes, and yes. Answer engines read the same page Google does, but they weigh different things: a clear answer in the first paragraph, headings that are real questions, checkable facts with their sources, a visible date and a named author. On top of that comes a technical permission – shut the AI crawlers out and you disappear from their answers, with no error showing anywhere. It is called GEO, and it is not a second project beside search engine optimisation but the same work done properly. Nobody can promise you a placement.",
+            a: "Yes, and yes. AI search reads the same page Google does, but weighs different things: a clear answer in the first paragraph, questions as headings, checkable facts with sources, a date and an author. And the AI crawlers must not be shut out. It is called GEO – but nobody can promise you a placement.",
             group: "takeover",
           },
           {
@@ -325,12 +325,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "How do you use AI?",
-            a: "I use AI as a tool, not as a service that does the work for me. It helps with research, with checking and with routine steps. What you get is decided, designed and checked by me. Unchecked AI copy or a site assembled by an AI does not go online.",
+            a: "As a tool, not as a substitute for my work. AI helps me with research, checking and routine steps. What you get is decided, designed and checked by me – unchecked AI copy does not go online.",
             group: "cooperation",
           },
           {
             q: "Do you also do contract programming?",
-            a: "Yes. I write tools and automation scripts for work that is done by hand today: moving data, matching lists, building reports, the same clicks in a browser again and again. You describe the process, I tell you what is worth it. With a fixed scope there is a fixed price per stage.",
+            a: "Yes. I write tools and scripts for work that is done by hand today: moving data, matching lists, building reports. You describe the process, I tell you what is worth it – with a fixed scope at a fixed price per stage.",
             group: "takeover",
           },
           {
@@ -340,17 +340,17 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Can I change text and images myself?",
-            a: "However you prefer. If you want to do it yourself, I set up your access and show you how. If not, you send me the change — that is part of maintenance, not an extra.",
+            a: "Yes, if you want to. I set up your access and show you how. Or you send me the change — that is part of maintenance, not an extra.",
             group: "cooperation",
           },
           {
             q: "What happens if the site goes down?",
-            a: "Get in touch and I will deal with it. A site that is offline I look at at the weekend too. Everything else I answer on weekdays, usually the same day.",
+            a: "Then I deal with it – at the weekend too if the site is down. Everything else I answer on weekdays, usually the same day.",
             group: "cooperation",
           },
           {
             q: "What do you need from me?",
-            a: "To begin with, only what you already have: text, images, logins. If something is missing I tell you what material is needed — and I can write it as well.",
+            a: "To begin with, only what you already have: text, images, logins. If something is missing, I tell you what is still needed — and I can write the text as well.",
             group: "cooperation",
           },
           {
