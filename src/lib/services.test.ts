@@ -12,7 +12,7 @@ describe("service catalog", () => {
   it("pins the five services in the agreed display order", () => {
     // Kundenportale & Verwaltungspanels first since 2026-10-06 — the site leads
     // with the business's own panel and with digitalization, and the hero says
-    // so ("Alles an einem Ort. Dein eigenes Panel."). The web presence, first
+    // so ("Alles an einem Ort. Ein eigenes Panel."). The web presence, first
     // from 2026-09-15, moved to the end; its id, CMS key and slugs did not
     // change, so no URL and no saved panel block changed with it.
     //

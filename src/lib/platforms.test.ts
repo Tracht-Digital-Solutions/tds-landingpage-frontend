@@ -13,7 +13,7 @@ import { retiredServiceTargets, serviceDefinitions } from "./services";
  * The shop system and CMS pages, and the rules their copy keeps.
  *
  * Several of these are Julian's decisions rather than code correctness — no
- * amount on these pages, "du", no free and no time-boxed first conversation —
+ * amount on these pages, no direct address, no free and no time-boxed first conversation —
  * and they are here because a well-meant sentence could undo each of them with
  * nothing else to notice.
  */
@@ -212,11 +212,11 @@ describe("platform copy rules", () => {
     }
   });
 
-  it("addresses the reader with du in German", () => {
+  it("addresses no one directly in German", () => {
     for (const platform of platformDefinitions) {
       const de = prose(platform, "de");
       expect(de, platform.id).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre|Ihren|Ihrem|Ihrer|Ihres)\b/);
-      expect(de, platform.id).toMatch(/\b(du|dein|deine|deinen|deinem|deiner|dir|dich)\b/);
+      expect(de, platform.id).not.toMatch(/\b(du|dein|deine|deinen|deinem|deiner|dir|dich)\b/i);
     }
   });
 

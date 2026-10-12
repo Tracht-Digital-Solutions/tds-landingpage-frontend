@@ -7,8 +7,8 @@ import type { Lang } from "./i18n";
  * Labels, placeholders and the consent sentence come from tds-shared, like
  * before — they address nobody ("Name", "Nachricht senden", "Ich willige …
  * ein"). The sentences that DO address the visitor are overridden here: the
- * shared bundle says "Bitte geben Sie …" for every site, and since 2026-09-15
- * this one says "du". Overriding them locally keeps the other sites' tone
+ * shared bundle says "Bitte geben Sie …" for every site, and since 2026-10-12
+ * this one addresses no one directly. Overriding them locally keeps the other sites' tone
  * untouched and needs no shared release.
  *
  * **Runtime import allowed:** the island bundles this, and it already bundled
@@ -54,7 +54,7 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
     return {
       form: t.contact.form,
       errors: t.errors,
-      failure: "The message could not be sent just now. Please try again later or email me directly: ",
+      failure: "The message could not be sent just now. Please try again later or send an email directly: ",
       email: t.contact.info.email,
       reasonLabel: "What is it about?",
       reasonEmpty: "Please choose",
@@ -67,8 +67,8 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
   return {
     form: {
       ...t.contact.form,
-      successMessage: "Danke für deine Nachricht. Ich melde mich in der Regel innerhalb von 24 Stunden.",
-      errorMessage: "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
+      successMessage: "Vielen Dank für die Nachricht. Die Antwort kommt in der Regel innerhalb von 24 Stunden.",
+      errorMessage: "Etwas ist schiefgelaufen. Bitte noch einmal versuchen.",
     },
     reasonLabel: "Worum geht es?",
     reasonEmpty: "Bitte auswählen",
@@ -78,13 +78,13 @@ export function contactFormCopy(lang: Lang): ContactFormCopy {
     urgentSubject: "Notfall",
     errors: {
       ...t.errors,
-      name: "Bitte gib deinen Namen an.",
-      email: "Bitte gib eine gültige E-Mail-Adresse an.",
+      name: "Bitte einen Namen angeben.",
+      email: "Bitte eine gültige E-Mail-Adresse angeben.",
       message: "Mindestens 20 Zeichen, bitte.",
-      consent: "Bitte bestätige die Einwilligung.",
+      consent: "Bitte die Einwilligung bestätigen.",
     },
     failure:
-      "Die Nachricht konnte gerade nicht gesendet werden. Bitte versuch es später noch einmal oder schreib mir direkt: ",
+      "Die Nachricht konnte gerade nicht gesendet werden. Bitte später noch einmal versuchen oder direkt per E-Mail schreiben: ",
     email: t.contact.info.email,
   };
 }

@@ -63,14 +63,14 @@ const defaults: Record<Lang, PricingContent> = {
     // beantwortet jetzt die Frage, mit der jeder hierher scrollt.
     headline: "Was es",
     headlineAccent: "kostet.",
-    sub: "Drei Website-Pakete zum *Festpreis*. Alles andere bekommst du als eigenes Angebot.",
+    sub: "Drei Website-Pakete zum *Festpreis*. Alles andere wird als eigenes Angebot kalkuliert.",
     notesTitle: "Gut zu wissen",
     // Festpreis and Angebot are steps of `pricing_logic` (homeContent.ts),
     // rendered in the same box as these notes — listing them here as well
     // printed each of them twice.
     notes: [],
     ctaTitle: "Individuelle Lösungen",
-    ctaSub: "Passt dein Vorhaben in kein Paket? Dann bekommst du ein eigenes Angebot mit Preis und Termin.",
+    ctaSub: "Passt ein Vorhaben in kein Paket, gibt es ein eigenes Angebot mit Preis und Termin.",
     ctaButton: "Anfrage stellen",
     back: "Zurück zur Startseite",
   },
@@ -82,7 +82,7 @@ const defaults: Record<Lang, PricingContent> = {
     notesTitle: "Good to know",
     notes: [],
     ctaTitle: "Custom solutions",
-    ctaSub: "Your project fits no package? Then you get a quote of its own with a price and a date.",
+    ctaSub: "A project that fits no package gets a quote of its own with a price and a date.",
     ctaButton: "Send a request",
     back: "Back to the homepage",
   },
@@ -104,7 +104,7 @@ const defaultPackages: Record<Lang, PricePackage[]> = {
     {
       title: "Website-Check",
       price: 390,
-      description: "Ich prüfe deine Seite und sage dir, was zuerst dran ist.",
+      description: "Prüfung der bestehenden Seite mit klarer Liste, was zuerst dran ist.",
       includes: [
         "Technik, Sicherheit und Ladezeit geprüft",
         "Schriftlicher Bericht mit Prioritäten",
@@ -114,7 +114,7 @@ const defaultPackages: Record<Lang, PricePackage[]> = {
     {
       title: "Website-Optimierung",
       price: 780,
-      description: "Ich mache deine bestehende Seite schneller, sicherer und besser auffindbar.",
+      description: "Die bestehende Seite wird schneller, sicherer und besser auffindbar.",
       includes: [
         "Ladezeit optimiert: Bilder, Caching, Code",
         "Technische Fehler behoben, Updates eingespielt",
@@ -136,7 +136,7 @@ const defaultPackages: Record<Lang, PricePackage[]> = {
     {
       title: "Website check",
       price: 390,
-      description: "I review your site and tell you what to fix first.",
+      description: "A review of the existing site with a clear list of what to fix first.",
       includes: [
         "Tech, security and load time reviewed",
         "Written report with priorities",
@@ -146,7 +146,7 @@ const defaultPackages: Record<Lang, PricePackage[]> = {
     {
       title: "Website optimisation",
       price: 780,
-      description: "I make your existing site faster, safer and easier to find.",
+      description: "The existing site becomes faster, safer and easier to find.",
       includes: [
         "Load time optimised: images, caching, code",
         "Technical faults fixed, updates applied",

@@ -175,11 +175,11 @@ describe("the finder's copy", () => {
     expect(Object.keys(FINDER_COPY.de).sort()).toEqual(Object.keys(FINDER_COPY.en).sort());
   });
 
-  it("keeps the site's rules: du, nothing free, no durations", () => {
+  it("keeps the site's rules: no direct address, nothing free, no durations", () => {
     const german = JSON.stringify([FINDER_COPY.de, FINDER_SECTION.de]);
     expect(german).not.toMatch(/kostenlos|kostenfrei|gratis|Minute/i);
     expect(german).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre|Ihren|Ihrem|Ihrer|Ihres)\b/);
-    expect(german).toMatch(/\bdu\b/);
+    expect(german).not.toMatch(/\b(du|dein\w*|dir|dich)\b/i);
     expect(JSON.stringify([FINDER_COPY.en, FINDER_SECTION.en])).not.toMatch(/\bfree\b|minute/i);
   });
 

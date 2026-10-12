@@ -151,7 +151,7 @@ export interface ServiceDefinition {
  *
  * ### Copy rules
  *
- * - **du**, lowercase, like the rest of the site (decided 2026-09-15).
+ * - Neutral voice since 2026-10-12: no "du", no "Sie" (see addressForm.test.ts).
  * - **Short and clear** (asked for 2026-09-15): three points per list, one
  *   statement per line, no filler.
  * - `summary` is rendered twice: as the card text on the pricing grid and as
@@ -650,7 +650,7 @@ export const serviceDefinitions = [
     slug: { de: "webauftritt", en: "web-presence" },
     seoTitle: {
       de: "Individuelle Website erstellen lassen — Tracht Digital",
-      en: "Custom Websites Built Around Your Business — Tracht Digital",
+      en: "Custom Websites Built Around Each Business — Tracht Digital",
     },
     // 2026-10-12: the page now leads with what sets the work apart — a site
     // made for this business and its customers, not a template and not
@@ -663,7 +663,7 @@ export const serviceDefinitions = [
     // not a thing somebody types into a search box.
     keywords: {
       de: ["Individuelle Websites", "Onlineshops", "Passend zum Firmenbild", "SEO & KI-Suche"],
-      en: ["Custom websites", "Online shops", "True to your brand", "SEO & AI search"],
+      en: ["Custom websites", "Online shops", "True to the brand", "SEO & AI search"],
     },
     tagline: {
       de: "Websites nach Maß statt Vorlage",

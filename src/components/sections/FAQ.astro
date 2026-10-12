@@ -31,14 +31,14 @@ const content = await cmsFor("faq_v2", lang, getFaqContent(lang));
 const ui =
   lang === "de"
     ? {
-        moreTitle: "Deine Frage war nicht dabei?",
-        moreText: "Schreib mir direkt – Antwort in der Regel innerhalb von 24 Stunden.",
-        moreCta: "Schreib mir",
+        moreTitle: "Eine Frage ist offen geblieben?",
+        moreText: "Eine kurze Nachricht genügt – Antwort in der Regel innerhalb von 24 Stunden.",
+        moreCta: "Nachricht schreiben",
         allQuestions: "Alle Fragen ansehen",
       }
     : {
-        moreTitle: "Not the question you had?",
-        moreText: "Write to me directly — usually answered within 24 hours.",
+        moreTitle: "A question still open?",
+        moreText: "A short message is enough — usually answered within 24 hours.",
         moreCta: "Get in touch",
         allQuestions: "See all questions",
       };
