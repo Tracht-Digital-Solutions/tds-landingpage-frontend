@@ -697,6 +697,33 @@ const ui =
     }
   }
   /* Side by side from `lg`; the seam turns vertical. */
+  /* The message box fills the form column down to the contacts' height
+     (2026-10-12): the grid row stretches both halves, the form becomes a
+     column, and the message row takes what is left, its field with it. */
+  @media (min-width: 64rem) {
+    #contact .contact-panel__form {
+      display: flex;
+      flex-direction: column;
+    }
+    /* The island's own wrapper (`<astro-island>`) and the island's inner
+       wrappers sit between the column and the form; each has to stretch. */
+    #contact .contact-panel__form > astro-island,
+    #contact .contact-panel__form astro-island div:has(.contact-form),
+    #contact .contact-panel__form .contact-form {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+    #contact .contact-field-row--message {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+    #contact .contact-field-row--message > textarea {
+      flex: 1;
+      min-height: 8rem;
+    }
+  }
   @media (min-width: 64rem) {
     #contact .contact-panel {
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);

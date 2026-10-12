@@ -384,7 +384,7 @@ export default function ContactForm({
           <span className="contact-urgent-toggle__title">{copy.urgentLabel}</span>
         </label>
 
-        <div className={rowClass("message")}>
+        <div className={`${rowClass("message")} contact-field-row--message`}>
           <label htmlFor="message" className="contact-field-label">
             {copy.form.message}
           </label>
