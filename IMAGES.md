@@ -1,5 +1,18 @@
 # Image work
 
+## Shared favicon
+
+The approved TD monogram with a coral offset is retained in
+`src/assets/branding/tds-favicon-master.png`. Run
+`node scripts/generate-favicons.mjs` to regenerate this site's PNG, multi-size ICO
+and Apple touch icon. The versioned PNG URL refreshes previously cached tab icons;
+`favicon.png` and `favicon.ico` remain compatibility paths. Export identical files
+to another frontend's public directory by passing that directory as the first
+argument; add `--pwa` for journal, tools and shop app icons. Maskable exports keep
+the artwork inside the safe circle on an opaque navy canvas.
+
+## Site imagery
+
 All image slots on the site are filled. The logo, portrait, favicon and process
 images were always there; the eight photographic grounds below — four service
 grounds and four section grounds — were added in the image pass. Journal cards
