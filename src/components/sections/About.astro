@@ -169,6 +169,13 @@ const credentialsUi =
 
         {/* See the note at the top for what is NOT rendered here and why. */}
         <p class="text-lg font-medium text-[var(--color-black)] leading-relaxed">{about.p2}</p>
+        <a
+          class="credentials-teaser__link mt-4"
+          href={`${siteConfig.freelanceUrl}${lang === "en" ? "/en/" : "/"}`}
+        >
+          {about.portfolioLink}
+          <span aria-hidden="true">↗</span>
+        </a>
 
         {/* Two facts: a one-word heading and the figure (2026-10-12). The figure
             counts up as the tile scrolls into view (script below). The markup
