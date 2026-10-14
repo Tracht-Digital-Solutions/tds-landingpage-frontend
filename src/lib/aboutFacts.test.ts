@@ -12,7 +12,7 @@ describe("about facts", () => {
     const de = aboutFacts("de", now);
     expect(de.map((fact) => fact.label)).toEqual(["Programmiererfahrung", "Selbstständig"]);
     for (const fact of [...de, ...aboutFacts("en", now)]) expect(fact.label).not.toMatch(/\s/);
-    expect(de.map((fact) => `${fact.value}${fact.unit}`)).toEqual(["8 Jahre", "2024"]);
+    expect(de.map((fact) => `${fact.prefix}${fact.value}${fact.unit}`)).toEqual(["+8 Jahre", "2024"]);
     expect(de[1]!.sr).toBe("Selbstständig seit 2024");
   });
 

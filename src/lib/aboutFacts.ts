@@ -18,6 +18,7 @@ export interface AboutFact {
   label: string;
   value: number;
   from: number;
+  prefix: string;
   /** Shown after the figure, e.g. " Jahre"; empty for a year. */
   unit: string;
   sr: string;
@@ -37,13 +38,15 @@ export function aboutFacts(lang: Lang, now: Date = new Date()): AboutFact[] {
           label: "Programmiererfahrung",
           value: years,
           from: 0,
+          prefix: "+",
           unit: years === 1 ? " Jahr" : " Jahre",
-          sr: `${years} Jahre Programmiererfahrung, seit ${since}`,
+          sr: `Mindestens ${years} Jahre Programmiererfahrung, seit ${since}`,
         },
         {
           label: "Selbstständig",
           value: founded,
           from: since,
+          prefix: "",
           unit: "",
           sr: `Selbstständig seit ${founded}`,
         },
@@ -53,13 +56,15 @@ export function aboutFacts(lang: Lang, now: Date = new Date()): AboutFact[] {
           label: "Experience",
           value: years,
           from: 0,
+          prefix: "+",
           unit: years === 1 ? " year" : " years",
-          sr: `${years} years of programming experience, since ${since}`,
+          sr: `At least ${years} years of programming experience, since ${since}`,
         },
         {
           label: "Self-employed",
           value: founded,
           from: since,
+          prefix: "",
           unit: "",
           sr: `Self-employed since ${founded}`,
         },
