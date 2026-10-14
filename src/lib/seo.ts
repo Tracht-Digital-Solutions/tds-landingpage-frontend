@@ -39,6 +39,8 @@ export const siteConfig = {
   url: "https://tracht-digital.de",
   /** Sister origin where the journal lives. */
   blogUrl: "https://blog.tracht-digital.de",
+  /** Julian Tracht's freelance portfolio. */
+  freelanceUrl: "https://freelance.tracht-digital.de",
   /** The customer portal (tds-customer-frontend). */
   portalUrl: "https://app.tracht-digital.de",
   /** Primary content language. */
