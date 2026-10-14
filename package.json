@@ -42,8 +42,8 @@
     "astro": "^7.2.6",
     "leaflet": "1.9.4",
     "lenis": "^1.3.26",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-hook-form": "^7.75.0",
     "tailwindcss": "~4.3.3",
     "typescript": "^6.0.3",
@@ -65,8 +65,8 @@
       "runtimeDependencies": {
         "@astrojs/node": "^11.1.4",
         "astro": "^7.2.6",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0",
+        "react": "19.3.0",
+        "react-dom": "19.3.0",
         "sharp": "^0.35.0"
       }
     }
