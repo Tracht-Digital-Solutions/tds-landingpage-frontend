@@ -65,6 +65,7 @@ export interface WhyMeContent {
   lead: string;
   p1: string;
   p2: string;
+  portfolioLink: string;
   /**
    * Why this work, in the first person. The one thing on the page that can
    * only come from Julian — which is why it replaced the claim tiles rather
@@ -275,6 +276,7 @@ const content: Record<Lang, HomeContent> = {
       lead: "*Ein Ansprechpartner* statt fünf Anbieter.",
       p1: "Tracht Digital Solutions baut auf dem auf, was schon da ist, statt alles neu zu machen.",
       p2: "Hinter Tracht Digital Solutions steht Julian Tracht – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
+      portfolioLink: "Freelancer-Portfolio ansehen",
       motivation: {
         title: "Warum ich das mache",
         body: [
@@ -424,6 +426,7 @@ const content: Record<Lang, HomeContent> = {
     whyMe: {
       headline: "Why",
       headlineAccent: "me?",
+      portfolioLink: "View freelance portfolio",
       lead: "*One point of contact* instead of five suppliers.",
       p1: "Tracht Digital Solutions builds on what already exists instead of starting from scratch.",
       p2: "Behind Tracht Digital Solutions is Julian Tracht – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
