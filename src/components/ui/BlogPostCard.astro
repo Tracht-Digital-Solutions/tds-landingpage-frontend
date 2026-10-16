@@ -1,5 +1,6 @@
 ---
 import { AbstractCover, coverVariant, hasPhotoCover } from "@tracht-digital-solutions/tds-shared/components";
+import { editorialCover } from '~/lib/editorialCovers';
 
 interface Props {
   category: string;
@@ -25,7 +26,8 @@ const blogBase = (import.meta.env.PUBLIC_BLOG_BASE_URL as string | undefined) ??
  * two properties. Rendered without a `client:` directive: this is static
  * markup, so the cover costs no JavaScript.
  */
-const hasPhoto = hasPhotoCover(coverHint);
+const cover = hasPhotoCover(coverHint) ? coverHint : editorialCover(slug);
+const hasPhoto = hasPhotoCover(cover);
 ---
 
 {/* The SLOT is the query container, never the card itself: a container
@@ -39,7 +41,7 @@ const hasPhoto = hasPhotoCover(coverHint);
       <div class="post-card__art">
         {hasPhoto ? (
           <img
-            src={coverHint}
+            src={cover}
             alt={title}
             width="1200"
             height="900"
