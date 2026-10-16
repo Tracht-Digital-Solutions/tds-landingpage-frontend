@@ -306,7 +306,7 @@ export const serviceDefinitions = [
       de: "Digitale Buchführung und Projektmanagement einführen",
       en: "Introduce digital bookkeeping and project management",
     },
-    image: "/images/services/02-prozesse.webp",
+    image: "/images/services/02-prozesse-editorial.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -422,7 +422,7 @@ export const serviceDefinitions = [
       de: "Klären, was gebraucht wird – mit Fachwissen und Konzept",
       en: "Work out what is needed – with expertise and a plan",
     },
-    image: "/images/services/01-beratung.webp",
+    image: "/images/services/01-beratung-editorial.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -538,7 +538,7 @@ export const serviceDefinitions = [
       de: "Tools und Skripte statt Handarbeit",
       en: "Tools and scripts instead of manual work",
     },
-    image: "/images/services/03-loesungen.webp",
+    image: "/images/services/03-loesungen-editorial.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
@@ -669,7 +669,7 @@ export const serviceDefinitions = [
       de: "Websites nach Maß statt Vorlage",
       en: "Made-to-measure websites, not templates",
     },
-    image: "/images/services/04-webauftritt.webp",
+    image: "/images/services/04-webauftritt-editorial.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",
