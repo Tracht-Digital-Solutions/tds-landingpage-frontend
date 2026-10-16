@@ -184,7 +184,7 @@ export const serviceDefinitions = [
       de: "Betrieb strukturieren – vom Projekt bis zur Automatisierung",
       en: "Structure the business – from projects to automation",
     },
-    image: null,
+    image: "/images/services/05-kundenportale-editorial.webp",
     fallback: {
       de: {
         label: "Alle Leistungen",

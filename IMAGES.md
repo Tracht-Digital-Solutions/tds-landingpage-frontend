@@ -2,7 +2,7 @@
 
 ## Editorial series — 2026-10-16
 
-The active service photos use `*-editorial.webp` (1536 × 960) plus 800 px
+All five active service photos use `*-editorial.webp` (1536 × 960) plus 800 px
 variants. The hero uses `hero-editorial.webp` (1642 × 924); About and Contact
 use `why-me-editorial.webp` / `contact-editorial.webp` (1860 × 840). Platform
 heroes reuse web-presence or inventory artwork. Previous files remain archived
@@ -15,7 +15,7 @@ Both surfaces use the landing site's absolute image URLs. Uploaded CMS artwork
 wins; unknown slugs retain the shared abstract cover. No topic guessing.
 
 Original PNGs, WebP copies and full generation prompts live in the workspace at
-`stuff/03-Materialien/Bildserie-2026-10-16/`, sorted by purpose. All 15 images
+`stuff/03-Materialien/Bildserie-2026-10-16/`, sorted by purpose. All 16 images
 were generated with the built-in image tool and visually inspected; they are
 illustrative scenes, never client evidence. Re-export with
 `node scripts/import-editorial-2026.mjs` from this repository.
