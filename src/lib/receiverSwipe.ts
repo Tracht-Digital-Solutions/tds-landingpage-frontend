@@ -1,13 +1,15 @@
 /**
- * The receiver can be SWIPED UP, like answering a call (2026-10-06).
+ * The receiver is SWIPED LEFT, like answering a call (2026-10-06, sideways
+ * since 2026-10-18 — asked for: "wie bei einem Smartphone").
  *
  * A tap still follows the link. Holding the receiver shows a slide TRACK
- * above it, up to the pill's top edge; dragging moves the receiver along it.
- * The moment it reaches the top the contact form opens — while the finger is
- * still down, not on release. Let go earlier and it springs back and nothing
- * happens. The buttons above are never touched: the pointer is captured by
- * the receiver once the drag has started, so neither hover nor click reaches
- * them while it passes over them (the track covers them meanwhile).
+ * that runs out of the pill to the LEFT, over the page; dragging moves the
+ * receiver along it. The moment it reaches the far end the contact form
+ * opens — while the finger is still down, not on release. Let go earlier and
+ * it springs back and nothing happens. Sideways rather than up: upwards the
+ * track lay over the other buttons of the pill, and a vertical drag on a
+ * phone is what scrolls the page — so `touch-action: pan-y` now keeps a
+ * vertical swipe over the receiver scrolling the page as everywhere else.
  *
  * Pointer capture starts only after `SWIPE_SLOP` pixels — capturing on
  * `pointerdown` swallowed plain clicks elsewhere on this site — and nothing
@@ -15,7 +17,7 @@
  * the whole press.
  *
  * The state goes onto the pill AND its inverted twin as `data-swipe`
- * ("hold" while pressed, "drag", "answered" once it reached the top) with
+ * ("hold" while pressed, "drag", "answered" once it reached the end) with
  * `--lp-swipe` (the offset), `--lp-swipe-travel` (the track's length) and
  * `--lp-swipe-progress` (0–1), so both layers move alike over a dark band.
  * The CSS lives in `FloatingCta.astro`.
@@ -25,32 +27,34 @@
 export const SWIPE_SLOP = 6;
 /** A press held this long shows the track before any movement. */
 export const HOLD_DELAY = 120;
-/** The track is never shorter than one button… */
-export const TRAVEL_MIN = 48;
-/** …and never longer than two. */
-export const TRAVEL_MAX = 96;
+/** The track is never shorter than one and a half buttons… */
+export const TRAVEL_MIN = 72;
+/** …and never longer than three: a thumb's reach on a phone. */
+export const TRAVEL_MAX = 144;
+/** Room kept free between the end of the track and the window's left edge. */
+export const TRAVEL_GUTTER = 16;
 
-/** The track's length for the room between the receiver and the pill's top. */
+/** The track's length for the room left of the receiver. */
 export function swipeTravel(reach: number): number {
   return Math.min(TRAVEL_MAX, Math.max(TRAVEL_MIN, Math.round(reach)));
 }
 
-/** The receiver's offset for an upward drag of `dy` (`dy > 0` is up). */
-export function swipeOffset(dy: number, travel: number): number {
-  return Math.min(travel, Math.max(0, dy));
+/** The receiver's offset for a leftward drag of `dx` (`dx > 0` is left). */
+export function swipeOffset(dx: number, travel: number): number {
+  return Math.min(travel, Math.max(0, dx));
 }
 
-/** 0 at rest, 1 at the top of the track. */
+/** 0 at rest, 1 at the end of the track. */
 export function swipeProgress(offset: number, travel: number): number {
   return travel > 0 ? Math.min(1, Math.max(0, offset / travel)) : 0;
 }
 
 /**
- * Whether a movement of (`dx`, `dy`) since the press starts a swipe: past
- * the slop, upwards, and more up than sideways.
+ * Whether a movement of (`dx`, `dy`) since the press starts a swipe (`dx > 0`
+ * is left): past the slop, leftwards, and more sideways than vertical.
  */
 export function startsSwipe(dx: number, dy: number, slop: number = SWIPE_SLOP): boolean {
-  return dy > slop && dy > Math.abs(dx);
+  return dx > slop && dx > Math.abs(dy);
 }
 
 type State = "hold" | "drag" | "answered" | null;
@@ -71,7 +75,7 @@ export function mountReceiverSwipe(group: HTMLElement, twin?: HTMLElement | null
   let holdTimer = 0;
   /** A click arriving before this time ends a drag, not a tap. */
   let swallowUntil = 0;
-  /** Set while WE click the link at the top of the track. */
+  /** Set while WE click the link at the end of the track. */
   let passThrough = false;
 
   const write = (state: State) => {
@@ -108,9 +112,8 @@ export function mountReceiverSwipe(group: HTMLElement, twin?: HTMLElement | null
     offset = 0;
     // A new press: whatever click is still pending from a drag has passed.
     swallowUntil = 0;
-    // The room up to the inside of the pill's top edge (its padding ring).
-    const padding = parseFloat(getComputedStyle(group).paddingTop) || 0;
-    travel = swipeTravel(link.getBoundingClientRect().top - group.getBoundingClientRect().top - padding);
+    // The room between the receiver and the window's left edge.
+    travel = swipeTravel(link.getBoundingClientRect().left - TRAVEL_GUTTER);
     window.clearTimeout(holdTimer);
     holdTimer = window.setTimeout(() => {
       if (pointer !== null && !dragging) write("hold");
@@ -119,20 +122,20 @@ export function mountReceiverSwipe(group: HTMLElement, twin?: HTMLElement | null
 
   link.addEventListener("pointermove", (event) => {
     if (event.pointerId !== pointer || answered) return;
-    const dx = event.clientX - startX;
-    const dy = startY - event.clientY;
+    const dx = startX - event.clientX;
+    const dy = event.clientY - startY;
     if (!dragging) {
       if (!startsSwipe(dx, dy)) return;
       dragging = true;
       window.clearTimeout(holdTimer);
       link.setPointerCapture(event.pointerId);
     }
-    offset = swipeOffset(dy, travel);
+    offset = swipeOffset(dx, travel);
     if (offset < travel) {
       write("drag");
       return;
     }
-    // At the top: pick up NOW. The capture stays until the finger lifts, so
+    // At the end: pick up NOW. The capture stays until the finger lifts, so
     // the rest of the press still reaches no other button.
     answered = true;
     write("answered");
@@ -155,7 +158,7 @@ export function mountReceiverSwipe(group: HTMLElement, twin?: HTMLElement | null
       return;
     }
     end();
-    // Let the receiver sit at the top a moment before it drops back.
+    // Let the receiver sit at the end a moment before it slides back.
     window.setTimeout(reset, 260);
   });
 

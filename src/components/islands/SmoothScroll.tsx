@@ -22,6 +22,13 @@ declare global {
      * desktop, native momentum on touch).
      */
     tdsScrollTo?: (target: ScrollTarget, opts?: { immediate?: boolean }) => void;
+    /**
+     * `performance.now()` until which a section settle may still be moving
+     * the page. Its scroll is the page's, not the reader's: the floating pill
+     * reads this so a settle downwards after an upward scroll does not tuck
+     * it away as if the reader were scrolling down (2026-10-18).
+     */
+    tdsSettlingUntil?: number;
   }
 }
 
@@ -288,6 +295,7 @@ export default function SmoothScroll() {
         if (settleRaf) cancelAnimationFrame(settleRaf);
         settleRaf = 0;
         window.clearTimeout(settleTimer);
+        window.tdsSettlingUntil = 0;
       }
       const settle = () => {
         if (touching || rafId || settleRaf) return;
@@ -295,6 +303,7 @@ export default function SmoothScroll() {
         if (destY === null) return;
         const startY = window.scrollY;
         const start = performance.now();
+        window.tdsSettlingUntil = start + SNAP_DURATION_MS + 120;
         const step = (now: number) => {
           const t = Math.min(1, (now - start) / SNAP_DURATION_MS);
           jumpTo(startY + (destY - startY) * settleEasing(t));
@@ -452,6 +461,7 @@ export default function SmoothScroll() {
       const destY = settleTarget();
       if (destY === null) return;
       settling = true;
+      window.tdsSettlingUntil = performance.now() + SNAP_DURATION_MS + 120;
       lenis.scrollTo(destY, {
         duration: SNAP_DURATION_MS / 1000,
         easing: settleEasing,
@@ -467,7 +477,10 @@ export default function SmoothScroll() {
       settleTimer = window.setTimeout(settle, SNAP_IDLE_MS);
     });
     // A new wheel turn takes the page back from a running settle.
-    const onWheelDuringSettle = () => (settling = false);
+    const onWheelDuringSettle = () => {
+      settling = false;
+      window.tdsSettlingUntil = 0;
+    };
     window.addEventListener("wheel", onWheelDuringSettle, { passive: true });
 
     /**

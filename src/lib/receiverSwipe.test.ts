@@ -12,13 +12,13 @@ import {
 } from "./receiverSwipe";
 
 describe("swipe arithmetic", () => {
-  it("sizes the track to the room above, within one to two buttons", () => {
+  it("sizes the track to the room on the left, within its bounds", () => {
     expect(swipeTravel(10)).toBe(TRAVEL_MIN);
-    expect(swipeTravel(60)).toBe(60);
+    expect(swipeTravel(100)).toBe(100);
     expect(swipeTravel(500)).toBe(TRAVEL_MAX);
   });
 
-  it("follows an upward drag 1:1 and stops at the top of the track", () => {
+  it("follows a leftward drag 1:1 and stops at the end of the track", () => {
     expect(swipeOffset(-20, 60)).toBe(0);
     expect(swipeOffset(30, 60)).toBe(30);
     expect(swipeOffset(200, 60)).toBe(60);
@@ -30,11 +30,14 @@ describe("swipe arithmetic", () => {
     expect(swipeProgress(90, 60)).toBe(1);
   });
 
-  it("starts only on a mostly upward movement past the slop", () => {
-    expect(startsSwipe(0, 4)).toBe(false);
-    expect(startsSwipe(0, 10)).toBe(true);
-    expect(startsSwipe(20, 10)).toBe(false);
-    expect(startsSwipe(0, -10)).toBe(false);
+  it("starts only on a mostly leftward movement past the slop", () => {
+    expect(startsSwipe(4, 0)).toBe(false);
+    expect(startsSwipe(10, 0)).toBe(true);
+    // Mostly vertical: the page scrolls (`touch-action: pan-y`).
+    expect(startsSwipe(10, 20)).toBe(false);
+    expect(startsSwipe(10, -20)).toBe(false);
+    // Rightwards, towards the window edge: nothing.
+    expect(startsSwipe(-10, 0)).toBe(false);
   });
 });
 
@@ -48,7 +51,7 @@ describe("mountReceiverSwipe", () => {
   let listeners: AbortController;
 
   // jsdom has no PointerEvent, no pointer capture and no layout: the track
-  // comes out at TRAVEL_MIN.
+  // comes out at TRAVEL_MIN (the receiver's left edge reads as 0).
   const pointer = (target: Element, type: string, x: number, y: number) => {
     const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0 });
     Object.assign(event, { pointerId: 1, isPrimary: true });
@@ -116,17 +119,17 @@ describe("mountReceiverSwipe", () => {
   });
 
   it("follows the finger on both layers", () => {
-    pointer(link, "pointerdown", 100, 200);
-    pointer(link, "pointermove", 100, 180);
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 280, 200);
     expect(group.dataset.swipe).toBe("drag");
     expect(twin.style.getPropertyValue("--lp-swipe")).toBe("20.0px");
     expect(link.setPointerCapture).toHaveBeenCalledWith(1);
   });
 
   it("springs back and swallows the click when released early", () => {
-    pointer(link, "pointerdown", 100, 200);
-    pointer(link, "pointermove", 100, 180);
-    pointer(link, "pointerup", 100, 180);
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 280, 200);
+    pointer(link, "pointerup", 280, 200);
     link.click();
     vi.runAllTimers();
     expect(navigated).toBe(0);
@@ -134,16 +137,16 @@ describe("mountReceiverSwipe", () => {
     expect(group.style.getPropertyValue("--lp-swipe")).toBe("0.0px");
   });
 
-  it("opens the form the moment it reaches the top, finger still down", () => {
-    pointer(link, "pointerdown", 100, 200);
-    pointer(link, "pointermove", 100, 180);
+  it("opens the form the moment it reaches the end, finger still down", () => {
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 280, 200);
     expect(navigated).toBe(0);
-    pointer(link, "pointermove", 100, 200 - TRAVEL_MIN);
+    pointer(link, "pointermove", 300 - TRAVEL_MIN, 200);
     expect(navigated).toBe(1);
     expect(group.dataset.swipe).toBe("answered");
     // Moving on and letting go does not navigate a second time.
-    pointer(link, "pointermove", 100, 100);
-    pointer(link, "pointerup", 100, 100);
+    pointer(link, "pointermove", 100, 200);
+    pointer(link, "pointerup", 100, 200);
     link.click(); // the click the browser sends after the drag
     vi.runAllTimers();
     expect(navigated).toBe(1);
@@ -151,8 +154,8 @@ describe("mountReceiverSwipe", () => {
   });
 
   it("keeps the drag when the icon loses its implicit touch capture", () => {
-    pointer(link, "pointerdown", 100, 200);
-    pointer(link, "pointermove", 100, 180);
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 280, 200);
     // Taking the capture from the icon fires the loss on the icon; it bubbles.
     link.querySelector("svg")!.dispatchEvent(new Event("lostpointercapture", { bubbles: true }));
     expect(group.dataset.swipe).toBe("drag");
@@ -160,18 +163,27 @@ describe("mountReceiverSwipe", () => {
     expect(group.dataset.swipe).toBeUndefined();
   });
 
+  it("ignores a vertical drag, which scrolls the page", () => {
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 296, 150);
+    expect(group.dataset.swipe).not.toBe("drag");
+    expect(link.setPointerCapture).not.toHaveBeenCalled();
+    pointer(link, "pointerup", 296, 150);
+    expect(group.dataset.swipe).toBeUndefined();
+  });
+
   it("never touches the buttons above", () => {
-    pointer(link, "pointerdown", 100, 200);
-    pointer(link, "pointermove", 100, 120);
-    pointer(link, "pointerup", 100, 120);
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 200, 200);
+    pointer(link, "pointerup", 200, 200);
     vi.runAllTimers();
     expect(topClicks).toBe(0);
   });
 
   it("does not let a swallowed click eat the next real tap", () => {
-    pointer(link, "pointerdown", 100, 200);
-    pointer(link, "pointermove", 100, 180);
-    pointer(link, "pointerup", 100, 180);
+    pointer(link, "pointerdown", 300, 200);
+    pointer(link, "pointermove", 280, 200);
+    pointer(link, "pointerup", 280, 200);
     // No click followed the drag (touch); the next tap must still work.
     pointer(link, "pointerdown", 100, 200);
     pointer(link, "pointerup", 100, 200);

@@ -82,17 +82,17 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       <span class="floating-cta-track" aria-hidden="true">
         <svg
           class="floating-cta-track__chevrons"
-          width="18"
-          height="22"
-          viewBox="0 0 18 22"
+          width="22"
+          height="18"
+          viewBox="0 0 22 18"
           fill="none"
           stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <polyline points="3 8 9 2 15 8" />
-          <polyline points="3 18 9 12 15 18" />
+          <polyline points="8 3 2 9 8 15" />
+          <polyline points="18 3 12 9 18 15" />
         </svg>
       </span>
       <a href={href} class="floating-cta" aria-label={label} draggable="false" data-track="floating-cta">
@@ -394,16 +394,16 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     background: var(--color-surface-navy);
     color: #fff;
   }
-  /* --- Swipe up to pick up (`lib/receiverSwipe.ts`, 2026-10-06) ------
-     A tap follows the link. Held, the receiver shows a slide track up to the
-     pill's top edge (over the buttons above it); dragged to the top it opens
-     the form at once, released earlier it springs back. `transform`, not
-     `translate`: the hover pop already owns `translate` and `scale`, and the
-     two compose instead of taking turns. `touch-action: none` on the receiver
-     alone, so a finger's swipe moves it instead of scrolling the page; the
-     other buttons keep their own gestures. */
+  /* --- Swipe left to pick up (`lib/receiverSwipe.ts`, sideways since
+     2026-10-18) -------------------------------------------------------
+     A tap follows the link. Held, the receiver shows a slide track running
+     out of the pill to the left; dragged to its end it opens the form at
+     once, released earlier it springs back. `transform`, not `translate`:
+     the hover pop already owns `translate` and `scale`, and the two compose
+     instead of taking turns. `touch-action: pan-y` on the receiver: a
+     sideways swipe moves it, a vertical one still scrolls the page. */
   .floating-cta {
-    touch-action: none;
+    touch-action: pan-y;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
@@ -426,7 +426,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
        through `:has()` with a heavier selector than any written here. */
     scale: 1 !important;
     translate: 0 0 !important;
-    transform: translateY(calc(-1 * var(--lp-swipe, 0px)));
+    transform: translateX(calc(-1 * var(--lp-swipe, 0px)));
     box-shadow: 3px 3px 0 0 rgb(0 0 0 / 0.42);
     z-index: 1;
     cursor: grabbing;
@@ -437,7 +437,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       background-color 200ms ease,
       scale 220ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
-  /* The receiver tilts as it is lifted, the way a handset comes off its
+  /* The receiver tilts as it is pulled, the way a handset comes off its
      cradle; the ring wobble would fight the finger. */
   .floating-cta-group[data-swipe] .floating-cta__icon {
     animation: none;
@@ -449,27 +449,30 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     color: #fff;
   }
 
-  /* The track: a groove from the receiver's resting place up to the top,
-     filled pink behind the receiver as it climbs, with a ring where it has
-     to go and chevrons pointing there. Hidden until the press is held. */
+  /* The track: a groove from the receiver's resting place out to the left,
+     filled pink behind the receiver as it slides, with a ring where it has
+     to go and chevrons pointing there. Hidden until the press is held. It
+     lies over the page, so it carries the pill's hard shadow too. */
   .floating-cta-track {
     position: absolute;
+    top: 0;
     left: 50%;
-    bottom: 0;
     z-index: 0;
-    width: 3rem;
-    height: calc(3rem + var(--lp-swipe-travel, 3rem));
-    margin-left: -1.5rem;
+    width: calc(3rem + var(--lp-swipe-travel, 3rem));
+    height: 3rem;
+    /* Its right end sits exactly under the receiver's resting disc. */
+    margin-left: calc(1.5rem - 3rem - var(--lp-swipe-travel, 3rem));
     border-radius: 9999px;
-    /* Opaque: it lies over the buttons above, and their icons showing
-       through read as part of the track. A darker shade of the pill. */
+    /* A darker shade of the pill. */
     background: color-mix(in srgb, var(--lp-fill) 70%, #000);
-    box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.35);
+    box-shadow:
+      inset 0 2px 4px rgb(0 0 0 / 0.35),
+      var(--tds-shadow-hard-sm);
     overflow: hidden;
     pointer-events: none;
     opacity: 0;
-    transform-origin: bottom center;
-    scale: 1 0.4;
+    transform-origin: right center;
+    scale: 0.4 1;
   }
   .tree-slot__inner > .floating-cta-track {
     transition:
@@ -478,7 +481,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   }
   .floating-cta-group--twin .floating-cta-track {
     background: #dfe2ee;
-    box-shadow: inset 0 2px 4px rgb(5 15 104 / 0.18);
+    box-shadow:
+      inset 0 2px 4px rgb(5 15 104 / 0.18),
+      var(--tds-shadow-hard-sm);
   }
   .floating-cta-group[data-swipe] .floating-cta-track {
     opacity: 1;
@@ -487,8 +492,8 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   .floating-cta-track::before {
     content: "";
     position: absolute;
-    inset: auto 0 0;
-    height: calc(3rem + var(--lp-swipe, 0px));
+    inset: 0 0 0 auto;
+    width: calc(3rem + var(--lp-swipe, 0px));
     border-radius: inherit;
     background: color-mix(in srgb, var(--color-accent-pink) 45%, transparent);
   }
@@ -509,9 +514,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   }
   .floating-cta-track__chevrons {
     position: absolute;
-    left: 50%;
-    bottom: 3rem;
-    margin-left: -9px;
+    top: 50%;
+    right: 3rem;
+    margin-top: -9px;
     opacity: calc(0.9 - var(--lp-swipe-progress, 0));
   }
   /* Only while the track is shown (a held receiver, `[data-swipe]`): the track
@@ -521,13 +526,13 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     animation: floating-cta-chevrons 900ms ease-in-out infinite alternate;
   }
   /* Translate only: the opacity above fades the chevrons as the receiver
-     climbs, and a keyframed opacity would override it. */
+     slides, and a keyframed opacity would override it. */
   @keyframes floating-cta-chevrons {
     0% {
-      translate: 0 4px;
+      translate: 4px 0;
     }
     100% {
-      translate: 0 -6px;
+      translate: -6px 0;
     }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -667,8 +672,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 </style>
 
 <script>
-  import { makeTwin, measureDarkRanges, splitClip, type Range } from "~/lib/darkSplit";
-  import { mountReceiverSwipe } from "~/lib/receiverSwipe";
+  import { SHADOW_PAD, makeTwin, measureDarkRanges, splitClip, type Range } from "~/lib/darkSplit";
+  import { TRAVEL_MAX, mountReceiverSwipe } from "~/lib/receiverSwipe";
+
+  /** The farthest the swipe track (and its hard shadow) reaches left of the pill. */
+  const SWIPE_REACH = TRAVEL_MAX + SHADOW_PAD;
 
   const group = document.querySelector<HTMLElement>(".floating-cta-group");
   const topBtn = group?.querySelector<HTMLElement>(".floating-cta-top");
@@ -768,7 +776,14 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       setFlag("scrolledDown", window.scrollY > window.innerHeight * 0.8);
 
       const dy = window.scrollY - lastY;
-      if (!phone.matches || group.contains(document.activeElement)) {
+      // A section settle (`SmoothScroll.tsx`) moves the page up to 140px on
+      // its own once a scroll has stopped — DOWN after a reader scrolled up
+      // to just above a section start. That is no direction of the reader's:
+      // counted, it tucked the receiver away right after scrolling up.
+      const settling = performance.now() < (window.tdsSettlingUntil ?? 0);
+      if (settling) {
+        lastY = window.scrollY;
+      } else if (!phone.matches || group.contains(document.activeElement)) {
         setTucked(false);
         lastY = window.scrollY;
       } else if (Math.abs(dy) > 8) {
@@ -784,7 +799,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       // and in the footer, the two places it is most wanted. See
       // `lib/darkSplit.ts`.
       const y = window.scrollY;
-      const clip = splitClip(y + box.top, y + box.bottom, darkRanges, documentIsDark());
+      // While the receiver is swiped, its track reaches out of the pill to
+      // the left; the twin's clip has to reach as far, or the track changes
+      // colour at the pill's edge instead of at the band's line.
+      const reachLeft = group.dataset.swipe ? SWIPE_REACH : SHADOW_PAD;
+      const clip = splitClip(y + box.top, y + box.bottom, darkRanges, documentIsDark(), reachLeft);
       if (clip !== lastTwin) twin.style.clipPath = lastTwin = clip;
     };
     const schedule = () => {
@@ -849,8 +868,10 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       attributeFilter: ["data-theme"],
     });
 
-    // The receiver can also be swiped up, like answering a call.
+    // The receiver can also be swiped left, like answering a call. The
+    // twin's clip widens while it is (see `update`).
     mountReceiverSwipe(group, twin);
+    new MutationObserver(schedule).observe(group, { attributes: true, attributeFilter: ["data-swipe"] });
 
     topBtn?.addEventListener("click", () => {
       const reduce = window.matchMedia(

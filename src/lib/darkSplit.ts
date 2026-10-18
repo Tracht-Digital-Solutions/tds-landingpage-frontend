@@ -63,9 +63,17 @@ const HIDDEN = "inset(100% 0 0 0)";
  * underneath produces the same picture — and leaves one layer that always
  * takes the pointer, at every scroll position.
  */
-export function splitClip(top: number, bottom: number, ranges: readonly Range[], allDark = false): string {
+export function splitClip(
+  top: number,
+  bottom: number,
+  ranges: readonly Range[],
+  allDark = false,
+  /** How far the twin may paint past the box on the LEFT (the pill's swipe track). */
+  reachLeft: number = SHADOW_PAD,
+): string {
   const pad = SHADOW_PAD;
-  const full = `inset(${-pad}px ${-pad}px ${-pad}px ${-pad}px)`;
+  const left = Math.max(pad, reachLeft);
+  const full = `inset(${-pad}px ${-pad}px ${-pad}px ${-left}px)`;
   if (allDark) return full;
   const span = darkSpan(top, bottom, ranges);
   if (!span) return HIDDEN;
@@ -75,7 +83,7 @@ export function splitClip(top: number, bottom: number, ranges: readonly Range[],
   if (coversTop && coversBottom) return full;
   const twinTop = coversTop ? -pad : from - top;
   const twinBottom = coversBottom ? -pad : bottom - to;
-  return `inset(${twinTop}px ${-pad}px ${twinBottom}px ${-pad}px)`;
+  return `inset(${twinTop}px ${-pad}px ${twinBottom}px ${-left}px)`;
 }
 
 /**
