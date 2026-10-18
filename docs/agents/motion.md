@@ -40,6 +40,9 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
   written only onto an off-screen figure, the markup holds the final one.
 - **The hero wheel turns several cards one step at a time** (`turnBy`, 180 ms apart): turned in one go, cards
   still in front rounded the back by jumping.
+- **Turns the hand asks for start with speed** (2026-10-18): release, throw and neighbour click set
+  `data-hand`, which swaps in a 1 s spring with initial velocity (`--hc-ease`). `--lp-ease-swing` starts from
+  rest (0.12° in the first frame, measured) and read as a hang after a moving hand. Autoplay clears `data-hand`.
 
 ## Jank rules (measured 2026-10-12, CPU ×4)
 
