@@ -254,6 +254,7 @@ const ui =
       if (!running()) return;
       // The rest is counted from the end of the previous turn.
       timer = window.setTimeout(() => {
+        delete root.dataset.hand;
         turn(1);
         timer = window.setTimeout(schedule, TURN_MS);
       }, REST_MS);
@@ -305,6 +306,7 @@ const ui =
       // In one frame: the hand lets go and the slots move, so the spring
       // starts where the hand left the cards.
       delete root.dataset.dragging;
+      root.dataset.hand = "";
       root.style.setProperty("--hc-drag", "0deg");
       // Dragging right brings the left-hand cards forward.
       turnBy(-by);
@@ -326,6 +328,7 @@ const ui =
         const slot = slots[cards.indexOf(card)] ?? 0;
         if (slot === 0) return; // The front card is a link.
         event.preventDefault();
+        root.dataset.hand = "";
         turnBy(slot);
         schedule();
       },
@@ -448,7 +451,7 @@ const ui =
     visibility: hidden;
     pointer-events: none;
     transition:
-      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--hc-ease, var(--lp-ease-swing)),
       opacity 700ms var(--tds-ease-out),
       visibility 0s linear 520ms;
   }
@@ -458,7 +461,7 @@ const ui =
     visibility: visible;
     pointer-events: auto;
     transition:
-      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--hc-ease, var(--lp-ease-swing)),
       opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
@@ -468,7 +471,7 @@ const ui =
     visibility: visible;
     pointer-events: auto;
     transition:
-      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--hc-ease, var(--lp-ease-swing)),
       opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
@@ -482,12 +485,27 @@ const ui =
     opacity: 0.18;
     visibility: visible;
     transition:
-      --hc-angle var(--hc-turn, 1500ms) var(--lp-ease-swing),
+      --hc-angle var(--hc-turn, 1500ms) var(--hc-ease, var(--lp-ease-swing)),
       opacity 700ms var(--tds-ease-out),
       visibility 0s;
   }
   .hero-carousel__card[data-wrap] {
     transition: none;
+  }
+  /* A turn the hand asked for — a release, a throw, a click on a neighbour
+     (2026-10-18). `--lp-ease-swing` is a spring released FROM REST: its first
+     frames barely move, which after a moving hand read as a hang before the
+     wheel set off, and every step of a throw stalled again. This spring
+     starts WITH speed (ζ 0.97, v₀ 1.4 ω, sampled): a third of the way in its
+     first frame, about 2.4 % past, no swing back. The wheel's own turns keep
+     the gentle start. */
+  .hero-carousel[data-hand] {
+    --hc-turn: 1000ms;
+    --hc-ease: linear(
+      0, 0.326, 0.556, 0.717, 0.828, 0.904, 0.953, 0.985, 1.005, 1.016, 1.022,
+      1.024, 1.023, 1.022, 1.02, 1.017, 1.015, 1.013, 1.011, 1.009, 1.007,
+      1.006, 1.005, 1.004, 1
+    );
   }
   /* The hand turns it: the cards follow the pointer without lag, and fade
      with their depth as usual. */
