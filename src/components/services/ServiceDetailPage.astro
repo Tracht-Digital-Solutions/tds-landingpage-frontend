@@ -9,6 +9,7 @@
  * JSON-LD is one graph: the page (dated, authored, published), the service with
  * the service (no price of its own since 2026-09-22), and the breadcrumb.
  */
+import { imageObject } from "~/lib/imageCatalog";
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
@@ -89,6 +90,7 @@ const breadcrumbId = `${canonical}#breadcrumb`;
 const faq = serviceFaq(service.id, lang);
 const faqTitle = lang === "de" ? `Häufige Fragen: ${content.title}` : `Common questions: ${content.title}`;
 const jsonLd = asGraph(
+  ...(imageObject(service.image, lang, canonical) ? [imageObject(service.image, lang, canonical)!] : []),
   webPageNode({
     url: canonical,
     name: service.seoTitle[lang],

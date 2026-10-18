@@ -1,4 +1,6 @@
 ---
+import { resolveLang } from "~/lib/i18n";
+import { imageHints } from "~/lib/imageCatalog";
 /**
  * The opening band of a detail page — back link, headline, brandbar, lead and
  * the page's primary action.
@@ -26,6 +28,7 @@ interface Props {
 }
 
 const { backHref, backLabel, navLabel, title, lead, ctaHref, ctaLabel, image = null } = Astro.props;
+const imageLang = resolveLang(Astro.currentLocale);
 ---
 
 <section
@@ -41,6 +44,10 @@ const { backHref, backLabel, navLabel, title, lead, ctaHref, ctaLabel, image = n
       <>
         <img
           src={image}
+          srcset={imageHints(image, imageLang)?.srcSet}
+          sizes="100vw"
+          width={imageHints(image, imageLang)?.width}
+          height={imageHints(image, imageLang)?.height}
           alt=""
           aria-hidden="true"
           fetchpriority="low"

@@ -1,4 +1,6 @@
 ---
+import { resolveLang } from "~/lib/i18n";
+import { imageHints } from "~/lib/imageCatalog";
 import { AbstractCover, coverVariant, hasPhotoCover } from "@tracht-digital-solutions/tds-shared/components";
 import { editorialCover } from '~/lib/editorialCovers';
 
@@ -28,6 +30,7 @@ const blogBase = (import.meta.env.PUBLIC_BLOG_BASE_URL as string | undefined) ??
  */
 const cover = hasPhotoCover(coverHint) ? coverHint : editorialCover(slug);
 const hasPhoto = hasPhotoCover(cover);
+const imageLang = resolveLang(Astro.currentLocale);
 ---
 
 {/* The SLOT is the query container, never the card itself: a container
@@ -42,9 +45,11 @@ const hasPhoto = hasPhotoCover(cover);
         {hasPhoto ? (
           <img
             src={cover}
-            alt={title}
-            width="1200"
-            height="900"
+            alt={imageHints(cover, imageLang)?.alt ?? title}
+            srcset={imageHints(cover, imageLang)?.srcSet}
+            sizes="(min-width: 64rem) 33vw, 100vw"
+            width={imageHints(cover, imageLang)?.width ?? 1200}
+            height={imageHints(cover, imageLang)?.height ?? 900}
             loading="lazy"
             decoding="async"
           />

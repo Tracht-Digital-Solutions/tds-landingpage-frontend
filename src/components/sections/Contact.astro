@@ -1,4 +1,5 @@
 ---
+import { imageHints } from "~/lib/imageCatalog";
 import { tFor, resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 // Only the HREF here since 2026-09-29. The QR code went with the mini card
@@ -188,6 +189,9 @@ const ui =
         beschneidet hier waagerecht. */}
     <img
       src="/images/sections/contact-editorial.webp"
+      srcset={imageHints("/images/sections/contact-editorial.webp", "de")?.srcSet}
+      sizes="100vw"
+      width="1860" height="840"
       alt=""
       aria-hidden="true"
       loading="lazy"

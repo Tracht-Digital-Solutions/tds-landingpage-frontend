@@ -1,5 +1,16 @@
 # Image work
 
+## Search and responsive image pass — 2026-10-18
+
+The 16 active editorial subjects now ship WebP and AVIF exports at 480, 800,
+960, 1440 and original width where applicable. `src/lib/imageCatalog.json`
+records exact dimensions, bilingual descriptions and content fingerprints.
+`imageCatalog.ts` supplies responsive attributes and ImageObject metadata;
+decorative grounds retain empty alt text. The hero preserves its mobile GIF
+fallback. XMP identifies generated editorial artwork as trainedAlgorithmicMedia.
+The journal consumes this catalog against the marketing image origin.
+
+
 ## Editorial series — 2026-10-16
 
 All five active service photos use `*-editorial.webp` (1536 × 960) plus 800 px
