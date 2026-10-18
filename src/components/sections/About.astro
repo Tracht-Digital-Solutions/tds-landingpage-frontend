@@ -1,4 +1,5 @@
 ---
+import { imageHints } from "~/lib/imageCatalog";
 /**
  * Wieso ich? — the person behind the page: portrait, the motivation, and in
  * plain words what working with one person means.
@@ -101,6 +102,9 @@ const credentialsUi =
   <span class="tds-decor" aria-hidden="true">
     <img
       src="/images/sections/why-me-editorial.webp"
+      srcset={imageHints("/images/sections/why-me-editorial.webp", "de")?.srcSet}
+      sizes="100vw"
+      width="1860" height="840"
       alt=""
       aria-hidden="true"
       loading="lazy"
