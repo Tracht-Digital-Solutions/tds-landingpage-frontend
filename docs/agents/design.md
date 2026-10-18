@@ -76,9 +76,14 @@ the accessibility tools, and a telephone receiver that leads **only** to the con
   re-declared (a `var()` in a custom property resolves where it is declared).
 - It publishes `--lp-floating-lane` so `scroll-padding-bottom` keeps focused elements above it. The lane offset is
   a `translate`, not `bottom` (a `bottom` change after the cookie notice measured 0.033 CLS).
-- **The receiver can be swiped up** like answering a call (`lib/receiverSwipe.ts`): a tap follows the link; held,
-  it shows a slide track; dragged to the top it opens the form immediately; released earlier it springs back.
-  Capture starts only after the slop; `touch-action: none` sits on the receiver alone.
+- **The receiver is swiped LEFT** like answering a call (`lib/receiverSwipe.ts`, sideways since 2026-10-18): a tap
+  follows the link; held, a track runs out of the pill to the left (72–144 px, 16 px from the window edge); dragged
+  to its end it opens the form immediately; released earlier it springs back. Capture starts only after the slop;
+  the receiver has `touch-action: pan-y`, so a vertical swipe over it still scrolls. While swiping, the twin's clip
+  reaches left over the track (`splitClip(…, reachLeft)`).
+- On a phone the pill tucks right while the reader scrolls down. A section settle (`SmoothScroll.tsx`) is the page's
+  own scroll and publishes `window.tdsSettlingUntil`; the pill ignores direction until then — counted, a settle
+  downwards after an upward scroll tucked the receiver away.
 
 ## Accessibility tools (`components/A11yTools.astro`, `lib/a11yPrefs.ts`)
 

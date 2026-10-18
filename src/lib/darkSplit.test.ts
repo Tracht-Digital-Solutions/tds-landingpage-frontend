@@ -44,6 +44,13 @@ describe("splitClip", () => {
   it("shows the twin whole in the dark theme", () => {
     expect(splitClip(100, 200, [], true)).toBe(`inset(${-P}px ${-P}px ${-P}px ${-P}px)`);
   });
+
+  it("reaches further left when asked (the pill's swipe track)", () => {
+    expect(splitClip(100, 200, [[0, 500]], false, 156)).toBe(`inset(${-P}px ${-P}px ${-P}px -156px)`);
+    expect(splitClip(100, 200, [[160, 900]], false, 156)).toBe(`inset(60px ${-P}px ${-P}px -156px)`);
+    // Never tighter than the shadow pad.
+    expect(splitClip(100, 200, [[0, 500]], false, 0)).toBe(`inset(${-P}px ${-P}px ${-P}px ${-P}px)`);
+  });
 });
 
 describe("makeTwin", () => {
