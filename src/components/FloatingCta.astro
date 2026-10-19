@@ -421,6 +421,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   .tree-slot--trunk .tree-slot__inner {
     position: relative;
   }
+  /* Always above the track, which rests under it as the pill's bottom cap. */
+  .tree-slot--trunk .floating-cta {
+    position: relative;
+    z-index: 1;
+  }
   .tree-slot__inner > .floating-cta {
     transition:
       opacity 200ms ease,
@@ -459,74 +464,108 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     color: #fff;
   }
 
-  /* The track: a groove from the receiver's resting place out to the left,
-     filled pink behind the receiver as it slides, with a ring where it has
-     to go and chevrons pointing there. Hidden until the press is held. It
-     lies over the page, so it carries the pill's hard shadow too. */
+  /* The track GROWS OUT OF THE PILL (2026-10-19, asked for: the old one did
+     not fit the design). It used to be a separate, darker bar laid across
+     the pill — a soft inset shadow, a second hard shadow crossing the
+     pill's, a scale-and-fade entrance and a muddy pink-over-black fill.
+
+     Now it is part of the one shape: the pill's own fill (`--lp-fill`, so
+     it follows hover, dark mode and the twin), the pill's own hard shadow,
+     and the pill's bottom edge. At rest it is exactly the pill's round
+     bottom cap — 3.5rem wide, its right end on the pill's right edge, top
+     and bottom on the receiver's padding ring — so it is invisible. Held,
+     it widens to the left on the site's spring (`width` and `margin-left`
+     move together, so its right end never moves) and the pill becomes an
+     L lying on its foot. No opacity anywhere: a fading track left a grey
+     ghost disc behind on release. */
   .floating-cta-track {
     position: absolute;
-    top: 0;
+    top: -0.25rem;
     left: 50%;
     z-index: 0;
-    width: calc(3rem + var(--lp-swipe-travel, 3rem));
-    height: 3rem;
-    /* Its right end sits exactly under the receiver's resting disc. */
-    margin-left: calc(1.5rem - 3rem - var(--lp-swipe-travel, 3rem));
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-left: -1.75rem;
     border-radius: 9999px;
-    /* A darker shade of the pill. */
-    background: color-mix(in srgb, var(--lp-fill) 70%, #000);
-    box-shadow:
-      inset 0 2px 4px rgb(0 0 0 / 0.35),
-      var(--tds-shadow-hard-sm);
+    background: var(--lp-fill);
     overflow: hidden;
     pointer-events: none;
-    opacity: 0;
-    transform-origin: right center;
-    scale: 0.4 1;
   }
+  /* Its shadow only while it reaches out, and until it has shrunk back: at
+     rest the pill's own shadow lies in exactly that place, and the twin's
+     translucent ink would darken where the two overlap. */
   .tree-slot__inner > .floating-cta-track {
     transition:
-      opacity 160ms ease,
-      scale 220ms var(--tds-ease-out);
+      width 300ms var(--tds-ease-out),
+      margin-left 300ms var(--tds-ease-out),
+      background-color 220ms ease,
+      box-shadow 0s linear 300ms;
   }
   .floating-cta-group--twin .floating-cta-track {
-    background: #dfe2ee;
-    box-shadow:
-      inset 0 2px 4px rgb(5 15 104 / 0.18),
-      var(--tds-shadow-hard-sm);
+    background: #fff;
+  }
+  @media (hover: hover) {
+    .floating-cta-group:hover + .floating-cta-group--twin .floating-cta-track {
+      background: var(--color-surface-accent);
+    }
   }
   .floating-cta-group[data-swipe] .floating-cta-track {
-    opacity: 1;
-    scale: 1;
+    box-shadow: var(--tds-shadow-hard);
+    width: calc(3.5rem + var(--lp-swipe-travel, 3rem));
+    margin-left: calc(1.75rem - 3.5rem - var(--lp-swipe-travel, 3rem));
   }
+  .floating-cta-group[data-swipe] .tree-slot__inner > .floating-cta-track {
+    transition:
+      width 460ms var(--lp-ease-spring, var(--tds-ease-out)),
+      margin-left 460ms var(--lp-ease-spring, var(--tds-ease-out)),
+      background-color 220ms ease,
+      box-shadow 0s;
+  }
+  /* The way the receiver has come: the same light wash a hovered button of
+     the pill takes, in the pill's own ink — no colour of its own. */
   .floating-cta-track::before {
     content: "";
     position: absolute;
-    inset: 0 0 0 auto;
+    top: 0.25rem;
+    right: 0.25rem;
     width: calc(3rem + var(--lp-swipe, 0px));
+    height: 3rem;
     border-radius: inherit;
-    background: color-mix(in srgb, var(--color-accent-pink) 45%, transparent);
+    background: color-mix(in srgb, currentColor 14%, transparent);
+    opacity: 0;
   }
+  /* Where it has to go: a dashed ring at the far end, solid once reached. */
   .floating-cta-track::after {
     content: "";
     position: absolute;
-    top: 0.25rem;
-    left: 0.25rem;
+    top: 0.5rem;
+    left: 0.5rem;
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 9999px;
     border: 2px dashed currentColor;
+    opacity: 0;
+  }
+  .floating-cta-group[data-swipe] .floating-cta-track::before {
+    opacity: 1;
+  }
+  .floating-cta-group[data-swipe] .floating-cta-track::after {
     opacity: 0.75;
+    transition: opacity 160ms ease 120ms;
   }
   .floating-cta-group[data-swipe="answered"] .floating-cta-track::after {
     border-style: solid;
+    border-color: var(--color-accent-pink);
     opacity: 1;
   }
   .floating-cta-track__chevrons {
     position: absolute;
     top: 50%;
-    right: 3rem;
+    right: 3.5rem;
     margin-top: -9px;
+    opacity: 0;
+  }
+  .floating-cta-group[data-swipe] .floating-cta-track__chevrons {
     opacity: calc(0.9 - var(--lp-swipe-progress, 0));
   }
   /* Only while the track is shown (a held receiver, `[data-swipe]`): the track
@@ -547,7 +586,8 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   }
   @media (prefers-reduced-motion: reduce) {
     .tree-slot__inner > .floating-cta,
-    .tree-slot__inner > .floating-cta-track {
+    .tree-slot__inner > .floating-cta-track,
+    .floating-cta-group[data-swipe] .tree-slot__inner > .floating-cta-track {
       transition: none;
     }
     .floating-cta-group[data-swipe] .floating-cta-track__chevrons {
@@ -687,6 +727,8 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
   /** The farthest the swipe track (and its hard shadow) reaches left of the pill. */
   const SWIPE_REACH = TRAVEL_MAX + SHADOW_PAD;
+  /** How long the track takes to shrink back into the pill (CSS). */
+  const TRACK_SHRINK_MS = 320;
 
   const group = document.querySelector<HTMLElement>(".floating-cta-group");
   const topBtn = group?.querySelector<HTMLElement>(".floating-cta-top");
@@ -766,6 +808,8 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     };
 
     let lastTwin = "";
+    /** The twin's clip stays wide until this time (the track shrinking back). */
+    let wideUntil = 0;
     // No tucking away on phones any more (2026-10-19, asked for): the pill
     // used to slide off the right edge while the reader scrolled down, and
     // the contact action vanished exactly while someone was reading. It stays
@@ -785,7 +829,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       // While the receiver is swiped, its track reaches out of the pill to
       // the left; the twin's clip has to reach as far, or the track changes
       // colour at the pill's edge instead of at the band's line.
-      const reachLeft = group.dataset.swipe ? SWIPE_REACH : SHADOW_PAD;
+      const reachLeft = group.dataset.swipe || performance.now() < wideUntil ? SWIPE_REACH : SHADOW_PAD;
       const clip = splitClip(y + box.top, y + box.bottom, darkRanges, documentIsDark(), reachLeft);
       if (clip !== lastTwin) twin.style.clipPath = lastTwin = clip;
     };
@@ -854,7 +898,15 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     // The receiver can also be swiped left, like answering a call. The
     // twin's clip widens while it is (see `update`).
     mountReceiverSwipe(group, twin);
-    new MutationObserver(schedule).observe(group, { attributes: true, attributeFilter: ["data-swipe"] });
+    // On release the track shrinks back into the pill over 300 ms; the clip
+    // stays wide until it has, or the twin's half would be cut off mid-way.
+    new MutationObserver(() => {
+      if (!group.dataset.swipe) {
+        wideUntil = performance.now() + TRACK_SHRINK_MS;
+        window.setTimeout(schedule, TRACK_SHRINK_MS + 20);
+      }
+      schedule();
+    }).observe(group, { attributes: true, attributeFilter: ["data-swipe"] });
 
     topBtn?.addEventListener("click", () => {
       const reduce = window.matchMedia(

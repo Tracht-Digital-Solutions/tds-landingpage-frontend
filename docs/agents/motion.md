@@ -85,6 +85,10 @@ Scroll reveal stays `lib/reveal.ts` (`[data-reveal]`).
 - **What opens on a phone stays on screen** (2026-10-19, `lib/keepInView.ts`): after a tap opens a process step,
   an explorer service or an FAQ row, the page scrolls (via `tdsScrollTo`) just enough to show the title and its
   content between header and pill, once the fold has played.
+- **The receiver's swipe track grows out of the pill** (2026-10-19): same fill, hard shadow and bottom edge as the
+  pill; at rest it is exactly the pill's bottom cap under the receiver, held it widens left on `--lp-ease-spring`
+  (`width` + `margin-left`, right end fixed), so the pill becomes an L. No opacity or scale on the track; its shadow
+  only while it reaches out; the twin's clip stays wide until it has shrunk back.
 - **Hover colours on the floating pill's receiver live in `@media (hover: hover)`**: a touch screen keeps `:hover`
   after a swipe, and the navy hover disc vanished on the navy pill.
 
