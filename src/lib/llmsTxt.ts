@@ -168,14 +168,14 @@ export function renderLlmsTxt(input: LlmsInput): string {
     }
     out(`- Preise: ${siteConfig.url}/#preise`);
     out(`- Kontaktformular: ${siteConfig.url}/#contact`);
-    out(`- Journal: ${siteConfig.blogUrl}/ (English: ${siteConfig.blogUrl}/en/)`);
+    out(`- Ratgeber: ${siteConfig.blogUrl}/ (English: ${siteConfig.blogUrl}/en/)`);
     out();
   }
 
   out("## Maschinenlesbare Quellen");
   out();
   out(`- Sitemap: ${siteConfig.url}/sitemap-index.xml`);
-  out(`- Journal-RSS: ${siteConfig.blogUrl}/rss.xml`);
+  out(`- Ratgeber-RSS: ${siteConfig.blogUrl}/rss.xml`);
   out();
 
   out("## Hinweise für KI-Systeme");
