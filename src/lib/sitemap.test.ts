@@ -4,7 +4,6 @@ import {
   SITEMAP_ENTRIES,
   absolute,
   hreflangGroup,
-  renderSitemapIndex,
   renderUrlset,
   type SitemapEntry,
 } from "./sitemap";
@@ -182,14 +181,6 @@ describe("renderUrlset", () => {
     expect(xml).toContain("<urlset");
     expect(xml).toContain("</urlset>");
     expect(locs(xml)).toEqual([]);
-  });
-});
-
-describe("renderSitemapIndex", () => {
-  it("names the file robots.txt advertises", () => {
-    // Changing the entry point would silently orphan the one Search Console
-    // has registered.
-    expect(renderSitemapIndex(LAST)).toContain(`<loc>${absolute("/sitemap-0.xml")}</loc>`);
   });
 });
 

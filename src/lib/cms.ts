@@ -1,6 +1,6 @@
 import { contentApiBase } from "./connection";
 import { memoisedOr } from "./contentCache";
-import { readContentJson } from "./contentFetch";
+import { readContentJson } from "./siteKey";
 import { hasBannedWord } from "./copyRules";
 /**
  * Server-side fetch of editable landingpage content blocks from

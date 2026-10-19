@@ -29,83 +29,27 @@
  * cannot be read may leave a page stale, never blank.
  */
 
+import { createSitemapExclusions } from "@tracht-digital-solutions/tds-shared/site";
 import { memoisedOr } from "./contentCache";
 import { contentApiBase } from "./connection";
-import { readContentJson } from "./contentFetch";
+import { readContentJson } from "./siteKey";
+
+export { canonicalPath, groupExcluded, matchesPattern } from "@tracht-digital-solutions/tds-shared/site";
 
 /** This site's id in the panel's site registry. */
 export const SITE_ID = "landingpage";
 
-const DEMO_MODE = import.meta.env.PUBLIC_DEMO_MODE === "true";
-
-interface ExclusionsResponse {
-  site?: string;
-  paths?: unknown;
-}
-
-/**
- * Trailing slash folded away, root kept — `trailingSlash: "ignore"` in the
- * Astro config, so `/preise` and `/preise/` are one page.
- *
- * Exported because `sitemap.ts` must fold paths the SAME way when it looks a
- * URL up in the inventory: that list stores the home pages as `/` and `/en/`,
- * with the slash, and a lookup that trimmed differently would simply fail to
- * find them.
- */
-export function canonicalPath(path: string): string {
-  const value = path.trim();
-  if (value === "" || value === "/") return "/";
-  return value.replace(/\/+$/, "") || "/";
-}
-
-const canonical = canonicalPath;
+const exclusions = createSitemapExclusions({
+  siteId: SITE_ID,
+  contentBase: contentApiBase,
+  read: (url) => readContentJson(new URL(url)),
+  memo: memoisedOr,
+  disabled: import.meta.env.PUBLIC_DEMO_MODE === "true",
+});
 
 /**
- * One pattern against one path.
- *
- * Deliberately the same two rules the API validates and documents: an exact
- * path, or a trailing `*` making it a raw prefix. Kept dumb on purpose — a
- * glob library here would accept patterns the API rejects, and the
- * disagreement would only ever show as a page that quietly stayed indexed.
+ * The patterns, memoised for the render generation. Through the generation
+ * cache rather than a module-level promise, which would live as long as the
+ * SSR server and never see an exclusion added later. Failures exclude nothing.
  */
-export function matchesPattern(path: string, pattern: string): boolean {
-  const value = pattern.trim();
-  if (value === "") return false;
-
-  if (value.endsWith("*")) {
-    const prefix = value.slice(0, -1);
-    return prefix === "" || canonical(path).startsWith(prefix);
-  }
-  return canonical(value) === canonical(path);
-}
-
-/** Does any pattern hit any member of this hreflang group? */
-export function groupExcluded(paths: readonly string[], patterns: readonly string[]): boolean {
-  return paths.some((path) => patterns.some((pattern) => matchesPattern(path, pattern)));
-}
-
-async function load(): Promise<string[]> {
-  if (DEMO_MODE) return [];
-
-  const url = new URL(`${contentApiBase()}/sitemap-exclusions`);
-  url.searchParams.set("site", SITE_ID);
-  // Throws on failure — `exclusionPatterns` decides what that renders as.
-  const data = await readContentJson<ExclusionsResponse>(url);
-  if (!Array.isArray(data.paths)) return [];
-  return data.paths.filter((p): p is string => typeof p === "string" && p.trim() !== "");
-}
-
-/**
- * The patterns, memoised for the render generation.
- *
- * Through `contentCache` rather than a module-level promise: the latter would
- * live as long as the server under SSR, so an exclusion added in the panel
- * would never reach a visitor and nothing would log.
- *
- * Imported from `contentCache.ts`, not `cache.ts` — the same cycle-breaking
- * split the content fetches use. A fetch has no business importing the route
- * table, and `cache.ts` imports this module's caller.
- */
-export function exclusionPatterns(): Promise<string[]> {
-  return memoisedOr("sitemap:exclusions", load, [], "sitemap exclusions (nothing excluded)");
-}
+export const exclusionPatterns = exclusions.exclusionPatterns;

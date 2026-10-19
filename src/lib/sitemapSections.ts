@@ -6,20 +6,14 @@
  *
  * No imports — `cache.ts` needs the paths without the content modules.
  */
-export const SITEMAP_SECTIONS = ["pages", "services", "platforms"] as const;
+import { defineSitemapSections } from "@tracht-digital-solutions/tds-shared/site";
+
+const sections = defineSitemapSections(["pages", "services", "platforms"] as const);
+
+export const SITEMAP_SECTIONS = sections.sections;
 export type SitemapSection = (typeof SITEMAP_SECTIONS)[number];
-
-export function isSitemapSection(value: string | undefined): value is SitemapSection {
-  return (SITEMAP_SECTIONS as readonly string[]).includes(value ?? "");
-}
-
-export function sectionPath(section: SitemapSection): string {
-  return `/sitemap-${section}.xml`;
-}
-
-/** Every sitemap document a rebuild must refresh (index, sections, legacy single file). */
-export const SITEMAP_PATHS: readonly string[] = [
-  "/sitemap-index.xml",
-  "/sitemap-0.xml",
-  ...SITEMAP_SECTIONS.map(sectionPath),
-];
+export const isSitemapSection = sections.isSection;
+/** `/sitemap-<section>.xml`. */
+export const sectionPath = sections.sectionPath;
+/** Every sitemap document the page cache rebuilds: index, legacy `sitemap-0.xml`, each section. */
+export const SITEMAP_PATHS = sections.paths;

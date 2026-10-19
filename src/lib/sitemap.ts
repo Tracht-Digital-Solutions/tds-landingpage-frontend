@@ -22,7 +22,7 @@ import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
 import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
-import { escapeXml, newestDay, renderSectionedSitemapIndex } from "@tracht-digital-solutions/tds-shared/site";
+import { newestDay, renderSectionedSitemapIndex, renderUrlset as renderUrlsetXml } from "@tracht-digital-solutions/tds-shared/site";
 import { SITEMAP_SECTIONS, sectionPath, type SitemapSection } from "./sitemapSections";
 
 /** One indexable page, in both languages. */
@@ -188,59 +188,17 @@ export function absolute(path: string): string {
  * be tested against a fixed list instead of the live inventory.
  */
 export function renderUrlset(entries: readonly SitemapEntry[], fallbackLastmod?: string): string {
-  const urls = entries.flatMap((entry) =>
-    (["de", "en"] as const).map((lang) => {
-      const loc = absolute(entry[lang]);
-      const lastmod = entry.lastmod ?? fallbackLastmod;
-      const alternates = [
-        `<xhtml:link rel="alternate" hreflang="de-DE" href="${escapeXml(absolute(entry.de))}"/>`,
-        `<xhtml:link rel="alternate" hreflang="en-GB" href="${escapeXml(absolute(entry.en))}"/>`,
-        `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(absolute(entry.de))}"/>`,
-      ].join("");
-      const image = entry.image
-        ? `<image:image><image:loc>${escapeXml(absolute(entry.image.loc))}</image:loc>` +
-          `<image:title>${escapeXml(entry.image.title[lang])}</image:title></image:image>`
-        : "";
-      return [
-        "<url>",
-        `<loc>${escapeXml(loc)}</loc>`,
-        alternates,
-        image,
-        lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "",
-        `<changefreq>${entry.changefreq}</changefreq>`,
-        `<priority>${entry.priority.toFixed(1)}</priority>`,
-        "</url>",
-      ].join("");
-    }),
-  ).join("");
-
-  return (
-    '<?xml version="1.0" encoding="UTF-8"?>' +
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" ' +
-    'xmlns:xhtml="http://www.w3.org/1999/xhtml" ' +
-    'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' +
-    urls +
-    "</urlset>"
-  );
-}
-
-/**
- * The index document.
- *
- * A single-child index looks redundant, but the filename is what
- * `public/robots.txt` advertises and what Search Console already knows —
- * `@astrojs/sitemap` produced exactly this pair, and changing the entry point
- * would silently orphan the registered one.
- */
-export function renderSitemapIndex(lastmod?: string): string {
-  return (
-    '<?xml version="1.0" encoding="UTF-8"?>' +
-    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
-    "<sitemap>" +
-    `<loc>${escapeXml(absolute("/sitemap-0.xml"))}</loc>` +
-    (lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "") +
-    "</sitemap>" +
-    "</sitemapindex>"
+  return renderUrlsetXml(
+    entries.flatMap((entry) =>
+      (["de", "en"] as const).map((lang) => ({
+        loc: absolute(entry[lang]),
+        alternates: { de: absolute(entry.de), en: absolute(entry.en) },
+        image: entry.image ? { loc: absolute(entry.image.loc), title: entry.image.title[lang] } : undefined,
+        lastmod: entry.lastmod ?? fallbackLastmod,
+        changefreq: entry.changefreq,
+        priority: entry.priority,
+      })),
+    ),
   );
 }
 
