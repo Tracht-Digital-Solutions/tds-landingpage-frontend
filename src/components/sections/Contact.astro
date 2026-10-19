@@ -304,16 +304,18 @@ const ui =
         <div class="contact-card__group contact-card__social">
           {/* `target`/`rel` because it leaves for a messenger, like every
               link in `SocialLinks`. */}
+          {/* Icon only (2026-10-19, asked for), like the profiles beside it; the
+              name is the accessible label and the hover tip. */}
           <a
             class="contact-action contact-action--whatsapp"
             href={whatsappHref(contact.phone)}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="WhatsApp"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d={WHATSAPP_ICON} />
             </svg>
-            WhatsApp
           </a>
           {profileLinks.length > 0 && <SocialLinks links={profileLinks} />}
         </div>
@@ -883,6 +885,11 @@ const ui =
   }
   #contact .contact-action--whatsapp {
     flex: none;
+    width: 2.75rem;
+    padding: 0;
+  }
+  #contact .contact-action--whatsapp:hover {
+    color: #25d366;
   }
 
   /* Two equal buttons, side by side, stacked on a very narrow column. Not

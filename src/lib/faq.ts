@@ -12,7 +12,8 @@
  * - As a visitor or a search asks them ("Was kostet eine Website?"), and
  *   answered in the first sentence — a question an answer engine lifts has to
  *   stand on its own.
- * - Each answered in one to three short sentences.
+ * - Each answered in two or three short sentences (2026-10-19: the one-liners
+ *   were filled out to say how, not just whether).
  * - No direct address (since 2026-10-12): questions as a search asks them
  *   ("Übernimmt Tracht Digital …?"), answers about the company. No free and
  *   no timed first conversation, no price range — the one
@@ -25,7 +26,7 @@
  * rule for how much a landing page may ask of a reader. The rest live on
  * `/fragen` (`/en/questions`), grouped by `FAQ_GROUPS`, and the home page links
  * there. The JSON-LD follows what is VISIBLE on each page: six on the home
- * page, twelve on the questions page. Marking up an answer a page does not
+ * page, all of them on the questions page. Marking up an answer a page does not
  * show is the one thing Google's FAQPage guidance forbids outright.
  *
  * So the ORDER of `items` is load-bearing: the first six are the six a visitor
@@ -63,7 +64,7 @@ export const FAQ_PAGE_SLUG = { de: "/fragen", en: "/en/questions" } as const;
  * has. Raise it only when an answer changes; a panel override does not move it,
  * because the panel cannot say when the copy it replaced was written.
  */
-export const FAQ_PAGE_UPDATED_AT = "2026-10-12";
+export const FAQ_PAGE_UPDATED_AT = "2026-10-19";
 
 /** The questions page, in one language. */
 export function faqPageHref(lang: "de" | "en"): string {
@@ -171,17 +172,17 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           // hier ankommen, und sie steht damit über der Preisfrage.
           {
             q: "Übernimmt Tracht Digital Solutions bestehende Websites und Shops?",
-            a: "Ja – auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Tracht Digital Solutions behebt Fehler und übernimmt die laufende Pflege.",
+            a: "Ja – auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Tracht Digital Solutions verschafft sich zuerst einen Überblick über Technik und Zugänge, behebt dann die dringenden Fehler und übernimmt anschließend die laufende Pflege. Der bisherige Stand bleibt dabei nutzbar.",
             group: "takeover",
           },
           {
             q: "Muss die Seite dafür neu gebaut werden?",
-            a: "Meistens nicht. Was trägt, bleibt – neu gebaut wird nur, was sich nicht mehr reparieren lässt.",
+            a: "Meistens nicht. Was trägt, bleibt – Inhalte, Gestaltung und gut laufende Funktionen werden weitergenutzt. Neu gebaut wird nur, was sich nicht mehr sinnvoll reparieren lässt, und das steht vorher im Angebot.",
             group: "takeover",
           },
           {
             q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Für drei Pakete gilt ein Festpreis – sie stehen bei den Preisen. Alles andere wird als eigenes Angebot kalkuliert.",
+            a: "Für drei Pakete gilt ein Festpreis: Website-Check, Website-Optimierung und Onepager – sie stehen bei den Preisen. Alles andere wird als eigenes Angebot kalkuliert, mit Festpreis oder Budgetobergrenze, bevor die Arbeit beginnt.",
             group: "pricing",
           },
           {
@@ -193,19 +194,19 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Wie lange dauert ein Projekt?",
-            a: "Das hängt vom Umfang ab, deshalb gibt es keine Pauschale. Im Angebot steht ein verbindlicher Termin – vor der Zusage, nicht danach.",
+            a: "Das hängt vom Umfang ab, deshalb gibt es keine Pauschale. Im Angebot steht ein verbindlicher Termin – vor der Zusage, nicht danach. Größere Vorhaben laufen in Etappen, sodass ein erster Teil früher fertig ist.",
             group: "pricing",
           },
           {
             q: "Wem gehören Daten und Zugänge?",
-            a: "Dem Kunden. Bei der Übergabe gehen alle Zugänge und alles, was zum Projekt gehört, an den Betrieb. Bei einem späteren Wechsel geht alles mit.",
+            a: "Dem Kunden. Bei der Übergabe gehen alle Zugänge, der Code und alles, was zum Projekt gehört, an den Betrieb. Bei einem späteren Wechsel zu einem anderen Anbieter geht alles mit.",
             group: "cooperation",
           },
 
           // --- Only on /fragen ------------------------------------------
           {
             q: "Was heißt „Abläufe digitalisieren“ für einen kleinen Betrieb?",
-            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Den Anfang macht ein Ablauf, der jede Woche Zeit kostet. Manchmal lautet die ehrliche Antwort auch: so lassen.",
+            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Den Anfang macht ein Ablauf, der jede Woche Zeit kostet – etwa Angebote, Termine oder Belege. Manchmal lautet die ehrliche Antwort auch: so lassen.",
             group: "takeover",
           },
           {
@@ -219,11 +220,52 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "takeover",
           },
           {
+            // Added 2026-10-19 with the SEO/GEO pass: the classic search
+            // question next to the AI one, with the same boundary.
+            q: "Wird die Website auch für Google optimiert?",
+            a: "Ja, von Anfang an. Dazu gehören schnelle Ladezeiten, saubere Technik, aussagekräftige Titel und Beschreibungen sowie Inhalte, die die Fragen der Kunden beantworten. Eine bestimmte Platzierung kann niemand seriös versprechen.",
+            group: "takeover",
+          },
+          {
             // Added 2026-10-12, with the Webauftritt page's new lead: the
             // question behind "nach Maß", answered without a slogan.
             q: "Baut Tracht Digital Solutions Websites aus Vorlagen?",
             a: "Nein. Gestaltung, Aufbau und Texte entstehen für jeden Betrieb neu: passend zum Firmenbild und zu dem, was seine Kunden suchen. Eine Vorlage mit ausgetauschtem Logo gibt es nicht.",
             group: "takeover",
+          },
+          {
+            // Added 2026-10-12 with the "Individuelle Lösungen" lead.
+            q: "Bietet Tracht Digital Solutions Auftragsprogrammierung an?",
+            a: "Ja. Es entstehen Tools und Skripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen. Bei festem Umfang gilt ein Festpreis pro Etappe, und der Code gehört danach dem Betrieb.",
+            group: "takeover",
+          },
+          {
+            // Added 2026-10-12 with the "Abläufe digitalisieren" lead.
+            q: "Hilft Tracht Digital Solutions bei der Umstellung auf digitale Buchführung?",
+            a: "Ja, bei der Technik. Tracht Digital Solutions bindet das Buchhaltungsprogramm ein, richtet den Weg von Belegen und Rechnungen bis zur Kanzlei ein und erklärt ihn dem Team. Die Buchführung selbst und die Steuerberatung bleiben bei der Kanzlei.",
+            group: "takeover",
+          },
+          {
+            // Added 2026-10-19. The process copy already says it ("Datenschutz,
+            // Barrierefreiheit und Suchmaschinenoptimierung gehören von Anfang
+            // an dazu"); the boundary is the same one the bookkeeping answer
+            // draws — technology yes, legal advice no.
+            q: "Kümmert sich Tracht Digital Solutions um Datenschutz und Barrierefreiheit?",
+            a: "Ja, bei der technischen Umsetzung – von Anfang an und nicht erst kurz vor dem Start. Dazu gehören ein datensparsamer Aufbau, eingebundene Pflichtseiten und eine Bedienung, die auch mit Tastatur und Screenreader funktioniert. Eine Rechtsberatung ersetzt das nicht.",
+            group: "takeover",
+          },
+          {
+            // Added 2026-10-19: the fixed-price package a takeover usually
+            // starts with, described from its own `includes`.
+            q: "Was prüft der Website-Check?",
+            a: "Der Website-Check prüft Technik, Sicherheit und Ladezeit der bestehenden Seite. Das Ergebnis ist ein schriftlicher Bericht mit klaren Prioritäten, der anschließend gemeinsam besprochen wird. Er hat einen Festpreis und steht bei den Preisen.",
+            group: "pricing",
+          },
+          {
+            // Added 2026-10-19, from the process step "Konzept & Angebot".
+            q: "Gibt es einen Festpreis oder wird nach Aufwand abgerechnet?",
+            a: "Vor dem Start steht ein schriftliches Angebot mit Festpreis oder Budgetobergrenze. Es beschreibt, was gebaut wird, was ausdrücklich nicht dazugehört und bis wann es fertig ist. Laufende Betreuung lässt sich nach Bedarf oder als festes Monatsmodell vereinbaren.",
+            group: "pricing",
           },
           {
             // Added 2026-10-12 at Julian's request: AI is a tool here, not the
@@ -234,20 +276,20 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "cooperation",
           },
           {
-            // Added 2026-10-12 with the "Individuelle Lösungen" lead.
-            q: "Bietet Tracht Digital Solutions Auftragsprogrammierung an?",
-            a: "Ja. Es entstehen Tools und Skripte für Arbeit, die heute von Hand läuft: Daten übertragen, Listen abgleichen, Berichte erstellen. Bei festem Umfang gilt ein Festpreis pro Etappe.",
-            group: "takeover",
+            // Added 2026-10-19, from the four process steps.
+            q: "Wie läuft ein Projekt ab?",
+            a: "In vier Schritten: Erstgespräch, Konzept und Angebot, Umsetzung, Übergabe und Betreuung. Nach jedem Schritt liegt etwas Greifbares vor. Die Umsetzung läuft in kurzen Etappen mit einer eigenen Vorschau, in der jeder Zwischenstand getestet werden kann.",
+            group: "cooperation",
           },
           {
-            // Added 2026-10-12 with the "Abläufe digitalisieren" lead.
-            q: "Hilft Tracht Digital Solutions bei der Umstellung auf digitale Buchführung?",
-            a: "Ja, bei der Technik. Tracht Digital Solutions bindet das Buchhaltungsprogramm ein, richtet den Weg von Belegen und Rechnungen bis zur Kanzlei ein und erklärt ihn dem Team. Die Buchführung selbst und die Steuerberatung bleiben bei der Kanzlei.",
-            group: "takeover",
+            // Added 2026-10-19, from the about copy and the first step.
+            q: "Arbeitet Tracht Digital Solutions nur im Raum Hamburg?",
+            a: "Nein. Tracht Digital Solutions sitzt in Schwarzenbek bei Hamburg und arbeitet für Betriebe in ganz Deutschland. Gespräche laufen per Telefon oder Video, im Raum Hamburg auch vor Ort.",
+            group: "cooperation",
           },
           {
             q: "Lassen sich Texte und Bilder selbst ändern?",
-            a: "Ja. Zur Übergabe gehören ein eigener Zugang und eine Einweisung. Alternativ genügt eine kurze Nachricht mit der Änderung – das ist Teil der Pflege, kein Aufpreis.",
+            a: "Ja. Zur Übergabe gehören ein eigener Zugang, eine verständliche Dokumentation und eine Einweisung. Alternativ genügt eine kurze Nachricht mit der Änderung – das ist Teil der Pflege, kein Aufpreis.",
             group: "cooperation",
           },
           {
@@ -257,17 +299,23 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Was wird für den Projektstart gebraucht?",
-            a: "Erst einmal nur, was schon vorhanden ist: Texte, Bilder, Zugänge. Fehlt etwas, kommt eine klare Liste – Texte schreibt Tracht Digital Solutions auf Wunsch auch selbst.",
+            a: "Erst einmal nur, was schon vorhanden ist: Texte, Bilder, Zugänge. Fehlt etwas, kommt eine klare Liste mit dem, was noch gebraucht wird. Texte schreibt Tracht Digital Solutions auf Wunsch auch selbst.",
             group: "cooperation",
           },
           {
             q: "Funktioniert die Zusammenarbeit mit bisherigen Anbietern weiter?",
-            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt.",
+            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt – bestehende Programme, Dienstleister und Verträge werden eingebunden statt ersetzt. Ein Wechsel wird nur empfohlen, wenn er dem Betrieb spürbar etwas bringt.",
             group: "cooperation",
           },
           {
             q: "Gibt es Betreuung nach dem Start?",
-            a: "Ja, auf Wunsch – nach Bedarf oder als festes Monatsmodell mit Wartung, Updates und Weiterentwicklung.",
+            a: "Ja, auf Wunsch – nach Bedarf oder als festes Monatsmodell mit Wartung, Updates und Weiterentwicklung. Ansprechpartner bleibt dabei dieselbe Person, die das Projekt gebaut hat.",
+            group: "cooperation",
+          },
+          {
+            // Added 2026-10-19, from the last process step ("Ohne Bindung").
+            q: "Gibt es eine Vertragsbindung?",
+            a: "Nein. Betreuung ist ein Angebot, keine Pflicht, und lässt sich jederzeit beenden. Code, Daten und Zugänge bleiben in jedem Fall beim Kunden.",
             group: "cooperation",
           },
         ],
@@ -281,17 +329,17 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         items: [
           {
             q: "Does Tracht Digital Solutions take over existing websites and shops?",
-            a: "Yes – including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. Tracht Digital Solutions fixes errors and takes over ongoing maintenance.",
+            a: "Yes – including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. Tracht Digital Solutions first gets an overview of the technology and logins, then fixes the urgent errors and takes over ongoing maintenance. The current site stays usable throughout.",
             group: "takeover",
           },
           {
             q: "Does the site have to be rebuilt for that?",
-            a: "Usually not. What holds up stays — only what cannot be repaired gets rebuilt.",
+            a: "Usually not. What holds up stays – content, design and features that work are kept. Only what can no longer be sensibly repaired gets rebuilt, and that is stated in the quote beforehand.",
             group: "takeover",
           },
           {
             q: "What does a website or an online shop cost?",
-            a: "Three packages have a fixed price, listed under Pricing. Everything else gets a quote of its own.",
+            a: "Three packages have a fixed price: website check, website optimisation and one-pager – listed under Pricing. Everything else gets a quote of its own, with a fixed price or a budget cap, before work begins.",
             group: "pricing",
           },
           {
@@ -301,18 +349,18 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "How long does a project take?",
-            a: "That depends on the scope, so there is no blanket figure. The quote carries a binding date — before any commitment, not after.",
+            a: "That depends on the scope, so there is no blanket figure. The quote carries a binding date — before any commitment, not after. Larger projects run in stages, so a first part is ready sooner.",
             group: "pricing",
           },
           {
             q: "Who owns the data and the logins?",
-            a: "The client does. At handover every login and everything belonging to the project goes to the business. A later switch takes all of it along.",
+            a: "The client does. At handover every login, the code and everything belonging to the project goes to the business. A later switch to another provider takes all of it along.",
             group: "cooperation",
           },
 
           {
             q: "What does “digitalizing workflows” mean for a small business?",
-            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. It starts with one routine that costs time every week. Sometimes the honest answer is: leave it as it is.",
+            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. It starts with one routine that costs time every week – quotes, appointments or receipts, for example. Sometimes the honest answer is: leave it as it is.",
             group: "takeover",
           },
           {
@@ -321,18 +369,18 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "takeover",
           },
           {
+            q: "Is the website optimised for Google as well?",
+            a: "Yes, from the start. That means fast loading, clean technology, meaningful titles and descriptions, and content that answers what customers ask. Nobody can seriously promise a particular ranking.",
+            group: "takeover",
+          },
+          {
             q: "Does Tracht Digital Solutions build websites from templates?",
             a: "No. Design, structure and copy are made for each business: true to its brand and to what its customers look for. There is no template with a swapped-in logo.",
             group: "takeover",
           },
           {
-            q: "How does Tracht Digital Solutions use AI?",
-            a: "As a tool, not as a substitute for the work. AI helps with research, checking and routine steps. Decisions, design and review stay with a person – unchecked AI copy does not go online.",
-            group: "cooperation",
-          },
-          {
             q: "Does Tracht Digital Solutions offer contract programming?",
-            a: "Yes. It builds tools and scripts for work that is done by hand today: moving data, matching lists, building reports. A fixed scope gets a fixed price per stage.",
+            a: "Yes. It builds tools and scripts for work that is done by hand today: moving data, matching lists, building reports. A fixed scope gets a fixed price per stage, and the code belongs to the business afterwards.",
             group: "takeover",
           },
           {
@@ -341,8 +389,38 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             group: "takeover",
           },
           {
+            q: "Does Tracht Digital Solutions take care of data protection and accessibility?",
+            a: "Yes, in the technical implementation – from the start, not just before launch. That covers a data-sparing setup, the mandatory legal pages and controls that work with a keyboard and a screen reader. It does not replace legal advice.",
+            group: "takeover",
+          },
+          {
+            q: "What does the website check cover?",
+            a: "The website check examines the technology, security and loading time of the existing site. The result is a written report with clear priorities, discussed together afterwards. It has a fixed price, listed under Pricing.",
+            group: "pricing",
+          },
+          {
+            q: "Is there a fixed price, or is work billed by effort?",
+            a: "Before the start there is a written quote with a fixed price or a budget cap. It describes what will be built, what is explicitly not included and when it will be done. Ongoing support can be agreed as needed or as a fixed monthly arrangement.",
+            group: "pricing",
+          },
+          {
+            q: "How does Tracht Digital Solutions use AI?",
+            a: "As a tool, not as a substitute for the work. AI helps with research, checking and routine steps. Decisions, design and review stay with a person – unchecked AI copy does not go online.",
+            group: "cooperation",
+          },
+          {
+            q: "How does a project run?",
+            a: "In four steps: first conversation, concept and quote, build, handover and support. Each step ends with something tangible. The build runs in short stages with a preview of its own, where every interim state can be tested.",
+            group: "cooperation",
+          },
+          {
+            q: "Does Tracht Digital Solutions only work in the Hamburg area?",
+            a: "No. Tracht Digital Solutions is based in Schwarzenbek near Hamburg and works with businesses across Germany. Conversations take place by phone or video, and in person in the Hamburg area.",
+            group: "cooperation",
+          },
+          {
             q: "Can text and images be changed in-house?",
-            a: "Yes. Handover includes a login and a walkthrough. Alternatively a short message with the change is enough — that is part of maintenance, not an extra.",
+            a: "Yes. Handover includes a login, clear documentation and a walkthrough. Alternatively a short message with the change is enough — that is part of maintenance, not an extra.",
             group: "cooperation",
           },
           {
@@ -352,17 +430,22 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "What is needed to start a project?",
-            a: "To begin with, only what already exists: text, images, logins. If something is missing, a clear list follows — and Tracht Digital Solutions can write the text as well.",
+            a: "To begin with, only what already exists: text, images, logins. If something is missing, a clear list of what is still needed follows. Tracht Digital Solutions can write the text as well.",
             group: "cooperation",
           },
           {
             q: "Does the work continue alongside current suppliers?",
-            a: "Where it makes sense, yes. What works stays.",
+            a: "Where it makes sense, yes. What works stays – existing software, service providers and contracts are integrated rather than replaced. A switch is only recommended when it brings the business a noticeable benefit.",
             group: "cooperation",
           },
           {
             q: "Is there support after launch?",
-            a: "Yes, on request — as needed, or as a fixed monthly arrangement covering maintenance, updates and further development.",
+            a: "Yes, on request — as needed, or as a fixed monthly arrangement covering maintenance, updates and further development. The contact remains the same person who built the project.",
+            group: "cooperation",
+          },
+          {
+            q: "Is there a minimum contract term?",
+            a: "No. Support is an offer, not an obligation, and can be ended at any time. Code, data and logins stay with the client in every case.",
             group: "cooperation",
           },
         ],

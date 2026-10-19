@@ -24,6 +24,8 @@
  * (`src/pages/llms.txt.ts`) is what resolves the corpus.
  */
 
+import { PROPERTY_ORIGINS } from "@tracht-digital-solutions/tds-shared/nav";
+import { HOME_FAQ_COUNT, type FaqItem } from "./faq";
 import type { PricePackage } from "./pricing";
 import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
@@ -46,6 +48,13 @@ export interface LlmsInput {
    * the CMS still renders a true file rather than crashing.
    */
   serviceContent?: Partial<Record<ServiceId, ServiceContent>>;
+  /**
+   * Every German FAQ item after CMS resolution. Its length names the count on
+   * the questions page's line, and the home page's six are quoted with their
+   * answers (2026-10-19): a question and its answer is the unit an answer
+   * engine lifts. Omitted, the file names the page without a count.
+   */
+  faq?: readonly Pick<FaqItem, "q" | "a">[];
 }
 
 const euro = new Intl.NumberFormat("de-DE");
@@ -76,13 +85,19 @@ function priceNote(priceText: string): string {
  */
 const PAGE_LABELS: Record<string, string> = {
   "/": "Startseite",
-  "/fragen": "Häufige Fragen — alle zwölf, nach Übernahme, Preisen und Zusammenarbeit gruppiert",
+  // The count is the FAQ's own length (see `faqLabel`); it said "alle zwölf"
+  // long after the page held seventeen.
+  "/fragen": "Häufige Fragen — nach Übernahme, Preisen und Zusammenarbeit gruppiert",
   "/visitenkarte": "Digitale Visitenkarte",
   "/qualifikationen": "Qualifikationen — abgeschlossene Weiterbildungen, jedes Zertifikat im Original",
 };
 
 export function renderLlmsTxt(input: LlmsInput): string {
-  const { entries, packages, serviceContent = {} } = input;
+  const { entries, packages, serviceContent = {}, faq = [] } = input;
+  const label = (path: string): string =>
+    path === "/fragen" && faq.length > 0
+      ? `Häufige Fragen — alle ${faq.length}, nach Übernahme, Preisen und Zusammenarbeit gruppiert`
+      : (PAGE_LABELS[path] ?? path);
 
   const serviceByPath = new Map(serviceDefinitions.map((service) => [serviceHref(service, "de"), service]));
   const platformByPath = new Map(platformDefinitions.map((platform) => [platformHref(platform, "de"), platform]));
@@ -163,12 +178,24 @@ export function renderLlmsTxt(input: LlmsInput): string {
     out("## Weitere Seiten");
     out();
     for (const entry of otherEntries) {
-      out(`- ${PAGE_LABELS[entry.de] ?? entry.de}:`);
+      out(`- ${label(entry.de)}:`);
       out(pair(entry));
     }
     out(`- Preise: ${siteConfig.url}/#preise`);
     out(`- Kontaktformular: ${siteConfig.url}/#contact`);
     out(`- Ratgeber: ${siteConfig.blogUrl}/ (English: ${siteConfig.blogUrl}/en/)`);
+    out(`- Online-Tools: ${PROPERTY_ORIGINS.tools}/ (English: ${PROPERTY_ORIGINS.tools}/en/)`);
+    out(`- Digitalmarkt: ${PROPERTY_ORIGINS.shop}/ (English: ${PROPERTY_ORIGINS.shop}/en/)`);
+    out();
+  }
+
+  // ── the questions a visitor most often arrives with ─────────────────────
+  if (faq.length > 0) {
+    out("## Häufige Fragen");
+    out();
+    for (const item of faq.slice(0, HOME_FAQ_COUNT)) {
+      out(`- **${item.q}** ${item.a}`);
+    }
     out();
   }
 

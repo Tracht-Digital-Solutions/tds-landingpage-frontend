@@ -13,6 +13,9 @@ The demo sites (`demo1`…`demo5.tracht-digital.de`, plus `shop`) render on the 
     entry points at `/de/`.
 - **`src/lib/demoData.json`** — the committed snapshot written by `npm run demos:sync` (each demo's own title,
   description, favicon and screenshot). Never edit by hand.
+- **Refreshed daily** (2026-10-19, `.github/workflows/refresh-previews.yml`, 04:17 UTC and by hand): CI runs
+  `demos:sync` and `references:sync`, commits only when a picture or a card field changed (timestamps alone don't
+  count) and then dispatches the Release workflow. Screenshots used to be taken only when somebody remembered to.
 - **`src/lib/demos.ts`** — `getDemos()`, the snapshot filtered by a live probe.
 
 ## A demo that isn't available isn't shown

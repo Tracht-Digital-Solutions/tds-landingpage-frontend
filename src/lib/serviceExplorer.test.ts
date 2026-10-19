@@ -63,7 +63,7 @@ describe("mountServiceExplorer", () => {
     buttons[2]!.click();
     expect(document.getElementById("p2")!.hidden).toBe(false);
     expect(document.getElementById("p0")!.hidden).toBe(true);
-    expect(onOpen).toHaveBeenCalledWith(document.getElementById("p2"));
+    expect(onOpen).toHaveBeenCalledWith(document.getElementById("p2"), document.getElementById("p0"), 1);
     buttons[2]!.click();
     expect(buttons.every((b) => b.getAttribute("aria-expanded") === "false")).toBe(true);
   });

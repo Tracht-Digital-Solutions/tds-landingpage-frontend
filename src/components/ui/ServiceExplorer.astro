@@ -410,34 +410,21 @@ const panelRows = "1 / -1";
       flex-direction: column;
       min-height: 0;
     }
-    /* The switch, in the site's spring: the new card rises from the side of
-       the chosen title (`--dir`, set by the script), the old one sinks
-       away. Overshoot on `translate` only. */
+    /* The switch's END STATES only. The motion between them is the script's
+       (`animateSwitch`, Web Animations, 2026-10-19): the old card leaves
+       against the direction of travel while the new one comes in with it,
+       the photo settling and the facts following one by one. Until then the
+       cards crossfaded on one CSS transition, and because a closed card's
+       offset was the same `--dir` the old one left by, both moved the same
+       way — the switch read as a flicker, not as cards changing places. */
     .svc-explorer[data-enhanced] .svc-explorer__panel[data-closed] {
       visibility: hidden;
       opacity: 0;
-      translate: 0 calc(var(--dir, 1) * 1.25rem);
-      transition:
-        opacity 160ms var(--tds-ease-out),
-        translate 220ms var(--tds-ease-out),
-        visibility 0s linear 220ms;
     }
     .svc-explorer[data-enhanced] .svc-explorer__panel:not([data-closed]) {
       z-index: 1;
       visibility: visible;
       opacity: 1;
-      translate: 0 0;
-      transition:
-        opacity 220ms var(--tds-ease-out) 40ms,
-        translate 560ms var(--lp-ease-spring) 40ms,
-        visibility 0s;
-    }
-    .svc-explorer[data-enhanced] .svc-explorer__panel:not([data-closed]) .svc-explorer__shot img {
-      scale: 1;
-      transition: scale 700ms var(--lp-ease-soft) 40ms;
-    }
-    .svc-explorer[data-enhanced] .svc-explorer__panel[data-closed] .svc-explorer__shot img {
-      scale: 1.05;
     }
     /* The PHOTO absorbs the difference. It is the one part of the panel with
        no information in its height: the text underneath says the same thing at
@@ -546,6 +533,67 @@ const panelRows = "1 / -1";
       });
   };
 
+  /**
+   * The desktop switch: cards changing places, not one picture fading into
+   * the next.
+   *
+   * Plain Web Animations, so the very first hover animates like the tenth
+   * (no module to wait for, unlike `warmMotion`). Transform and opacity only;
+   * nothing here relayouts. A new switch cancels the running one, so a pointer
+   * running down the list never stacks them.
+   */
+  const SPRING =
+    getComputedStyle(document.documentElement).getPropertyValue("--lp-ease-spring").trim() ||
+    "cubic-bezier(0.22, 1, 0.36, 1)";
+  const SOFT = "cubic-bezier(0.22, 1, 0.36, 1)";
+  const running = new Set<Animation>();
+  const play = (el: Element | null, frames: Keyframe[], timing: KeyframeAnimationOptions) => {
+    if (!el) return;
+    const animation = el.animate(frames, { fill: "backwards", ...timing });
+    running.add(animation);
+    void animation.finished.catch(() => undefined).finally(() => running.delete(animation));
+  };
+  const animateSwitch = (panel: HTMLElement, previous: HTMLElement | null, dir: 1 | -1) => {
+    running.forEach((animation) => animation.cancel());
+    running.clear();
+    if (previous && previous !== panel) {
+      // Held visible for its own exit; the CSS end state hides it afterwards.
+      play(
+        previous,
+        [
+          { visibility: "visible", opacity: 1, translate: "0 0", scale: "1" },
+          { visibility: "visible", opacity: 0, translate: `0 ${dir * -1.5}rem`, scale: "0.97" },
+        ],
+        { duration: 200, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "none" },
+      );
+    }
+    play(
+      panel,
+      [
+        { opacity: 0, translate: `0 ${dir * 2.25}rem`, scale: "0.97" },
+        { opacity: 1, translate: "0 0", scale: "1" },
+      ],
+      { duration: 640, delay: 70, easing: SPRING },
+    );
+    play(panel.querySelector("[data-explorer-shot] img"), [{ scale: "1.08" }, { scale: "1" }], {
+      duration: 900,
+      delay: 70,
+      easing: SOFT,
+    });
+    panel
+      .querySelectorAll("[data-explorer-body] dl > div, [data-explorer-body] > a")
+      .forEach((row, index) => {
+        play(
+          row,
+          [
+            { opacity: 0, translate: `0 ${dir * 0.75}rem` },
+            { opacity: 1, translate: "0 0" },
+          ],
+          { duration: 420, delay: 170 + index * 55, easing: SOFT },
+        );
+      });
+  };
+
   document.querySelectorAll<HTMLElement>("[data-service-explorer]").forEach((root) => {
     // Interest, in the three ways it can arrive. `once` on each: the module is
     // fetched one time and cached in `motion` from then on.
@@ -554,13 +602,16 @@ const panelRows = "1 / -1";
     root.addEventListener("touchstart", warmMotion, { once: true, passive: true });
 
     mountServiceExplorer(root, {
-      onOpen: (panel) => {
-        if (window.matchMedia(EXPLORER_DESKTOP_QUERY).matches) return;
+      onOpen: (panel, previous, dir) => {
+        if (window.matchMedia(EXPLORER_DESKTOP_QUERY).matches) {
+          if (!lessMotion()) animateSwitch(panel, previous, dir);
+          return;
+        }
         // The accordion: the tapped title and its panel come fully on screen
         // (a row closed above it may just have pulled it upwards).
         const title = root.querySelector<HTMLElement>(`[aria-controls="${panel.id}"]`);
         keepInView(title ?? panel, panel);
-        // From 64rem the switch is CSS (see the desktop block); Motion only
+        // From 64rem the switch is `animateSwitch` above; Motion only
         // animates the phone's accordion.
         if (lessMotion()) return;
         // Not loaded yet (a click inside the first few hundred milliseconds, or
