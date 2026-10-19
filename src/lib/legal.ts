@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { assertKeyAccepted, siteKeyHeaders } from "./siteKey";
 import { memoisedOr } from "./contentCache";
-import { readContentJson } from "./contentFetch";
+import { readContentJson } from "./siteKey";
 import { contentApiBase } from "./connection";
 
 /** Metadata for one uploaded document, as `GET /content/legal` returns it. */

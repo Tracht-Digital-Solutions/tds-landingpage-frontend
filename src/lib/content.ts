@@ -1,5 +1,5 @@
 import { contentApiBase } from "./connection";
-import { readContentJson } from "./contentFetch";
+import { readContentJson } from "./siteKey";
 
 /**
  * Shared shape of a published post as returned by tds-content-api's

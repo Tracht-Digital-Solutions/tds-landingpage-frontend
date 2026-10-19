@@ -3,88 +3,34 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * `scripts/geo-audit.mjs` is the same file in all four public repos; only its
- * `PROFILE` block differs. Nothing else keeps the copies in step, and the one
- * failure that matters is silent: a site that quietly audits less than its
- * siblings still reports "No hard failures".
- *
- * So this test reads the script as TEXT and pulls the `CHECK_IDS` array out
- * with a regex. It never imports or executes it — the script fetches a site on
- * the first line and calls `process.exit`, neither of which belongs in a test
- * run. Byte-parity across 400 lines would be brittle; the list of checks is
- * the part that has to agree.
- *
- * This repo is where the script is maintained, so the contract list lives here
- * and the other three compare their own copy against this file.
+ * The audit ships in tds-shared (`tds-geo-audit`, 0.59), which pins its check
+ * list; this repo keeps only `scripts/geo-audit.profile.mjs`. Both are read as
+ * TEXT and never imported: the audit fetches a site on load and calls
+ * `process.exit`, neither of which belongs in a test run.
  */
-const script = readFileSync(resolve(process.cwd(), "scripts/geo-audit.mjs"), "utf8");
-
-/** The checks every one of the four sites has to run. */
-const UNIVERSAL = [
-  "robots.agents",
-  "robots.disallow",
-  "robots.sitemap",
-  "sitemap.index",
-  "sitemap.pages",
-  "page.status",
-  "page.noindex",
-  "page.lang",
-  "title.present",
-  "title.length",
-  "title.distinct",
-  "description.present",
-  "description.length",
-  "description.distinct",
-  "heading.single-h1",
-  "heading.levels",
-  "canonical.self",
-  "hreflang.present",
-  "hreflang.reciprocal",
-  "og.title-description",
-  "og.image",
-  "og.image-answers",
-  "jsonld.parses",
-  "jsonld.required-types",
-  "jsonld.forbidden-types",
-  "jsonld.id-unique",
-  "jsonld.id-resolves",
-  "jsonld.date-visible",
-  "img.alt",
-  "link.internal-resolves",
-  "text.banned-words",
-  "text.word-count",
-  "llms.status",
-  "llms.type",
-  "llms.budget",
-  "llms.covers-sitemap",
-] as const;
+const script = readFileSync(resolve(process.cwd(), "scripts/geo-audit.profile.mjs"), "utf8");
+const shared = readFileSync(
+  resolve(process.cwd(), "node_modules/@tracht-digital-solutions/tds-shared/scripts/geo-audit.mjs"),
+  "utf8",
+);
 
 /**
- * The array literal, read without evaluating the module. Matches both a
- * top-level `const NAME = [...]` and a `NAME: [...]` key inside `PROFILE`.
+ * An array literal, read without evaluating the module. Matches both a
+ * top-level `const NAME = [...]` and a `NAME: [...]` key in the profile.
  */
-function arrayLiteral(name: string): string[] {
+function arrayLiteral(name: string, source = script): string[] {
   // None of these arrays nests a bracket, so "up to the next ]" is exact and
   // works for the one-line and the multi-line form alike.
-  const match = script.match(new RegExp(`(?:const ${name} = |\\b${name}: )\\[([^\\]]*)\\]`));
-  if (!match) throw new Error(`${name} not found in scripts/geo-audit.mjs`);
+  const match = source.match(new RegExp(`(?:const ${name} = |\\b${name}: )\\[([^\\]]*)\\]`));
+  if (!match) throw new Error(`${name} not found`);
   return [...match[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 }
 
 describe("geo-audit check list", () => {
-  const ids = arrayLiteral("CHECK_IDS");
-
-  it.each(UNIVERSAL)("runs %s", (id) => {
-    expect(ids).toContain(id);
-  });
-
-  it("lists each check once", () => {
-    expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("keeps the site-specific checks out of the universal list", () => {
+  it("keeps the site-specific checks out of the shared list", () => {
     // The lead/byline/source checks only make sense where a detail page
-    // promises them; they belong to PROFILE, not to the shared contract.
+    // promises them; they belong to the profile, not to the shared contract.
+    const ids = arrayLiteral("CHECK_IDS", shared);
     for (const id of arrayLiteral("extraCheckIds")) {
       expect(ids, id).not.toContain(id);
     }

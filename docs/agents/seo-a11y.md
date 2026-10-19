@@ -63,10 +63,9 @@ permissive `*` group.
 
 ### Geo audit and IndexNow
 
-- **`scripts/geo-audit.mjs` is the same file in all four public repos**; only `PROFILE` differs. **This repo
-  maintains the generic body.** `src/lib/geoAudit.test.ts` reads `CHECK_IDS` as text (the script fetches on its
-  first line). `PROFILE` carries refused types: `SearchAction`, `HowTo`, `Review`, `AggregateRating`,
-  `openingHoursSpecification`.
+- **The geo audit ships in tds-shared** (`tds-geo-audit`, since 0.59; its check list is pinned there). This repo
+  keeps only `scripts/geo-audit.profile.mjs`; `src/lib/geoAudit.test.ts` reads it as text. The profile carries
+  refused types: `SearchAction`, `HowTo`, `Review`, `AggregateRating`, `openingHoursSpecification`.
 - **IndexNow** (`npm run indexnow`) tells IndexNow engines which URLs changed. Key: `public/<key>.txt`. Manual,
   after a deploy, never from the build; `-- --dry-run` lists without sending.
 
