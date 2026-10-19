@@ -186,6 +186,13 @@ const toggles = [
     font-size: 0.9375rem;
     text-align: left;
     cursor: pointer;
+    /* Slid sideways by hand; a vertical swipe still scrolls the panel. */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .a11y-switch[data-sliding] {
+    cursor: grabbing;
   }
   .a11y-switch:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -232,6 +239,7 @@ const toggles = [
 
 <script>
   import { lessMotion, readPrefs, setPref, type A11yPref } from "~/lib/a11yPrefs";
+  import { mountSlideSwitch } from "~/lib/slideSwitch";
 
   const opener = document.querySelector<HTMLButtonElement>("[data-a11y-open]");
   const panel = document.getElementById("a11y-panel");
@@ -245,11 +253,26 @@ const toggles = [
       }
     };
     for (const button of switches) {
+      const pref = button.dataset.a11yPref as A11yPref;
       button.addEventListener("click", () => {
-        const pref = button.dataset.a11yPref as A11yPref;
         setPref(pref, button.getAttribute("aria-pressed") !== "true");
         sync();
       });
+      // The knob slides by hand as well (`lib/slideSwitch.ts`): from one
+      // inset to the other inside its track.
+      const track = button.querySelector<HTMLElement>(".a11y-switch__track");
+      const thumb = button.querySelector<HTMLElement>(".a11y-switch__thumb");
+      if (track && thumb) {
+        mountSlideSwitch(button, {
+          thumb,
+          travel: () => track.clientWidth - thumb.offsetWidth - 2 * thumb.offsetLeft,
+          isOn: () => button.getAttribute("aria-pressed") === "true",
+          set: (on) => {
+            setPref(pref, on);
+            sync();
+          },
+        });
+      }
     }
     sync();
 

@@ -514,6 +514,7 @@ const panelRows = "1 / -1";
 <script>
   import { EXPLORER_DESKTOP_QUERY, mountServiceExplorer } from "~/lib/serviceExplorer";
   import { lessMotion } from "~/lib/a11yPrefs";
+  import { keepInView } from "~/lib/keepInView";
 
   /**
    * Motion, WARMED BEFORE THE FIRST SWITCH RATHER THAN DURING IT.
@@ -554,9 +555,14 @@ const panelRows = "1 / -1";
 
     mountServiceExplorer(root, {
       onOpen: (panel) => {
+        if (window.matchMedia(EXPLORER_DESKTOP_QUERY).matches) return;
+        // The accordion: the tapped title and its panel come fully on screen
+        // (a row closed above it may just have pulled it upwards).
+        const title = root.querySelector<HTMLElement>(`[aria-controls="${panel.id}"]`);
+        keepInView(title ?? panel, panel);
         // From 64rem the switch is CSS (see the desktop block); Motion only
         // animates the phone's accordion.
-        if (lessMotion() || window.matchMedia(EXPLORER_DESKTOP_QUERY).matches) return;
+        if (lessMotion()) return;
         // Not loaded yet (a click inside the first few hundred milliseconds, or
         // a failed fetch): leave the panel as it is. See the note above.
         if (!motion) {
