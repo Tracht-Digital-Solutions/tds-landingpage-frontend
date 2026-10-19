@@ -81,9 +81,8 @@ the accessibility tools, and a telephone receiver that leads **only** to the con
   to its end it opens the form immediately; released earlier it springs back. Capture starts only after the slop;
   the receiver has `touch-action: pan-y`, so a vertical swipe over it still scrolls. While swiping, the twin's clip
   reaches left over the track (`splitClip(…, reachLeft)`).
-- On a phone the pill tucks right while the reader scrolls down. A section settle (`SmoothScroll.tsx`) is the page's
-  own scroll and publishes `window.tdsSettlingUntil`; the pill ignores direction until then — counted, a settle
-  downwards after an upward scroll tucked the receiver away.
+- The pill never hides on scroll, on any width (2026-10-19, asked for): the phone-only tuck to the right while
+  scrolling down was removed — the contact action vanished exactly while someone was reading.
 
 ## Accessibility tools (`components/A11yTools.astro`, `lib/a11yPrefs.ts`)
 

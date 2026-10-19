@@ -184,11 +184,6 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
   .floating-cta-group > :global(*) {
     pointer-events: auto;
   }
-  /* Phones: tucked off the right edge while the reader scrolls down (script
-     below). Same `translate` the cookie lane uses, so one transition moves it. */
-  .floating-cta-group[data-tucked="true"] {
-    translate: calc(100% + 1.5rem) calc(-1 * var(--tds-bottom-lane, 0px));
-  }
 
   /* --- Slots: fold open and shut ------------------------------------ */
   .tree-slot {
@@ -736,13 +731,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     let darkRanges: Range[] = [];
     /** The pill's box in the viewport — fixed, so it moves only on resize. */
     let box = { top: 0, bottom: 0 };
-    let docHeight = Number.POSITIVE_INFINITY;
 
     const measure = () => {
       darkRanges = measureDarkRanges();
       const rect = group.getBoundingClientRect();
       box = { top: rect.top, bottom: rect.bottom };
-      docHeight = document.documentElement.scrollHeight;
     };
 
     // In dark mode every ground is dark, so the twin covers the whole pill.
@@ -758,39 +751,14 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     };
 
     let lastTwin = "";
-    // Phones (2026-10-12): the pill sat over the last 40px of every text line
-    // and over a FAQ chevron. While the reader scrolls DOWN it tucks away to
-    // the right; scrolling up, reaching the end of the page or focusing it
-    // brings it back. Desktop has room beside the content and is untouched.
-    const phone = window.matchMedia("(max-width: 767px)");
-    let lastY = window.scrollY;
-    const setTucked = (on: boolean) => {
-      const value = on ? "true" : "false";
-      if (group.dataset.tucked !== value) group.dataset.tucked = value;
-    };
-    // A keyboard user tabbing into the tucked pill must see where focus went.
-    group.addEventListener("focusin", () => setTucked(false));
+    // No tucking away on phones any more (2026-10-19, asked for): the pill
+    // used to slide off the right edge while the reader scrolled down, and
+    // the contact action vanished exactly while someone was reading. It stays
+    // put on every screen width now.
     const update = () => {
       frame = 0;
       // Fold out "Nach oben" after ~one viewport of scroll.
       setFlag("scrolledDown", window.scrollY > window.innerHeight * 0.8);
-
-      const dy = window.scrollY - lastY;
-      // A section settle (`SmoothScroll.tsx`) moves the page up to 140px on
-      // its own once a scroll has stopped — DOWN after a reader scrolled up
-      // to just above a section start. That is no direction of the reader's:
-      // counted, it tucked the receiver away right after scrolling up.
-      const settling = performance.now() < (window.tdsSettlingUntil ?? 0);
-      if (settling) {
-        lastY = window.scrollY;
-      } else if (!phone.matches || group.contains(document.activeElement)) {
-        setTucked(false);
-        lastY = window.scrollY;
-      } else if (Math.abs(dy) > 8) {
-        const nearEnd = window.scrollY + window.innerHeight > docHeight - 160;
-        setTucked(dy > 0 && window.scrollY > window.innerHeight * 0.5 && !nearEnd);
-        lastY = window.scrollY;
-      }
 
       // Pure arithmetic from here down — no layout is read during a scroll.
       // ONLY the twin is clipped. The pill itself is painted whole underneath
