@@ -259,6 +259,26 @@ const ui =
     /* A switch is a control you reach into: its track is pressed IN, never
        lifted by the outer offset the buttons take. */
     box-shadow: var(--tds-shadow-inset);
+    /* Slid by hand sideways (`lib/slideSwitch.ts`); a vertical swipe over it
+       still scrolls the page. */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .vat-switch[data-sliding],
+  .vat-switch[data-sliding] .vat-switch__option {
+    cursor: grabbing;
+  }
+  /* On a phone the switch sits centred under the heading (2026-10-19, asked
+     for), not pushed to whichever edge the wrap left it at. */
+  @media (max-width: 47.99rem) {
+    .pricing-packages__head {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .vat-switch {
+      align-self: center;
+    }
   }
   .vat-switch[hidden] {
     display: none;
@@ -437,6 +457,7 @@ const ui =
 
 <script>
   import { lessMotion } from "~/lib/a11yPrefs";
+  import { mountSlideSwitch } from "~/lib/slideSwitch";
 
   type Mode = "net" | "gross";
   const STORAGE_KEY = "tds-price-mode";
@@ -518,6 +539,21 @@ const ui =
         if (next === mode) return;
         storeMode(next);
         apply(next, true);
+      });
+    }
+    // The thumb can be dragged too (`lib/slideSwitch.ts`); it travels one
+    // thumb width, the `translateX(100%)` of the gross state.
+    const thumb = toggle.querySelector<HTMLElement>(".vat-switch__thumb");
+    if (thumb) {
+      mountSlideSwitch(toggle, {
+        thumb,
+        travel: () => thumb.offsetWidth,
+        isOn: () => mode === "gross",
+        set: (on) => {
+          const next: Mode = on ? "gross" : "net";
+          storeMode(next);
+          apply(next, true);
+        },
       });
     }
 

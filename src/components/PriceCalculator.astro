@@ -181,7 +181,8 @@ const formatPrice = (value: number) =>
       </div>
 
       <div class="calc__result tds-tone-navy">
-        <div class="calc__mode" role="group" aria-label={ui.mode}>
+        <div class="calc__mode" role="group" aria-label={ui.mode} data-calc-mode-switch>
+          <span class="calc__mode-thumb" aria-hidden="true"></span>
           <button type="button" class="calc__mode-option" data-calc-mode="net" aria-pressed="true">{ui.net}</button>
           <button type="button" class="calc__mode-option" data-calc-mode="gross" aria-pressed="false">{ui.gross}</button>
         </div>
@@ -217,6 +218,7 @@ const formatPrice = (value: number) =>
 
 <script>
   import { handOffContactDraft } from "~/lib/contactDraft";
+  import { mountSlideSwitch } from "~/lib/slideSwitch";
   import { animatedDialog } from "~/lib/motion/dialog";
 
   const MODE_KEY = "tds-price-mode";
@@ -229,6 +231,7 @@ const formatPrice = (value: number) =>
     const extras = [...dialog.querySelectorAll<HTMLInputElement>("[data-calc-extra]")];
     const prices = [...dialog.querySelectorAll<HTMLElement>("[data-calc-price]")];
     const modeButtons = [...dialog.querySelectorAll<HTMLButtonElement>("[data-calc-mode]")];
+    const modeSwitch = dialog.querySelector<HTMLElement>("[data-calc-mode-switch]");
     const total = dialog.querySelector<HTMLElement>("[data-calc-total]")!;
     const suffix = dialog.querySelector<HTMLElement>("[data-calc-suffix]")!;
     const lines = dialog.querySelector<HTMLUListElement>("[data-calc-lines]")!;
@@ -271,6 +274,7 @@ const formatPrice = (value: number) =>
 
     const update = () => {
       modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.calcMode === mode)));
+      modeSwitch?.setAttribute("data-mode", mode);
       prices.forEach((el) => {
         el.textContent = format(Number(el.dataset[mode]));
       });
@@ -296,17 +300,28 @@ const formatPrice = (value: number) =>
     };
 
     [...packages, ...extras].forEach((input) => input.addEventListener("change", update));
+    const setMode = (next: "net" | "gross") => {
+      mode = next;
+      try {
+        window.localStorage.setItem(MODE_KEY, mode);
+      } catch {
+        // Storage blocked: the choice lasts while the dialog is open.
+      }
+      update();
+    };
     modeButtons.forEach((button) =>
-      button.addEventListener("click", () => {
-        mode = button.dataset.calcMode === "gross" ? "gross" : "net";
-        try {
-          window.localStorage.setItem(MODE_KEY, mode);
-        } catch {
-          // Storage blocked: the choice lasts while the dialog is open.
-        }
-        update();
-      }),
+      button.addEventListener("click", () => setMode(button.dataset.calcMode === "gross" ? "gross" : "net")),
     );
+    // Like the price list's switch, the thumb slides by hand as well.
+    const modeThumb = modeSwitch?.querySelector<HTMLElement>(".calc__mode-thumb");
+    if (modeSwitch && modeThumb) {
+      mountSlideSwitch(modeSwitch, {
+        thumb: modeThumb,
+        travel: () => modeThumb.offsetWidth,
+        isOn: () => mode === "gross",
+        set: (on) => setMode(on ? "gross" : "net"),
+      });
+    }
 
     cta.addEventListener("click", (event) => {
       event.preventDefault();
@@ -549,15 +564,45 @@ const formatPrice = (value: number) =>
     background: var(--color-surface-navy);
     color: #fff;
   }
+  /* A sliding switch like the price list's (2026-10-19): a white thumb runs
+     under the pressed option and can be dragged (`lib/slideSwitch.ts`). */
   .calc__mode {
-    display: inline-flex;
-    gap: 0.25rem;
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
     margin-bottom: 1.25rem;
     padding: 0.25rem;
     border-radius: 100px;
     background: rgb(255 255 255 / 0.1);
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .calc__mode-thumb {
+    position: absolute;
+    top: 0.25rem;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    width: calc(50% - 0.25rem);
+    border-radius: inherit;
+    background: #fff;
+    transition: transform 320ms var(--lp-ease-bounce, var(--tds-ease-out));
+  }
+  .calc__mode[data-mode="gross"] .calc__mode-thumb {
+    transform: translateX(100%);
+  }
+  .calc__mode[data-sliding],
+  .calc__mode[data-sliding] .calc__mode-option {
+    cursor: grabbing;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .calc__mode-thumb {
+      transition: none;
+    }
   }
   .calc__mode-option {
+    position: relative;
+    z-index: 1;
     min-height: 2.25rem;
     padding: 0.25rem 0.875rem;
     border: 0;
@@ -569,7 +614,6 @@ const formatPrice = (value: number) =>
     cursor: pointer;
   }
   .calc__mode-option[aria-pressed="true"] {
-    background: #fff;
     color: var(--color-surface-navy);
   }
   .calc__mode-option:focus-visible {

@@ -79,6 +79,15 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 
 Scroll reveal stays `lib/reveal.ts` (`[data-reveal]`).
 
+- **Switches slide by hand** (2026-10-19, `lib/slideSwitch.ts`): the net/gross switches (price list and
+  calculator) and the accessibility toggles follow a sideways drag (mouse and touch, capture after 6 px,
+  `touch-action: pan-y`) and settle on the nearer end; a tap stays a tap, the click a drag ends in is swallowed.
+- **What opens on a phone stays on screen** (2026-10-19, `lib/keepInView.ts`): after a tap opens a process step,
+  an explorer service or an FAQ row, the page scrolls (via `tdsScrollTo`) just enough to show the title and its
+  content between header and pill, once the fold has played.
+- **Hover colours on the floating pill's receiver live in `@media (hover: hover)`**: a touch screen keeps `:hover`
+  after a swipe, and the navy hover disc vanished on the navy pill.
+
 ### Drawn cursor
 
 While it runs (`data-cursor-absorb` on `<html>`) the native pointer is `cursor: none !important` on the whole

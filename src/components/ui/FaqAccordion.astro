@@ -49,6 +49,29 @@ const { items, name = "faq" } = Astro.props;
   </details>
 ))}
 
+<script>
+  import { PHONE_QUERY, keepInView } from "~/lib/keepInView";
+
+  /**
+   * On a phone a row opened by a tap comes fully on screen once its answer
+   * has unfolded (tds-shared's `.tds-disclosure`, `--tds-dur-slow` 320 ms).
+   * Only after a tap on the question: the first row's initial `open` fires a
+   * `toggle` as well, and must not scroll the page on load.
+   */
+  const FOLD_MS = 360;
+  const phone = window.matchMedia(PHONE_QUERY);
+  document.querySelectorAll<HTMLElement>(".faq-summary").forEach((summary) => {
+    const row = summary.parentElement;
+    if (!(row instanceof HTMLDetailsElement)) return;
+    summary.addEventListener("click", () => {
+      // The row opens after the click's default action.
+      requestAnimationFrame(() => {
+        if (row.open && phone.matches) keepInView(summary, row, FOLD_MS);
+      });
+    });
+  });
+</script>
+
 <style>
   /* ROUND rows (2026-09-22): each question is its own rounded card with the
      site's hard shadow (global.css) and a round chevron button; hovering a

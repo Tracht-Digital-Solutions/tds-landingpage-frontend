@@ -167,7 +167,11 @@ const labels = lang === "en"
    * swings in from the side of the chosen step and the old one leaves toward
    * the other.
    */
+  import { PHONE_QUERY, keepInView } from "~/lib/keepInView";
+
   const INTENT_MS = 140;
+  /** The phone's fold opens in 420 ms (CSS); the page follows once it has. */
+  const FOLD_MS = 440;
 
   document.querySelectorAll<HTMLElement>("[data-process-stepper]").forEach((root) => {
     const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-process-step]")];
@@ -199,8 +203,13 @@ const labels = lang === "en"
     root.setAttribute("data-enhanced", "");
 
     const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const phone = window.matchMedia(PHONE_QUERY);
     buttons.forEach((button, index) => {
-      button.addEventListener("click", () => open(index));
+      button.addEventListener("click", () => {
+        open(index);
+        // On a phone the tapped step and its card come fully on screen.
+        if (phone.matches) keepInView(button, panels[index]!, FOLD_MS);
+      });
       button.addEventListener("focus", () => open(index));
       button.addEventListener("pointerenter", () => {
         if (!hoverable.matches) return;
@@ -268,13 +277,20 @@ const labels = lang === "en"
   }
   /* It fills with the accent up to the open step — the further along, the
      fuller the stepper (2026-10-12). One gradient layer over the line, sized
-     by `--rail-fill`, so the fill can run along it. */
-  .process-stepper__item:not(:last-child) .process-stepper__step::after {
+     by `--rail-fill`, so the fill can run along it.
+
+     In the column it hangs on the ITEM, not on the step (2026-10-19): sized
+     to the button, it ended at the button's foot, so the moment a step
+     folded its card open below, the line stopped short and the gap to the
+     next dot read as no rail at all. The item holds the title AND its card;
+     the line runs from the bottom of this dot to the top of the next one
+     (the next step's padding, plus the gap between the items). */
+  .process-stepper__item:not(:last-child)::before {
     content: "";
     position: absolute;
     left: calc(0.625rem + 1.75rem - 1px);
-    top: calc(50% + 1.75rem);
-    height: calc(100% - 3.5rem + 0.5rem);
+    top: calc(0.625rem + 3.5rem);
+    bottom: -0.625rem;
     width: 2px;
     border-radius: 2px;
     background:
@@ -282,7 +298,11 @@ const labels = lang === "en"
       var(--color-line);
     transition: background-size 560ms var(--lp-ease-soft);
   }
-  .process-stepper__step[data-state="done"] {
+  [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child)::before {
+    bottom: calc(-0.5rem - 0.625rem);
+  }
+  .process-stepper__step[data-state="done"],
+  .process-stepper__item:has(> .process-stepper__step[data-state="done"]) {
     --rail-fill: 100%;
   }
 
@@ -470,9 +490,21 @@ const labels = lang === "en"
       align-items: center;
       gap: 0.25rem;
     }
-    /* The rail runs from this dot's centre to the next one's, across the
-       column gap: one button width plus the gap, minus a dot. */
+    /* In the row the items are `display: contents` (their `::before` would
+       turn into a stray grid item), so the rail hangs on the step: it runs
+       from this dot's centre to the next one's, across the column gap — one
+       button width plus the gap, minus a dot. */
+    [data-process-stepper][data-enhanced] .process-stepper__item::before {
+      content: none;
+    }
     [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child) .process-stepper__step::after {
+      content: "";
+      position: absolute;
+      border-radius: 2px;
+      background:
+        linear-gradient(var(--color-accent), var(--color-accent)) 0 0 / 100% var(--rail-fill, 0%) no-repeat,
+        var(--color-line);
+      transition: background-size 560ms var(--lp-ease-soft);
       left: calc(50% + 1.75rem + 0.25rem);
       top: calc(1rem + 1.75rem - 1px);
       width: calc(100% + 1rem - 3.5rem - 0.5rem);
