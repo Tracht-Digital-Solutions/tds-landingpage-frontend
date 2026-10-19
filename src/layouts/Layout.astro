@@ -40,6 +40,7 @@ import { LiveChatCta } from "@tracht-digital-solutions/tds-shared/islands/live-c
 import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
 import {
   errorBounceScript,
+  hoverTipScript,
   offscreenAnimationScript,
   themeBootstrapScript,
 } from "@tracht-digital-solutions/tds-shared/astro";
@@ -187,6 +188,8 @@ const showCookieNotice = !bare;
     <script is:inline set:html={errorBounceScript} />
     {/* Endless animations rest while they are off screen (tds-shared ≥ 0.54). */}
     <script is:inline set:html={offscreenAnimationScript} />
+    {/* A tip on a control the mouse rests on (tds-shared >= 0.58). */}
+    <script is:inline set:html={hoverTipScript} />
     {/* With a mouse the native scrollbar goes before the first paint and the
         floating one (PageScrollbar) takes over — switching it later would
         reflow the page once. `bare` pages draw no bar of their own. */}

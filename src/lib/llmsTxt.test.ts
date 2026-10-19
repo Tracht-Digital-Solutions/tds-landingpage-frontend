@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { HOME_FAQ_COUNT, getFaqContent } from "./faq";
 import { renderLlmsTxt } from "./llmsTxt";
 import { getDefaultPackages } from "./pricing";
 import { platformDefinitions } from "./platforms";
@@ -28,6 +29,21 @@ const packages = getDefaultPackages("de");
 const llms = renderLlmsTxt({ entries: SITEMAP_ENTRIES, packages });
 
 describe("llms.txt", () => {
+  it("counts the questions from the FAQ itself and quotes the home page's six", () => {
+    const faq = getFaqContent("de").items;
+    const withFaq = renderLlmsTxt({ entries: SITEMAP_ENTRIES, packages, faq });
+    // It said "alle zwölf" while the page held seventeen.
+    expect(withFaq).toContain(`Häufige Fragen — alle ${faq.length},`);
+    expect(llms).not.toMatch(/alle (zwölf|\d+),/);
+    for (const item of faq.slice(0, HOME_FAQ_COUNT)) expect(withFaq).toContain(`- **${item.q}** ${item.a}`);
+    expect(withFaq).not.toContain(faq[HOME_FAQ_COUNT]!.q);
+  });
+
+  it("names the sibling sites", () => {
+    expect(llms).toContain("- Online-Tools: https://tools.tracht-digital.de/");
+    expect(llms).toContain("- Digitalmarkt: https://shop.tracht-digital.de/");
+  });
+
   it("names every page of the sitemap, in both languages", () => {
     for (const entry of SITEMAP_ENTRIES) {
       expect(llms, entry.de).toContain(absolute(entry.de));

@@ -56,8 +56,12 @@ export function afterClick(open: number | null, clicked: number, desktop: boolea
 }
 
 interface MountOptions {
-  /** Called with the panel that just opened, for its entrance animation. */
-  onOpen?: (panel: HTMLElement) => void;
+  /**
+   * Called with the panel that just opened, for its entrance animation, plus
+   * the one it replaces (`null` when nothing was open) and which way the
+   * switch went down the list (`1`) or up it (`-1`).
+   */
+  onOpen?: (panel: HTMLElement, previous: HTMLElement | null, dir: 1 | -1) => void;
 }
 
 export function mountServiceExplorer(root: HTMLElement, options: MountOptions = {}): void {
@@ -86,8 +90,10 @@ export function mountServiceExplorer(root: HTMLElement, options: MountOptions = 
 
   const show = (next: number | null, animate: boolean) => {
     const changed = next !== open;
-    // Which way the switch went, for the card's entrance (CSS `--dir`).
-    if (changed && open !== null && next !== null) root.style.setProperty("--dir", next > open ? "1" : "-1");
+    const previous = open === null ? null : panels[open]!;
+    // Which way the switch went, for the card's entrance.
+    const dir: 1 | -1 = open !== null && next !== null && next < open ? -1 : 1;
+    if (changed && open !== null && next !== null) root.style.setProperty("--dir", String(dir));
     open = next;
     buttons.forEach((button, index) => {
       const expanded = index === open;
@@ -101,7 +107,7 @@ export function mountServiceExplorer(root: HTMLElement, options: MountOptions = 
     });
     root.dataset.open = open === null ? "" : String(open);
     placeMarker();
-    if (animate && changed && open !== null) options.onOpen?.(panels[open]!);
+    if (animate && changed && open !== null) options.onOpen?.(panels[open]!, previous, dir);
   };
 
   let hoverTimer = 0;

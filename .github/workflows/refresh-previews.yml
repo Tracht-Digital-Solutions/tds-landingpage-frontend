@@ -1,0 +1,98 @@
+name: Refresh previews (daily)
+
+# The demo and reference cards render committed screenshots (demos:sync,
+# references:sync — see docs/agents/website-demos.md). Nobody ran the syncs by
+# hand often enough, so the cards showed sites as they looked weeks ago. This
+# job re-captures them every morning, commits only when a picture or a card
+# text actually changed, and then fires the normal Release workflow — so a
+# fresh screenshot reaches production through the same gate as any other change.
+#
+# Captured sites are public pages; the job sends nothing but GETs and
+# screenshots them with consent overlays hidden (never clicked).
+
+on:
+  schedule:
+    # 04:17 UTC — before the working day in Berlin, off the full hour.
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-previews
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+  packages: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          # The PAT, not GITHUB_TOKEN: the push below must run the dev build
+          # like any other push to main.
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@tracht-digital-solutions'
+
+      - name: Pin npm
+        # Same reason as _build.yml: npm 10's arborist crashes on this graph.
+        run: npm install -g npm@11
+
+      - name: Install
+        run: npm install --no-package-lock
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install Chromium
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Capture demos
+        run: npm run demos:sync
+
+      - name: Capture references
+        run: npm run references:sync
+
+      - name: Decide whether anything changed
+        id: diff
+        # The snapshots carry a timestamp per run, so a bare `git diff` is never
+        # empty. What counts is a changed asset or a changed card field.
+        run: |
+          changed=no
+          git add -A public/demos public/references
+          if ! git diff --cached --quiet -- public/demos public/references; then
+            changed=yes
+          fi
+          for f in src/lib/demoData.json src/lib/referencePreviewData.json; do
+            strip='JSON.stringify(JSON.parse(require("fs").readFileSync(0,"utf8")),(k,v)=>["generatedAt","checkedAt","capturedAt"].includes(k)?undefined:v)'
+            before=$(git show "HEAD:$f" | node -e "process.stdout.write($strip)")
+            after=$(node -e "process.stdout.write($strip)" < "$f")
+            if [ "$before" != "$after" ]; then changed=yes; fi
+          done
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "Previews changed: $changed"
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'yes'
+        run: |
+          git config user.name "tds-preview-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A public/demos public/references src/lib/demoData.json src/lib/referencePreviewData.json
+          git commit -m "chore(previews): daily capture of demos and references"
+          git push origin HEAD:main
+
+      - name: Release
+        if: steps.diff.outputs.changed == 'yes'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run release.yml --ref main

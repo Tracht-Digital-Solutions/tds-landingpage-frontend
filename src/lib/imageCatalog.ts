@@ -13,5 +13,5 @@ export function imageHints(src:string|null|undefined,lang:Lang,sizes='100vw') {
 }
 export function imageObject(src:string|null|undefined,lang:Lang,pageUrl:string) {
   const image=imageInfo(src);if(!image)return null;
-  return {'@type':'ImageObject','@id':pageUrl+'#editorial-image',contentUrl:origin+image.src,url:origin+image.src,caption:image.alt[lang],width:image.width,height:image.height,encodingFormat:'image/webp',digitalSourceType:image.digitalSourceType,creditText:'Tracht Digital Solutions',about:{'@id':pageUrl}};
+  return {'@type':'ImageObject','@id':pageUrl+'#editorial-image',contentUrl:origin+image.src,url:origin+image.src,caption:image.alt[lang],width:image.width,height:image.height,encodingFormat:'image/webp',digitalSourceType:image.digitalSourceType,creditText:'Tracht Digital Solutions',about:{'@id':pageUrl+'#webpage'}};
 }

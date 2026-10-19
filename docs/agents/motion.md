@@ -142,6 +142,10 @@ within 72 px of the right edge.
 ## The service explorer and assistant
 
 - The explorer's navy marker slides behind the open title on desktop.
+- **The explorer's cards change places** (2026-10-19, `animateSwitch` in `ui/ServiceExplorer.astro`, plain Web
+  Animations): the old card leaves against the direction of travel (200 ms), the new one comes in with it on
+  `--lp-ease-spring`, its photo settles from 1.08 and the facts follow 55 ms apart. CSS only holds the end states;
+  a new switch cancels the running one.
 - The assistant dialog: a segmented progress, questions sliding in from their side (`AnimatePresence` with
   `initial={false}`, focus via a stable callback ref), round answer cards that lift and pop a tick, staggered
   result cards (best fit navy, hand-off CTA pink).
