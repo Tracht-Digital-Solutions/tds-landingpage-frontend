@@ -196,7 +196,7 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
     {
       id: "journal",
       group: "more",
-      label: "Journal",
+      label: "Ratgeber",
       meta: de ? "Beiträge zur Digitalisierung" : "Notes on digitalization",
       href: blogUrl,
       external: true,

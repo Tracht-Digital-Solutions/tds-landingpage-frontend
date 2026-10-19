@@ -1,5 +1,5 @@
 import type { Lang } from "./i18n";
-import { propertyHome } from "@tracht-digital-solutions/tds-shared/nav";
+import { propertyHome, propertyLabel } from "@tracht-digital-solutions/tds-shared/nav";
 import { referenceCases } from "./references";
 import { siteConfig } from "./seo";
 
@@ -54,9 +54,9 @@ export interface PropertyTabLink {
 
 export function propertyLinks(lang: Lang): PropertyTabLink[] {
   return [
-    { id: "journal", label: "Journal", href: propertyHome("journal", lang) },
-    { id: "tools", label: "Tools", href: propertyHome("tools", lang) },
+    { id: "journal", label: propertyLabel("journal", lang), href: propertyHome("journal", lang) },
+    { id: "tools", label: propertyLabel("tools", lang), href: propertyHome("tools", lang) },
     { id: "portal", label: lang === "de" ? "Kundenportal" : "Customer portal", href: siteConfig.portalUrl },
-    { id: "shop", label: "Shop", href: propertyHome("shop", lang) },
+    { id: "shop", label: propertyLabel("shop", lang), href: propertyHome("shop", lang) },
   ];
 }
