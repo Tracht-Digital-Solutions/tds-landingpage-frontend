@@ -55,7 +55,7 @@
  * server bundle and answered both card pages with a 500 on the host.
  */
 import Layout from "~/layouts/Layout.astro";
-import { ThemeToggle } from "@tracht-digital-solutions/tds-shared/islands/theme-toggle";
+import { themeToggleMarkup } from "@tracht-digital-solutions/tds-shared/dom";
 import { asGraph, personSchema } from "~/lib/jsonld";
 import { tFor, type Lang } from "~/lib/i18n";
 import { legalCopy } from "~/lib/legal";
@@ -228,7 +228,7 @@ const profileSchema = {
         >
           {ui.langOther}
         </a>
-        <ThemeToggle client:idle labelToDark={ui.toDark} labelToLight={ui.toLight} />
+        <Fragment set:html={themeToggleMarkup({ labelToDark: ui.toDark, labelToLight: ui.toLight })} />
       </nav>
 
       <header class="card__id">

@@ -1,7 +1,7 @@
 /**
  * Input lock for the duration of a programmatic scroll.
  *
- * The bounce-eased jumps in `islands/SmoothScroll.tsx` (nav links, the hero
+ * The bounce-eased jumps in `lib/smoothScroll.ts` (nav links, the hero
  * CTAs, the logo, the back-to-top nub) drive the scroll position frame by
  * frame for 1.2s. Anything the visitor does with the wheel, a finger or the
  * keyboard in that window fights the tween for the same one property, and

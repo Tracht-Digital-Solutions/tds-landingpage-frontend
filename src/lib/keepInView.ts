@@ -11,7 +11,7 @@
  * (global.css). A part taller than the screen lands with its title at the
  * top; nothing is scrolled when it already fits.
  *
- * The scroll goes through `window.tdsScrollTo` (`SmoothScroll.tsx`), which
+ * The scroll goes through `window.tdsScrollTo` (`lib/smoothScroll.ts`), which
  * also keeps the section settle from pulling the page elsewhere afterwards.
  */
 

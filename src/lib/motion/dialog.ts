@@ -38,7 +38,7 @@ const BOUNCE_IN = { type: "spring", bounce: 0.42, visualDuration: 0.42 } as cons
  * Page lock while a modal is open (2026-10-12). The wheel used to scroll the
  * page behind a dialog: Lenis hijacks it on window, and a dialog scrolled to
  * its end chained the rest to the document. `html[data-modal-open]` stops both
- * (`overflow: hidden` in global.css, Lenis' `prevent` in SmoothScroll.tsx).
+ * (`overflow: hidden` in global.css, Lenis' `prevent` in lib/smoothScroll.ts).
  * An attribute, not `html:has(dialog[open])`: :has() on the root recalculates
  * the whole page on every DOM change.
  */

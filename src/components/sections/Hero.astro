@@ -23,8 +23,8 @@ import { imageHints } from "~/lib/imageCatalog";
  * ### Decoration
  *
  * Only in the negative space, never behind the copy or the fixed header —
- * `scripts/ux-audit.mjs` measures the overlap. `HeroDecor` is the one island
- * (`client:idle`): the capsule and the quarter render
+ * `scripts/ux-audit.mjs` measures the overlap. No island since 2026-10-22: the
+ * capsule and the quarter are markup here, moved by `lib/motion/heroDecor.ts`; they render
  * in the free bands on every width (the gold node and the "fit" motif went
  * on 2026-09-22) as turning 3D bodies (2026-10-11; the floor grid went).
  *
@@ -35,7 +35,6 @@ import { imageHints } from "~/lib/imageCatalog";
  */
 import type { Lang } from "~/lib/i18n";
 import CircuitRun from "~/components/ui/CircuitRun.astro";
-import HeroDecor from "~/components/islands/HeroDecor.tsx";
 import HeroCarousel from "~/components/ui/HeroCarousel.astro";
 
 interface Props {
@@ -47,6 +46,14 @@ interface Props {
 }
 
 const { lang, slogan, cta1, cta2 } = Astro.props;
+
+/** The two constructed shapes; `lib/motion/heroDecor.ts` animates them. */
+const SHAPES = [
+  { kind: "capsule", colour: "tds-shape--capsule tds-shape--navy" },
+  { kind: "quarter", colour: "tds-shape--quarter-tl tds-shape--bordeaux" },
+] as const;
+/** Outline rings behind each face; the step between them is CSS. */
+const DEPTH_LAYERS = 6;
 ---
 
 <section
@@ -72,25 +79,35 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
     <span class="hero-photo-scrim hidden md:block absolute inset-0"></span>
 
     {/* No floor grid any more (2026-10-11): the depth is in the shapes
-        themselves, see `islands/HeroDecor.tsx`. */}
+        themselves, see `lib/motion/heroDecor.ts`. */}
 
     {/* Die konstruierte Geometrie — große Kapsel links unten angeschnitten,
         Viertelkreis unten rechts über beide Ränder hinaus. Sie liegen alle
         in der echten Negativfläche
         des Heros, nie hinter der Copy.
 
-        `client:idle`, und seit 2026-09-21 auf jeder Breite. Vorher lud die
-        Island erst ab 64rem, weil ALLE Formen darunter ausgeblendet waren —
-        ein Telefon hatte damit gar keine Bewegung im Hero. Jetzt bewegen sich
-        dort Kapsel und Viertelkreis. Das kostet
-        gemessen ~129 KB JS dort; bezahlt wird es aus den Einsparungen
-        derselben Änderung, und `npm run audit:perf` bewacht die Grenze.
+        Seit 2026-09-21 auf jeder Breite. Seit 2026-10-22 keine React-Island
+        mehr: das Markup steht hier, die Ankunft ist CSS (unten), Drift,
+        Schwingen und Zeiger-Parallaxe kommen aus `lib/motion/heroDecor.ts`
+        ueber die Motion-Schicht (`boot.ts`). Unter reduzierter Bewegung
+        bleibt die gedrehte Ruhepose (`hero-shape--still`).
 
         AUSSCHLIESSLICH diese Formen: das Foto oben und jeder Textknoten
         unten bleiben statisches Astro-Markup, damit nichts Sichtbares auf
-        Hydration wartet. Die Begründung steht in `islands/HeroDecor.tsx`,
-        die Regel in `__tests__/motion.test.ts`. */}
-    <HeroDecor client:idle />
+        ein Skript wartet. Die Regel steht in `__tests__/motion.test.ts`. */}
+    {SHAPES.map(({ kind, colour }) => (
+      <span class={`hero-shape hero-shape--${kind} hero-shape--still`} data-hero-shape={kind}>
+        <span class="hero-shape__body">
+          {Array.from({ length: DEPTH_LAYERS }, (_, index) => (
+            <span
+              class={`hero-shape__layer tds-shape tds-shape--outline ${colour}`}
+              style={`--z: ${DEPTH_LAYERS - index}`}
+            />
+          ))}
+          <span class={`hero-shape__layer hero-shape__face tds-shape ${colour}`} />
+        </span>
+      </span>
+    ))}
     {/* Cut by the section's lower edge, with its box inside the bottom padding:
         since the note under the actions the copy column reaches down to where
         the conduit used to start (overlap measured at 1280 and 1440). At 6 %
@@ -115,7 +132,7 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
           without motion. */}
       <span aria-hidden="true" class="tds-brandbar hero-brandbar"></span>
 
-      {/* Real anchors: they work before JavaScript, and `SmoothScroll` gives
+      {/* Real anchors: they work before JavaScript, and `lib/smoothScroll.ts` gives
           them the site's jump when it is there. The primary one is Motion's
           CTA (`data-cta`, lib/motion/cta.ts). */}
       <div class="hero-actions hero-rise">
@@ -168,10 +185,10 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
 
   /* === Die Formen der Dekorationsebene =============================
 
-     Position und Groesse stehen HIER, nicht in `islands/HeroDecor.tsx`, und
-     zwar `:global()`, weil das DOM einer React-Island Astros
-     Scoped-Style-Attribut nie bekommt. Die Trennung ist nicht nur Ordnung:
-     so schreibt die Island ausschliesslich Transforms, und genau die kann
+     Position und Groesse stehen HIER, nicht in `lib/motion/heroDecor.ts`.
+     (`:global()` stammt aus der Zeit als React-Island, deren DOM Astros
+     Scoped-Style-Attribut nie bekam.) Die Trennung ist nicht nur Ordnung:
+     so schreibt das Modul ausschliesslich Transforms, und genau die kann
      der Compositor bewegen, ohne Layout anzufassen.
 
      Bis 2026-09-21 waren die Formen unter 64rem ausgeblendet. Sie sind
@@ -210,12 +227,37 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
       --hero-depth-step: -0.75rem;
     }
   }
-  /* Reduced motion: turned once, standing still, so the depth still reads. */
+  /* The resting pose: turned once, so the depth reads before the motion layer
+     runs and stays the picture under reduced motion. The first frame of the
+     sway in `lib/motion/heroDecor.ts` (REST), so nothing jumps when it starts;
+     Motion's inline transform takes over from here. */
   :global(.hero-shape--still .hero-shape__body) {
-    transform: perspective(900px) rotateX(14deg) rotateY(-22deg);
+    transform: perspective(900px) rotateX(16deg) rotateY(-26deg);
   }
   :global(.hero-shape--still.hero-shape--quarter .hero-shape__body) {
-    transform: perspective(900px) rotateX(-10deg) rotateY(20deg);
+    transform: perspective(900px) rotateX(-14deg) rotateY(24deg);
+  }
+  /* The arrival, on the first paint — it used to wait for the island to
+     hydrate. `translate` only: the motion layer writes `transform`, so the two
+     never fight, and no opacity start state (nothing in the hero ships at
+     `opacity: 0`). The shapes slide in from the edges that cut them. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html:not([data-a11y-motion]) .hero-shape--capsule) {
+      animation: hero-shape-in-left 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    :global(html:not([data-a11y-motion]) .hero-shape--quarter) {
+      animation: hero-shape-in-right 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+  @keyframes hero-shape-in-left {
+    from {
+      translate: -180px 0;
+    }
+  }
+  @keyframes hero-shape-in-right {
+    from {
+      translate: 160px 0;
+    }
   }
   /* Until 2026-09-22 the two large shapes were not drawn below 80rem: with
      the trust card in the hero, the only free bands on a phone were 100 px

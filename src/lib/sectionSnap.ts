@@ -5,7 +5,7 @@
  * onto that start; anywhere else it stays exactly where the visitor left it.
  * No CSS `scroll-snap-type` on the root: Lenis owns the wheel on desktop and
  * the two would fight, and a mandatory snap would trap a reader inside the
- * long sections. One rule for both input paths (`islands/SmoothScroll.tsx`).
+ * long sections. One rule for both input paths (`lib/smoothScroll.ts`).
  */
 
 /** Pixels within which a section start pulls the page onto it. */

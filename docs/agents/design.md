@@ -125,7 +125,7 @@ contents`) otherwise paint under the glass and vanish.
 
 A section jump lands with the section's top edge on the top of the screen, not under the header: `main
 section[id]` has `scroll-margin-top: calc(-1 * var(--lp-header-clearance))`, which cancels the header's
-`scroll-padding-top` for sections only (focused links keep it). `SmoothScroll.tsx` adds a target's
+`scroll-padding-top` for sections only (focused links keep it). `lib/smoothScroll.ts` adds a target's
 `scroll-margin-top`, so jumps, the section snap and fragment links land on the same pixel. Every home section's
 upper padding is at least `--lp-section-top` (header + 1rem, `HomePage.astro`), so its heading clears the
 header.
