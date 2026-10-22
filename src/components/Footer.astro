@@ -1,5 +1,5 @@
 ---
-import { ConsentLink } from "@tracht-digital-solutions/tds-shared/consent";
+import { consentLinkMarkup } from "@tracht-digital-solutions/tds-shared/dom";
 
 import { tFor, resolveLang, localizePath } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
@@ -199,7 +199,7 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
             it, and a notice that appears once leaves no route back without
             this. It belongs in this row because this row is where a reader
             already looks for exactly that kind of thing. */}
-        <ConsentLink client:idle lang={lang} className="footer-link hover:text-white" />
+        <Fragment set:html={consentLinkMarkup({ lang, className: "footer-link hover:text-white" })} />
       </div>
     </div>
   </div>

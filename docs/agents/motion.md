@@ -15,7 +15,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 - Every JS motion path also respects the site's motion switch (`lessMotion()` / `data-a11y-motion`).
 - **Nothing runs off screen** (2026-10-11). Endless CSS/Web Animations are paused by tds-shared's
   `offscreenAnimationScript` (inline in `Layout.astro`). JavaScript loops gate themselves: the hero's Motion loops
-  and its pointer listener stop when `#hero` leaves the viewport, the Lenis loop in `SmoothScroll.tsx` runs only
+  and its pointer listener stop when `#hero` leaves the viewport, the Lenis loop in `lib/smoothScroll.ts` runs only
   while Lenis scrolls (parks after 30 still frames; `lenis.time = 0` before a wake), the showcase drift and the
   brand-bar keys use `inView`, the cursor parks when settled, the pill's chevrons loop only while the swipe track
   shows. Check: count `requestAnimationFrame` calls over 2 s at the page bottom — it must be 0.
@@ -24,7 +24,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
   decays exponentially (τ 325 ms, like a native fling); a hold before letting go throws nothing. The showcase shelf
   glides with snap off, then snaps; the hero wheel adds the projected distance before it picks the card. A press
   catches a coasting shelf. Touch keeps its native momentum.
-- **Gentle section snap** (2026-10-12, `lib/sectionSnap.ts`, both paths in `SmoothScroll.tsx`): a scroll that
+- **Gentle section snap** (2026-10-12, `lib/sectionSnap.ts`, both paths in `lib/smoothScroll.ts`): a scroll that
   comes to rest within min(140 px, 16 % vh) of a top-level `main section[id]` start settles onto it in 520 ms;
   anywhere else the page stays. Not after a click-jump, while a pointer is held, a dialog is open, a field has
   focus, or under reduced motion. No CSS root `scroll-snap-type` (it would fight Lenis).
@@ -67,7 +67,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | Bookmarks | `propertyTabs.ts` | Slide-in springs, neighbours lean |
 | Brand bars | `brandbar.ts` | Each `.tds-brandbar` is split into three `aria-hidden` key spans coloured from the bar's computed layers (`.lp-brandbar-keys` hides the layers) and played like keys: the key under the pointer jumps and stretches on a stiff spring, neighbours follow, all drop back with a crisp bounce. Only the spans' `transform` and `height` are written (height, not `scaleY`, so every key stays a pill) |
 | Cards in depth (`[data-motion-tilt]`) | `tilt.ts` | Price packages and showcase cards lean up to 6° toward a fine pointer (`rotateX`/`rotateY`, perspective 900 px) and spring back flat with a light bounce. Delegated from `document`, so showcase clones tilt too; flat while the shelf is dragged. No glare, no shadow animation. Never on a seam mosaic cell (service tiles): the tilted cell tears the 1 px seams |
-| Drawn cursor | `islands/CustomCursor.tsx`, `lib/cursorAbsorb.ts` | See below |
+| Drawn cursor | `lib/customCursor.ts`, `lib/cursorAbsorb.ts` | See below |
 | Page scroll bar | `pageScrollbar.ts`, `components/PageScrollbar.astro` | See below |
 | Generated photos (`[data-motion-image]`) | `images.ts` | Settle from a larger scale on scroll-in, then drift ±20 px; transform only |
 | Page transitions | `pageTransition.ts` | `<main>` animates out on a same-site click and the next `<main>` in. The header is fixed outside `<main>`. Hand-over via a sessionStorage flag read by an inline head script (`PAGE_ENTER_SCRIPT`), CSS failsafe after 1.5 s; a first visit never carries it. The native cross-document View Transition was removed |
@@ -118,8 +118,11 @@ within 72 px of the right edge.
 
 ## Hero
 
-- The hero's **copy** stays plain Astro. Its decorative geometry is `islands/HeroDecor.tsx` (`client:idle`).
-- The decoration arrives visibly, drifts at about 5–10 px/s and follows the pointer about 60 px. The bodies tilt
+- The hero's **copy** stays plain Astro, and so does its decorative geometry (2026-10-22, was a React island):
+  markup in `sections/Hero.astro`, arrival in CSS (`translate` only), drift/sway/pointer in `lib/motion/heroDecor.ts`
+  through `boot.ts`. The landing page loads React only for the consent banner, chat, the service finder (on intent)
+  and the contact form (on view) — see architecture.md.
+- The decoration slides in from its edges, drifts at about 5–10 px/s and follows the pointer about 60 px. The bodies tilt
   toward the pointer (16–20°, springs on the outer span, `transformPerspective` 900) and sway on their own (inner
   `.hero-shape__body`, 14–17 s loops), so the depth shows on a phone too. Reduced motion renders one fixed turned
   pose in CSS (`.hero-shape--still`).
@@ -134,8 +137,7 @@ within 72 px of the right edge.
   hero's links take the pointer). Pauses under the pointer, with focus inside, while dragged, off screen, in a hidden
   tab, under reduced motion and the motion switch. Only the front card's link is in the tab order; the others are
   `aria-hidden` with `tabindex="-1"` but stay clickable.
-- **On a phone the shapes keep to measured bands:** smaller, less drift (`narrow` in `HeroDecor.tsx`, never in
-  `initial`, which is server-rendered; a width-dependent start state was a hydration mismatch), no scroll drift.
+- **On a phone the shapes keep to measured bands:** smaller, less drift (`narrowQuery` in `heroDecor.ts`), no scroll drift.
   `audit:ux` at 360 × 740 is the tightest case.
 - `npm run audit:perf` measures 390 px and 1440 px and pins `h1#hero-heading` as the LCP element on both.
 

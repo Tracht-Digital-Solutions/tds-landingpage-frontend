@@ -5,7 +5,7 @@
  * to nothing; the second took the control's INVERTED colour (a navy button
  * gave a pale yellow cursor, a pink one a mint one). Julian wanted neither:
  * the cursor stays on the pointer and turns WHITE on a dark control and the
- * brand BLUE on a light one (`islands/CustomCursor.tsx`) — two colours that
+ * brand BLUE on a light one (`lib/customCursor.ts`) — two colours that
  * belong to the site, chosen by how bright the control is.
  *
  * The native pointer is hidden on the whole page while the drawn cursor runs

@@ -60,7 +60,7 @@ describe("accessibility preferences", () => {
     for (const file of ["lib/motion/boot.ts", "lib/motion/dialog.ts"]) {
       expect(src(file), file).toContain("lessMotion");
     }
-    for (const file of ["lib/reveal.ts", "components/islands/HeroDecor.tsx", "components/islands/SmoothScroll.tsx", "components/islands/CustomCursor.tsx", "lib/motion/constants.ts"]) {
+    for (const file of ["lib/reveal.ts", "lib/motion/heroDecor.ts", "lib/smoothScroll.ts", "lib/customCursor.ts", "lib/motion/constants.ts"]) {
       expect(src(file), file).toContain("data-a11y-motion");
     }
   });

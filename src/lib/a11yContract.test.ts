@@ -246,12 +246,15 @@ describe("the service assistant", () => {
     expect(island).not.toMatch(/disabled=\{/);
   });
 
-  it("hydrates when the browser is idle — a closed dialog never becomes visible", () => {
-    // `client:visible` inside a closed <dialog> never fires, and the
-    // server-rendered first question is a real form: "Weiter" before
+  it("hydrates when a visitor reaches for an opener, and never submits natively before", () => {
+    // Hover, focus or press of an opener — or the dialog becoming visible
+    // (a #hash) — loads it; nobody else pays for React (2026-10-22).
+    // `client:visible` alone would never fire inside a closed <dialog>.
+    expect(markup).toMatch(/<ServiceFinderIsland[^>]*client:when="intent:\[data-assistant-open\]"/);
+    expect(markup).not.toMatch(/client:(load|visible|idle)/);
+    // The server-rendered first question is a real form: "Weiter" before
     // hydration would submit it natively and reload the page.
-    expect(markup).toMatch(/<ServiceFinderIsland[^>]*client:idle/);
-    expect(markup).not.toMatch(/client:(load|visible)/);
+    expect(script).toMatch(/astro-island\[ssr\][\s\S]{0,40}\)\) event\.preventDefault\(\)/);
   });
 
   it("is one native, labelled dialog", () => {

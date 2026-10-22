@@ -1,7 +1,7 @@
 /**
  * Geometry + easing for the bounce-eased section jumps (nav links, CTAs,
  * logo, back-to-top). Kept DOM-free on purpose: the desktop (Lenis) and
- * touch (rAF) paths in `islands/SmoothScroll.tsx` both plan a jump through
+ * touch (rAF) paths in `lib/smoothScroll.ts` both plan a jump through
  * here, so the two land on the same pixel with the same curve, and the part
  * that used to be wrong is the part a unit test can actually see.
  */

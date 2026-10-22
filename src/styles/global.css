@@ -301,7 +301,7 @@ body {
 /* Clearance for the fixed chrome on ANY kind of scroll the browser performs
    by itself — one value per edge.
 
-   TOP: the floating header. `islands/SmoothScroll.tsx` reads it back off
+   TOP: the floating header. `lib/smoothScroll.ts` reads it back off
    <html> rather than carrying its own constant, and the browser applies it
    to the jumps JS never sees: the fragment landing on a cross-page `/#preise`
    (every redirect and every nav link from a subpage is one), back/forward
@@ -340,7 +340,7 @@ html {
 }
 /* Sections land with their top edge on the top of the screen, not under the
    header (2026-10-12): the negative margin cancels the clearance for a
-   section target only, so focused links and fields keep it. SmoothScroll.tsx
+   section target only, so focused links and fields keep it. lib/smoothScroll.ts
    adds a target's `scroll-margin-top` to the clearance, so its jumps and the
    section snap land on the same pixel as a fragment link. */
 main section[id] {
@@ -357,7 +357,7 @@ html {
    `tds-shared/styles/base.css` sets `html { scroll-behavior: smooth }` for
    every site. On this one Lenis also smooths the wheel, so both were running:
    the CSS engine and a rAF tween writing the same scroll position. That is the
-   bug `islands/SmoothScroll.tsx` documents around its `behavior: "instant"`
+   bug `lib/smoothScroll.ts` documents around its `behavior: "instant"`
    calls — a `scrollTo` whose `behavior` resolves to `auto` inherits the CSS
    value, so a jump was handed to CSS while Lenis was mid-tween and on a phone
    never arrived. It is also why a rAF tween can starve: the two fight per frame.
@@ -495,7 +495,7 @@ html[data-modal-open] dialog {
 }
 
 /* Custom cursor — an additive dot + trailing ring layered over the native
-   pointer (see islands/CustomCursor.tsx). Both start hidden and fade in on
+   pointer (see lib/customCursor.ts). Both start hidden and fade in on
    first pointer move. */
 .tds-cursor-ring,
 .tds-cursor-dot {
@@ -507,7 +507,7 @@ html[data-modal-open] dialog {
   opacity: 0;
   will-change: transform;
   /* Brand accent over light surfaces; the JS flips this to a light pink
-     over dark surfaces (see CustomCursor.tsx → .is-on-dark). */
+     over dark surfaces (see lib/customCursor.ts → .is-on-dark). */
   --cursor-tint: var(--color-accent);
 }
 .tds-cursor-ring.is-on-dark,
@@ -547,7 +547,7 @@ html[data-modal-open] dialog {
   height: 24px;
   background-color: color-mix(in srgb, var(--cursor-tint) 42%, transparent);
 }
-/* The drawn cursor IS the cursor (2026-10-05): while `CustomCursor` runs,
+/* The drawn cursor IS the cursor (2026-10-05): while the drawn cursor (`lib/customCursor.ts`) runs,
    the native pointer is hidden on the whole page, descendants and
    pseudo-elements included — `!important` because components set their own
    `cursor` (grab, pointer, text) and every one of them would bring the
@@ -590,7 +590,7 @@ html[data-cursor-absorb] *::after {
   background-color: var(--cursor-tint);
 }
 /* Over an action control the tint is white (dark control) or the brand blue
-   (light control), set inline by CustomCursor.tsx, and the ring is fuller so
+   (light control), set inline by lib/customCursor.ts, and the ring is fuller so
    it reads against the button instead of washing out at 30 %. */
 .tds-cursor-ring[popover].is-action {
   background-color: color-mix(in srgb, var(--cursor-tint) 55%, transparent);

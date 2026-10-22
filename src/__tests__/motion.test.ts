@@ -29,17 +29,12 @@ describe("motion on the landing page", () => {
     const hero = src("components/sections/Hero.astro");
     expect(hero).not.toMatch(/motion\/react|from ["']motion/);
 
-    // Exactly one island, and it is the decoration.
-    const hydrated = hero.match(/<(\w+)[^>]*client:(load|idle|visible|only|media)/g) ?? [];
-    expect(hydrated).toHaveLength(1);
-    expect(hydrated[0]).toContain("HeroDecor");
-    // It loads at every width since 2026-09-21. It used to be gated on
-    // `client:media="(min-width: 64rem)"`, because below that the shapes were
-    // hidden and the island bought a phone nothing — but that also meant a
-    // phone had NO motion in the hero at all. The shapes render everywhere
-    // now, so the gate is gone; the ~129 KB it costs there is watched by
-    // `npm run audit:perf` rather than by a directive.
-    expect(hero).toContain("<HeroDecor client:idle />");
+    // No island at all since 2026-10-22: the decoration is markup here and
+    // moves through the vanilla motion layer (`lib/motion/heroDecor.ts`), so
+    // the first screen loads no React.
+    const hydrated = hero.match(/<(\w+)[^>]*client:\w+/g) ?? [];
+    expect(hydrated).toEqual([]);
+    expect(hero).toContain("data-hero-shape={kind}");
 
     // The things that must still be server-rendered text and markup.
     expect(hero).toContain("<h1");
@@ -74,19 +69,22 @@ describe("motion on the landing page", () => {
   });
 
   it("lets the hero decoration animate, but nothing it renders is read", () => {
-    const decor = src("components/islands/HeroDecor.tsx");
-    // Through tds-shared, never a bare `motion` import — same rule as the form.
-    expect(decor).toContain('from "@tracht-digital-solutions/tds-shared/motion/react"');
+    const decor = src("lib/motion/heroDecor.ts");
+    // Through the motion layer's runtime (tds-shared/motion/dom, handed in by
+    // boot.ts), never a bare `motion` import.
     expect(decor).not.toMatch(/from ["'](motion|framer-motion)["']/);
-    // Decoration only: no text, no image, no control. Checked against the
-    // code with its comments stripped — the file's own documentation names
-    // `<picture>` as the thing that stays in Astro, and a naive grep reads
-    // that mention as a violation of the rule it is explaining.
-    const code = decor.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-    expect(code).not.toMatch(/<(img|picture|h[1-6]|a|button|p)[\s>/]/);
-    // It must have a branch that mounts no animation at all under reduced
-    // motion — a zero duration still costs the listener and the frames.
-    expect(decor).toContain("prefers-reduced-motion: reduce");
+    expect(src("lib/motion/boot.ts")).toContain("heroDecor.mountHeroDecor(dom)");
+    // Decoration only: the shapes are spans in the aria-hidden decor layer.
+    const hero = src("components/sections/Hero.astro");
+    const shapes = hero.slice(hero.indexOf("{SHAPES.map("), hero.indexOf("))}", hero.indexOf("{SHAPES.map(")));
+    expect(shapes).not.toMatch(/<(img|picture|h[1-6]|a|button|p)[\s>/]/);
+    // The arrival is CSS, translate only, and off under reduced motion; the
+    // resting pose is the picture when nothing runs.
+    expect(hero).toMatch(/@media \(prefers-reduced-motion: no-preference\)[\s\S]*hero-shape-in-left/);
+    expect(hero).not.toMatch(/hero-shape-fade/);
+    expect(hero).toContain("hero-shape--still");
+    // The live motion switch stops it too.
+    expect(decor).toContain("data-a11y-motion");
   });
 
   it("opens FAQ answers through tds-shared's disclosure, not a local copy", () => {

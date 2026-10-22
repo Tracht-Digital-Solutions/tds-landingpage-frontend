@@ -21,10 +21,18 @@
  *
  * ### Hydration
  *
- * `client:idle`, not `client:visible`. A closed dialog is never "visible", and
- * the server-rendered first question is a real `<form>`: a click on "Weiter"
- * before hydration would submit it natively and reload the page. Idle
- * hydration has finished long before anybody finds the button.
+ * `client:when="intent:[data-assistant-open]"` (tds-shared ≥ 0.61, 2026-10-22):
+ * the finder and React load when a pointer moves over one of the buttons, one
+ * takes keyboard focus or is pressed — or when the dialog becomes visible some
+ * other way (`/#leistungsassistent`). Hovering is the early signal, so by the
+ * click the code is usually there; a visitor who never reaches for the
+ * assistant never loads it. (It was `client:idle`, which put React on the
+ * home page for everyone.)
+ *
+ * The server-rendered first question is a real `<form>`: a click on "Weiter"
+ * before hydration would submit it natively and reload the page. The script
+ * below swallows that submit while the island still carries Astro's `ssr`
+ * attribute.
  *
  * The buttons ship `hidden` and are revealed by the script below once
  * `showModal` exists — a button that cannot open anything is never shown.
@@ -110,7 +118,7 @@ const pricesHref = `${home}#preise`;
       </button>
     </div>
     <ServiceFinderIsland
-      client:idle
+      client:when="intent:[data-assistant-open]"
       lang={lang}
       services={services}
       contactHref={contactHref}
@@ -806,6 +814,17 @@ const pricesHref = `${home}#preise`;
         history.replaceState(null, "", `${location.pathname}${location.search}`);
       }
     });
+
+    // Until the finder has hydrated, its first question is plain markup: a
+    // native submit would reload the page. Astro drops `ssr` from the island
+    // once it has hydrated, and from then on React handles the submit.
+    dialog.addEventListener(
+      "submit",
+      (event) => {
+        if (dialog.querySelector("astro-island[ssr]")) event.preventDefault();
+      },
+      true,
+    );
 
     const openFromHash = () => {
       if (HASHES.has(location.hash)) open(null);

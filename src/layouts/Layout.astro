@@ -28,9 +28,6 @@ import "@fontsource-variable/jetbrains-mono";
 // this is the file to preload and not the 700.
 import latoLcpFont from "@fontsource/lato/files/lato-latin-400-normal.woff2?url";
 import "~/styles/global.css";
-import SmoothScroll from "~/components/islands/SmoothScroll.tsx";
-import CustomCursor from "~/components/islands/CustomCursor.tsx";
-import ScrollProgress from "~/components/islands/ScrollProgress.tsx";
 import PageScrollbar from "~/components/PageScrollbar.astro";
 import { PAGE_SCROLLBAR_BOOT_SCRIPT } from "~/lib/pageScrollbar";
 import FloatingCta from "~/components/FloatingCta.astro";
@@ -285,22 +282,37 @@ const showCookieNotice = !bare;
     >
       {tFor(lang).a11y.skipToContent}
     </a>
-    {/* Non-critical chrome — deferred to idle so it never competes with the
-        first paint. SmoothScroll as well: until it hydrates, an anchor jump is
-        the browser's own smooth scroll, and `client:load` put its chunk (Lenis
-        and React) among the requests a phone waited on before the headline. */}
-    {!bare && <SmoothScroll client:idle />}
-    {!bare && <CustomCursor client:idle />}
+    {/* Smooth scrolling, the drawn cursor and the reading progress are plain
+        modules since 2026-10-22, started at idle by the script below — they
+        were React islands that used React for nothing, and three of them put
+        the React runtime on every page. The cursor's two elements and the
+        progress track are rendered here; `data-theme-preview="skip"` keeps the
+        cursor out of the theme toggle's hover preview (a script positions it,
+        so a copy would freeze a second cursor). */}
+    {!bare && (
+      <>
+        <div popover="manual" class="tds-cursor-ring" aria-hidden="true" data-theme-preview="skip" data-cursor-ring></div>
+        <div popover="manual" class="tds-cursor-dot" aria-hidden="true" data-theme-preview="skip" data-cursor-dot></div>
+      </>
+    )}
     {/* The reading progress sits on the top edge of the window again
         (2026-10-05, on Julian's word) — not on the header's lower edge. */}
-    {!bare && <ScrollProgress client:idle />}
+    {!bare && (
+      <div aria-hidden="true" hidden data-scroll-progress class="fixed top-0 left-0 right-0 z-50 h-[3px] pointer-events-none">
+        <div
+          data-scroll-progress-bar
+          class="h-full origin-left bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-accent)] to-[var(--color-accent-pink)]"
+          style="transform: scaleX(0)"
+        ></div>
+      </div>
+    )}
     {!bare && <PageScrollbar />}
     <slot />
     {!bare && <FloatingCta />}
     {!bare && <PropertyTabs />}
     {showCookieNotice && (
       <ConsentBanner
-        client:idle
+        client:when="consent"
         lang={lang}
         categories={["analytics"]}
         privacyUrl="/legal/datenschutz"
@@ -315,7 +327,7 @@ const showCookieNotice = !bare;
         proxy) without a rebuild. A hard-coded origin would silently opt the
         widget out of that. */}
     {!bare && (
-      <LiveChatCta client:idle frontend="landingpage" lang={lang} />
+      <LiveChatCta client:when={`chat:landingpage:${lang}`} frontend="landingpage" lang={lang} />
     )}
 
     {/* Scroll reveal for every `[data-reveal]` element on the page. NOT
@@ -353,8 +365,10 @@ const showCookieNotice = !bare;
         see lib/motion/boot.ts. */}
     <script>
       import { bootMotion } from "~/lib/motion/boot";
+      import { bootChrome } from "~/lib/chrome";
 
       bootMotion();
+      bootChrome();
     </script>
 
     {/* Besucher-Statistik. Starts only once the visitor has agreed to

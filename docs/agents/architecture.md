@@ -48,7 +48,8 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   trust card no longer render; their fields stay so stored blocks load.
 - The page is written for businesses that **already have** a website or shop: taking over, repairing and
   maintaining it is the lead story.
-- Copy and photo are server-rendered; only the decoration is an island (`islands/HeroDecor.tsx`, `client:idle`).
+- Copy, photo and the decoration are server-rendered; the decoration moves through `lib/motion/heroDecor.ts`
+  (arrival in CSS). No React on a page unless a visitor needs it: see "Page chrome without React" below.
   **Nothing in the hero ships at `opacity: 0`** (an SSR start state once made the cookie notice the mobile
   LCP at 4.1 s). The entrance is a transform-only CSS rise under `prefers-reduced-motion: no-preference`.
 - The photo is a `<picture>` whose source applies from `48rem`; phones get a 1×1 inline GIF.
@@ -200,7 +201,10 @@ cookie-, session- or `Accept-Language`-dependent content on a cached route.**
 - **Stylesheets are inlined** (`build.inlineStylesheets: "always"`): with `"auto"` nothing was inlined and the
   home page waited on three render-blocking requests (mobile LCP 3.6 s → 2.6 s). Measure through compression
   before switching back.
-- **Nothing in the shared chrome hydrates at `client:load`.** `ThemeToggle` and `SmoothScroll` are `client:idle`
-  and the logo is a pre-sized lossless WebP (`LOGO` in `lib/imageVariants.ts`).
+- **Page chrome without React (2026-10-22).** Theme toggle and consent link are `tds-shared/dom` markup; smooth
+  scroll, cursor and reading progress are modules started at idle by `lib/chrome.ts`. The consent banner and chat
+  use `client:when` (`consent`, `chat:…`), the service finder `client:when="intent:[data-assistant-open]"` (hover,
+  focus or press of an opener). Don't add a React island to every page; the contact form is `client:visible`.
+  The logo is a pre-sized lossless WebP (`LOGO` in `lib/imageVariants.ts`).
 - Republished screenshots carry a content hash (`scripts/media-versions.mjs` → `virtual:media-versions`;
   `mediaSrc()` appends `?v=<hash>`), because those paths are cached for a week.
