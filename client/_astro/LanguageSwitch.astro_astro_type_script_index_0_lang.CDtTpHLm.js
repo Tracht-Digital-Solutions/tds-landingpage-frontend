@@ -1,0 +1,1 @@
+import{t as e}from"./chunk-CKIWAE4V.PJu_Y7Ya.js";function t(t){return e(t)}function n(e){t({locale:e})}for(let e of document.querySelectorAll(`a[data-lang-switch]`))e.addEventListener(`click`,()=>{location.hash&&(e.hash=location.hash);let t=e.getAttribute(`hreflang`);(t===`de`||t===`en`)&&n(t)});
