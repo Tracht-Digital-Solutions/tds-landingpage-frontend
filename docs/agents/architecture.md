@@ -28,6 +28,8 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - **Seams between sections** are `ui/SectionSeam.astro` elements in `HomePage.astro` (content width, faded
   ends, the small brand bar in the middle), not borders on the sections. None under the hero or above the navy
   contact block; two in a row collapse to one.
+- **Own projects** (`lib/ownProjects.ts`, `ui/OwnProjectCard.astro`): WParted and its website lead the Showcase
+  shelf with the badge "Eigenes Projekt". They never go into `references.ts`: that section says "für Kunden".
 - **Kundenprojekte** shows the heading and the cards only; the `references_home` intro and consent line stay
   in the content shape but don't render.
 - **Vorgehen is a horizontal stepper** (`sections/Process.astro`, 2026-10-11): only the step titles, side by side
