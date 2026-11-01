@@ -1,0 +1,150 @@
+---
+/**
+ * One own project on the showcase shelf (`lib/ownProjects.ts`). Built to
+ * `BusinessCardTile`'s measurements, because the two stand in one track. The
+ * eyebrow is the origin badge: nobody may read this as a client's project.
+ */
+import { DEMO_ORIGINS, DEMO_PREVIEW } from "~/lib/demoCatalog";
+import type { CardAction } from "~/lib/cardActions";
+import type { Lang } from "~/lib/i18n";
+import { mediaSrc } from "~/lib/mediaSrc";
+import type { OwnProject } from "~/lib/ownProjects";
+import { getServiceById, serviceHref } from "~/lib/services";
+import CardActions from "~/components/ui/CardActions.astro";
+
+interface Props {
+  project: OwnProject;
+  lang: Lang;
+}
+
+const { project, lang } = Astro.props;
+const copy = project.copy[lang];
+const service = getServiceById(project.service);
+const serviceLink: CardAction = { label: service.fallback[lang].title, href: serviceHref(service, lang) };
+---
+
+<article class="project-tile-slot" data-reveal>
+  <div class="project-tile" data-motion-tilt>
+    <div class="project-tile__shot">
+      <img
+        src={mediaSrc(project.image[lang])}
+        alt={copy.alt}
+        width={DEMO_PREVIEW.width}
+        height={DEMO_PREVIEW.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+
+    <div class="project-tile__body">
+      <p class="project-tile__eyebrow">{DEMO_ORIGINS.own[lang]}</p>
+      <h3 class="project-tile__title">{copy.title}</h3>
+      <p class="project-tile__text">{copy.text}</p>
+    </div>
+
+    <CardActions
+      lang={lang}
+      service={serviceLink}
+      cta={{ href: project.href[lang], label: copy.cta, external: true, hreflang: project.hreflang[lang], detail: copy.title }}
+    />
+  </div>
+</article>
+
+<style>
+  .project-tile-slot {
+    /* Same containment as `.demo-card-slot`, same reason: the showcase slide is
+       a grid so this element's width is definite before containment is
+       consulted. See the note in `Showcase.astro`. */
+    container-type: inline-size;
+  }
+
+  .project-tile {
+    --project-tile-bg: var(--color-soft);
+    --project-tile-bg-hover: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Without it a card in a shorter row stops at its content and the row's
+       cards end on different baselines. */
+    height: 100%;
+    background: var(--project-tile-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    color: inherit;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .project-tile:hover,
+  .project-tile:focus-within {
+    background: var(--project-tile-bg-hover);
+  }
+  /* The focus ring is drawn for this tile from the bar's call to action — that
+     link's stretched layer IS the tile's hit area. The rule lives in the one
+     global block in `ui/CardActions.astro`, because it needs a class from each
+     of the two components and an Astro scoped style can only name its own. */
+
+  .project-tile__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+    /* A screenshot of a page has a page edge; without this it bleeds into the
+       card's fill and reads as a broken layout rather than a picture of one. */
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .project-tile__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+
+  .project-tile__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1.125rem 1.25rem 1rem;
+  }
+
+  /* The one thing this tile says that neither neighbour does: it is ours. A
+     visitor who reads it as a customer case would be misled about the
+     reference shelf it sits on. */
+  .project-tile__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .project-tile__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    margin: 0;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .project-tile:hover .project-tile__title,
+  .project-tile:focus-within .project-tile__title {
+    color: var(--color-primary);
+  }
+
+  .project-tile__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+</style>

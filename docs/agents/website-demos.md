@@ -96,3 +96,9 @@ Each demo embeds only `<tds-brand-bar lang="…">` with a fallback link plus
 - Order is drawn per render (2026-10-12, `src/lib/shuffle.ts`): the showcase shuffles demos among
   demos and studies among studies (running sites still lead); the hero carousel samples from both.
   The page cache keeps one draw until it renders again — at the latest the next day (daily gate).
+
+## Own projects on the shelf
+
+`src/lib/ownProjects.ts` holds WParted and its website: code-owned, one picture per language in
+`public/projects/`, not probed and not synced. They lead the shelf with the badge "Eigenes Projekt" and never
+go into `references.ts`. Replace the pictures by hand when WParted or its website changes visibly.
