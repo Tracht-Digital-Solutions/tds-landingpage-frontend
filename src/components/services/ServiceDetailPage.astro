@@ -1,4 +1,5 @@
 ---
+import { shopServicesHref } from "~/lib/serviceProducts";
 /**
  * A service's detail page, composed from the shared detail bands in
  * `components/detail/` — the same bands the platform pages use, so a service
@@ -161,7 +162,7 @@ const jsonLd = asGraph(
       process={content.process}
       priceLabel={content.priceLabel}
       priceText={content.priceText}
-      priceLink={{ href: `${homeHref}#preise`, label: lang === "de" ? "Festpreise ansehen" : "See fixed prices" }}
+      priceLink={{ href: shopServicesHref(lang), label: lang === "de" ? "Preise im Digitalmarkt" : "Prices in the Digitalmarkt" }}
     />
 
     {content.references.length > 0 && (

@@ -174,7 +174,7 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     priceOnRequest: "Individuell, auf Anfrage",
     platformsLabel: "Seiten zum eingesetzten System:",
     note: "Eine erste Orientierung. Was genau passt, klären wir im Erstgespräch.",
-    priceLink: "So entsteht der Preis",
+    priceLink: "Preise im Digitalmarkt",
     cta: "Mit dieser Auswahl Erstgespräch vereinbaren",
     handoffNote: "Die Auswahl landet im Kontaktformular. Gesendet wird erst beim Absenden.",
     draft: {
@@ -222,7 +222,7 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     priceOnRequest: "Custom, on request",
     platformsLabel: "Pages for the system in use:",
     note: "A first sense of direction. We work out exactly what fits in the first conversation.",
-    priceLink: "How a price comes about",
+    priceLink: "Prices in the Digitalmarkt",
     cta: "Arrange an initial consultation with this selection",
     handoffNote: "The selection goes into the contact form. Nothing is sent until it is submitted.",
     draft: {

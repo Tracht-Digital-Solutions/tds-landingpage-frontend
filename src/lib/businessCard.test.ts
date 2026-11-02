@@ -74,7 +74,7 @@ describe("the link stack", () => {
           expect(link.href, link.id).toMatch(/^https:\/\//);
           expect(link.href, link.id).not.toContain(siteConfig.url);
         } else {
-          expect(link.href, link.id).toMatch(/^(\/|tel:|mailto:)/);
+          expect(link.href, link.id).toMatch(/^(\/|tel:|mailto:|https:\/\/shop\.)/);
         }
       }
     }

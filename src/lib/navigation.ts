@@ -30,7 +30,6 @@ export function sectionLinks(lang: Lang): SectionLink[] {
     { id: "services", label: de ? "Leistungen" : "Services" },
     ...(referenceCases.length > 0 ? [{ id: "cases", label: de ? "Projekte" : "Projects" }] : []),
     { id: "process", label: de ? "Vorgehen" : "Process" },
-    { id: "preise", label: de ? "Preise" : "Pricing" },
   ];
 }
 

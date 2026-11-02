@@ -22,7 +22,7 @@ export interface OwnProject {
   hreflang: Record<Lang, string>;
   /** The service page this card is evidence for. */
   service: ServiceId;
-  copy: Record<Lang, { title: string; text: string; cta: string; alt: string; highlights?: { label: string; items: string[] } }>;
+  copy: Record<Lang, { title: string; kind: string; text: string; cta: string; alt: string; highlights?: { label: string; items: string[] } }>;
 }
 
 export const ownProjects: readonly OwnProject[] = [
@@ -35,6 +35,7 @@ export const ownProjects: readonly OwnProject[] = [
     copy: {
       de: {
         title: "WParted",
+        kind: "Software",
         text: "Freier Partitionsmanager für Windows 11, eine GParted-Alternative. Open Source, entwickelt von Julian Tracht. Beta: physische Datenträger bleiben gesperrt.",
         cta: "Quellcode ansehen",
         alt: "WParted mit Datenträgerkarte, Partitionsliste und einer ausstehenden Operation",
@@ -49,6 +50,7 @@ export const ownProjects: readonly OwnProject[] = [
       },
       en: {
         title: "WParted",
+        kind: "Software",
         text: "Free partition manager for Windows 11, a GParted alternative. Open source, developed by Julian Tracht. Beta: physical disks stay locked.",
         cta: "View the source",
         alt: "WParted showing a disk map, a partition list and one pending operation",
@@ -72,12 +74,14 @@ export const ownProjects: readonly OwnProject[] = [
     copy: {
       de: {
         title: "WParted-Webseite",
+        kind: "Webseite",
         text: "Die Projektseite zu WParted: zweisprachig, auf Suchmaschinen und KI-Antworten ausgerichtet und an die eigene Plattform angebunden.",
         cta: "Webseite ansehen",
         alt: "Startseite der WParted-Webseite mit dem Maskottchen Parti und einer Datenträgerleiste",
       },
       en: {
         title: "WParted website",
+        kind: "Website",
         text: "The project page for WParted: in two languages, set up for search engines and AI answers, and connected to our own platform.",
         cta: "View the website",
         alt: "Home page of the WParted website with the mascot Parti and a disk bar",

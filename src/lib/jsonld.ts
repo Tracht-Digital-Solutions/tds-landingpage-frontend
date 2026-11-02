@@ -11,6 +11,7 @@
  * what AI search engines parse), so keeping the renderers next to the
  * data lets us iterate the shape without touching the source of truth.
  */
+import { imageRights } from "@tracht-digital-solutions/tds-shared/site";
 import { LOGO, portraitSrc } from "./imageVariants";
 // Sync helpers only — `getDefaultPackages` reads the committed list and
 // touches neither the CMS nor `contentCache`, so this stays a leaf import and
@@ -38,7 +39,12 @@ export function personSchema() {
     worksFor: { "@id": `${siteConfig.url}/#organization` },
     url: siteConfig.url,
     email: `mailto:${siteConfig.email}`,
-    image: `${siteConfig.url}${portraitSrc(720)}`,
+    image: {
+      "@type": "ImageObject",
+      url: `${siteConfig.url}${portraitSrc(720)}`,
+      contentUrl: `${siteConfig.url}${portraitSrc(720)}`,
+      ...imageRights("de", { portrait: true }),
+    },
     knowsAbout: [...siteConfig.knowsAbout],
     // `founder.sameAs` rather than `socials`: both are built from one list
     // (`PROFILES` in `seo.ts`), and reading the author's own field is what
@@ -100,6 +106,7 @@ export function organizationSchema() {
       url: `${siteConfig.url}${LOGO.mark.original}`,
       width: LOGO.mark.width,
       height: LOGO.mark.height,
+      ...imageRights("de"),
     },
     image: `${siteConfig.url}${LOGO.mark.original}`,
     /**

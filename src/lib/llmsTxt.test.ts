@@ -26,12 +26,12 @@ const packages = getDefaultPackages("de");
 // No `serviceContent`: the renderer then uses each service's committed copy,
 // which is what the assertions below read. The endpoint passes the
 // CMS-resolved copy instead, so the file says what the page says.
-const llms = renderLlmsTxt({ entries: SITEMAP_ENTRIES, packages });
+const llms = renderLlmsTxt({ entries: SITEMAP_ENTRIES });
 
 describe("llms.txt", () => {
   it("counts the questions from the FAQ itself and quotes the home page's six", () => {
     const faq = getFaqContent("de").items;
-    const withFaq = renderLlmsTxt({ entries: SITEMAP_ENTRIES, packages, faq });
+    const withFaq = renderLlmsTxt({ entries: SITEMAP_ENTRIES, faq });
     // It said "alle zwölf" while the page held seventeen.
     expect(withFaq).toContain(`Häufige Fragen — alle ${faq.length},`);
     expect(llms).not.toMatch(/alle (zwölf|\d+),/);
@@ -102,7 +102,6 @@ describe("llms.txt", () => {
     // broken by forgetting to describe a new page.
     const rendered = renderLlmsTxt({
       entries: [...SITEMAP_ENTRIES, { de: "/neue-seite", en: "/en/new-page", changefreq: "monthly", priority: 0.5 }],
-      packages,
     });
     expect(rendered).toContain(absolute("/neue-seite"));
     expect(rendered).toContain(absolute("/en/new-page"));

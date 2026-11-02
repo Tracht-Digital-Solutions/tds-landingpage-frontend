@@ -1,49 +1,16 @@
 ---
 /**
- * Vorgehen — how a working relationship runs, and what the first step is.
+ * So arbeiten wir zusammen: four steps on one rail, all readable at once.
  *
- * ### A horizontal stepper (2026-10-11)
+ * Each step lists what happens in plain sentences and names what exists at its
+ * end. No hover, no panel, no script: a visitor comparing the steps should not
+ * have to open them one at a time. The rail runs across from 64rem and down the
+ * left edge below that.
  *
- * Only the step TITLES form the stepper, and from 48rem they run side by side
- * along one rail. The card under the row shows the open step's text: it
- * changes when the pointer rests on a step (140 ms intent, like the services
- * list), when a step takes keyboard focus, or when it is tapped. A small notch
- * on the card points at the step it belongs to.
+ * The copy is code-owned (`lib/processContent.ts`). A stored `process` block
+ * still holds the older wording, so it no longer applies.
  *
- * - Each title is a `<button aria-expanded aria-controls>`; its panel is the
- *   next element in the same `<li>`. That one DOM serves both layouts: from
- *   48rem the `<ol>` is a grid, every `<li>` is `display: contents`, the
- *   buttons fill the first row and all panels share one cell spanning the
- *   second; below 48rem it is an accordion with the panel under its title.
- * - **Without JavaScript every panel shows**, as a plain list: the open state
- *   (`data-open`) is only ever set by the script, and the grid and the folds
- *   need `[data-enhanced]`.
- * - **The section never changes height on a switch** (2026-10-12). From 48rem
- *   every panel stays laid out in the one shared cell, so the cell is as tall
- *   as the longest card; a closed one is only `visibility: hidden`. Before,
- *   closed panels were `display: none` and the page below jumped by the
- *   difference on every hover. On a phone the accordion folds with
- *   `grid-template-rows` instead of snapping.
- *
- * ### Motion (2026-10-12)
- *
- * The site's spring, in CSS: one round pill glides behind the open step (a
- * grid pseudo-element, so it needs no markup), the notch glides along the
- * card's edge, the dot pops, and the new card swings in from the side of the
- * step that was chosen while the old one leaves toward the other. Overshoot
- * on `translate` and `margin` only, never on `opacity`. Reduced motion: every
- * change is instant.
- * - The panel is NOT `aria-hidden` and the titles are real buttons — the
- *   reason the older hover panel was removed in 2026-09 was exactly a focus
- *   stop that announced nothing in front of text a screen reader never
- *   reached.
- *
- * The section's lead sentence and the "Das Erstgespräch" card beside the
- * stepper went on 2026-10-11. The first step's card carries the section's one
- * call to action instead: "Erstgespräch vereinbaren", to the contact form.
- *
- * No step is numbered any more (2026-10-12): the `<ol>` carries the order for
- * assistive technology, the rail and the icons carry it for the eye.
+ * The `<ol>` carries the order for assistive technology.
  */
 import { localizePath, resolveLang } from "~/lib/i18n";
 import ProcessIcon from "~/components/ui/ProcessIcon.astro";
@@ -53,583 +20,194 @@ import { getHomeContent } from "~/lib/homeContent";
 import { cmsFor } from "~/lib/cms";
 
 const lang = resolveLang(Astro.currentLocale);
-
-// Default = the local process copy (`lib/processContent.ts`). An admin-edited
-// "process" block overrides it (cmsFor); the shape is unchanged. `body` stays
-// in the shape but no longer renders.
-const process = await cmsFor("process", lang, getProcessContent(lang));
-// The button label in the first step: the same field the old card used.
+const process = getProcessContent(lang);
 const firstCall = await cmsFor("first_call", lang, getHomeContent(lang).firstCall);
 const contactHref = `${localizePath("/", lang)}#contact`;
-
-/**
- * A stored block may still carry the old "Ergebnis: …" / "Outcome: …" prefix,
- * from when the line had no label of its own. The label says it now.
- */
-const steps = process.steps.map((step) => ({
-  ...step,
-  outcome: (step.outcome ?? "").replace(/^\s*(Ergebnis|Outcome)\s*:\s*/i, ""),
-}));
-
-const labels = lang === "en"
-  ? { what: "What happens", result: "Result" }
-  : { what: "Was passiert", result: "Ergebnis" };
+const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
 ---
 
-{/* Ground: `.page-ground` in the layout, once for the whole page. */}
-<section
-  id="process"
-  class="section-spacing"
-  aria-labelledby="process-heading"
->
+<section id="process" class="section-spacing" aria-labelledby="process-heading">
   <div class="lp-container">
     <SectionHeader
       headline={process.headline}
       headlineAccent={process.headlineAccent}
       id="process-heading"
-      headingClass="mb-10 md:mb-12"
+      headingClass="mb-10 md:mb-14"
       bar
     />
 
-    <div class="process-stepper" data-process-stepper style={`--steps: ${steps.length}; --active: 0; --dir: 1`}>
-      <ol class="process-stepper__list">
-        {
-          steps.map((step, index) => (
-            <li class="process-stepper__item" style={`--col: ${index + 1}`}>
-              <button
-                type="button"
-                class="process-stepper__step"
-                id={`process-step-${step.number}`}
-                aria-controls={`process-panel-${step.number}`}
-                aria-expanded={index === 0 ? "true" : "false"}
-                data-state={index === 0 ? "current" : "todo"}
-                data-process-step
-              >
-                <span aria-hidden="true" class="process-stepper__dot">
-                  <ProcessIcon number={step.number} />
-                </span>
-                {/* The title alone (2026-10-12): `duration` stays in the content
-                    shape for the CMS block, it is no longer shown. */}
-                <span class="process-stepper__text">
-                  <span class="process-stepper__title">{step.title}</span>
-                </span>
-              </button>
+    <ol class="process-rail">
+      {
+        process.steps.map((step) => (
+          <li class="process-step" data-reveal>
+            <span aria-hidden="true" class="process-step__dot">
+              <ProcessIcon number={step.number} />
+            </span>
+            <div class="process-step__card">
+              <p class="process-step__when">{step.duration}</p>
+              <h3 class="process-step__title">{step.title}</h3>
+              <ul class="process-step__actions">
+                {step.actions.map((action) => <li>{action}</li>)}
+              </ul>
+              <p class="process-step__result">
+                <span class="process-step__result-label">{resultLabel}</span>
+                {step.outcome}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
 
-              <div
-                class="process-stepper__panel"
-                id={`process-panel-${step.number}`}
-                role="region"
-                aria-labelledby={`process-step-${step.number}`}
-                data-process-panel
-              >
-                {/* The fold: on a phone it clips the card while the row
-                    height opens; from 48rem it is a plain box. */}
-                <div class="process-stepper__fold">
-                  <div class="process-stepper__card">
-                    <div class="process-stepper__body">
-                      <p class="eyebrow process-stepper__label">{labels.what}</p>
-                      <p class="process-stepper__description">{step.description}</p>
-                      {
-                        index === 0 && (
-                          <a href={contactHref} class="process-stepper__cta lp-ink" data-cta data-track="process-first-call">
-                            {firstCall.cta}
-                            <span aria-hidden="true">→</span>
-                          </a>
-                        )
-                      }
-                    </div>
-                    {
-                      step.outcome && (
-                        <div class="process-stepper__result">
-                          <p class="eyebrow process-stepper__label">{labels.result}</p>
-                          <p class="process-stepper__outcome">{step.outcome}</p>
-                        </div>
-                      )
-                    }
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
+    <div class="process-cta">
+      <a href={contactHref} class="process-cta__link lp-ink" data-cta data-track="process-first-call">
+        {firstCall.cta}
+        <span aria-hidden="true">→</span>
+      </a>
     </div>
   </div>
 </section>
 
-<script>
-  /**
-   * Hover with intent, focus or a tap opens a step; exactly one is open.
-   * Everything is visible until this runs (`data-open` is only set here).
-   *
-   * The root carries the open index (`--active`, for the gliding pill and the
-   * notch) and the direction of the last move (`--dir`), so the new card
-   * swings in from the side of the chosen step and the old one leaves toward
-   * the other.
-   */
-  import { PHONE_QUERY, keepInView } from "~/lib/keepInView";
-
-  const INTENT_MS = 140;
-  /** The phone's fold opens in 420 ms (CSS); the page follows once it has. */
-  const FOLD_MS = 440;
-
-  document.querySelectorAll<HTMLElement>("[data-process-stepper]").forEach((root) => {
-    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-process-step]")];
-    const panels = buttons.map((button) =>
-      document.getElementById(button.getAttribute("aria-controls") ?? ""),
-    );
-    if (buttons.length === 0 || panels.some((panel) => !panel)) return;
-
-    let timer = 0;
-    let current = -1;
-    const open = (index: number) => {
-      window.clearTimeout(timer);
-      if (index === current) return;
-      if (current >= 0) root.style.setProperty("--dir", index > current ? "1" : "-1");
-      root.style.setProperty("--active", String(index));
-      buttons.forEach((button, i) => {
-        const active = i === index;
-        button.setAttribute("aria-expanded", active ? "true" : "false");
-        // The way so far fills in: done steps and their rail take the accent.
-        button.dataset.state = active ? "current" : i < index ? "done" : "todo";
-        const panel = panels[i]!;
-        panel.toggleAttribute("data-open", active);
-        panel.toggleAttribute("data-leaving", i === current && !active);
-      });
-      current = index;
-    };
-
-    open(Math.max(0, buttons.findIndex((b) => b.getAttribute("aria-expanded") === "true")));
-    root.setAttribute("data-enhanced", "");
-
-    const hoverable = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const phone = window.matchMedia(PHONE_QUERY);
-    buttons.forEach((button, index) => {
-      button.addEventListener("click", () => {
-        open(index);
-        // On a phone the tapped step and its card come fully on screen.
-        if (phone.matches) keepInView(button, panels[index]!, FOLD_MS);
-      });
-      button.addEventListener("focus", () => open(index));
-      button.addEventListener("pointerenter", () => {
-        if (!hoverable.matches) return;
-        window.clearTimeout(timer);
-        timer = window.setTimeout(() => open(index), INTENT_MS);
-      });
-      button.addEventListener("pointerleave", () => window.clearTimeout(timer));
-      // Arrow keys walk the stepper in either axis: left/right along the row,
-      // up/down in the phone's column.
-      button.addEventListener("keydown", (event) => {
-        const forward = event.key === "ArrowRight" || event.key === "ArrowDown";
-        const back = event.key === "ArrowLeft" || event.key === "ArrowUp";
-        if (!forward && !back) return;
-        event.preventDefault();
-        const step = forward ? 1 : -1;
-        buttons[(index + step + buttons.length) % buttons.length]!.focus();
-      });
-    });
-  });
-</script>
-
 <style>
-  .process-stepper__list {
+  .process-rail {
+    --dot: 3rem;
     position: relative;
+    display: grid;
+    gap: 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-
-  /* --- The steps: titles only ------------------------------------------- */
-  /* Round: the hover fill and the open fill are pills, like every other
-     control on the site. */
-  .process-stepper__step {
-    --lp-fill: transparent;
-    --lp-shade: initial;
+  .process-step {
     position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: var(--dot) minmax(0, 1fr);
     gap: 1rem;
-    width: 100%;
-    padding: 0.625rem 1.25rem 0.625rem 0.625rem;
-    border: 0;
-    border-radius: var(--tds-radius-pill, 100px);
-    background: var(--lp-fill);
-    color: var(--color-black);
-    text-align: left;
-    cursor: pointer;
-    transition:
-      background-color 200ms var(--tds-ease-out),
-      translate 160ms var(--tds-ease-out);
   }
-  /* No fill around a step (2026-10-12): the open, hovered and passed states
-     live on the DOT alone — colour and its hard offset — not on a pill that
-     wrapped the whole step. */
-  .process-stepper__step:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
-  }
-
-  /* The rail: a line through the dots, from the first to the last. On a
-     phone it runs down the column. */
-  .process-stepper__item {
-    position: relative;
-  }
-  /* It fills with the accent up to the open step — the further along, the
-     fuller the stepper (2026-10-12). One gradient layer over the line, sized
-     by `--rail-fill`, so the fill can run along it.
-
-     In the column it hangs on the ITEM, not on the step (2026-10-19): sized
-     to the button, it ended at the button's foot, so the moment a step
-     folded its card open below, the line stopped short and the gap to the
-     next dot read as no rail at all. The item holds the title AND its card;
-     the line runs from the bottom of this dot to the top of the next one
-     (the next step's padding, plus the gap between the items). */
-  .process-stepper__item:not(:last-child)::before {
+  /* The rail, drawn per step so it ends at the last dot. */
+  .process-step:not(:last-child)::before {
     content: "";
     position: absolute;
-    left: calc(0.625rem + 1.75rem - 1px);
-    top: calc(0.625rem + 3.5rem);
-    bottom: -0.625rem;
+    top: var(--dot);
+    bottom: -1.25rem;
+    left: calc(var(--dot) / 2 - 1px);
     width: 2px;
-    border-radius: 2px;
-    background:
-      linear-gradient(var(--color-accent), var(--color-accent)) 0 0 / 100% var(--rail-fill, 0%) no-repeat,
-      var(--color-line);
-    transition: background-size 560ms var(--lp-ease-soft);
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
   }
-  [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child)::before {
-    bottom: calc(-0.5rem - 0.625rem);
-  }
-  .process-stepper__step[data-state="done"],
-  .process-stepper__item:has(> .process-stepper__step[data-state="done"]) {
-    --rail-fill: 100%;
-  }
-
-  .process-stepper__dot {
+  .process-step__dot {
     position: relative;
     z-index: 1;
     display: inline-flex;
-    flex: none;
     align-items: center;
     justify-content: center;
-    width: 3.5rem;
-    height: 3.5rem;
+    width: var(--dot);
+    height: var(--dot);
     border-radius: 100px;
-    background: var(--color-card);
-    color: var(--color-accent);
-    /* Every point carries the site's hard offset; the open one a larger one. */
-    box-shadow: var(--tds-shadow-hard-press);
-    transition:
-      background-color 200ms var(--tds-ease-out),
-      color 200ms var(--tds-ease-out);
+    background: var(--color-surface-navy);
+    color: #fff;
   }
-  .process-stepper__step:hover .process-stepper__dot {
-    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-card));
-  }
-  .process-stepper__dot :global(svg) {
-    width: 1.75rem;
-    height: 1.75rem;
-  }
-  /* A step already passed keeps a tinted dot; the open one is solid. */
-  .process-stepper__step[data-state="done"] .process-stepper__dot {
-    background: color-mix(in srgb, var(--color-accent) 18%, var(--color-card));
-  }
-  .process-stepper__step[aria-expanded="true"] .process-stepper__dot {
-    background: var(--color-accent);
-    color: var(--color-on-accent, #fff);
-    box-shadow: var(--tds-shadow-hard-sm);
-  }
-
-  .process-stepper__text {
+  .process-step__card {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.125rem 0.625rem;
-    min-width: 0;
-  }
-  .process-stepper__title {
-    font-family: var(--font-display);
-    font-size: 1.125rem;
-    font-weight: 600;
-    line-height: 1.25;
-    transition: color 200ms var(--tds-ease-out);
-  }
-  .process-stepper__step[aria-expanded="true"] .process-stepper__title {
-    color: var(--color-accent);
-  }
-
-  /* --- The panel: what the step means ------------------------------------ */
-  .process-stepper__panel {
-    position: relative;
-  }
-  .process-stepper__card {
-    position: relative;
+    flex-direction: column;
+    gap: 0.625rem;
+    height: 100%;
+    padding: 1.25rem;
     border-radius: 6px;
     background: var(--color-soft);
-    margin: 0.5rem 0 1.25rem 4.25rem;
   }
-  .process-stepper__body {
-    padding: 1.25rem 1.5rem;
-  }
-  .process-stepper__label {
-    margin: 0 0 0.375rem;
-  }
-  .process-stepper__description {
+  .process-step__when {
     margin: 0;
-    font-size: 1rem;
-    line-height: 1.6;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .process-step__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
     color: var(--color-black);
   }
-  .process-stepper__result {
-    padding: 1rem 1.5rem 1.125rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-    background: color-mix(in srgb, var(--color-black) 3%, transparent);
-    border-radius: 0 0 6px 6px;
-  }
-  .process-stepper__outcome {
+  .process-step__actions {
+    display: grid;
+    gap: 0.5rem;
     margin: 0;
+    padding: 0 0 0 1rem;
+    list-style: disc;
     font-size: 0.9375rem;
-    font-weight: 600;
-    line-height: 1.45;
+    line-height: 1.5;
+    color: var(--color-black);
+  }
+  .process-step__actions li::marker {
     color: var(--color-accent);
   }
+  .process-step__result {
+    margin: auto 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 10%, transparent);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-black);
+  }
+  .process-step__result-label {
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-muted);
+  }
 
-  /* The way from the first step to the contact form. A navy pill: navy fill,
-     so a coral shade (design.md). */
-  .process-stepper__cta {
-    --lp-fill: var(--color-surface-navy);
-    --lp-shade: var(--color-accent-pink);
+  @media (min-width: 64rem) {
+    .process-rail {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .process-step {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: var(--dot) 1fr;
+    }
+    .process-step:not(:last-child)::before {
+      top: calc(var(--dot) / 2 - 1px);
+      right: -1.25rem;
+      bottom: auto;
+      left: var(--dot);
+      width: auto;
+      height: 2px;
+    }
+  }
+
+  .process-cta {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  .process-cta__link {
+    --lp-fill: var(--color-accent);
+    --lp-shade: initial;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1.25rem;
     min-height: 2.75rem;
-    padding: 0.625rem 1.375rem;
+    padding: 0.75rem 1.75rem;
     border-radius: 100px;
     background: var(--lp-fill);
-    color: #fff;
+    color: var(--color-paper);
     font-size: 0.9375rem;
     font-weight: 600;
     text-decoration: none;
     transition: background-color 200ms var(--tds-ease-out);
   }
-  .process-stepper__cta:hover {
-    --lp-fill: var(--color-surface-accent);
-    --lp-shade: initial;
+  .process-cta__link:hover {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
   }
-  .process-stepper__cta:focus-visible {
+  .process-cta__link:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
-  }
-  :global(:root[data-theme="dark"]) .process-stepper__cta {
-    --lp-fill: var(--color-primary);
-    color: var(--color-on-primary);
-  }
-
-  /* Enhanced, phone: an accordion that folds. The row height opens from
-     0fr to 1fr, so the steps below slide instead of jumping; a closed panel
-     is hidden only once its fold has shut. */
-  [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
-    margin-top: 0.5rem;
-  }
-  [data-process-stepper][data-enhanced] .process-stepper__panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    visibility: hidden;
-    transition:
-      grid-template-rows 360ms var(--lp-ease-soft),
-      visibility 0s linear 360ms;
-  }
-  [data-process-stepper][data-enhanced] .process-stepper__panel[data-open] {
-    grid-template-rows: 1fr;
-    visibility: visible;
-    transition:
-      grid-template-rows 420ms var(--lp-ease-soft),
-      visibility 0s;
-  }
-  [data-process-stepper][data-enhanced] .process-stepper__fold {
-    min-height: 0;
-    overflow: hidden;
-    /* Room for the card's hard shadow inside the clip. */
-    padding-right: 0.5rem;
-  }
-
-  /* Enhanced, from 48rem: the steps in one row along a horizontal rail, the
-     open step's card under the whole row. Every panel sits in the same cell
-     and stays laid out there, so the cell keeps the height of the tallest
-     card and nothing below moves on a switch. */
-  @media (min-width: 48rem) {
-    [data-process-stepper][data-enhanced] .process-stepper__list {
-      display: grid;
-      grid-template-columns: repeat(var(--steps, 4), minmax(0, 1fr));
-      column-gap: 1rem;
-      row-gap: 1.75rem;
-      align-items: stretch;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__item {
-      display: contents;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__item + .process-stepper__item {
-      margin-top: 0;
-    }
-    /* Each step names its column: the gliding pill below occupies the whole
-       first row as well, and auto-placement would push the steps into new
-       implicit columns beside it. */
-    [data-process-stepper][data-enhanced] .process-stepper__step {
-      grid-row: 1;
-      grid-column: var(--col);
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem 1.5rem 1.375rem;
-      text-align: center;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__text {
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-    }
-    /* In the row the items are `display: contents` (their `::before` would
-       turn into a stray grid item), so the rail hangs on the step: it runs
-       from this dot's centre to the next one's, across the column gap — one
-       button width plus the gap, minus a dot. */
-    [data-process-stepper][data-enhanced] .process-stepper__item::before {
-      content: none;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__item:not(:last-child) .process-stepper__step::after {
-      content: "";
-      position: absolute;
-      border-radius: 2px;
-      background:
-        linear-gradient(var(--color-accent), var(--color-accent)) 0 0 / 100% var(--rail-fill, 0%) no-repeat,
-        var(--color-line);
-      transition: background-size 560ms var(--lp-ease-soft);
-      left: calc(50% + 1.75rem + 0.25rem);
-      top: calc(1rem + 1.75rem - 1px);
-      width: calc(100% + 1rem - 3.5rem - 0.5rem);
-      height: 2px;
-      background-size:
-        var(--rail-fill, 0%) 100%,
-        auto;
-    }
-
-    /* The notch: a small square turned 45°, under the middle of the open
-       column, on the card's top edge. Same fill as the card. */
-    [data-process-stepper][data-enhanced] .process-stepper__list::after {
-      content: "";
-      position: relative;
-      z-index: 2;
-      grid-row: 2;
-      grid-column: 1 / -1;
-      justify-self: start;
-      align-self: start;
-      width: 1rem;
-      height: 1rem;
-      margin-top: -0.5rem;
-      margin-left: calc((var(--active, 0) + 0.5) / var(--steps, 4) * 100% - 0.5rem);
-      background: var(--color-soft);
-      rotate: 45deg;
-      border-radius: 2px 0 0 0;
-      pointer-events: none;
-    }
-
-    [data-process-stepper][data-enhanced] .process-stepper__panel,
-    [data-process-stepper][data-enhanced] .process-stepper__panel[data-open] {
-      grid-row: 2;
-      grid-column: 1 / -1;
-      display: block;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__fold {
-      overflow: visible;
-      padding: 0;
-      height: 100%;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__card {
-      height: 100%;
-      margin: 0;
-      box-shadow: var(--tds-shadow-hard);
-      display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__body {
-      padding: 1.75rem 2rem;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__description {
-      font-size: 1.125rem;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__result {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 1.75rem 2rem;
-      border-top: 0;
-      border-left: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-      border-radius: 0 6px 6px 0;
-    }
-
-    /* The cards cross: a closed card waits on the side the next move comes
-       from, the leaving one slides toward the other side. */
-    [data-process-stepper][data-enhanced] .process-stepper__panel {
-      opacity: 0;
-      translate: calc(var(--dir, 1) * 2.5rem) 0;
-      transition:
-        opacity 160ms var(--tds-ease-out),
-        translate 0s linear 260ms,
-        visibility 0s linear 260ms;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__panel[data-leaving] {
-      translate: calc(var(--dir, 1) * -2.5rem) 0;
-      transition:
-        opacity 160ms var(--tds-ease-out),
-        translate 260ms var(--tds-ease-out),
-        visibility 0s linear 260ms;
-    }
-    [data-process-stepper][data-enhanced] .process-stepper__panel[data-open] {
-      z-index: 1;
-      opacity: 1;
-      translate: 0 0;
-      transition:
-        opacity 220ms var(--tds-ease-out) 40ms,
-        translate 640ms var(--lp-ease-spring) 40ms,
-        visibility 0s;
-    }
-  }
-
-  @media (min-width: 48rem) and (prefers-reduced-motion: no-preference) {
-    [data-process-stepper][data-enhanced] .process-stepper__list::after {
-      transition: margin-left 620ms var(--lp-ease-spring);
-    }
-  }
-
-  /* The dot of the step that opens pops once. Transform only. */
-  @media (prefers-reduced-motion: no-preference) {
-    .process-stepper__step[aria-expanded="true"] .process-stepper__dot {
-      animation: process-dot-pop 520ms var(--lp-ease-bounce);
-    }
-    .process-stepper__step:not([aria-expanded="true"]):hover .process-stepper__dot {
-      scale: 1.06;
-    }
-    .process-stepper__dot {
-      transition:
-        background-color 200ms var(--tds-ease-out),
-        color 200ms var(--tds-ease-out),
-        scale 240ms var(--lp-ease-bounce);
-    }
-  }
-  @keyframes process-dot-pop {
-    from {
-      scale: 0.72;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .process-stepper__step,
-    .process-stepper__dot,
-    .process-stepper__cta,
-    [data-process-stepper][data-enhanced] .process-stepper__panel,
-    [data-process-stepper][data-enhanced] .process-stepper__panel[data-open],
-    [data-process-stepper][data-enhanced] .process-stepper__panel[data-leaving] {
-      transition: none;
-    }
   }
 </style>

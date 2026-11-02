@@ -1,0 +1,67 @@
+---
+/**
+ * Bildrechte: the page every image's `license` and `acquireLicensePage` point at
+ * (tds-shared `imageRights`), for all the group's sites.
+ */
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { localizePath, type Lang } from "~/lib/i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+// The NAME is load-bearing: `seo.test.ts` reads this literal off disk.
+const pageDescriptions = {
+  de: "Bildrechte auf den Seiten von Tracht Digital Solutions: Herkunft der Bilder, Nutzung, Credit-Angabe und der Weg zu einer Nutzungserlaubnis.",
+  en: "Image rights on the Tracht Digital Solutions sites: where the images come from, how they may be used, the credit line and how to request permission.",
+};
+
+const copy =
+  lang === "de"
+    ? {
+        title: "Bildrechte",
+        origin: "Herkunft",
+        originText: "Alle Bilder auf den Seiten von Tracht Digital Solutions wurden mit ChatGPT erstellt. Die Ausnahme ist das Porträt von Julian Tracht.",
+        use: "Nutzung",
+        useText: "Eine Nutzung außerhalb dieser Seiten braucht eine vorherige Erlaubnis. Credit-Angabe: Tracht Digital Solutions.",
+        ask: "Erlaubnis anfragen",
+        askText: "Eine Anfrage nennt das Bild, den Zweck, den Ort der Veröffentlichung.",
+        cta: "Zum Kontaktformular",
+      }
+    : {
+        title: "Image rights",
+        origin: "Origin",
+        originText: "All images on the Tracht Digital Solutions sites were created with ChatGPT. The exception is the portrait of Julian Tracht.",
+        use: "Use",
+        useText: "Any use outside these sites needs prior permission. Credit line: Tracht Digital Solutions.",
+        ask: "Request permission",
+        askText: "A request names the image, the purpose, the place of publication.",
+        cta: "To the contact form",
+      };
+const contact = `${localizePath("/", lang)}#contact`;
+---
+
+<Layout
+  title={`${copy.title} — Tracht Digital`}
+  description={pageDescriptions[lang]}
+  lang={lang}
+  alternates={{ de: "/bildrechte", en: "/en/image-rights" }}
+>
+  <Header />
+  <main id="main" class="pt-36 pb-24 md:pt-44 md:pb-32">
+    <div class="lp-container max-w-3xl">
+      <h1 class="display text-4xl sm:text-5xl text-[var(--color-black)] mb-8">{copy.title}</h1>
+      <h2 class="display text-2xl text-[var(--color-black)] mb-2">{copy.origin}</h2>
+      <p class="text-[var(--color-muted)] leading-relaxed mb-8">{copy.originText}</p>
+      <h2 class="display text-2xl text-[var(--color-black)] mb-2">{copy.use}</h2>
+      <p class="text-[var(--color-muted)] leading-relaxed mb-8">{copy.useText}</p>
+      <h2 class="display text-2xl text-[var(--color-black)] mb-2">{copy.ask}</h2>
+      <p class="text-[var(--color-muted)] leading-relaxed mb-4">{copy.askText}</p>
+      <a class="underline text-[var(--color-accent)]" href={contact}>{copy.cta}</a>
+    </div>
+  </main>
+  <Footer />
+</Layout>

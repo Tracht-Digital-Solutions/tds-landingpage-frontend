@@ -108,6 +108,9 @@ export default {
     if (path === "/qualifikationen" || path === "/en/qualifications") {
       return { kind: "credentials", requiredTypes: ["WebPage", "Person", "BreadcrumbList"], requireDate: true };
     }
+    if (path === "/bildrechte" || path === "/en/image-rights") {
+      return { kind: "image-rights", requiredTypes: [], requireDate: false };
+    }
     if (path === "/projekte" || path === "/en/projects") {
       return { kind: "projects", requiredTypes: ["WebPage", "BreadcrumbList"], requireDate: true };
     }

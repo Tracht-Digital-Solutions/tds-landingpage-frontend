@@ -22,15 +22,6 @@ describe("pricing defaults", () => {
     }
   });
 
-  it("quotes the lowest package where the Webauftritt page names a figure", () => {
-    // The one amount in a service's prose is the entry price of the packages;
-    // a package change fails here until the sentence follows.
-    for (const lang of ["de", "en"] as const) {
-      const lowest = Math.min(...getDefaultPackages(lang).map((pkg) => pkg.price));
-      const webPresence = serviceDefinitions.find((service) => service.id === "web-presence")!;
-      expect(webPresence.fallback[lang].priceText).toContain(String(lowest));
-    }
-  });
 
   it("adds 19 % VAT for the gross view, to the cent", () => {
     expect(VAT_RATE).toBe(0.19);

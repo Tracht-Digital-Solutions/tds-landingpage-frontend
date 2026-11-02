@@ -38,12 +38,11 @@ const homeHref = localizePath("/", lang);
 const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
 
 // The same sections the header lists (`lib/navigation.ts`), plus Kontakt —
-// the footer is where a reader who scrolled past the form looks for it. The
-// pricing label stays the editable `footer.pricing`.
+// the footer is where a reader who scrolled past the form looks for it.
 const navItems = [
   ...sectionLinks(lang).map((item) => ({
     href: `${homeHref}#${item.id}`,
-    label: item.id === "preise" ? footer.pricing : item.label,
+    label: item.label,
   })),
   { href: `${homeHref}#contact`, label: lang === "de" ? "Kontakt" : "Contact" },
 ];

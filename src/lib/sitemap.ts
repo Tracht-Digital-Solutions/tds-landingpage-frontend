@@ -86,6 +86,8 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     priority: 0.7,
     lastmod: PROJECTS_UPDATED_AT,
   },
+  // The page every image's licence points at.
+  { de: "/bildrechte", en: "/en/image-rights", changefreq: "monthly", priority: 0.2 },
   // The certificates. Above the business card and below a service page: it is
   // evidence for what the service pages claim, not a thing for sale.
   {

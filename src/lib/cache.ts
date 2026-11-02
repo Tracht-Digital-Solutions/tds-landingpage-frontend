@@ -152,6 +152,8 @@ export const alwaysPaths = [
   CREDENTIALS_SLUG.en,
   PROJECTS_SLUG.de,
   PROJECTS_SLUG.en,
+  "/bildrechte",
+  "/en/image-rights",
   FAQ_PAGE_SLUG.de,
   FAQ_PAGE_SLUG.en,
   ...SITEMAP_PATHS,

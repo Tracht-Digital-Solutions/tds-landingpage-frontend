@@ -286,7 +286,7 @@ describe("the service assistant", () => {
     expect(template(read("src/components/ui/AssistantCard.astro"))).toMatch(
       /<button\s+type="button"\s+data-assistant-open\s+hidden/,
     );
-    for (const file of ["src/components/sections/Services.astro", "src/components/sections/Pricing.astro"]) {
+    for (const file of ["src/components/sections/Services.astro"]) {
       expect(template(read(file)), file).toMatch(/<AssistantCard\b/);
     }
     expect(script).toMatch(/typeof dialog\.showModal === "function"/);

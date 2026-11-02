@@ -15,9 +15,9 @@ import { SITEMAP_ENTRIES } from "./sitemap";
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), "utf8");
 
 const REDIRECTS: Array<[file: string, target: string]> = [
-  ["src/pages/preise.astro", "/#preise"],
-  ["src/pages/en/preise.astro", "/en/#preise"],
-  ["src/pages/en/pricing.astro", "/en/#preise"],
+  ["src/pages/preise.astro", "https://shop.tracht-digital.de/?art=own"],
+  ["src/pages/en/preise.astro", "https://shop.tracht-digital.de/en/?art=own"],
+  ["src/pages/en/pricing.astro", "https://shop.tracht-digital.de/en/?art=own"],
   ["src/pages/kontakt.astro", "/#contact"],
   ["src/pages/en/contact.astro", "/en/#contact"],
 ];
@@ -41,10 +41,6 @@ describe("addresses that answer with a redirect instead of a 404", () => {
   });
 
   it("points at anchors the home page actually has", () => {
-    const pricing = read("src/components/sections/Pricing.astro");
-    expect(pricing).toMatch(/<section id="preise"/);
-    // Old deep links keep landing on the prices.
-    expect(pricing).toMatch(/id="pricing-teaser"/);
     expect(read("src/components/sections/Contact.astro")).toMatch(/id="contact"/);
   });
 });
@@ -54,7 +50,6 @@ describe("the section navigation", () => {
     "src/components/sections/Services.astro",
     "src/components/sections/ProjectReferences.astro",
     "src/components/sections/Process.astro",
-    "src/components/sections/Pricing.astro",
   ]
     .map(read)
     .join("\n");
@@ -67,7 +62,7 @@ describe("the section navigation", () => {
 
   it("renders every home section the navigation names", () => {
     const home = read("src/components/HomePage.astro");
-    for (const component of ["Services", "ProjectReferences", "Process", "Pricing", "FAQ", "Contact"]) {
+    for (const component of ["Services", "ProjectReferences", "Process", "FAQ", "Contact"]) {
       expect(home).toMatch(new RegExp(`<${component} />`));
     }
   });
