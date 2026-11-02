@@ -136,7 +136,7 @@ const graph = asGraph(
       groups.map((group) => (
         <section id={group.id} class="project-group" aria-labelledby={`${group.id}-title`}>
           <div class="lp-container">
-            <div class="mb-8 max-w-2xl">
+            <div class="project-group__head">
               <h2 id={`${group.id}-title`} class="display text-2xl md:text-3xl text-[var(--color-black)] mb-2">
                 {group.title}
               </h2>
@@ -221,21 +221,26 @@ const graph = asGraph(
     }
   }
 
+  .project-group__head {
+    max-width: 42rem;
+    margin: 0 auto 2rem;
+    text-align: center;
+  }
+  /* Flex, not `auto-fill`: a row with fewer tiles stands in the middle instead
+     of leaving empty tracks on its right. Same tile width in every group. */
   .project-grid {
     --project-gap: 1rem;
-    display: grid;
-    gap: var(--project-gap);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: stretch;
-    grid-auto-rows: 1fr;
-    /* `auto-fill`, so a short group keeps the same tile size as a long one. The
-       19rem floor keeps a tile beside a neighbour below the 30rem where only
-       some card families widen their screenshot band. */
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: var(--project-gap);
   }
   .project-grid__cell {
     display: grid;
     grid-template-rows: 1fr;
-    min-width: 0;
+    flex: 0 1 21rem;
+    min-width: min(100%, 19rem);
   }
   @media (min-width: 48rem) {
     .project-grid {

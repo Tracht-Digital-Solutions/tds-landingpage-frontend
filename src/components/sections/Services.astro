@@ -1,15 +1,16 @@
 ---
+/**
+ * Leistungen, as products. The most important ones stand here without a price;
+ * the Digitalmarkt carries all of them with their "ab" price. "Alle Leistungen"
+ * leads to the catalogue filtered to our own services.
+ */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
+import { imageHints } from "~/lib/imageCatalog";
 import { platformDefinitions, platformHref } from "~/lib/platforms";
-import {
-  resolveServiceContent,
-  serviceDefinitions,
-  serviceHref,
-} from "~/lib/services";
+import { getServiceProducts, shopServicesHref } from "~/lib/serviceProducts";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
-import ServiceExplorer from "~/components/ui/ServiceExplorer.astro";
 import AssistantCard from "~/components/ui/AssistantCard.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -19,13 +20,12 @@ const servicesContent = await cmsFor(
   lang,
   getHomeContent(lang).servicesOverview,
 );
-const services = await Promise.all(
-  serviceDefinitions.map(async (definition) => ({
-    definition,
-    content: await resolveServiceContent(definition, lang),
-  })),
-);
+const products = await getServiceProducts(lang);
 const systemsLabel = lang === "de" ? "Hilfe für das eingesetzte System:" : "Help with the system in use:";
+const ui =
+  lang === "de"
+    ? { details: "Details ansehen", more: "Alle Leistungen im Digitalmarkt" }
+    : { details: "View details", more: "All services in the Digitalmarkt" };
 ---
 
 {/* No ground of its own. The page has ONE ground now — `.page-ground` in
@@ -44,29 +44,41 @@ const systemsLabel = lang === "de" ? "Hilfe für das eingesetzte System:" : "Hel
       headingClass="mb-10"
       bar
     />
-    {/* `servicesOverview.intro` no longer renders (2026-10-11); the field
-        stays so a stored block loads. */}
+    <ul class="product-grid">
+      {
+        products.map((product) => (
+          <li class="product-tile" data-reveal>
+            <div class="product-tile__shot">
+              <img
+                src={product.image}
+                srcset={imageHints(product.image, lang)?.srcSet}
+                sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw"
+                alt=""
+                width="1536"
+                height="960"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="product-tile__body">
+              <p class="product-tile__kind">{product.kind[lang]}</p>
+              <h3 class="product-tile__title">
+                <a href={product.href} data-track="service-product">{product.title[lang]}</a>
+              </h3>
+              <p class="product-tile__text">{product.text[lang]}</p>
+              <span aria-hidden="true" class="product-tile__more">{ui.details} →</span>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
 
-    {/* An interactive list since 2026-09-22 (`ui/ServiceExplorer.astro`):
-        the four titles on the left, one open panel on the right, an
-        accordion on a phone. Each panel answers what a visitor scanning
-        services asks — what I do, the typical starting point, the outcome, the scope
-        and where to go next — from the SAME resolved content the service
-        page renders, so an edit in the panel moves both. */}
-    <ServiceExplorer
-      lang={lang}
-      services={services.map(({ definition, content }) => ({
-        id: definition.id,
-        href: serviceHref(definition, lang),
-        title: content.title,
-        tagline: definition.tagline[lang],
-        summary: content.summary,
-        problem: content.situations[0] ?? "",
-        result: content.outcomes[0] ?? "",
-        keywords: definition.keywords[lang],
-        image: definition.image ?? null,
-      }))}
-    />
+    <div class="product-more">
+      <a class="product-more__link lp-ink" href={shopServicesHref(lang)} data-cta data-track="services-more">
+        {ui.more}
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
 
     {/* For the visitor who reads the list and still cannot say which service
         is theirs — or what it costs: the assistant asks instead. Highlighted
@@ -95,3 +107,125 @@ const systemsLabel = lang === "de" ? "Hilfe für das eingesetzte System:" : "Hel
     </div>
   </div>
 </section>
+
+<style>
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .product-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 23rem;
+    min-width: min(100%, 17rem);
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--color-soft);
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .product-tile:hover,
+  .product-tile:focus-within {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+  }
+  .product-tile:has(a:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .product-tile__shot {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+  }
+  .product-tile__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .product-tile__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 0.5rem;
+    padding: 1.125rem 1.25rem 1.25rem;
+  }
+  .product-tile__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .product-tile__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+  }
+  .product-tile__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .product-tile__title a:focus-visible {
+    outline: none;
+  }
+  /* The whole tile is the link's hit area; its name stays the product's. */
+  .product-tile__title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .product-tile__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+  .product-tile__more {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  .product-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  .product-more__link {
+    --lp-fill: var(--color-accent);
+    --lp-shade: initial;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    color: var(--color-paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .product-more__link:hover {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
+  }
+  .product-more__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+</style>

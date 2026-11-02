@@ -124,12 +124,19 @@ const cta: CardAction | null = card.articleHref
           loading="lazy"
           decoding="async"
         />
+        {badge && <span class="reference-card__origin">{badge}</span>}
+      </div>
+    )}
+
+    {!card.preview && (
+      <div class="reference-card__shot reference-card__shot--plain">
+        {badge && <span class="reference-card__origin">{badge}</span>}
+        <span aria-hidden="true" class="reference-card__mark">{card.reference.title.charAt(0)}</span>
       </div>
     )}
 
     <div class="reference-card__body">
-      {badge && <p class="reference-card__badge">{badge}</p>}
-      <p class="eyebrow text-[var(--color-accent)] mb-3">
+      <p class="reference-card__kind">
         <span class="sr-only">{ui.context}: </span>
         {card.reference.context}
       </p>
@@ -194,7 +201,6 @@ const cta: CardAction | null = card.articleHref
   }
 
   .reference-card {
-    /* Overridden by the wide-card container query at the bottom. */
     --reference-shot-aspect: 16 / 10;
 
     /* The positioning context for the footer bar's stretched link. Without it
@@ -215,6 +221,11 @@ const cta: CardAction | null = card.articleHref
     background: var(--color-soft);
     border-radius: 6px;
     overflow: hidden;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .reference-card:hover,
+  .reference-card:focus-within {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
   }
 
   /* The screenshot is CONTENT, not a ground: full strength, in front, with a
@@ -232,6 +243,17 @@ const cta: CardAction | null = card.articleHref
        card's fill and reads as a broken layout rather than a picture of one. */
     border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
   }
+  .reference-card__shot--plain {
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-paper));
+  }
+  .reference-card__mark {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  }
   .reference-card__shot img {
     display: block;
     width: 100%;
@@ -243,52 +265,69 @@ const cta: CardAction | null = card.articleHref
   .reference-card__body {
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
     flex: 1;
-    padding: 1.5rem 1.5rem 1.375rem;
+    padding: 1.125rem 1.25rem 1rem;
   }
 
-  /* The card's kind, before anything else on it. Ink on a light accent tint,
-     so it reads as a label and not as a link. */
-  .reference-card__badge {
-    align-self: flex-start;
-    margin: 0 0 0.875rem;
+  .reference-card__origin {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    max-width: calc(100% - 4.5rem);
     padding: 0.25rem 0.625rem;
     border-radius: 100px;
-    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-paper));
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
     color: var(--color-black);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+  .reference-card__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
 
   .reference-card__title {
+    margin: 0;
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-weight: 700;
+    font-size: 1.25rem;
     line-height: 1.15;
     letter-spacing: -0.015em;
     color: var(--color-black);
-    margin: 0 0 1rem;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .reference-card:hover .reference-card__title,
+  .reference-card:focus-within .reference-card__title {
+    color: var(--color-primary);
   }
 
   .reference-card__result {
     margin: 0;
-    color: var(--color-black);
+    font-size: 0.875rem;
     line-height: 1.6;
-    /* See the note at the call site: one long outcome would otherwise set the
-       height of every slide in the track. The full text stays on the service
-       page and in the journal article, which is where it belongs. */
+    color: var(--color-muted);
     display: -webkit-box;
-    -webkit-line-clamp: 6;
-    line-clamp: 6;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
   .reference-card__metric {
-    margin: 1.25rem 0 0;
-    font-family: var(--font-display);
-    font-size: 1.25rem;
-    color: var(--color-black);
+    margin: auto 0 0;
+    padding-top: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
   }
 
   /* Pinned to the bottom of the BODY, so the badges sit directly on the bar
@@ -300,7 +339,7 @@ const cta: CardAction | null = card.articleHref
     flex-wrap: wrap;
     gap: 0.4rem;
     margin: auto 0 0;
-    padding: 1.75rem 0 0;
+    padding: 0.75rem 0 0;
     list-style: none;
   }
   .reference-card__service {
@@ -342,17 +381,5 @@ const cta: CardAction | null = card.articleHref
      pays for as padding — `32 / 10` is exactly twice `16 / 10` at the same
      height, and `object-position: top center` then crops to the top of the
      captured page, which is the half worth showing. */
-  @container (min-width: 30rem) {
-    .reference-card {
-      --reference-shot-aspect: 32 / 10;
-    }
-    .reference-card__title {
-      font-size: 1.75rem;
-    }
-    .reference-card__result {
-      -webkit-line-clamp: 4;
-      line-clamp: 4;
-      max-width: 60ch;
-    }
-  }
+  
 </style>

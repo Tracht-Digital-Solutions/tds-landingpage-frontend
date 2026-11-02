@@ -30,7 +30,6 @@ export const STUDY_MAX_WIDTH = 1440;
  * one place which capture became which card.
  */
 export const STUDY_SOURCES: Record<string, string> = {
-  "Nordholz.png": "nordholz-tischlerei",
   "Kinderarztpraxis_Sonnengarten.png": "kinderarztpraxis-sonnengarten",
   "Kinderarztpraxis_Sonnengarten_mobil.png": "kinderarztpraxis-sonnengarten-mobil",
   "Mira_Markt.png": "mira-markt",

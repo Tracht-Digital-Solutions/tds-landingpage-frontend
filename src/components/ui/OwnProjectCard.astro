@@ -34,22 +34,13 @@ const serviceLink: CardAction = { label: service.fallback[lang].title, href: ser
         loading="lazy"
         decoding="async"
       />
+      <span class="project-tile__origin">{DEMO_ORIGINS.own[lang]}</span>
     </div>
 
     <div class="project-tile__body">
-      <p class="project-tile__eyebrow">{DEMO_ORIGINS.own[lang]}</p>
+      <p class="project-tile__kind">{copy.kind}</p>
       <h3 class="project-tile__title">{copy.title}</h3>
       <p class="project-tile__text">{copy.text}</p>
-      {
-        copy.highlights ? (
-          <div class="project-tile__highlights">
-            <p class="project-tile__highlights-label">{copy.highlights.label}</p>
-            <ul>
-              {copy.highlights.items.map((item) => <li>{item}</li>)}
-            </ul>
-          </div>
-        ) : null
-      }
     </div>
 
     <CardActions
@@ -118,16 +109,29 @@ const serviceLink: CardAction = { label: service.fallback[lang].title, href: ser
     padding: 1.125rem 1.25rem 1rem;
   }
 
-  /* The one thing this tile says that neither neighbour does: it is ours. A
-     visitor who reads it as a customer case would be misled about the
-     reference shelf it sits on. */
-  .project-tile__eyebrow {
-    margin: 0;
+  .project-tile__origin {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    max-width: calc(100% - 4.5rem);
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    color: var(--color-black);
     font-size: 0.6875rem;
     font-weight: 600;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+  .project-tile__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-accent);
+    color: var(--color-muted);
   }
 
   .project-tile__title {
@@ -151,26 +155,10 @@ const serviceLink: CardAction = { label: service.fallback[lang].title, href: ser
     line-height: 1.6;
     color: var(--color-muted);
     display: -webkit-box;
-    -webkit-line-clamp: 5;
-    line-clamp: 5;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  .project-tile__highlights {
-    margin-top: 0.25rem;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    color: var(--color-muted);
-  }
-  .project-tile__highlights-label {
-    margin: 0 0 0.25rem;
-    font-weight: 600;
-    color: var(--color-black);
-  }
-  .project-tile__highlights ul {
-    margin: 0;
-    padding-left: 1rem;
-    list-style: disc;
-  }
 </style>

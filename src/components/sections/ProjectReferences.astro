@@ -41,7 +41,7 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
 
 <section id="cases" class="section-spacing" aria-labelledby="cases-heading">
   <div class="lp-container">
-    <div class="max-w-2xl mx-auto md:mx-0">
+    <div class="projects-head">
       <SectionHeader
         headline={copy.headline}
         headlineAccent={copy.headlineAccent}
@@ -72,6 +72,11 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
 </section>
 
 <style>
+  .projects-head {
+    max-width: 42rem;
+    margin-inline: auto;
+    text-align: center;
+  }
   .projects-grid {
     display: grid;
     gap: 1rem;
@@ -108,6 +113,7 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
       /* Below the 30rem where cards widen their screenshot band: only some card
          families do that, and a row would lose its common picture height. */
       max-width: calc(3 * 29.5rem + 2 * 1.5rem);
+      margin-inline: auto;
     }
   }
 

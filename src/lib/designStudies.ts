@@ -77,19 +77,6 @@ const VIEW_LABELS = {
 
 export const designStudies: readonly DesignStudy[] = [
   {
-    id: "nordholz-tischlerei",
-    kind: "website",
-    title: "Nordholz Tischlerei",
-    sector: { de: "Handwerk · Tischlerei", en: "Trade · joinery" },
-    description: {
-      de: "Handwerk, das man sieht: Werkstattfotos, fünf Leistungen, ein Team mit Namen. Die Anfrage steht am Ende der Seite.",
-      en: "Craft you can see: workshop photos, five services, a team with names. The enquiry sits at the end of the page.",
-    },
-    views: [
-      { id: "desktop", label: VIEW_LABELS.desktop, src: studyImageSrc("nordholz-tischlerei"), width: 949, height: 1658 },
-    ],
-  },
-  {
     id: "kinderarztpraxis-sonnengarten",
     kind: "website",
     title: "Kinderarztpraxis Sonnengarten",

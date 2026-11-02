@@ -2,7 +2,6 @@ import type { APIRoute } from "astro";
 import { cmsFor } from "~/lib/cms";
 import { getFaqContent } from "~/lib/faq";
 import { renderLlmsTxt } from "~/lib/llmsTxt";
-import { getPricingContent } from "~/lib/pricing";
 import { resolveServiceContent, serviceDefinitions, type ServiceContent, type ServiceId } from "~/lib/services";
 import { sitemapEntries } from "~/lib/sitemap";
 
@@ -27,9 +26,8 @@ import { sitemapEntries } from "~/lib/sitemap";
 export const prerender = false;
 
 export const GET: APIRoute = async () => {
-  const [entries, pricing, contents, faq] = await Promise.all([
+  const [entries, contents, faq] = await Promise.all([
     sitemapEntries(),
-    getPricingContent("de"),
     Promise.all(serviceDefinitions.map((service) => resolveServiceContent(service, "de"))),
     cmsFor("faq_v2", "de", getFaqContent("de")),
   ]);
@@ -41,7 +39,7 @@ export const GET: APIRoute = async () => {
     serviceContent[service.id] = contents[index];
   });
 
-  return new Response(renderLlmsTxt({ entries, packages: pricing.packages, serviceContent, faq: faq.items }), {
+  return new Response(renderLlmsTxt({ entries, serviceContent, faq: faq.items }), {
     headers: {
       "content-type": "text/plain; charset=utf-8",
       "cache-control": "public, max-age=3600",

@@ -290,19 +290,19 @@ const ui = cardActionUi[lang];
    * The card roots are named explicitly rather than matched by shape: a
    * wildcard would draw a ring around whatever box happened to contain a bar.
    */
-  :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):has(.card-actions__cta:focus-visible) {
+  :where(.demo-card, .reference-card, .bc-tile, .project-tile, .study-card, .credential-card):has(.card-actions__cta:focus-visible) {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
-  :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):hover .card-actions__cta svg,
-  :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):focus-within .card-actions__cta svg {
+  :where(.demo-card, .reference-card, .bc-tile, .project-tile, .study-card, .credential-card):hover .card-actions__cta svg,
+  :where(.demo-card, .reference-card, .bc-tile, .project-tile, .study-card, .credential-card):focus-within .card-actions__cta svg {
     transform: translate(2px, -2px);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):hover .card-actions__cta svg,
-    :where(.demo-card, .reference-card, .bc-tile, .study-card, .credential-card):focus-within .card-actions__cta svg {
+    :where(.demo-card, .reference-card, .bc-tile, .project-tile, .study-card, .credential-card):hover .card-actions__cta svg,
+    :where(.demo-card, .reference-card, .bc-tile, .project-tile, .study-card, .credential-card):focus-within .card-actions__cta svg {
       transform: none;
     }
   }

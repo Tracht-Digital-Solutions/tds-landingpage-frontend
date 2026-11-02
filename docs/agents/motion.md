@@ -114,7 +114,7 @@ within 72 px of the right edge.
 ## Hero
 
 - The hero's **copy** stays plain Astro, and so does its decorative geometry (2026-10-22, was a React island):
-  markup in `sections/Hero.astro`, arrival in CSS (`translate` only), drift/sway/pointer in `lib/motion/heroDecor.ts`
+  markup in `sections/Hero.astro`, arrival in CSS (`translate` only), drift/sway/pointer in one frame loop in `lib/motion/heroDecor.ts` (never a Motion spring per pointer event: it restarts without velocity and stutters)
   through `boot.ts`. The landing page loads React only for the consent banner, chat, the service finder (on intent)
   and the contact form (on view) — see architecture.md.
 - The decoration slides in from its edges, drifts at about 5–10 px/s and follows the pointer about 60 px. The bodies tilt
@@ -122,16 +122,7 @@ within 72 px of the right edge.
   `.hero-shape__body`, 14–17 s loops), so the depth shows on a phone too. Reduced motion renders one fixed turned
   pose in CSS (`.hero-shape--still`).
 - The scroll-linked part is CSS (`animation-timeline: view()`), not a hook.
-- **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render from the demos and
-  design studies, on a flat wheel right of the slogan (2026-10-12: flatter, slower, larger cards) — front card on
-  top, neighbours lower at 50 % / 18 % opacity, the rest hidden. A turn every 5.2 s changes `--slot`; the
-  registered `--hc-angle` derived from it transitions with `--lp-ease-swing` (1.5 s), and position, scale and tilt
-  are `sin()`/`cos()` of that angle, so cards travel the arc and swing past their place. **Dragging** turns it with
-  the hand (`--hc-drag`, capture only after a 6 px slop) and springs onto the nearest card on release; a throw
-  coasts on by its speed (`lib/momentum.ts`); a click on a neighbour brings it forward. Plain Astro, no island; it sits behind the copy (only the
-  hero's links take the pointer). Pauses under the pointer, with focus inside, while dragged, off screen, in a hidden
-  tab, under reduced motion and the motion switch. Only the front card's link is in the tab order; the others are
-  `aria-hidden` with `tabindex="-1"` but stay clickable.
+- **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render. The wheel is one number, its position in cards (`lib/heroWheel.ts`); hand, spring and the own turn all move it and the script writes each card's `--slot`, so a press mid-turn holds the wheel. A swipe of 12 % of a card turns one card; a throw carries further. Only the fade is a CSS transition.
 - **On a phone the shapes keep to measured bands:** smaller, less drift (`narrowQuery` in `heroDecor.ts`), no scroll drift.
   `audit:ux` at 360 × 740 is the tightest case.
 - `npm run audit:perf` measures 390 px and 1440 px and pins `h1#hero-heading` as the LCP element on both.

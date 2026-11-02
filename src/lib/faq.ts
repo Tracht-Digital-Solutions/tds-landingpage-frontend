@@ -182,7 +182,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Für drei Pakete gilt ein Festpreis: Website-Check, Website-Optimierung und Onepager – sie stehen bei den Preisen. Alles andere wird als eigenes Angebot kalkuliert, mit Festpreis oder Budgetobergrenze, bevor die Arbeit beginnt.",
+            a: "Die Leistungen stehen mit ihrem Ab-Preis im Digitalmarkt. Jedes Projekt wird als eigenes Angebot kalkuliert, mit Festpreis oder Budgetobergrenze, bevor die Arbeit beginnt.",
             group: "pricing",
           },
           {
@@ -339,7 +339,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "What does a website or an online shop cost?",
-            a: "Three packages have a fixed price: website check, website optimisation and one-pager – listed under Pricing. Everything else gets a quote of its own, with a fixed price or a budget cap, before work begins.",
+            a: "Services are listed with their starting price in the Digitalmarkt. Every project gets a quote of its own, with a fixed price or a budget cap, before work begins.",
             group: "pricing",
           },
           {

@@ -26,7 +26,6 @@
 
 import { PROPERTY_ORIGINS } from "@tracht-digital-solutions/tds-shared/nav";
 import { HOME_FAQ_COUNT, type FaqItem } from "./faq";
-import type { PricePackage } from "./pricing";
 import { platformDefinitions, platformHref } from "./platforms";
 import { siteConfig } from "./seo";
 import type { SitemapEntry } from "./sitemap";
@@ -40,8 +39,6 @@ export interface LlmsInput {
    * panel's exclusions apply, and the unfiltered `SITEMAP_ENTRIES` from a test.
    */
   entries: readonly SitemapEntry[];
-  /** The fixed-price packages the page shows — never a committed copy of them. */
-  packages: readonly PricePackage[];
   /**
    * German service copy after CMS resolution, by service id. A service without
    * an entry falls back to its committed copy, so a caller that cannot resolve
@@ -57,7 +54,6 @@ export interface LlmsInput {
   faq?: readonly Pick<FaqItem, "q" | "a">[];
 }
 
-const euro = new Intl.NumberFormat("de-DE");
 
 /**
  * The first clause of a price sentence: "Festpreise ab 390 € netto, alles
@@ -89,12 +85,13 @@ const PAGE_LABELS: Record<string, string> = {
   // long after the page held seventeen.
   "/fragen": "Häufige Fragen — nach Übernahme, Preisen und Zusammenarbeit gruppiert",
   "/visitenkarte": "Digitale Visitenkarte",
+  "/bildrechte": "Bildrechte — Herkunft der Bilder, Nutzung, Erlaubnis anfragen",
   "/projekte": "Projekte und Referenzen — Kundenprojekte, eigene Projekte, Beispielseiten und Designstudien",
   "/qualifikationen": "Qualifikationen — abgeschlossene Weiterbildungen, jedes Zertifikat im Original",
 };
 
 export function renderLlmsTxt(input: LlmsInput): string {
-  const { entries, packages, serviceContent = {}, faq = [] } = input;
+  const { entries, serviceContent = {}, faq = [] } = input;
   const label = (path: string): string =>
     path === "/fragen" && faq.length > 0
       ? `Häufige Fragen — alle ${faq.length}, nach Übernahme, Preisen und Zusammenarbeit gruppiert`
@@ -132,17 +129,10 @@ export function renderLlmsTxt(input: LlmsInput): string {
   // ── services, in the catalogue's order ──────────────────────────────────
   const serviceEntries = entries.filter((entry) => serviceByPath.has(entry.de));
   if (serviceEntries.length > 0) {
-    const fixed = packages.map((pkg) => `${pkg.title} ${euro.format(pkg.price)} €`).join(", ");
     out("## Leistungen");
     out();
-    out(
-      `${serviceEntries.length === 4 ? "Vier" : String(serviceEntries.length)} Leistungen, jede mit einer eigenen Seite. ` +
-        `${packages.length === 3 ? "Drei" : String(packages.length)} Pakete haben einen`,
-    );
-    out("Festpreis (netto, zuzüglich Mehrwertsteuer):");
-    out(`${fixed}.`);
-    out("Alles andere gibt es auf Anfrage. Kosten entstehen erst, wenn wir einen");
-    out("Auftrag vereinbaren.");
+    out(`${serviceEntries.length === 4 ? "Vier" : String(serviceEntries.length)} Leistungen, jede mit einer eigenen Seite.`);
+    out(`Konkrete Lösungen stehen mit ihrem Ab-Preis im Digitalmarkt: ${PROPERTY_ORIGINS.shop}/`);
     out();
     // `entries` keeps `serviceDefinitions`' order, which is the order the
     // overview, the navigation and the sitemap all use.
@@ -182,7 +172,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
       out(`- ${label(entry.de)}:`);
       out(pair(entry));
     }
-    out(`- Preise: ${siteConfig.url}/#preise`);
+    out(`- Preise: ${PROPERTY_ORIGINS.shop}/?art=own`);
     out(`- Kontaktformular: ${siteConfig.url}/#contact`);
     out(`- Ratgeber: ${siteConfig.blogUrl}/ (English: ${siteConfig.blogUrl}/en/)`);
     out(`- Online-Tools: ${PROPERTY_ORIGINS.tools}/ (English: ${PROPERTY_ORIGINS.tools}/en/)`);
@@ -213,10 +203,8 @@ export function renderLlmsTxt(input: LlmsInput): string {
   out("- Die Seiten werden serverseitig gerendert; JSON-LD-Strukturdaten stehen im");
   out("  `<head>` jeder Seite. Leistungs- und Systemseiten nennen ihr Stand-Datum");
   out("  und ihren Autor.");
-  out(
-    `- Die einzigen genannten Preise sind die ${packages.length === 3 ? "drei" : String(packages.length)} Festpreise oben. Alle anderen`,
-  );
-  out("  Preise hängen vom Umfang ab; sie gibt es auf Anfrage.");
+  out("- Preise nennt nur der Digitalmarkt, als Ab-Preise. Ein Projekt bekommt ein");
+  out("  schriftliches Angebot.");
   out("- Diese Datei wird aus denselben Quellen erzeugt wie die Seiten. Es gibt");
   out("  keine weitere Fassung, keine Markdown-Kopien und keine Stichwortlisten.");
 

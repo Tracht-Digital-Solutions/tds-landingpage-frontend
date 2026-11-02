@@ -1200,3 +1200,17 @@ const ui =
     }
   }
 </style>
+
+<script>
+  import { handOffContactDraft } from "~/lib/contactDraft";
+  import { QUOTE_PARAM, readQuoteRequest } from "~/lib/quoteRequest";
+
+  const quote = readQuoteRequest(window.location.search);
+  if (quote) {
+    handOffContactDraft({ message: quote, service: "web-presence" });
+    // A reload must not write over what the visitor has changed since.
+    const url = new URL(window.location.href);
+    url.searchParams.delete(QUOTE_PARAM);
+    window.history.replaceState(null, "", url);
+  }
+</script>

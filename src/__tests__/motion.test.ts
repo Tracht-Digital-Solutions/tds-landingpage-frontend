@@ -182,7 +182,6 @@ describe("motion on the landing page", () => {
 
   it("tilts the interactive cards in depth, under a fine pointer only", () => {
     for (const file of [
-      "components/PricingList.astro",
       "components/ui/DemoCard.astro",
       "components/ui/StudyCard.astro",
       "components/ui/BusinessCardTile.astro",

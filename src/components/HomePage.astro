@@ -10,9 +10,9 @@
  * Promise → offer → proof and examples → how it works → knowledge → the person →
  * cost → objections → action:
  *
- * Hero → Leistungen (Webauftritt first, the systems, the assistant's button) →
- * Projekte und Referenzen → Vorgehen → Journal → Wieso ich? → Preise
- * (with the assistant's second button) → FAQ → Kontakt.
+ * Hero → Leistungen (products, the assistant's button, the systems) →
+ * Projekte und Referenzen → Vorgehen → Journal → Wieso ich? → FAQ → Kontakt.
+ * Prices live in the Digitalmarkt, not here.
  *
  * Each section answers the question a visitor has at that point. Paper and
  * sand alternate down the page (the FAQ stays directly above the navy contact
@@ -32,7 +32,6 @@ import Services from "~/components/sections/Services.astro";
 import ProjectReferences from "~/components/sections/ProjectReferences.astro";
 import Process from "~/components/sections/Process.astro";
 import Journal from "~/components/sections/Journal.astro";
-import Pricing from "~/components/sections/Pricing.astro";
 import FAQ from "~/components/sections/FAQ.astro";
 import Contact from "~/components/sections/Contact.astro";
 import ServiceAssistant from "~/components/ServiceAssistant.astro";
@@ -42,7 +41,6 @@ import {
   faqPageSchema,
   organizationSchema,
   personSchema,
-  pricingSchema,
   speakableSchema,
   websiteSchema,
 } from "~/lib/jsonld";
@@ -52,7 +50,6 @@ import { getFaqContent, homeFaqItems } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import { tFor } from "~/lib/i18n";
-import { getPricingContent } from "~/lib/pricing";
 
 interface Props {
   lang: Lang;
@@ -66,7 +63,6 @@ const home = getHomeContent(lang);
 // the button labels stay in `home_hero`.
 const hero = await cmsFor("home_hero", lang, home.hero);
 const footer = await cmsFor("footer", lang, tFor(lang).footer);
-const pricing = await getPricingContent(lang);
 // Resolved here too so the FAQPage JSON-LD stays 1:1 with the (possibly
 // admin-edited) answers FAQ.astro renders. cms.ts memoises the fetch.
 const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
@@ -77,20 +73,12 @@ const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
 const shownFaq = homeFaqItems(faq);
 
 // The home page carries the canonical entity graph — Organization, Person and
-// WebSite live here; subpages reference them by @id. The fixed-price packages
-// are an `OfferCatalog` on the page that shows them. No `HowTo`: Google retired those
+// WebSite live here; subpages reference them by @id. No `HowTo`: Google retired those
 // rich results, and the process is not a set of instructions.
 const jsonLd = asGraph(
   organizationSchema(),
   personSchema(),
   websiteSchema(lang),
-  pricingSchema(
-    pricing.packages.map((pkg) => ({
-      name: pkg.title,
-      description: pkg.description,
-      price: pkg.price,
-    })),
-  ),
   faqPageSchema(shownFaq),
   {
     "@type": "WebPage",
@@ -139,8 +127,6 @@ const titles = {
     <Journal />
     <SectionSeam />
     <About />
-    <SectionSeam />
-    <Pricing />
     <SectionSeam />
     <FAQ />
     <Contact />
@@ -205,18 +191,9 @@ const titles = {
     padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));
   }
 
-  /* about → preise: WIDE. Between the person and the money is the biggest
-     break on the page. */
+  /* about → faq: WIDE. */
   #about {
     padding-block-end: var(--lp-rhythm-wide);
-  }
-  #preise {
-    padding-block-start: max(var(--lp-rhythm-wide), var(--lp-section-top));
-  }
-
-  /* preise → faq: NORMAL. The questions are mostly about the prices above. */
-  #preise {
-    padding-block-end: var(--lp-rhythm-normal);
   }
   #faq {
     padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));

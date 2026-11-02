@@ -209,3 +209,10 @@ cookie-, session- or `Accept-Language`-dependent content on a cached route.**
   The logo is a pre-sized lossless WebP (`LOGO` in `lib/imageVariants.ts`).
 - Republished screenshots carry a content hash (`scripts/media-versions.mjs` → `virtual:media-versions`;
   `mediaSrc()` appends `?v=<hash>`), because those paths are cached for a week.
+
+## Services and prices (2026-11-02)
+
+- The home page shows the most important services as products (`lib/serviceProducts.ts`) and states no amount. The Pricing section, its calculator and the `pricingSchema` call are gone; `/preise` and its twins 301 to the Digitalmarkt.
+- "Alle Leistungen" leads to the shop's `?art=own`. A tile links to its product page only when the API lists the slug; otherwise to that filtered list.
+- The shop's "Angebot anfordern" arrives as `?anfrage=` (`lib/quoteRequest.ts`) and becomes a draft in the contact form. It never changes what the server renders.
+- `/bildrechte` is where every image's `license` points (tds-shared `imageRights`).

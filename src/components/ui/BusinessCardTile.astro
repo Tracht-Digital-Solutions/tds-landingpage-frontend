@@ -79,10 +79,11 @@ const href = businessCardHref(lang);
         loading="lazy"
         decoding="async"
       />
+      <span class="bc-tile__origin">{copy.eyebrow}</span>
     </div>
 
     <div class="bc-tile__body">
-      <p class="bc-tile__eyebrow">{copy.eyebrow}</p>
+      <p class="bc-tile__kind">{copy.kind}</p>
       <h3 class="bc-tile__title">{copy.title}</h3>
       <p class="bc-tile__text">{copy.text}</p>
     </div>
@@ -153,16 +154,29 @@ const href = businessCardHref(lang);
     padding: 1.125rem 1.25rem 1rem;
   }
 
-  /* The one thing this tile says that neither neighbour does: it is ours. A
-     visitor who reads it as a customer case would be misled about the
-     reference shelf it sits on. */
-  .bc-tile__eyebrow {
-    margin: 0;
+  .bc-tile__origin {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    max-width: calc(100% - 4.5rem);
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    color: var(--color-black);
     font-size: 0.6875rem;
     font-weight: 600;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+  .bc-tile__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-accent);
+    color: var(--color-muted);
   }
 
   .bc-tile__title {

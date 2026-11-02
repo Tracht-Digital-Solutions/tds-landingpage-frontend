@@ -227,7 +227,6 @@ const origin = DEMO_ORIGINS[definition.origin][lang];
        matches its section is not a card. */
     --demo-card-bg: var(--color-soft);
     --demo-card-bg-hover: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
-    /* Overridden by the wide-card container query at the bottom. */
     --demo-shot-aspect: 16 / 10;
 
     position: relative;
@@ -425,25 +424,7 @@ const origin = DEMO_ORIGINS[definition.origin][lang];
   /* THE LEAD CARD. Two tracks wide on desktop and nothing at all on a phone,
      because the same card is one track wide there. See the header note for
      why the band doubles in WIDTH rather than in height. */
-  @container (min-width: 30rem) {
-    .demo-card {
-      --demo-shot-aspect: 32 / 10;
-    }
-    .demo-card__body {
-      padding: 1.375rem 1.5rem 1.25rem;
-    }
-    .demo-card__title {
-      font-size: 1.625rem;
-      -webkit-line-clamp: 1;
-      line-clamp: 1;
-    }
-    .demo-card__text {
-      font-size: 0.9375rem;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      max-width: 46ch;
-    }
-  }
+  
 
   @media (prefers-reduced-motion: reduce) {
     .demo-card__zoom {

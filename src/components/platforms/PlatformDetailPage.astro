@@ -1,4 +1,5 @@
 ---
+import { shopServicesHref } from "~/lib/serviceProducts";
 /**
  * The page of one shop system or CMS (`lib/platforms.ts`), composed from the
  * same detail bands as a service page, plus the parts a platform page needs:
@@ -58,7 +59,7 @@ const path = platformHref(platform, lang);
 const canonical = `${siteConfig.url}${path}`;
 const homeHref = localizePath("/", lang);
 const contactHref = `${homeHref}#contact`;
-const pricesHref = `${homeHref}#preise`;
+const pricesHref = shopServicesHref(lang);
 
 const webPresence = getServiceById("web-presence");
 const parentHref = serviceHref(webPresence, lang);
@@ -79,7 +80,7 @@ const ui =
     ? {
         breadcrumb: "Brotkrümelnavigation",
         home: "Startseite",
-        prices: "Festpreise ansehen",
+        prices: "Preise im Digitalmarkt",
         updated: `Stand: ${month}`,
         relatedTitle: "Wie geht es weiter?",
         parentTitle: "Die Leistung dahinter",

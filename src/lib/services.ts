@@ -712,7 +712,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "Festpreise ab 390 € netto, alles andere auf Anfrage.",
+          "Die Preise stehen im Digitalmarkt, jedes Projekt bekommt ein schriftliches Angebot.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -761,7 +761,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "Fixed prices from €390 net, everything else on request.",
+          "Prices are listed in the Digitalmarkt, every project gets a written quote.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],

@@ -54,6 +54,7 @@ export const BUSINESS_CARD_QR_PATH: Record<Lang, string> = {
 
 export interface BusinessCardCopy {
   eyebrow: string;
+  kind: string;
   title: string;
   text: string;
   cta: string;
@@ -71,6 +72,7 @@ export interface BusinessCardCopy {
 export const businessCardCopy: Record<Lang, BusinessCardCopy> = {
   de: {
     eyebrow: "Eigenes Projekt",
+    kind: "Digitale Visitenkarte",
     title: "Digitale Visitenkarte",
     text: "Kontaktdaten, die man scannt statt abtippt — meine eigene, gebaut wie die für Kunden.",
     cta: "Karte ansehen",
@@ -78,6 +80,7 @@ export const businessCardCopy: Record<Lang, BusinessCardCopy> = {
   },
   en: {
     eyebrow: "Own project",
+    kind: "Digital business card",
     title: "Digital business card",
     text: "Contact details people scan instead of typing — mine, built like the ones for customers.",
     cta: "View the card",
@@ -124,8 +127,8 @@ export interface BusinessCardLink {
  * The slugs are code-owned anyway — the same rule as `BUSINESS_CARD_SLUG`.
  */
 const SITE_LINKS: Record<Lang, { home: string; services: string; pricing: string }> = {
-  de: { home: "/", services: "/#services", pricing: "/#preise" },
-  en: { home: "/en/", services: "/en/#services", pricing: "/en/#preise" },
+  de: { home: "/", services: "/#services", pricing: "https://shop.tracht-digital.de/?art=own#katalog" },
+  en: { home: "/en/", services: "/en/#services", pricing: "https://shop.tracht-digital.de/en/?art=own#katalog" },
 };
 
 /**
@@ -190,7 +193,7 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
       id: "pricing",
       group: "more",
       label: de ? "Preise" : "Pricing",
-      meta: de ? "Festpreise und Pakete" : "Fixed prices and packages",
+      meta: de ? "Leistungen im Digitalmarkt" : "Services in the Digitalmarkt",
       href: site.pricing,
     },
     {
