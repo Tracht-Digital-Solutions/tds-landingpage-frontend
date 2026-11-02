@@ -22,7 +22,7 @@ export interface OwnProject {
   hreflang: Record<Lang, string>;
   /** The service page this card is evidence for. */
   service: ServiceId;
-  copy: Record<Lang, { title: string; text: string; cta: string; alt: string }>;
+  copy: Record<Lang, { title: string; text: string; cta: string; alt: string; highlights?: { label: string; items: string[] } }>;
 }
 
 export const ownProjects: readonly OwnProject[] = [
@@ -38,12 +38,28 @@ export const ownProjects: readonly OwnProject[] = [
         text: "Freier Partitionsmanager für Windows 11, eine GParted-Alternative. Open Source, entwickelt von Julian Tracht. Beta: physische Datenträger bleiben gesperrt.",
         cta: "Quellcode ansehen",
         alt: "WParted mit Datenträgerkarte, Partitionsliste und einer ausstehenden Operation",
+        highlights: {
+          label: "Das Besondere",
+          items: [
+            "Läuft direkt unter Windows, ohne Installation und ohne Linux-Live-System",
+            "Erst planen, dann anwenden; jeder Schritt wird zurückgelesen und geprüft",
+            "Eigene Umsetzung von NTFS, exFAT und ext4, geprüft mit unabhängigen Werkzeugen",
+          ],
+        },
       },
       en: {
         title: "WParted",
         text: "Free partition manager for Windows 11, a GParted alternative. Open source, developed by Julian Tracht. Beta: physical disks stay locked.",
         cta: "View the source",
         alt: "WParted showing a disk map, a partition list and one pending operation",
+        highlights: {
+          label: "What is special",
+          items: [
+            "Runs directly on Windows, with no installation and no Linux live system",
+            "Plan first, then apply; every step is read back and verified",
+            "Own implementation of NTFS, exFAT and ext4, checked with independent tools",
+          ],
+        },
       },
     },
   },
