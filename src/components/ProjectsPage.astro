@@ -1,0 +1,281 @@
+---
+/**
+ * Projekte: every piece of work as a tile, in four groups, where the home
+ * page's "Mehr Projekte" leads. A page rather than an inline expansion, so the
+ * overview has its own address, works without JavaScript and keeps the back
+ * button. The group links are plain anchors for the same reason.
+ *
+ * A group without a tile renders nothing, and neither does its link: how many
+ * demos stand here is decided by `getDemos()`, not by an editor.
+ */
+import Layout from "~/layouts/Layout.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import AccentLetters from "~/components/ui/AccentLetters.astro";
+import PreviewLightbox from "~/components/ui/PreviewLightbox.astro";
+import ProjectTile from "~/components/ui/ProjectTile.astro";
+import DetailMeta from "~/components/detail/DetailMeta.astro";
+import { getCaseCards } from "~/lib/caseCards";
+import { getDemos } from "~/lib/demos";
+import { designStudies } from "~/lib/designStudies";
+import { localizePath, type Lang } from "~/lib/i18n";
+import { asGraph, breadcrumbNode, webPageNode } from "~/lib/jsonld";
+import { ownProjects } from "~/lib/ownProjects";
+import {
+  PROJECTS_UPDATED_AT,
+  caseEntry,
+  demoEntry,
+  projectEntry,
+  projectsCopy,
+  projectsHref,
+  studyEntry,
+  type ProjectEntry,
+} from "~/lib/projects";
+import { getServiceById, serviceHref } from "~/lib/services";
+import { absolute } from "~/lib/sitemap";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// The NAME is load-bearing: `seo.test.ts` reads this literal off disk.
+const pageDescriptions = {
+  de: "Kundenprojekte, eigene Projekte, Beispielseiten und Designstudien von Tracht Digital Solutions aus Schwarzenbek, als Kacheln mit klarer Herkunft.",
+  en: "Client projects, own projects, example sites and design studies by Tracht Digital Solutions from Schwarzenbek, as tiles that state their origin.",
+};
+
+const copy = projectsCopy[lang];
+const ui = copy.page;
+
+const groups = (
+  [
+    { id: "kunden", ...copy.groups.cases, entries: (await getCaseCards(lang)).map(caseEntry) },
+    {
+      id: "eigene",
+      ...copy.groups.own,
+      entries: [...ownProjects.map(projectEntry), { kind: "business-card", key: "business-card" } as ProjectEntry],
+    },
+    { id: "beispiele", ...copy.groups.demos, entries: (await getDemos()).map(demoEntry) },
+    { id: "studien", ...copy.groups.studies, entries: designStudies.map(studyEntry) },
+  ] satisfies { id: string; title: string; lead: string; entries: ProjectEntry[] }[]
+).filter((group) => group.entries.length > 0);
+
+const webPresence = getServiceById("web-presence");
+const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref(webPresence, lang) };
+
+const homeHref = localizePath("/", lang);
+const pageUrl = absolute(projectsHref(lang));
+const breadcrumbId = `${pageUrl}#breadcrumb`;
+const graph = asGraph(
+  webPageNode({
+    url: pageUrl,
+    name: ui.name,
+    description: pageDescriptions[lang],
+    lang,
+    dateModified: PROJECTS_UPDATED_AT,
+    breadcrumbId,
+  }),
+  breadcrumbNode(breadcrumbId, [
+    { name: ui.home, url: absolute(homeHref) },
+    { name: ui.name, url: pageUrl },
+  ]),
+);
+---
+
+<Layout
+  title={`${ui.name} — Tracht Digital`}
+  description={pageDescriptions[lang]}
+  lang={lang}
+  alternates={{ de: projectsHref("de"), en: projectsHref("en") }}
+  jsonLd={graph}
+>
+  <Header />
+
+  <main id="main">
+    <section class="relative pt-36 pb-10 md:pt-44 md:pb-14" aria-labelledby="projects-title">
+      <div class="relative lp-container">
+        <nav aria-label={ui.backNav} class="mb-10">
+          <a
+            href={homeHref}
+            class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors [@media(pointer:coarse)]:min-h-11"
+          >
+            <span aria-hidden="true">←</span>
+            {ui.back}
+          </a>
+        </nav>
+
+        <div class="max-w-3xl">
+          <h1
+            id="projects-title"
+            class="display text-4xl sm:text-5xl md:text-6xl text-[var(--color-black)] leading-[1.04] mb-6"
+          >
+            {ui.headline}{" "}
+            <AccentLetters text={ui.headlineAccent} />
+          </h1>
+          <span aria-hidden="true" class="tds-brandbar mb-8"></span>
+          <p class="lead text-[var(--color-muted)]">{ui.answer}</p>
+          <DetailMeta lang={lang} updatedAt={PROJECTS_UPDATED_AT} />
+        </div>
+
+        <nav aria-label={ui.jump} class="project-jump">
+          {
+            groups.map((group) => (
+              <a class="project-jump__link" href={`#${group.id}`}>
+                {group.title}
+                <span class="project-jump__count">{group.entries.length}</span>
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </section>
+
+    {
+      groups.map((group) => (
+        <section id={group.id} class="project-group" aria-labelledby={`${group.id}-title`}>
+          <div class="lp-container">
+            <div class="mb-8 max-w-2xl">
+              <h2 id={`${group.id}-title`} class="display text-2xl md:text-3xl text-[var(--color-black)] mb-2">
+                {group.title}
+              </h2>
+              <p class="text-[var(--color-muted)] leading-relaxed">{group.lead}</p>
+            </div>
+
+            <div class="project-grid">
+              {group.entries.map((entry) => (
+                <div class="project-grid__cell">
+                  <ProjectTile entry={entry} lang={lang} serviceLink={serviceLink} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    <section class="pb-24 md:pb-32" aria-labelledby="projects-cta">
+      <div class="lp-container">
+        <div class="project-cta">
+          <h2 id="projects-cta" class="display text-2xl md:text-3xl text-[var(--color-black)]">
+            {ui.ctaLead}
+          </h2>
+          <a href={`${homeHref}#contact`} class="project-cta__link" data-cta data-track="projects-cta">
+            {ui.cta}
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* Outside the groups: the lightbox binds to `closest("section")`, and from
+        here that is `null`, so it wires every card on the page. */}
+    <PreviewLightbox lang={lang} />
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .project-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  .project-jump__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    background: var(--color-soft);
+    color: var(--color-black);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .project-jump__link:hover {
+    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-soft));
+  }
+  .project-jump__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .project-jump__count {
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .project-group {
+    padding-block: 2rem 3.5rem;
+  }
+  @media (min-width: 48rem) {
+    .project-group {
+      padding-block: 2.5rem 5rem;
+    }
+  }
+
+  .project-grid {
+    --project-gap: 1rem;
+    display: grid;
+    gap: var(--project-gap);
+    align-items: stretch;
+    grid-auto-rows: 1fr;
+    /* `auto-fill`, so a short group keeps the same tile size as a long one. The
+       19rem floor keeps a tile beside a neighbour below the 30rem where only
+       some card families widen their screenshot band. */
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  }
+  .project-grid__cell {
+    display: grid;
+    grid-template-rows: 1fr;
+    min-width: 0;
+  }
+  @media (min-width: 48rem) {
+    .project-grid {
+      --project-gap: 1.5rem;
+    }
+  }
+
+  .project-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.75rem;
+    border-radius: 6px;
+    background: var(--color-soft);
+  }
+  .project-cta__link {
+    --lp-fill: var(--color-accent);
+    --lp-shade: initial;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+    max-width: 100%;
+    padding: 0.875rem 1.5rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    color: var(--color-paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .project-cta__link:hover {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
+  }
+  .project-cta__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+</style>

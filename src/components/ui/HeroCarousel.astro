@@ -39,11 +39,11 @@
  * is a link a keyboard reaches; the others are `aria-hidden` and out of the
  * tab order, but stay clickable. Every card leads to the showcase section.
  */
+import { projectsHref } from "~/lib/projects";
 import { getDemos } from "~/lib/demos";
 import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
 import { coverView, designStudies } from "~/lib/designStudies";
 import type { Lang } from "~/lib/i18n";
-import { localizePath } from "~/lib/i18n";
 import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
 import { mediaSrc } from "~/lib/mediaSrc";
 import { shuffled } from "~/lib/shuffle";
@@ -103,7 +103,7 @@ const half = Math.floor(sample.length / 2);
     the next ones to its right, the last ones to its left. */
 const slotOf = (index: number) => (((index + half) % sample.length) + sample.length) % sample.length - half;
 
-const href = `${localizePath("/", lang)}#showcase`;
+const href = projectsHref(lang);
 const ui =
   lang === "en"
     ? { label: "Examples of our work", roledescription: "carousel", open: "See the examples" }

@@ -1,0 +1,145 @@
+---
+/**
+ * Projekte und Referenzen: client work and samples under one heading, with
+ * "Mehr Projekte" leading to every tile on `/projekte`.
+ *
+ * Client cases lead and carry the badge "Kundenprojekt"; every other tile
+ * carries its origin (`DEMO_ORIGINS`). The copy is code-owned because the stored
+ * `references_home` headline says "für Kunden", which would be false over a
+ * grid that also holds samples.
+ *
+ * A grid, not a scroller, so nothing on the home page hides behind a gesture.
+ * Phones show the first three tiles: six stacked cards would bury the sections
+ * below them, and the link leads to the rest.
+ *
+ * The id stays `cases`: the navigation and the trust facts link to it.
+ */
+import { resolveLang } from "~/lib/i18n";
+import { getCaseCards } from "~/lib/caseCards";
+import { getDemos } from "~/lib/demos";
+import { designStudies } from "~/lib/designStudies";
+import { ownProjects } from "~/lib/ownProjects";
+import { projectsCopy, projectsHref, selectHomeProjects } from "~/lib/projects";
+import { getServiceById, serviceHref } from "~/lib/services";
+import PreviewLightbox from "~/components/ui/PreviewLightbox.astro";
+import ProjectTile from "~/components/ui/ProjectTile.astro";
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+
+const lang = resolveLang(Astro.currentLocale);
+const copy = projectsCopy[lang].home;
+
+const entries = selectHomeProjects({
+  cases: await getCaseCards(lang),
+  projects: ownProjects,
+  demos: await getDemos(),
+  studies: designStudies,
+});
+
+const webPresence = getServiceById("web-presence");
+const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref(webPresence, lang) };
+---
+
+<section id="cases" class="section-spacing" aria-labelledby="cases-heading">
+  <div class="lp-container">
+    <div class="max-w-2xl mx-auto md:mx-0">
+      <SectionHeader
+        headline={copy.headline}
+        headlineAccent={copy.headlineAccent}
+        id="cases-heading"
+        headingClass="mb-0"
+      />
+    </div>
+
+    <div class="projects-grid">
+      {
+        entries.map((entry) => (
+          <div class="projects-grid__cell">
+            <ProjectTile entry={entry} lang={lang} serviceLink={serviceLink} />
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="projects-more">
+      <a class="projects-more__link" href={projectsHref(lang)} data-cta data-track="projects-more">
+        {copy.more}
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+
+  <PreviewLightbox lang={lang} />
+</section>
+
+<style>
+  .projects-grid {
+    display: grid;
+    gap: 1rem;
+    align-items: stretch;
+    grid-auto-rows: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 2.5rem;
+  }
+  .projects-grid__cell {
+    display: grid;
+    grid-template-rows: 1fr;
+    min-width: 0;
+  }
+  .projects-grid__cell:nth-child(n + 4) {
+    display: none;
+  }
+
+  @media (min-width: 40rem) {
+    .projects-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .projects-grid__cell:nth-child(n + 4) {
+      display: grid;
+    }
+  }
+  @media (min-width: 48rem) {
+    .projects-grid {
+      gap: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .projects-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      /* Below the 30rem where cards widen their screenshot band: only some card
+         families do that, and a row would lose its common picture height. */
+      max-width: calc(3 * 29.5rem + 2 * 1.5rem);
+    }
+  }
+
+  .projects-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  /* No `.btn`: unlayered tds-shared beats a custom fill (see the FAQ's pill). */
+  .projects-more__link {
+    --lp-fill: var(--color-accent);
+    --lp-shade: initial;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    /* The paper colour: white fails contrast here in dark mode, where the accent lightens. */
+    color: var(--color-paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .projects-more__link:hover {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
+  }
+  .projects-more__link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+</style>

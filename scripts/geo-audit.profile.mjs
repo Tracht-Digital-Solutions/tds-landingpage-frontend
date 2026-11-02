@@ -108,6 +108,9 @@ export default {
     if (path === "/qualifikationen" || path === "/en/qualifications") {
       return { kind: "credentials", requiredTypes: ["WebPage", "Person", "BreadcrumbList"], requireDate: true };
     }
+    if (path === "/projekte" || path === "/en/projects") {
+      return { kind: "projects", requiredTypes: ["WebPage", "BreadcrumbList"], requireDate: true };
+    }
     if (path === "/visitenkarte" || path === "/en/business-card") {
       // `ProfilePage` IS a `WebPage`; a second one beside it would describe the
       // same thing twice. No `BreadcrumbList` and no date on purpose: the card

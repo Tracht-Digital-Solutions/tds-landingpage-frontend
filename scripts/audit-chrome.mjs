@@ -281,53 +281,6 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
   await context.close();
 }
 
-// ── 4. The shelf wraps with motion switched OFF ─────────────────────────────
-{
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    reducedMotion: "reduce",
-  });
-  const page = await context.newPage();
-  await page.goto(base, { waitUntil: "networkidle" });
-  const shelf = await page.$("[data-carousel] .showcase__track, .showcase__track");
-  if (!shelf) {
-    check("shelf found", false);
-  } else {
-    await shelf.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(1800);
-    const state = await page.evaluate(() => {
-      const track = document.querySelector(".showcase__track");
-      return {
-        children: track.children.length,
-        clones: track.querySelectorAll(".showcase__slide--clone").length,
-        autoplay: track.classList.contains("is-autoplay"),
-        scrollWidth: track.scrollWidth,
-        clientWidth: track.clientWidth,
-      };
-    });
-    check("clones exist under reduced motion", state.clones > 0, `${state.clones} clones of ${state.children} slides`);
-    check("no drift under reduced motion", state.autoplay === false, `is-autoplay=${state.autoplay}`);
-
-    // Push it past the wrap point by hand and see whether it comes back.
-    const wrapped = await page.evaluate(async () => {
-      const track = document.querySelector(".showcase__track");
-      const originals = [...track.children].filter((c) => !c.classList.contains("showcase__slide--clone"));
-      const firstClone = track.querySelector(".showcase__slide--clone");
-      if (!firstClone) return { loop: 0 };
-      const loop = firstClone.offsetLeft - originals[0].offsetLeft;
-      track.scrollLeft = loop + 40;
-      await new Promise((r) => setTimeout(r, 300));
-      return { loop, after: track.scrollLeft };
-    });
-    check(
-      "a hand scroll past the set wraps back",
-      wrapped.loop > 0 && wrapped.after < wrapped.loop,
-      `loop ${wrapped.loop}px, pushed to ${wrapped.loop + 40}, landed at ${Math.round(wrapped.after)}`,
-    );
-  }
-  await context.close();
-}
-
 // ── 5. The contact card ─────────────────────────────────────────────────────
 {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });

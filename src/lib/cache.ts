@@ -15,6 +15,7 @@ import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { CREDENTIALS_SLUG } from "./credentials";
 import { FAQ_PAGE_SLUG, faqPageHref } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
+import { PROJECTS_SLUG, projectsHref } from "./projects";
 import { serviceDefinitions, serviceHref } from "./services";
 import { SITEMAP_PATHS } from "./sitemapSections";
 
@@ -47,6 +48,8 @@ function contentPages(lang: "de" | "en"): string[] {
     // does, so an admin editing an answer has to date this page too. Unlike the
     // business card and the certificates, it is NOT code-owned throughout.
     faqPageHref(lang),
+    // Its tiles are code-owned, but it renders the footer and contact blocks.
+    projectsHref(lang),
   ];
 }
 
@@ -147,6 +150,8 @@ export const alwaysPaths = [
   // it — but a full rebuild still has to render it.
   CREDENTIALS_SLUG.de,
   CREDENTIALS_SLUG.en,
+  PROJECTS_SLUG.de,
+  PROJECTS_SLUG.en,
   FAQ_PAGE_SLUG.de,
   FAQ_PAGE_SLUG.en,
   ...SITEMAP_PATHS,
