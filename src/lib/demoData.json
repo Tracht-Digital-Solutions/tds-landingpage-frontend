@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-01T11:16:56.505Z",
+  "generatedAt": "2026-11-02T12:25:15.910Z",
   "demos": {
     "demo1": {
       "status": "ok",
@@ -10,7 +10,7 @@
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-01T11:16:38.370Z"
+      "checkedAt": "2026-11-02T12:24:51.786Z"
     },
     "demo2": {
       "status": "ok",
@@ -21,7 +21,7 @@
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-01T11:16:39.308Z"
+      "checkedAt": "2026-11-02T12:24:52.479Z"
     },
     "demo3": {
       "status": "ok",
@@ -32,18 +32,18 @@
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-01T11:16:40.441Z"
+      "checkedAt": "2026-11-02T12:24:53.348Z"
     },
     "demo4": {
-      "status": "tls-invalid",
-      "title": null,
-      "description": null,
-      "siteLang": null,
-      "favicon": null,
-      "preview": null,
-      "previewWidth": null,
-      "previewHeight": null,
-      "checkedAt": "2026-11-01T11:16:41.017Z"
+      "status": "ok",
+      "title": "Schreinerei Lindgrund | Demo-Webseite",
+      "description": "Demo-Webseite der fiktiven Schreinerei Lindgrund: So könnte die Unternehmensseite eines Handwerksbetriebs aussehen.",
+      "siteLang": "de",
+      "favicon": "/demos/demo4-favicon.svg",
+      "preview": "/demos/demo4.webp",
+      "previewWidth": 1440,
+      "previewHeight": 900,
+      "checkedAt": "2026-11-02T12:24:54.028Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-11-01T11:16:41.518Z"
+      "checkedAt": "2026-11-02T12:24:54.827Z"
     },
     "shop": {
       "status": "ok",
@@ -65,7 +65,7 @@
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-01T11:16:42.628Z"
+      "checkedAt": "2026-11-02T12:24:55.802Z"
     }
   }
 }
