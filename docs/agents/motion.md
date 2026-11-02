@@ -16,22 +16,17 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 - **Nothing runs off screen** (2026-10-11). Endless CSS/Web Animations are paused by tds-shared's
   `offscreenAnimationScript` (inline in `Layout.astro`). JavaScript loops gate themselves: the hero's Motion loops
   and its pointer listener stop when `#hero` leaves the viewport, the Lenis loop in `lib/smoothScroll.ts` runs only
-  while Lenis scrolls (parks after 30 still frames; `lenis.time = 0` before a wake), the showcase drift and the
+  while Lenis scrolls (parks after 30 still frames; `lenis.time = 0` before a wake), the
   brand-bar keys use `inView`, the cursor parks when settled, the pill's chevrons loop only while the swipe track
   shows. Check: count `requestAnimationFrame` calls over 2 s at the page bottom — it must be 0.
 - The shared React motion entry re-exports only `m` and `AnimatePresence`; a bare `motion` import is forbidden.
 - **Mouse drags coast on release** (2026-10-12, `lib/momentum.ts`): the speed of the last 100 ms carries on and
-  decays exponentially (τ 325 ms, like a native fling); a hold before letting go throws nothing. The showcase shelf
-  glides with snap off, then snaps; the hero wheel adds the projected distance before it picks the card. A press
-  catches a coasting shelf. Touch keeps its native momentum.
+  decays exponentially (τ 325 ms, like a native fling); a hold before letting go throws nothing. The hero wheel
+  adds the projected distance before it picks the card. Touch keeps its native momentum.
 - **Gentle section snap** (2026-10-12, `lib/sectionSnap.ts`, both paths in `lib/smoothScroll.ts`): a scroll that
   comes to rest within min(140 px, 16 % vh) of a top-level `main section[id]` start settles onto it in 520 ms;
   anywhere else the page stays. Not after a click-jump, while a pointer is held, a dialog is open, a field has
   focus, or under reduced motion. No CSS root `scroll-snap-type` (it would fight Lenis).
-- **The shelf has no ends** (2026-10-12): `wrap()` in `Showcase.astro` folds drag, glide and hand scroll into
-  `[1, loop + 1)`, so it runs backwards from the start too. Clones are NOT `inert` (that killed hover after the
-  wrap); they stay `aria-hidden` with `tabindex="-1"`. While dragged and coasting, cards take no pointer, and
-  `tilt.ts` lays a leaning card flat on any scroll.
 - **Hero scroll timelines are live** (2026-10-12): `#hero` is `overflow: clip` (was `hidden`, a scroll
   container, so every `view()` inside sat at progress 0), and so is its `.tds-decor` layer. The copy and the
   carousel share one named timeline (`--hero-copy`, `timeline-scope` on the section), so they leave together.
@@ -66,7 +61,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | Floating pill | `floatingCta.ts` | Springs its slots |
 | Bookmarks | `propertyTabs.ts` | Slide-in springs, neighbours lean |
 | Brand bars | `brandbar.ts` | Each `.tds-brandbar` is split into three `aria-hidden` key spans coloured from the bar's computed layers (`.lp-brandbar-keys` hides the layers) and played like keys: the key under the pointer jumps and stretches on a stiff spring, neighbours follow, all drop back with a crisp bounce. Only the spans' `transform` and `height` are written (height, not `scaleY`, so every key stays a pill) |
-| Cards in depth (`[data-motion-tilt]`) | `tilt.ts` | Price packages and showcase cards lean up to 6° toward a fine pointer (`rotateX`/`rotateY`, perspective 900 px) and spring back flat with a light bounce. Delegated from `document`, so showcase clones tilt too; flat while the shelf is dragged. No glare, no shadow animation. Never on a seam mosaic cell (service tiles): the tilted cell tears the 1 px seams |
+| Cards in depth (`[data-motion-tilt]`) | `tilt.ts` | Price packages and project tiles lean up to 6° toward a fine pointer (`rotateX`/`rotateY`, perspective 900 px) and spring back flat with a light bounce. Delegated from `document`. No glare, no shadow animation. Never on a seam mosaic cell (service tiles): the tilted cell tears the 1 px seams |
 | Drawn cursor | `lib/customCursor.ts`, `lib/cursorAbsorb.ts` | See below |
 | Page scroll bar | `pageScrollbar.ts`, `components/PageScrollbar.astro` | See below |
 | Generated photos (`[data-motion-image]`) | `images.ts` | Settle from a larger scale on scroll-in, then drift ±20 px; transform only |
@@ -152,9 +147,6 @@ within 72 px of the right edge.
   `initial={false}`, focus via a stable callback ref), round answer cards that lift and pop a tick, staggered
   result cards (best fit navy, hand-off CTA pink).
 
-## Showcase drift
-
-See [website-demos.md](website-demos.md#the-showcase-shelf).
 
 - Hero carousel (2026-10-12): front card 24vw (`--hc-focus` 0.2), centred on the section's vertical middle
   (`top: 50%` + `translate(0, -50%)`), `--hc-center` 80 % / 77 % from 80rem (≥ 21 px clear of the slogan at

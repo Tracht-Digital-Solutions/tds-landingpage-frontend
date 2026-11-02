@@ -52,7 +52,7 @@ describe("addresses that answer with a redirect instead of a 404", () => {
 describe("the section navigation", () => {
   const sections = [
     "src/components/sections/Services.astro",
-    "src/components/sections/CustomerCases.astro",
+    "src/components/sections/ProjectReferences.astro",
     "src/components/sections/Process.astro",
     "src/components/sections/Pricing.astro",
   ]
@@ -67,7 +67,7 @@ describe("the section navigation", () => {
 
   it("renders every home section the navigation names", () => {
     const home = read("src/components/HomePage.astro");
-    for (const component of ["Services", "CustomerCases", "Process", "Pricing", "FAQ", "Contact"]) {
+    for (const component of ["Services", "ProjectReferences", "Process", "Pricing", "FAQ", "Contact"]) {
       expect(home).toMatch(new RegExp(`<${component} />`));
     }
   });

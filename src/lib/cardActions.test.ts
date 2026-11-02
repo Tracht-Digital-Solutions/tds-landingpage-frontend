@@ -18,7 +18,8 @@ const cards = {
   ReferenceCard: read("src/components/ui/ReferenceCard.astro"),
   BusinessCardTile: read("src/components/ui/BusinessCardTile.astro"),
 };
-const showcase = read("src/components/sections/Showcase.astro");
+const projectTile = read("src/components/ui/ProjectTile.astro");
+const projectSection = read("src/components/sections/ProjectReferences.astro");
 const websiteDemos = read("src/components/sections/WebsiteDemos.astro");
 // The reference cards of a detail page live in the shared detail band since
 // the service page was split into `components/detail/`.
@@ -71,11 +72,11 @@ describe("the service link", () => {
     expect(serviceDetail).not.toMatch(/<CardActions[^>]*service=/);
   });
 
-  it("is present on the home page's shelf", () => {
+  it("is present on the home page's project grid", () => {
     // Resolved once per render and handed down, not looked up per card.
-    expect(showcase).toMatch(/getServiceById\("web-presence"\)/);
-    expect(showcase).toMatch(/<DemoCard[^>]*serviceLink=\{webPresenceLink\}/s);
-    expect(showcase).toMatch(/<BusinessCardTile serviceLink=\{webPresenceLink\}/);
+    expect(projectSection).toMatch(/getServiceById\("web-presence"\)/);
+    expect(projectTile).toMatch(/<DemoCard[^>]*serviceLink=\{serviceLink\}/s);
+    expect(projectTile).toMatch(/<BusinessCardTile serviceLink=\{serviceLink\}/);
   });
 
   /**

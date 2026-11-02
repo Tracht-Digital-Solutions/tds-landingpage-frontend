@@ -1,0 +1,33 @@
+---
+/**
+ * One tile of the project grids (home page and `/projekte`), whatever kind of
+ * work it shows. Each card family keeps its own markup and its own origin badge.
+ *
+ * The caller wraps this in a grid cell: a card root under `container-type:
+ * inline-size` collapses to 0 px as a flex item (docs/agents/website-demos.md).
+ */
+import type { CardAction } from "~/lib/cardActions";
+import type { Lang } from "~/lib/i18n";
+import type { ProjectEntry } from "~/lib/projects";
+import BusinessCardTile from "~/components/ui/BusinessCardTile.astro";
+import DemoCard from "~/components/ui/DemoCard.astro";
+import OwnProjectCard from "~/components/ui/OwnProjectCard.astro";
+import ReferenceCard from "~/components/ui/ReferenceCard.astro";
+import StudyCard from "~/components/ui/StudyCard.astro";
+
+interface Props {
+  entry: ProjectEntry;
+  lang: Lang;
+  /** The service the samples are evidence for. Resolved once by the section. */
+  serviceLink: CardAction;
+}
+
+const { entry, lang, serviceLink } = Astro.props;
+const clientBadge = lang === "de" ? "Kundenprojekt" : "Client project";
+---
+
+{entry.kind === "case" && <ReferenceCard card={entry.card} lang={lang} badge={clientBadge} />}
+{entry.kind === "project" && <OwnProjectCard project={entry.project} lang={lang} />}
+{entry.kind === "demo" && <DemoCard demo={entry.demo} lang={lang} serviceLink={serviceLink} />}
+{entry.kind === "study" && <StudyCard study={entry.study} lang={lang} serviceLink={serviceLink} />}
+{entry.kind === "business-card" && <BusinessCardTile serviceLink={serviceLink} />}

@@ -3,11 +3,9 @@
  * One published reference case: an optional screenshot of the customer's site,
  * the context, the outcome, an optional metric, and the links the case earns.
  *
- * Extracted out of `sections/References.astro` when that section merged into
- * `sections/Showcase.astro`. It is a component now for one concrete reason:
- * the merged shelf puts reference cards and demo cards side by side in the
- * same track, and two card families that sit next to each other have to be
- * tuned against each other in one place rather than inside a section body.
+ * A component for one concrete reason: the project grids put reference cards
+ * and demo cards side by side, and two card families that sit next to each
+ * other have to be tuned against each other in one place.
  *
  * ### What this card shares with `DemoCard`
  *
@@ -33,24 +31,10 @@
  */
 import type { Lang } from "~/lib/i18n";
 import type { CardAction } from "~/lib/cardActions";
+import type { ReferenceCardData } from "~/lib/caseCards";
 import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
 import { mediaSrc } from "~/lib/mediaSrc";
 import CardActions from "~/components/ui/CardActions.astro";
-
-export interface ReferenceCardData {
-  id: string;
-  preview: { src: string; width: number; height: number } | null;
-  reference: {
-    title: string;
-    context: string;
-    result: string;
-    metric?: string | null;
-  };
-  /** Every service the case used, in catalog order, each with its page. */
-  services: { label: string; href: string }[];
-  articleHref: string | null;
-  siteHref: string | null;
-}
 
 interface Props {
   card: ReferenceCardData;

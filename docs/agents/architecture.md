@@ -13,25 +13,24 @@
 Used by both trees (`pages/index.astro`, `pages/en/index.astro` are wrappers). The order follows a visitor's
 questions:
 
-Hero → Leistungen (Webauftritt first, systems strip, assistant button) → Kundenprojekte
-(`sections/CustomerCases.astro`) → Vorgehen (with the first-conversation card) → Beispielseiten und
-Designstudien (`sections/Showcase.astro`) → compact Journal → Wieso ich? (with the qualifications teaser) →
+Hero → Leistungen (Webauftritt first, systems strip, assistant button) → Projekte und Referenzen
+(`sections/ProjectReferences.astro`) → Vorgehen (with the first-conversation card) → compact Journal → Wieso ich? (with the qualifications teaser) →
 Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ → Kontakt.
 
 - The FAQ stays directly above the navy contact block.
 - Removed for good (don't bring back): positioning band, pricing teaser with drawer, hero slider,
   TechMarquee, Currently. Portfolio stays hidden.
-- **Client work and samples are separate sections.** Approved cases render on their service's detail page and
-  in `CustomerCases` (badge "Kundenprojekt"); demos, design studies and the business card render in
-  `Showcase` with an origin badge (`DEMO_ORIGINS`). No origin label may name a client, not even to deny one
-  (`demos.test.ts`). `CustomerCases` renders nothing without a case; `Showcase` always has the business card.
+- **Client work and samples share one section, told apart by badges** (2026-11-02). `ProjectReferences` shows six
+  tiles (three on a phone, `selectHomeProjects` in `lib/projects.ts`): cases with the badge "Kundenprojekt", then
+  samples with an origin badge (`DEMO_ORIGINS`). "Mehr Projekte" leads to `/projekte`, `/en/projects`
+  (`components/ProjectsPage.astro`), every tile in four groups. No origin label may name a client, not even to
+  deny one (`demos.test.ts`). The heading is code-owned: a stored `references_home` headline says "für Kunden".
 - **Seams between sections** are `ui/SectionSeam.astro` elements in `HomePage.astro` (content width, faded
   ends, the small brand bar in the middle), not borders on the sections. None under the hero or above the navy
   contact block; two in a row collapse to one.
-- **Own projects** (`lib/ownProjects.ts`, `ui/OwnProjectCard.astro`): WParted and its website lead the Showcase
-  shelf with the badge "Eigenes Projekt". They never go into `references.ts`: that section says "für Kunden".
-- **Kundenprojekte** shows the heading and the cards only; the `references_home` intro and consent line stay
-  in the content shape but don't render.
+- **Own projects** (`lib/ownProjects.ts`, `ui/OwnProjectCard.astro`) carry the badge "Eigenes Projekt" and never go
+  into `references.ts`.
+- `references_home` no longer renders on the home page; the block stays in the content shape so it keeps loading.
 - **Vorgehen is a horizontal stepper** (`sections/Process.astro`, 2026-10-11): only the step titles, side by side
   on one rail from 48rem, each a `<button aria-expanded aria-controls>`; the open step's card shows under the row
   with a notch at its step (hover with 140 ms intent, focus, tap, arrow keys). Without JavaScript every panel

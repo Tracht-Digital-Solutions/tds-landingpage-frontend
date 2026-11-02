@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolveEvents } from "@tracht-digital-solutions/tds-shared/cache";
 
 import { alwaysPaths, cacheEvents } from "./cache";
+import { projectsHref } from "./projects";
 import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { faqPageHref } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
@@ -30,6 +31,7 @@ describe("cacheEvents", () => {
       // The questions page renders the same `faq_v2` block the home page's FAQ
       // section does, so editing an answer has to rebuild it.
       faqPageHref(lang),
+      projectsHref(lang),
       // The business card is NOT in here. It is a standalone page rendering
       // no CMS block, so a block save must not rebuild it — it is covered by
       // `alwaysPaths` instead, asserted further down.

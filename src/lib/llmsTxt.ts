@@ -89,6 +89,7 @@ const PAGE_LABELS: Record<string, string> = {
   // long after the page held seventeen.
   "/fragen": "Häufige Fragen — nach Übernahme, Preisen und Zusammenarbeit gruppiert",
   "/visitenkarte": "Digitale Visitenkarte",
+  "/projekte": "Projekte und Referenzen — Kundenprojekte, eigene Projekte, Beispielseiten und Designstudien",
   "/qualifikationen": "Qualifikationen — abgeschlossene Weiterbildungen, jedes Zertifikat im Original",
 };
 

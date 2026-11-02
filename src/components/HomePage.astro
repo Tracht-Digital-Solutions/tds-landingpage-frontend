@@ -7,16 +7,16 @@
  *
  * ### The order (2026-09-15)
  *
- * Promise → offer → proof → how it works → examples → knowledge → the person →
+ * Promise → offer → proof and examples → how it works → knowledge → the person →
  * cost → objections → action:
  *
  * Hero → Leistungen (Webauftritt first, the systems, the assistant's button) →
- * Kundenprojekte → Vorgehen → Beispielseiten → Journal → Wieso ich? → Preise
+ * Projekte und Referenzen → Vorgehen → Journal → Wieso ich? → Preise
  * (with the assistant's second button) → FAQ → Kontakt.
  *
  * Each section answers the question a visitor has at that point. Paper and
- * sand alternate down the page (the showcase keeps sand on both sides, the FAQ
- * stays directly above the navy contact block); the one paper-on-paper seam is
+ * sand alternate down the page (the FAQ stays directly above the navy contact
+ * block); the one paper-on-paper seam is
  * "Wieso ich?" — photo and wash — above the prices.
  *
  * The service finder is no longer a section: it waits behind two buttons and
@@ -29,9 +29,8 @@ import Footer from "~/components/Footer.astro";
 import Hero from "~/components/sections/Hero.astro";
 import About from "~/components/sections/About.astro";
 import Services from "~/components/sections/Services.astro";
-import CustomerCases from "~/components/sections/CustomerCases.astro";
+import ProjectReferences from "~/components/sections/ProjectReferences.astro";
 import Process from "~/components/sections/Process.astro";
-import Showcase from "~/components/sections/Showcase.astro";
 import Journal from "~/components/sections/Journal.astro";
 import Pricing from "~/components/sections/Pricing.astro";
 import FAQ from "~/components/sections/FAQ.astro";
@@ -133,11 +132,9 @@ const titles = {
     <Hero lang={lang} slogan={footer.slogan} cta1={hero.cta1} cta2={hero.cta2} />
     <Services />
     <SectionSeam />
-    <CustomerCases />
+    <ProjectReferences />
     <SectionSeam />
     <Process />
-    <SectionSeam />
-    <Showcase />
     <SectionSeam />
     <Journal />
     <SectionSeam />
@@ -195,19 +192,10 @@ const titles = {
     padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));
   }
 
-  /* process → showcase: WIDE. "How we work" ends the argument about working
-     together; the shelf below it is a different kind of thing entirely. */
-  #process {
-    padding-block-end: var(--lp-rhythm-wide);
-  }
-  #showcase {
-    padding-block-start: max(var(--lp-rhythm-wide), var(--lp-section-top));
-  }
-
-  /* showcase → blog → about: NORMAL throughout. `#blog` is the one section
+  /* process → blog → about: NORMAL throughout. `#blog` is the one section
      that never used `.section-spacing` (it had a hand-written `py-16 md:py-24`),
      which is why both of its edges are set here rather than overridden. */
-  #showcase {
+  #process {
     padding-block-end: var(--lp-rhythm-normal);
   }
   #blog {

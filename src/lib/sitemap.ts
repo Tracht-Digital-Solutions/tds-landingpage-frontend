@@ -19,6 +19,7 @@ import { BUSINESS_CARD_SLUG } from "./businessCard";
 import { CREDENTIALS_SLUG, CREDENTIALS_UPDATED_AT } from "./credentials";
 import { FAQ_PAGE_SLUG, FAQ_PAGE_UPDATED_AT } from "./faq";
 import { platformDefinitions, platformHref } from "./platforms";
+import { PROJECTS_SLUG, PROJECTS_UPDATED_AT } from "./projects";
 import { siteConfig } from "./seo";
 import { serviceDefinitions, serviceHref } from "./services";
 import { canonicalPath, exclusionPatterns, groupExcluded } from "./sitemapExclusions";
@@ -75,6 +76,15 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
     en: BUSINESS_CARD_SLUG.en,
     changefreq: "monthly",
     priority: 0.5,
+  },
+  // Every piece of work as a tile. Evidence for the service pages, like the
+  // certificates, and refreshed as projects are added.
+  {
+    de: PROJECTS_SLUG.de,
+    en: PROJECTS_SLUG.en,
+    changefreq: "monthly",
+    priority: 0.7,
+    lastmod: PROJECTS_UPDATED_AT,
   },
   // The certificates. Above the business card and below a service page: it is
   // evidence for what the service pages claim, not a thing for sale.

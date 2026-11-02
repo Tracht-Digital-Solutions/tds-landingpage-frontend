@@ -1,7 +1,8 @@
-# Website demos and the showcase
+# Website demos and the project grids
 
 The demo sites (`demo1`…`demo5.tracht-digital.de`, plus `shop`) render on the home page in
-`sections/Showcase.astro` and on the Webauftritt service page in `sections/WebsiteDemos.astro`.
+`sections/ProjectReferences.astro`, on `/projekte` in `components/ProjectsPage.astro` and on the Webauftritt
+service page in `sections/WebsiteDemos.astro`. `ui/ProjectTile.astro` picks the card family for the first two.
 
 ## Three files, load-bearing split
 
@@ -50,7 +51,7 @@ lone card into a poster).
 
 ## Design studies
 
-Seven studies (`lib/designStudies.ts`, `ui/StudyCard.astro`) follow the demos on the shelf: invented brands, no
+Seven studies (`lib/designStudies.ts`, `ui/StudyCard.astro`) follow the demos on `/projekte`: invented brands, no
 host, no URL. Captures carry "DESIGNSTUDIE · eigenständig erstellt · kein Kundenauftrag" as a watermark and the
 card's badge says only "Designstudie". Built to `DemoCard`'s measurements (16:10 band), shows the sector, no magnifier: the
 bar's call to action opens the enlargement. Not in `sections/WebsiteDemos.astro`. `npm run studies:import`
@@ -74,13 +75,12 @@ writes the WebP; PNG originals stay out of the repo.
   - The service link is a **prop**; on the Webauftritt page it is `null`. `cardActions.test.ts` guards geometry,
     that absence, and that a reference card never repeats its primary service as a badge.
 
-## The showcase shelf
+## The project grids
 
-Every card is one track wide. The shelf has **no arrows**: it drifts on its own (32 px/s, a seamless loop over one
-set of `aria-hidden` / `inert` clones) and is swiped (touch natively, mouse by drag). It stops under the pointer,
-with focus inside, during a drag or touch, off screen and in a hidden tab, and never drifts under reduced motion or
-the site's motion switch. `showcaseDrag.test.ts` holds the drag rules and clones. Scroll snap needs
-`scroll-padding`.
+No shelf any more (2026-11-02): everything is a grid in a `display: grid` cell, or a card root under
+`container-type: inline-size` collapses. Column counts are explicit on the home page (1/2/3), so six tiles never
+leave a half-empty row; `/projekte` uses `auto-fill`, so every group has one tile size. Tiles beside a neighbour stay
+below 30rem, where only some card families widen their screenshot band.
 
 ## The demos' closing brand bar (`public/embed/tds-brand-bar.js`)
 
@@ -93,12 +93,11 @@ Each demo embeds only `<tds-brand-bar lang="…">` with a fallback link plus
 - `.htaccess` caches `/embed/` for an hour.
 - `brandBar.test.ts` holds the contract. **Edit the bar here, never in a demo.**
 
-- Order is drawn per render (2026-10-12, `src/lib/shuffle.ts`): the showcase shuffles demos among
-  demos and studies among studies (running sites still lead); the hero carousel samples from both.
-  The page cache keeps one draw until it renders again — at the latest the next day (daily gate).
+- The hero carousel's order is drawn per render (`src/lib/shuffle.ts`); the page cache keeps one draw until it
+  renders again, at the latest the next day. The project grids use catalog order.
 
-## Own projects on the shelf
+## Own projects
 
 `src/lib/ownProjects.ts` holds WParted and its website: code-owned, one picture per language in
-`public/projects/`, not probed and not synced. They lead the shelf with the badge "Eigenes Projekt" and never
+`public/projects/`, not probed and not synced. They carry the badge "Eigenes Projekt" and never
 go into `references.ts`. Replace the pictures by hand when WParted or its website changes visibly.
