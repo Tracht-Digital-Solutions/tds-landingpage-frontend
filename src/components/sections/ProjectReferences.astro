@@ -81,7 +81,6 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
     display: grid;
     gap: 1rem;
     align-items: stretch;
-    grid-auto-rows: 1fr;
     grid-template-columns: minmax(0, 1fr);
     margin-top: 2.5rem;
   }
@@ -96,6 +95,7 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
 
   @media (min-width: 40rem) {
     .projects-grid {
+      grid-auto-rows: 1fr;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .projects-grid__cell:nth-child(n + 4) {
