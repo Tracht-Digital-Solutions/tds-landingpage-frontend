@@ -894,13 +894,10 @@ html[data-motion="on"] :where([data-cta]) {
    not one per tile — its 1px seams are the tiles' separation. */
 :where(
   [class*="rounded-[6px]"],
-  .demo-card,
-  .study-card,
   .credential-card,
   .about-portrait__card,
   .post-card,
   .reference-card,
-  .bc-tile,
   .faq-item,
   .first-call,
   .pricing-packages__card
@@ -975,11 +972,8 @@ html[data-motion="on"] :where([data-cta]) {
 }
 :where(
   a.post-card,
-  .demo-card,
-  .study-card,
   .credential-card,
   .reference-card,
-  .bc-tile,
   a.faq-cta
 ):where(:hover, :focus-within) {
   translate: -2px -2px;
@@ -987,11 +981,8 @@ html[data-motion="on"] :where([data-cta]) {
 }
 :where(
   a.post-card,
-  .demo-card,
-  .study-card,
   .credential-card,
   .reference-card,
-  .bc-tile,
   a.faq-cta
 ) {
   transition-property: background-color, color, translate;
@@ -1010,12 +1001,9 @@ html[data-motion="on"] :where([data-cta]) {
     .first-call__cta,
     .submit-button,
     a.post-card,
-    .demo-card,
-    .study-card,
     .credential-card,
     .reference-card,
-    .bc-tile,
-    a.faq-cta
+      a.faq-cta
   ):where(:hover, :focus-visible, :focus-within) {
     translate: none;
   }
@@ -1148,4 +1136,22 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
   border-radius: var(--tds-radius-pill);
   will-change: transform;
   pointer-events: none;
+}
+
+/* The tooltip at the pointer (`lib/pointerTooltip.ts`). */
+.lp-tooltip {
+  position: fixed;
+  z-index: 2147483000;
+  max-width: 18rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 6px;
+  background: var(--color-surface-navy);
+  color: #fff;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  box-shadow: 3px 3px 0 0 var(--color-accent-pink);
+  pointer-events: none;
+}
+.lp-tooltip[hidden] {
+  display: none;
 }

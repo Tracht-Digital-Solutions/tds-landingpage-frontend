@@ -144,17 +144,17 @@ const ui =
         saveContact: "Kontakt speichern",
         urgentBadge: "Auch für Notfälle",
         urgentTitle: "Notfall?",
-        urgentText: "Ich nehme auch kurzfristige Notfälle an. Kreuz im Formular „Notfall“ an oder",
-        urgentCall: "ruf direkt an",
+        urgentText: "Kurzfristige Notfälle werden angenommen. Im Formular „Notfall“ ankreuzen oder",
+        urgentCall: "direkt anrufen",
       }
     : {
-        reachTitle: "Reach me directly",
+        reachTitle: "Direct contact",
         businessCard: "Business card",
         saveContact: "Save contact",
         urgentBadge: "Emergencies too",
         urgentTitle: "Emergency?",
-        urgentText: "I also take on emergencies at short notice. Tick “Emergency” in the form or",
-        urgentCall: "call me directly",
+        urgentText: "Emergencies at short notice are taken on. Tick “Emergency” in the form or",
+        urgentCall: "call directly",
       };
 ---
 
@@ -978,6 +978,7 @@ const ui =
      still shows on the pink. */
   .contact-urgent-toggle {
     display: flex;
+    align-self: end;
     align-items: center;
     gap: 0.75rem;
     padding: 0.875rem 1rem;
@@ -1169,6 +1170,82 @@ const ui =
     font-size: 0.75rem;
     line-height: 1.5;
     color: rgb(255 255 255 / 0.55);
+  }
+
+  /* === Contact form: the three steps ================================
+     Numbered groups instead of one column of fields: what is asked, in what
+     order, and how far along it is. The number turns into a tick once a step
+     has what it needs. */
+  .contact-step {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .contact-step + .contact-step {
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+  }
+  .contact-step__head {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0;
+    margin-bottom: 1rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  .contact-step__num {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+  .contact-step[data-done] .contact-step__num {
+    background: var(--color-accent-pink);
+    color: var(--color-surface-navy);
+  }
+  /* A field with its icon. */
+  .contact-input {
+    position: relative;
+  }
+  .contact-input__icon {
+    position: absolute;
+    top: 50%;
+    left: 0.875rem;
+    z-index: 2;
+    display: inline-flex;
+    translate: 0 -50%;
+    color: rgb(255 255 255 / 0.55);
+    pointer-events: none;
+    transition: color 200ms ease;
+  }
+  .contact-field-row:focus-within .contact-input__icon {
+    color: var(--color-accent-pink);
+  }
+  .contact-input .contact-field {
+    padding-left: 2.625rem !important;
+  }
+  @media (min-width: 64rem) {
+    #contact .contact-step--grow {
+      flex: 1;
+    }
   }
 
   /* === Contact form: send button ==================================== */

@@ -102,14 +102,6 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
               {lang === "de" ? "Freelancer-Portfolio" : "Freelance portfolio"}
             </a>
           </li>
-          <li>
-            <a
-              href={`https://wparted.tracht-digital.de${lang === "en" ? "/en/" : "/"}`}
-              class="footer-link text-white/80 hover:text-white"
-            >
-              {lang === "de" ? "WParted (Open Source)" : "WParted (open source)"}
-            </a>
-          </li>
         </ul>
       </nav>
 
@@ -125,6 +117,24 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
               </a>
             </li>
           ))}
+        </ul>
+        <p id="footer-projects-title" class="eyebrow text-white/60 mt-8 mb-4">
+          {lang === "de" ? "Weitere Projekte" : "More projects"}
+        </p>
+        <ul class="space-y-2 text-sm" aria-labelledby="footer-projects-title">
+          <li>
+            <a
+              href={`https://wparted.tracht-digital.de${lang === "en" ? "/en/" : "/"}`}
+              class="footer-link text-white/80 hover:text-white"
+            >
+              WParted
+            </a>
+          </li>
+          <li>
+            <a href="https://astera.one" class="footer-link text-white/80 hover:text-white" rel="noopener">
+              astera.one
+            </a>
+          </li>
         </ul>
       </nav>
 

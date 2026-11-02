@@ -144,3 +144,9 @@ within 72 px of the right edge.
   1024–1920); earlier: `--hc-focus` 0.18 (cos⁸ bump), flatter rim (`--hc-ry` 80svh,
   `--hc-tilt` 0.1), snappy turn (`--hc-turn` 1400ms = `TURN_MS`, rest 11 s); shots are 16:10 and width-fitted, never `cover`-cropped. The left neighbour rises
   under the slogan on the flat rim, so it rests at opacity 0.3 (`data-side`).
+
+## Project cards and the receiver (2026-11-02)
+
+- `ui/ProjectCard.astro` is the one card template. Its hard shadow is a plate at z -28 in the tilt's 3D space, scaled 1.031 to cancel the perspective; `lib/motion/tilt.ts` slides it against the lean with `--tilt-shade-*`. A `box-shadow` on the tilting card leans with it.
+- The receiver slides only on a smartphone (`isPhone()`, shorter screen side under 600 px). The track fills pink behind it; elsewhere it is a plain link.
+- Tooltips sit at the pointer (`lib/pointerTooltip.ts`, 700 ms rest); a `title` moves to `data-tip` so the native one never opens.

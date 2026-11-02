@@ -181,13 +181,7 @@ describe("motion on the landing page", () => {
   });
 
   it("tilts the interactive cards in depth, under a fine pointer only", () => {
-    for (const file of [
-      "components/ui/DemoCard.astro",
-      "components/ui/StudyCard.astro",
-      "components/ui/BusinessCardTile.astro",
-    ]) {
-      expect(src(file), file).toContain("data-motion-tilt");
-    }
+    expect(src("components/ui/ProjectCard.astro")).toContain("data-motion-tilt");
     const tilt = src("lib/motion/tilt.ts");
     expect(tilt).toContain("hasFinePointer()");
     // Transform only: a transitioned box-shadow is ruled out in design.md.

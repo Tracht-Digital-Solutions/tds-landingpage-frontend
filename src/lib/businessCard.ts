@@ -193,7 +193,7 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
       id: "pricing",
       group: "more",
       label: de ? "Preise" : "Pricing",
-      meta: de ? "Leistungen im Digitalmarkt" : "Services in the Digitalmarkt",
+      meta: de ? "Leistungen im Shop" : "Services in the shop",
       href: site.pricing,
     },
     {

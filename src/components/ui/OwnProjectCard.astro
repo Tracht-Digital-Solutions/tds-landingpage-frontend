@@ -21,144 +21,23 @@ const { project, lang } = Astro.props;
 const copy = project.copy[lang];
 const service = getServiceById(project.service);
 const serviceLink: CardAction = { label: service.fallback[lang].title, href: serviceHref(service, lang) };
+import ProjectCard from "~/components/ui/ProjectCard.astro";
 ---
 
-<article class="project-tile-slot" data-reveal>
-  <div class="project-tile" data-motion-tilt>
-    <div class="project-tile__shot">
-      <img
-        src={mediaSrc(project.image[lang])}
-        alt={copy.alt}
-        width={DEMO_PREVIEW.width}
-        height={DEMO_PREVIEW.height}
-        loading="lazy"
-        decoding="async"
-      />
-      <span class="project-tile__origin">{DEMO_ORIGINS.own[lang]}</span>
-    </div>
-
-    <div class="project-tile__body">
-      <p class="project-tile__kind">{copy.kind}</p>
-      <h3 class="project-tile__title">{copy.title}</h3>
-      <p class="project-tile__text">{copy.text}</p>
-    </div>
-
-    <CardActions
-      lang={lang}
-      service={serviceLink}
-      cta={{ href: project.href[lang], label: copy.cta, external: true, hreflang: project.hreflang[lang], detail: copy.title }}
-    />
-  </div>
-</article>
-
-<style>
-  .project-tile-slot {
-    /* Same containment as `.demo-card-slot`, same reason: the showcase slide is
-       a grid so this element's width is definite before containment is
-       consulted. See the note in `Showcase.astro`. */
-    container-type: inline-size;
-  }
-
-  .project-tile {
-    --project-tile-bg: var(--color-soft);
-    --project-tile-bg-hover: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
-
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    /* Without it a card in a shorter row stops at its content and the row's
-       cards end on different baselines. */
-    height: 100%;
-    background: var(--project-tile-bg);
-    border-radius: 6px;
-    overflow: hidden;
-    color: inherit;
-    transition: background-color 200ms var(--tds-ease-out);
-  }
-  .project-tile:hover,
-  .project-tile:focus-within {
-    background: var(--project-tile-bg-hover);
-  }
-  /* The focus ring is drawn for this tile from the bar's call to action — that
-     link's stretched layer IS the tile's hit area. The rule lives in the one
-     global block in `ui/CardActions.astro`, because it needs a class from each
-     of the two components and an Astro scoped style can only name its own. */
-
-  .project-tile__shot {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
-    background: var(--color-paper);
-    /* A screenshot of a page has a page edge; without this it bleeds into the
-       card's fill and reads as a broken layout rather than a picture of one. */
-    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-  }
-  .project-tile__shot img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-  }
-
-  .project-tile__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-    padding: 1.125rem 1.25rem 1rem;
-  }
-
-  .project-tile__origin {
-    position: absolute;
-    top: 0.625rem;
-    left: 0.625rem;
-    z-index: 1;
-    max-width: calc(100% - 4.5rem);
-    padding: 0.25rem 0.625rem;
-    border-radius: 100px;
-    background: color-mix(in srgb, var(--color-card) 94%, transparent);
-    color: var(--color-black);
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    pointer-events: none;
-  }
-  .project-tile__kind {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-muted);
-  }
-
-  .project-tile__title {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.25rem;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
-    color: var(--color-black);
-    margin: 0;
-    transition: color 200ms var(--tds-ease-out);
-  }
-  .project-tile:hover .project-tile__title,
-  .project-tile:focus-within .project-tile__title {
-    color: var(--color-primary);
-  }
-
-  .project-tile__text {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: var(--color-muted);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-</style>
+<ProjectCard
+  title={copy.title}
+  src={mediaSrc(project.image[lang])}
+  alt={copy.alt}
+  width={DEMO_PREVIEW.width}
+  height={DEMO_PREVIEW.height}
+  origin={DEMO_ORIGINS.own[lang]}
+  kind={copy.kind}
+  text={copy.text}
+>
+  <CardActions
+    slot="actions"
+    lang={lang}
+    service={serviceLink}
+    cta={{ href: project.href[lang], label: copy.cta, external: true, hreflang: project.hreflang[lang], detail: copy.title }}
+  />
+</ProjectCard>

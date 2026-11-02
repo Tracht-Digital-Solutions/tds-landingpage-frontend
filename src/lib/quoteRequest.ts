@@ -1,5 +1,5 @@
 /**
- * A quote request arriving from the Digitalmarkt.
+ * A quote request arriving from the Shop.
  *
  * The shop lives on another origin, so `lib/contactDraft.ts`'s sessionStorage
  * cannot reach it: the text comes in the query string. It is only ever a draft

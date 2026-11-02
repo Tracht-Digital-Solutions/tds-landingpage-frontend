@@ -14,13 +14,15 @@
  * Delegated from `document`, so the showcase's cloned slides tilt too. Only
  * `rotateX`/`rotateY`/`transformPerspective` are written — they compose with
  * the package cards' `y` lift from `ux.ts`; the hard shadow's CSS `translate`
- * lift is a separate property and tilts along. No glare, no animated shadow.
+ * lift is a separate property and tilts along. No animated `box-shadow`.
  */
 type Dom = typeof import("@tracht-digital-solutions/tds-shared/motion/dom");
 
 /** Degrees at the card's edge: enough to read as depth, calm enough for text. */
 const MAX = 6;
 const PERSPECTIVE = 900;
+/** How far the shadow plate slides against the lean, in px. */
+const SHADE = 8;
 const RETURN = { type: "spring", bounce: 0.35, visualDuration: 0.5 } as const;
 
 export function mountTilt({ animate, pointerSpring, hasFinePointer }: Dom): void {
@@ -30,6 +32,9 @@ export function mountTilt({ animate, pointerSpring, hasFinePointer }: Dom): void
   let current: HTMLElement | null = null;
 
   const flatten = (card: HTMLElement) => {
+    card.removeAttribute("data-tilting");
+    card.style.setProperty("--tilt-shade-x", "0px");
+    card.style.setProperty("--tilt-shade-y", "0px");
     void animate(card, { rotateX: 0, rotateY: 0, transformPerspective: PERSPECTIVE }, RETURN);
   };
 
@@ -52,6 +57,14 @@ export function mountTilt({ animate, pointerSpring, hasFinePointer }: Dom): void
       const dx = Math.max(-1, Math.min(1, (event.clientX - (box.left + box.width / 2)) / (box.width / 2)));
       const dy = Math.max(-1, Math.min(1, (event.clientY - (box.top + box.height / 2)) / (box.height / 2)));
       void animate(card, { rotateX: -dy * MAX, rotateY: dx * MAX, transformPerspective: PERSPECTIVE }, pointerSpring);
+      // The shadow plate (`ui/ProjectCard.astro`) slides against the lean, the
+      // light follows the pointer. Custom properties on the card; the moving
+      // parts are transforms and an opacity.
+      card.toggleAttribute("data-tilting", true);
+      card.style.setProperty("--tilt-shade-x", `${(-dx * SHADE).toFixed(1)}px`);
+      card.style.setProperty("--tilt-shade-y", `${(-dy * SHADE).toFixed(1)}px`);
+      card.style.setProperty("--tilt-light-x", `${((dx + 1) * 50).toFixed(1)}%`);
+      card.style.setProperty("--tilt-light-y", `${((dy + 1) * 50).toFixed(1)}%`);
     },
     { passive: true },
   );

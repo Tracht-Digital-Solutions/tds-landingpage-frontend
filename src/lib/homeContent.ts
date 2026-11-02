@@ -343,7 +343,7 @@ const content: Record<Lang, HomeContent> = {
       sub: "Eine kurze Nachricht genügt. Die Antwort kommt in der Regel innerhalb von 24 Stunden.",
     },
     journalHeading: {
-      headline: "Wissen für",
+      headline: "Blog für",
       headlineAccent: "Betriebe.",
     },
     trust: {
@@ -496,7 +496,7 @@ const content: Record<Lang, HomeContent> = {
       sub: "A short message is enough. Replies usually arrive within 24 hours.",
     },
     journalHeading: {
-      headline: "Know-how for",
+      headline: "Blog for",
       headlineAccent: "businesses.",
     },
     trust: {

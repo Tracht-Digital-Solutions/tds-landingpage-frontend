@@ -38,7 +38,7 @@ describe("own projects", () => {
       const text = ownProjects[0]!.copy[lang].text;
       expect(text).toMatch(/GParted[- ]?alternative/i);
       expect(text).toMatch(/beta/i);
-      expect(text).toContain("Julian Tracht");
+      expect(text).toContain("Tracht Digital Solutions");
       expect(text).not.toMatch(/GParted (für|for) Windows/i);
     }
   });

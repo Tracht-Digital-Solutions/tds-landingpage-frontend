@@ -132,7 +132,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
     out("## Leistungen");
     out();
     out(`${serviceEntries.length === 4 ? "Vier" : String(serviceEntries.length)} Leistungen, jede mit einer eigenen Seite.`);
-    out(`Konkrete Lösungen stehen mit ihrem Ab-Preis im Digitalmarkt: ${PROPERTY_ORIGINS.shop}/`);
+    out(`Konkrete Lösungen stehen mit ihrem Ab-Preis im Shop: ${PROPERTY_ORIGINS.shop}/`);
     out();
     // `entries` keeps `serviceDefinitions`' order, which is the order the
     // overview, the navigation and the sitemap all use.
@@ -176,7 +176,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
     out(`- Kontaktformular: ${siteConfig.url}/#contact`);
     out(`- Ratgeber: ${siteConfig.blogUrl}/ (English: ${siteConfig.blogUrl}/en/)`);
     out(`- Online-Tools: ${PROPERTY_ORIGINS.tools}/ (English: ${PROPERTY_ORIGINS.tools}/en/)`);
-    out(`- Digitalmarkt: ${PROPERTY_ORIGINS.shop}/ (English: ${PROPERTY_ORIGINS.shop}/en/)`);
+    out(`- Shop: ${PROPERTY_ORIGINS.shop}/ (English: ${PROPERTY_ORIGINS.shop}/en/)`);
     out();
   }
 
@@ -203,7 +203,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
   out("- Die Seiten werden serverseitig gerendert; JSON-LD-Strukturdaten stehen im");
   out("  `<head>` jeder Seite. Leistungs- und Systemseiten nennen ihr Stand-Datum");
   out("  und ihren Autor.");
-  out("- Preise nennt nur der Digitalmarkt, als Ab-Preise. Ein Projekt bekommt ein");
+  out("- Preise nennt nur der Shop, als Ab-Preise. Ein Projekt bekommt ein");
   out("  schriftliches Angebot.");
   out("- Diese Datei wird aus denselben Quellen erzeugt wie die Seiten. Es gibt");
   out("  keine weitere Fassung, keine Markdown-Kopien und keine Stichwortlisten.");

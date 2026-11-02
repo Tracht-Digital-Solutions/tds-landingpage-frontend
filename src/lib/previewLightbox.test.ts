@@ -62,7 +62,7 @@ describe("the demo card's markup", () => {
     expect(actions).toMatch(/inset:\s*0/);
     // `inset: 0` only reaches the card while the card is what it resolves
     // against. Without this the layer spreads over the whole carousel.
-    expect(card).toMatch(/\.demo-card\s*\{[^}]*position:\s*relative/s);
+    expect(readFileSync(resolve(process.cwd(), "src/components/ui/ProjectCard.astro"), "utf8")).toMatch(/\.project-card\s*\{[^}]*position:\s*relative/s);
   });
 
   it("keeps a focus ring on the whole card", () => {
@@ -72,7 +72,7 @@ describe("the demo card's markup", () => {
     // each of the two components, and an Astro scoped style only ever gets its
     // own appended.
     expect(actions).toMatch(
-      /:where\([^)]*\.demo-card[^)]*\):has\(\.card-actions__cta:focus-visible\)/,
+      /:where\([^)]*\.project-card[^)]*\):has\(\.card-actions__cta:focus-visible\)/,
     );
   });
 

@@ -41,7 +41,7 @@ describe("llms.txt", () => {
 
   it("names the sibling sites", () => {
     expect(llms).toContain("- Online-Tools: https://tools.tracht-digital.de/");
-    expect(llms).toContain("- Digitalmarkt: https://shop.tracht-digital.de/");
+    expect(llms).toContain("- Shop: https://shop.tracht-digital.de/");
   });
 
   it("names every page of the sitemap, in both languages", () => {

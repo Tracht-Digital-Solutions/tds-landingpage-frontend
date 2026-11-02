@@ -311,7 +311,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions baut WooCommerce-Shops, behebt Fehler und passt Themes update-sicher an – aus Schwarzenbek bei Hamburg.",
         answer:
-          "Tracht Digital Solutions ist das Unternehmen von Julian Tracht aus Schwarzenbek bei Hamburg. Für WooCommerce richtet es Shops ein, behebt Fehler und passt Themes so an, dass Updates möglich bleiben – mit *einem festen Ansprechpartner*.",
+          "Tracht Digital Solutions ist ein Unternehmen aus Schwarzenbek bei Hamburg. Für WooCommerce richtet es Shops ein, behebt Fehler und passt Themes so an, dass Updates möglich bleiben – mit *einem festen Ansprechpartner*.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Nach einem Update zeigt der Shop eine weiße Seite oder einen kritischen Fehler.",
@@ -403,7 +403,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions builds WooCommerce shops, fixes errors and customises themes in an update-safe way – from Schwarzenbek near Hamburg.",
         answer:
-          "Tracht Digital Solutions is the company of Julian Tracht, based in Schwarzenbek near Hamburg. For WooCommerce it sets up shops, fixes errors and customises themes so that updates stay possible – with *one steady point of contact*.",
+          "Tracht Digital Solutions is a company based in Schwarzenbek near Hamburg. For WooCommerce it sets up shops, fixes errors and customises themes so that updates stay possible – with *one steady point of contact*.",
         situationsTitle: "Typical situations",
         situations: [
           "After an update the shop shows a white page or a critical error.",
@@ -518,7 +518,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions richtet Shopware-6-Shops ein, behebt Fehler nach Updates und baut Themes – auch beim Umstieg von Shopware 5.",
         answer:
-          "Tracht Digital Solutions ist das Unternehmen von Julian Tracht aus Schwarzenbek bei Hamburg. Für Shopware 6 richtet es Shops ein, behebt Fehler und baut Themes. Es begleitet auch den Umstieg von Shopware 5, dessen Sicherheitsupdates *am 31. Juli 2024 endeten*.",
+          "Tracht Digital Solutions ist ein Unternehmen aus Schwarzenbek bei Hamburg. Für Shopware 6 richtet es Shops ein, behebt Fehler und baut Themes. Es begleitet auch den Umstieg von Shopware 5, dessen Sicherheitsupdates *am 31. Juli 2024 endeten*.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Nach einem Update lädt die Storefront oder die Administration nicht mehr richtig.",
@@ -610,7 +610,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions sets up Shopware 6 shops, fixes errors after updates and builds themes – including the move from Shopware 5.",
         answer:
-          "Tracht Digital Solutions is the company of Julian Tracht, based in Schwarzenbek near Hamburg. For Shopware 6 it sets up shops, fixes errors and builds themes. It also handles the move from Shopware 5, whose security updates *ended on 31 July 2024*.",
+          "Tracht Digital Solutions is a company based in Schwarzenbek near Hamburg. For Shopware 6 it sets up shops, fixes errors and builds themes. It also handles the move from Shopware 5, whose security updates *ended on 31 July 2024*.",
         situationsTitle: "Typical situations",
         situations: [
           "After an update the storefront or the administration no longer loads properly.",
@@ -725,7 +725,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions baut WordPress-Websites, behebt Fehler, passt Themes an und übernimmt Updates und Pflege – aus Schwarzenbek bei Hamburg.",
         answer:
-          "Tracht Digital Solutions ist das Unternehmen von Julian Tracht aus Schwarzenbek bei Hamburg. Es betreut WordPress-Websites: Fehler beheben, Updates, neue Seiten, Themes und Umzüge. WordPress läuft laut W3Techs auf *40,3 % aller Websites* (September 2026).",
+          "Tracht Digital Solutions ist ein Unternehmen aus Schwarzenbek bei Hamburg. Es betreut WordPress-Websites: Fehler beheben, Updates, neue Seiten, Themes und Umzüge. WordPress läuft laut W3Techs auf *40,3 % aller Websites* (September 2026).",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Statt der Website erscheint eine weiße Seite oder ein kritischer Fehler.",
@@ -838,7 +838,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions builds WordPress websites, fixes errors, customises themes and takes care of updates and upkeep – from Schwarzenbek near Hamburg.",
         answer:
-          "Tracht Digital Solutions is the company of Julian Tracht, based in Schwarzenbek near Hamburg. It looks after WordPress websites: fixing errors, updates, new sites, themes and migrations. According to W3Techs, WordPress runs *40.3% of all websites* (September 2026).",
+          "Tracht Digital Solutions is a company based in Schwarzenbek near Hamburg. It looks after WordPress websites: fixing errors, updates, new sites, themes and migrations. According to W3Techs, WordPress runs *40.3% of all websites* (September 2026).",
         situationsTitle: "Typical situations",
         situations: [
           "Instead of the website there is a white page or a critical error.",
@@ -974,7 +974,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions bringt TYPO3-Websites auf eine unterstützte Version, behebt Fehler und übernimmt die Pflege – aus Schwarzenbek bei Hamburg.",
         answer:
-          "Tracht Digital Solutions ist das Unternehmen von Julian Tracht aus Schwarzenbek bei Hamburg. Es betreut TYPO3-Websites: Upgrades, Fehlerbehebung, Templates und Relaunches. Wichtig: TYPO3 v12 bekommt *seit dem 1. Mai 2026 keine Community-Updates mehr*.",
+          "Tracht Digital Solutions ist ein Unternehmen aus Schwarzenbek bei Hamburg. Es betreut TYPO3-Websites: Upgrades, Fehlerbehebung, Templates und Relaunches. Wichtig: TYPO3 v12 bekommt *seit dem 1. Mai 2026 keine Community-Updates mehr*.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Die Seite läuft noch auf TYPO3 v12 oder älter.",
@@ -1087,7 +1087,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Tracht Digital Solutions brings TYPO3 websites onto a supported version, fixes errors and takes over the upkeep – from Schwarzenbek near Hamburg.",
         answer:
-          "Tracht Digital Solutions is the company of Julian Tracht, based in Schwarzenbek near Hamburg. It looks after TYPO3 websites: upgrades, fixing errors, templates and relaunches. Important: TYPO3 v12 has had *no community updates since 1 May 2026*.",
+          "Tracht Digital Solutions is a company based in Schwarzenbek near Hamburg. It looks after TYPO3 websites: upgrades, fixing errors, templates and relaunches. Important: TYPO3 v12 has had *no community updates since 1 May 2026*.",
         situationsTitle: "Typical situations",
         situations: [
           "The site still runs on TYPO3 v12 or older.",
@@ -1223,7 +1223,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "Homepage-Baukasten oder WordPress bei STRATO? Tracht Digital Solutions hilft bei Aufbau, Fehlern und Design – und beim Umzug zu WordPress.",
         answer:
-          "Tracht Digital Solutions ist das Unternehmen von Julian Tracht aus Schwarzenbek bei Hamburg. Es hilft bei Websites auf STRATO – ob Homepage-Baukasten oder WordPress: bei Aufbau, Fehlern und Gestaltung und *beim Umzug zu WordPress*.",
+          "Tracht Digital Solutions ist ein Unternehmen aus Schwarzenbek bei Hamburg. Es hilft bei Websites auf STRATO – ob Homepage-Baukasten oder WordPress: bei Aufbau, Fehlern und Gestaltung und *beim Umzug zu WordPress*.",
         situationsTitle: "Typische Ausgangslagen",
         situations: [
           "Der Homepage-Baukasten ist eingerichtet, aber die Seite wirkt nicht professionell.",
@@ -1337,7 +1337,7 @@ export const platformDefinitions: readonly PlatformDefinition[] = [
         summary:
           "STRATO website builder or WordPress at STRATO? Tracht Digital Solutions helps with setup, errors and design – and with moving to WordPress.",
         answer:
-          "Tracht Digital Solutions is the company of Julian Tracht, based in Schwarzenbek near Hamburg. It helps with websites at STRATO – on the Homepage-Baukasten website builder or WordPress: with setup, errors and design, and *with moving to WordPress*.",
+          "Tracht Digital Solutions is a company based in Schwarzenbek near Hamburg. It helps with websites at STRATO – on the Homepage-Baukasten website builder or WordPress: with setup, errors and design, and *with moving to WordPress*.",
         situationsTitle: "Typical situations",
         situations: [
           "The website builder is set up, but the site does not look professional.",
