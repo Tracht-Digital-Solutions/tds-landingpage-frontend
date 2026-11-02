@@ -27,6 +27,12 @@ describe("own projects", () => {
     }
   });
 
+  it("say what is special about the program, in both languages", () => {
+    const program = ownProjects[0]!;
+    expect(program.copy.de.highlights?.items).toHaveLength(3);
+    expect(program.copy.en.highlights?.items).toHaveLength(3);
+  });
+
   it("describe WParted as an alternative in beta, never as GParted itself", () => {
     for (const lang of LANGS) {
       const text = ownProjects[0]!.copy[lang].text;

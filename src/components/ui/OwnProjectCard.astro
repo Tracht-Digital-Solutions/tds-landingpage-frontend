@@ -40,6 +40,16 @@ const serviceLink: CardAction = { label: service.fallback[lang].title, href: ser
       <p class="project-tile__eyebrow">{DEMO_ORIGINS.own[lang]}</p>
       <h3 class="project-tile__title">{copy.title}</h3>
       <p class="project-tile__text">{copy.text}</p>
+      {
+        copy.highlights ? (
+          <div class="project-tile__highlights">
+            <p class="project-tile__highlights-label">{copy.highlights.label}</p>
+            <ul>
+              {copy.highlights.items.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+        ) : null
+      }
     </div>
 
     <CardActions
@@ -147,4 +157,20 @@ const serviceLink: CardAction = { label: service.fallback[lang].title, href: ser
     overflow: hidden;
   }
 
+  .project-tile__highlights {
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  .project-tile__highlights-label {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+    color: var(--color-black);
+  }
+  .project-tile__highlights ul {
+    margin: 0;
+    padding-left: 1rem;
+    list-style: disc;
+  }
 </style>
