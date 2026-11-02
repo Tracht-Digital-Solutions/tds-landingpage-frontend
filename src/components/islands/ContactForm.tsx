@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
@@ -26,6 +26,41 @@ type Lang = "de" | "en";
 
 /** Field ids double as the prefix of their error messages' ids. */
 type FieldName = "name" | "email" | "message" | "consent";
+
+const STEPS: Record<Lang, [string, string, string]> = {
+  de: ["Kontaktdaten", "Anliegen", "Nachricht"],
+  en: ["Contact details", "Your request", "Message"],
+};
+
+const ICONS = {
+  name: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+  email: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 6 10-6" /></>,
+  company: <><path d="M3 21h18M5 21V5l8-2v18M13 9l6 2v10M8 8h1M8 12h1M8 16h1" /></>,
+  subject: <><path d="M4 5h16v11H8l-4 4z" /></>,
+};
+
+function InputIcon({ name }: { name: keyof typeof ICONS }) {
+  return (
+    <span className="contact-input__icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {ICONS[name]}
+      </svg>
+    </span>
+  );
+}
+
+/** A numbered group of fields: the number becomes a tick once it is filled in. */
+function Step({ number, title, done, grow, children }: { number: number; title: string; done: boolean; grow?: boolean; children: ReactNode }) {
+  return (
+    <fieldset className={`contact-step${grow ? " contact-step--grow" : ""}`} data-done={done ? "" : undefined}>
+      <legend className="contact-step__head">
+        <span className="contact-step__num" aria-hidden="true">{done ? "✓" : number}</span>
+        {title}
+      </legend>
+      {children}
+    </fieldset>
+  );
+}
 
 /**
  * Contact form. Posts to tds-contact-api over CORS and validates with
@@ -98,6 +133,7 @@ export default function ContactForm({
     handleSubmit,
     setValue,
     getValues,
+    watch,
     formState: { errors },
   } = useForm<ContactFormData>({
     resolver: zodResolver(ContactSchema),
@@ -261,6 +297,8 @@ export default function ContactForm({
   );
 
   const submitting = submitState === "submitting";
+  const [nameValue, emailValue, subjectValue, messageValue] = watch(["name", "email", "subject", "message"]);
+  const steps = STEPS[lang];
 
   const form = (
     <div className={shake ? "shake" : ""}>
@@ -280,11 +318,14 @@ export default function ContactForm({
         {/* Pairs side by side from `sm` (2026-10-11): name and e-mail, then
             company and reason — the form is half as tall and reads as one
             card rather than a ladder of rows. */}
+        <Step number={1} title={steps[0]} done={Boolean(nameValue?.trim() && emailValue?.includes("@"))}>
         <div className="contact-form-pair">
         <div className={rowClass("name")}>
           <label htmlFor="name" className="contact-field-label">
             {copy.form.name}
           </label>
+          <div className="contact-input">
+            <InputIcon name="name" />
           <input
             id="name"
             type="text"
@@ -295,6 +336,7 @@ export default function ContactForm({
             {...a11yFor("name")}
             {...register("name")}
           />
+          </div>
           <Collapse open={Boolean(errors.name)}>
             <p id={errorId("name")} className="contact-field-error text-xs mt-2">
               {copy.errors.name}
@@ -306,6 +348,8 @@ export default function ContactForm({
           <label htmlFor="email" className="contact-field-label">
             {copy.form.email}
           </label>
+          <div className="contact-input">
+            <InputIcon name="email" />
           <input
             id="email"
             type="email"
@@ -316,6 +360,7 @@ export default function ContactForm({
             {...a11yFor("email")}
             {...register("email")}
           />
+          </div>
           <Collapse open={Boolean(errors.email)}>
             <p id={errorId("email")} className="contact-field-error text-xs mt-2">
               {copy.errors.email}
@@ -325,11 +370,12 @@ export default function ContactForm({
 
         </div>
 
-        <div className="contact-form-pair">
         <div className={rowClass()}>
           <label htmlFor="company" className="contact-field-label">
             {copy.form.company}
           </label>
+          <div className="contact-input">
+            <InputIcon name="company" />
           <input
             id="company"
             type="text"
@@ -338,8 +384,13 @@ export default function ContactForm({
             className={fieldClass}
             {...register("company")}
           />
+          </div>
         </div>
 
+        </Step>
+
+        <Step number={2} title={steps[1]} done={Boolean(subjectValue || urgent)}>
+        <div className="contact-form-pair">
         {/* The reason for getting in touch. Optional on purpose: making it
             mandatory costs submissions from the people whose request fits no
             entry, and they are the ones worth hearing from. Rendered only when
@@ -354,6 +405,8 @@ export default function ContactForm({
                 the row's underline, with the accent line growing on focus.
                 Only the OPEN list keeps its own frosted surface
                 (`::picker(select)` in Contact.astro). */}
+            <div className="contact-input">
+              <InputIcon name="subject" />
             <select
               id="subject"
               className={`${fieldClass} contact-select`}
@@ -367,9 +420,9 @@ export default function ContactForm({
                 </option>
               ))}
             </select>
+            </div>
           </div>
         )}
-        </div>
 
         {/* Short-notice emergencies are taken (2026-10-11). The same round box
             as the consent below, in a row that fills pink when ticked. Just the
@@ -384,7 +437,10 @@ export default function ContactForm({
           <span className="contact-consent-box" aria-hidden="true" />
           <span className="contact-urgent-toggle__title">{copy.urgentLabel}</span>
         </label>
+        </div>
+        </Step>
 
+        <Step number={3} title={steps[2]} done={Boolean(messageValue?.trim())} grow>
         <div className={`${rowClass("message")} contact-field-row--message`}>
           <label htmlFor="message" className="contact-field-label">
             {copy.form.message}
@@ -418,6 +474,7 @@ export default function ContactForm({
             </p>
           </Collapse>
         </div>
+        </Step>
 
         <div>
           <label className="flex items-center gap-3 cursor-pointer">

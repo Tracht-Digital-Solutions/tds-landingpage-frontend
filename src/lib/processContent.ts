@@ -35,10 +35,10 @@ const content: Record<Lang, ProcessContent> = {
         duration: "Schritt 1",
         actions: [
           "Das Gespräch läuft per Telefon, per Video oder vor Ort im Raum Hamburg.",
-          "Julian Tracht sieht sich Website, Shop, Tabellen, wiederkehrende Handarbeit an.",
-          "Danach sagt er offen, was sich lohnt.",
+          "Website, Shop, Tabellen, wiederkehrende Handarbeit werden gesichtet.",
+          "Danach ist klargestellt, welche Aufgaben sich lohnen.",
         ],
-        outcome: "Eine klare Einschätzung, woran sich die Arbeit lohnt.",
+        outcome: "Klare Aufgaben.",
       },
       {
         number: "02",
@@ -49,7 +49,7 @@ const content: Record<Lang, ProcessContent> = {
           "Der Preis steht als Festpreis oder Budgetobergrenze darin.",
           "Was nicht dazugehört, steht ebenfalls im Angebot.",
         ],
-        outcome: "Ein Angebot, über das sich in Ruhe entscheiden lässt.",
+        outcome: "Ein festes Angebot.",
       },
       {
         number: "03",
@@ -60,7 +60,7 @@ const content: Record<Lang, ProcessContent> = {
           "Jede Etappe lässt sich im Browser ausprobieren, Rückmeldungen fließen in die nächste.",
           "Datenschutz, Barrierefreiheit, Suchmaschinen gehören von Beginn an dazu.",
         ],
-        outcome: "Eine getestete Vorschau, bereit für den Start.",
+        outcome: "Eine getestete Vorschau.",
       },
       {
         number: "04",
@@ -71,7 +71,7 @@ const content: Record<Lang, ProcessContent> = {
           "Alle Zugänge, Code, Daten, eine verständliche Dokumentation gehen an den Betrieb.",
           "Eine Einweisung zeigt die Pflege der Inhalte. Wartung gibt es auf Wunsch, ohne Vertragsbindung.",
         ],
-        outcome: "Ein laufendes System in eigener Hand.",
+        outcome: "Ein laufendes System.",
       },
     ],
   },
@@ -85,10 +85,10 @@ const content: Record<Lang, ProcessContent> = {
         duration: "Step 1",
         actions: [
           "The conversation runs by phone, by video or in person around Hamburg.",
-          "Julian Tracht looks at the website, shop, spreadsheets, recurring manual work.",
-          "He then says openly what is worth doing.",
+          "The website, shop, spreadsheets, recurring manual work get reviewed.",
+          "After that it is clear which tasks are worth doing.",
         ],
-        outcome: "A clear view of where the work pays off.",
+        outcome: "Clear tasks.",
       },
       {
         number: "02",
@@ -99,7 +99,7 @@ const content: Record<Lang, ProcessContent> = {
           "The price is in it as a fixed price or a budget cap.",
           "What is not included is stated in the quote too.",
         ],
-        outcome: "A quote to decide on calmly.",
+        outcome: "A firm quote.",
       },
       {
         number: "03",
@@ -110,7 +110,7 @@ const content: Record<Lang, ProcessContent> = {
           "Each stage can be tried in the browser, feedback goes into the next one.",
           "Data protection, accessibility, search engines are part of it from the start.",
         ],
-        outcome: "A tested preview, ready to launch.",
+        outcome: "A tested preview.",
       },
       {
         number: "04",
@@ -121,7 +121,7 @@ const content: Record<Lang, ProcessContent> = {
           "All logins, code, data, clear documentation go to the business.",
           "A walkthrough shows how content is maintained. Maintenance is available on request, with no tie-in.",
         ],
-        outcome: "A running system in the business's own hands.",
+        outcome: "A running system.",
       },
     ],
   },

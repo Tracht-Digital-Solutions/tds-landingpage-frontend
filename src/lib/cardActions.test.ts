@@ -43,12 +43,10 @@ describe("the footer bar sits on the card, not in its body", () => {
    * build would complain about.
    */
   for (const [name, source] of Object.entries(cards)) {
-    it(`${name} renders it beside the body`, () => {
-      const body = indentOf(source, /<div class="[a-z-]+__body"/);
-      const bar = indentOf(source, /<CardActions/);
-      expect(body, "a card body").toBeGreaterThan(-1);
-      expect(bar, "a footer bar").toBeGreaterThan(-1);
-      expect(bar).toBe(body);
+    it(`${name} renders it in the template's actions slot`, () => {
+      // The template's actions slot sits beside its body.
+      expect(source).toContain("<ProjectCard");
+      expect(source).toMatch(/<CardActions\s+slot="actions"/);
     });
   }
 });

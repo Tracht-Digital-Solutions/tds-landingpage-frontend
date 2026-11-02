@@ -122,7 +122,7 @@ const credentialsUi =
       {/* Centred in the left column (2026-10-11), both ways: `mx-auto` in the
           half-width column and `self-center` against the taller text column,
           so the portrait no longer hangs at the top-left corner of its half. */}
-      <div class="max-w-sm mx-auto w-full md:self-center">
+      <div class="about-portrait-col max-w-sm mx-auto w-full">
         {/* A CARD, like every other box on this site since 0.42 (2026-09-28).
             It used to be a masked cut-out dissolving into a coral rectangle
             that dissolved with it — the last piece of the old soft language,
@@ -154,6 +154,13 @@ const credentialsUi =
           {/* The caption the card earns by being a card: who this is. It was
               only in the photo's `alt` before, i.e. invisible to everyone who
               can see. */}
+          <span class="about-portrait__place">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            {lang === "de" ? "Schwarzenbek bei Hamburg" : "Schwarzenbek near Hamburg"}
+          </span>
           <p class="about-portrait__caption">
             <span class="about-portrait__name">{siteConfig.founder.name}</span>
             <span class="about-portrait__role">{siteConfig.founder.jobTitle}</span>
@@ -173,13 +180,6 @@ const credentialsUi =
 
         {/* See the note at the top for what is NOT rendered here and why. */}
         <p class="text-lg font-medium text-[var(--color-black)] leading-relaxed">{about.p2}</p>
-        <a
-          class="credentials-teaser__link mt-4"
-          href={`${siteConfig.freelanceUrl}${lang === "en" ? "/en/" : "/"}`}
-        >
-          {about.portfolioLink}
-          <span aria-hidden="true">↗</span>
-        </a>
 
         {/* Two facts: a one-word heading and the figure (2026-10-12). The figure
             counts up as the tile scrolls into view (script below). The markup
@@ -188,7 +188,7 @@ const credentialsUi =
         <dl class="about-facts">
           {
             facts.map((fact) => (
-              <div class="about-fact">
+              <div class="about-fact tds-tone-navy">
                 <dt class="about-fact__label">{fact.label}</dt>
                 <dd class="about-fact__value">
                   <span aria-hidden="true">
@@ -201,17 +201,27 @@ const credentialsUi =
           }
         </dl>
 
+        <a
+          class="about-portfolio"
+          href={`${siteConfig.freelanceUrl}${lang === "en" ? "/en/" : "/"}`}
+          data-cta
+        >
+          {about.portfolioLink}
+          <span aria-hidden="true">↗</span>
+        </a>
+
         {/* The motivation. First person, and the only block on this page a
             competitor could not write — which is why it stands above the
             reasons rather than after them. */}
-        <div class="about-block">
+        <blockquote class="about-quote">
+          <span class="about-quote__mark" aria-hidden="true">„</span>
           <p class="eyebrow about-block__label">{about.motivation.title}</p>
           {
             about.motivation.body.map((paragraph) => (
               <p class="about-motivation__text">{paragraph}</p>
             ))
           }
-        </div>
+        </blockquote>
 
         <div class="about-block credentials-teaser">
           <p class="eyebrow credentials-teaser__label">{credentialsUi.label}</p>
@@ -219,6 +229,12 @@ const credentialsUi =
             {
               featured.map((entry) => (
                 <li class="about-tile">
+                  <span class="about-tile__icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="9" r="6" />
+                      <path d="m8.5 14-1.5 8 5-3 5 3-1.5-8" />
+                    </svg>
+                  </span>
                   <span class="about-tile__title">{shortTitle(entry)}</span>
                   <span class="about-tile__meta">{entry.issuer}</span>
                 </li>
@@ -372,6 +388,72 @@ const credentialsUi =
     color: var(--color-muted);
   }
 
+  /* The portrait stays in view beside the longer column. */
+  @media (min-width: 48rem) {
+    .about-portrait-col {
+      position: sticky;
+      top: 7rem;
+    }
+  }
+  .about-portrait__place {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    color: var(--color-black);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .about-portfolio {
+    --lp-fill: var(--color-accent);
+    --lp-shade: initial;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    margin-top: 1.25rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    color: var(--color-paper);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .about-portfolio:hover {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
+  }
+  .about-portfolio:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  /* The motivation, as the page's one spoken line. */
+  .about-quote {
+    position: relative;
+    margin: 1.75rem 0 0;
+    padding: 1.25rem 4rem 1.25rem 1.5rem;
+    border-left: 4px solid var(--color-accent-pink);
+    border-radius: 0 6px 6px 0;
+    background: var(--lp-surface-card);
+    text-align: left;
+  }
+  .about-quote__mark {
+    position: absolute;
+    top: -0.5rem;
+    right: 1rem;
+    font-family: var(--font-display);
+    font-size: 5rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  }
+
   /* --- The three blocks under the paragraph ------------------------------
      Motivation, reasons, certificates. A SEAM between them, not a gap: three
      stacked lists separated by air read as three things that came apart, and
@@ -418,20 +500,21 @@ const credentialsUi =
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
-    padding: 0.875rem 0.875rem 0.875rem 1.875rem;
+    padding: 0.875rem;
     border-radius: 6px;
     background: var(--lp-surface-card);
     text-align: left;
   }
-  .about-tile::before {
-    content: "";
-    position: absolute;
-    left: 0.875rem;
-    top: calc(0.875rem + 0.5em);
-    width: 0.375rem;
-    height: 0.375rem;
+  .about-tile__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: 0.375rem;
     border-radius: 100px;
-    background: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-accent);
   }
   .about-tile__title {
     font-weight: 600;
@@ -456,9 +539,10 @@ const credentialsUi =
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    padding: 1rem 1.125rem;
+    padding: 1.25rem;
     border-radius: 6px;
-    background: var(--lp-surface-card);
+    background: var(--color-surface-navy);
+    box-shadow: 4px 4px 0 0 var(--color-accent-pink);
     text-align: left;
   }
   .about-fact__label {
@@ -466,17 +550,17 @@ const credentialsUi =
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: rgb(255 255 255 / 0.75);
   }
   .about-fact__value {
     margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 2.25rem;
+    font-size: 2.75rem;
     line-height: 1.05;
     /* Figures of equal width, so the count does not wobble the line. */
     font-variant-numeric: tabular-nums;
-    color: var(--color-black);
+    color: #fff;
   }
 
   /* The certificates: the label, the tiles and one way to all of them. Its
@@ -531,7 +615,7 @@ const credentialsUi =
     /* Prose stays centred with the rest of the column — it has no marker to
        hang, so a left edge of its own would look like a mistake. */
     .about-motivation__text {
-      text-align: center;
+      text-align: left;
     }
   }
 

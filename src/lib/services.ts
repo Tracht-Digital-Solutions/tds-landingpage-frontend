@@ -712,7 +712,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Preis",
         priceText:
-          "Die Preise stehen im Digitalmarkt, jedes Projekt bekommt ein schriftliches Angebot.",
+          "Die Preise stehen im Shop, jedes Projekt bekommt ein schriftliches Angebot.",
         referencesLabel: "Veröffentlicht nur mit Freigabe der Kunden.",
         referencesHeadline: "Einblicke aus der Praxis",
         references: [],
@@ -761,7 +761,7 @@ export const serviceDefinitions = [
         ],
         priceLabel: "Price",
         priceText:
-          "Prices are listed in the Digitalmarkt, every project gets a written quote.",
+          "Prices are listed in the shop, every project gets a written quote.",
         referencesLabel: "Published only with the client's approval.",
         referencesHeadline: "Examples from practice",
         references: [],

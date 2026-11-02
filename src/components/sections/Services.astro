@@ -1,14 +1,13 @@
 ---
 /**
  * Leistungen, as products. The most important ones stand here without a price;
- * the Digitalmarkt carries all of them with their "ab" price. "Alle Leistungen"
+ * the Shop carries all of them with their "ab" price. "Alle Leistungen"
  * leads to the catalogue filtered to our own services.
  */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import { imageHints } from "~/lib/imageCatalog";
-import { platformDefinitions, platformHref } from "~/lib/platforms";
 import { getServiceProducts, shopServicesHref } from "~/lib/serviceProducts";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import AssistantCard from "~/components/ui/AssistantCard.astro";
@@ -21,11 +20,10 @@ const servicesContent = await cmsFor(
   getHomeContent(lang).servicesOverview,
 );
 const products = await getServiceProducts(lang);
-const systemsLabel = lang === "de" ? "Hilfe für das eingesetzte System:" : "Help with the system in use:";
 const ui =
   lang === "de"
-    ? { details: "Details ansehen", more: "Alle Leistungen im Digitalmarkt" }
-    : { details: "View details", more: "All services in the Digitalmarkt" };
+    ? { more: "Alle Leistungen im Shop" }
+    : { more: "All services in the shop" };
 ---
 
 {/* No ground of its own. The page has ONE ground now — `.page-ground` in
@@ -48,26 +46,23 @@ const ui =
       {
         products.map((product) => (
           <li class="product-tile" data-reveal>
-            <div class="product-tile__shot">
+            <a class="product-tile__link" href={product.href} data-track="service-product">
               <img
+                class="product-tile__img"
                 src={product.image}
                 srcset={imageHints(product.image, lang)?.srcSet}
-                sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw"
+                sizes="(min-width: 48rem) 20vw, 50vw"
                 alt=""
                 width="1536"
                 height="960"
                 loading="lazy"
                 decoding="async"
               />
-            </div>
-            <div class="product-tile__body">
-              <p class="product-tile__kind">{product.kind[lang]}</p>
-              <h3 class="product-tile__title">
-                <a href={product.href} data-track="service-product">{product.title[lang]}</a>
-              </h3>
-              <p class="product-tile__text">{product.text[lang]}</p>
-              <span aria-hidden="true" class="product-tile__more">{ui.details} →</span>
-            </div>
+              <span class="product-tile__scrim" aria-hidden="true"></span>
+              <span class="product-tile__kind">{product.kind[lang]}</span>
+              <span class="product-tile__title">{product.title[lang]}</span>
+              <span class="product-tile__go" aria-hidden="true">→</span>
+            </a>
           </li>
         ))
       }
@@ -88,117 +83,139 @@ const ui =
       <AssistantCard lang={lang} />
     </div>
 
-    {/* The systems people search for by name, one chip each, in the chips'
-        own style — the way from "Webauftritt" to "my WooCommerce shop". */}
-    <div class="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-3">
-      <p class="text-sm font-medium text-[var(--color-muted)]">{systemsLabel}</p>
-      <ul class="flex flex-wrap justify-center md:justify-start gap-2">
-        {platformDefinitions.map((platform) => (
-          <li>
-            <a
-              href={platformHref(platform, lang)}
-              class="lp-ink inline-flex items-center px-3 py-1 text-xs rounded-full [--lp-fill:color-mix(in_srgb,var(--color-accent)_10%,var(--lp-surface-card))] hover:[--lp-fill:color-mix(in_srgb,var(--color-accent)_18%,var(--lp-surface-card))] bg-[var(--lp-fill)] text-[var(--color-accent)] transition-colors [@media(pointer:coarse)]:min-h-11"
-            >
-              {platform.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
   </div>
 </section>
 
 <style>
+  /* Never a wrapped row: the five tiles scale with the page. A phone gets a
+     composed layout, the lead tile across, the other four in pairs. */
   .product-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .product-tile {
+    container-type: inline-size;
+    min-width: 0;
+  }
+  .product-tile:first-child {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 48rem) {
+    .product-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: clamp(0.5rem, 1.2vw, 1.25rem);
+    }
+    .product-tile:first-child {
+      grid-column: auto;
+    }
+  }
+  .product-tile__link {
     position: relative;
     display: flex;
     flex-direction: column;
-    flex: 0 1 23rem;
-    min-width: min(100%, 17rem);
+    justify-content: flex-end;
+    gap: 0.25rem;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
+    padding: clamp(0.75rem, 8cqi, 1.25rem);
     border-radius: 6px;
-    background: var(--color-soft);
-    transition: background-color 200ms var(--tds-ease-out);
+    background: var(--color-surface-navy);
+    color: #fff;
+    text-decoration: none;
+    box-shadow: var(--tds-shadow-hard);
+    transition: translate 160ms var(--tds-ease-out);
   }
-  .product-tile:hover,
-  .product-tile:focus-within {
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+  .product-tile:first-child .product-tile__link {
+    aspect-ratio: 16 / 9;
   }
-  .product-tile:has(a:focus-visible) {
+  @media (min-width: 48rem) {
+    .product-tile__link,
+    .product-tile:first-child .product-tile__link {
+      aspect-ratio: 3 / 4;
+    }
+  }
+  .product-tile__link:is(:hover, :focus-visible) {
+    translate: -2px -2px;
+    box-shadow: var(--tds-shadow-hard-hover);
+  }
+  .product-tile__link:focus-visible {
     outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
-  .product-tile__shot {
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
-    background: var(--color-paper);
-  }
-  .product-tile__shot img {
-    display: block;
+  .product-tile__img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 500ms var(--tds-ease-out);
   }
-  .product-tile__body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    gap: 0.5rem;
-    padding: 1.125rem 1.25rem 1.25rem;
+  .product-tile__link:is(:hover, :focus-visible) .product-tile__img {
+    transform: scale(1.06);
   }
-  .product-tile__kind {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-muted);
-  }
-  .product-tile__title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.25rem;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
-    color: var(--color-black);
-  }
-  .product-tile__title a {
-    color: inherit;
-    text-decoration: none;
-  }
-  .product-tile__title a:focus-visible {
-    outline: none;
-  }
-  /* The whole tile is the link's hit area; its name stays the product's. */
-  .product-tile__title a::after {
-    content: "";
+  /* Fixed navy, in both themes: it carries white type over any photo. */
+  .product-tile__scrim {
     position: absolute;
     inset: 0;
+    background: linear-gradient(to top, rgb(5 15 104 / 0.94) 12%, rgb(5 15 104 / 0.55) 48%, rgb(5 15 104 / 0.08) 78%);
   }
-  .product-tile__text {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: var(--color-muted);
+  .product-tile__kind,
+  .product-tile__title,
+  .product-tile__go {
+    position: relative;
   }
-  .product-tile__more {
-    margin-top: auto;
-    padding-top: 0.75rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-accent);
+  .product-tile__kind {
+    font-family: var(--font-mono);
+    font-size: clamp(0.625rem, 5.4cqi, 0.75rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.85);
   }
+  .product-tile__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1rem, 10.5cqi, 1.625rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+  .product-tile__go {
+    position: absolute;
+    top: clamp(0.625rem, 6cqi, 1rem);
+    right: clamp(0.625rem, 6cqi, 1rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 100px;
+    background: var(--color-accent-pink);
+    color: #050f68;
+    font-weight: 700;
+    transition: translate 200ms var(--tds-ease-out);
+  }
+  .product-tile__link:is(:hover, :focus-visible) .product-tile__go {
+    translate: 2px -2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .product-tile__link,
+    .product-tile__img,
+    .product-tile__go {
+      transition: none;
+    }
+    .product-tile__link:is(:hover, :focus-visible) {
+      translate: none;
+    }
+    .product-tile__link:is(:hover, :focus-visible) .product-tile__img {
+      transform: none;
+    }
+  }
+
   .product-more {
     display: flex;
     justify-content: center;

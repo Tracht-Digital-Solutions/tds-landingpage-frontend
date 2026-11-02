@@ -36,7 +36,7 @@ export const ownProjects: readonly OwnProject[] = [
       de: {
         title: "WParted",
         kind: "Software",
-        text: "Freier Partitionsmanager für Windows 11, eine GParted-Alternative. Open Source, entwickelt von Julian Tracht. Beta: physische Datenträger bleiben gesperrt.",
+        text: "Freier Partitionsmanager für Windows 11, eine GParted-Alternative. Open Source, entwickelt von Tracht Digital Solutions. Beta: physische Datenträger bleiben gesperrt.",
         cta: "Quellcode ansehen",
         alt: "WParted mit Datenträgerkarte, Partitionsliste und einer ausstehenden Operation",
         highlights: {
@@ -51,7 +51,7 @@ export const ownProjects: readonly OwnProject[] = [
       en: {
         title: "WParted",
         kind: "Software",
-        text: "Free partition manager for Windows 11, a GParted alternative. Open source, developed by Julian Tracht. Beta: physical disks stay locked.",
+        text: "Free partition manager for Windows 11, a GParted alternative. Open source, developed by Tracht Digital Solutions. Beta: physical disks stay locked.",
         cta: "View the source",
         alt: "WParted showing a disk map, a partition list and one pending operation",
         highlights: {

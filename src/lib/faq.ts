@@ -120,7 +120,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
         // It is the first thing an answer engine reads after the headline, and
         // the first thing a reader needs in order to trust the rest.
         answer:
-          "Die Fragen auf dieser Seite beantwortet Julian Tracht selbst – Inhaber von Tracht Digital Solutions in Schwarzenbek bei Hamburg, tätig für Unternehmen in ganz Deutschland. Es geht um Websites und eigene Software, um Festpreise und Dauer, um den Umgang mit KI und um die Betreuung nach dem Start.",
+          "Die Fragen auf dieser Seite beantwortet Tracht Digital Solutions aus Schwarzenbek bei Hamburg, tätig für Unternehmen in ganz Deutschland. Es geht um Websites und eigene Software, um Festpreise und Dauer, um den Umgang mit KI und um die Betreuung nach dem Start.",
         seoTitle: "Häufige Fragen zu Website, Preis und Ablauf — Tracht Digital",
         description:
           "Antworten zu Websites, eigener Software, Festpreisen, Dauer, KI und Betreuung – kurz beantwortet, ohne Fachsprache.",
@@ -141,7 +141,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
         intro:
           "Takeovers, pricing and working together – the questions Tracht Digital Solutions is asked most often.",
         answer:
-          "The questions on this page are answered by Julian Tracht himself – owner of Tracht Digital Solutions in Schwarzenbek near Hamburg, working with companies across Germany. They cover websites and custom software, fixed prices and timelines, the use of AI and support after launch.",
+          "The questions on this page are answered by Tracht Digital Solutions from Schwarzenbek near Hamburg, working with companies across Germany. They cover websites and custom software, fixed prices and timelines, the use of AI and support after launch.",
         seoTitle: "Common Questions on Websites and Pricing — Tracht Digital",
         description:
           "Answers on websites, custom software, fixed prices, timelines, AI and ongoing support – answered briefly, without the jargon.",
@@ -182,7 +182,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Was kostet eine Website oder ein Onlineshop?",
-            a: "Die Leistungen stehen mit ihrem Ab-Preis im Digitalmarkt. Jedes Projekt wird als eigenes Angebot kalkuliert, mit Festpreis oder Budgetobergrenze, bevor die Arbeit beginnt.",
+            a: "Die Leistungen stehen mit ihrem Ab-Preis im Shop. Jedes Projekt wird als eigenes Angebot kalkuliert, mit Festpreis oder Budgetobergrenze, bevor die Arbeit beginnt.",
             group: "pricing",
           },
           {
@@ -339,7 +339,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "What does a website or an online shop cost?",
-            a: "Services are listed with their starting price in the Digitalmarkt. Every project gets a quote of its own, with a fixed price or a budget cap, before work begins.",
+            a: "Services are listed with their starting price in the shop. Every project gets a quote of its own, with a fixed price or a budget cap, before work begins.",
             group: "pricing",
           },
           {

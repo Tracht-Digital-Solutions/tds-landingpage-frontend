@@ -434,6 +434,11 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       scale 220ms var(--lp-ease-bounce, var(--tds-ease-out)),
       transform 300ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
+  /* Pink on pink would hide the disc on its own trail. */
+  .floating-cta-group[data-swipe] .tree-slot__inner > .floating-cta {
+    background: #fff;
+    color: var(--color-surface-navy);
+  }
   .floating-cta-group[data-swipe] .floating-cta {
     /* Centred on the track: the hover pop (scale 1.18, 2px down-right) stays
        on while a mouse drags, so the disc sat off-centre and wider than the
@@ -459,7 +464,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     rotate: calc(var(--lp-swipe-progress, 0) * -24deg);
   }
   /* Picked up: the disc turns navy like a hover. */
-  .floating-cta-group[data-swipe="answered"] .floating-cta {
+  .floating-cta-group[data-swipe="answered"] .tree-slot__inner > .floating-cta {
     background: var(--color-surface-navy);
     color: #fff;
   }
@@ -521,8 +526,8 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       background-color 220ms ease,
       box-shadow 0s;
   }
-  /* The way the receiver has come: the same light wash a hovered button of
-     the pill takes, in the pill's own ink — no colour of its own. */
+  /* The way the receiver has come FILLS, like answering a call: the colour
+     runs after the receiver and has taken the whole track when it arrives. */
   .floating-cta-track::before {
     content: "";
     position: absolute;
@@ -531,7 +536,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
     width: calc(3rem + var(--lp-swipe, 0px));
     height: 3rem;
     border-radius: inherit;
-    background: color-mix(in srgb, currentColor 14%, transparent);
+    background: var(--color-accent-pink);
     opacity: 0;
   }
   /* Where it has to go: a dashed ring at the far end, solid once reached. */
@@ -723,7 +728,7 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
 
 <script>
   import { SHADOW_PAD, makeTwin, measureDarkRanges, splitClip, type Range } from "~/lib/darkSplit";
-  import { TRAVEL_MAX, mountReceiverSwipe } from "~/lib/receiverSwipe";
+  import { TRAVEL_MAX, isPhone, mountReceiverSwipe } from "~/lib/receiverSwipe";
 
   /** The farthest the swipe track (and its hard shadow) reaches left of the pill. */
   const SWIPE_REACH = TRAVEL_MAX + SHADOW_PAD;
@@ -895,9 +900,9 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
       attributeFilter: ["data-theme"],
     });
 
-    // The receiver can also be swiped left, like answering a call. The
+    // On a smartphone the receiver is swiped left, like answering a call. The
     // twin's clip widens while it is (see `update`).
-    mountReceiverSwipe(group, twin);
+    if (isPhone()) mountReceiverSwipe(group, twin);
     // On release the track shrinks back into the pill over 300 ms; the clip
     // stays wide until it has, or the twin's half would be cut off mid-way.
     new MutationObserver(() => {

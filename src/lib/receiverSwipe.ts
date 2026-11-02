@@ -57,6 +57,18 @@ export function startsSwipe(dx: number, dy: number, slop: number = SWIPE_SLOP): 
   return dx > slop && dx > Math.abs(dy);
 }
 
+/**
+ * Whether this is a smartphone: only there the receiver slides. The shorter
+ * side of the screen, so turning the phone changes nothing; everywhere else the
+ * receiver is a plain link.
+ */
+export function isPhone(
+  touch: boolean = window.matchMedia("(pointer: coarse)").matches,
+  shortSide: number = Math.min(window.screen.width, window.screen.height),
+): boolean {
+  return touch && shortSide < 600;
+}
+
 type State = "hold" | "drag" | "answered" | null;
 
 /** Wire the gesture onto the receiver of `group`, mirrored onto `twin`. */

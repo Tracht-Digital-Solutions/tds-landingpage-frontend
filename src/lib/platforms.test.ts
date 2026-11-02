@@ -145,7 +145,7 @@ describe("platform search and answer-engine signals", () => {
       for (const lang of LANGS) {
         const answer = platform.content[lang].answer;
         expect(answer, `${platform.id} (${lang})`).toContain("Tracht Digital Solutions");
-        expect(answer, `${platform.id} (${lang})`).toContain("Julian Tracht");
+        expect(answer, `${platform.id} (${lang})`).toContain("Tracht Digital Solutions");
         expect(answer, `${platform.id} (${lang})`).toContain("Schwarzenbek");
         expect(answer, `${platform.id} (${lang})`).toContain(platform.name.split(" ")[0]);
         expect(answer.split(/\s+/).length, `${platform.id} (${lang})`).toBeLessThanOrEqual(75);

@@ -1,0 +1,286 @@
+---
+/**
+ * THE card of the project grids: one template for client projects, own projects,
+ * demos, design studies and the business card. The families (`DemoCard`,
+ * `ReferenceCard`, …) only map their data onto these props.
+ *
+ * ### The depth (2026-11-02)
+ *
+ * The hard shadow used to be a `box-shadow` on the tilting card, so it leaned
+ * with the card like a sticker. Now the shadow is its own plate behind the card
+ * in the same 3D space: the card lifts toward the pointer, the plate stays behind
+ * it and slides against the tilt (`lib/motion/tilt.ts` writes `--tilt-*`).
+ * Only `transform` moves, so it runs on the compositor.
+ *
+ * The caller wraps this in a grid cell: a root under `container-type:
+ * inline-size` collapses to 0 px as a flex item (docs/agents/website-demos.md).
+ */
+import { tdsPlaceholder } from "@tracht-digital-solutions/tds-shared/site";
+
+interface Props {
+  title: string;
+  /** Without a picture the shared TDS placeholder stands in, seeded by the title. */
+  src?: string | null;
+  srcset?: string;
+  sizes?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  /** Whose work it is, on the picture. */
+  origin?: string;
+  /** What kind of work it is, above the title. */
+  kind?: string;
+  /** Read before the kind by a screen reader. */
+  kindLabel?: string;
+  text?: string | null;
+  /** Read before the text by a screen reader. */
+  textLabel?: string;
+  /** A short fact at the foot of the body: a host, a sector. */
+  caption?: string;
+  captionLabel?: string;
+}
+
+const {
+  title,
+  src = null,
+  srcset,
+  sizes = "(min-width: 64rem) 34vw, (min-width: 48rem) 48vw, 85vw",
+  alt = "",
+  width = 1440,
+  height = 900,
+  origin,
+  kind,
+  kindLabel,
+  text,
+  textLabel,
+  caption,
+  captionLabel,
+} = Astro.props;
+
+const picture = src ?? tdsPlaceholder({ seed: title, width, height, monogram: title.charAt(0) });
+---
+
+<article class="project-card-slot" data-reveal>
+  <div class="project-card__tilt" data-motion-tilt>
+    <span class="project-card__shade" aria-hidden="true"></span>
+    <div class="project-card">
+      <div class="project-card__shot">
+        <img
+          src={picture}
+          srcset={srcset}
+          sizes={srcset ? sizes : undefined}
+          alt={src ? alt : ""}
+          width={width}
+          height={height}
+          loading="lazy"
+          decoding="async"
+        />
+        {origin && <span class="project-card__origin">{origin}</span>}
+        <slot name="shot" />
+      </div>
+
+      <div class="project-card__body">
+        {
+          kind && (
+            <p class="project-card__kind">
+              {kindLabel && <span class="sr-only">{kindLabel}: </span>}
+              {kind}
+            </p>
+          )
+        }
+        <div class="project-card__head">
+          <slot name="before-title" />
+          <h3 class="project-card__title">{title}</h3>
+        </div>
+        {
+          text && (
+            <p class="project-card__text">
+              {textLabel && <span class="sr-only">{textLabel}: </span>}
+              {text}
+            </p>
+          )
+        }
+        <slot />
+        {
+          caption && (
+            <p class="project-card__caption">
+              {captionLabel && <span class="sr-only">{captionLabel}: </span>}
+              {caption}
+            </p>
+          )
+        }
+      </div>
+
+      <slot name="actions" />
+    </div>
+  </div>
+</article>
+
+<style>
+  .project-card-slot {
+    container-type: inline-size;
+  }
+
+  .project-card__tilt {
+    --tilt-shade-x: 0px;
+    --tilt-shade-y: 0px;
+    position: relative;
+    height: 100%;
+    transform: perspective(900px);
+    transform-style: preserve-3d;
+  }
+
+  /* The shadow, as a plate. The site's hard offset at rest. */
+  .project-card__shade {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: var(--tds-shadow-ink, rgb(0 0 0 / 0.22));
+    /* Scaled back up: at z -28 under a 900px perspective it would draw 3 % small
+       and hide behind the card. */
+    transform: translate3d(calc(8px + var(--tilt-shade-x)), calc(8px + var(--tilt-shade-y)), -28px) scale(1.031);
+    transition: transform 220ms var(--tds-ease-out);
+    pointer-events: none;
+  }
+
+  .project-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--color-soft);
+    color: inherit;
+    transform: translateZ(0);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      transform 220ms var(--tds-ease-out);
+  }
+  .project-card:hover,
+  .project-card:focus-within {
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
+  }
+  /* Only under a mouse: a finger has no hover to lift it with. */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .project-card__tilt:hover .project-card {
+      transform: translateZ(8px);
+    }
+  }
+  /* Light from the pointer's side, so the surface reads as turned. */
+  .project-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: radial-gradient(
+      circle at var(--tilt-light-x, 50%) var(--tilt-light-y, 0%),
+      rgb(255 255 255 / 0.16),
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 220ms var(--tds-ease-out);
+    pointer-events: none;
+  }
+  .project-card__tilt[data-tilting] .project-card::after {
+    opacity: 1;
+  }
+
+  .project-card__shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--color-paper);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
+  }
+  .project-card__shot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Anchored to the top: a page's hero belongs on the card. */
+    object-fit: cover;
+    object-position: top center;
+  }
+  .project-card__origin {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    max-width: calc(100% - 4.5rem);
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--color-card) 94%, transparent);
+    color: var(--color-black);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
+  .project-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 1.125rem 1.25rem 1rem;
+  }
+  .project-card__kind {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .project-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .project-card__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 200ms var(--tds-ease-out);
+  }
+  .project-card:hover .project-card__title,
+  .project-card:focus-within .project-card__title {
+    color: var(--color-primary);
+  }
+  .project-card__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .project-card__caption {
+    margin: auto 0 0;
+    padding-top: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-card__shade,
+    .project-card {
+      transition: background-color 200ms var(--tds-ease-out);
+    }
+  }
+</style>

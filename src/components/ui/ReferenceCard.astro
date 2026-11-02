@@ -101,78 +101,36 @@ const cta: CardAction | null = card.articleHref
         detail: card.reference.title,
       }
     : null;
+import ProjectCard from "~/components/ui/ProjectCard.astro";
 ---
 
-{/* The slot exists for the container query at the bottom of this file — the
-    card asks its own width whether it is the shelf's lead card. `data-reveal`
-    stays on the outer element, which is the one the observer watches. */}
-<article class="reference-card-slot" data-reveal>
-  <div class="reference-card">
-    {/* The picture, where the customer allowed one. A screenshot, captured
-        offline by `npm run references:sync` — never an iframe: a live embed of
-        somebody else's site fails on their `X-Frame-Options` with no way to know
-        in advance, and the page cache would then freeze the broken state. */}
-    {card.preview && (
-      <div class="reference-card__shot">
-        <img
-          src={mediaSrc(card.preview.src)}
-          srcset={srcsetFor(card.preview.src, PREVIEW_VARIANT_WIDTHS, card.preview.width, mediaSrc)}
-          sizes="(min-width: 80rem) 40rem, (min-width: 48rem) 50vw, 100vw"
-          alt={ui.previewAlt(card.reference.title)}
-          width={card.preview.width}
-          height={card.preview.height}
-          loading="lazy"
-          decoding="async"
-        />
-        {badge && <span class="reference-card__origin">{badge}</span>}
-      </div>
-    )}
-
-    {!card.preview && (
-      <div class="reference-card__shot reference-card__shot--plain">
-        {badge && <span class="reference-card__origin">{badge}</span>}
-        <span aria-hidden="true" class="reference-card__mark">{card.reference.title.charAt(0)}</span>
-      </div>
-    )}
-
-    <div class="reference-card__body">
-      <p class="reference-card__kind">
-        <span class="sr-only">{ui.context}: </span>
-        {card.reference.context}
+<ProjectCard
+  title={card.reference.title}
+  src={card.preview ? mediaSrc(card.preview.src) : null}
+  srcset={card.preview ? srcsetFor(card.preview.src, PREVIEW_VARIANT_WIDTHS, card.preview.width, mediaSrc) : undefined}
+  alt={ui.previewAlt(card.reference.title)}
+  width={card.preview?.width}
+  height={card.preview?.height}
+  origin={badge}
+  kind={card.reference.context}
+  kindLabel={ui.context}
+  text={card.reference.result}
+  textLabel={ui.result}
+>
+  {
+    card.reference.metric && (
+      <p class="reference-card__metric">
+        <span class="sr-only">{ui.metric}: </span>
+        {card.reference.metric}
       </p>
-      <h3 class="reference-card__title">{card.reference.title}</h3>
-      {/* Result only. The starting point and the approach are the article's job
-          — repeating them here made every card three labelled paragraphs long,
-          which is not a card. In the carousel it is clamped as well: slides in a
-          flex track all take the height of the tallest one, so a single long
-          outcome would set the height of every demo card beside it. */}
-      <p class="reference-card__result">
-        <span class="sr-only">{ui.result}: </span>
-        {card.reference.result}
-      </p>
-      {card.reference.metric && (
-        <p class="reference-card__metric">
-          <span class="sr-only">{ui.metric}: </span>
-          {card.reference.metric}
-        </p>
-      )}
+    )
+  }
 
-      {/* The services this case used BEYOND the one the bar already links. A
-          case that used three of them is a stronger statement than the primary
-          service alone, and dropping the extras to fit two links in a bar would
-          quietly narrow what the case says it did.
-
-          `.status-pill` is the shared badge from tds-shared/styles/primitives.css
-          rather than a fourth local pill. It carries `white-space: nowrap`, so
-          the row it sits in MUST wrap — "Individuelle Lösungen" set in caps is
-          wider than a phone column, and `body { overflow-x: hidden }` would clip
-          the overflow rather than show it.
-
-          No Tailwind utility belongs on these: unlayered CSS out of tds-shared
-          beats a utility class, so it would simply do nothing here. */}
-      {furtherServices.length > 0 && (
+  {/* The services this case used BEYOND the one the bar links. `.status-pill`
+      carries `white-space: nowrap`, so the row MUST wrap. */}
+  {furtherServices.length > 0 && (
         <ul class="reference-card__services">
-          {furtherServices.map((service) => (
+      {furtherServices.map((service) => (
             <li>
               <a href={service.href} class="status-pill status-pill--accent reference-card__service">
                 {service.label}
@@ -181,147 +139,16 @@ const cta: CardAction | null = card.articleHref
           ))}
         </ul>
       )}
-    </div>
 
-    <CardActions
-      lang={lang}
-      service={primaryService ? { href: primaryService.href, label: primaryService.label } : null}
-      cta={cta}
-    />
-  </div>
-</article>
+  <CardActions
+    slot="actions"
+    lang={lang}
+    service={primaryService ? { href: primaryService.href, label: primaryService.label } : null}
+    cta={cta}
+  />
+</ProjectCard>
 
 <style>
-  .reference-card-slot {
-    /* A grid child, not a flex item: under size containment a flex item takes
-       its base size from max-content and collapses to 0px. `.showcase__slide`
-       is a grid for exactly this reason — see the note there. Same containment
-       and same trap as `.demo-card-slot`. */
-    container-type: inline-size;
-  }
-
-  .reference-card {
-    --reference-shot-aspect: 16 / 10;
-
-    /* The positioning context for the footer bar's stretched link. Without it
-       that `::after` would spread over whatever ancestor happens to be
-       positioned, which on the shelf is the whole carousel. */
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    /* Without it a card in a shorter row stops at its content and the row's
-       cards end on different baselines. Same line, same reason, as
-       `.demo-card` — the two are neighbours in one track. */
-    height: 100%;
-    /* Sand on the showcase's paper ground: the same fill as `.demo-card`, so
-       the two families read as one shelf rather than as two pasted-together
-       sections. A borderless card whose fill matches its section is not a
-       card, which is why this is NOT `--color-paper` any more — it was, back
-       when the references section carried the sand ground itself. */
-    background: var(--color-soft);
-    border-radius: 6px;
-    overflow: hidden;
-    transition: background-color 200ms var(--tds-ease-out);
-  }
-  .reference-card:hover,
-  .reference-card:focus-within {
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-soft));
-  }
-
-  /* The screenshot is CONTENT, not a ground: full strength, in front, with a
-     real alt. Same rule as DemoCard — the difference between a picture of a
-     site and a texture behind text is the whole point of showing it.
-
-     The ratio is reserved before the image loads so neighbouring cards keep
-     their headings aligned while the shot arrives. */
-  .reference-card__shot {
-    position: relative;
-    aspect-ratio: var(--reference-shot-aspect);
-    overflow: hidden;
-    background: var(--color-paper);
-    /* A screenshot of a page has a page edge. Without this it bleeds into the
-       card's fill and reads as a broken layout rather than a picture of one. */
-    border-bottom: 1px solid color-mix(in srgb, var(--color-black) 8%, transparent);
-  }
-  .reference-card__shot--plain {
-    display: grid;
-    place-items: center;
-    background: color-mix(in srgb, var(--color-primary) 10%, var(--color-paper));
-  }
-  .reference-card__mark {
-    font-family: var(--font-display);
-    font-size: 4rem;
-    line-height: 1;
-    color: color-mix(in srgb, var(--color-primary) 40%, transparent);
-  }
-  .reference-card__shot img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-  }
-
-  .reference-card__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-    padding: 1.125rem 1.25rem 1rem;
-  }
-
-  .reference-card__origin {
-    position: absolute;
-    top: 0.625rem;
-    left: 0.625rem;
-    z-index: 1;
-    max-width: calc(100% - 4.5rem);
-    padding: 0.25rem 0.625rem;
-    border-radius: 100px;
-    background: color-mix(in srgb, var(--color-card) 94%, transparent);
-    color: var(--color-black);
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    pointer-events: none;
-  }
-  .reference-card__kind {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-muted);
-  }
-
-  .reference-card__title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 1.25rem;
-    line-height: 1.15;
-    letter-spacing: -0.015em;
-    color: var(--color-black);
-    transition: color 200ms var(--tds-ease-out);
-  }
-  .reference-card:hover .reference-card__title,
-  .reference-card:focus-within .reference-card__title {
-    color: var(--color-primary);
-  }
-
-  .reference-card__result {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: var(--color-muted);
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
   .reference-card__metric {
     margin: auto 0 0;
     padding-top: 0.75rem;
@@ -329,11 +156,6 @@ const cta: CardAction | null = card.articleHref
     font-size: 0.75rem;
     color: var(--color-muted);
   }
-
-  /* Pinned to the bottom of the BODY, so the badges sit directly on the bar
-     across cards whose outcomes are different lengths. The bar itself is a
-     sibling of the body and needs no help staying at the bottom; this is what
-     keeps the last line of the body on one level too. */
   .reference-card__services {
     display: flex;
     flex-wrap: wrap;

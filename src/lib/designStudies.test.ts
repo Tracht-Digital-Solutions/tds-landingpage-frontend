@@ -114,8 +114,7 @@ describe("the origin badge", () => {
 
 describe("the card", () => {
   it("shows the sector where a demo card shows its host", () => {
-    expect(card).toContain("study-card__sector");
-    expect(card).not.toContain("study-card__host");
+    expect(card).toMatch(/caption=\{sector\}/);
   });
 
   it("carries no magnifier of its own", () => {
@@ -128,7 +127,7 @@ describe("the card", () => {
   it("reserves the same band as a demo card", () => {
     // These cards share one track and the shelf stretches every slide to the
     // tallest; a different ratio pads every demo card's body by the difference.
-    expect(card).toMatch(/\.study-card__shot\s*\{[^}]*aspect-ratio:\s*16 \/ 10/s);
+    expect(card).toMatch(/<ProjectCard\b/);
   });
 
   it("lets a full-page capture scroll in the dialog instead of squashing it", () => {
