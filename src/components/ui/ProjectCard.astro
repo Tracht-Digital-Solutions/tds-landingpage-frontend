@@ -57,7 +57,6 @@ const {
   captionLabel,
 } = Astro.props;
 
-const picture = src ?? tdsPlaceholder({ seed: title, width, height, monogram: title.charAt(0) });
 ---
 
 <article class="project-card-slot" data-reveal>
@@ -65,16 +64,23 @@ const picture = src ?? tdsPlaceholder({ seed: title, width, height, monogram: ti
     <span class="project-card__shade" aria-hidden="true"></span>
     <div class="project-card">
       <div class="project-card__shot">
-        <img
-          src={picture}
-          srcset={srcset}
-          sizes={srcset ? sizes : undefined}
-          alt={src ? alt : ""}
-          width={width}
-          height={height}
-          loading="lazy"
-          decoding="async"
-        />
+        {
+          src ? (
+            <img
+              src={src}
+              srcset={srcset}
+              sizes={srcset ? sizes : undefined}
+              alt={alt}
+              width={width}
+              height={height}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            /* A literal empty alt: Astro drops an expression that is "". */
+            <img src={tdsPlaceholder({ seed: title, width, height, monogram: title.charAt(0) })} alt="" width={width} height={height} loading="lazy" decoding="async" />
+          )
+        }
         {origin && <span class="project-card__origin">{origin}</span>}
         <slot name="shot" />
       </div>
