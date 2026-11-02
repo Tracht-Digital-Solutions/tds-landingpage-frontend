@@ -47,7 +47,7 @@ import {
 import { getHomeContent } from "~/lib/homeContent";
 import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
 import { siteConfig } from "~/lib/seo";
-import { aboutFacts } from "~/lib/aboutFacts";
+import { aboutFacts, FOUNDER_QUOTE } from "~/lib/aboutFacts";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -77,8 +77,8 @@ const featured = featuredCredentials();
 const facts = aboutFacts(lang);
 const credentialsUi =
   lang === "de"
-    ? { label: "Nachweise", all: `Alle ${credentials.length} Nachweise ansehen` }
-    : { label: "Credentials", all: `See all ${credentials.length} credentials` };
+    ? { label: "Zertifikate", all: `Alle ${credentials.length} Zertifikate ansehen` }
+    : { label: "Certificates", all: `See all ${credentials.length} certificates` };
 ---
 
 {/* Kein eigener Grund mehr: die Markenfelder liegen seitenweit in
@@ -210,18 +210,16 @@ const credentialsUi =
           <span aria-hidden="true">↗</span>
         </a>
 
-        {/* The motivation. First person, and the only block on this page a
-            competitor could not write — which is why it stands above the
-            reasons rather than after them. */}
-        <blockquote class="about-quote">
-          <span class="about-quote__mark" aria-hidden="true">„</span>
-          <p class="eyebrow about-block__label">{about.motivation.title}</p>
-          {
-            about.motivation.body.map((paragraph) => (
-              <p class="about-motivation__text">{paragraph}</p>
-            ))
-          }
-        </blockquote>
+        {/* Julian's line, set large: no box, no stripe. The opening mark and the
+            brand bar frame it; the name stands below. */}
+        <figure class="about-quote">
+          <span class="about-quote__mark" aria-hidden="true">“</span>
+          <blockquote class="about-quote__text">{FOUNDER_QUOTE[lang]}</blockquote>
+          <figcaption class="about-quote__who">
+            <span aria-hidden="true" class="tds-brandbar about-quote__bar"></span>
+            {siteConfig.founder.name}
+          </figcaption>
+        </figure>
 
         <div class="about-block credentials-teaser">
           <p class="eyebrow credentials-teaser__label">{credentialsUi.label}</p>
@@ -315,15 +313,10 @@ const credentialsUi =
   :global(:root[data-theme="dark"]) .about-photo {
     opacity: 0.22;
   }
-  /* Die PAPIERFARBE des Abschnitts, von rechts auslaufend — kein grauer
-     Schleier, damit die Fläche ihren Farbton behält. */
+  /* Die PAPIERFARBE des Abschnitts als ebener Schleier, damit die Fläche ihren
+     Farbton behält. */
   .about-photo-scrim {
-    background: linear-gradient(
-      to left,
-      var(--color-paper) 24%,
-      color-mix(in srgb, var(--color-paper) 74%, transparent) 66%,
-      color-mix(in srgb, var(--color-paper) 46%, transparent) 100%
-    );
+    background: color-mix(in srgb, var(--color-paper) 72%, transparent);
   }
 
   /* --- The portrait, as a card ------------------------------------------
@@ -434,24 +427,41 @@ const credentialsUi =
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
-  /* The motivation, as the page's one spoken line. */
+  /* The quotation: type alone carries it. */
   .about-quote {
-    position: relative;
-    margin: 1.75rem 0 0;
-    padding: 1.25rem 4rem 1.25rem 1.5rem;
-    border-left: 4px solid var(--color-accent-pink);
-    border-radius: 0 6px 6px 0;
-    background: var(--lp-surface-card);
+    margin: 2.5rem 0 0;
     text-align: left;
   }
   .about-quote__mark {
-    position: absolute;
-    top: -0.5rem;
-    right: 1rem;
+    display: block;
+    height: 2.75rem;
     font-family: var(--font-display);
-    font-size: 5rem;
+    font-size: 6rem;
+    font-weight: 700;
     line-height: 1;
-    color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+    color: var(--color-accent);
+  }
+  .about-quote__text {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 1.1rem + 1.1vw, 2rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--color-black);
+    text-wrap: pretty;
+  }
+  .about-quote__who {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .about-quote__bar {
+    margin: 0;
   }
 
   /* --- The three blocks under the paragraph ------------------------------
@@ -468,17 +478,6 @@ const credentialsUi =
     margin-top: 1.75rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--color-line);
-  }
-  .about-block__label {
-    margin: 0 0 0.75rem;
-  }
-  .about-motivation__text {
-    margin: 0 0 0.625rem;
-    line-height: 1.6;
-    color: var(--color-ink);
-  }
-  .about-motivation__text:last-child {
-    margin-bottom: 0;
   }
 
   /* The reasons and the certificates: small tiles side by side where the
@@ -611,11 +610,6 @@ const credentialsUi =
     }
     .about-tiles {
       align-self: stretch;
-    }
-    /* Prose stays centred with the rest of the column — it has no marker to
-       hang, so a left edge of its own would look like a mistake. */
-    .about-motivation__text {
-      text-align: left;
     }
   }
 

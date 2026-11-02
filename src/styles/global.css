@@ -253,24 +253,7 @@ body {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(
-      60rem 45rem at 6% 14%,
-      rgb(var(--tds-decor-navy) / calc(0.11 * var(--tds-decor-field-strength))),
-      transparent 62%
-    ),
-    radial-gradient(
-      55rem 40rem at 96% 42%,
-      rgb(var(--tds-decor-bordeaux) / calc(0.1 * var(--tds-decor-field-strength))),
-      transparent 60%
-    ),
-    /* Low and off-centre, never the middle of the viewport: a tint directly
-       behind body copy is the one thing this layer must not do. */
-    radial-gradient(
-      48rem 34rem at 70% 96%,
-      rgb(var(--tds-decor-coral) / calc(0.09 * var(--tds-decor-field-strength))),
-      transparent 58%
-    );
+  background: var(--color-paper);
 }
 
 /* Clearance for the fixed chrome on ANY kind of scroll the browser performs
@@ -812,12 +795,7 @@ html[data-motion="on"] :where([data-cta]) {
   width: 45%;
   pointer-events: none;
   transform: translateX(-120%);
-  background: linear-gradient(
-    100deg,
-    transparent 0%,
-    rgb(255 255 255 / 0.38) 50%,
-    transparent 100%
-  );
+  background: rgb(255 255 255 / 0.2);
   z-index: -1;
 }
 
@@ -1138,20 +1116,9 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
   pointer-events: none;
 }
 
-/* The tooltip at the pointer (`lib/pointerTooltip.ts`). */
-.lp-tooltip {
-  position: fixed;
-  z-index: 2147483000;
-  max-width: 18rem;
-  padding: 0.375rem 0.625rem;
-  border-radius: 6px;
-  background: var(--color-surface-navy);
-  color: #fff;
-  font-size: 0.8125rem;
-  line-height: 1.35;
-  box-shadow: 3px 3px 0 0 var(--color-accent-pink);
-  pointer-events: none;
-}
-.lp-tooltip[hidden] {
-  display: none;
+/* No gradients on this site: the shared wash stays flat here. */
+.tds-wash::before,
+.tds-wash--calm::before,
+.tds-wash--mirror::before {
+  background: none;
 }

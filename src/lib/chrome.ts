@@ -35,7 +35,6 @@ export function bootChrome(): void {
     }
     const ring = document.querySelector<HTMLElement>("[data-cursor-ring]");
     const dot = document.querySelector<HTMLElement>("[data-cursor-dot]");
-    void import("./pointerTooltip").then(({ mountPointerTooltip }) => mountPointerTooltip());
     if (ring && dot) void import("./customCursor").then(({ mountCustomCursor }) => mountCustomCursor(ring, dot));
     const track = document.querySelector<HTMLElement>("[data-scroll-progress]");
     const bar = document.querySelector<HTMLElement>("[data-scroll-progress-bar]");

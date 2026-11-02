@@ -145,10 +145,10 @@ describe("the page", () => {
    * kind of mistake nobody reviews. So the number is asserted to be absent.
    */
   it("takes the number of records from the catalog, never from the copy", () => {
-    expect(page).toContain("${credentials.length} Nachweise");
-    expect(about).toContain("${credentials.length} Nachweise");
+    expect(page).toContain("${credentials.length} Zertifikate");
+    expect(about).toContain("${credentials.length} Zertifikate");
     for (const source of [page, about]) {
-      expect(source).not.toMatch(/d+ Nachweise/);
+      expect(source).not.toMatch(/d+ Zertifikate/);
       expect(source).not.toMatch(/d+ (records|credentials)/);
     }
   });

@@ -141,3 +141,8 @@ header.
   transforming under reduced motion.
 - Test desktop, 375 px, both themes and reduced motion. Overflow can be clipped invisibly; measure the rendered
   page.
+
+## No gradients
+
+No surface on this site uses a gradient (`noGradients.test.ts`): scrims are flat veils, the page ground is one colour, and the
+brand bar's hard-edged segments are its only `linear-gradient`, in tds-shared. Tooltips are tds-shared's `hoverTipScript`, at the pointer.

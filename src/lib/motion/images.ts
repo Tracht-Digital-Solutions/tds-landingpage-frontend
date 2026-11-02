@@ -25,7 +25,7 @@ function onScreen(el: Element): boolean {
   return box.bottom > 0 && box.top < window.innerHeight;
 }
 
-export function mountImages({ animate, inView, scroll, hover }: Dom): void {
+export function mountImages({ animate, inView, scroll }: Dom): void {
   const images = Array.from(document.querySelectorAll<HTMLElement>("[data-motion-image]"));
   for (const image of images) {
     const frame = image.parentElement ?? image;
@@ -57,14 +57,5 @@ export function mountImages({ animate, inView, scroll, hover }: Dom): void {
       offset: ["start end", "end start"],
     });
 
-    // Service photos zoom a little further while their tile is hovered — the
-    // same cue the CSS gave before, now on the transform Motion owns.
-    const tile = image.closest<HTMLElement>("[data-motion-tile]");
-    if (tile) {
-      hover(tile, () => {
-        void animate(image, { scale: REST_SCALE + 0.05 }, { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] });
-        return () => void animate(image, { scale: REST_SCALE }, { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] });
-      });
-    }
   }
 }

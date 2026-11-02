@@ -370,16 +370,10 @@ const ui =
   #contact .contact-photo {
     opacity: 0.38;
   }
-  /* Deckend über der linken oberen Hälfte, wo Überschrift, Fließtext
-     und die Formularfelder stehen; erst nach unten rechts läuft es aus.
-     Reines Panel-Navy, damit die Fläche ihren Farbton behält. */
+  /* Ein ebener Schleier in reinem Panel-Navy, damit die Fläche ihren Farbton
+     behält und Überschrift, Fließtext und Formular lesbar bleiben. */
   #contact .contact-photo-scrim {
-    background: linear-gradient(
-      to bottom right,
-      var(--color-surface-navy) 34%,
-      color-mix(in srgb, var(--color-surface-navy) 74%, transparent) 70%,
-      color-mix(in srgb, var(--color-surface-navy) 52%, transparent) 100%
-    );
+    background: color-mix(in srgb, var(--color-surface-navy) 88%, transparent);
   }
 
   /* === Contact form: field + focus state ============================ */

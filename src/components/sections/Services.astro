@@ -1,8 +1,8 @@
 ---
 /**
- * Leistungen, as products. The most important ones stand here without a price;
- * the Shop carries all of them with their "ab" price. "Alle Leistungen"
- * leads to the catalogue filtered to our own services.
+ * Leistungen, as products: the most important ones and, in the same row, the
+ * assistant for whoever cannot say yet which one fits. The Shop carries all of
+ * them with their "ab" price; the link below leads to its filtered catalogue.
  */
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
@@ -22,13 +22,12 @@ const servicesContent = await cmsFor(
 const products = await getServiceProducts(lang);
 const ui =
   lang === "de"
-    ? { more: "Alle Leistungen im Shop" }
-    : { more: "All services in the shop" };
+    ? { more: "Zu den Leistungen" }
+    : { more: "To the services" };
 ---
 
-{/* No ground of its own. The page has ONE ground now — `.page-ground` in
-    `layouts/Layout.astro` — and a section that painted sand or its own wash
-    fields would cut it in half at its own edge. */}
+{/* No ground of its own: the page has ONE ground, `.page-ground` in
+    `layouts/Layout.astro`. */}
 <section
   id="services"
   class="section-spacing"
@@ -47,25 +46,33 @@ const ui =
         products.map((product) => (
           <li class="product-tile" data-reveal>
             <a class="product-tile__link" href={product.href} data-track="service-product">
-              <img
-                class="product-tile__img"
-                src={product.image}
-                srcset={imageHints(product.image, lang)?.srcSet}
-                sizes="(min-width: 48rem) 20vw, 50vw"
-                alt=""
-                width="1536"
-                height="960"
-                loading="lazy"
-                decoding="async"
-              />
-              <span class="product-tile__scrim" aria-hidden="true"></span>
-              <span class="product-tile__kind">{product.kind[lang]}</span>
-              <span class="product-tile__title">{product.title[lang]}</span>
-              <span class="product-tile__go" aria-hidden="true">→</span>
+              <span class="product-tile__media">
+                <img
+                  class="product-tile__img"
+                  src={product.image}
+                  srcset={imageHints(product.image, lang)?.srcSet}
+                  sizes="(min-width: 48rem) 18vw, 50vw"
+                  alt=""
+                  width="1536"
+                  height="960"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span class="product-tile__body">
+                <span class="product-tile__go" aria-hidden="true">→</span>
+                <span class="product-tile__kind">{product.kind[lang]}</span>
+                <span class="product-tile__title">{product.title[lang]}</span>
+              </span>
             </a>
           </li>
         ))
       }
+      {/* The dialog is `components/ServiceAssistant.astro`, which also reveals
+          the tile once it can open anything. Without it the row closes up. */}
+      <li class="product-tile product-tile--assistant" data-reveal>
+        <AssistantCard lang={lang} />
+      </li>
     </ul>
 
     <div class="product-more">
@@ -74,21 +81,13 @@ const ui =
         <span aria-hidden="true">→</span>
       </a>
     </div>
-
-    {/* For the visitor who reads the list and still cannot say which service
-        is theirs — or what it costs: the assistant asks instead. Highlighted
-        since 2026-09-22; it opens as a dialog (`components/ServiceAssistant.astro`),
-        which also reveals the card once it can open anything. */}
-    <div class="mt-10">
-      <AssistantCard lang={lang} />
-    </div>
-
   </div>
 </section>
 
-<style>
-  /* Never a wrapped row: the five tiles scale with the page. A phone gets a
-     composed layout, the lead tile across, the other four in pairs. */
+{/* Global: `ui/AssistantCard.astro` is a tile of this row. */}
+<style is:global>
+  /* Never a wrapped row: the tiles scale with the page. A phone gets a composed
+     layout: the lead tile across, pairs, the assistant across. */
   .product-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -101,27 +100,32 @@ const ui =
     container-type: inline-size;
     min-width: 0;
   }
-  .product-tile:first-child {
+  .product-tile:first-child,
+  .product-tile--assistant {
     grid-column: 1 / -1;
+  }
+  .product-tile--assistant:has(> [hidden]) {
+    display: none;
   }
   @media (min-width: 48rem) {
     .product-grid {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      grid-template-columns: none;
       gap: clamp(0.5rem, 1.2vw, 1.25rem);
     }
-    .product-tile:first-child {
+    .product-tile:first-child,
+    .product-tile--assistant {
       grid-column: auto;
     }
   }
   .product-tile__link {
-    position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    gap: 0.25rem;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 4 / 5;
+    height: auto;
     overflow: hidden;
-    padding: clamp(0.75rem, 8cqi, 1.25rem);
+    padding: 0;
     border-radius: 6px;
     background: var(--color-surface-navy);
     color: #fff;
@@ -129,12 +133,14 @@ const ui =
     box-shadow: var(--tds-shadow-hard);
     transition: translate 160ms var(--tds-ease-out);
   }
-  .product-tile:first-child .product-tile__link {
+  .product-tile:first-child .product-tile__link,
+  .product-tile--assistant .product-tile__link {
     aspect-ratio: 16 / 9;
   }
   @media (min-width: 48rem) {
     .product-tile__link,
-    .product-tile:first-child .product-tile__link {
+    .product-tile:first-child .product-tile__link,
+    .product-tile--assistant .product-tile__link {
       aspect-ratio: 3 / 4;
     }
   }
@@ -142,31 +148,39 @@ const ui =
     translate: -2px -2px;
     box-shadow: var(--tds-shadow-hard-hover);
   }
+  .product-tile__link:active {
+    translate: 2px 2px;
+    box-shadow: var(--tds-shadow-hard-press);
+  }
   .product-tile__link:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
+  .product-tile__media {
+    display: block;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
   .product-tile__img {
-    position: absolute;
-    inset: 0;
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 500ms var(--tds-ease-out);
   }
-  .product-tile__link:is(:hover, :focus-visible) .product-tile__img {
-    transform: scale(1.06);
-  }
-  /* Fixed navy, in both themes: it carries white type over any photo. */
-  .product-tile__scrim {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgb(5 15 104 / 0.94) 12%, rgb(5 15 104 / 0.55) 48%, rgb(5 15 104 / 0.08) 78%);
-  }
-  .product-tile__kind,
-  .product-tile__title,
-  .product-tile__go {
+  /* The words stand on solid navy, in both themes. */
+  .product-tile__body {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: clamp(0.75rem, 8cqi, 1.125rem);
+  }
+  /* Room for two title lines, so every tile in the row cuts its picture at one height. */
+  @media (min-width: 48rem) {
+    .product-tile__body {
+      min-height: clamp(6.25rem, 52cqi, 7.5rem);
+    }
   }
   .product-tile__kind {
     font-family: var(--font-mono);
@@ -178,41 +192,49 @@ const ui =
   .product-tile__title {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(1rem, 10.5cqi, 1.625rem);
+    font-size: clamp(1rem, 9.5cqi, 1.5rem);
     line-height: 1.12;
     letter-spacing: -0.015em;
     overflow-wrap: anywhere;
     hyphens: auto;
   }
+  /* The button rides the seam between picture and words, with the site's hard
+     offset. It answers the tile: pink fill, the shadow's lift. */
   .product-tile__go {
     position: absolute;
-    top: clamp(0.625rem, 6cqi, 1rem);
-    right: clamp(0.625rem, 6cqi, 1rem);
+    top: 0;
+    right: clamp(0.75rem, 8cqi, 1.125rem);
+    translate: 0 -50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 100px;
-    background: var(--color-accent-pink);
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: #fff;
     color: #050f68;
     font-weight: 700;
-    transition: translate 200ms var(--tds-ease-out);
+    box-shadow: 2px 2px 0 0 var(--color-accent-pink);
+    transition:
+      background-color 160ms var(--tds-ease-out),
+      translate 160ms var(--tds-ease-out),
+      box-shadow 160ms var(--tds-ease-out);
   }
   .product-tile__link:is(:hover, :focus-visible) .product-tile__go {
-    translate: 2px -2px;
+    background: var(--color-accent-pink);
+    translate: -1px calc(-50% - 1px);
+    box-shadow: 3px 3px 0 0 #fff;
   }
   @media (prefers-reduced-motion: reduce) {
     .product-tile__link,
-    .product-tile__img,
     .product-tile__go {
       transition: none;
     }
     .product-tile__link:is(:hover, :focus-visible) {
       translate: none;
     }
-    .product-tile__link:is(:hover, :focus-visible) .product-tile__img {
-      transform: none;
+    .product-tile__link:is(:hover, :focus-visible) .product-tile__go {
+      translate: 0 -50%;
     }
   }
 

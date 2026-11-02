@@ -1,26 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
+  CATALOGUE,
+  CATALOGUE_PRODUCTS,
+  CATEGORY_IDS,
   FINDER_COPY,
   FINDER_SECTION,
-  SERVICE_ORDER,
+  MAX_MATCHES,
   STAGE_IDS,
   TOPIC_IDS,
   buildDraft,
   recommend,
   situationOptions,
+  topicWords,
   type FinderAnswers,
-  type FinderService,
 } from "./serviceFinder";
-import { serviceDefinitions } from "./services";
-
-const services: FinderService[] = SERVICE_ORDER.map((id) => ({
-  id,
-  title: `Titel ${id}`,
-  summary: `Zusammenfassung ${id}`,
-  href: `/leistungen/${id}`,
-  situations: [1, 2, 3, 4, 5].map((n) => `${id} Ausgangslage ${n}.`),
-  fromPrice: 390,
-}));
 
 const answers = (over: Partial<FinderAnswers> = {}): FinderAnswers => ({
   topics: [],
@@ -29,144 +22,100 @@ const answers = (over: Partial<FinderAnswers> = {}): FinderAnswers => ({
   ...over,
 });
 
-const ids = (result: ReturnType<typeof recommend>) => result.map((match) => match.serviceId);
+const ids = (result: ReturnType<typeof recommend>) => result.map((match) => match.productId);
+
+describe("the catalogue", () => {
+  it("names only products it lists, in their own category", () => {
+    const known = new Map(CATALOGUE_PRODUCTS.map((product) => [product.id, product.category]));
+    for (const id of CATEGORY_IDS) {
+      const pointed = [...CATALOGUE[id].lead, ...CATALOGUE[id].situations.flatMap((situation) => situation.products)];
+      for (const product of pointed) expect(known.get(product), product).toBe(id);
+    }
+  });
+
+  it("has a slug and a title per language", () => {
+    for (const product of CATALOGUE_PRODUCTS) {
+      for (const value of [product.slug.de, product.slug.en, product.title.de, product.title.en]) {
+        expect(value, product.id).toBeTruthy();
+      }
+    }
+    expect(new Set(CATALOGUE_PRODUCTS.map((product) => product.slug.en)).size).toBe(CATALOGUE_PRODUCTS.length);
+  });
+});
 
 describe("recommend", () => {
-  it.each(SERVICE_ORDER)("puts %s first when it is the only topic", (id) => {
-    expect(ids(recommend(answers({ topics: [id] }), "de"))[0]).toBe(id);
+  it.each(CATEGORY_IDS)("starts %s with that category's products", (id) => {
+    expect(ids(recommend(answers({ topics: [id] }), "de"))).toEqual(CATALOGUE[id].lead);
   });
 
-  it("returns every service the visitor pointed at, strongest first", () => {
-    const result = recommend(
-      answers({
-        topics: ["process", "web-presence"],
-        situations: [{ key: "web-presence:0", serviceId: "web-presence", text: "Die Seite ist alt." }],
-      }),
-      "de",
-    );
-    expect(ids(result)).toEqual(["web-presence", "process"]);
-  });
-
-  it("keeps the catalogue order between equally strong matches", () => {
-    // Kundenportale lead the catalogue since 2026-10-06, so they win a tie;
-    // the web presence comes last now.
-    expect(ids(recommend(answers({ topics: ["web-presence", "panels"] }), "de"))).toEqual([
-      "panels",
-      "web-presence",
-    ]);
-  });
-
-  it("counts a recognised starting point on its own", () => {
-    const result = recommend(
-      answers({ situations: [{ key: "solutions:0", serviceId: "solutions", text: "Programme arbeiten nicht zusammen." }] }),
-      "de",
-    );
-    expect(ids(result)).toEqual(["solutions"]);
-  });
-
-  it("brings the sorting conversation along when the project is still open", () => {
-    expect(ids(recommend(answers({ topics: ["web-presence"], stage: "open" }), "de"))).toEqual([
-      "web-presence",
-      "consulting",
-    ]);
-    // A rough idea only nudges; it does not add a service by itself.
-    expect(ids(recommend(answers({ topics: ["web-presence"], stage: "rough" }), "de"))).toEqual(["web-presence"]);
-  });
-
-  it("answers 'not sure yet' with Beratung & Konzeption", () => {
-    expect(ids(recommend(answers({ topics: ["unsure"] }), "de"))).toEqual(["consulting"]);
-  });
-
-  it("never comes back empty", () => {
-    expect(ids(recommend(answers(), "de"))).toEqual(["consulting"]);
-    expect(ids(recommend(answers({ stage: "clear" }), "en"))).toEqual(["consulting"]);
+  it("puts what a recognised situation names first", () => {
+    const [spam] = situationOptions(["e-mail-domain"], "de").slice(1);
+    const result = recommend(answers({ topics: ["e-mail-domain"], situations: [spam!] }), "de");
+    expect(ids(result)[0]).toBe("spf-dkim-dmarc-einrichten");
   });
 
   it("gives the visitor's own choices as the reasons", () => {
-    const [match] = recommend(
-      answers({
-        topics: ["process"],
-        situations: [{ key: "process:0", serviceId: "process", text: "Dieselben Daten werden mehrfach eingetippt." }],
-      }),
-      "de",
+    const [form] = situationOptions(["digitalisierung"], "de").slice(0, 1);
+    const match = recommend(answers({ topics: ["digitalisierung"], situations: [form!] }), "de").find(
+      (item) => item.productId === "online-formular-statt-papier",
     );
-    expect(match?.reasons).toEqual([FINDER_COPY.de.topics.process.label, "Dieselben Daten werden mehrfach eingetippt."]);
+    expect(match?.reasons).toEqual([CATALOGUE.digitalisierung.topic.de, "Formulare laufen auf Papier."]);
+  });
+
+  it("shows a handful at most", () => {
+    const all = situationOptions(["webauftritt", "seo-sichtbarkeit"], "de");
+    expect(recommend(answers({ topics: ["webauftritt", "seo-sichtbarkeit"], situations: all }), "de").length).toBeLessThanOrEqual(MAX_MATCHES);
+  });
+
+  it("stays empty for 'not sure yet', so the result offers the conversation", () => {
+    expect(recommend(answers({ topics: ["unsure"], stage: "open" }), "de")).toEqual([]);
   });
 });
 
 describe("situationOptions", () => {
-  it("offers the starting points of the chosen services", () => {
-    const options = situationOptions(["process"], services);
+  it("offers the starting points of the chosen category", () => {
+    const options = situationOptions(["schulung"], "de");
     expect(options).toHaveLength(4);
-    expect(options.every((option) => option.serviceId === "process")).toBe(true);
+    expect(options.every((option) => option.category === "schulung")).toBe(true);
   });
 
-  it("offers a couple of every service when the visitor chose none", () => {
-    const options = situationOptions(["unsure"], services);
-    expect(new Set(options.map((option) => option.serviceId)).size).toBe(SERVICE_ORDER.length);
+  it("offers some of every category when the visitor chose none", () => {
+    const options = situationOptions(["unsure"], "de");
+    expect(new Set(options.map((option) => option.category)).size).toBe(CATEGORY_IDS.length);
     expect(options.length).toBeLessThanOrEqual(8);
   });
 
   it("never offers more than eight", () => {
-    expect(situationOptions(SERVICE_ORDER, services).length).toBeLessThanOrEqual(8);
-    expect(situationOptions(["consulting", "process", "solutions"], services).length).toBeLessThanOrEqual(8);
-  });
-
-  it("keys each option by service and position", () => {
-    expect(situationOptions(["solutions"], services)[1]).toEqual({
-      key: "solutions:1",
-      serviceId: "solutions",
-      text: "solutions Ausgangslage 2.",
-    });
+    expect(situationOptions(CATEGORY_IDS, "de").length).toBeLessThanOrEqual(8);
+    expect(situationOptions(["schulung", "webauftritt", "e-mail-domain"], "de").length).toBeLessThanOrEqual(8);
   });
 });
 
 describe("buildDraft", () => {
-  it("names the matches, the starting points and the stage", () => {
-    const given = answers({
-      topics: ["process"],
-      situations: [{ key: "process:0", serviceId: "process", text: "Dieselben Daten werden mehrfach eingetippt." }],
-      stage: "rough",
-    });
-    const { message } = buildDraft(recommend(given, "de"), given, services, "de");
+  it("names the products, the starting points and the stage", () => {
+    const [form] = situationOptions(["digitalisierung"], "de");
+    const given = answers({ topics: ["digitalisierung"], situations: [form!], stage: "rough" });
+    const { message, service } = buildDraft(recommend(given, "de"), given, "de");
     expect(message).toContain(FINDER_COPY.de.draft.intro);
-    expect(message).toContain("Titel process");
-    expect(message).toContain("Dieselben Daten werden mehrfach eingetippt.");
+    expect(message).toContain("Online-Formular statt Papier");
+    expect(message).toContain("Formulare laufen auf Papier.");
     expect(message).toContain(FINDER_COPY.de.stages.rough.label);
-  });
-
-  /**
-   * What preselects "Worum geht es?" on the contact form is the STRONGEST
-   * match's id — not its title. The options over there are written in
-   * `sections/Contact.astro`, are CMS-editable, and share no wording with the
-   * service names, so a label sent from here could only ever fail to match.
-   */
-  it("carries the strongest match's id, not a label", () => {
-    const given = answers({ topics: ["process"] });
-    const matches = recommend(given, "de");
-    const { service } = buildDraft(matches, given, services, "de");
     expect(service).toBe("process");
-    expect(service).toBe(matches[0]!.serviceId);
   });
 
-  it("is long enough for the contact form on its own", () => {
+  it("falls back to the conversation, long enough for the contact form", () => {
     // ContactSchema (tds-shared) wants a message of at least 20 characters.
-    const { message } = buildDraft(recommend(answers({ topics: ["unsure"] }), "en"), answers({ topics: ["unsure"] }), services, "en");
+    const { message, service } = buildDraft([], answers({ topics: ["unsure"] }), "en");
+    expect(service).toBe("consulting");
     expect(message.trim().length).toBeGreaterThanOrEqual(20);
   });
 });
 
 describe("the finder's copy", () => {
-  it("follows the service catalogue, in the catalogue's order", () => {
-    // SERVICE_ORDER is the tie-breaker, so it has to BE the catalogue order —
-    // otherwise the assistant and the services section disagree on a tie.
-    expect([...SERVICE_ORDER]).toEqual(serviceDefinitions.map((service) => service.id));
-  });
-
   it("has every answer in both languages", () => {
     for (const id of TOPIC_IDS) {
-      expect(FINDER_COPY.de.topics[id].label, id).toBeTruthy();
-      expect(FINDER_COPY.en.topics[id].label, id).toBeTruthy();
+      expect(topicWords(id, "de").label, id).toBeTruthy();
+      expect(topicWords(id, "en").label, id).toBeTruthy();
     }
     for (const id of STAGE_IDS) {
       expect(FINDER_COPY.de.stages[id].label, id).toBeTruthy();
@@ -176,21 +125,16 @@ describe("the finder's copy", () => {
   });
 
   it("keeps the site's rules: no direct address, nothing free, no durations", () => {
-    const german = JSON.stringify([FINDER_COPY.de, FINDER_SECTION.de]);
+    const german = JSON.stringify([FINDER_COPY.de, FINDER_SECTION.de, CATALOGUE, CATALOGUE_PRODUCTS.map((product) => product.title.de)]);
     expect(german).not.toMatch(/kostenlos|kostenfrei|gratis|Minute/i);
     expect(german).not.toMatch(/\b(Sie|Ihnen|Ihr|Ihre|Ihren|Ihrem|Ihrer|Ihres)\b/);
     expect(german).not.toMatch(/\b(du|dein\w*|dir|dich)\b/i);
     expect(JSON.stringify([FINDER_COPY.en, FINDER_SECTION.en])).not.toMatch(/\bfree\b|minute/i);
   });
 
-  it("names no amount of its own — only the package price it is handed", () => {
-    // JSON.stringify drops the functions; the price one is checked below.
-    const words = JSON.stringify([FINDER_COPY, FINDER_SECTION]);
+  it("names no amount", () => {
+    const words = JSON.stringify([FINDER_COPY, FINDER_SECTION, CATALOGUE]);
     expect(words).not.toMatch(/€|\bEUR\b|\bEuro\b/);
-    expect(words).not.toMatch(/\d+\s*[–-]\s*\d+/);
-    expect(FINDER_COPY.de.priceFrom(390)).toBe("Festpreise ab 390 € netto");
-    expect(FINDER_COPY.en.priceFrom(390)).toBe("Fixed prices from €390 net");
-    // No hourly rates since 2026-09-22.
     expect(words).not.toMatch(/Stunde|hourly|per hour|an hour/i);
   });
 });

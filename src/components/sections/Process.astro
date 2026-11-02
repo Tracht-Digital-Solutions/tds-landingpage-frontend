@@ -1,16 +1,15 @@
 ---
 /**
- * So arbeiten wir zusammen: four steps on one rail, all readable at once.
+ * So arbeiten wir zusammen: four steps, all readable at once.
  *
- * Each step lists what happens in plain sentences and names what exists at its
- * end. No hover, no panel, no script: a visitor comparing the steps should not
- * have to open them one at a time. The rail runs across from 64rem and down the
- * left edge below that.
+ * Each step is a card in the site's language: a navy band, the hard offset
+ * shadow, a pink marker. Under a mouse the card leans toward the pointer and its
+ * shadow plate slides against the lean (`lib/motion/tilt.ts`, as on the project
+ * cards); the card lifts and its band turns bordeaux. Nothing has to be opened.
  *
- * The copy is code-owned (`lib/processContent.ts`). A stored `process` block
- * still holds the older wording, so it no longer applies.
- *
- * The `<ol>` carries the order for assistive technology.
+ * The copy is code-owned (`lib/processContent.ts`). The `<ol>` carries the order
+ * for assistive technology. `data-reveal` and the tilt sit on two elements, so
+ * their transforms never meet.
  */
 import { localizePath, resolveLang } from "~/lib/i18n";
 import ProcessIcon from "~/components/ui/ProcessIcon.astro";
@@ -36,23 +35,30 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
       bar
     />
 
-    <ol class="process-rail">
+    <ol class="process-steps">
       {
         process.steps.map((step) => (
           <li class="process-step" data-reveal>
-            <span aria-hidden="true" class="process-step__dot">
-              <ProcessIcon number={step.number} />
-            </span>
-            <div class="process-step__card">
-              <p class="process-step__when">{step.duration}</p>
-              <h3 class="process-step__title">{step.title}</h3>
-              <ul class="process-step__actions">
-                {step.actions.map((action) => <li>{action}</li>)}
-              </ul>
-              <p class="process-step__result">
-                <span class="process-step__result-label">{resultLabel}</span>
-                {step.outcome}
-              </p>
+            <div class="process-step__tilt" data-motion-tilt>
+              <span class="process-step__shade" aria-hidden="true"></span>
+              <div class="process-step__card">
+                <div class="process-step__band">
+                  <span aria-hidden="true" class="process-step__icon">
+                    <ProcessIcon number={step.number} />
+                  </span>
+                  <p class="process-step__when">{step.duration}</p>
+                </div>
+                <div class="process-step__body">
+                  <h3 class="process-step__title">{step.title}</h3>
+                  <ul class="process-step__actions">
+                    {step.actions.map((action) => <li>{action}</li>)}
+                  </ul>
+                  <p class="process-step__result">
+                    <span class="process-step__result-label">{resultLabel}</span>
+                    {step.outcome}
+                  </p>
+                </div>
+              </div>
             </div>
           </li>
         ))
@@ -69,66 +75,100 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
 </section>
 
 <style>
-  .process-rail {
-    --dot: 3rem;
-    position: relative;
+  .process-steps {
     display: grid;
-    gap: 1.25rem;
+    gap: 1.5rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
+  @media (min-width: 40rem) {
+    .process-steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 72rem) {
+    .process-steps {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
   .process-step {
-    position: relative;
-    display: grid;
-    grid-template-columns: var(--dot) minmax(0, 1fr);
-    gap: 1rem;
+    min-width: 0;
   }
-  /* The rail, drawn per step so it ends at the last dot. */
-  .process-step:not(:last-child)::before {
-    content: "";
+
+  .process-step__tilt {
+    --tilt-shade-x: 0px;
+    --tilt-shade-y: 0px;
+    position: relative;
+    height: 100%;
+    transform: perspective(900px);
+    transform-style: preserve-3d;
+  }
+  /* The hard shadow, as a plate behind the card (see `ui/ProjectCard.astro`). */
+  .process-step__shade {
     position: absolute;
-    top: var(--dot);
-    bottom: -1.25rem;
-    left: calc(var(--dot) / 2 - 1px);
-    width: 2px;
-    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
-  }
-  .process-step__dot {
-    position: relative;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--dot);
-    height: var(--dot);
-    border-radius: 100px;
-    background: var(--color-surface-navy);
-    color: #fff;
+    inset: 0;
+    border-radius: 6px;
+    background: var(--tds-shadow-ink, rgb(0 0 0 / 0.22));
+    transform: translate3d(calc(8px + var(--tilt-shade-x)), calc(8px + var(--tilt-shade-y)), -28px) scale(1.031);
+    transition: transform 220ms var(--tds-ease-out);
+    pointer-events: none;
   }
   .process-step__card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
     height: 100%;
-    padding: 1.25rem;
+    overflow: hidden;
     border-radius: 6px;
     background: var(--color-soft);
+    transform: translateZ(0);
+    transition: transform 220ms var(--tds-ease-out);
+  }
+
+  .process-step__band {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--color-surface-navy);
+    color: #fff;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .process-step__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--tds-radius-pill, 100px);
+    background: var(--color-accent-pink);
+    color: #050f68;
+    transition: rotate 420ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
   .process-step__when {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-muted);
+    color: rgb(255 255 255 / 0.9);
+  }
+
+  .process-step__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
   }
   .process-step__title {
     margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1.375rem;
     line-height: 1.15;
     letter-spacing: -0.015em;
     color: var(--color-black);
@@ -148,36 +188,31 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
   }
   .process-step__result {
     margin: auto 0 0;
-    padding-top: 0.75rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-black) 10%, transparent);
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.4;
+    padding: 0.625rem 0.875rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-accent-pink) 18%, var(--color-paper));
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.3;
     color: var(--color-black);
   }
   .process-step__result-label {
     display: block;
-    margin-bottom: 0.125rem;
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--color-muted);
+    color: color-mix(in srgb, var(--color-muted) 82%, var(--color-black));
   }
 
-  @media (min-width: 64rem) {
-    .process-rail {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Only under a mouse: a finger has no hover. */
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .process-step__tilt:hover .process-step__card {
+      transform: translateZ(10px);
     }
-    .process-step {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: var(--dot) 1fr;
+    .process-step__tilt:hover .process-step__band {
+      background: var(--color-surface-accent);
     }
-    .process-step:not(:last-child)::before {
-      top: calc(var(--dot) / 2 - 1px);
-      right: -1.25rem;
-      bottom: auto;
-      left: var(--dot);
-      width: auto;
-      height: 2px;
+    .process-step__tilt:hover .process-step__icon {
+      rotate: -8deg;
     }
   }
 

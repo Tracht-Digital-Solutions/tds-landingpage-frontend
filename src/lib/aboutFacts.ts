@@ -70,3 +70,9 @@ export function aboutFacts(lang: Lang, now: Date = new Date()): AboutFact[] {
         },
       ];
 }
+
+/** Julian's line, the same one the freelance site carries. Code-owned: it is a quotation. */
+export const FOUNDER_QUOTE: Record<Lang, string> = {
+  de: "Software soll den Alltag einfacher machen. Ihre Komplexität gehört nicht auf die Schultern der Menschen, die sie nutzen.",
+  en: "Software should make everyday tasks easier. Its complexity shouldn’t become a burden for the people using it.",
+};

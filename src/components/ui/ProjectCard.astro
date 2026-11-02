@@ -173,25 +173,6 @@ const {
       transform: translateZ(8px);
     }
   }
-  /* Light from the pointer's side, so the surface reads as turned. */
-  .project-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background: radial-gradient(
-      circle at var(--tilt-light-x, 50%) var(--tilt-light-y, 0%),
-      rgb(255 255 255 / 0.16),
-      transparent 60%
-    );
-    opacity: 0;
-    transition: opacity 220ms var(--tds-ease-out);
-    pointer-events: none;
-  }
-  .project-card__tilt[data-tilting] .project-card::after {
-    opacity: 1;
-  }
-
   .project-card__shot {
     position: relative;
     aspect-ratio: 16 / 10;

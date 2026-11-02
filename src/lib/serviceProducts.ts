@@ -2,6 +2,7 @@ import { PROPERTY_ORIGINS } from "@tracht-digital-solutions/tds-shared/nav";
 import { contentApiBase } from "./connection";
 import { memoisedOr } from "./contentCache";
 import type { Lang } from "./i18n";
+import { CATEGORY_IDS } from "./serviceFinder";
 import { readContentJson } from "./siteKey";
 
 /**
@@ -64,14 +65,29 @@ const shopHome = (lang: Lang) => `${PROPERTY_ORIGINS.shop}${lang === "en" ? "/en
 /** The shop's catalogue, filtered in the browser to our own services. */
 export const shopServicesHref = (lang: Lang) => `${shopHome(lang)}?art=own#katalog`;
 
-const productHref = (product: ServiceProduct, lang: Lang) =>
-  `${PROPERTY_ORIGINS.shop}${lang === "en" ? "/en/product/" : "/produkt/"}${product.slug[lang]}`;
-
-async function releasedSlugs(lang: Lang): Promise<string[]> {
-  const page = await readContentJson<{ products: { slug: string }[] }>(
-    `${contentApiBase()}/shop?lang=${lang}&limit=48`,
+/** One request per category: the list endpoint stops at 48 per page. */
+async function fetchReleasedSlugs(lang: Lang): Promise<string[]> {
+  const pages = await Promise.all(
+    CATEGORY_IDS.map((category) =>
+      readContentJson<{ products: { slug: string }[] }>(
+        `${contentApiBase()}/shop?lang=${lang}&limit=48&category=${category}`,
+      ),
+    ),
   );
-  return page.products.map((product) => product.slug);
+  return pages.flatMap((page) => page.products.map((product) => product.slug));
+}
+
+/** The Shop's released product slugs; empty while the Shop cannot be reached. */
+export async function releasedSlugs(lang: Lang): Promise<Set<string>> {
+  return new Set(
+    await memoisedOr(`service-products:${lang}`, () => fetchReleasedSlugs(lang), [] as string[], "released products"),
+  );
+}
+
+/** A product's page once the Shop has released it, otherwise the filtered list. */
+export function shopProductHref(slug: string, lang: Lang, released: ReadonlySet<string>): string {
+  if (!released.has(slug)) return shopServicesHref(lang);
+  return `${PROPERTY_ORIGINS.shop}${lang === "en" ? "/en/product/" : "/produkt/"}${slug}`;
 }
 
 export interface ServiceProductTile extends ServiceProduct {
@@ -80,11 +96,9 @@ export interface ServiceProductTile extends ServiceProduct {
 
 /** The tiles, each linked to its product page once the shop has released it. */
 export async function getServiceProducts(lang: Lang): Promise<ServiceProductTile[]> {
-  const released = new Set(
-    await memoisedOr(`service-products:${lang}`, () => releasedSlugs(lang), [] as string[], "released products"),
-  );
+  const released = await releasedSlugs(lang);
   return SERVICE_PRODUCTS.map((product) => ({
     ...product,
-    href: released.has(product.slug[lang]) ? productHref(product, lang) : shopServicesHref(lang),
+    href: shopProductHref(product.slug[lang], lang, released),
   }));
 }

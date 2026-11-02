@@ -153,11 +153,11 @@ const titles = {
      2026-10-12): a section lands with its edge on the top of the screen, so
      its heading has to clear the floating header by itself. */
 
-  /* hero → services: WIDE, and the whole gap is on services. The hero is
-     `min-h-svh` with no bottom padding of its own, so there is no upper half to
-     add — this is the one boundary where one side carries all of it. */
+  /* hero → services: NORMAL. A jump lands a little above the section's edge, so
+     the smaller padding still clears the floating header. */
   #services {
-    padding-block-start: calc(var(--lp-rhythm-wide) * 2);
+    padding-block-start: var(--lp-rhythm-normal);
+    scroll-margin-top: calc(-1 * var(--lp-header-clearance) + max(0px, var(--lp-section-top) - var(--lp-rhythm-normal)));
   }
 
   /* services → cases: TIGHT. The five services and the client projects that
