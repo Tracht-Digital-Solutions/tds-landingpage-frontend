@@ -96,6 +96,6 @@ Each demo embeds only `<tds-brand-bar lang="…">` with a fallback link plus
 
 ## Own projects
 
-`src/lib/ownProjects.ts` holds WParted and its website: code-owned, one picture per language in
+`src/lib/ownProjects.ts` holds WParted, Pi Imager for Android and the WParted website: code-owned, one picture per language in
 `public/projects/`, not probed and not synced. They carry the badge "Eigenes Projekt" and never
 go into `references.ts`. Replace the pictures by hand when WParted or its website changes visibly.

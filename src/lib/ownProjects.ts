@@ -66,6 +66,30 @@ export const ownProjects: readonly OwnProject[] = [
     },
   },
   {
+    id: "pi-imager-android",
+    // The app's captures exist in German only, so both languages share the picture.
+    image: { de: "/projects/pi-imager-android.webp", en: "/projects/pi-imager-android.webp" },
+    href: { de: "https://github.com/jtracht/rpi-imager-android", en: "https://github.com/jtracht/rpi-imager-android" },
+    hreflang: { de: "de", en: "de" },
+    service: "solutions",
+    copy: {
+      de: {
+        title: "Pi Imager für Android",
+        kind: "App",
+        text: "Freie Android-App, die Raspberry-Pi-Images ohne PC und ohne Root über USB-OTG schreibt und jeden Sektor prüft. Unabhängiges Open-Source-Projekt, bisher auf Emulatoren geprüft.",
+        cta: "Quellcode ansehen",
+        alt: "Pi Imager für Android auf Tablet und Handy, mit fertig vorbereitetem Image und Modellauswahl",
+      },
+      en: {
+        title: "Pi Imager for Android",
+        kind: "App",
+        text: "Free Android app that writes Raspberry Pi images over USB OTG, with no PC and no root, and verifies every sector. Independent open-source project, tested on emulators so far.",
+        cta: "View the source",
+        alt: "Pi Imager for Android on tablet and phone, with a prepared image and the model picker (German interface)",
+      },
+    },
+  },
+  {
     id: "wparted-website",
     image: { de: "/projects/wparted-webseite-de.webp", en: "/projects/wparted-webseite-en.webp" },
     href: { de: "https://wparted.tracht-digital.de/", en: "https://wparted.tracht-digital.de/en/" },

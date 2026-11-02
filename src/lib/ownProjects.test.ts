@@ -8,8 +8,14 @@ import { getServiceById } from "./services";
 const LANGS = ["de", "en"] as const;
 
 describe("own projects", () => {
-  it("shows the WParted program and its website", () => {
-    expect(ownProjects.map((p) => p.id)).toEqual(["wparted", "wparted-website"]);
+  it("shows WParted, Pi Imager for Android and the WParted website", () => {
+    expect(ownProjects.map((p) => p.id)).toEqual(["wparted", "pi-imager-android", "wparted-website"]);
+  });
+
+  it("call Pi Imager independent and do not hide its test state", () => {
+    const app = ownProjects.find((p) => p.id === "pi-imager-android")!;
+    expect(app.copy.de.text).toMatch(/Unabhängiges.*Emulatoren/);
+    expect(app.copy.en.text).toMatch(/Independent.*emulators/);
   });
 
   it("are never listed as client work", () => {
