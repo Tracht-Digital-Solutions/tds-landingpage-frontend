@@ -79,11 +79,13 @@ const hiddenCount = content.items.length - shown.length;
 
       <div class="faq-list">
         <FaqAccordion items={shown} name="faq" />
-        {/* The way on, at the end of the list rather than inside the contact
-            card below: a reader who has just worked through six questions is
-            here, and the card is one whole link already — a second link nested
-            inside an `<a>` is not markup. The count is printed because "more"
-            without a number is a promise a visitor cannot size. */}
+      </div>
+
+      {/* Under the list, side by side: the way to the other questions and the
+          exit for a question the list does not answer. The whole card is the
+          link. NO `.btn` — unlayered tds-shared beats every Tailwind utility.
+          Rosé, not navy: the contact block directly below is navy. */}
+      <div class="faq-foot">
         {
           hiddenCount > 0 && (
             <a class="faq-all" href={allQuestionsHref}>
@@ -93,38 +95,19 @@ const hiddenCount = content.items.length - shown.length;
             </a>
           )
         }
-      </div>
-
-      {/* The list can only ever answer the questions it anticipated. This is
-          the exit for everyone else.
-
-          The whole card is the link, not only the pill inside it. NO `.btn` —
-          unlayered tds-shared beats every Tailwind utility, so a custom fill
-          on `.btn btn-primary` would not apply.
-
-          Rosé, not navy: the contact block directly below is navy, and two
-          navy blocks in a row read as one. The title stays a `<span>` — a
-          heading here would add an outline level that is not one. */}
-      <a
-        href={contactHref}
-        class="faq-cta group relative block overflow-hidden rounded-[6px] p-7 md:p-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
-      >
-        <span class="tds-decor" aria-hidden="true">
-          <span
-            class="tds-shape tds-shape--quarter-bl tds-shape--coral"
-            style="top: -4rem; right: -4rem; width: 14rem; height: 14rem;"
-          ></span>
-        </span>
-        <span class="flex flex-col gap-4">
-          <span class="block">
-            <span class="block font-[var(--font-display)] text-xl text-[var(--color-black)]">
+        <a
+          href={contactHref}
+          class="faq-cta group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
+        >
+          <span class="faq-cta__words">
+            <span class="block font-[var(--font-display)] text-lg font-semibold text-[var(--color-black)]">
               {ui.moreTitle}
             </span>
-            <span class="faq-cta-sub mt-1.5 block text-sm">
+            <span class="faq-cta-sub mt-1 block text-sm">
               {ui.moreText}
             </span>
           </span>
-          <span class="faq-cta-pill inline-flex shrink-0 items-center gap-2 self-start rounded-full px-5 py-2.5 text-sm font-medium">
+          <span class="faq-cta-pill inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
             {ui.moreCta}
             <svg
               aria-hidden="true"
@@ -142,24 +125,22 @@ const hiddenCount = content.items.length - shown.length;
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
           </span>
-        </span>
-      </a>
+        </a>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  /* One source order, two arrangements: phones read heading → questions →
-     way out; from `lg` the heading and the way out share the left column and
-     the list runs down the right. Grid areas do this without a second copy of
-     anything in the markup. */
+  /* Phones read heading → questions → the two ways on; from `lg` the heading
+     stands left, the list and the ways on right. */
   .faq-layout {
     display: grid;
     gap: 2.5rem;
     grid-template-areas:
       "head"
       "list"
-      "cta";
+      "foot";
   }
   .faq-layout__head {
     grid-area: head;
@@ -170,8 +151,28 @@ const hiddenCount = content.items.length - shown.length;
     /* Room for each row's hard shadow and its hover lift (6 + 2 px). */
     gap: 0.875rem;
   }
+  .faq-foot {
+    grid-area: foot;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+  }
   .faq-cta {
-    grid-area: cta;
+    flex: 1 1 22rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.875rem 1.5rem;
+    max-width: 44rem;
+    margin-inline-start: auto;
+    padding: 1.25rem 1.5rem;
+    border-radius: 6px;
+  }
+  .faq-cta__words {
+    flex: 1 1 14rem;
   }
 
   /* The link to the rest. A row in the list's own rhythm, not a button: it
@@ -181,8 +182,6 @@ const hiddenCount = content.items.length - shown.length;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    align-self: start;
-    margin-top: 0.25rem;
     padding: 0.5rem 0;
     font-size: 0.9375rem;
     font-weight: 600;
@@ -229,10 +228,9 @@ const hiddenCount = content.items.length - shown.length;
   @media (min-width: 64rem) {
     .faq-layout {
       grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-      grid-template-rows: auto 1fr;
       grid-template-areas:
         "head list"
-        "cta list";
+        ". foot";
       column-gap: 4rem;
       row-gap: 2rem;
       align-items: start;

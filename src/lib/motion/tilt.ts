@@ -57,14 +57,11 @@ export function mountTilt({ animate, pointerSpring, hasFinePointer }: Dom): void
       const dx = Math.max(-1, Math.min(1, (event.clientX - (box.left + box.width / 2)) / (box.width / 2)));
       const dy = Math.max(-1, Math.min(1, (event.clientY - (box.top + box.height / 2)) / (box.height / 2)));
       void animate(card, { rotateX: -dy * MAX, rotateY: dx * MAX, transformPerspective: PERSPECTIVE }, pointerSpring);
-      // The shadow plate (`ui/ProjectCard.astro`) slides against the lean, the
-      // light follows the pointer. Custom properties on the card; the moving
-      // parts are transforms and an opacity.
+      // The shadow plate slides against the lean. Custom properties on the card;
+      // the moving part is a transform.
       card.toggleAttribute("data-tilting", true);
       card.style.setProperty("--tilt-shade-x", `${(-dx * SHADE).toFixed(1)}px`);
       card.style.setProperty("--tilt-shade-y", `${(-dy * SHADE).toFixed(1)}px`);
-      card.style.setProperty("--tilt-light-x", `${((dx + 1) * 50).toFixed(1)}%`);
-      card.style.setProperty("--tilt-light-y", `${((dy + 1) * 50).toFixed(1)}%`);
     },
     { passive: true },
   );

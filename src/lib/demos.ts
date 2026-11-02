@@ -223,26 +223,19 @@ export async function getDemos(options: GetDemosOptions = {}): Promise<ResolvedD
 
 /**
  * Card microcopy that belongs to this site, not to the demo.
- *
- * `zoom` names the magnifier over the screenshot. It says "enlarge", never
- * "open": the button shows the captured picture, the card's link goes to the
- * live site, and a visitor who confuses the two ends up looking at a
- * screenshot when they meant to click through.
  */
 export const demoUi: Record<
   Lang,
-  { newTab: string; visit: string; hostLabel: string; zoom: string }
+  { newTab: string; visit: string; hostLabel: string }
 > = {
   de: {
     newTab: "öffnet in neuem Tab",
     visit: "Demo ansehen",
     hostLabel: "Adresse",
-    zoom: "Vorschau vergrößern",
   },
   en: {
     newTab: "opens in a new tab",
     visit: "View demo",
     hostLabel: "Address",
-    zoom: "Enlarge preview",
   },
 };

@@ -58,7 +58,7 @@ const DEPTH_LAYERS = 6;
 
 <section
   id="hero"
-  class="hero relative min-h-svh flex flex-col justify-center overflow-clip"
+  class="hero relative flex flex-col justify-center overflow-clip"
   aria-labelledby="hero-heading"
   lang={lang === "en" ? "en" : undefined}
 >
@@ -147,7 +147,9 @@ const DEPTH_LAYERS = 6;
 </section>
 
 <style>
+  /* Not a full screen: the next section's heading stays close below the actions. */
   .hero {
+    min-height: min(82svh, 46rem);
     padding-top: 6.25rem;
     padding-bottom: 3.5rem;
   }
@@ -166,8 +168,8 @@ const DEPTH_LAYERS = 6;
   }
 
   /* Hero-Fotogrund. Ein GRUND, keine Abbildung: niedrige Deckkraft, und im
-     Dark Mode noch einmal tiefer. Der Scrim ist die PAPIERFARBE, die nach
-     rechts ausläuft — die linke Bildhälfte bleibt so ruhig wie die Fläche. */
+     Dark Mode noch einmal tiefer. Der Scrim ist die PAPIERFARBE als ebener
+     Schleier. */
   .hero-photo {
     opacity: 0.32;
   }
@@ -175,12 +177,7 @@ const DEPTH_LAYERS = 6;
     opacity: 0.2;
   }
   .hero-photo-scrim {
-    background: linear-gradient(
-      to right,
-      var(--color-paper) 20%,
-      color-mix(in srgb, var(--color-paper) 72%, transparent) 62%,
-      color-mix(in srgb, var(--color-paper) 42%, transparent) 100%
-    );
+    background: color-mix(in srgb, var(--color-paper) 62%, transparent);
   }
 
   /* === Die Formen der Dekorationsebene =============================

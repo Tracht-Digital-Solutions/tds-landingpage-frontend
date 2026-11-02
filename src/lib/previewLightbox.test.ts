@@ -42,14 +42,9 @@ describe("the demo card's markup", () => {
    * button out of the link. Restoring the wrapper anchor "because it is
    * simpler" would look right in the diff and break both controls.
    */
-  it("does not nest the magnifier inside an anchor", () => {
-    const zoomStart = card.indexOf('class="demo-card__zoom"');
-    const actionsStart = card.indexOf("<CardActions");
-    expect(actionsStart, "the footer bar").toBeGreaterThan(-1);
-    expect(zoomStart, "the magnifier").toBeGreaterThan(-1);
-    // The magnifier is in the screenshot band, which comes BEFORE the bar that
-    // holds the links. Nothing can nest them in that order.
-    expect(zoomStart).toBeLessThan(actionsStart);
+  it("has no magnifier and no anchor of its own", () => {
+    expect(card).not.toContain("data-preview-open");
+    expect(card.indexOf("<CardActions"), "the footer bar").toBeGreaterThan(-1);
     // And the card's own template contributes no anchor to wrap either. Only
     // the template: the frontmatter above it talks ABOUT `<a>` at length.
     const template = card.slice(card.indexOf("---", 3) + 3);
@@ -86,21 +81,6 @@ describe("the demo card's markup", () => {
    */
   it("lifts the service link above the stretched layer", () => {
     expect(actions).toMatch(/\.card-actions__service\s*\{[^}]*z-index:\s*1/s);
-  });
-
-  it("ships the magnifier hidden", () => {
-    const zoom = card.slice(card.indexOf('class="demo-card__zoom"'));
-    expect(zoom.slice(0, 200)).toMatch(/\bhidden\b/);
-  });
-
-  /**
-   * `display: inline-flex` out-specifies the user agent's
-   * `[hidden] { display: none }`, so without an explicit override the button
-   * would be visible before its dialog exists — and clicking it would do
-   * nothing at all.
-   */
-  it("re-asserts display:none for the hidden magnifier", () => {
-    expect(card).toMatch(/\.demo-card__zoom\[hidden\]\s*\{\s*display:\s*none;?\s*\}/);
   });
 });
 

@@ -1,5 +1,5 @@
 ---
-import { shopServicesHref } from "~/lib/serviceProducts";
+import { releasedSlugs, shopProductHref, shopServicesHref } from "~/lib/serviceProducts";
 /**
  * Leistungsassistent — the service finder behind a button, in ONE native
  * `<dialog>` on the home page.
@@ -42,36 +42,21 @@ import { shopServicesHref } from "~/lib/serviceProducts";
  * `.finder` rule below is `:global`, anchored on the `.finder` root.
  */
 import { localizePath, resolveLang } from "~/lib/i18n";
-import { platformDefinitions, platformHref } from "~/lib/platforms";
-import { resolveServiceContent, serviceDefinitions, serviceHref } from "~/lib/services";
-import { FINDER_SECTION } from "~/lib/serviceFinder";
+import { CATALOGUE, CATALOGUE_PRODUCTS, FINDER_SECTION, type FinderProduct } from "~/lib/serviceFinder";
 import ServiceFinderIsland from "~/components/islands/ServiceFinder";
 
 const lang = resolveLang(Astro.currentLocale);
 const section = FINDER_SECTION[lang];
-const services = await Promise.all(
-  serviceDefinitions.map(async (definition) => {
-    const content = await resolveServiceContent(definition, lang);
-    return {
-      id: definition.id,
-      title: content.title,
-      summary: content.summary,
-      href: serviceHref(definition, lang),
-      situations: content.situations.slice(0, 4),
-      ...(definition.id === "web-presence"
-        ? {
-            platforms: platformDefinitions.map((platform) => ({
-              label: platform.name,
-              href: platformHref(platform, lang),
-            })),
-          }
-        : {}),
-    };
-  }),
-);
+const released = await releasedSlugs(lang);
+const products: FinderProduct[] = CATALOGUE_PRODUCTS.map((product) => ({
+  id: product.id,
+  title: product.title[lang],
+  categoryName: CATALOGUE[product.category].name[lang],
+  href: shopProductHref(product.slug[lang], lang, released),
+}));
 const home = localizePath("/", lang);
 const contactHref = `${home}#contact`;
-const pricesHref = shopServicesHref(lang);
+const catalogueHref = shopServicesHref(lang);
 ---
 
 <dialog
@@ -116,9 +101,9 @@ const pricesHref = shopServicesHref(lang);
     <ServiceFinderIsland
       client:when="intent:[data-assistant-open]"
       lang={lang}
-      services={services}
+      products={products}
       contactHref={contactHref}
-      pricesHref={pricesHref}
+      catalogueHref={catalogueHref}
     />
   </div>
 </dialog>
@@ -568,13 +553,13 @@ const pricesHref = shopServicesHref(lang);
     background: var(--color-surface-navy);
     color: #fff;
   }
-  :global(.finder__match[data-rank="best"] :is(.finder__match-title, .finder__rate, .finder__why, .finder__why-label)) {
+  :global(.finder__match[data-rank="best"] :is(.finder__match-title, .finder__why, .finder__why-label)) {
     color: #fff;
   }
   :global(.finder__match[data-rank="best"] .finder__summary) {
     color: rgb(255 255 255 / 0.78);
   }
-  :global(.finder__match[data-rank="best"] :is(.finder__rate-value, .finder__detail, .finder__tick, .finder__rank)) {
+  :global(.finder__match[data-rank="best"] :is(.finder__detail, .finder__tick, .finder__rank)) {
     color: var(--color-accent-pink);
   }
   :global(.finder__rank) {
@@ -613,19 +598,6 @@ const pricesHref = shopServicesHref(lang);
     line-height: 1.55;
     color: var(--color-muted);
   }
-  :global(.finder__rate) {
-    margin: 0 0 0.875rem;
-    font-size: 0.9375rem;
-    line-height: 1.45;
-    color: var(--color-black);
-  }
-  :global(.finder__rate-label) {
-    font-weight: 600;
-  }
-  :global(.finder__rate-value) {
-    font-weight: 600;
-    color: var(--color-primary);
-  }
   :global(.finder__why-label) {
     margin: 0 0 0.35rem;
     font-size: 0.875rem;
@@ -650,32 +622,6 @@ const pricesHref = shopServicesHref(lang);
   :global(.finder__tick) {
     flex: none;
     color: var(--color-accent);
-  }
-  :global(.finder__platforms) {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 0.75rem;
-    padding: 0;
-    list-style: none;
-  }
-  :global(.finder__platforms a) {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 100px;
-    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-paper));
-    color: var(--color-accent);
-    font-size: 0.8125rem;
-    text-decoration: none;
-  }
-  :global(.finder__platforms a:hover) {
-    background: color-mix(in srgb, var(--color-accent) 18%, var(--color-paper));
-  }
-  @media (pointer: coarse) {
-    :global(.finder__platforms a) {
-      min-height: 2.75rem;
-    }
   }
   /* Pinned to the card's foot, so the links line up across cards of different length. */
   :global(.finder__detail) {

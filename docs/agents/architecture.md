@@ -13,7 +13,7 @@
 Used by both trees (`pages/index.astro`, `pages/en/index.astro` are wrappers). The order follows a visitor's
 questions:
 
-Hero → Leistungen (Webauftritt first, systems strip, assistant button) → Projekte und Referenzen
+Hero → Leistungen (five product tiles with the assistant as sixth tile) → Projekte und Referenzen
 (`sections/ProjectReferences.astro`) → Vorgehen (with the first-conversation card) → compact Journal → Wieso ich? (with the qualifications teaser) →
 Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ → Kontakt.
 
@@ -82,8 +82,8 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 `components/ServiceAssistant.astro` renders one native `<dialog id="leistungsassistent">` around
 `islands/ServiceFinder.tsx`; questions, weights and copy live in `lib/serviceFinder.ts`.
 
-- Ways in: a navy card with a compass (`ui/AssistantCard.astro`) under the services list and, compact, under the
-  prices. Cards marked `[data-assistant-open]` ship `hidden` until `showModal` exists. `/#leistungsassistent`
+- Way in: the last tile of the services row (`ui/AssistantCard.astro`). Questions and results follow the Shop's categories and
+  products (`lib/serviceFinder.ts`); a new Shop product it should recommend is added there. Cards marked `[data-assistant-open]` ship `hidden` until `showModal` exists. `/#leistungsassistent`
   and the old `/#leistungsfinder` open it directly.
 - Focus returns to the opener, except after a same-page link or the hand-off to the contact form.
 - The island is `client:idle` (a closed dialog never becomes visible, so `client:visible` would never hydrate,

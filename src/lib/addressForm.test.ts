@@ -54,6 +54,8 @@ describe("the visitor is not addressed directly", () => {
     const offenders: string[] = [];
     for (const file of copyFiles()) {
       for (const line of withoutComments(read(file)).split("\n")) {
+        // The founder quotation: "Ihre" there means the software, not the reader.
+        if (line.includes("Ihre Komplexität")) continue;
         const hit = line.match(FORMAL);
         if (hit) offenders.push(`${file}: "${hit[0]}" — ${line.trim().slice(0, 120)}`);
       }

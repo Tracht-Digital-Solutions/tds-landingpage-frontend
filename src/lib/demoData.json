@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T12:39:06.453Z",
+  "generatedAt": "2026-11-02T17:37:32.374Z",
   "demos": {
     "demo1": {
       "status": "ok",
@@ -10,7 +10,7 @@
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-02T12:38:46.628Z"
+      "checkedAt": "2026-11-02T17:37:11.080Z"
     },
     "demo2": {
       "status": "ok",
@@ -21,7 +21,7 @@
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-02T12:38:47.000Z"
+      "checkedAt": "2026-11-02T17:37:11.344Z"
     },
     "demo3": {
       "status": "ok",
@@ -32,18 +32,18 @@
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-02T12:38:47.476Z"
+      "checkedAt": "2026-11-02T17:37:11.739Z"
     },
     "demo4": {
       "status": "ok",
-      "title": "Schreinerei Lindgrund | Demo-Webseite",
+      "title": "Schreinerei in Musterstadt | Schreinerei Lindgrund (Demo-Webseite)",
       "description": "Demo-Webseite der fiktiven Schreinerei Lindgrund: So könnte die Unternehmensseite eines Handwerksbetriebs aussehen.",
       "siteLang": "de",
       "favicon": "/demos/demo4-favicon.svg",
       "preview": "/demos/demo4.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-02T12:38:47.734Z"
+      "checkedAt": "2026-11-02T17:37:11.990Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-11-02T12:38:47.886Z"
+      "checkedAt": "2026-11-02T17:37:12.085Z"
     },
     "shop": {
       "status": "ok",
@@ -65,7 +65,7 @@
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-02T12:38:48.245Z"
+      "checkedAt": "2026-11-02T17:37:12.516Z"
     }
   }
 }

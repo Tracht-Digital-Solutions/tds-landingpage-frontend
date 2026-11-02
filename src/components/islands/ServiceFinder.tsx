@@ -10,7 +10,8 @@ import {
   buildDraft,
   recommend,
   situationOptions,
-  type FinderService,
+  topicWords,
+  type FinderProduct,
   type SituationChoice,
   type StageId,
   type TopicId,
@@ -18,11 +19,11 @@ import {
 
 interface Props {
   lang?: Lang;
-  services: FinderService[];
+  products: FinderProduct[];
   /** The contact section on the home page of this language. */
   contactHref: string;
-  /** The pricing section, where "how your price comes about" is explained. */
-  pricesHref: string;
+  /** The Shop's catalogue, filtered to our own services. */
+  catalogueHref: string;
 }
 
 /**
@@ -55,7 +56,7 @@ interface Props {
  * hydrates, never animated in from `opacity: 0`. Reduced motion (the OS, via
  * `MotionScope`, or the site's own switch) turns every one of them off.
  */
-export default function ServiceFinder({ lang = "de", services, contactHref, pricesHref }: Props) {
+export default function ServiceFinder({ lang = "de", products, contactHref, catalogueHref }: Props) {
   const copy = FINDER_COPY[lang];
   const uid = useId();
   // 0 topics · 1 starting points · 2 stage · STEP_COUNT result
@@ -71,7 +72,7 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
     typeof document !== "undefined" && document.documentElement.hasAttribute("data-a11y-motion");
   const still = siteMotionOff ? { duration: 0 } : undefined;
 
-  const options = useMemo(() => situationOptions(topics, services), [topics, services]);
+  const options = useMemo(() => situationOptions(topics, lang), [topics, lang]);
   const matches = useMemo(
     () => (step === STEP_COUNT ? recommend({ topics, situations, stage }, lang) : []),
     [step, topics, situations, stage, lang],
@@ -88,8 +89,6 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
     }
     node.focus();
   }, []);
-
-  const serviceTitle = (id: TopicId) => services.find((service) => service.id === id)?.title;
 
   const toggleTopic = (id: TopicId) => {
     setHint("");
@@ -117,7 +116,7 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
     if (step === 0) {
       // Starting points of a topic the visitor has since deselected are no
       // longer on offer, so they must not count either.
-      const offered = new Set(situationOptions(topics, services).map((choice) => choice.key));
+      const offered = new Set(situationOptions(topics, lang).map((choice) => choice.key));
       setSituations((current) => current.filter((choice) => offered.has(choice.key)));
     }
     setHint("");
@@ -141,7 +140,7 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
   };
 
   const handOff = () => {
-    handOffContactDraft(buildDraft(matches, { topics, situations, stage }, services, lang));
+    handOffContactDraft(buildDraft(matches, { topics, situations, stage }, lang));
   };
 
   /**
@@ -245,13 +244,14 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
               <h3 ref={focusOnMount} tabIndex={-1} className="finder__result-title">
                 {copy.resultTitle}
               </h3>
+              {matches.length === 0 && <p className="finder__summary">{copy.noMatch}</p>}
               <ol className="finder__matches">
                 {matches.map((match, index) => {
-                  const service = services.find((candidate) => candidate.id === match.serviceId);
-                  if (!service) return null;
+                  const product = products.find((candidate) => candidate.id === match.productId);
+                  if (!product) return null;
                   return (
                     <m.li
-                      key={match.serviceId}
+                      key={match.productId}
                       className="finder__match"
                       data-rank={index === 0 ? "best" : "also"}
                       initial={still ? false : { y: 24, opacity: 0 }}
@@ -264,14 +264,8 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
                         </span>
                         {index === 0 ? copy.rankBest : copy.rankAlso}
                       </p>
-                      <h4 className="finder__match-title">{service.title}</h4>
-                      <p className="finder__summary">{service.summary}</p>
-                      <p className="finder__rate">
-                        <span className="finder__rate-label">{copy.rateLabel}</span>{" "}
-                        <span className="finder__rate-value">
-                          {service.fromPrice !== undefined ? copy.priceFrom(service.fromPrice) : copy.priceOnRequest}
-                        </span>
-                      </p>
+                      <h4 className="finder__match-title">{product.title}</h4>
+                      <p className="finder__summary">{product.categoryName}</p>
                       {match.reasons.length > 0 && (
                         <>
                           <p className="finder__why-label">{copy.whyLabel}</p>
@@ -287,19 +281,7 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
                           </ul>
                         </>
                       )}
-                      {service.platforms && service.platforms.length > 0 && (
-                        <>
-                          <p className="finder__why-label">{copy.platformsLabel}</p>
-                          <ul className="finder__platforms">
-                            {service.platforms.map((platform) => (
-                              <li key={platform.href}>
-                                <a href={platform.href}>{platform.label}</a>
-                              </li>
-                            ))}
-                          </ul>
-                        </>
-                      )}
-                      <a className="finder__detail" href={service.href}>
+                      <a className="finder__detail" href={product.href}>
                         {copy.detailLink}
                         <span aria-hidden="true">→</span>
                       </a>
@@ -309,8 +291,8 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
               </ol>
               <p className="finder__note">
                 {copy.note}{" "}
-                <a className="finder__price-link" href={pricesHref}>
-                  {copy.priceLink}
+                <a className="finder__price-link" href={catalogueHref}>
+                  {copy.catalogueLink}
                 </a>
               </p>
               <div className="finder__actions">
@@ -359,8 +341,8 @@ export default function ServiceFinder({ lang = "de", services, contactHref, pric
                         />
                         <Tick on={topics.includes(id)} still={still} />
                         <span className="finder__option-body">
-                          <span className="finder__option-label">{copy.topics[id].label}</span>
-                          <span className="finder__option-hint">{copy.topics[id].hint ?? serviceTitle(id)}</span>
+                          <span className="finder__option-label">{topicWords(id, lang).label}</span>
+                          <span className="finder__option-hint">{topicWords(id, lang).hint}</span>
                         </span>
                       </label>
                     ))}

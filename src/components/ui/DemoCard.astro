@@ -7,8 +7,7 @@
  * at 0.34 opacity behind a scrim with `alt=""` because there the image is
  * decoration under the copy; here the screenshot IS the point — it is what a
  * visitor came to look at — so it runs at full strength, in front, with a real
- * `alt`, and a magnifier opens the full 1440×900 capture without leaving the
- * page.
+ * `alt`.
  *
  * Everything textual on this card came from the demo itself via
  * `npm run demos:sync`, with ONE deliberate exception: the genre etiquette
@@ -16,23 +15,11 @@
  * here is written about a site; a demo with no meta description simply shows
  * no description.
  *
- * ### Why this is not one big `<a>` any more
+ * ### The link
  *
- * It was, and the magnifier is why it stopped being one: a `<button>` inside
- * an `<a>` is invalid, and no amount of `preventDefault` makes it valid. The
- * card is a plain element now, and the link lives in `ui/CardActions.astro` at
- * the bottom, stretching over the whole card with a `::after`. The full-card
- * hit area, the hover response and the focus ring all survive that swap — they
- * are the invariant, not the tag that used to provide them. The magnifier then
- * sits above the stretched layer on `z-index`, which is exactly the layering
- * the pattern exists for.
- *
- * The link moved off the TITLE and into the bar when the card gained a second
- * destination. A card with two links must not also have a third anchor saying
- * the same thing as one of them: a screen reader would read the demo out twice
- * and the visitor would be offered a choice that is not one. The title is
- * plain text now and the bar holds exactly two links — the service this demo
- * is evidence for, and the demo itself.
+ * The card is a plain element; the link lives in `ui/CardActions.astro` at the
+ * bottom and stretches over the whole card with a `::after`. The bar holds
+ * exactly two links: the service this demo is evidence for, and the demo.
  *
  * ### Why the sizes are container queries, not a `featured` prop
  *
@@ -116,37 +103,6 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
   caption={definition.host}
   captionLabel={ui.hostLabel}
 >
-  {/* Starts `hidden`; `PreviewLightbox.astro` reveals it once its dialog is wired. */}
-      <button
-        slot="shot"
-        type="button"
-        class="demo-card__zoom"
-        hidden
-        data-preview-open
-        data-preview-src={mediaSrc(preview)}
-        data-preview-alt={previewAlt}
-        data-preview-title={title}
-        data-preview-host={definition.host}
-        data-preview-href={definition.url}
-      >
-        <span class="sr-only">{ui.zoom}</span>
-        <svg
-          aria-hidden="true"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.75"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
-          <line x1="11" y1="8" x2="11" y2="14"></line>
-          <line x1="8" y1="11" x2="14" y2="11"></line>
-        </svg>
-      </button>
   {
     favicon && (
       <img
@@ -178,60 +134,11 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
 </ProjectCard>
 
 <style>
-  .demo-card__zoom {
-    position: absolute;
-    top: 0.625rem;
-    right: 0.625rem;
-    /* Above the stretched link, which covers the entire card. */
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    /* The shared 44px minimum. */
-    width: 2.75rem;
-    height: 2.75rem;
-    border: none;
-    border-radius: 100px;
-    background: color-mix(in srgb, var(--color-card) 88%, transparent);
-    color: var(--color-black);
-    cursor: pointer;
-    opacity: 0;
-    transition:
-      opacity 200ms var(--tds-ease-out),
-      background-color 200ms var(--tds-ease-out);
-  }
-  /* MUST stay after the rule above: `display: inline-flex` beats `hidden`. */
-  .demo-card__zoom[hidden] {
-    display: none;
-  }
-  :global(.project-card:hover) .demo-card__zoom,
-  :global(.project-card:focus-within) .demo-card__zoom,
-  .demo-card__zoom:focus-visible {
-    opacity: 1;
-  }
-  .demo-card__zoom:hover {
-    background: var(--color-card);
-  }
-  .demo-card__zoom:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-  /* No hover to reveal it on a touch screen, so it is simply always there. */
-  @media (hover: none) {
-    .demo-card__zoom {
-      opacity: 1;
-    }
-  }
   .demo-card__favicon {
     flex: none;
     width: 20px;
     height: 20px;
     border-radius: 4px;
     object-fit: contain;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .demo-card__zoom {
-      transition: none;
-    }
   }
 </style>

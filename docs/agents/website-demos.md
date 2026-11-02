@@ -62,10 +62,8 @@ writes the WebP; PNG originals stay out of the repo.
 - **The screenshot never zooms on hover** (demo, study and business-card tiles, 2026-10-11); the card answers
   with its fill and title colour only.
 
-- **The card is not a wrapper `<a>`.** It carries a magnifier that opens the 1440 × 900 capture in
-  `ui/PreviewLightbox.astro` (one native `<dialog>` per section); a `<button>` inside an `<a>` is invalid.
-  Magnifiers ship `hidden` until `showModal` is confirmed. `previewLightbox.test.ts` guards nesting, the stretched
-  link, the focus ring, the hidden default and focus restore.
+- **The card is not a wrapper `<a>`** and has no magnifier (removed 2026-11-02); a study opens its enlargement through the bar's
+  call to action in `ui/PreviewLightbox.astro`. `previewLightbox.test.ts` guards the stretched link, focus ring and focus restore.
 - **Every card ends in the same bar**, `ui/CardActions.astro`, edge to edge with a 1 px seam, carrying exactly two
   links: the service the card is evidence for and the card's own destination.
   - The bar is a **sibling of the card body**, never inside it.
