@@ -80,7 +80,6 @@ export function formatSavings(value: number, lang: Lang): string {
 export interface SavingsCopy {
   headline: string;
   headlineAccent: string;
-  lead: string;
   pending: string;
   resultPrefix: string;
   year: string;
@@ -95,7 +94,6 @@ const copy: Record<Lang, SavingsCopy> = {
   de: {
     headline: "Was Digitalisierung",
     headlineAccent: "an Zeit spart.",
-    lead: "Drei Fragen zu einem wiederkehrenden Ablauf, zum Beispiel Rechnungen erfassen oder Bestellungen übertragen.",
     pending: "Nach drei Antworten steht hier die Schätzung.",
     resultPrefix: "Etwa",
     year: "Stunden pro Jahr",
@@ -108,7 +106,6 @@ const copy: Record<Lang, SavingsCopy> = {
   en: {
     headline: "How much time",
     headlineAccent: "digitalization saves.",
-    lead: "Three questions about a recurring task, for example entering invoices or copying orders.",
     pending: "The estimate appears here after three answers.",
     resultPrefix: "About",
     year: "hours per year",

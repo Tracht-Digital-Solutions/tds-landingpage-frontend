@@ -47,6 +47,7 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
         headlineAccent={copy.headlineAccent}
         id="cases-heading"
         headingClass="mb-0"
+        align="end"
       />
     </div>
 
@@ -72,10 +73,17 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
 </section>
 
 <style>
+  /* Right-aligned (2026-11-03): from here the home sections alternate
+     right, left, right … (see `HomePage.astro`). */
   .projects-head {
-    max-width: 42rem;
     margin-inline: auto;
     text-align: center;
+  }
+  @media (min-width: 48rem) {
+    .projects-head {
+      margin-inline: auto 0;
+      text-align: right;
+    }
   }
   .projects-grid {
     display: grid;
@@ -121,6 +129,11 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
     display: flex;
     justify-content: center;
     margin-top: 2.5rem;
+  }
+  @media (min-width: 48rem) {
+    .projects-more {
+      justify-content: flex-end;
+    }
   }
   /* No `.btn`: unlayered tds-shared beats a custom fill (see the FAQ's pill). */
   .projects-more__link {

@@ -131,7 +131,6 @@ export function getFaqPageCopy(lang: "de" | "en") {
         } satisfies Record<FaqGroup, string>,
         backLabel: "Zurück zur Startseite",
         ctaTitle: "Eine Frage ist offen geblieben?",
-        ctaText: "Eine kurze Nachricht genügt – Antwort in der Regel innerhalb von 24 Stunden.",
         ctaButton: "Nachricht schreiben",
       }
     : {
@@ -152,7 +151,6 @@ export function getFaqPageCopy(lang: "de" | "en") {
         } satisfies Record<FaqGroup, string>,
         backLabel: "Back to the home page",
         ctaTitle: "A question still open?",
-        ctaText: "A short message is enough – replies usually within 24 hours.",
         ctaButton: "Send a message",
       };
 }

@@ -32,13 +32,11 @@ const ui =
   lang === "de"
     ? {
         moreTitle: "Eine Frage ist offen geblieben?",
-        moreText: "Eine kurze Nachricht genügt – Antwort in der Regel innerhalb von 24 Stunden.",
         moreCta: "Nachricht schreiben",
         allQuestions: "Alle Fragen ansehen",
       }
     : {
         moreTitle: "A question still open?",
-        moreText: "A short message is enough — usually answered within 24 hours.",
         moreCta: "Get in touch",
         allQuestions: "See all questions",
       };
@@ -102,9 +100,6 @@ const hiddenCount = content.items.length - shown.length;
           <span class="faq-cta__words">
             <span class="block font-[var(--font-display)] text-lg font-semibold text-[var(--color-black)]">
               {ui.moreTitle}
-            </span>
-            <span class="faq-cta-sub mt-1 block text-sm">
-              {ui.moreText}
             </span>
           </span>
           <span class="faq-cta-pill inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium">
@@ -271,12 +266,6 @@ const hiddenCount = content.items.length - shown.length;
        den hellen bzw. dunklen Gegenpol. */
     color: var(--color-paper);
     transition: gap 200ms var(--tds-ease-out);
-  }
-  /* `--color-muted` auf der rosé Flaeche misst 4.47:1 und verfehlt die
-     4.5 damit um Haaresbreite. Eine Spur dunkler statt die Flaeche heller:
-     die Toenung ist der Punkt der Karte. */
-  .faq-cta-sub {
-    color: color-mix(in srgb, var(--color-muted) 82%, var(--color-black));
   }
   .faq-cta:hover .faq-cta-pill {
     gap: 0.75rem;

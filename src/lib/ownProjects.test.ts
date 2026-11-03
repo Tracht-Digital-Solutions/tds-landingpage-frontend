@@ -33,6 +33,11 @@ describe("own projects", () => {
     }
   });
 
+  it("lead from the program card to the WParted website", () => {
+    const program = ownProjects[0]!;
+    for (const lang of LANGS) expect(program.href[lang]).toMatch(/^https:\/\/wparted\.tracht-digital\.de\//);
+  });
+
   it("say what is special about the program, in both languages", () => {
     const program = ownProjects[0]!;
     expect(program.copy.de.highlights?.items).toHaveLength(3);
