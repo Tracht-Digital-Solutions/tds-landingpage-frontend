@@ -1,0 +1,290 @@
+---
+/**
+ * Zeitersparnis: what an automated workflow frees up, worked out with the
+ * visitor's own figures.
+ *
+ * The server renders the example's result into the `<output>`s, so the
+ * section is complete without JavaScript; the plain script below only
+ * recalculates on input and hands the figures to the contact form as a draft
+ * (`lib/contactDraft.ts`), like the shop's quote request. It sends nothing.
+ *
+ * Copy and arithmetic live in `lib/savingsCalculator.ts`. No measured figure,
+ * no promise: the fields are labelled as example values and the note says the
+ * result is only a calculation.
+ */
+import SectionHeader from "~/components/ui/SectionHeader.astro";
+import { localizePath, resolveLang } from "~/lib/i18n";
+import {
+  SAVINGS_DEFAULTS,
+  SAVINGS_LIMITS,
+  formatSavings,
+  getSavingsCopy,
+  savings,
+} from "~/lib/savingsCalculator";
+
+const lang = resolveLang(Astro.currentLocale);
+const copy = getSavingsCopy(lang);
+const example = savings(SAVINGS_DEFAULTS);
+const contactHref = `${localizePath("/", lang)}#contact`;
+const fields = [
+  { name: "minutes", label: copy.minutes, min: 1, step: 1 },
+  { name: "perWeek", label: copy.perWeek, min: 1, step: 1 },
+  { name: "share", label: copy.share, min: 0, step: 5 },
+] as const;
+---
+
+<section id="savings" class="section-spacing" aria-labelledby="savings-heading">
+  <div class="lp-container">
+    <SectionHeader
+      headline={copy.headline}
+      headlineAccent={copy.headlineAccent}
+      id="savings-heading"
+      headingClass="mb-6"
+    />
+    <p class="savings-lead">{copy.lead}</p>
+
+    <div class="savings-card" data-reveal>
+      <div class="savings-input">
+        <form class="savings-form" data-savings data-lang={lang} data-draft={copy.draft}>
+          {
+            fields.map((field) => (
+              <label class="savings-field">
+                <span>{field.label}</span>
+                <input
+                  type="number"
+                  name={field.name}
+                  inputmode="numeric"
+                  min={field.min}
+                  max={SAVINGS_LIMITS[field.name]}
+                  step={field.step}
+                  value={SAVINGS_DEFAULTS[field.name]}
+                  required
+                />
+              </label>
+            ))
+          }
+        </form>
+        <p class="savings-examples">{copy.examples}</p>
+        <p class="savings-label">{copy.benefitsLabel}</p>
+        <ul class="savings-benefits">
+          {copy.benefits.map((benefit) => <li>{benefit}</li>)}
+        </ul>
+      </div>
+
+      <div class="savings-result">
+        <p class="savings-figure savings-figure--year">
+          <output data-savings-result="year">{formatSavings(example.year, lang)}</output>
+          <span>{copy.year}</span>
+        </p>
+        <div class="savings-pair">
+          <p class="savings-figure">
+            <output data-savings-result="month">{formatSavings(example.month, lang)}</output>
+            <span>{copy.month}</span>
+          </p>
+          <p class="savings-figure">
+            <output data-savings-result="days">{formatSavings(example.days, lang)}</output>
+            <span>{copy.days}</span>
+          </p>
+        </div>
+        <p class="savings-small">{copy.formula}</p>
+        <p class="savings-small">{copy.note}</p>
+        <a href={contactHref} class="savings-cta" data-cta data-savings-cta data-track="savings-first-call">
+          {copy.cta}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .savings-lead {
+    max-width: 46rem;
+    margin: 0 0 2.5rem;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--color-black);
+  }
+
+  .savings-card {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+    border-radius: 6px;
+    background: var(--color-surface-navy);
+    color: #fff;
+    box-shadow: 8px 8px 0 0 var(--color-accent-pink);
+  }
+  @media (min-width: 64rem) {
+    .savings-card {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: clamp(2rem, 4vw, 3.5rem);
+    }
+  }
+
+  .savings-form {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .savings-form {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .savings-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .savings-field input {
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid rgb(255 255 255 / 0.35);
+    border-radius: 100px;
+    background: rgb(255 255 255 / 0.08);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+  }
+  .savings-field input:focus-visible {
+    border-color: var(--color-accent-pink);
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 3px;
+  }
+
+  .savings-examples {
+    margin: 0.75rem 0 1.75rem;
+    font-size: 0.875rem;
+    color: rgb(255 255 255 / 0.82);
+  }
+  .savings-label {
+    margin: 0 0 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-pink);
+  }
+  .savings-benefits {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .savings-benefits li {
+    position: relative;
+    padding-left: 1.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .savings-benefits li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent-pink);
+    font-weight: 800;
+  }
+
+  /* The result plate stays white in both themes: it sits on the fixed navy. */
+  .savings-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: clamp(1.25rem, 2.5vw, 1.75rem);
+    border-radius: 6px;
+    background: #fff;
+    color: #0b0a07;
+  }
+  .savings-figure {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+  }
+  .savings-figure output {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #050f68;
+    font-variant-numeric: tabular-nums;
+  }
+  .savings-figure--year output {
+    font-size: clamp(3rem, 7vw, 4.75rem);
+    color: #820933;
+  }
+  .savings-figure span {
+    font-weight: 600;
+  }
+  .savings-pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+  }
+  .savings-small {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: #4f4f4a;
+  }
+  .savings-cta {
+    --lp-fill: var(--color-surface-accent);
+    --lp-shade: initial;
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 100px;
+    background: var(--lp-fill);
+    color: #fff;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .savings-cta:hover {
+    --lp-fill: var(--color-surface-navy);
+    --lp-shade: var(--color-accent-pink);
+  }
+  .savings-cta:focus-visible {
+    outline: 2px solid #820933;
+    outline-offset: 3px;
+  }
+</style>
+
+<script>
+  import { handOffContactDraft } from "~/lib/contactDraft";
+  import { formatSavings, savings, savingsDraft, type SavingsInput } from "~/lib/savingsCalculator";
+
+  for (const form of document.querySelectorAll<HTMLFormElement>("[data-savings]")) {
+    const section = form.closest("section");
+    const lang = form.dataset.lang === "en" ? "en" : "de";
+    const read = (): SavingsInput => {
+      const value = (name: string) => Number((form.elements.namedItem(name) as HTMLInputElement | null)?.value);
+      return { minutes: value("minutes"), perWeek: value("perWeek"), share: value("share") };
+    };
+    const update = () => {
+      const result = savings(read());
+      for (const key of ["month", "year", "days"] as const) {
+        const output = section?.querySelector<HTMLOutputElement>(`[data-savings-result="${key}"]`);
+        if (output) output.textContent = formatSavings(result[key], lang);
+      }
+    };
+    form.addEventListener("input", update);
+    form.addEventListener("submit", (event) => event.preventDefault());
+    section?.querySelector("[data-savings-cta]")?.addEventListener("click", () => {
+      handOffContactDraft({ message: savingsDraft(form.dataset.draft ?? "", read(), lang), service: "process" });
+    });
+    update();
+  }
+</script>

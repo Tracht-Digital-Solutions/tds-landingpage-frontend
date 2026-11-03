@@ -11,7 +11,7 @@
  * cost → objections → action:
  *
  * Hero → Leistungen (products, the assistant's button, the systems) →
- * Projekte und Referenzen → Vorgehen → Journal → Wieso ich? → FAQ → Kontakt.
+ * Projekte und Referenzen → Zeitersparnis (calculator) → Vorgehen → Journal → Wieso ich? → FAQ → Kontakt.
  * Prices live in the shop, not here.
  *
  * Each section answers the question a visitor has at that point. Paper and
@@ -31,6 +31,7 @@ import About from "~/components/sections/About.astro";
 import Services from "~/components/sections/Services.astro";
 import ProjectReferences from "~/components/sections/ProjectReferences.astro";
 import Process from "~/components/sections/Process.astro";
+import TimeSavings from "~/components/sections/TimeSavings.astro";
 import Journal from "~/components/sections/Journal.astro";
 import FAQ from "~/components/sections/FAQ.astro";
 import Contact from "~/components/sections/Contact.astro";
@@ -122,6 +123,8 @@ const titles = {
     <SectionSeam />
     <ProjectReferences />
     <SectionSeam />
+    <TimeSavings />
+    <SectionSeam />
     <Process />
     <SectionSeam />
     <Journal />
@@ -170,9 +173,12 @@ const titles = {
     padding-block-start: max(var(--lp-rhythm-tight), var(--lp-section-top));
   }
 
-  /* cases → process: NORMAL. */
+  /* cases → savings → process: NORMAL. */
   #cases {
     padding-block-end: var(--lp-rhythm-normal);
+  }
+  #savings {
+    padding-block: max(var(--lp-rhythm-normal), var(--lp-section-top)) var(--lp-rhythm-normal);
   }
   #process {
     padding-block-start: max(var(--lp-rhythm-normal), var(--lp-section-top));
