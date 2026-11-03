@@ -120,7 +120,7 @@ within 72 px of the right edge.
   is fine, the page ground's bodies lean toward it (up to 16°/20°) and the planes shift by depth (14/30/52 px);
   one smoothing loop (τ 0.45 s, never a spring per pointer event: a restarted spring loses its velocity) parks when
   settled and eases back to the centre when the hero leaves. Reduced motion: the turned resting pose.
-- **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render. The wheel is one number, its position in cards (`lib/heroWheel.ts`); hand, spring and the own turn all move it and the script writes each card's `--slot`, so a press mid-turn holds the wheel. A swipe of 12 % of a card turns one card; a throw carries further. Only the fade is a CSS transition.
+- **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render. The wheel is one number, its position in cards (`lib/heroWheel.ts`); hand, spring and the own turn all move it and the script writes each card's `--slot`, so a press mid-turn holds the wheel. A swipe of 12 % of a card turns one card; a throw carries further. Only the fade is a CSS transition. No card is ever shown cut off (2026-11-04): the script fades each card to 0 over the last 48 px before the hero's box or the window edge, so cards fade out and in as they turn.
 - `npm run audit:perf` measures 390 px and 1440 px and pins `h1#hero-heading` as the LCP element on both.
 
 ## The service explorer and assistant

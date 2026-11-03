@@ -66,7 +66,7 @@ import {
   businessCardHref,
   businessCardLinks,
 } from "~/lib/businessCard";
-import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
+import { LOGO, PORTRAIT_SIZE, logoSrc, logoSrcset, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
 
 interface Props {
   lang: Lang;
@@ -94,11 +94,11 @@ const ui =
   lang === "de"
     ? {
         eyebrow: "Digitale Visitenkarte",
-        bio: "Fester Ansprechpartner für Kundenportale, Digitalisierung und Websites.",
+        bio: "Digitale Lösungen für Unternehmen: Kundenportale, digitale Abläufe, individuelle Software und Websites. Ein fester Ansprechpartner von der ersten Idee bis zur Wartung.",
         save: "Kontakt speichern",
-        saveMeta: "vCard für Telefon, Mac und Outlook",
+        saveMeta: "Telefon, Mobil, E-Mail und Profile als vCard",
         groupContact: "Direkt erreichbar",
-        groupMore: "Mehr von mir",
+        groupMore: "Mehr ansehen",
         qrTitle: "Zum Weitergeben",
         qrText:
           "Diese Seite als QR-Code — abfotografieren lassen, statt Kontaktdaten zu diktieren.",
@@ -117,11 +117,11 @@ const ui =
       }
     : {
         eyebrow: "Digital business card",
-        bio: "A steady point of contact for customer portals, digitalization and websites.",
+        bio: "Digital solutions for businesses: customer portals, digital workflows, custom software and websites. One steady point of contact from the first idea to maintenance.",
         save: "Save contact",
-        saveMeta: "vCard for phone, Mac and Outlook",
+        saveMeta: "Phone, mobile, email and profiles as a vCard",
         groupContact: "Reach me directly",
-        groupMore: "More from me",
+        groupMore: "See more",
         qrTitle: "To pass on",
         qrText:
           "This page as a QR code — let people photograph it instead of dictating contact details.",
@@ -171,8 +171,12 @@ const ICONS: Record<string, string> = {
     '<circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />',
   services:
     '<rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />',
-  pricing:
-    '<path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.58a2 2 0 0 1 0 2.83z" /><line x1="7" y1="7" x2="7.01" y2="7" />',
+  shop:
+    '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />',
+  projects:
+    '<rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />',
+  freelance:
+    '<circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />',
   journal:
     '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><line x1="9" y1="7" x2="16" y2="7" /><line x1="9" y1="11" x2="16" y2="11" />',
   linkedin:
@@ -217,7 +221,7 @@ const profileSchema = {
       {/* The two controls the site chrome would otherwise have carried. They
           come FIRST in the DOM rather than last because a keyboard user
           reaching a page with no navigation should meet them before a stack of
-          ten links, and the language switch in particular is what a visitor
+          links, and the language switch in particular is what a visitor
           served the wrong locale is looking for. A plain link, not the
           header's dropdown island: both card routes are known here, so the
           switch needs no JavaScript at all. */}
@@ -233,142 +237,70 @@ const profileSchema = {
         <Fragment set:html={themeToggleMarkup({ labelToDark: ui.toDark, labelToLight: ui.toLight })} />
       </nav>
 
-      <header class="card__id">
-        {/* The same pre-sized copies `About.astro` uses (`lib/imageVariants.ts`):
-            committed static files, not the on-request `/_image` resize this
-            used to go through in the Node process. It is this page's largest
-            element, hence eager and high priority. NOT
-            `assets/portrait-vcard.jpg` — that one is a 400×400 crop the vCard
-            endpoint embeds as base64. */}
-        <img
-          src={portraitSrc(360)}
-          srcset={portraitSrcset()}
-          sizes="(min-width: 768px) 9rem, 7.5rem"
-          width={PORTRAIT_SIZE.width}
-          height={PORTRAIT_SIZE.height}
-          alt={founder.name}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          class="card__portrait"
-        />
-        <p class="eyebrow card__eyebrow">{ui.eyebrow}</p>
-        <h1 class="card__name">{founder.name}</h1>
-        <p class="card__role">{founder.jobTitle}</p>
-        <p class="card__org">{name}</p>
-        <span aria-hidden="true" class="tds-brandbar tds-brandbar--sm card__bar"></span>
-        <p class="card__bio">{ui.bio}</p>
-        {/* Postal code + locality only, exactly as the site footer publishes
-            them: the local-search signal without the private street. */}
-        <p class="card__place">
-          {address.postalCode} {address.addressLocality}
-        </p>
-      </header>
+      <div class="card__layout">
+        <div class="card__aside">
+          {/* The card as an object (2026-11-04): a navy plate in the 85 × 55 mm
+              proportion of a printed business card, so the page reads as the
+              card itself rather than as a profile. It carries the identity;
+              everything a thumb presses is below it. */}
+          <header class="card__plate">
+            <div class="card__plate-top">
+              <span class="card__brand">
+                <img
+                  class="card__brand-mark"
+                  src={logoSrc("mark", LOGO.mark.widths[1])}
+                  srcset={logoSrcset("mark")}
+                  sizes="2.5rem"
+                  width={LOGO.mark.width}
+                  height={LOGO.mark.height}
+                  alt=""
+                  decoding="async"
+                />
+                <span class="card__brand-name">{name}</span>
+              </span>
+              <p class="card__eyebrow">{ui.eyebrow}</p>
+            </div>
+            <div class="card__plate-body">
+              <div class="card__plate-id">
+                <h1 class="card__name">{founder.name}</h1>
+                <p class="card__role">{founder.jobTitle}</p>
+              </div>
+              {/* The same pre-sized copies `About.astro` uses
+                  (`lib/imageVariants.ts`). It is this page's largest image,
+                  hence eager and high priority. NOT `assets/portrait-vcard.jpg`
+                  — that one is the square crop the vCard embeds. */}
+              <img
+                src={portraitSrc(360)}
+                srcset={portraitSrcset()}
+                sizes="6.5rem"
+                width={PORTRAIT_SIZE.width}
+                height={PORTRAIT_SIZE.height}
+                alt={founder.name}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                class="card__portrait"
+              />
+            </div>
+            <div class="card__plate-foot">
+              <span aria-hidden="true" class="tds-brandbar tds-brandbar--sm card__bar"></span>
+              {/* Postal code + locality only, exactly as the site footer
+                  publishes them: the local-search signal without the street. */}
+              <span class="card__place">{address.postalCode} {address.addressLocality}</span>
+            </div>
+          </header>
 
-      {/* No `download` attribute, deliberately — the same call the contact
-          aside makes: with the `text/vcard` MIME (public/.htaccess in
-          production) a phone opens its "add contact" flow while a desktop
-          browser saves the file. `download` would force the save on both. */}
-      <a class="card__save" href="/kontakt.vcf">
-        <svg
-          class="card__save-icon"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          set:html={ICONS.save}
-        />
-        <span>
-          {ui.save}
-          <span class="card__save-meta">{ui.saveMeta}</span>
-        </span>
-      </a>
+          <p class="card__bio">{ui.bio}</p>
 
-      {groups.map((group) => (
-        <section class="card__group" aria-labelledby={`card-group-${group.id}`}>
-          <h2 id={`card-group-${group.id}`} class="eyebrow card__group-title">
-            {groupHeadings[group.id]}
-          </h2>
-          {/* A real list, so a screen reader announces the count before
-              reading it out — on a page that is nothing BUT a stack of links,
-              that count is the page's structure. */}
-          <ul class="card__list">
-            {group.items.map((link) => (
-              <li>
-                <a
-                  class="card__row"
-                  href={link.href}
-                  data-reveal
-                  target={link.external ? "_blank" : undefined}
-                  rel={link.external ? "noopener noreferrer" : undefined}
-                >
-                  <svg
-                    class="card__row-icon"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    set:html={ICONS[link.id]}
-                  />
-                  <span class="card__row-text">
-                    <span class="card__row-label">
-                      {link.label}
-                      {link.external && <span class="sr-only"> ({ui.newTab})</span>}
-                    </span>
-                    <span class="card__row-meta">{link.meta}</span>
-                  </span>
-                  {/* Decoration: the row's accessible name is already the
-                      label plus, on an external row, the spoken hint above. */}
-                  <span class="card__row-mark" aria-hidden="true">
-                    <Arrow dir={link.external ? "up-right" : "right"} />
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-
-      <section class="card__qr" aria-labelledby="card-qr-title" data-reveal>
-        {/* A plain <img>, not an inlined SVG: the file is prerendered, so
-            inlining it would mean reading it back at request time — which
-            is the runtime dependency this whole route exists to avoid. It
-            is a picture with a meaning, so it carries a real alt. */}
-        <img
-          class="card__qr-code"
-          src={BUSINESS_CARD_QR_PATH[lang]}
-          alt={ui.qrAlt}
-          width="120"
-          height="120"
-          decoding="async"
-        />
-        <div class="card__qr-body">
-          <h2 id="card-qr-title" class="card__qr-title">{ui.qrTitle}</h2>
-          <p class="card__qr-text">{ui.qrText}</p>
-          {/* Hidden until the script confirms the browser can actually share
-              or copy. A button that silently does nothing is worse than no
-              button, and this one needs no fallback: the QR code beside it
-              already is the offline way to pass the page on. */}
-          <button
-            type="button"
-            class="card__share"
-            data-card-share
-            data-label-done={ui.shareDone}
-            hidden
-          >
+          {/* No `download` attribute, deliberately — the same call the contact
+              aside makes: with the `text/vcard` MIME (public/.htaccess in
+              production) a phone opens its "add contact" flow while a desktop
+              browser saves the file. `download` would force the save on both. */}
+          <a class="card__save" href="/kontakt.vcf">
             <svg
-              width="16"
-              height="16"
+              class="card__save-icon"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -376,25 +308,127 @@ const profileSchema = {
               stroke-linecap="round"
               stroke-linejoin="round"
               aria-hidden="true"
-              set:html={ICONS.share}
+              set:html={ICONS.save}
             />
-            <span data-card-share-label>{ui.share}</span>
-          </button>
-        </div>
-      </section>
+            <span>
+              {ui.save}
+              <span class="card__save-meta">{ui.saveMeta}</span>
+            </span>
+          </a>
 
-      {/* The card is a work sample as much as it is a contact detail — this
-          says so once, in words, and sends the reader to the service it
-          belongs to. Without it the page answers "who is this" and never
-          "can I have one". */}
-      <aside class="card__pitch" data-reveal>
-        <h2 class="card__pitch-title">{ui.pitchTitle}</h2>
-        <p class="card__pitch-text">{ui.pitchText}</p>
-        <a href={webPresencePath} class="link-underline card__pitch-cta">
-          {ui.pitchCta}
-          <span aria-hidden="true"><Arrow dir="right" /></span>
-        </a>
-      </aside>
+        </div>
+
+        <div class="card__main">
+          {groups.map((group) => (
+            <section class={`card__group card__group--${group.id}`} aria-labelledby={`card-group-${group.id}`}>
+              <h2 id={`card-group-${group.id}`} class="eyebrow card__group-title">
+                {groupHeadings[group.id]}
+              </h2>
+              {/* A real list, so a screen reader announces the count before
+                  reading it out — on a page that is nothing BUT links, that
+                  count is the page's structure. No `data-reveal`: nothing a
+                  visitor reads may wait on a scroll to appear. */}
+              <ul class="card__list">
+                {group.items.map((link) => (
+                  <li>
+                    <a
+                      class="card__row"
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                    >
+                      <span class="card__row-icon" aria-hidden="true">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          set:html={ICONS[link.id]}
+                        />
+                      </span>
+                      <span class="card__row-text">
+                        <span class="card__row-label">
+                          {link.label}
+                          {link.external && <span class="sr-only"> ({ui.newTab})</span>}
+                        </span>
+                        <span class="card__row-meta">{link.meta}</span>
+                      </span>
+                      {/* Decoration: the row's accessible name is already the
+                          label plus, on an external row, the spoken hint. */}
+                      <span class="card__row-mark" aria-hidden="true">
+                        <Arrow dir={link.external ? "up-right" : "right"} />
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+
+          {/* The card is a work sample as much as it is a contact detail — this
+              says so once, in words, and sends the reader to the service it
+              belongs to. */}
+          <aside class="card__pitch">
+            <h2 class="card__pitch-title">{ui.pitchTitle}</h2>
+            <p class="card__pitch-text">{ui.pitchText}</p>
+            <a href={webPresencePath} class="card__pitch-cta">
+              {ui.pitchCta}
+              <span aria-hidden="true"><Arrow dir="right" /></span>
+            </a>
+          </aside>
+        </div>
+
+        {/* After the rows in the DOM: someone holding a phone wants to call
+            first and pass the card on second. On the wide layout it moves
+            under the card. */}
+        <section class="card__qr" aria-labelledby="card-qr-title">
+          {/* A plain <img>, not an inlined SVG: the file is prerendered, so
+              inlining it would mean reading it back at request time — which
+              is the runtime dependency this whole route exists to avoid. It
+              is a picture with a meaning, so it carries a real alt. */}
+          <img
+            class="card__qr-code"
+            src={BUSINESS_CARD_QR_PATH[lang]}
+            alt={ui.qrAlt}
+            width="120"
+            height="120"
+            decoding="async"
+          />
+          <div class="card__qr-body">
+            <h2 id="card-qr-title" class="card__qr-title">{ui.qrTitle}</h2>
+            <p class="card__qr-text">{ui.qrText}</p>
+            {/* Hidden until the script confirms the browser can actually
+                share or copy. A button that silently does nothing is worse
+                than no button; the QR code beside it already is the offline
+                way to pass the page on. */}
+            <button
+              type="button"
+              class="card__share"
+              data-card-share
+              data-label-done={ui.shareDone}
+              hidden
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                set:html={ICONS.share}
+              />
+              <span data-card-share-label>{ui.share}</span>
+            </button>
+          </div>
+        </section>
+      </div>
 
       {/* The legal strip. Not the site footer and not a fork of it: three
           links and a copyright line, which is the minimum a public German
@@ -461,21 +495,58 @@ const profileSchema = {
 </script>
 
 <style>
-  /* The page IS the card: one column, centred, breathing at the top and the
-     bottom so it reads as a held object rather than as a document that lost
-     its header. `100svh` (not `100vh`) because this page is opened on a phone
-     more than anywhere else, and `vh` there is the address-bar-less height —
-     it would leave the bottom of the card under the browser UI on first
-     paint. */
+  /* The page IS the card. One column on a phone; from 60rem the card, the
+     save action and the QR code stand left (and stay in view) and the rows
+     run beside them (2026-11-04). `100svh` (not `100vh`) because this page is
+     opened on a phone more than anywhere else. */
   .card {
     min-height: 100svh;
     background: var(--color-paper);
-    padding: 2rem 1.25rem 3rem;
+    padding: 1.25rem 1rem 3rem;
   }
   .card__inner {
     width: 100%;
     max-width: 32rem;
     margin: 0 auto;
+  }
+  .card__layout {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: 0.75rem;
+  }
+  .card__aside,
+  .card__main {
+    min-width: 0;
+  }
+  @media (min-width: 60rem) {
+    .card__layout > .card__qr {
+      margin-top: 1.5rem;
+    }
+    .card {
+      padding: 2.5rem 2rem 4rem;
+    }
+    .card__inner {
+      max-width: 64rem;
+    }
+    .card__layout {
+      grid-template-columns: minmax(0, 27rem) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 3.5rem;
+      row-gap: 0;
+      align-items: start;
+    }
+    .card__aside {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .card__main {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+    .card__layout > .card__qr {
+      grid-column: 1;
+      grid-row: 2;
+    }
   }
 
   .card__top {
@@ -505,63 +576,125 @@ const profileSchema = {
     background: color-mix(in srgb, var(--color-black) 5%, transparent);
   }
 
-  .card__id {
+  /* ---- The plate: a printed card, 85 × 55 mm, navy in both themes. */
+  .card__plate {
+    container-type: inline-size;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-top: 1rem;
+    justify-content: space-between;
+    gap: 1rem;
+    aspect-ratio: 85 / 55;
+    padding: clamp(1rem, 5.5cqi, 1.5rem) clamp(1.125rem, 6cqi, 1.75rem);
+    border-radius: 10px;
+    background: var(--color-surface-navy);
+    color: #fff;
+    box-shadow: var(--tds-shadow-hard);
   }
-  /* A CARD, not a disc (2026-09-28). The round portrait with a fill ring was
-     the last of the soft language on this page — everything else on the site
-     is a 6px box with an unblurred offset, and this page is the one a visitor
-     is shown as an example of the work. Same treatment as the portrait in
-     "Wieso ich?". */
+  /* Too narrow for the proportion (a 320 px phone): the plate grows instead
+     of squeezing the name. A media query: the plate is its own container,
+     and a container query never matches the container itself. */
+  @media (max-width: 22rem) {
+    .card__plate {
+      aspect-ratio: auto;
+    }
+  }
+  /* On a phone the company name needs the whole top line; the page title
+     already says what this is. */
+  @container (max-width: 21rem) {
+    .card__eyebrow {
+      display: none;
+    }
+  }
+  .card__plate-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .card__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  /* The mark ships navy; on the plate it is white, as in the dark header. */
+  .card__brand-mark {
+    width: auto;
+    height: 1.25rem;
+    filter: brightness(0) invert(1);
+  }
+  .card__brand-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card__eyebrow {
+    margin: 0;
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, #fff 70%, transparent);
+  }
+  .card__plate-body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .card__plate-id {
+    min-width: 0;
+  }
+  .card__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.625rem, 9.5cqi, 2.375rem);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .card__role {
+    margin: 0.5rem 0 0;
+    font-size: clamp(0.8125rem, 3.8cqi, 0.9375rem);
+    line-height: 1.35;
+    color: var(--color-accent-pink);
+  }
+  /* A CARD, not a disc: a 6px box like every portrait on the site. */
   .card__portrait {
-    width: 8rem;
-    height: 10rem;
+    flex: none;
+    width: clamp(4.5rem, 24cqi, 6.5rem);
+    aspect-ratio: 4 / 5;
+    height: auto;
     border-radius: 6px;
     object-fit: cover;
     object-position: top center;
     background: var(--color-soft);
-    box-shadow: var(--tds-shadow-hard-sm);
   }
-  .card__eyebrow {
-    margin: 1.75rem 0 0.75rem;
-    color: var(--color-accent);
-  }
-  .card__name {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 1.4rem + 2.6vw, 2.75rem);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    color: var(--color-black);
-    margin: 0;
-  }
-  .card__role {
-    margin: 0.6rem 0 0;
-    color: var(--color-accent);
-  }
-  .card__org {
-    margin: 0.2rem 0 0;
-    color: var(--color-muted);
-    font-size: 0.9375rem;
+  .card__plate-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
   }
   .card__bar {
-    margin: 1.25rem 0;
-  }
-  .card__bio {
     margin: 0;
-    max-width: 26rem;
-    color: var(--color-ink);
-    line-height: 1.65;
   }
   .card__place {
-    margin: 0.75rem 0 0;
     font-family: var(--font-mono);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     letter-spacing: 0.02em;
-    color: var(--color-muted);
+    color: color-mix(in srgb, #fff 75%, transparent);
+  }
+
+  .card__bio {
+    margin: 1.5rem 0 0;
+    color: var(--color-ink);
+    line-height: 1.65;
   }
 
   /* The one filled, full-width action. Everything else on the page is a row
@@ -571,14 +704,11 @@ const profileSchema = {
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    margin-top: 2rem;
+    margin-top: 1.25rem;
     padding: 1rem 1.5rem;
     border-radius: var(--tds-radius-pill);
-    /* Navy, the site's primary — black was this page's own colour and nothing
-       else's. The hard offset and the press into it are the shared control
-       behaviour; `translate`, never `transform`, so nothing fights Motion. */
-    background: var(--color-surface-navy);
-    color: #fff;
+    background: var(--color-accent);
+    color: var(--color-paper);
     text-align: left;
     text-decoration: none;
     box-shadow: var(--tds-shadow-hard-sm);
@@ -589,19 +719,16 @@ const profileSchema = {
   .card__save:hover {
     translate: -2px -2px;
     box-shadow: var(--tds-shadow-hard-sm-hover);
-    background: var(--color-surface-accent);
+    background: var(--color-surface-navy);
+    color: #fff;
   }
   .card__save:active {
     translate: 2px 2px;
     box-shadow: var(--tds-shadow-hard-press);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .card__save,
-    .card__save:hover,
-    .card__save:active {
-      translate: none;
-      transition: background-color 200ms var(--tds-ease-out);
-    }
+  .card__save:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
   .card__save-icon {
     flex: none;
@@ -609,35 +736,122 @@ const profileSchema = {
   .card__save-meta {
     display: block;
     font-size: 0.75rem;
-    opacity: 0.7;
+    opacity: 0.8;
   }
 
-  .card__group {
-    margin-top: 2.5rem;
+  .card__qr {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+    background: var(--color-soft);
+    box-shadow: var(--tds-shadow-hard-sm);
+  }
+  .card__qr-code {
+    display: block;
+    flex: none;
+    width: 6.5rem;
+    height: 6.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    /* White in BOTH themes, and hardcoded rather than a token: the generated
+       code is pure black on a transparent ground, so it needs a light plate
+       to stay scannable on a dark page. */
+    box-sizing: border-box;
+    background: #ffffff;
+  }
+  .card__qr-body {
+    min-width: 0;
+  }
+  .card__qr-title {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    color: var(--color-black);
+  }
+  .card__qr-text {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+  .card__share {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    margin-top: 0.5rem;
+    padding: 0 1rem;
+    border-radius: var(--tds-radius-pill);
+    background: var(--lp-surface-card);
+    color: var(--color-black);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 200ms var(--tds-ease-out);
+  }
+  .card__share:hover {
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--lp-surface-card));
+  }
+  /* `display` on the class would otherwise beat the UA's `[hidden]` rule and
+     the button would paint before the script has decided it can work. */
+  .card__share[hidden] {
+    display: none;
+  }
+
+  /* ---- The rows. */
+  .card__group + .card__group {
+    margin-top: 2.25rem;
   }
   .card__group-title {
     margin: 0 0 0.75rem;
     color: var(--color-muted);
   }
   .card__list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: grid;
+    gap: 0.625rem;
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+  .card__list > li {
+    display: grid;
+    min-width: 0;
+  }
+  /* The four ways to reach a person as a 2 × 2 block of tiles from 26rem,
+     the rest as rows; on the wide layout both groups run two abreast. */
+  @media (min-width: 26rem) {
+    .card__group--contact .card__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .card__group--contact .card__row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .card__group--contact .card__row-mark {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+  }
+  @media (min-width: 72rem) {
+    .card__group--more .card__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   /* Borderless, per the design invariants: the row is told apart from the
      page by its FILL, and the hover response is what confirms it is live. */
   .card__row {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.875rem;
     /* Comfortably past the 44px touch floor — this is the row a thumb aims
        at while its owner is standing up. */
     min-height: 3.75rem;
-    padding: 0.875rem 1.125rem;
+    padding: 0.875rem 1rem;
     border-radius: 6px;
     background: var(--lp-surface-card);
     color: var(--color-black);
@@ -648,27 +862,29 @@ const profileSchema = {
       translate 160ms var(--tds-ease-out);
   }
   /* Up-LEFT into a growing offset, the site's one hover for a box that leads
-     somewhere. It used to rise straight up with no shadow to rise out of. */
+     somewhere. */
   .card__row:hover,
   .card__row:focus-visible {
     background: color-mix(in srgb, var(--color-accent) 8%, var(--lp-surface-card));
     translate: -2px -2px;
     box-shadow: var(--tds-shadow-hard-sm-hover);
   }
+  .card__row:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
   .card__row:active {
     translate: 2px 2px;
     box-shadow: var(--tds-shadow-hard-press);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .card__row,
-    .card__row:hover,
-    .card__row:focus-visible,
-    .card__row:active {
-      translate: none;
-    }
-  }
   .card__row-icon {
+    display: grid;
+    place-items: center;
     flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
     color: var(--color-accent);
   }
   .card__row-text {
@@ -698,95 +914,35 @@ const profileSchema = {
     transform: translateX(2px);
   }
 
-  .card__qr {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1.25rem;
-    margin-top: 2.5rem;
-    padding: 1.25rem;
+  .card__pitch {
+    margin-top: 2.25rem;
+    padding: 1.25rem 1.25rem 1rem;
     border-radius: 6px;
     background: var(--color-soft);
-    box-shadow: var(--tds-shadow-hard);
-  }
-  .card__qr-code {
-    display: block;
-    flex: none;
-    width: 7.5rem;
-    height: 7.5rem;
-    padding: 0.625rem;
-    border-radius: 6px;
-    /* White in BOTH themes, and hardcoded rather than a token: the generated
-       code is pure black on a transparent ground, so it needs a light plate
-       to stay scannable on a dark page. `box-sizing: border-box` keeps the
-       padding inside the 7.5rem so the plate does not grow. */
-    box-sizing: border-box;
-    background: #ffffff;
-  }
-  .card__qr-body {
-    flex: 1 1 12rem;
-  }
-  .card__qr-title {
-    margin: 0 0 0.35rem;
-    font-family: var(--font-display);
-    font-size: 1.125rem;
-    color: var(--color-black);
-  }
-  .card__qr-text {
-    margin: 0;
-    color: var(--color-muted);
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
-  .card__share {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 2.75rem;
-    margin-top: 0.875rem;
-    padding: 0 1rem;
-    border-radius: var(--tds-radius-pill);
-    background: var(--lp-surface-card);
-    color: var(--color-black);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: background-color 200ms var(--tds-ease-out);
-  }
-  .card__share:hover {
-    background: color-mix(in srgb, var(--color-accent) 10%, var(--lp-surface-card));
-  }
-  /* `display` on the class would otherwise beat the UA's `[hidden]` rule and
-     the button would paint before the script has decided it can work. */
-  .card__share[hidden] {
-    display: none;
-  }
-
-  .card__pitch {
-    margin-top: 3rem;
   }
   .card__pitch-title {
     font-family: var(--font-display);
-    font-size: 1.375rem;
+    font-size: 1.25rem;
     line-height: 1.2;
     color: var(--color-black);
-    margin: 0 0 0.6rem;
+    margin: 0 0 0.5rem;
   }
   .card__pitch-text {
-    margin: 0 0 0.9rem;
+    margin: 0 0 0.5rem;
     color: var(--color-muted);
-    line-height: 1.7;
+    line-height: 1.65;
   }
   .card__pitch-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
     color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
   }
-  /* A link on its own line, 21px high on a phone (2026-10-12 audit): lifted
-     to a 44px target on touch, the desktop line stays as it is. */
-  @media (pointer: coarse) {
-    .card__pitch-cta {
-      display: inline-flex;
-      align-items: center;
-      min-height: 44px;
-    }
+  .card__pitch-cta:hover {
+    text-decoration: underline;
   }
 
   .card__legal {
@@ -822,20 +978,15 @@ const profileSchema = {
     text-decoration: underline;
   }
 
-  @media (min-width: 768px) {
-    .card {
-      padding: 3rem 1.5rem 4rem;
-    }
-    .card__portrait {
-      width: 9rem;
-      height: 9rem;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
+    .card__save,
+    .card__save:hover,
+    .card__save:active,
+    .card__row,
     .card__row:hover,
-    .card__save:hover {
-      transform: none;
+    .card__row:focus-visible,
+    .card__row:active {
+      translate: none;
     }
     .card__row:hover .card__row-mark {
       transform: none;

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { APIRoute } from "astro";
+import { BUSINESS_CARD_SLUG } from "~/lib/businessCard";
 import { siteConfig } from "~/lib/seo";
 
 /**
@@ -64,12 +65,15 @@ function photoLine(): string | null {
 }
 
 export const GET: APIRoute = () => {
-  const { name, url, email, telephone, mobile, vatID, founder, socials } = siteConfig;
+  const { name, url, email, telephone, mobile, vatID, founder, socials, address, freelanceUrl } = siteConfig;
   const tel = telephone.replace(/\s/g, ""); // → E.164, e.g. +4941518788264
   const cell = mobile.replace(/\s/g, "");
 
-  // Deliberately no ADR / GEO — the postal address is intentionally omitted from
-  // the vCard (it's a private home address).
+  // No street and no GEO — the street address is a private home address. The
+  // work address carries postal code, locality, region and country only, the
+  // same part the site footer and the business card publish (2026-11-04).
+  // Grouped `itemN.` lines give iOS and macOS their own labels; other clients
+  // ignore the X-ABLabel and keep the plain TYPE.
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
@@ -77,17 +81,27 @@ export const GET: APIRoute = () => {
     `FN:${esc(founder.name)}`,
     `ORG:${esc(name)}`,
     `TITLE:${esc(founder.jobTitle)}`,
-    `TEL;TYPE=WORK,VOICE:${tel}`,
-    `TEL;TYPE=CELL,VOICE:${cell}`,
-    `EMAIL;TYPE=WORK,PREF:${email}`,
-    `URL:${url}`,
+    `TEL;TYPE=WORK,VOICE,PREF:${tel}`,
+    `item1.TEL;TYPE=CELL,VOICE:${cell}`,
+    "item1.X-ABLabel:Mobil / WhatsApp",
+    `EMAIL;TYPE=WORK,INTERNET,PREF:${email}`,
+    `ADR;TYPE=WORK:;;;${esc(address.addressLocality)};${esc(address.addressRegion)};${address.postalCode};Deutschland`,
+    `URL;TYPE=WORK:${url}`,
+    `item2.URL:${url}${BUSINESS_CARD_SLUG.de}`,
+    "item2.X-ABLabel:Digitale Visitenkarte",
+    `item3.URL:${freelanceUrl}/`,
+    "item3.X-ABLabel:Freelancer-Profil",
     socials.linkedin ? `X-SOCIALPROFILE;TYPE=linkedin:${socials.linkedin}` : "",
     socials.github ? `X-SOCIALPROFILE;TYPE=github:${socials.github}` : "",
-    `NOTE:${esc(`USt-IdNr. ${vatID}`)}`,
+    `CATEGORIES:${esc("Digitalisierung")},${esc("Kundenportale")},${esc("Software")},${esc("Webentwicklung")}`,
+    `NOTE:${esc(`Digitale Lösungen für Unternehmen: Kundenportale, digitale Abläufe, individuelle Software und Websites. USt-IdNr. ${vatID}`)}`,
     photoLine() ?? "",
-    "REV:2026-11-03T00:00:00Z",
+    "REV:2026-11-04T00:00:00Z",
     "END:VCARD",
-  ].filter((line) => line !== "");
+  ]
+    .filter((line) => line !== "")
+    // The note runs past 75 characters; the photo arrives folded already.
+    .map((line) => (line.startsWith("PHOTO") ? line : fold(line)));
 
   // RFC 6350 mandates CRLF line breaks; trailing CRLF closes the last line.
   const body = lines.join("\r\n") + "\r\n";
