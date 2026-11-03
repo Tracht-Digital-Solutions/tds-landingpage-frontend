@@ -13,15 +13,15 @@
  *
  * Light since 2026-11-03 (asked for: friendlier, brighter, easier to read):
  * the card is the page's card fill, each question a tinted row, and the result
- * a donut chart of the task's year: the routine slice software can take over
- * against what stays manual. The ring is drawn with `stroke-dasharray` (no
- * gradients); its numbers also stand in the legend, so nothing depends on
- * telling two colours apart.
+ * a donut chart of one working year: the hours saved as a slice of it, the
+ * working days saved in the middle (asked for). The ring is drawn with
+ * `stroke-dasharray` (no gradients); its numbers also stand in the legend, so
+ * nothing depends on telling two colours apart.
  */
 import Arrow from "~/components/ui/Arrow.astro";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import { localizePath, resolveLang } from "~/lib/i18n";
-import { SAVINGS_QUESTIONS, getSavingsCopy } from "~/lib/savingsCalculator";
+import { SAVINGS_QUESTIONS, WORK_YEAR_HOURS, getSavingsCopy } from "~/lib/savingsCalculator";
 
 const lang = resolveLang(Astro.currentLocale);
 const copy = getSavingsCopy(lang);
@@ -51,7 +51,7 @@ const ICONS: Record<string, string> = {
     />
 
     <div class="savings-card" data-reveal>
-      <form class="savings-form" data-savings data-lang={lang} data-draft={copy.draft} data-chart-label={copy.chartLabel}>
+      <form class="savings-form" data-savings data-lang={lang} data-draft={copy.draft} data-chart-label={copy.chartLabel} data-work-hours={WORK_YEAR_HOURS}>
         {
           SAVINGS_QUESTIONS.map((question) => (
             <fieldset class="savings-question" data-tone={TONES[question.id]}>
@@ -90,7 +90,10 @@ const ICONS: Record<string, string> = {
                 data-savings-arc
               />
             </svg>
-            <span class="savings-chart__centre" aria-hidden="true" data-savings-share>–</span>
+            <span class="savings-chart__centre" aria-hidden="true">
+              <span class="savings-chart__days" data-savings-share>–</span>
+              <span class="savings-chart__unit">{copy.centre}</span>
+            </span>
           </figure>
 
           <div class="savings-summary">
@@ -315,14 +318,25 @@ const ICONS: Record<string, string> = {
   .savings-chart__centre {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     color: var(--color-black);
+  }
+  .savings-chart__days {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
+  }
+  .savings-chart__unit {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-muted);
   }
   .savings-summary {
     flex: 1 1 11rem;
@@ -475,12 +489,15 @@ const ICONS: Record<string, string> = {
           output.textContent = formatSavings(result[key], lang);
         }
       }
-      arc?.setAttribute("stroke-dasharray", `${(ring * result.share).toFixed(2)} ${ring}`);
-      if (centre) centre.textContent = `${Math.round(result.share * 100)} %`;
+      // At least a sliver, so a small saving still shows on the ring.
+      const slice = result.year > 0 ? Math.max(result.yearShare, 0.015) : 0;
+      arc?.setAttribute("stroke-dasharray", `${(ring * slice).toFixed(2)} ${ring}`);
+      if (centre) centre.textContent = formatSavings(result.days, lang);
       if (label) {
         label.textContent = (form.dataset.chartLabel ?? "")
-          .replace("{total}", formatSavings(result.total, lang))
-          .replace("{year}", formatSavings(result.year, lang));
+          .replace("{year}", formatSavings(result.year, lang))
+          .replace("{days}", formatSavings(result.days, lang))
+          .replace("{work}", formatSavings(Number(form.dataset.workHours ?? 0), lang));
       }
     };
     form.addEventListener("change", update);
