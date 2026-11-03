@@ -65,6 +65,7 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 | Drawn cursor | `lib/customCursor.ts`, `lib/cursorAbsorb.ts` | See below |
 | Page scroll bar | `pageScrollbar.ts`, `components/PageScrollbar.astro` | See below |
 | Generated photos (`[data-motion-image]`) | `images.ts` | Settle from a larger scale on scroll-in, then drift ±20 px; transform only |
+| Page ground shapes | `groundScroll.ts`, `components/PageGround.astro` | A passive scroll listener writes `--lp-ground-y` (px, unitless) onto `.page-ground`, never `<html>`. CSS slides each depth plane by `mod(y × speed, tile)` (speeds 0.14/0.3/0.5: parallax, seamless) and turns each body 2.5–7° per 100 px. In the hero the pointer adds a lean (see [Hero](#hero)). The motion switch removes the listeners and the bodies return to their resting pose |
 | Page transitions | `pageTransition.ts` | `<main>` animates out on a same-site click and the next `<main>` in. The header is fixed outside `<main>`. Hand-over via a sessionStorage flag read by an inline head script (`PAGE_ENTER_SCRIPT`), CSS failsafe after 1.5 s; a first visit never carries it. The native cross-document View Transition was removed |
 | Business card | `businessCard.ts` | Docked card spring |
 | UX cues | `ux.ts` | A pill glides behind the header link of the section on screen (`aria-current="location"`); price cards arrive staggered and never rise on hover (2026-10-12; they only lean, `tilt.ts`); contact form rows arrive as one staggered group (`[data-motion-stagger]`, honeypot skipped) |
@@ -113,18 +114,13 @@ within 72 px of the right edge.
 
 ## Hero
 
-- The hero's **copy** stays plain Astro, and so does its decorative geometry (2026-10-22, was a React island):
-  markup in `sections/Hero.astro`, arrival in CSS (`translate` only), drift/sway/pointer in one frame loop in `lib/motion/heroDecor.ts` (never a Motion spring per pointer event: it restarts without velocity and stutters)
-  through `boot.ts`. The landing page loads React only for the consent banner, chat, the service finder (on intent)
-  and the contact form (on view) — see architecture.md.
-- The decoration slides in from its edges, drifts at about 5–10 px/s and follows the pointer about 60 px. The bodies tilt
-  toward the pointer (16–20°, springs on the outer span, `transformPerspective` 900) and sway on their own (inner
-  `.hero-shape__body`, 14–17 s loops), so the depth shows on a phone too. Reduced motion renders one fixed turned
-  pose in CSS (`.hero-shape--still`).
-- The scroll-linked part is CSS (`animation-timeline: view()`), not a hook.
+- The hero's **copy** stays plain Astro. The landing page loads React only for the consent banner, chat, the
+  service finder (on intent) and the contact form (on view) — see architecture.md.
+- **No decoration of its own since 2026-11-03** (`heroDecor.ts` is gone). While `#hero` is on screen and the pointer
+  is fine, the page ground's bodies lean toward it (up to 16°/20°) and the planes shift by depth (14/30/52 px);
+  one smoothing loop (τ 0.45 s, never a spring per pointer event: a restarted spring loses its velocity) parks when
+  settled and eases back to the centre when the hero leaves. Reduced motion: the turned resting pose.
 - **The carousel** (`ui/HeroCarousel.astro`, from 64rem): seven examples sampled per render. The wheel is one number, its position in cards (`lib/heroWheel.ts`); hand, spring and the own turn all move it and the script writes each card's `--slot`, so a press mid-turn holds the wheel. A swipe of 12 % of a card turns one card; a throw carries further. Only the fade is a CSS transition.
-- **On a phone the shapes keep to measured bands:** smaller, less drift (`narrowQuery` in `heroDecor.ts`), no scroll drift.
-  `audit:ux` at 360 × 740 is the tightest case.
 - `npm run audit:perf` measures 390 px and 1440 px and pins `h1#hero-heading` as the LCP element on both.
 
 ## The service explorer and assistant

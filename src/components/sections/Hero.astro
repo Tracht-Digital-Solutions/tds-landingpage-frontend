@@ -1,5 +1,4 @@
 ---
-import { imageHints } from "~/lib/imageCatalog";
 /**
  * Hero — the brand's slogan and two actions. Nothing else (decided
  * 2026-09-21): the eyebrow, the benefit sub, the note under the buttons and the
@@ -20,21 +19,14 @@ import { imageHints } from "~/lib/imageCatalog";
  *   React island; its successor (2026-10-12) is `ui/HeroCarousel.astro`, plain
  *   markup that renders in its resting pose, right of the slogan from 64rem.
  *
- * ### Decoration
+ * ### Background
  *
- * Only in the negative space, never behind the copy or the fixed header —
- * `scripts/ux-audit.mjs` measures the overlap. No island since 2026-10-22: the
- * capsule and the quarter are markup here, moved by `lib/motion/heroDecor.ts`; they render
- * in the free bands on every width (the gold node and the "fit" motif went
- * on 2026-09-22) as turning 3D bodies (2026-10-11; the floor grid went).
- *
- * The photo is a `<picture>` whose source applies from `48rem`; a phone gets a
- * 1×1 GIF and downloads nothing. It carries `data-motion-image`: Motion
- * (`lib/motion/images.ts`) settles and drifts it — transform only, never an
- * opacity start state.
+ * None of its own since 2026-11-03: no photo, no capsule, no quarter, no
+ * conduit. The hero lies on the page ground (`components/PageGround.astro`),
+ * whose generated 3D shapes turn toward the pointer while the hero is on
+ * screen and move with the scroll (`lib/motion/groundScroll.ts`).
  */
 import type { Lang } from "~/lib/i18n";
-import CircuitRun from "~/components/ui/CircuitRun.astro";
 import HeroCarousel from "~/components/ui/HeroCarousel.astro";
 
 interface Props {
@@ -47,13 +39,6 @@ interface Props {
 
 const { lang, slogan, cta1, cta2 } = Astro.props;
 
-/** The two constructed shapes; `lib/motion/heroDecor.ts` animates them. */
-const SHAPES = [
-  { kind: "capsule", colour: "tds-shape--capsule tds-shape--navy" },
-  { kind: "quarter", colour: "tds-shape--quarter-tl tds-shape--bordeaux" },
-] as const;
-/** Outline rings behind each face; the step between them is CSS. */
-const DEPTH_LAYERS = 6;
 ---
 
 <section
@@ -62,59 +47,6 @@ const DEPTH_LAYERS = 6;
   aria-labelledby="hero-heading"
   lang={lang === "en" ? "en" : undefined}
 >
-  <div class="tds-decor" aria-hidden="true">
-    <picture>
-      <source media="(min-width: 48rem)" srcset={imageHints("/images/sections/hero-editorial.webp", lang)?.srcSet.replaceAll(".webp", ".avif")} sizes="100vw" type="image/avif" />
-      <source media="(min-width: 48rem)" srcset={imageHints("/images/sections/hero-editorial.webp", lang)?.srcSet} sizes="100vw" type="image/webp" />
-      <img
-        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        alt=""
-        width="1642"
-        height="924"
-        decoding="async"
-        class="hero-photo absolute inset-0 h-full w-full object-cover object-right"
-        data-motion-image
-      />
-    </picture>
-    <span class="hero-photo-scrim hidden md:block absolute inset-0"></span>
-
-    {/* No floor grid any more (2026-10-11): the depth is in the shapes
-        themselves, see `lib/motion/heroDecor.ts`. */}
-
-    {/* Die konstruierte Geometrie — große Kapsel links unten angeschnitten,
-        Viertelkreis unten rechts über beide Ränder hinaus. Sie liegen alle
-        in der echten Negativfläche
-        des Heros, nie hinter der Copy.
-
-        Seit 2026-09-21 auf jeder Breite. Seit 2026-10-22 keine React-Island
-        mehr: das Markup steht hier, die Ankunft ist CSS (unten), Drift,
-        Schwingen und Zeiger-Parallaxe kommen aus `lib/motion/heroDecor.ts`
-        ueber die Motion-Schicht (`boot.ts`). Unter reduzierter Bewegung
-        bleibt die gedrehte Ruhepose (`hero-shape--still`).
-
-        AUSSCHLIESSLICH diese Formen: das Foto oben und jeder Textknoten
-        unten bleiben statisches Astro-Markup, damit nichts Sichtbares auf
-        ein Skript wartet. Die Regel steht in `__tests__/motion.test.ts`. */}
-    {SHAPES.map(({ kind, colour }) => (
-      <span class={`hero-shape hero-shape--${kind} hero-shape--still`} data-hero-shape={kind}>
-        <span class="hero-shape__body">
-          {Array.from({ length: DEPTH_LAYERS }, (_, index) => (
-            <span
-              class={`hero-shape__layer tds-shape tds-shape--outline ${colour}`}
-              style={`--z: ${DEPTH_LAYERS - index}`}
-            />
-          ))}
-          <span class={`hero-shape__layer hero-shape__face tds-shape ${colour}`} />
-        </span>
-      </span>
-    ))}
-    {/* Cut by the section's lower edge, with its box inside the bottom padding:
-        since the note under the actions the copy column reaches down to where
-        the conduit used to start (overlap measured at 1280 and 1440). At 6 %
-        since 2026-10-12: from 20 % it ran under the carousel's left card. */}
-    <CircuitRun class="hidden xl:block -bottom-14 left-[6%] w-[15rem] h-[8rem]" />
-  </div>
-
   {/* A random handful of our own examples on a turning wheel, right of the
       slogan from 64rem. Plain Astro: it paints in its resting pose. */}
   <HeroCarousel lang={lang} />
@@ -164,219 +96,6 @@ const DEPTH_LAYERS = 6;
   @media (max-height: 40rem) and (orientation: landscape) {
     .hero {
       min-height: auto;
-    }
-  }
-
-  /* Hero-Fotogrund. Ein GRUND, keine Abbildung: niedrige Deckkraft, und im
-     Dark Mode noch einmal tiefer. Der Scrim ist die PAPIERFARBE als ebener
-     Schleier. */
-  .hero-photo {
-    opacity: 0.32;
-  }
-  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .hero-photo:not(:where([data-theme="dark"] [data-theme="light"] *)) {
-    opacity: 0.2;
-  }
-  .hero-photo-scrim {
-    background: color-mix(in srgb, var(--color-paper) 62%, transparent);
-  }
-
-  /* === Die Formen der Dekorationsebene =============================
-
-     Position und Groesse stehen HIER, nicht in `lib/motion/heroDecor.ts`.
-     (`:global()` stammt aus der Zeit als React-Island, deren DOM Astros
-     Scoped-Style-Attribut nie bekam.) Die Trennung ist nicht nur Ordnung:
-     so schreibt das Modul ausschliesslich Transforms, und genau die kann
-     der Compositor bewegen, ohne Layout anzufassen.
-
-     Bis 2026-09-21 waren die Formen unter 64rem ausgeblendet. Sie sind
-     jetzt ueberall da, auf dem Telefon kleiner und weiter aussen, damit sie
-     in der echten Negativflaeche bleiben und nie hinter der Copy landen. */
-  :global(.hero-shape) {
-    position: absolute;
-    pointer-events: none;
-    /* Eigene Ebene, damit Drift und Parallaxe nicht jedes Frame neu rastern. */
-    will-change: transform;
-    /* A 3D body (2026-10-11): the island turns it, and its face and the
-       outline rings behind it keep their depth because the context is
-       preserved down to the layers. No box-shadow: the box itself has no
-       fill, and the old two-step extrusion is what the rings replaced. */
-    transform-style: preserve-3d;
-  }
-  /* The body turns inside the shape; the layers fill it. Each ring sits
-     `--z` steps behind the face, so a turned body shows its depth as a stack
-     of construction lines. */
-  :global(.hero-shape__body) {
-    position: absolute;
-    inset: 0;
-    transform-style: preserve-3d;
-  }
-  :global(.hero-shape__layer) {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    transform: translateZ(calc(var(--z, 0) * var(--hero-depth-step, -0.5rem)));
-  }
-  :global(.hero-shape__layer.tds-shape--outline) {
-    border-width: 1.5px;
-  }
-  @media (min-width: 80rem) {
-    :global(.hero-shape) {
-      --hero-depth-step: -0.75rem;
-    }
-  }
-  /* The resting pose: turned once, so the depth reads before the motion layer
-     runs and stays the picture under reduced motion. The first frame of the
-     sway in `lib/motion/heroDecor.ts` (REST), so nothing jumps when it starts;
-     Motion's inline transform takes over from here. */
-  :global(.hero-shape--still .hero-shape__body) {
-    transform: perspective(900px) rotateX(16deg) rotateY(-26deg);
-  }
-  :global(.hero-shape--still.hero-shape--quarter .hero-shape__body) {
-    transform: perspective(900px) rotateX(-14deg) rotateY(24deg);
-  }
-  /* The arrival, on the first paint — it used to wait for the island to
-     hydrate. `translate` only: the motion layer writes `transform`, so the two
-     never fight, and no opacity start state (nothing in the hero ships at
-     `opacity: 0`). The shapes slide in from the edges that cut them. */
-  @media (prefers-reduced-motion: no-preference) {
-    :global(html:not([data-a11y-motion]) .hero-shape--capsule) {
-      animation: hero-shape-in-left 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-    :global(html:not([data-a11y-motion]) .hero-shape--quarter) {
-      animation: hero-shape-in-right 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-  }
-  @keyframes hero-shape-in-left {
-    from {
-      translate: -180px 0;
-    }
-  }
-  @keyframes hero-shape-in-right {
-    from {
-      translate: 160px 0;
-    }
-  }
-  /* Until 2026-09-22 the two large shapes were not drawn below 80rem: with
-     the trust card in the hero, the only free bands on a phone were 100 px
-     at the top and 56 px at the bottom, and `audit:ux` reported sixteen
-     "decoration over content" failures the first time they were tried. */
-  /* 2026-09-22: the measurement above is from the hero WITH its trust card.
-     Since the hero is the slogan and two buttons, a 390 px phone has about
-     250 px free between the header (ends y=76) and the slogan (y≈320), and
-     about 280 px below the buttons (y≈565 to 844). So the phone gets the
-     whole scene again, smaller and at the edges: the quarter in the top band
-     under the header's right end, the capsule in the bottom band from the
-     left edge. Each stays in its band;
-     `audit:ux` measures it. */
-  :global(.hero-shape--quarter) {
-    top: 5.75rem;
-    right: calc(min(9rem, 14svh) * -0.5);
-    /* Tied to the height: on a 740 px phone the slogan starts ~220 px down. */
-    width: min(9rem, 14svh);
-    height: min(9rem, 14svh);
-  }
-  :global(.hero-shape--capsule) {
-    /* Low in the band: its drift lifts it, and on a 360×740 phone the
-       buttons end about 180 px above the bottom edge (`audit:ux`). On a
-       first visit the cookie notice covers it, which is the lesser evil. */
-    bottom: 1.5rem;
-    left: -4.5rem;
-    width: 12rem;
-    height: 4.75rem;
-  }
-  @media (max-width: 79.999rem) and (max-height: 46rem) {
-    /* Short screens (an SE, a landscape phone, a window zoomed to 400 %): the
-       copy fills the hero and there is no free band left, so the scene stays
-       out — `audit:ux` measured the quarter on the slogan at 720×450. */
-    :global(.hero-shape--capsule),
-    :global(.hero-shape--quarter) {
-      display: none;
-    }
-  }
-  @media (min-width: 48rem) {
-    :global(.hero-shape--quarter) {
-      top: 7rem;
-      right: -5rem;
-      width: 13rem;
-      height: 13rem;
-    }
-    :global(.hero-shape--capsule) {
-      bottom: 3rem;
-      left: -6rem;
-      width: 18rem;
-      height: 7rem;
-    }
-  }
-  @media (min-width: 80rem) {
-    :global(.hero-shape--capsule) {
-      bottom: -7rem;
-      left: -16rem;
-      width: 32rem;
-      height: 13rem;
-    }
-    :global(.hero-shape--quarter) {
-      top: auto;
-      bottom: -15rem;
-      right: -11rem;
-      width: 26rem;
-      height: 26rem;
-    }
-  }
-
-  /* Where the carousel turns (`ui/HeroCarousel.astro`, same query), the
-     quarter would lie on its cards: the wheel takes the right side, the
-     capsule keeps the left (`audit:ux` measured the overlap, 2026-10-12). */
-  @media (min-width: 64rem) and (min-height: 36rem) {
-    :global(.hero-shape--quarter) {
-      display: none;
-    }
-  }
-
-  /* Die scrollgesteuerte Szene. CSS, kein JavaScript: `animation-timeline`
-     laeuft auf dem Compositor, braucht keinen Scroll-Listener und keinen
-     Hook aus einer Bibliothek, die die geteilte Motion-Schicht gar nicht
-     re-exportiert. Wo es fehlt (Safari heute), passiert einfach nichts —
-     die Formen behalten ihre Drift und ihre Parallaxe.
-
-     `animation-composition: add` ist das Entscheidende: ohne sie wuerde
-     diese Animation die Transforms der Island ERSETZEN statt sich zu ihnen
-     zu addieren, und Drift wie Parallaxe waeren beim Scrollen tot. */
-  /* From 80rem only: on a phone the shapes sit in tight bands under the
-     header, and a 3 rem drift carried the quarter onto it (`audit:ux`). */
-  /* The shared `.tds-decor` layer is `overflow: hidden`, i.e. a scroll
-     container, so the shapes' `view()` measured that layer and never moved
-     (2026-10-12). `clip` cuts the same edge without being a scroll container. */
-  #hero > :global(.tds-decor) {
-    overflow: clip;
-  }
-  @media (prefers-reduced-motion: no-preference) and (min-width: 80rem) {
-    @supports (animation-timeline: view()) {
-      :global(.hero-shape--capsule),
-      :global(.hero-shape--quarter) {
-        animation: hero-scroll-drift linear both;
-        animation-timeline: view();
-        animation-range: entry 0% exit 100%;
-        animation-composition: add;
-      }
-      :global(.hero-shape--quarter) {
-        animation-name: hero-scroll-drift-reverse;
-      }
-    }
-  }
-  @keyframes hero-scroll-drift {
-    from {
-      transform: translateY(-3.5rem);
-    }
-    to {
-      transform: translateY(3.5rem);
-    }
-  }
-  @keyframes hero-scroll-drift-reverse {
-    from {
-      transform: translateY(3rem);
-    }
-    to {
-      transform: translateY(-3rem);
     }
   }
 

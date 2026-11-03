@@ -49,14 +49,14 @@ const base = (process.argv[2] ?? "http://localhost:4321/").replace(/\/$/, "");
  * What to probe, and at which scroll position.
  *
  * `scrollTo` matters as much as the selector: a glass element's contrast is a
- * property of what is behind it, so a CTA over the hero photo and the same CTA
+ * property of what is behind it, so a CTA over the hero and the same CTA
  * over flat paper are two different measurements. Each entry names the worst
  * case that could be found by hand.
  */
 const PROBES = [
   // The CTAs are component classes and utilities, never `.btn` — see the note
   // in `global.css` above the glass rules.
-  { label: "hero CTA over the photo", selector: ".hero-cta--primary", scrollTo: 0 },
+  { label: "hero CTA", selector: ".hero-cta--primary", scrollTo: 0 },
   { label: "hero secondary CTA", selector: ".hero-cta--secondary", scrollTo: 0 },
   { label: "contact submit", selector: "#contact .submit-button", scrollTo: "#contact" },
   { label: "contact card e-mail row", selector: "#contact .contact-way", scrollTo: "#contact" },

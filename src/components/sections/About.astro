@@ -1,5 +1,4 @@
 ---
-import { imageHints } from "~/lib/imageCatalog";
 /**
  * Wieso ich? — the person behind the page: portrait, the motivation, and in
  * plain words what working with one person means.
@@ -81,39 +80,14 @@ const credentialsUi =
     : { label: "Certificates", all: `See all ${credentials.length} certificates` };
 ---
 
-{/* Kein eigener Grund mehr: die Markenfelder liegen seitenweit in
-    `.page-ground` (siehe `layouts/Layout.astro`). Hier bleibt nur der sehr
-    leise Fotogrund (siehe IMAGES.md). Gestapelt wird Seitengrund (fixiert,
-    z -1) → Foto (`.tds-decor`, z 0) → Inhalt (z 1).
-
-    `relative` ist Voraussetzung, nicht Kosmetik: `.tds-decor` ist
-    `position: absolute; inset: 0` und braucht diesen Abschnitt als
-    Bezugsrahmen. Es kam bis hierher von `.tds-wash` mit; ohne die Klasse
-    würde das Foto sonst am nächsten positionierten Vorfahren hängen. */}
+{/* Kein eigener Grund: der Abschnitt liegt auf dem Seitengrund mit seinen
+    generierten Formen (`components/PageGround.astro`). Der Fotogrund ging
+    2026-11-03, weil er diese Formen verdeckte. */}
 <section
   id="about"
   class="relative section-spacing"
   aria-labelledby="about-heading"
 >
-  {/* Fotogrund unter dem Wash, in der geteilten `.tds-decor`-Ebene, weil deren
-      Regel `.tds-decor ~ *` jedes folgende Geschwister automatisch auf
-      z-index 1 hebt. `object-left`, weil das Motiv seine Gegenstände unten
-      links hat; der Scrim läuft von rechts, wo die Textspalte steht. */}
-  <span class="tds-decor" aria-hidden="true">
-    <img
-      src="/images/sections/why-me-editorial.webp"
-      srcset={imageHints("/images/sections/why-me-editorial.webp", "de")?.srcSet}
-      sizes="100vw"
-      width="1860" height="840"
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      decoding="async"
-      class="about-photo absolute inset-0 h-full w-full object-cover object-left"
-      data-motion-image
-    />
-    <span class="about-photo-scrim absolute inset-0"></span>
-  </span>
   <div class="lp-container">
     {/* `items-start`, not `items-center`: the columns are deliberately unequal
         (a 3:4 portrait against a text column) and centring the shorter one
@@ -297,22 +271,6 @@ const credentialsUi =
 </script>
 
 <style>
-  /* Ein GRUND, keine Abbildung — dieser Abschnitt ist der ruhigste der Seite.
-     Spiegelverkehrt per CSS statt durch ein zweites WebP. `scaleX(-1)` greift
-     NACH `object-fit`/`object-position`; das ist gewollt, nicht ein Versehen. */
-  .about-photo {
-    opacity: 0.35;
-    transform: scaleX(-1);
-  }
-  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .about-photo:not(:where([data-theme="dark"] [data-theme="light"] *)) {
-    opacity: 0.22;
-  }
-  /* Die PAPIERFARBE des Abschnitts als ebener Schleier, damit die Fläche ihren
-     Farbton behält. */
-  .about-photo-scrim {
-    background: color-mix(in srgb, var(--color-paper) 72%, transparent);
-  }
-
   /* --- The portrait, as a card ------------------------------------------
      Radius, fill and shadow are the site's card language (6px, sand on paper,
      the hard 2D offset from `global.css`). Nothing here is decorative for its

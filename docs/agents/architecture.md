@@ -63,11 +63,11 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   trust card no longer render; their fields stay so stored blocks load.
 - The page is written for businesses that **already have** a website or shop: taking over, repairing and
   maintaining it is the lead story.
-- Copy, photo and the decoration are server-rendered; the decoration moves through `lib/motion/heroDecor.ts`
-  (arrival in CSS). No React on a page unless a visitor needs it: see "Page chrome without React" below.
+- The copy is server-rendered. The hero has no background of its own since 2026-11-03 (no photo, no shapes):
+  the page ground's 3D shapes show through and lean toward the pointer there (`lib/motion/groundScroll.ts`).
+  No React on a page unless a visitor needs it: see "Page chrome without React" below.
   **Nothing in the hero ships at `opacity: 0`** (an SSR start state once made the cookie notice the mobile
   LCP at 4.1 s). The entrance is a transform-only CSS rise under `prefers-reduced-motion: no-preference`.
-- The photo is a `<picture>` whose source applies from `48rem`; phones get a 1×1 inline GIF.
 - Decoration placement: see [design.md](design.md#hero-decoration).
 
 ## Services

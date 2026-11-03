@@ -234,28 +234,8 @@ body {
   background-color: var(--color-paper);
 }
 
-/* --- The page's one ground -----------------------------------------------
-   See `layouts/Layout.astro` for why this exists instead of a `.tds-wash`
-   per section.
-
-   Viewport-anchored on purpose: the three fields keep the size they were
-   drawn at while the page scrolls over them, instead of being stretched down
-   a 10,000px document into a flat tint. The alphas are the shared
-   `--tds-decor-*` tokens, so this follows the dark theme and the phone
-   reduction without a second set of numbers.
-
-   `z-index: -1` needs no `isolation: isolate` here: the body is the nearest
-   stacking context that matters and nothing between them creates one. That
-   is a real constraint, not an observation — giving <body> a `transform`,
-   `filter`, `opacity` or `will-change` would trap this layer behind the
-   body background and the ground would vanish with no error anywhere. */
-.page-ground {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--color-paper);
-}
+/* The page's one ground (`.page-ground`) and its shapes live in
+   `components/PageGround.astro`. */
 
 /* Clearance for the fixed chrome on ANY kind of scroll the browser performs
    by itself — one value per edge.

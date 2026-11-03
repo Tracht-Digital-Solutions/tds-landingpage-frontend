@@ -113,7 +113,7 @@ the new picture to show on the next reload.
 | Design studies | `public/designstudien/<id>[-<view>].webp`, full-page captures of whatever height, width capped at **1440**. Written by `npm run studies:import -- --from "<folder>"`; the PNG originals live in `stuff/Beispieldesigns, Optimierungen/` in the workspace, not in this repo. The file-name map is `lib/designStudyMeta.ts` |
 | Certificates | `public/zertifikate/<id>.webp`, **1584 × 1224** (US Letter landscape at scale 2). Rendered from the committed PDFs in `src/assets/certificates/` by `npm run certificates:render` (pdf.js in a headless Chromium — `sharp` cannot read PDF). Quality 88, not 82: these are pictures of small type |
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
-| Section grounds | `public/images/sections/<name>.webp`, **1870 × 841** (≈2.22:1); hero **1642 × 958** (≈1.71:1) |
+| Section grounds | `public/images/sections/contact-editorial.webp`, **1870 × 841** (≈2.22:1) — the only one left |
 | Format | WebP, quality 82 (AVIF 55 if a second source is ever added) |
 | Served sizes | Committed copies beside each original, named `<name>-<width>.webp`: screenshots `-480`/`-960` (written by `capture-preview.ts`), service photos `-800`, portrait `public/images/portrait/portrait-{360,720,1080}.webp`, header logo `public/images/logo/{mark,letters}-{width}.webp` (lossless, from `logo.webp` and `logo-letters.png`). Regenerate with `npm run images:variants`; `imageVariants.test.ts` fails when a `srcset` candidate is missing — a missing candidate breaks the image instead of falling back |
 | Alt text | none — these are decorative grounds and render `alt=""` + `aria-hidden` |
@@ -132,14 +132,17 @@ await sharp(png).webp({ quality: 82 }).toFile(webp);
 
 ## Where each ground is rendered
 
+**No photo lies on the page ground any more (2026-11-03).** The paper carries
+the generated 3D shapes of `components/PageGround.astro`, and a photo ground
+on top of it only covered them. The hero (`hero-editorial`), "Über mich"
+(`why-me-editorial`) and the service and platform detail heads (the service
+photo at 0.36) lost theirs; the files went with them. The contact photo stays:
+it lies on the navy block, which covers the ground by its own colour.
+
 | Ground | Rendered by | Opacity (light / dark) |
 |---|---|---|
 | `services/*.webp` | `ui/ServiceCard.astro` — `.service-tile__shot img` | **1.0 — content, not a ground** |
-| `services/*.webp` | `services/ServiceDetailPage.astro` — `.service-hero__photo` | 0.36 / 0.23 |
-| `sections/hero.webp` | `sections/Hero.astro` — `.hero-photo` in a `<picture>` whose source applies from 48rem | 0.32 / 0.20 |
-| `sections/why-me.webp` | `sections/About.astro` — `.about-photo` | 0.35 / 0.22 |
-| `sections/pricing.webp` | `sections/PricingTeaser.astro` — `.pricing-photo` | 0.50, no dark variant |
-| `sections/contact.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
+| `sections/contact-editorial.webp` | `sections/Contact.astro` — `.contact-photo` | 0.38, no dark variant |
 | `demos/*.webp` | `ui/DemoCard.astro` — `.demo-card__shot img` | **1.0 — content, not a ground** |
 | `references/*.webp` | `ui/ReferenceCard.astro`, `services/ServiceDetailPage.astro` — `.reference-card__shot img` | **1.0 — content, not a ground** |
 

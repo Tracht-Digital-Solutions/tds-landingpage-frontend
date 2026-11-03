@@ -1,6 +1,4 @@
 ---
-import { resolveLang } from "~/lib/i18n";
-import { imageHints } from "~/lib/imageCatalog";
 /**
  * The opening band of a detail page — back link, headline, brandbar, lead and
  * the page's primary action.
@@ -23,12 +21,9 @@ interface Props {
   lead: string;
   ctaHref: string;
   ctaLabel: string;
-  /** Artwork for the band's ground; `null` renders none at all. */
-  image?: string | null;
 }
 
-const { backHref, backLabel, navLabel, title, lead, ctaHref, ctaLabel, image = null } = Astro.props;
-const imageLang = resolveLang(Astro.currentLocale);
+const { backHref, backLabel, navLabel, title, lead, ctaHref, ctaLabel } = Astro.props;
 ---
 
 <section
@@ -36,30 +31,6 @@ const imageLang = resolveLang(Astro.currentLocale);
   aria-labelledby="service-title"
 >
   <div class="tds-decor" aria-hidden="true">
-    {/* When artwork exists it becomes the band's ground; the constructed
-        geometry stays on top of it either way, so the page looks composed
-        with or without the file. `null` renders nothing at all — no broken
-        image, no empty box. See IMAGES.md for the open assets. */}
-    {image && (
-      <>
-        <img
-          src={image}
-          srcset={imageHints(image, imageLang)?.srcSet}
-          sizes="100vw"
-          width={imageHints(image, imageLang)?.width}
-          height={imageHints(image, imageLang)?.height}
-          alt=""
-          aria-hidden="true"
-          fetchpriority="low"
-          decoding="async"
-          class="service-hero__photo absolute inset-0 h-full w-full object-cover"
-          data-motion-image
-        />
-        <span
-          class="absolute inset-0 bg-[color-mix(in_srgb,var(--color-paper)_78%,transparent)]"
-        ></span>
-      </>
-    )}
     <span
       class="tds-shape tds-shape--quarter-tl tds-shape--bordeaux"
       style="right: -8rem; bottom: -11rem; width: 29rem; height: 29rem; --tds-decor-shape-alpha: 0.13;"
@@ -132,14 +103,3 @@ const imageLang = resolveLang(Astro.currentLocale);
   </div>
 </section>
 
-<style>
-  /* Hero band artwork — a ground, not an illustration. The headline sits
-     on top of it, so it stays quiet enough that the scrim beside it does
-     not have to fight for the text. */
-  .service-hero__photo {
-    opacity: 0.36;
-  }
-  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .service-hero__photo:not(:where([data-theme="dark"] [data-theme="light"] *)) {
-    opacity: 0.23;
-  }
-</style>
