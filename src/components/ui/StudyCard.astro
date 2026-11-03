@@ -101,8 +101,8 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
   origin={origin}
   kind={kind}
   text={study.description[lang]}
-  caption={sector}
-  captionLabel={ui.sectorLabel}
+  labels={sector.split(" · ")}
+  labelsLabel={ui.sectorLabel}
 >
   <CardActions
     slot="actions"

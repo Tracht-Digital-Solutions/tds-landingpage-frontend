@@ -45,7 +45,7 @@ const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdo
       >
         Datenschutzerklärung
       </h1>
-      <p class="text-sm text-[var(--color-muted)] mb-12">Stand: Oktober 2026</p>
+      <p class="text-sm text-[var(--color-muted)] mb-12">Stand: November 2026</p>
 
       {/* Outside the CMS/fallback switch on purpose: an edited policy text
           must not remove the visitor's way to withdraw and erase. */}
@@ -196,8 +196,16 @@ const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdo
             </h2>
             <p class="text-[var(--color-muted)] leading-relaxed">
               Wenn Sie das Kontaktformular nutzen, werden die von Ihnen eingegebenen Daten (Name, E-Mail-Adresse,
-              optional Unternehmen, Nachricht) zur Bearbeitung Ihrer Anfrage verarbeitet. Rechtsgrundlagen sind
+              optional Unternehmen, das gewählte Anliegen, gegebenenfalls die Kennzeichnung als Notfall und Ihre
+              Nachricht) zur Bearbeitung Ihrer Anfrage verarbeitet. Rechtsgrundlagen sind
               Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) und Art. 6 Abs. 1 lit. b DSGVO (Vertragsanbahnung).
+            </p>
+            <p class="text-[var(--color-muted)] leading-relaxed mt-3">
+              Der Zeitersparnis-Fragebogen und der Leistungsassistent auf der Startseite rechnen ausschließlich in
+              Ihrem Browser; dabei wird nichts an uns gesendet. Erst wenn Sie danach zum Kontaktformular wechseln,
+              werden Ihre Antworten als Entwurf in den Sitzungsspeicher Ihres Browsers (sessionStorage) gelegt und
+              in das Nachrichtenfeld übernommen. Der Entwurf wird beim Schließen des Tabs gelöscht und nur
+              übermittelt, wenn Sie das Formular selbst absenden.
             </p>
             <p class="text-[var(--color-muted)] leading-relaxed mt-3">
               Die Daten werden nicht an Dritte weitergegeben, außer an den E-Mail-Dienst Resend (siehe unten), und
@@ -236,9 +244,9 @@ const html = edited.markdown.trim() === "" ? null : renderMarkdown(edited.markdo
                 </p>
               </div>
               <div>
-                <strong class="text-[var(--color-black)]">OpenStreetMap (Karte im Footer)</strong>
+                <strong class="text-[var(--color-black)]">OpenStreetMap (Karte im Kontaktbereich und im Footer)</strong>
                 <p class="mt-1">
-                  Wenn Sie im Footer mit der Maus auf unseren Standort zeigen, ihn antippen oder per Tastatur
+                  Wenn Sie im Kontaktbereich oder im Footer mit der Maus auf unseren Standort zeigen, ihn antippen oder per Tastatur
                   auswählen, wird eine Karte von OpenStreetMap geladen (OpenStreetMap Foundation, St John’s
                   Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Vereinigtes Königreich). Dabei überträgt
                   Ihr Browser Ihre IP-Adresse und technische Anfragedaten an die Kartenserver der Foundation.

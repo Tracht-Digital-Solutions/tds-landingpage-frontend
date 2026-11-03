@@ -100,8 +100,7 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
   origin={origin}
   kind={kind}
   text={description}
-  caption={definition.host}
-  captionLabel={ui.hostLabel}
+  labels={definition.labels[lang]}
 >
   {
     favicon && (

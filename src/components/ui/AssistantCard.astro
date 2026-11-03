@@ -8,6 +8,7 @@
  * can open — a button that cannot open anything is never shown (the rule in
  * `a11yContract.test.ts`).
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import type { Lang } from "~/lib/i18n";
 import { FINDER_SECTION } from "~/lib/serviceFinder";
 
@@ -27,7 +28,7 @@ const copy = FINDER_SECTION[lang];
     </svg>
   </span>
   <span class="product-tile__body">
-    <span class="product-tile__go" aria-hidden="true">→</span>
+    <span class="product-tile__go" aria-hidden="true"><Arrow dir="right" /></span>
     <span class="product-tile__kind">{copy.tileKind}</span>
     <span class="product-tile__title">{copy.tileTitle}</span>
   </span>

@@ -22,6 +22,8 @@ export interface OwnProject {
   hreflang: Record<Lang, string>;
   /** The service page this card is evidence for. */
   service: ServiceId;
+  /** Labels on the card (2026-11-03): platform, licence, scope. */
+  labels: Record<Lang, readonly string[]>;
   copy: Record<Lang, { title: string; kind: string; text: string; cta: string; alt: string; highlights?: { label: string; items: string[] } }>;
 }
 
@@ -34,6 +36,7 @@ export const ownProjects: readonly OwnProject[] = [
     href: { de: "https://wparted.tracht-digital.de/", en: "https://wparted.tracht-digital.de/en/" },
     hreflang: { de: "de", en: "en" },
     service: "solutions",
+    labels: { de: ["Windows 11", "Open Source", "Beta"], en: ["Windows 11", "Open source", "Beta"] },
     copy: {
       de: {
         title: "WParted",
@@ -74,6 +77,7 @@ export const ownProjects: readonly OwnProject[] = [
     href: { de: "https://github.com/jtracht/rpi-imager-android", en: "https://github.com/jtracht/rpi-imager-android" },
     hreflang: { de: "de", en: "de" },
     service: "solutions",
+    labels: { de: ["Android", "Open Source", "USB-OTG"], en: ["Android", "Open source", "USB OTG"] },
     copy: {
       de: {
         title: "Pi Imager für Android",
@@ -97,6 +101,7 @@ export const ownProjects: readonly OwnProject[] = [
     href: { de: "https://wparted.tracht-digital.de/", en: "https://wparted.tracht-digital.de/en/" },
     hreflang: { de: "de", en: "en" },
     service: "web-presence",
+    labels: { de: ["Zweisprachig", "SEO", "KI-Sichtbarkeit"], en: ["Bilingual", "SEO", "AI visibility"] },
     copy: {
       de: {
         title: "WParted-Webseite",

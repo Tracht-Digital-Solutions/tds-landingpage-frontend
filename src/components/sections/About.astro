@@ -35,6 +35,7 @@
  * i.e. an on-request resize in the Node process for every uncached view, with a
  * 1500 × 2100 fallback source.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import { resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
 import {
@@ -175,7 +176,7 @@ const credentialsUi =
           data-cta
         >
           {about.portfolioLink}
-          <span aria-hidden="true">↗</span>
+          <span aria-hidden="true"><Arrow dir="up-right" /></span>
         </a>
 
         {/* Julian's line, set large: no box, no stripe. The opening mark and the
@@ -209,7 +210,7 @@ const credentialsUi =
           </ul>
           <a class="credentials-teaser__link" href={credentialsHref(lang)}>
             {credentialsUi.all}
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true"><Arrow dir="right" /></span>
           </a>
         </div>
       </div>

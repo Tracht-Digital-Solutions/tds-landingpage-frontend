@@ -48,7 +48,10 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   never a promise. "Erstgespräch vereinbaren" hands the chosen answers over as a `contactDraft`.
   Since 2026-11-03: no lead sentence and no question numbers; each question has an icon disc in a brand colour
   (coral, gold, periwinkle), an unchosen answer is a pressed-in well like the contact fields, the chosen one is
-  filled in its question's colour; the result plate is bordeaux with a pink CTA.
+  filled in its question's colour. Since 0.101.0 the card is light (`--lp-surface-card`), each question a row
+  tinted in its colour, and the result a rosé plate with a donut chart (SVG ring, `stroke-dasharray`, no
+  gradient): the routine share of the task's yearly hours against what stays manual, with both numbers in a
+  legend. `savings()` returns `total`, `rest` and `share` for it.
 - **Vorgehen** (0.97.0): the step title sits in the navy head. From 40rem all four steps show; on a phone
   the heads are buttons of an accordion, one open at a time (`hidden` only set by the script; on desktop the
   heads are disabled buttons, no tab stop). No "Schritt n" label; an arrow points from step to step (right in
@@ -137,8 +140,7 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - The message field is guided by an element tied with `aria-describedby` (not a placeholder).
 - The four "what happens next" points are the confirmation's content. `ui/FirstCall.astro` keeps its `contact`
   variant for stored blocks but has no caller on the home page.
-- **Emergencies** (2026-10-11): a code-owned "Notfall?" line as the card's FIRST ROW across both halves,
-  parted by a horizontal seam (2026-10-12; one line on desktop, with a `tel:` link), an "Auch für Notfälle" badge beside the phone number and a "Notfall" checkbox in the form. The checkbox is local state, not a form
+- **Emergencies** (2026-10-11): an "Auch für Notfälle" badge beside the phone number and a "Notfall" checkbox in the form. The "Notfall?" row across the top of the card was removed in 0.101.0 (asked for). The checkbox is local state, not a form
   field (`ContactSchema` has no such key and zodResolver drops unknown ones): ticked, the request goes out with
   `subject` = "Notfall – <reason>" (max 200). Copy in `lib/contactCopy.ts`.
 - The card's grid (2026-11-03): the emergency row on top; the form and "Direkt erreichbar" (e-mail, landline,

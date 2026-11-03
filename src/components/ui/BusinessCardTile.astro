@@ -74,6 +74,7 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
   origin={copy.eyebrow}
   kind={copy.kind}
   text={copy.text}
+  labels={lang === "de" ? ["QR-Code", "Kontakt speichern"] : ["QR code", "Save contact"]}
 >
   <CardActions slot="actions" lang={lang} service={serviceLink} cta={{ href, label: copy.cta, detail: copy.title }} />
 </ProjectCard>

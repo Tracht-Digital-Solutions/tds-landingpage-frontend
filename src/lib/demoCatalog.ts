@@ -91,6 +91,11 @@ export interface DemoDefinition {
   kind: DemoKind;
   /** Sample or our own real site. See {@link DEMO_ORIGINS}. */
   origin: DemoOrigin;
+  /**
+   * Labels on the card (2026-11-03): the trade the sample is built for and what
+   * it shows. Code-owned like the kind; each one is visible on the demo itself.
+   */
+  labels: { readonly de: readonly string[]; readonly en: readonly string[] };
 }
 
 /**
@@ -108,16 +113,16 @@ export interface DemoDefinition {
  * turned it into a card without a code change.
  */
 export const demoDefinitions: readonly DemoDefinition[] = [
-  { id: "demo1", number: "01", host: "demo1.tracht-digital.de", url: "https://demo1.tracht-digital.de/", kind: "website", origin: "demo" },
+  { id: "demo1", number: "01", host: "demo1.tracht-digital.de", url: "https://demo1.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: ["Kanzlei", "Onepager"], en: ["Law firm", "One-pager"] } },
   // Not the bare host. `demo2`'s root is a 330-byte language gate whose entire
   // body is one link to `/de/` — no heading, 25 characters of text — which is
   // indistinguishable from a parking page and was rejected as one, correctly:
   // that IS what the root serves. The entry points past the gate, at the site.
-  { id: "demo2", number: "02", host: "demo2.tracht-digital.de", url: "https://demo2.tracht-digital.de/de/", kind: "shop", origin: "demo" },
-  { id: "demo3", number: "03", host: "demo3.tracht-digital.de", url: "https://demo3.tracht-digital.de/", kind: "website", origin: "demo" },
-  { id: "demo4", number: "04", host: "demo4.tracht-digital.de", url: "https://demo4.tracht-digital.de/", kind: "website", origin: "demo" },
-  { id: "demo5", number: "05", host: "demo5.tracht-digital.de", url: "https://demo5.tracht-digital.de/", kind: "website", origin: "demo" },
-  { id: "shop", number: "06", host: "shop.tracht-digital.de", url: "https://shop.tracht-digital.de/", kind: "shop", origin: "own" },
+  { id: "demo2", number: "02", host: "demo2.tracht-digital.de", url: "https://demo2.tracht-digital.de/de/", kind: "shop", origin: "demo", labels: { de: ["Mode", "Interaktiv"], en: ["Fashion", "Interactive"] } },
+  { id: "demo3", number: "03", host: "demo3.tracht-digital.de", url: "https://demo3.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: ["Immobilien", "Verwaltungspanel"], en: ["Real estate", "Management panel"] } },
+  { id: "demo4", number: "04", host: "demo4.tracht-digital.de", url: "https://demo4.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: ["Handwerk", "Schreinerei"], en: ["Trades", "Joinery"] } },
+  { id: "demo5", number: "05", host: "demo5.tracht-digital.de", url: "https://demo5.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: [], en: [] } },
+  { id: "shop", number: "06", host: "shop.tracht-digital.de", url: "https://shop.tracht-digital.de/", kind: "shop", origin: "own", labels: { de: ["Festpreise", "Leistungskatalog"], en: ["Fixed prices", "Service catalogue"] } },
 ] as const;
 
 /**

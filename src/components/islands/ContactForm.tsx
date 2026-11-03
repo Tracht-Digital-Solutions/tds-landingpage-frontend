@@ -1,3 +1,4 @@
+import Arrow from "~/components/ui/Arrow";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -686,12 +687,12 @@ export default function ContactForm({
         <div className="contact-stepper-actions">
         {stage > 0 && (
           <button type="button" className="contact-back" onClick={() => goTo(stage - 1)}>
-            <span aria-hidden="true">←</span> {stepper.back}
+            <span aria-hidden="true"><Arrow dir="left" /></span> {stepper.back}
           </button>
         )}
         {stage < last ? (
           <button key="next" type="button" className="submit-button contact-next-button min-h-[3.25rem] px-8 py-4 text-[0.9375rem] font-semibold rounded-full inline-flex items-center justify-center gap-2 cursor-pointer" onClick={() => void next()}>
-            {stepper.next} <span aria-hidden="true">→</span>
+            {stepper.next} <span aria-hidden="true"><Arrow dir="right" /></span>
           </button>
         ) : (
         <button
@@ -719,8 +720,7 @@ export default function ContactForm({
                 strokeLinejoin="round"
                 className="transition-transform duration-200 group-hover:translate-x-1"
               >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
+                <polyline points="9 6 15 12 9 18" />
               </svg>
             )}
           </span>

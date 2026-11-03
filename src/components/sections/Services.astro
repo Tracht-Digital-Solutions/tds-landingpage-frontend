@@ -4,9 +4,8 @@
  * assistant for whoever cannot say yet which one fits. The Shop carries all of
  * them with their "ab" price; the link below leads to its filtered catalogue.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import { resolveLang } from "~/lib/i18n";
-import { cmsFor } from "~/lib/cms";
-import { getHomeContent } from "~/lib/homeContent";
 import { imageHints } from "~/lib/imageCatalog";
 import { getServiceProducts, shopServicesHref } from "~/lib/serviceProducts";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
@@ -14,16 +13,13 @@ import AssistantCard from "~/components/ui/AssistantCard.astro";
 
 const lang = resolveLang(Astro.currentLocale);
 
-const servicesContent = await cmsFor(
-  "services_overview",
-  lang,
-  getHomeContent(lang).servicesOverview,
-);
 const products = await getServiceProducts(lang);
+// Code-owned (2026-11-03, asked for): the masthead reads "Digitale Lösungen"
+// and the link "Mehr Leistungen", whatever a stored block still says.
 const ui =
   lang === "de"
-    ? { more: "Zu den Leistungen" }
-    : { more: "To the services" };
+    ? { headline: "Digitale", headlineAccent: "Lösungen.", more: "Mehr Leistungen" }
+    : { headline: "Digital", headlineAccent: "solutions.", more: "More services" };
 ---
 
 {/* No ground of its own: the page has ONE ground, `.page-ground` in
@@ -35,8 +31,8 @@ const ui =
 >
   <div class="lp-container">
     <SectionHeader
-      headline={servicesContent.headline}
-      headlineAccent={servicesContent.headlineAccent}
+      headline={ui.headline}
+      headlineAccent={ui.headlineAccent}
       id="services-heading"
       headingClass="mb-10"
       bar
@@ -60,7 +56,7 @@ const ui =
                 />
               </span>
               <span class="product-tile__body">
-                <span class="product-tile__go" aria-hidden="true">→</span>
+                <span class="product-tile__go" aria-hidden="true"><Arrow dir="right" /></span>
                 <span class="product-tile__kind">{product.kind[lang]}</span>
                 <span class="product-tile__title">{product.title[lang]}</span>
               </span>
@@ -78,7 +74,7 @@ const ui =
     <div class="product-more">
       <a class="product-more__link lp-ink" href={shopServicesHref(lang)} data-cta data-track="services-more">
         {ui.more}
-        <span aria-hidden="true">→</span>
+        <span aria-hidden="true"><Arrow dir="right" /></span>
       </a>
     </div>
   </div>
@@ -137,11 +133,12 @@ const ui =
   .product-tile--assistant .product-tile__link {
     aspect-ratio: 16 / 9;
   }
+  /* 4:5 since 2026-11-03 (3:4 read too tall). */
   @media (min-width: 48rem) {
     .product-tile__link,
     .product-tile:first-child .product-tile__link,
     .product-tile--assistant .product-tile__link {
-      aspect-ratio: 3 / 4;
+      aspect-ratio: 4 / 5;
     }
   }
   .product-tile__link:is(:hover, :focus-visible) {
@@ -173,13 +170,19 @@ const ui =
     position: relative;
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     gap: 0.25rem;
-    padding: clamp(0.75rem, 8cqi, 1.125rem);
+    padding: clamp(0.875rem, 9cqi, 1.25rem) clamp(0.75rem, 8cqi, 1.125rem) clamp(0.625rem, 6cqi, 0.875rem);
   }
-  /* Room for two title lines, so every tile in the row cuts its picture at one height. */
+  /* Exactly the eyebrow and two title lines, so every tile in the row cuts its
+     picture at one height. The words sit at the bottom: a one-line title leaves
+     its spare line above the eyebrow, beside the button, not under the text
+     (2026-11-03: the space under the words read as padding). */
   @media (min-width: 48rem) {
     .product-tile__body {
-      min-height: clamp(6.25rem, 52cqi, 7.5rem);
+      min-height: calc(
+        clamp(0.875rem, 9cqi, 1.25rem) + clamp(0.625rem, 6cqi, 0.875rem) + 1.25rem + 2.24 * clamp(1rem, 9.5cqi, 1.5rem)
+      );
     }
   }
   .product-tile__kind {
@@ -242,6 +245,11 @@ const ui =
     display: flex;
     justify-content: center;
     margin-top: 2.5rem;
+  }
+  @media (min-width: 48rem) {
+    .product-more {
+      justify-content: flex-start;
+    }
   }
   .product-more__link {
     --lp-fill: var(--color-accent);

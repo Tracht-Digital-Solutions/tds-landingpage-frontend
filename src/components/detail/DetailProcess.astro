@@ -15,6 +15,7 @@ interface Props {
 }
 
 const { processTitle, process, priceLabel, priceText, priceLink = null } = Astro.props;
+import Arrow from "~/components/ui/Arrow.astro";
 ---
 
 <div class="section-spacing">
@@ -64,7 +65,7 @@ const { processTitle, process, priceLabel, priceText, priceLink = null } = Astro
             class="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white underline underline-offset-4 decoration-white/40 hover:decoration-white [@media(pointer:coarse)]:min-h-11"
           >
             {priceLink.label}
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true"><Arrow dir="right" /></span>
           </a>
         )}
       </div>

@@ -26,6 +26,7 @@
  * whose generated 3D shapes turn toward the pointer while the hero is on
  * screen and move with the scroll (`lib/motion/groundScroll.ts`).
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import type { Lang } from "~/lib/i18n";
 import HeroCarousel from "~/components/ui/HeroCarousel.astro";
 
@@ -70,7 +71,7 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
       <div class="hero-actions hero-rise">
         <a href="#contact" class="hero-cta hero-cta--primary" data-cta data-track="hero-primary">
           {cta1}
-          <span aria-hidden="true" class="hero-cta__arrow">→</span>
+          <span aria-hidden="true" class="hero-cta__arrow"><Arrow dir="right" /></span>
         </a>
         <a href="#services" class="hero-cta hero-cta--secondary" data-track="hero-secondary">{cta2}</a>
       </div>
