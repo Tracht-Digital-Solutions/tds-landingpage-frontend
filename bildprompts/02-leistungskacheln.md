@@ -2,11 +2,12 @@
 
 Fünf neue Motive, je eins pro Produkt. Bisher teilen sich die Kacheln Bilder mit anderen Leistungen, die teils nicht zum Produkt passen.
 
-- **Verwendung:** `sections/Services.astro`, oben in der Kachel, in voller Stärke
-- **Format:** 3:2, mindestens 1536 × 1024
-- **Aufbau:** Die Kachel schneidet fast quadratisch, auf dem Handy die erste breit. Das Motiv steht deshalb in der mittleren Bildhälfte und bleibt in 200 Pixeln Breite erkennbar.
+- **Verwendung:** `sections/Services.astro`, oben in der Kachel, in voller Stärke; darunter Typ und Titel auf massivem Navy
+- **Format:** 16:10, mindestens 1536 × 960 (so steht es im Markup und bei den bisherigen Bildern)
+- **Aufbau:** Zugeschnitten wird mittig (`object-fit: cover`, ohne Ausrichtung). Ab Tablet stehen die Kacheln in einer Reihe, 3:4 hoch; das Bild bekommt davon etwa 1,2:1, rund 200 Pixel breit. Auf dem Handy stehen zwei Kacheln nebeneinander (ebenfalls etwa 1,2:1), die erste Kachel liegt quer und zeigt nur einen Streifen von etwa 3:1. Das Motiv sitzt deshalb kompakt in der Bildmitte, höchstens im mittleren Drittel der Höhe.
+- **Unterkante:** Das Bild stößt direkt an die Navy-Fläche. Der untere Rand bleibt ruhig und eher hell, kein dunkler Schatten, der mit dem Navy verschwimmt.
 - **Serie:** Gleiche Kamerahöhe (leicht von oben), gleiche Eichenplatte, gleiches Licht von links. Nebeneinander sollen die Bilder wie eine Reihe wirken. Jedes trägt genau einen Farbakzent.
-- **Einbau:** Pfad in `src/lib/serviceProducts.ts` eintragen.
+- **Einbau:** Pfad in `src/lib/serviceProducts.ts` eintragen. Bis dahin zeigen die Kacheln die Leistungsbilder (Firmenwebsite → Webauftritt, Onepager → Individuelle Lösungen, Wartung → Kundenportale, KI-Sichtbarkeit → Beratung, Online-Formular → Prozesse).
 
 ## Firmenwebsite
 
