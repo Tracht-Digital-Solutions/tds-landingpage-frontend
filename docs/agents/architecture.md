@@ -14,7 +14,7 @@ Used by both trees (`pages/index.astro`, `pages/en/index.astro` are wrappers). T
 questions:
 
 Hero → Leistungen (five product tiles with the assistant as sixth tile) → Projekte und Referenzen
-(`sections/ProjectReferences.astro`) → Vorgehen (with the first-conversation card) → compact Journal → Wieso ich? (with the qualifications teaser) →
+(`sections/ProjectReferences.astro`) → Zeitersparnis (`sections/TimeSavings.astro`) → Vorgehen (with the first-conversation card) → compact Journal → Wieso ich? (with the qualifications teaser) →
 Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ → Kontakt.
 
 - The FAQ stays directly above the navy contact block.
@@ -41,6 +41,13 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - **Not rendered, fields kept** (2026-10-11) so stored blocks load: `pricing.sub`, package `description` (still in
   the JSON-LD offers), `servicesOverview.intro`, the explorer's `tagline`, the showcase `intro`, `process.body`,
   the `why_me` reasons' `description`, `footer.tagline`.
+
+- **Zeitersparnis** (2026-11-03): a calculator on fixed navy. Minutes per task × tasks per week × share
+  automated × 46 working weeks gives hours per month, per year and working days (`lib/savingsCalculator.ts`).
+  It only uses the visitor's figures; the defaults (10 min, 25 a week, 70 %) are labelled as examples and the
+  server renders their result, so it reads complete without JavaScript. Its button is "Erstgespräch
+  vereinbaren": a plain link to `#contact` that also hands the figures over as a `contactDraft`
+  (`service: "process"`). Never publish a saved-hours figure as measured or promised.
 
 ## Hero (`sections/Hero.astro`)
 
