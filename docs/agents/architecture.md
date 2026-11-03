@@ -50,8 +50,9 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   (coral, gold, periwinkle), an unchosen answer is a pressed-in well like the contact fields, the chosen one is
   filled in its question's colour. Since 0.101.0 the card is light (`--lp-surface-card`), each question a row
   tinted in its colour, and the result a rosé plate with a donut chart (SVG ring, `stroke-dasharray`, no
-  gradient): the routine share of the task's yearly hours against what stays manual, with both numbers in a
-  legend. `savings()` returns `total`, `rest` and `share` for it.
+  gradient): the hours saved as a slice of one working year (`WORK_YEAR_HOURS`, 46 × 40 h), the working days
+  saved in its middle, saved and remaining hours in a legend (0.101.1, asked for). `savings()` returns
+  `yearShare` and `rest` for it.
 - **Vorgehen** (0.97.0): the step title sits in the navy head. From 40rem all four steps show; on a phone
   the heads are buttons of an accordion, one open at a time (`hidden` only set by the script; on desktop the
   heads are disabled buttons, no tab stop). No "Schritt n" label; an arrow points from step to step (right in
