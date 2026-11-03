@@ -74,7 +74,7 @@ export const businessCardCopy: Record<Lang, BusinessCardCopy> = {
     eyebrow: "Eigenes Projekt",
     kind: "Digitale Visitenkarte",
     title: "Digitale Visitenkarte",
-    text: "Kontaktdaten, die man scannt statt abtippt — meine eigene, gebaut wie die für Kunden.",
+    text: "Kontaktdaten zum Scannen statt Abtippen: die eigene Karte, gebaut wie die für Kunden.",
     cta: "Karte ansehen",
     previewAlt: "Vorschau der digitalen Visitenkarte von Julian Tracht",
   },
@@ -82,7 +82,7 @@ export const businessCardCopy: Record<Lang, BusinessCardCopy> = {
     eyebrow: "Own project",
     kind: "Digital business card",
     title: "Digital business card",
-    text: "Contact details people scan instead of typing — mine, built like the ones for customers.",
+    text: "Contact details to scan instead of typing: our own card, built like the ones for customers.",
     cta: "View the card",
     previewAlt: "Preview of Julian Tracht's digital business card",
   },
@@ -126,9 +126,21 @@ export interface BusinessCardLink {
  * into both of them (and into their unit tests) to produce four constants.
  * The slugs are code-owned anyway — the same rule as `BUSINESS_CARD_SLUG`.
  */
-const SITE_LINKS: Record<Lang, { home: string; services: string; pricing: string }> = {
-  de: { home: "/", services: "/#services", pricing: "https://shop.tracht-digital.de/?art=own#katalog" },
-  en: { home: "/en/", services: "/en/#services", pricing: "https://shop.tracht-digital.de/en/?art=own#katalog" },
+const SITE_LINKS: Record<Lang, { home: string; services: string; projects: string; shop: string; freelance: string }> = {
+  de: {
+    home: "/",
+    services: "/#services",
+    projects: "/projekte",
+    shop: "https://shop.tracht-digital.de/?art=own#katalog",
+    freelance: "https://freelance.tracht-digital.de/",
+  },
+  en: {
+    home: "/en/",
+    services: "/en/#services",
+    projects: "/en/projects",
+    shop: "https://shop.tracht-digital.de/en/?art=own#katalog",
+    freelance: "https://freelance.tracht-digital.de/en/",
+  },
 };
 
 /**
@@ -170,7 +182,7 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
       id: "whatsapp",
       group: "contact",
       label: "WhatsApp",
-      meta: de ? "Kurz schreiben, statt zu telefonieren" : "Message instead of calling",
+      meta: de ? "Nachricht statt Anruf" : "Message instead of calling",
       href: `https://wa.me/${mobileHref.replace(/^\+/, "")}`,
       external: true,
     },
@@ -193,16 +205,31 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
       group: "more",
       label: de ? "Leistungen" : "Services",
       meta: de
-        ? "Beratung, Prozesse, Software, Webauftritt"
-        : "Advice, processes, software, web presence",
+        ? "Kundenportale, Abläufe, Beratung, Software, Webauftritt"
+        : "Portals, workflows, advice, software, web presence",
       href: site.services,
     },
     {
-      id: "pricing",
+      id: "projects",
       group: "more",
-      label: de ? "Preise" : "Pricing",
-      meta: de ? "Leistungen im Shop" : "Services in the shop",
-      href: site.pricing,
+      label: de ? "Projekte" : "Projects",
+      meta: de ? "Kundenprojekte, Demos und Designstudien" : "Client work, demos and design studies",
+      href: site.projects,
+    },
+    {
+      id: "shop",
+      group: "more",
+      label: "Shop",
+      meta: de ? "Leistungen ansehen und anfragen" : "Browse and request services",
+      href: site.shop,
+    },
+    {
+      id: "freelance",
+      group: "more",
+      label: de ? "Freelancer-Profil" : "Freelance profile",
+      meta: de ? "Werdegang, Fähigkeiten, Zertifikate" : "Career, skills, certificates",
+      href: site.freelance,
+      external: true,
     },
     {
       id: "journal",

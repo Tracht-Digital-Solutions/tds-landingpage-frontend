@@ -19,6 +19,9 @@
  * - **WCAG 2.2.2:** it turns only while on screen and in a visible tab, stops
  *   under the pointer and with focus inside, and never under reduced motion
  *   or the site's motion switch.
+ * - **Never cut off** (2026-11-04). The hero clips at its box and the window
+ *   at its width; a card fades out over the last 3rem before either edge and
+ *   is invisible where it would be cut, so cards fade in and out as they turn.
  * - **Sampled per render.** The page cache keeps one sample per generation;
  *   the next rebuild draws a new one. That is the "Stichprobe": no favourite.
  *
@@ -173,6 +176,9 @@ const ui =
   const REST_MS = 11000;
   /** Pointer travel before a press becomes a drag (a click stays a click). */
   const SLOP_PX = 6;
+  /** Pixels over which a card fades out toward an edge: narrow, so the front
+      card (about 3.5rem from the window at 1024 px) never dims. */
+  const FADE_PX = 48;
 
   document.querySelectorAll<HTMLElement>("[data-hero-carousel]").forEach((root) => {
     const cards = [...root.querySelectorAll<HTMLElement>("[data-hero-card]")];
@@ -201,6 +207,26 @@ const ui =
     let dragging = false;
     let timer = 0;
 
+    const hero = root.closest<HTMLElement>(".hero") ?? root.parentElement ?? root;
+    const links = cards.map((card) => card.querySelector<HTMLElement>(".hero-carousel__link"));
+
+    /** Never a card cut off by an edge (2026-11-04): the hero clips at its own
+        box and the window at its width, so a card fades out as it nears
+        either and is gone by the time it would touch it. All writes first,
+        then all reads: one layout per frame, not one per card. */
+    const fadeAtEdges = () => {
+      const box = hero.getBoundingClientRect();
+      const right = Math.min(box.right, document.documentElement.clientWidth);
+      const left = Math.max(box.left, 0);
+      const fades = cards.map((card) => {
+        const rect = card.getBoundingClientRect();
+        if (!rect.width) return 1;
+        const inside = Math.min(rect.left - left, right - rect.right, rect.top - box.top, box.bottom - rect.bottom);
+        return Math.max(0, Math.min(1, inside / FADE_PX));
+      });
+      fades.forEach((fade, i) => links[i]?.style.setProperty("--hc-fade", fade.toFixed(3)));
+    };
+
     const paint = () => {
       cards.forEach((card, i) => {
         const slot = slotAt(homes[i]!, position, n);
@@ -217,7 +243,22 @@ const ui =
         if (front) card.removeAttribute("aria-hidden");
         else card.setAttribute("aria-hidden", "true");
       });
+      fadeAtEdges();
     };
+
+    // The resting pose needs its fades too, and a resize or a scroll (the
+    // carousel leaves with the copy) moves the cards against the edges.
+    let refade = 0;
+    const queueFade = () => {
+      if (refade || !onScreen) return;
+      refade = requestAnimationFrame(() => {
+        refade = 0;
+        fadeAtEdges();
+      });
+    };
+    fadeAtEdges();
+    window.addEventListener("resize", queueFade, { passive: true });
+    window.addEventListener("scroll", queueFade, { passive: true });
 
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
@@ -504,6 +545,9 @@ const ui =
     color: var(--color-black);
     text-decoration: none;
     box-shadow: var(--tds-shadow-hard);
+    /* The edge fade (script): 1 well inside the hero, 0 where the card would
+       be cut off. Multiplies with the card's own depth opacity. */
+    opacity: var(--hc-fade, 1);
     transition:
       background-color 200ms var(--tds-ease-out),
       translate 160ms var(--tds-ease-out);
