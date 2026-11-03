@@ -32,12 +32,6 @@ interface Props {
    * carry it today (About, Process, Contact).
    */
   bar?: boolean;
-  /**
-   * Which edge the masthead keeps from `md` (2026-11-03): the home page's
-   * sections alternate, starting with "Projekte und Referenzen" on the right.
-   * Phones keep every masthead centred.
-   */
-  align?: "start" | "end";
 }
 
 const {
@@ -47,9 +41,7 @@ const {
   dark = false,
   headingClass = "mb-16",
   bar = false,
-  align = "start",
 } = Astro.props;
-const end = align === "end";
 
 // With the bar showing, the headline's own bottom margin moves to the
 // bar so the section's rhythm below the masthead is unchanged.
@@ -67,7 +59,7 @@ const headingSpacing = bar ? "mb-5" : headingClass;
     `h1#hero-heading`), and `tds-reveal`'s own contract in tds-shared forbids it
     there. The hidden state sits behind `html[data-reveal-active]`, which only
     `lib/reveal.ts` sets, so with no JavaScript this renders fully visible. */}
-<div class:list={["text-center", end ? "md:text-right" : "md:text-left"]} data-reveal>
+<div class="text-center md:text-left" data-reveal>
   <h2
     id={id}
     class:list={[
@@ -87,8 +79,7 @@ const headingSpacing = bar ? "mb-5" : headingClass;
       <span
         aria-hidden="true"
         class:list={[
-          "tds-brandbar mx-auto",
-          end ? "md:ml-auto md:mr-0" : "md:mx-0",
+          "tds-brandbar mx-auto md:mx-0",
           dark ? "tds-brandbar--on-dark" : null,
           headingClass,
         ]}
