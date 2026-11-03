@@ -5,6 +5,7 @@ import { fetchBlocks } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import BlogPostCard from "~/components/ui/BlogPostCard.astro";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
+import { mostRelevantPosts } from "~/lib/journalRelevance";
 
 const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
@@ -17,7 +18,7 @@ const heading = getHomeContent(lang).journalHeading;
  * landing block (edited in tds-admin). That selection is language-agnostic
  * (stored under `lang=de`) but each post is rendered in the current page's
  * language. When no selection is saved, we fall back to the 3 most recent
- * published posts, and if the API is unreachable, to the local i18n
+ * published posts ranked by relevance for businesses, and if the API is unreachable, to the local i18n
  * placeholders — so the build never breaks on a content hiccup.
  */
 const blocks = await fetchBlocks("de");
@@ -28,7 +29,8 @@ let livePosts: ContentPost[] = [];
 if (curatedSlugs.length > 0) {
   livePosts = await fetchPostsBySlug(curatedSlugs.slice(0, 3), lang);
 } else {
-  livePosts = await fetchTopics(lang, 3);
+  // The newest 24 are ranked by relevance for businesses (lib/journalRelevance.ts).
+  livePosts = mostRelevantPosts(await fetchTopics(lang, 24), 3);
 }
 
 const formatter = new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-IE", {

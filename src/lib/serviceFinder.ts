@@ -45,6 +45,38 @@ export const STEP_COUNT = 3;
 /** A result shows this many products at most. */
 export const MAX_MATCHES = 4;
 
+/**
+ * Rough time saved per product, as a band rather than a figure: an estimate
+ * for a typical small business, labelled as such in the result and never a
+ * promise. `low` < 1 h, `medium` 1–5 h, `high` > 5 h a month.
+ */
+export type SavingsLevel = "low" | "medium" | "high";
+export const SAVINGS_LEVELS: readonly SavingsLevel[] = ["low", "medium", "high"];
+
+const HIGH = new Set([
+  "online-terminbuchung-einbinden",
+  "einen-ablauf-automatisieren",
+  "rechnungen-digital-schreiben",
+  "ki-im-buero-workshop",
+]);
+const MEDIUM = new Set([
+  "firmenwebsite-bis-5-seiten",
+  "online-formular-statt-papier",
+  "anfragen-automatisch-als-ticket",
+  "microsoft-365-einrichten",
+  "google-workspace-einrichten",
+  "website-wartung-12-monate",
+  "website-selbst-pflegen-einweisung",
+  "e-mail-postfach-im-griff",
+]);
+
+/** The estimated band of a product; anything not listed saves little time. */
+export function savingsLevel(productId: string): SavingsLevel {
+  if (HIGH.has(productId)) return "high";
+  if (MEDIUM.has(productId)) return "medium";
+  return "low";
+}
+
 export interface CatalogueProduct {
   id: string;
   category: CategoryId;
@@ -200,6 +232,7 @@ export interface FinderProduct {
   title: string;
   categoryName: string;
   href: string;
+  savings: SavingsLevel;
 }
 
 export interface SituationChoice {
@@ -250,6 +283,9 @@ interface FinderCopy {
   rankAlso: string;
   whyLabel: string;
   detailLink: string;
+  savingsLabel: string;
+  savingsLevels: Record<SavingsLevel, string>;
+  savingsNote: string;
   noMatch: string;
   note: string;
   catalogueLink: string;
@@ -285,6 +321,13 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rankAlso: "Passt ebenfalls",
     whyLabel: "Angaben dazu:",
     detailLink: "Im Shop ansehen",
+    savingsLabel: "Geschätzte Zeitersparnis",
+    savingsLevels: {
+      low: "gering, unter 1 Std. im Monat",
+      medium: "mittel, 1–5 Std. im Monat",
+      high: "hoch, über 5 Std. im Monat",
+    },
+    savingsNote: "Die Zeitersparnis ist eine grobe Schätzung für einen kleinen Betrieb, keine Zusage.",
     noMatch: "Das lässt sich am besten im Erstgespräch sortieren.",
     note: "Eine erste Orientierung. Was genau passt, klären wir im Erstgespräch.",
     catalogueLink: "Alle Leistungen",
@@ -323,6 +366,13 @@ export const FINDER_COPY: Record<Lang, FinderCopy> = {
     rankAlso: "Also fits",
     whyLabel: "Answers given:",
     detailLink: "View in the shop",
+    savingsLabel: "Estimated time saved",
+    savingsLevels: {
+      low: "low, under 1 hour a month",
+      medium: "medium, 1–5 hours a month",
+      high: "high, over 5 hours a month",
+    },
+    savingsNote: "Time saved is a rough estimate for a small business, not a promise.",
     noMatch: "This is best sorted out in a first conversation.",
     note: "A first sense of direction. We work out exactly what fits in the first conversation.",
     catalogueLink: "All services",

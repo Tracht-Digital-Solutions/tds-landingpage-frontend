@@ -146,3 +146,10 @@ header.
 
 No surface on this site uses a gradient (`noGradients.test.ts`): scrims are flat veils, the page ground is one colour, and the
 brand bar's hard-edged segments are its only `linear-gradient`, in tds-shared. Tooltips are tds-shared's `hoverTipScript`, at the pointer.
+
+## Dark rules and the theme hover preview (0.97.0)
+
+Never write `:root[data-theme="dark"] X`: the hover preview's copy carries its own `data-theme`, so such a
+rule misses a dark copy and leaks into a light one. Use
+`:is(:root, .tds-theme-preview__page)[data-theme="dark"] X:not(:where([data-theme="dark"] [data-theme="light"] *))`
+(`themePreviewSelectors.test.ts`; pattern documented in tds-shared `docs/agents/theme-motion-app.md`).

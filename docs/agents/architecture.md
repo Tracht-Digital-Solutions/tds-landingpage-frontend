@@ -42,12 +42,15 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   the JSON-LD offers), `servicesOverview.intro`, the explorer's `tagline`, the showcase `intro`, `process.body`,
   the `why_me` reasons' `description`, `footer.tagline`.
 
-- **Zeitersparnis** (2026-11-03): a calculator on fixed navy. Minutes per task × tasks per week × share
-  automated × 46 working weeks gives hours per month, per year and working days (`lib/savingsCalculator.ts`).
-  It only uses the visitor's figures; the defaults (10 min, 25 a week, 70 %) are labelled as examples and the
-  server renders their result, so it reads complete without JavaScript. Its button is "Erstgespräch
-  vereinbaren": a plain link to `#contact` that also hands the figures over as a `contactDraft`
-  (`service: "process"`). Never publish a saved-hours figure as measured or promised.
+- **Zeitersparnis** (2026-11-03, questionnaire since 0.97.0): three questions with fixed answers (radios, no
+  number fields) in `lib/savingsCalculator.ts`; each answer stands for a mid value, × 46 working weeks. The
+  estimate (hours per year, working days) shows once all three are answered; it is labelled a rough estimate,
+  never a promise. "Erstgespräch vereinbaren" hands the chosen answers over as a `contactDraft`.
+- **Vorgehen** (0.97.0): the step title sits in the navy head. From 40rem all four steps show; on a phone
+  the heads are buttons of an accordion, one open at a time (`hidden` only set by the script; on desktop the
+  heads are disabled buttons, no tab stop). The outcome reads "Ergebnis: …".
+- **Blog für Betriebe** (0.97.0): without a curated `journal` block the newest 24 posts are ranked by
+  `lib/journalRelevance.ts` (business categories and keywords), not by date alone.
 
 ## Hero (`sections/Hero.astro`)
 
@@ -97,13 +100,19 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   and "Weiter" before hydration would submit natively).
 - It asks topic, recognised starting points and stage, and recommends one or more services with the visitor's
   answers as the reason and the price (Webauftritt: "Festpreise ab" the lowest package; others "auf Anfrage").
-  Never empty, never an estimate or range. `SERVICE_ORDER` breaks ties.
+  Never empty, never a price estimate or range. `SERVICE_ORDER` breaks ties.
+- Each recommended product shows an estimated time saved as a band (`savingsLevel`: low < 1 h, medium
+  1–5 h, high > 5 h a month), with the note that it is a rough estimate, not a promise.
 - Starting points are the services' `situations`, resolved on the server; the island never imports the catalog.
 - It sends nothing: the result becomes a draft in the contact form (`lib/contactDraft.ts`: sessionStorage for a
   later-hydrating form, an event for a live one), never replacing typed text.
 
 ## Contact form
 
+- **A three-step stepper** (0.97.0): Kontaktdaten → Anliegen → Nachricht, one step at a time with a
+  progress row; "Weiter" validates the step's fields, a failed submit jumps to the first step with an error.
+  "Weiter" and "Senden" carry distinct React keys, or React reuses the element and submits on "Weiter".
+  A complete, valid field is filled periwinkle (`[data-filled]`), like the ticked emergency row but not pink.
 - A reason dropdown above the message posts as `subject` (declared in tds-shared's `ContactSchema`, because
   `zodResolver` forwards only known keys). Reasons come from `contact.reasons` and ship committed. Optional on
   purpose.

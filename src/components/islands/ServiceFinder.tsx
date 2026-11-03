@@ -4,6 +4,7 @@ import type { Lang } from "~/lib/i18n";
 import { handOffContactDraft } from "~/lib/contactDraft";
 import {
   FINDER_COPY,
+  SAVINGS_LEVELS,
   STAGE_IDS,
   STEP_COUNT,
   TOPIC_IDS,
@@ -266,6 +267,15 @@ export default function ServiceFinder({ lang = "de", products, contactHref, cata
                       </p>
                       <h4 className="finder__match-title">{product.title}</h4>
                       <p className="finder__summary">{product.categoryName}</p>
+                      <p className="finder__savings">
+                        <span className="finder__savings-label">{copy.savingsLabel}:</span>
+                        <span className="finder__savings-meter" aria-hidden="true">
+                          {SAVINGS_LEVELS.map((level, rank) => (
+                            <span key={level} data-on={rank <= SAVINGS_LEVELS.indexOf(product.savings) ? "" : undefined} />
+                          ))}
+                        </span>
+                        <span>{copy.savingsLevels[product.savings]}</span>
+                      </p>
                       {match.reasons.length > 0 && (
                         <>
                           <p className="finder__why-label">{copy.whyLabel}</p>
@@ -290,7 +300,7 @@ export default function ServiceFinder({ lang = "de", products, contactHref, cata
                 })}
               </ol>
               <p className="finder__note">
-                {copy.note}{" "}
+                {copy.note} {copy.savingsNote}{" "}
                 <a className="finder__price-link" href={catalogueHref}>
                   {copy.catalogueLink}
                 </a>

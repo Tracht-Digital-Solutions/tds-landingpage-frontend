@@ -42,7 +42,7 @@ import { releasedSlugs, shopProductHref, shopServicesHref } from "~/lib/serviceP
  * `.finder` rule below is `:global`, anchored on the `.finder` root.
  */
 import { localizePath, resolveLang } from "~/lib/i18n";
-import { CATALOGUE, CATALOGUE_PRODUCTS, FINDER_SECTION, type FinderProduct } from "~/lib/serviceFinder";
+import { CATALOGUE, CATALOGUE_PRODUCTS, FINDER_SECTION, savingsLevel, type FinderProduct } from "~/lib/serviceFinder";
 import ServiceFinderIsland from "~/components/islands/ServiceFinder";
 
 const lang = resolveLang(Astro.currentLocale);
@@ -53,6 +53,7 @@ const products: FinderProduct[] = CATALOGUE_PRODUCTS.map((product) => ({
   title: product.title[lang],
   categoryName: CATALOGUE[product.category].name[lang],
   href: shopProductHref(product.slug[lang], lang, released),
+  savings: savingsLevel(product.id),
 }));
 const home = localizePath("/", lang);
 const contactHref = `${home}#contact`;
@@ -597,6 +598,31 @@ const catalogueHref = shopServicesHref(lang);
     margin: 0 0 0.75rem;
     line-height: 1.55;
     color: var(--color-muted);
+  }
+  :global(.finder__savings) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    margin: 0 0 0.75rem;
+    font-size: 0.875rem;
+  }
+  :global(.finder__savings-label) {
+    font-weight: 600;
+  }
+  :global(.finder__savings-meter) {
+    display: inline-flex;
+    gap: 3px;
+  }
+  :global(.finder__savings-meter > span) {
+    width: 0.875rem;
+    height: 0.375rem;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.25;
+  }
+  :global(.finder__savings-meter > span[data-on]) {
+    opacity: 1;
   }
   :global(.finder__why-label) {
     margin: 0 0 0.35rem;
