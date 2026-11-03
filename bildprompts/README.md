@@ -8,6 +8,8 @@ Stand: Version 0.99.1 (2026-11-03). Formate, Zuschnitte und Deckkräfte sind am 
 
 ## Dateien
 
+Schritt-für-Schritt-Liste vom Erzeugen bis zum Release: [ABLAUF.md](ABLAUF.md).
+
 | Datei | Inhalt | Motive |
 |---|---|---|
 | [01-hero-und-abschnitte.md](01-hero-und-abschnitte.md) | Hero, Wieso ich, Kontakt, Erstgespräch | 4 |
