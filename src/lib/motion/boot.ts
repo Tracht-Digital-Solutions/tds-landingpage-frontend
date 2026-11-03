@@ -46,7 +46,7 @@ export function bootMotion(): void {
       root.removeAttribute(PAGE_ENTER_ATTR);
       return;
     }
-    const [page, cta, images, card, ux, tabs, floating, brandbar, scrollbar, tilt, heroDecor] = await Promise.all([
+    const [page, cta, images, card, ux, tabs, floating, brandbar, scrollbar, tilt, groundScroll] = await Promise.all([
       import("./pageTransition"),
       import("./cta"),
       import("./images"),
@@ -57,7 +57,7 @@ export function bootMotion(): void {
       import("./brandbar"),
       import("./pageScrollbar"),
       import("./tilt"),
-      import("./heroDecor"),
+      import("./groundScroll"),
     ]);
     root.dataset.motion = "on";
     page.mountPageTransition(dom);
@@ -70,7 +70,7 @@ export function bootMotion(): void {
     brandbar.mountBrandbars(dom);
     scrollbar.mountPageScrollbar(dom);
     tilt.mountTilt(dom);
-    heroDecor.mountHeroDecor(dom);
+    groundScroll.mountGroundScroll(dom);
   };
 
   if (root.hasAttribute(PAGE_ENTER_ATTR)) void load();

@@ -1,13 +1,12 @@
 /**
- * The generated photographs (`[data-motion-image]`): the four section grounds
- * and the four service photos. They settle into place as they scroll in, then
+ * The generated photographs (`[data-motion-image]`): the contact ground and
+ * the service photos. (The hero and "about" grounds went on 2026-11-03.) They settle into place as they scroll in, then
  * drift slightly slower than the page — a depth cue, never a content move.
  *
  * Why it is safe for the LCP: the photos are decoration (`alt=""`), none is
  * the LCP element (the H1 is, pinned by `audit:perf`), and an image that is
  * already on screen when this runs is NOT reset to a start state — it only
- * gets the drift. On a phone the hero photo is a 1×1 GIF (see `Hero.astro`),
- * so there is nothing to animate there.
+ * gets the drift.
  *
  * TRANSFORM ONLY. The section grounds carry their resting opacity in CSS
  * (0.2–0.38, lower in dark mode); an opacity tween would overwrite it. And no

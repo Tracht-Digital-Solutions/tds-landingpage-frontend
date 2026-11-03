@@ -114,11 +114,10 @@ const check = (label, ok, detail) => out.push(`${ok ? "PASS" : "FAIL"}  ${label}
   /**
    * Scrolled to a KNOWN-LIGHT part of the page before hovering.
    *
-   * At the top the bar is docked and transparent over the hero photograph, which
-   * is itself dark (L 0.15 behind the bar). A preview measured there compares a
-   * dark patch against a dark ground and says almost nothing — the first run of
-   * the check below read 0.052 inside against 0.147 outside and looked like a
-   * failure. y=1600 is inside the services section, flat paper.
+   * At the top the bar is docked and transparent over the hero (until
+   * 2026-11-03 a dark photograph, L 0.15 behind the bar). A preview measured
+   * there compared a dark patch against a dark ground and said almost nothing.
+   * y=1600 is inside the services section, on the paper ground.
    */
   await page.evaluate(() => window.scrollTo({ top: 1600, behavior: "instant" }));
   await page.waitForTimeout(1500);

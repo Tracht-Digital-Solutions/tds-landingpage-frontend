@@ -20,9 +20,18 @@ This site uses tds-shared's `marketing` surface. Preserve its language rather th
 
 ## One ground
 
-`.page-ground` in `Layout.astro` is one viewport-anchored layer carrying the brand fields; `body` is
-`--color-paper`. No section paints its own tone or `.tds-wash`. The navy contact block (`.tds-tone-navy`)
-paints over it.
+`.page-ground` (`components/PageGround.astro`, mounted in `Layout.astro`) is one viewport-anchored layer: paper
+plus generated 3D brand shapes (2026-11-03). `body` is `--color-paper`. No section paints its own tone, `.tds-wash`
+or photo ground; the navy contact block (`.tds-tone-navy`) paints over it.
+
+- **The shapes are generated, not placed**: `lib/groundShapes.ts` seeds three depth planes (far/mid/near), each a
+  tile drawn three times so the loop has no seam. Same seed on every render (cache-safe). Few and large: five
+  bodies per tile (6–22 rem), all in the outer bands, three outline rings each. Below 48rem they shrink to 62 % and
+  the near plane is off; print and `bare` pages get plain paper.
+- **Quiet on purpose**: the layer sets its own `--tds-decor-shape-alpha` / `--tds-decor-line-opacity`. Raising them
+  needs `audit:contrast`.
+- **No photo on the page ground**: hero, "about" and detail-head photo grounds were removed because they covered
+  the shapes.
 
 - **Nothing between `body` and that layer may create a stacking context** (a `transform`, `filter` or `opacity`
   on `<body>` hides the ground silently).
@@ -107,14 +116,12 @@ from tds-shared, the portal from `siteConfig.portalUrl`).
 - The nav is `overflow: clip`, or parked parts count as overflow in `audit:ux`.
 - Over a dark band the colour changes at the line like the pill (twin + `splitClip`, hover mirrored with `:has()`).
 
-## Hero decoration
+## Hero background
 
-Decoration lives only in the hero's negative space, never behind the copy or the fixed header
-(`npm run audit:ux` measures overlap). On a phone: a quarter in the top band and a capsule in the bottom band;
-on short screens (`max-height: 46rem` below 80rem) none. Scroll drift and the conduit stay desktop-only (80rem).
-Depth (2026-10-11, second pass): no floor grid. Each shape is a 3D body — a filled face plus six outline rings
-behind it (`.hero-shape__layer`, `translateZ` steps in `transform-style: preserve-3d`), turned by the island.
-Outline rings, not filled layers: stacked translucent fills darken the face. No box-shadow on `.hero-shape`. Under the slogan a `.tds-brandbar` draws itself by a round `clip-path` (never a scale: every brand-bar segment stays a pill, tds-shared ≥ 0.54) and the copy drifts up on scroll-out. Motion
+None of its own (2026-11-03): the photo, the capsule, the quarter and the conduit are gone. The hero lies on the
+page ground ([One ground](#one-ground)), whose bodies are built the same way — a filled face plus outline rings
+(`translateZ` steps in `transform-style: preserve-3d`); outline rings, not filled layers, because stacked
+translucent fills darken the face. Under the slogan a `.tds-brandbar` draws itself by a round `clip-path` (never a scale: every brand-bar segment stays a pill, tds-shared ≥ 0.54) and the copy drifts up on scroll-out. Motion
 details: [motion.md](motion.md#hero).
 
 ## Header: two islands (2026-10-12)

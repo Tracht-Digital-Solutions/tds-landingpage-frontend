@@ -156,9 +156,6 @@ const jsonLd = asGraph(
       lead={content.summary}
       ctaHref={contactHref}
       ctaLabel={content.ctaButton}
-      image={platform.id === 'woocommerce' || platform.id === 'shopware'
-        ? '/images/editorial/inventory-2026.webp'
-        : webPresence.image}
     >
       <DetailMeta lang={lang} updatedAt={platform.updatedAt} />
     </DetailHero>

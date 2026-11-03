@@ -164,8 +164,8 @@ describe("the hero", () => {
     expect(keyframes).not.toContain("opacity");
   });
 
-  it("does not download its photograph on a phone", () => {
-    expect(hero).toMatch(/<source media="\(min-width: 48rem\)"/);
+  it("downloads no photograph at all: the page ground shows through", () => {
+    expect(template(hero)).not.toMatch(/<img|<picture|<source/);
   });
 
   it("has no rotating slider", () => {

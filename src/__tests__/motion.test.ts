@@ -25,7 +25,7 @@ describe("motion on the landing page", () => {
    * `hidden xl:block` — absent entirely on the device the incident was
    * measured on.
    */
-  it("keeps the hero's copy and photo out of any animation runtime", () => {
+  it("keeps the hero's copy out of any animation runtime", () => {
     const hero = src("components/sections/Hero.astro");
     expect(hero).not.toMatch(/motion\/react|from ["']motion/);
 
@@ -34,11 +34,13 @@ describe("motion on the landing page", () => {
     // the first screen loads no React.
     const hydrated = hero.match(/<(\w+)[^>]*client:\w+/g) ?? [];
     expect(hydrated).toEqual([]);
-    expect(hero).toContain("data-hero-shape={kind}");
+    // No decoration of its own since 2026-11-03: the page ground shows through.
+    expect(hero).not.toMatch(/tds-decor|hero-shape|CircuitRun/);
 
     // The things that must still be server-rendered text and markup.
     expect(hero).toContain("<h1");
-    expect(hero).toContain("<picture>");
+    // No photo ground since 2026-11-03: it covered the page ground's shapes.
+    expect(hero).not.toContain("<picture>");
     // Slogan + two buttons, nothing else (2026-09-21).
     for (const field of ["{slogan}", "{cta1}", "{cta2}"]) {
       expect(hero, `${field} must render in Astro`).toContain(field);
@@ -68,23 +70,21 @@ describe("motion on the landing page", () => {
     expect(hero).toMatch(/hyphenate-limit-chars:\s*12/);
   });
 
-  it("lets the hero decoration animate, but nothing it renders is read", () => {
-    const decor = src("lib/motion/heroDecor.ts");
-    // Through the motion layer's runtime (tds-shared/motion/dom, handed in by
-    // boot.ts), never a bare `motion` import.
-    expect(decor).not.toMatch(/from ["'](motion|framer-motion)["']/);
-    expect(src("lib/motion/boot.ts")).toContain("heroDecor.mountHeroDecor(dom)");
-    // Decoration only: the shapes are spans in the aria-hidden decor layer.
-    const hero = src("components/sections/Hero.astro");
-    const shapes = hero.slice(hero.indexOf("{SHAPES.map("), hero.indexOf("))}", hero.indexOf("{SHAPES.map(")));
-    expect(shapes).not.toMatch(/<(img|picture|h[1-6]|a|button|p)[\s>/]/);
-    // The arrival is CSS, translate only, and off under reduced motion; the
-    // resting pose is the picture when nothing runs.
-    expect(hero).toMatch(/@media \(prefers-reduced-motion: no-preference\)[\s\S]*hero-shape-in-left/);
-    expect(hero).not.toMatch(/hero-shape-fade/);
-    expect(hero).toContain("hero-shape--still");
-    // The live motion switch stops it too.
-    expect(decor).toContain("data-a11y-motion");
+  it("moves the page ground's shapes with scroll and pointer, never from <html>", () => {
+    const ground = src("lib/motion/groundScroll.ts");
+    expect(ground).not.toMatch(/from ["'](motion|framer-motion)["']/);
+    expect(src("lib/motion/boot.ts")).toContain("groundScroll.mountGroundScroll(dom)");
+    // Written onto the ground layer only: an inherited property on <html>
+    // restyles the whole page (docs/agents/motion.md, jank rules).
+    expect(ground).not.toMatch(/documentElement\.style\.setProperty/);
+    expect(ground).toContain('ground.style.setProperty("--lp-ground-y"');
+    // The live motion switch stops it, and the frame loop parks when settled.
+    expect(ground).toContain("data-a11y-motion");
+    expect(ground).toMatch(/cancelAnimationFrame|settled/);
+    // Decoration only: the layer holds no readable content.
+    const layer = src("components/PageGround.astro");
+    expect(layer).toContain('aria-hidden="true"');
+    expect(layer).not.toMatch(/<(img|picture|h[1-6]|a|button|p)[\s>/]/);
   });
 
   it("opens FAQ answers through tds-shared's disclosure, not a local copy", () => {
@@ -165,14 +165,17 @@ describe("motion on the landing page", () => {
   });
 
   it("gives the generated photos and the CTA their Motion hooks", () => {
+    for (const file of ["components/sections/Contact.astro", "components/ui/ServiceCard.astro"]) {
+      expect(src(file), file).toContain("data-motion-image");
+    }
+    // Nothing photographic lies on the page ground (2026-11-03): it would cover
+    // the generated shapes of `components/PageGround.astro`.
     for (const file of [
       "components/sections/Hero.astro",
       "components/sections/About.astro",
-      "components/sections/Contact.astro",
-      "components/ui/ServiceCard.astro",
       "components/detail/DetailHero.astro",
     ]) {
-      expect(src(file), file).toContain("data-motion-image");
+      expect(src(file), file).not.toContain("data-motion-image");
     }
     expect(src("components/sections/Hero.astro")).toMatch(/hero-cta--primary" data-cta/);
     // Start states come from JS, off screen only — never from the markup.
