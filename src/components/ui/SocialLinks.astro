@@ -30,7 +30,14 @@ const { links, class: className } = Astro.props;
           style={`--social-brand: ${link.brand}`}
           data-social={link.id}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          {/* The WhatsApp glyph is a thin outline; at 16 px it read smaller than its neighbours. */}
+          <svg
+            width={link.id === "whatsapp" ? 20 : 16}
+            height={link.id === "whatsapp" ? 20 : 16}
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
             <path d={link.icon} />
           </svg>
         </a>

@@ -37,6 +37,7 @@ const groups = [
   { title: platformsTitle, links: platforms },
   { title: articlesTitle, links: articles },
 ].filter((group) => group.links.length > 0);
+import Arrow from "~/components/ui/Arrow.astro";
 ---
 
 <div class="section-spacing">
@@ -59,7 +60,7 @@ const groups = [
                   class="inline-flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors [@media(pointer:coarse)]:min-h-11"
                 >
                   <span>{link.label}</span>
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true"><Arrow dir="right" /></span>
                 </a>
               </li>
             ))}

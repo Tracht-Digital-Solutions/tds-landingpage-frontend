@@ -64,10 +64,17 @@ export const SAVINGS_QUESTIONS: readonly SavingsQuestion[] = [
 
 const clamp = (value: number, max: number) => (Number.isFinite(value) ? Math.min(Math.max(value, 0), max) : 0);
 
+/**
+ * `year` is the routine share of the task's yearly time, the part software can
+ * take over; `total` is the whole task, `rest` what stays manual. The chart in
+ * the section draws `share` as the slice of `total`.
+ */
 export function savings({ minutes, perWeek, share }: SavingsInput) {
-  const weekly = (clamp(minutes, 600) * clamp(perWeek, 5000) * clamp(share, 100)) / 100 / 60;
-  const year = weekly * WORK_WEEKS;
-  return { month: year / 12, year, days: year / WORKDAY_HOURS };
+  const totalWeekly = (clamp(minutes, 600) * clamp(perWeek, 5000)) / 60;
+  const ratio = clamp(share, 100) / 100;
+  const total = totalWeekly * WORK_WEEKS;
+  const year = total * ratio;
+  return { month: year / 12, year, days: year / WORKDAY_HOURS, total, rest: total - year, share: ratio };
 }
 
 /** Whole hours, one decimal below 10: "8,5", "134", "1.235". */
@@ -84,6 +91,10 @@ export interface SavingsCopy {
   resultPrefix: string;
   year: string;
   days: string;
+  /** The chart's two slices and its accessible summary; `{…}` filled in by the script. */
+  sliceSaved: string;
+  sliceRest: string;
+  chartLabel: string;
   note: string;
   cta: string;
   /** The draft handed to the contact form; `{…}` are filled in by the script. */
@@ -98,6 +109,9 @@ const copy: Record<Lang, SavingsCopy> = {
     resultPrefix: "Etwa",
     year: "Stunden pro Jahr",
     days: "Arbeitstage",
+    sliceSaved: "Routine, automatisierbar",
+    sliceRest: "Bleibt Handarbeit",
+    chartLabel: "Von {total} Stunden im Jahr sind etwa {year} Routine.",
     note: "Eine grobe Schätzung aus den Antworten, keine Zusage.",
     cta: "Erstgespräch vereinbaren",
     draft:
@@ -110,6 +124,9 @@ const copy: Record<Lang, SavingsCopy> = {
     resultPrefix: "About",
     year: "hours per year",
     days: "working days",
+    sliceSaved: "Routine, can be automated",
+    sliceRest: "Stays manual",
+    chartLabel: "Of {total} hours a year, about {year} are routine.",
     note: "A rough estimate from the answers, not a promise.",
     cta: "Book a first conversation",
     draft:

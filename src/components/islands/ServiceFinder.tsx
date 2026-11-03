@@ -1,3 +1,4 @@
+import Arrow from "~/components/ui/Arrow";
 import { useCallback, useId, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { AnimatePresence, MotionScope, m } from "@tracht-digital-solutions/tds-shared/motion/react";
 import type { Lang } from "~/lib/i18n";
@@ -293,7 +294,7 @@ export default function ServiceFinder({ lang = "de", products, contactHref, cata
                       )}
                       <a className="finder__detail" href={product.href}>
                         {copy.detailLink}
-                        <span aria-hidden="true">→</span>
+                        <span aria-hidden="true"><Arrow dir="right" /></span>
                       </a>
                     </m.li>
                   );
@@ -308,7 +309,7 @@ export default function ServiceFinder({ lang = "de", products, contactHref, cata
               <div className="finder__actions">
                 <a className="finder__cta finder__cta--contact" href={contactHref} onClick={handOff}>
                   {copy.cta}
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true"><Arrow dir="right" /></span>
                 </a>
                 <button type="button" className="finder__secondary" onClick={restart}>
                   {copy.restart}
@@ -416,7 +417,7 @@ export default function ServiceFinder({ lang = "de", products, contactHref, cata
                 )}
                 <button type="submit" className="finder__cta">
                   {step === STEP_COUNT - 1 ? copy.showResult : copy.next}
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true"><Arrow dir="right" /></span>
                 </button>
               </div>
             </m.form>

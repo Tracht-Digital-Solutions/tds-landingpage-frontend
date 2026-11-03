@@ -52,6 +52,7 @@
  * The focus ring is drawn around the whole card, which is another component's
  * element, so that one rule is deliberately global; see the note on it below.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import type { Lang } from "~/lib/i18n";
 import { cardActionUi, type CardAction } from "~/lib/cardActions";
 
@@ -82,7 +83,7 @@ const ui = cardActionUi[lang];
             category rather than as a destination. */}
         <span class="sr-only">{ui.service}: </span>
         {service.label}
-        <span aria-hidden="true"> →</span>
+        <span aria-hidden="true"><Arrow dir="right" /></span>
       </a>
     )
   }
@@ -113,7 +114,7 @@ const ui = cardActionUi[lang];
       >
         {cta.label}
         {cta.detail && <span class="sr-only"> — {cta.detail}</span>}
-        <span aria-hidden="true">→</span>
+        <span aria-hidden="true"><Arrow dir="right" /></span>
       </button>
     )
   }
@@ -144,11 +145,10 @@ const ui = cardActionUi[lang];
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <line x1="7" y1="17" x2="17" y2="7" />
-            <polyline points="7 7 17 7 17 17" />
+            <polyline points="8.5 7.5 16.5 7.5 16.5 15.5" />
           </svg>
         ) : (
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true"><Arrow dir="right" /></span>
         )}
       </a>
     )

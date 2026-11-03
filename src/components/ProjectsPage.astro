@@ -8,6 +8,7 @@
  * A group without a tile renders nothing, and neither does its link: how many
  * demos stand here is decided by `getDemos()`, not by an editor.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import Layout from "~/layouts/Layout.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
@@ -101,7 +102,7 @@ const graph = asGraph(
             href={homeHref}
             class="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors [@media(pointer:coarse)]:min-h-11"
           >
-            <span aria-hidden="true">←</span>
+            <span aria-hidden="true"><Arrow dir="left" /></span>
             {ui.back}
           </a>
         </nav>
@@ -163,7 +164,7 @@ const graph = asGraph(
           </h2>
           <a href={`${homeHref}#contact`} class="project-cta__link" data-cta data-track="projects-cta">
             {ui.cta}
-            <span aria-hidden="true">→</span>
+            <span aria-hidden="true"><Arrow dir="right" /></span>
           </a>
         </div>
       </div>

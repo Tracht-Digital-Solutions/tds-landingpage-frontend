@@ -14,6 +14,7 @@
  *
  * The id stays `cases`: the navigation and the trust facts link to it.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import { resolveLang } from "~/lib/i18n";
 import { getCaseCards } from "~/lib/caseCards";
 import { getDemos } from "~/lib/demos";
@@ -63,7 +64,7 @@ const serviceLink = { label: webPresence.fallback[lang].title, href: serviceHref
     <div class="projects-more">
       <a class="projects-more__link" href={projectsHref(lang)} data-cta data-track="projects-more">
         {copy.more}
-        <span aria-hidden="true">→</span>
+        <span aria-hidden="true"><Arrow dir="right" /></span>
       </a>
     </div>
   </div>

@@ -11,6 +11,7 @@
  * Content lives in `src/lib/faq.ts` so the FAQPage JSON-LD on the home page
  * renders from the same source as the visible answers.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import { resolveLang, localizePath } from "~/lib/i18n";
 import { getFaqContent, homeFaqItems, faqPageHref } from "~/lib/faq";
 import { cmsFor } from "~/lib/cms";
@@ -89,11 +90,15 @@ const hiddenCount = content.items.length - shown.length;
             <a class="faq-all" href={allQuestionsHref}>
               {ui.allQuestions}
               <span class="faq-all__count">{hiddenCount}</span>
-              <span aria-hidden="true">→</span>
+              <span aria-hidden="true"><Arrow dir="right" /></span>
             </a>
           )
         }
-        <a
+      </div>
+
+      {/* Under the heading from `lg` (2026-11-03, asked for); after the list on
+          a phone. */}
+      <a
           href={contactHref}
           class="faq-cta group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-4 focus-visible:ring-offset-[var(--color-soft)]"
         >
@@ -116,12 +121,10 @@ const hiddenCount = content.items.length - shown.length;
               stroke-linejoin="round"
               class="faq-cta-arrow"
             >
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
+              <polyline points="9 6 15 12 9 18"></polyline>
             </svg>
           </span>
         </a>
-      </div>
     </div>
   </div>
 </section>
@@ -135,7 +138,8 @@ const hiddenCount = content.items.length - shown.length;
     grid-template-areas:
       "head"
       "list"
-      "foot";
+      "foot"
+      "cta";
   }
   .faq-layout__head {
     grid-area: head;
@@ -155,14 +159,12 @@ const hiddenCount = content.items.length - shown.length;
     gap: 1rem 2rem;
   }
   .faq-cta {
-    flex: 1 1 22rem;
+    grid-area: cta;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 0.875rem 1.5rem;
-    max-width: 44rem;
-    margin-inline-start: auto;
     padding: 1.25rem 1.5rem;
     border-radius: 6px;
   }
@@ -223,12 +225,22 @@ const hiddenCount = content.items.length - shown.length;
   @media (min-width: 64rem) {
     .faq-layout {
       grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+      grid-template-rows: auto 1fr auto;
       grid-template-areas:
         "head list"
+        "cta list"
         ". foot";
       column-gap: 4rem;
       row-gap: 2rem;
       align-items: start;
+    }
+    /* In the narrow left column the words stand above the button. */
+    .faq-cta {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .faq-cta__words {
+      flex: none;
     }
   }
 

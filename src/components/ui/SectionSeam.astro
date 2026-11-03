@@ -4,10 +4,9 @@
  *
  * It replaces a full-bleed `border-block-start` on each section, which ran
  * edge to edge through the gutters and the bookmarks and read as a leftover
- * table rule rather than as part of the design. The seam keeps to the content
- * width (`.lp-container`), fades out at both ends and carries the brand's
- * three-part bar in the middle — the same mark the headings use, at its small
- * size.
+ * table rule rather than as part of the design. Since 2026-11-03 it is short
+ * and centred: a hairline of a few rem on either side of the brand's
+ * three-part bar — the same mark the headings use, at its small size.
  *
  * It is rendered BETWEEN sections, so it sits exactly at the boundary, i.e.
  * at the midpoint of the gap both sections share. It takes no height of its
@@ -24,12 +23,16 @@
 </div>
 
 <style>
+  /* Short and centred since 2026-11-03 (asked for): two hairlines a few
+     rem long either side of the brand mark, instead of rules across the
+     whole content width. Solid, rounded ends; no fade (no gradients). */
   .lp-seam {
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
+    gap: 0.875rem;
     height: 0;
     pointer-events: none;
   }
@@ -37,11 +40,10 @@
     display: none;
   }
   .lp-seam__line {
-    flex: 1 1 0;
+    flex: none;
+    width: clamp(2.5rem, 6vw, 5rem);
     height: 1px;
-    background: var(--color-line);
-  }
-  .lp-seam__line--end {
+    border-radius: 1px;
     background: var(--color-line);
   }
   .lp-seam__mark {

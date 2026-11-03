@@ -1,4 +1,5 @@
 ---
+import Arrow from "~/components/ui/Arrow.astro";
 import { resolveLang } from "~/lib/i18n";
 import { imageHints } from "~/lib/imageCatalog";
 import { AbstractCover, coverVariant, hasPhotoCover } from "@tracht-digital-solutions/tds-shared/components";
@@ -68,7 +69,7 @@ const imageLang = resolveLang(Astro.currentLocale);
       <div class="post-card__foot">
         <span class="post-card__more">
           {readMore}
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true"><Arrow dir="right" /></span>
         </span>
       </div>
     </div>

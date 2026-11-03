@@ -23,6 +23,7 @@ interface Props {
 
 const { situationsTitle, situations, responsibilitiesTitle, responsibilities } = Astro.props;
 const items = responsibilities.map((item) => (typeof item === "string" ? { text: item } : item));
+import Arrow from "~/components/ui/Arrow.astro";
 ---
 
 <div class="section-spacing">
@@ -40,7 +41,7 @@ const items = responsibilities.map((item) => (typeof item === "string" ? { text:
       <ul class="space-y-5">
         {situations.map((item) => (
           <li class="flex gap-4 text-[var(--color-muted)] leading-relaxed">
-            <span aria-hidden="true" class="text-[var(--color-accent)] mt-0.5">→</span>
+            <span aria-hidden="true" class="text-[var(--color-accent)] mt-0.5"><Arrow dir="right" /></span>
             <span>{item}</span>
           </li>
         ))}

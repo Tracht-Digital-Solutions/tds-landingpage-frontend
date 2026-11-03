@@ -54,6 +54,7 @@
  * short version: encoding it in this frontmatter shipped `qrcode` into the
  * server bundle and answered both card pages with a 500 on the host.
  */
+import Arrow from "~/components/ui/Arrow.astro";
 import Layout from "~/layouts/Layout.astro";
 import { themeToggleMarkup } from "@tracht-digital-solutions/tds-shared/dom";
 import { asGraph, personSchema } from "~/lib/jsonld";
@@ -329,7 +330,7 @@ const profileSchema = {
                   {/* Decoration: the row's accessible name is already the
                       label plus, on an external row, the spoken hint above. */}
                   <span class="card__row-mark" aria-hidden="true">
-                    {link.external ? "↗" : "→"}
+                    <Arrow dir={link.external ? "up-right" : "right"} />
                   </span>
                 </a>
               </li>
@@ -391,7 +392,7 @@ const profileSchema = {
         <p class="card__pitch-text">{ui.pitchText}</p>
         <a href={webPresencePath} class="link-underline card__pitch-cta">
           {ui.pitchCta}
-          <span aria-hidden="true"> →</span>
+          <span aria-hidden="true"><Arrow dir="right" /></span>
         </a>
       </aside>
 

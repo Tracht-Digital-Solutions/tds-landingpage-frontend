@@ -304,8 +304,8 @@ const content: Record<Lang, HomeContent> = {
       ],
     },
     servicesOverview: {
-      headline: "Leistungen von",
-      headlineAccent: "Tracht Digital.",
+      headline: "Digitale",
+      headlineAccent: "Lösungen.",
       intro: "Fünf Leistungen, *ein Ansprechpartner*: vom eigenen Panel über digitale Abläufe bis zur Website.",
     },
     websiteDemos: {
@@ -457,8 +457,8 @@ const content: Record<Lang, HomeContent> = {
       ],
     },
     servicesOverview: {
-      headline: "Services by",
-      headlineAccent: "Tracht Digital.",
+      headline: "Digital",
+      headlineAccent: "solutions.",
       intro: "Five services, *one point of contact*: from a panel of its own and digital workflows to the website.",
     },
     websiteDemos: {

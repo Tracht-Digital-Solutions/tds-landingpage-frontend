@@ -113,8 +113,8 @@ describe("the origin badge", () => {
 });
 
 describe("the card", () => {
-  it("shows the sector where a demo card shows its host", () => {
-    expect(card).toMatch(/caption=\{sector\}/);
+  it("shows the sector as the card's labels", () => {
+    expect(card).toMatch(/labels=\{sector\.split/);
   });
 
   it("carries no magnifier of its own", () => {

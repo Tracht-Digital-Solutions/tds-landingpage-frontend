@@ -1,4 +1,5 @@
 ---
+import Arrow from "~/components/ui/Arrow.astro";
 import LanguageSwitch from "~/components/LanguageSwitch.astro";
 import { themeToggleMarkup } from "@tracht-digital-solutions/tds-shared/dom";
 import { resolveLang, localizePath } from "~/lib/i18n";
@@ -167,7 +168,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
             class="tds-mobile-menu__link justify-between"
           >
             <span>{property.label}</span>
-            <span aria-hidden="true" class="text-sm text-[var(--color-muted)]">↗</span>
+            <span aria-hidden="true" class="text-sm text-[var(--color-muted)]"><Arrow dir="up-right" /></span>
           </a>
         </li>
       ))}

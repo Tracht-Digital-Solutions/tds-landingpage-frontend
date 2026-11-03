@@ -46,6 +46,23 @@ Every section, the header and footer sit in `.lp-container`: full width, gutter
 `clamp(1.5rem, 1rem + 3vw, 5rem)`, no max-width. Text blocks keep their own `max-w-*`. Check 375, 1920 and
 2560 px for overflow.
 
+## Arrows and seams (0.101.0)
+
+- **One arrow: a chevron without a shaft.** `components/ui/Arrow.astro` (islands: `ui/Arrow.tsx`, paths in
+  `lib/arrowPaths.ts`) replaces every "→", "←", "↗", "↓" glyph and every drawn arrow with a middle stroke. New
+  arrows use it; don't type the glyphs again.
+- **Section seams are short and centred** (`ui/SectionSeam.astro`): a few rem of hairline either side of the
+  small brand bar, not a rule across the content width.
+
+## Home cards (0.101.0)
+
+- Services: masthead "Digitale Lösungen" (code-owned in `Services.astro`), link "Mehr Leistungen", tiles 4:5 from
+  `md`. The tile body is exactly eyebrow plus two title lines, the words at its bottom, so a one-line title leaves
+  no padding under the text.
+- Projects (`ui/ProjectCard.astro`): 16:9 shot, text clamped to two lines, `labels` as chips at the foot of the
+  body. Labels are code-owned: `DemoDefinition.labels`, `OwnProject.labels`, a study's sector split at " · ", the
+  business card's two. Demos no longer show their host as a caption.
+
 ## Mastheads (2026-11-03)
 
 Every section heading is left-aligned from `md` (phones centre them), "Projekte und Referenzen" included. An

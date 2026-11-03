@@ -1,4 +1,5 @@
 ---
+import Arrow from "~/components/ui/Arrow.astro";
 import { imageHints } from "~/lib/imageCatalog";
 import { tFor, resolveLang } from "~/lib/i18n";
 import { cmsFor } from "~/lib/cms";
@@ -150,9 +151,6 @@ const ui =
         businessCard: "Visitenkarte",
         saveContact: "Kontakt speichern",
         urgentBadge: "Auch für Notfälle",
-        urgentTitle: "Notfall?",
-        urgentText: "Kurzfristige Notfälle werden angenommen. Im Formular „Notfall“ ankreuzen oder",
-        urgentCall: "direkt anrufen",
       }
     : {
         reachTitle: "Direct contact",
@@ -162,9 +160,6 @@ const ui =
         businessCard: "Business card",
         saveContact: "Save contact",
         urgentBadge: "Emergencies too",
-        urgentTitle: "Emergency?",
-        urgentText: "Emergencies at short notice are taken on. Tick “Emergency” in the form or",
-        urgentCall: "call directly",
       };
 ---
 
@@ -238,21 +233,6 @@ const ui =
         inside the island: the island has two roots, the form and the success
         view, and both belong on the same surface. Form 3 parts, contacts 2. */}
     <div class="contact-panel">
-      {/* Short-notice emergencies are taken (2026-10-11): said here, marked on
-          the phone row and offered as a checkbox in the form. Code-owned copy,
-          like the card's labels. The first row of the card since 2026-10-12,
-          across both halves and parted from them by a horizontal seam. */}
-      <p class="contact-urgent">
-        <span class="contact-urgent__icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
-        </span>
-        <span>
-          <strong>{ui.urgentTitle}</strong> {ui.urgentText}{" "}
-          <a href={`tel:${phoneHref}`} data-track="contact-urgent-call">{ui.urgentCall}</a>.
-        </span>
-      </p>
       <div class="contact-panel__form">
         <ContactForm
           client:visible
@@ -286,7 +266,7 @@ const ui =
                 <span class="contact-way__label">{t.contact.info.emailLabel}</span>
                 <span class="contact-way__value">{contact.email}</span>
               </span>
-              <span aria-hidden="true" class="contact-way__go">→</span>
+              <span aria-hidden="true" class="contact-way__go"><Arrow dir="right" /></span>
             </a>
           </li>
 
@@ -301,7 +281,7 @@ const ui =
                 <span class="contact-way__label">{ui.landlineLabel}</span>
                 <span class="contact-way__value">{siteConfig.telephone}</span>
               </span>
-              <span aria-hidden="true" class="contact-way__go">→</span>
+              <span aria-hidden="true" class="contact-way__go"><Arrow dir="right" /></span>
             </a>
           </li>
 
@@ -319,7 +299,7 @@ const ui =
                   <span class="contact-way__badge">{ui.urgentBadge}</span>
                 </span>
               </span>
-              <span aria-hidden="true" class="contact-way__go">→</span>
+              <span aria-hidden="true" class="contact-way__go"><Arrow dir="right" /></span>
             </a>
           </li>
         </ul>
@@ -337,7 +317,7 @@ const ui =
               rel="noopener noreferrer"
               aria-label="WhatsApp"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d={WHATSAPP_ICON} />
               </svg>
             </a>
@@ -424,7 +404,7 @@ const ui =
   @media (min-width: 40rem) {
     .contact-form-pair {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.25rem;
+      gap: 1.75rem 1.5rem;
     }
   }
 
@@ -466,7 +446,7 @@ const ui =
     position: relative;
     z-index: 1;
     border-radius: 10px;
-    padding: 0.875rem 1rem !important;
+    padding: 1rem 1.125rem !important;
     background-color: rgb(0 0 0 / 0.2) !important;
     box-shadow: inset 2px 2px 0 0 rgb(0 0 0 / 0.32);
     transition:
@@ -721,11 +701,6 @@ const ui =
       padding: 2rem;
     }
   }
-  @media (min-width: 48rem) {
-    #contact .contact-urgent {
-      padding-inline: 2rem;
-    }
-  }
   /* The card's grid (2026-11-03, reordered because the stepper left a large
      empty field under the form): the emergency row on top, the form and the
      direct ways side by side from `lg`, and one row across the bottom with
@@ -735,22 +710,19 @@ const ui =
     #contact .contact-panel {
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       grid-template-areas:
-        "urgent urgent"
         "form card"
         "foot foot";
     }
-    #contact .contact-urgent {
-      grid-area: urgent;
-    }
+    /* More air around the fields (2026-11-03: the form read squeezed). */
     #contact .contact-panel__form {
       grid-area: form;
-      padding-right: 2.5rem;
+      padding: 2.75rem 3rem 2.75rem 2.75rem;
     }
     #contact .contact-card {
       grid-area: card;
       border-top: 0;
       border-left: 1px solid rgb(255 255 255 / 0.14);
-      padding-left: 2.5rem;
+      padding: 2.75rem 2.75rem 2.75rem 3rem;
     }
     #contact .contact-foot {
       grid-area: foot;
@@ -912,9 +884,10 @@ const ui =
     white-space: nowrap;
     padding: 0.125rem 0.5rem;
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent-pink) 18%, transparent);
-    color: var(--color-accent-pink);
-    font-size: 0.625rem;
+    /* White on a deeper pink: the pink type on its own tint failed axe at 390 px. */
+    background: color-mix(in srgb, var(--color-accent-pink) 34%, transparent);
+    color: #fff;
+    font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.06em;
   }
@@ -990,49 +963,6 @@ const ui =
     outline-offset: 3px;
   }
 
-  /* === The emergency line: the card's first row ===================== */
-  #contact .contact-urgent {
-    display: flex;
-    /* Across both halves, so the note runs on to the right in one line where
-       the screen allows (2026-10-12). A pink-tinted band at the top of the
-       card, parted from the form and the contacts by a horizontal seam. */
-    grid-column: 1 / -1;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgb(255 255 255 / 0.14);
-    border-radius: 6px 6px 0 0;
-    background: color-mix(in srgb, var(--color-accent-pink) 10%, transparent);
-    color: rgb(255 255 255 / 0.85);
-    font-size: 0.9375rem;
-    line-height: 1.5;
-    text-align: left;
-  }
-  #contact .contact-urgent__icon {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 9999px;
-    background: var(--color-accent-pink);
-    color: var(--color-surface-navy);
-  }
-  #contact .contact-urgent strong {
-    color: #fff;
-    font-weight: 700;
-  }
-  #contact .contact-urgent a {
-    color: var(--color-accent-pink);
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-  #contact .contact-urgent a:hover {
-    text-decoration: none;
-  }
 
   /* === Contact form: the emergency checkbox =========================
 
@@ -1243,7 +1173,7 @@ const ui =
   .contact-step {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.75rem;
     min-width: 0;
     margin: 0;
     padding: 0;
@@ -1422,11 +1352,15 @@ const ui =
     }
   }
 
+  /* Parted from the last field (2026-11-03: the button sat on it). */
   .contact-stepper-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem 1.25rem;
+    margin-top: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgb(255 255 255 / 0.1);
   }
   .contact-back {
     display: inline-flex;

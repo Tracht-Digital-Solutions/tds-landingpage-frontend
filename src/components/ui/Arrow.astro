@@ -1,0 +1,31 @@
+---
+/**
+ * The site's one arrow (2026-11-03, asked for): a chevron without a shaft, in
+ * every link, button and row that used to carry "→", "←", "↗" or a drawn
+ * arrow with a middle stroke. Sized in `em`, so it follows the text it stands
+ * in; decorative, the link text names the destination.
+ *
+ * React islands draw the same paths from `lib/arrowPaths.ts`.
+ */
+import { ARROW_PATHS, type ArrowDirection } from "~/lib/arrowPaths";
+
+interface Props {
+  dir?: ArrowDirection;
+  class?: string;
+}
+
+const { dir = "right", class: className } = Astro.props;
+---
+
+<svg
+  class:list={["lp-arrow", className]}
+  viewBox="0 0 24 24"
+  width="1em"
+  height="1em"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2.25"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"><path d={ARROW_PATHS[dir]} /></svg>
