@@ -182,12 +182,12 @@ const contactHref = `${localizePath("/", lang)}#contact`;
      theme's pastel pair instead: periwinkle `--color-primary` with dark
      `--color-on-primary`, coral `--color-accent` on hover. In the light theme
      nothing here applies. */
-  :global(:root[data-theme="dark"]) .first-call__cta {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .first-call__cta:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: var(--color-primary);
     --lp-shade: var(--color-accent-pink);
     color: var(--color-on-primary);
   }
-  :global(:root[data-theme="dark"]) .first-call__cta:hover {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .first-call__cta:hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: var(--color-accent);
     --lp-shade: initial;
     color: var(--color-on-accent);

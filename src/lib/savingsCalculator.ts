@@ -1,13 +1,13 @@
 import type { Lang } from "./i18n";
 
 /**
- * The home page's time-savings calculator (`sections/TimeSavings.astro`).
+ * The home page's time-savings questionnaire (`sections/TimeSavings.astro`).
  *
- * It only multiplies what the visitor enters: minutes per task × tasks per
- * week × the share that runs automatically × 46 working weeks. No measured
- * figure, no promise and no range is published (docs/agents/content-cms.md);
- * the defaults are labelled as example values, and the server renders their
- * result so the section reads the same without JavaScript.
+ * Three questions with fixed answers instead of number fields. Each answer
+ * stands for a mid value (minutes, times a week, share of routine); the result
+ * multiplies them over 46 working weeks. It is an estimate from the visitor's
+ * answers, labelled as such, never a measured figure or a promise
+ * (docs/agents/content-cms.md).
  *
  * Kept free of runtime imports: the section's script bundles this file.
  */
@@ -20,26 +20,60 @@ export interface SavingsInput {
   share: number;
 }
 
-export const SAVINGS_DEFAULTS: SavingsInput = { minutes: 10, perWeek: 25, share: 70 };
+export type QuestionId = keyof SavingsInput;
 
-/** Upper bounds of the three fields, mirrored in the inputs' `max`. */
-export const SAVINGS_LIMITS: SavingsInput = { minutes: 600, perWeek: 5000, share: 100 };
+type Words = Record<Lang, string>;
+
+export interface SavingsQuestion {
+  id: QuestionId;
+  question: Words;
+  answers: readonly { value: number; label: Words }[];
+}
+
+export const SAVINGS_QUESTIONS: readonly SavingsQuestion[] = [
+  {
+    id: "minutes",
+    question: { de: "Wie lange dauert der Vorgang?", en: "How long does the task take?" },
+    answers: [
+      { value: 3, label: { de: "Unter 5 Minuten", en: "Under 5 minutes" } },
+      { value: 10, label: { de: "5 bis 15 Minuten", en: "5 to 15 minutes" } },
+      { value: 25, label: { de: "15 bis 30 Minuten", en: "15 to 30 minutes" } },
+      { value: 45, label: { de: "Länger", en: "Longer" } },
+    ],
+  },
+  {
+    id: "perWeek",
+    question: { de: "Wie oft fällt er an?", en: "How often does it come up?" },
+    answers: [
+      { value: 3, label: { de: "Ein paarmal pro Woche", en: "A few times a week" } },
+      { value: 5, label: { de: "Täglich", en: "Daily" } },
+      { value: 20, label: { de: "Mehrmals täglich", en: "Several times a day" } },
+      { value: 50, label: { de: "Ständig", en: "All the time" } },
+    ],
+  },
+  {
+    id: "share",
+    question: { de: "Wie viel davon ist Routine?", en: "How much of it is routine?" },
+    answers: [
+      { value: 30, label: { de: "Ein kleiner Teil", en: "A small part" } },
+      { value: 50, label: { de: "Etwa die Hälfte", en: "About half" } },
+      { value: 80, label: { de: "Fast alles", en: "Almost all" } },
+    ],
+  },
+];
 
 const clamp = (value: number, max: number) => (Number.isFinite(value) ? Math.min(Math.max(value, 0), max) : 0);
 
 export function savings({ minutes, perWeek, share }: SavingsInput) {
-  const weekly =
-    (clamp(minutes, SAVINGS_LIMITS.minutes) * clamp(perWeek, SAVINGS_LIMITS.perWeek) * clamp(share, SAVINGS_LIMITS.share)) /
-    100 /
-    60;
+  const weekly = (clamp(minutes, 600) * clamp(perWeek, 5000) * clamp(share, 100)) / 100 / 60;
   const year = weekly * WORK_WEEKS;
   return { month: year / 12, year, days: year / WORKDAY_HOURS };
 }
 
-/** One decimal below 100, whole numbers above: "11,2", "134", "1.235". */
+/** Whole hours, one decimal below 10: "8,5", "134", "1.235". */
 export function formatSavings(value: number, lang: Lang): string {
   return new Intl.NumberFormat(lang === "de" ? "de-DE" : "en-GB", {
-    maximumFractionDigits: value < 100 ? 1 : 0,
+    maximumFractionDigits: value < 10 ? 1 : 0,
   }).format(value);
 }
 
@@ -47,16 +81,10 @@ export interface SavingsCopy {
   headline: string;
   headlineAccent: string;
   lead: string;
-  examples: string;
-  minutes: string;
-  perWeek: string;
-  share: string;
-  month: string;
+  pending: string;
+  resultPrefix: string;
   year: string;
   days: string;
-  benefitsLabel: string;
-  benefits: string[];
-  formula: string;
   note: string;
   cta: string;
   /** The draft handed to the contact form; `{…}` are filled in by the script. */
@@ -67,48 +95,28 @@ const copy: Record<Lang, SavingsCopy> = {
   de: {
     headline: "Was Digitalisierung",
     headlineAccent: "an Zeit spart.",
-    lead: "Die gesparte Zeit hängt von drei Zahlen ab: Dauer eines Vorgangs, Häufigkeit und Anteil, der automatisch läuft. Tracht Digital Solutions digitalisiert solche Abläufe, zum Beispiel Bestellungen übertragen, Rechnungen erfassen oder Statusmails schreiben.",
-    examples: "Die Felder enthalten Beispielwerte und lassen sich überschreiben.",
-    minutes: "Minuten pro Vorgang",
-    perWeek: "Vorgänge pro Woche",
-    share: "Anteil automatisiert (%)",
-    month: "Stunden pro Monat",
+    lead: "Drei Fragen zu einem wiederkehrenden Ablauf, zum Beispiel Rechnungen erfassen oder Bestellungen übertragen.",
+    pending: "Nach drei Antworten steht hier die Schätzung.",
+    resultPrefix: "Etwa",
     year: "Stunden pro Jahr",
-    days: "Arbeitstage pro Jahr",
-    benefitsLabel: "Was sich danach ändert",
-    benefits: [
-      "Keine doppelte Dateneingabe mehr.",
-      "Weniger Fehler durch Handarbeit.",
-      "Mehr Zeit für Kunden und Aufträge.",
-    ],
-    formula: "Rechnung: Minuten × Vorgänge pro Woche × Anteil × 46 Arbeitswochen. Ein Arbeitstag hat 8 Stunden.",
-    note: "Das Ergebnis ist eine Rechnung mit den eingegebenen Werten, keine Zusage. Eine belastbare Zahl entsteht im Erstgespräch am konkreten Ablauf.",
+    days: "Arbeitstage",
+    note: "Eine grobe Schätzung aus den Antworten, keine Zusage.",
     cta: "Erstgespräch vereinbaren",
     draft:
-      "Aus dem Zeitersparnis-Rechner: {minutes} Minuten pro Vorgang, {perWeek} Vorgänge pro Woche, {share} % automatisiert. Ergebnis: {year} Stunden pro Jahr ({month} pro Monat).\n\nUm diesen Ablauf geht es: ",
+      "Aus dem Zeitersparnis-Fragebogen: Dauer {minutes}, Häufigkeit {perWeek}, Routine {share}. Geschätzt etwa {year} Stunden pro Jahr.\n\nUm diesen Ablauf geht es: ",
   },
   en: {
     headline: "How much time",
     headlineAccent: "digitalization saves.",
-    lead: "The time saved depends on three figures: how long a task takes, how often it happens and the share that runs automatically. Tracht Digital Solutions digitalizes such workflows, for example copying orders, entering invoices or writing status emails.",
-    examples: "The fields hold example values and can be overwritten.",
-    minutes: "Minutes per task",
-    perWeek: "Tasks per week",
-    share: "Share automated (%)",
-    month: "hours per month",
+    lead: "Three questions about a recurring task, for example entering invoices or copying orders.",
+    pending: "The estimate appears here after three answers.",
+    resultPrefix: "About",
     year: "hours per year",
-    days: "working days per year",
-    benefitsLabel: "What changes afterwards",
-    benefits: [
-      "No more double data entry.",
-      "Fewer mistakes from manual work.",
-      "More time for customers and orders.",
-    ],
-    formula: "Calculation: minutes × tasks per week × share × 46 working weeks. A working day has 8 hours.",
-    note: "The result is a calculation with the values entered, not a promise. A reliable figure comes from the first conversation about the actual task.",
+    days: "working days",
+    note: "A rough estimate from the answers, not a promise.",
     cta: "Book a first conversation",
     draft:
-      "From the time-savings calculator: {minutes} minutes per task, {perWeek} tasks per week, {share} % automated. Result: {year} hours per year ({month} per month).\n\nThe task in question: ",
+      "From the time-savings questionnaire: duration {minutes}, frequency {perWeek}, routine {share}. Estimated at about {year} hours per year.\n\nThe task in question: ",
   },
 };
 
@@ -116,14 +124,18 @@ export function getSavingsCopy(lang: Lang): SavingsCopy {
   return copy[lang];
 }
 
+/** The answer label behind a value, for the contact draft. */
+export function answerLabel(id: QuestionId, value: number, lang: Lang): string {
+  const question = SAVINGS_QUESTIONS.find((item) => item.id === id);
+  return question?.answers.find((answer) => answer.value === value)?.label[lang] ?? String(value);
+}
+
 export function savingsDraft(template: string, input: SavingsInput, lang: Lang): string {
-  const result = savings(input);
   const values: Record<string, string> = {
-    minutes: formatSavings(input.minutes, lang),
-    perWeek: formatSavings(input.perWeek, lang),
-    share: formatSavings(input.share, lang),
-    month: formatSavings(result.month, lang),
-    year: formatSavings(result.year, lang),
+    minutes: answerLabel("minutes", input.minutes, lang),
+    perWeek: answerLabel("perWeek", input.perWeek, lang),
+    share: answerLabel("share", input.share, lang),
+    year: formatSavings(savings(input).year, lang),
   };
   return template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
 }

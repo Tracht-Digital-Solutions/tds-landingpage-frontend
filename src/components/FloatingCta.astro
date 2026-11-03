@@ -311,16 +311,16 @@ const regionLabel = lang === "en" ? "Quick access" : "Schnellzugriff";
      theme's pastel pair instead: periwinkle `--color-primary` with dark
      `--color-on-primary`, coral `--color-accent` on hover. In the light theme
      nothing here applies. */
-  :global(:root[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin) {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin):not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: var(--color-primary);
     --lp-shade: var(--color-accent-pink);
     color: var(--color-on-primary);
   }
-  :global(:root[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin) .floating-cta-top:hover {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin) .floating-cta-top:hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     background: color-mix(in srgb, var(--color-on-primary) 12%, transparent);
   }
   @media (hover: hover) {
-    :global(:root[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin):hover {
+    :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .floating-cta-group:not(.floating-cta-group--twin):hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
       --lp-fill: var(--color-accent);
       --lp-shade: initial;
       color: var(--color-on-accent);

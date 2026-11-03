@@ -153,7 +153,8 @@
    Absicht dieselbe ist: auch im Dunkeln soll mehr Farbe zu sehen sein. Die
    dunklen Dekorfarben sind bereits die aufgehellten Varianten, deshalb
    bleibt der Abstand zu Hell kleiner. */
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+.tds-theme-preview__page[data-theme="dark"] {
   --tds-decor-field-strength: 0.8;
   --tds-decor-shape-alpha: 0.13;
 }
@@ -1051,7 +1052,7 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
    fill — a dark-blue offset under a dark-blue card. Those take the dark
    theme's own ink (tds-shared base.css), so the offset reads lighter than the
    shape; a navy-family fill still casts its coral `--lp-shade`. */
-:root[data-theme="dark"] :where(
+:is(:root, .tds-theme-preview__page)[data-theme="dark"] :where(
     .hero-cta,
     .svc-explorer__more,
     .svc-explorer__button,
@@ -1064,7 +1065,7 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
     .lp-ink,
     .property-tab:not(.property-tabs--twin *),
     .floating-cta-group:not(.floating-cta-group--twin)
-  ) {
+  ):not(:where([data-theme="dark"] [data-theme="light"] *)) {
   --tds-shadow-ink: var(--lp-shade, rgb(147 167 255 / 0.32));
 }
 /* tds-shared's consent buttons: their fills, restated as `--lp-fill` (the
@@ -1077,11 +1078,11 @@ html[data-page-scrollbar] > body::-webkit-scrollbar {
   --lp-fill: color-mix(in srgb, var(--color-surface-navy) 88%, #fff);
   --lp-shade: var(--color-accent-pink);
 }
-:root[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost) {
+:is(:root, .tds-theme-preview__page)[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost):not(:where([data-theme="dark"] [data-theme="light"] *)) {
   --lp-fill: var(--color-primary);
   --lp-shade: var(--color-accent-pink);
 }
-:root[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost):hover {
+:is(:root, .tds-theme-preview__page)[data-theme="dark"] .cookie-notice-btn:not(.cookie-notice-btn--ghost):hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
   --lp-fill: var(--color-accent);
   --lp-shade: initial;
 }

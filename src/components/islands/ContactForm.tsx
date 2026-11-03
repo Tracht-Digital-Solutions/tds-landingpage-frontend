@@ -32,6 +32,21 @@ const STEPS: Record<Lang, [string, string, string]> = {
   en: ["Contact details", "Your request", "Message"],
 };
 
+const STEPPER: Record<Lang, { next: string; back: string; progress: (step: number, total: number) => string }> = {
+  de: { next: "Weiter", back: "Zurück", progress: (step, total) => `Schritt ${step} von ${total}` },
+  en: { next: "Next", back: "Back", progress: (step, total) => `Step ${step} of ${total}` },
+};
+
+/** The fields each step checks before "Weiter" moves on. */
+const STEP_FIELDS: readonly (readonly FieldName[])[] = [["name", "email"], [], ["message", "consent"]];
+
+/** Whether a value passes the shared schema's rule for that one field. */
+function fieldValid(field: "name" | "email" | "company" | "message", value: unknown): boolean {
+  if (!String(value ?? "").trim()) return false;
+  const shape = (ContactSchema as unknown as { shape?: Record<string, { safeParse: (v: unknown) => { success: boolean } }> }).shape;
+  return shape?.[field]?.safeParse(value).success ?? true;
+}
+
 const ICONS = {
   name: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
   email: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 6 10-6" /></>,
@@ -49,11 +64,33 @@ function InputIcon({ name }: { name: keyof typeof ICONS }) {
   );
 }
 
-/** A numbered group of fields: the number becomes a tick once it is filled in. */
-function Step({ number, title, done, grow, children }: { number: number; title: string; done: boolean; grow?: boolean; children: ReactNode }) {
+/**
+ * One step of the form. Only the current one is shown (`hidden`, never
+ * `opacity: 0`); its legend takes focus when the step changes.
+ */
+function Step({
+  number,
+  title,
+  done,
+  grow,
+  current,
+  children,
+}: {
+  number: number;
+  title: string;
+  done: boolean;
+  grow?: boolean;
+  current: boolean;
+  children: ReactNode;
+}) {
   return (
-    <fieldset className={`contact-step${grow ? " contact-step--grow" : ""}`} data-done={done ? "" : undefined}>
-      <legend className="contact-step__head">
+    <fieldset
+      className={`contact-step${grow ? " contact-step--grow" : ""}`}
+      data-done={done ? "" : undefined}
+      hidden={!current}
+    >
+      {/* Visually hidden: the progress row above already shows the title. */}
+      <legend className="contact-step__head sr-only" id={`contact-step-${number}`} tabIndex={-1}>
         <span className="contact-step__num" aria-hidden="true">{done ? "✓" : number}</span>
         {title}
       </legend>
@@ -127,10 +164,15 @@ export default function ContactForm({
   const [urgent, setUrgent] = useState(false);
   const [shake, setShake] = useState(false);
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The stepper: which step shows, and how far the visitor has come.
+  const [stage, setStage] = useState(0);
+  const [reached, setReached] = useState(0);
+  const movedRef = useRef(false);
 
   const {
     register,
     handleSubmit,
+    trigger,
     setValue,
     getValues,
     watch,
@@ -198,6 +240,30 @@ export default function ContactForm({
     [],
   );
 
+  // A step change moves focus to the new step's legend; never on hydration.
+  useEffect(() => {
+    if (!movedRef.current) return;
+    document.getElementById(`contact-step-${stage + 1}`)?.focus();
+  }, [stage]);
+
+  const goTo = (index: number) => {
+    movedRef.current = true;
+    setStage(index);
+    setReached((value) => Math.max(value, index));
+  };
+
+  const next = async () => {
+    const fields = STEP_FIELDS[stage] as FieldName[];
+    if (fields.length > 0 && !(await trigger(fields))) return;
+    goTo(Math.min(stage + 1, STEP_FIELDS.length - 1));
+  };
+
+  /** After a failed submit, show the first step that holds an error. */
+  const onInvalid = (invalid: Partial<Record<string, unknown>>) => {
+    const first = STEP_FIELDS.findIndex((fields) => fields.some((field) => invalid[field]));
+    if (first >= 0 && first !== stage) goTo(first);
+  };
+
   const triggerShake = () => {
     if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
     setShake(true);
@@ -257,6 +323,8 @@ export default function ContactForm({
 
   const rowClass = (field?: FieldName) =>
     `contact-field-row ${field && errors[field] ? "contact-field-row--error" : ""}`;
+  /** A field that is complete and valid is filled (`.contact-field-row[data-filled]`). */
+  const filled = (ok: boolean) => (ok ? "" : undefined);
 
   // Plain JSX, not an inner component (a component declared in here would be
   // a new type every render and remount the form on each keystroke).
@@ -297,8 +365,20 @@ export default function ContactForm({
   );
 
   const submitting = submitState === "submitting";
-  const [nameValue, emailValue, subjectValue, messageValue] = watch(["name", "email", "subject", "message"]);
+  const [nameValue, emailValue, companyValue, subjectValue, messageValue] = watch([
+    "name",
+    "email",
+    "company",
+    "subject",
+    "message",
+  ]);
   const steps = STEPS[lang];
+  const stepper = STEPPER[lang];
+  const nameOk = fieldValid("name", nameValue);
+  const emailOk = fieldValid("email", emailValue);
+  const messageOk = fieldValid("message", messageValue);
+  const doneSteps = [nameOk && emailOk, Boolean(subjectValue || urgent), messageOk];
+  const last = STEP_FIELDS.length - 1;
 
   const form = (
     <div className={shake ? "shake" : ""}>
@@ -306,7 +386,21 @@ export default function ContactForm({
           arrive one after another as the form scrolls in (lib/motion/ux.ts,
           vanilla Motion on this markup, off screen only). The honeypot is
           `aria-hidden` and skipped, or the fade would reveal it. */}
-      <form onSubmit={handleSubmit(onSubmit)} className="contact-form space-y-6" noValidate data-motion-stagger data-track-form="contact">
+      <form
+        onSubmit={(event) => {
+          // Enter in an early step moves on instead of sending.
+          if (stage < last) {
+            event.preventDefault();
+            void next();
+            return;
+          }
+          void handleSubmit(onSubmit, onInvalid)(event);
+        }}
+        className="contact-form space-y-6"
+        noValidate
+        data-motion-stagger
+        data-track-form="contact"
+      >
         <div
           style={{ position: "absolute", left: "-9999px", opacity: 0, pointerEvents: "none" }}
           aria-hidden="true"
@@ -315,12 +409,30 @@ export default function ContactForm({
           <input id="website" type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
         </div>
 
-        {/* Pairs side by side from `sm` (2026-10-11): name and e-mail, then
-            company and reason — the form is half as tall and reads as one
-            card rather than a ladder of rows. */}
-        <Step number={1} title={steps[0]} done={Boolean(nameValue?.trim() && emailValue?.includes("@"))}>
+        {/* The stepper (2026-11-03): one step at a time, so the card never
+            asks everything at once. Earlier steps stay reachable. */}
+        <ol className="contact-progress" aria-label={stepper.progress(stage + 1, steps.length)}>
+          {steps.map((title, index) => (
+            <li key={title} className="contact-progress__item" data-state={index === stage ? "current" : doneSteps[index] ? "done" : undefined}>
+              <button
+                type="button"
+                className="contact-progress__button"
+                disabled={index > reached}
+                aria-current={index === stage ? "step" : undefined}
+                onClick={() => goTo(index)}
+              >
+                <span className="contact-progress__num" aria-hidden="true">
+                  {doneSteps[index] && index !== stage ? "✓" : index + 1}
+                </span>
+                <span className="contact-progress__title">{title}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+
+        <Step number={1} title={steps[0]} done={doneSteps[0]} current={stage === 0}>
         <div className="contact-form-pair">
-        <div className={rowClass("name")}>
+        <div className={rowClass("name")} data-filled={filled(nameOk)}>
           <label htmlFor="name" className="contact-field-label">
             {copy.form.name}
           </label>
@@ -344,7 +456,7 @@ export default function ContactForm({
           </Collapse>
         </div>
 
-        <div className={rowClass("email")}>
+        <div className={rowClass("email")} data-filled={filled(emailOk)}>
           <label htmlFor="email" className="contact-field-label">
             {copy.form.email}
           </label>
@@ -370,7 +482,7 @@ export default function ContactForm({
 
         </div>
 
-        <div className={rowClass()}>
+        <div className={rowClass()} data-filled={filled(fieldValid("company", companyValue))}>
           <label htmlFor="company" className="contact-field-label">
             {copy.form.company}
           </label>
@@ -389,14 +501,14 @@ export default function ContactForm({
 
         </Step>
 
-        <Step number={2} title={steps[1]} done={Boolean(subjectValue || urgent)}>
+        <Step number={2} title={steps[1]} done={doneSteps[1]} current={stage === 1}>
         <div className="contact-form-pair">
         {/* The reason for getting in touch. Optional on purpose: making it
             mandatory costs submissions from the people whose request fits no
             entry, and they are the ones worth hearing from. Rendered only when
             there are options — the list is CMS-editable and can be emptied. */}
         {reasons.length > 0 && (
-          <div className={rowClass()}>
+          <div className={rowClass()} data-filled={filled(Boolean(subjectValue))}>
             <label htmlFor="subject" className="contact-field-label">
               {copy.reasonLabel}
             </label>
@@ -440,8 +552,8 @@ export default function ContactForm({
         </div>
         </Step>
 
-        <Step number={3} title={steps[2]} done={Boolean(messageValue?.trim())} grow>
-        <div className={`${rowClass("message")} contact-field-row--message`}>
+        <Step number={3} title={steps[2]} done={doneSteps[2]} grow current={stage === 2}>
+        <div className={`${rowClass("message")} contact-field-row--message`} data-filled={filled(messageOk)}>
           <label htmlFor="message" className="contact-field-label">
             {copy.form.message}
           </label>
@@ -474,7 +586,6 @@ export default function ContactForm({
             </p>
           </Collapse>
         </div>
-        </Step>
 
         <div>
           <label className="flex items-center gap-3 cursor-pointer">
@@ -519,7 +630,23 @@ export default function ContactForm({
           </p>
         </Collapse>
 
+        </Step>
+
+        <div className="contact-stepper-actions">
+        {stage > 0 && (
+          <button type="button" className="contact-back" onClick={() => goTo(stage - 1)}>
+            <span aria-hidden="true">←</span> {stepper.back}
+          </button>
+        )}
+        {stage < last ? (
+          <button key="next" type="button" className="submit-button contact-next-button min-h-[3.25rem] px-8 py-4 text-[0.9375rem] font-semibold rounded-full inline-flex items-center justify-center gap-2 cursor-pointer" onClick={() => void next()}>
+            {stepper.next} <span aria-hidden="true">→</span>
+          </button>
+        ) : (
         <button
+          // Its own key: React would otherwise reuse the "Weiter" element and
+          // flip its type to submit inside that very click, sending the form.
+          key="submit"
           type="submit"
           disabled={submitting}
           className="submit-button group relative w-full sm:w-auto min-h-[3.25rem] px-8 py-4 text-[0.9375rem] font-semibold rounded-full flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
@@ -547,6 +674,8 @@ export default function ContactForm({
             )}
           </span>
         </button>
+        )}
+        </div>
 
         {/* Status only — the error above is its own `role="alert"`. */}
         <p className="sr-only" aria-live="polite">

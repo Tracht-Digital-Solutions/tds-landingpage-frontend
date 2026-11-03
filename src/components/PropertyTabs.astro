@@ -245,13 +245,13 @@ const ICONS: Record<PropertyTabId, string[]> = {
   /* In the dark theme the navy tab would disappear into the ground — and a
      card-coloured one did too (1.17:1, 2026-10-05). The bookmarks take the
      CTAs' dark pastel pair: periwinkle, coral on hover, dark type. */
-  :global(:root[data-theme="dark"]) .property-tab {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .property-tab:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in oklab, var(--color-primary) 92%, transparent);
     --lp-shade: var(--color-accent-pink);
     color: var(--color-on-primary);
   }
-  :global(:root[data-theme="dark"]) .property-tab:hover,
-  :global(:root[data-theme="dark"]) .property-tab:focus-visible {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .property-tab:hover:not(:where([data-theme="dark"] [data-theme="light"] *)),
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .property-tab:focus-visible:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in oklab, var(--color-accent) 92%, transparent);
     --lp-shade: initial;
     color: var(--color-on-accent);
@@ -282,7 +282,7 @@ const ICONS: Record<PropertyTabId, string[]> = {
      It is also the one place where legibility depends on the fill NOT letting a
      dark band through. */
   .property-tabs--twin .property-tab,
-  :global(:root[data-theme="dark"]) .property-tabs--twin .property-tab {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .property-tabs--twin .property-tab:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     background: #fff;
     backdrop-filter: none;
     color: var(--color-surface-navy);

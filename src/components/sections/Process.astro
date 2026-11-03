@@ -1,6 +1,11 @@
 ---
 /**
- * So arbeiten wir zusammen: four steps, all readable at once.
+ * So arbeiten wir zusammen: four steps.
+ *
+ * From 40rem every step is open side by side. On a phone the steps are an
+ * accordion: the step's head (number, icon, title) is a button, and opening
+ * one closes the others. Without JavaScript every step stays open: `hidden`
+ * is only ever set by the script below.
  *
  * Each step is a card in the site's language: a navy band, the hard offset
  * shadow, a pink marker. Under a mouse the card leans toward the pointer and its
@@ -22,7 +27,7 @@ const lang = resolveLang(Astro.currentLocale);
 const process = getProcessContent(lang);
 const firstCall = await cmsFor("first_call", lang, getHomeContent(lang).firstCall);
 const contactHref = `${localizePath("/", lang)}#contact`;
-const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
+const resultLabel = lang === "en" ? "Result" : "Ergebnis";
 ---
 
 <section id="process" class="section-spacing" aria-labelledby="process-heading">
@@ -42,19 +47,29 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
             <div class="process-step__tilt" data-motion-tilt>
               <span class="process-step__shade" aria-hidden="true"></span>
               <div class="process-step__card">
-                <div class="process-step__band">
-                  <span aria-hidden="true" class="process-step__icon">
-                    <ProcessIcon number={step.number} />
-                  </span>
-                  <p class="process-step__when">{step.duration}</p>
-                </div>
-                <div class="process-step__body">
-                  <h3 class="process-step__title">{step.title}</h3>
+                <h3 class="process-step__head">
+                  <button
+                    type="button"
+                    class="process-step__band"
+                    data-process-toggle
+                    aria-controls={`process-step-${step.number}`}
+                  >
+                    <span aria-hidden="true" class="process-step__icon">
+                      <ProcessIcon number={step.number} />
+                    </span>
+                    <span class="process-step__heading">
+                      <span class="process-step__when">{step.duration}</span>
+                      <span class="process-step__title">{step.title}</span>
+                    </span>
+                    <span class="process-step__chevron" aria-hidden="true"></span>
+                  </button>
+                </h3>
+                <div class="process-step__body" id={`process-step-${step.number}`}>
                   <ul class="process-step__actions">
                     {step.actions.map((action) => <li>{action}</li>)}
                   </ul>
                   <p class="process-step__result">
-                    <span class="process-step__result-label">{resultLabel}</span>
+                    <span class="process-step__result-label">{resultLabel}:</span>{" "}
                     {step.outcome}
                   </p>
                 </div>
@@ -126,14 +141,58 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
     transition: transform 220ms var(--tds-ease-out);
   }
 
+  .process-step__head {
+    margin: 0;
+  }
   .process-step__band {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.875rem;
+    width: 100%;
     padding: 0.875rem 1.25rem;
+    border: 0;
     background: var(--color-surface-navy);
     color: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: default;
     transition: background-color 200ms var(--tds-ease-out);
+  }
+  .process-step__band[aria-expanded] {
+    cursor: pointer;
+  }
+  .process-step__band:disabled {
+    opacity: 1;
+    color: #fff;
+  }
+  .process-step__band:focus-visible {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: -4px;
+  }
+  .process-step__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .process-step__chevron {
+    display: none;
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-left: auto;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    rotate: 45deg;
+    translate: 0 -25%;
+    transition: rotate 200ms var(--tds-ease-out);
+  }
+  .process-step__band[aria-expanded] .process-step__chevron {
+    display: block;
+  }
+  .process-step__band[aria-expanded="true"] .process-step__chevron {
+    rotate: 225deg;
+    translate: 0 25%;
   }
   .process-step__icon {
     display: inline-flex;
@@ -148,9 +207,8 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
     transition: rotate 420ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
   .process-step__when {
-    margin: 0;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -165,13 +223,15 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
     padding: 1.25rem;
   }
   .process-step__title {
-    margin: 0;
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1.375rem;
+    font-size: 1.25rem;
     line-height: 1.15;
     letter-spacing: -0.015em;
-    color: var(--color-black);
+    color: #fff;
+  }
+  .process-step__body[hidden] {
+    display: none;
   }
   .process-step__actions {
     display: grid;
@@ -197,8 +257,6 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
     color: var(--color-black);
   }
   .process-step__result-label {
-    display: block;
-    font-size: 0.75rem;
     font-weight: 500;
     color: color-mix(in srgb, var(--color-muted) 82%, var(--color-black));
   }
@@ -246,3 +304,37 @@ const resultLabel = lang === "en" ? "At the end" : "Am Ende steht";
     outline-offset: 3px;
   }
 </style>
+
+<script>
+  /* Phone accordion: one step open at a time. From 40rem every step shows and
+     the heads are plain headings again: disabled, no aria-expanded, no tab stop. */
+  const phone = matchMedia("(max-width: 39.99rem)");
+  for (const list of document.querySelectorAll<HTMLElement>(".process-steps")) {
+    const toggles = [...list.querySelectorAll<HTMLButtonElement>("[data-process-toggle]")];
+    const panel = (toggle: HTMLButtonElement) => document.getElementById(toggle.getAttribute("aria-controls") ?? "");
+    let open = 0;
+    const apply = () => {
+      toggles.forEach((toggle, index) => {
+        const body = panel(toggle);
+        if (phone.matches) {
+          toggle.disabled = false;
+          toggle.setAttribute("aria-expanded", String(index === open));
+          if (body) body.hidden = index !== open;
+        } else {
+          toggle.disabled = true;
+          toggle.removeAttribute("aria-expanded");
+          if (body) body.hidden = false;
+        }
+      });
+    };
+    toggles.forEach((toggle, index) => {
+      toggle.addEventListener("click", () => {
+        if (!phone.matches) return;
+        open = open === index ? -1 : index;
+        apply();
+      });
+    });
+    phone.addEventListener("change", apply);
+    apply();
+  }
+</script>

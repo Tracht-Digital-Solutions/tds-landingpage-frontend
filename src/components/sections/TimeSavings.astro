@@ -1,36 +1,23 @@
 ---
 /**
- * Zeitersparnis: what an automated workflow frees up, worked out with the
- * visitor's own figures.
+ * Zeitersparnis: a short questionnaire about one recurring task.
  *
- * The server renders the example's result into the `<output>`s, so the
- * section is complete without JavaScript; the plain script below only
- * recalculates on input and hands the figures to the contact form as a draft
- * (`lib/contactDraft.ts`), like the shop's quote request. It sends nothing.
+ * Three questions with fixed answers (native radios inside their labels, no
+ * number fields). Once all three are answered, the plain script below shows
+ * the estimate and hands the answers to the contact form as a draft
+ * (`lib/contactDraft.ts`). It sends nothing. Without JavaScript the questions
+ * stay usable and the button still leads to the contact form.
  *
- * Copy and arithmetic live in `lib/savingsCalculator.ts`. No measured figure,
- * no promise: the fields are labelled as example values and the note says the
- * result is only a calculation.
+ * Questions, answer values and copy live in `lib/savingsCalculator.ts`. No
+ * measured figure, no promise: the note calls the result a rough estimate.
  */
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import { localizePath, resolveLang } from "~/lib/i18n";
-import {
-  SAVINGS_DEFAULTS,
-  SAVINGS_LIMITS,
-  formatSavings,
-  getSavingsCopy,
-  savings,
-} from "~/lib/savingsCalculator";
+import { SAVINGS_QUESTIONS, getSavingsCopy } from "~/lib/savingsCalculator";
 
 const lang = resolveLang(Astro.currentLocale);
 const copy = getSavingsCopy(lang);
-const example = savings(SAVINGS_DEFAULTS);
 const contactHref = `${localizePath("/", lang)}#contact`;
-const fields = [
-  { name: "minutes", label: copy.minutes, min: 1, step: 1 },
-  { name: "perWeek", label: copy.perWeek, min: 1, step: 1 },
-  { name: "share", label: copy.share, min: 0, step: 5 },
-] as const;
 ---
 
 <section id="savings" class="section-spacing" aria-labelledby="savings-heading">
@@ -44,49 +31,42 @@ const fields = [
     <p class="savings-lead">{copy.lead}</p>
 
     <div class="savings-card" data-reveal>
-      <div class="savings-input">
-        <form class="savings-form" data-savings data-lang={lang} data-draft={copy.draft}>
-          {
-            fields.map((field) => (
-              <label class="savings-field">
-                <span>{field.label}</span>
-                <input
-                  type="number"
-                  name={field.name}
-                  inputmode="numeric"
-                  min={field.min}
-                  max={SAVINGS_LIMITS[field.name]}
-                  step={field.step}
-                  value={SAVINGS_DEFAULTS[field.name]}
-                  required
-                />
-              </label>
-            ))
-          }
-        </form>
-        <p class="savings-examples">{copy.examples}</p>
-        <p class="savings-label">{copy.benefitsLabel}</p>
-        <ul class="savings-benefits">
-          {copy.benefits.map((benefit) => <li>{benefit}</li>)}
-        </ul>
-      </div>
+      <form class="savings-form" data-savings data-lang={lang} data-draft={copy.draft}>
+        {
+          SAVINGS_QUESTIONS.map((question, index) => (
+            <fieldset class="savings-question">
+              <legend>
+                <span class="savings-number" aria-hidden="true">
+                  0{index + 1}
+                </span>
+                {question.question[lang]}
+              </legend>
+              <div class="savings-answers">
+                {question.answers.map((answer) => (
+                  <label class="savings-answer">
+                    <input type="radio" name={question.id} value={answer.value} />
+                    <span>{answer.label[lang]}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ))
+        }
+      </form>
 
-      <div class="savings-result">
-        <p class="savings-figure savings-figure--year">
-          <output data-savings-result="year">{formatSavings(example.year, lang)}</output>
-          <span>{copy.year}</span>
-        </p>
-        <div class="savings-pair">
-          <p class="savings-figure">
-            <output data-savings-result="month">{formatSavings(example.month, lang)}</output>
-            <span>{copy.month}</span>
+      <div class="savings-result" aria-live="polite">
+        <p class="savings-pending" data-savings-pending>{copy.pending}</p>
+        <div class="savings-figures" data-savings-figures hidden>
+          <p class="savings-figure savings-figure--year">
+            <span class="savings-prefix">{copy.resultPrefix}</span>
+            <output data-savings-result="year"></output>
+            <span>{copy.year}</span>
           </p>
           <p class="savings-figure">
-            <output data-savings-result="days">{formatSavings(example.days, lang)}</output>
+            <output data-savings-result="days"></output>
             <span>{copy.days}</span>
           </p>
         </div>
-        <p class="savings-small">{copy.formula}</p>
         <p class="savings-small">{copy.note}</p>
         <a href={contactHref} class="savings-cta" data-cta data-savings-cta data-track="savings-first-call">
           {copy.cta}
@@ -99,8 +79,8 @@ const fields = [
 
 <style>
   .savings-lead {
-    max-width: 46rem;
-    margin: 0 0 2.5rem;
+    max-width: 40rem;
+    margin: 0 0 2rem;
     font-size: 1.0625rem;
     line-height: 1.6;
     color: var(--color-black);
@@ -109,7 +89,7 @@ const fields = [
   .savings-card {
     display: grid;
     gap: 1.5rem;
-    padding: clamp(1.25rem, 3vw, 2.5rem);
+    padding: clamp(1.25rem, 3vw, 2.25rem);
     border-radius: 6px;
     background: var(--color-surface-navy);
     color: #fff;
@@ -117,95 +97,107 @@ const fields = [
   }
   @media (min-width: 64rem) {
     .savings-card {
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: clamp(2rem, 4vw, 3.5rem);
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      gap: clamp(2rem, 4vw, 3rem);
     }
   }
 
   .savings-form {
     display: grid;
-    gap: 1rem;
+    gap: 1.25rem;
   }
-  @media (min-width: 40rem) {
-    .savings-form {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-  .savings-field {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-  }
-  .savings-field input {
-    width: 100%;
-    min-height: 3.25rem;
-    padding: 0.5rem 1rem;
-    border: 2px solid rgb(255 255 255 / 0.35);
-    border-radius: 100px;
-    background: rgb(255 255 255 / 0.08);
-    color: #fff;
-    font-family: var(--font-mono);
-    font-size: 1.25rem;
-  }
-  .savings-field input:focus-visible {
-    border-color: var(--color-accent-pink);
-    outline: 2px solid var(--color-accent-pink);
-    outline-offset: 3px;
-  }
-
-  .savings-examples {
-    margin: 0.75rem 0 1.75rem;
-    font-size: 0.875rem;
-    color: rgb(255 255 255 / 0.82);
-  }
-  .savings-label {
-    margin: 0 0 0.625rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-accent-pink);
-  }
-  .savings-benefits {
-    display: grid;
-    gap: 0.5rem;
+  .savings-question {
     margin: 0;
     padding: 0;
-    list-style: none;
+    border: 0;
+    min-width: 0;
   }
-  .savings-benefits li {
-    position: relative;
-    padding-left: 1.75rem;
-    font-weight: 600;
-    line-height: 1.4;
+  .savings-question legend {
+    display: flex;
+    align-items: baseline;
+    gap: 0.625rem;
+    margin-bottom: 0.625rem;
+    padding: 0;
+    font-weight: 700;
   }
-  .savings-benefits li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
+  .savings-number {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
     color: var(--color-accent-pink);
-    font-weight: 800;
+  }
+  .savings-answers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .savings-answer {
+    position: relative;
+    display: inline-flex;
+  }
+  .savings-answer input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .savings-answer span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.125rem;
+    border: 2px solid rgb(255 255 255 / 0.35);
+    border-radius: 100px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    transition:
+      background-color 160ms var(--tds-ease-out),
+      border-color 160ms var(--tds-ease-out),
+      color 160ms var(--tds-ease-out);
+  }
+  .savings-answer:hover span {
+    border-color: #fff;
+  }
+  .savings-answer input:checked + span {
+    border-color: #fff;
+    background: #fff;
+    color: #050f68;
+  }
+  .savings-answer input:focus-visible + span {
+    outline: 2px solid var(--color-accent-pink);
+    outline-offset: 3px;
   }
 
   /* The result plate stays white in both themes: it sits on the fixed navy. */
   .savings-result {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 0.875rem;
     padding: clamp(1.25rem, 2.5vw, 1.75rem);
     border-radius: 6px;
     background: #fff;
     color: #0b0a07;
   }
+  .savings-pending {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #050f68;
+  }
+  .savings-figures {
+    display: grid;
+    gap: 0.5rem;
+  }
   .savings-figure {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.25rem 0.75rem;
+    gap: 0.25rem 0.625rem;
     margin: 0;
+    font-weight: 600;
   }
   .savings-figure output {
     font-family: var(--font-display);
@@ -217,16 +209,8 @@ const fields = [
     font-variant-numeric: tabular-nums;
   }
   .savings-figure--year output {
-    font-size: clamp(3rem, 7vw, 4.75rem);
+    font-size: clamp(3rem, 7vw, 4.5rem);
     color: #820933;
-  }
-  .savings-figure span {
-    font-weight: 600;
-  }
-  .savings-pair {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem 2rem;
   }
   .savings-small {
     margin: 0;
@@ -242,7 +226,7 @@ const fields = [
     align-items: center;
     gap: 0.5rem;
     min-height: 2.75rem;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     padding: 0.75rem 1.75rem;
     border-radius: 100px;
     background: var(--lp-fill);
@@ -269,21 +253,30 @@ const fields = [
   for (const form of document.querySelectorAll<HTMLFormElement>("[data-savings]")) {
     const section = form.closest("section");
     const lang = form.dataset.lang === "en" ? "en" : "de";
-    const read = (): SavingsInput => {
-      const value = (name: string) => Number((form.elements.namedItem(name) as HTMLInputElement | null)?.value);
-      return { minutes: value("minutes"), perWeek: value("perWeek"), share: value("share") };
+    const read = (): SavingsInput | null => {
+      const data = new FormData(form);
+      const value = (name: string) => (data.has(name) ? Number(data.get(name)) : Number.NaN);
+      const input = { minutes: value("minutes"), perWeek: value("perWeek"), share: value("share") };
+      return Object.values(input).every(Number.isFinite) ? input : null;
     };
     const update = () => {
-      const result = savings(read());
-      for (const key of ["month", "year", "days"] as const) {
+      const input = read();
+      const figures = section?.querySelector<HTMLElement>("[data-savings-figures]");
+      const pending = section?.querySelector<HTMLElement>("[data-savings-pending]");
+      if (figures) figures.hidden = !input;
+      if (pending) pending.hidden = !!input;
+      if (!input) return;
+      const result = savings(input);
+      for (const key of ["year", "days"] as const) {
         const output = section?.querySelector<HTMLOutputElement>(`[data-savings-result="${key}"]`);
         if (output) output.textContent = formatSavings(result[key], lang);
       }
     };
-    form.addEventListener("input", update);
+    form.addEventListener("change", update);
     form.addEventListener("submit", (event) => event.preventDefault());
     section?.querySelector("[data-savings-cta]")?.addEventListener("click", () => {
-      handOffContactDraft({ message: savingsDraft(form.dataset.draft ?? "", read(), lang), service: "process" });
+      const input = read();
+      if (input) handOffContactDraft({ message: savingsDraft(form.dataset.draft ?? "", input, lang), service: "process" });
     });
     update();
   }

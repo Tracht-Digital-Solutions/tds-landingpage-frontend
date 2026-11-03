@@ -139,7 +139,7 @@ const imageLang = resolveLang(Astro.currentLocale);
   .service-hero__photo {
     opacity: 0.36;
   }
-  :global(:root[data-theme="dark"]) .service-hero__photo {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .service-hero__photo:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     opacity: 0.23;
   }
 </style>

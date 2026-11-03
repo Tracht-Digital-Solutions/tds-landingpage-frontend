@@ -138,3 +138,13 @@ describe("the finder's copy", () => {
     expect(words).not.toMatch(/Stunde|hourly|per hour|an hour/i);
   });
 });
+
+describe("estimated time saved", () => {
+  it("gives every product a band and calls it an estimate", async () => {
+    const { CATALOGUE_PRODUCTS, FINDER_COPY, SAVINGS_LEVELS, savingsLevel } = await import("./serviceFinder");
+    for (const product of CATALOGUE_PRODUCTS) expect(SAVINGS_LEVELS).toContain(savingsLevel(product.id));
+    expect(savingsLevel("einen-ablauf-automatisieren")).toBe("high");
+    expect(FINDER_COPY.de.savingsNote).toMatch(/Schätzung.*keine Zusage/);
+    expect(FINDER_COPY.en.savingsNote).toMatch(/estimate.*not a promise/);
+  });
+});

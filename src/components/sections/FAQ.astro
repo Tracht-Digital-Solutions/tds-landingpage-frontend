@@ -253,11 +253,11 @@ const hiddenCount = content.items.length - shown.length;
   /* Dark mode: the pink tint at 16 % sank into the near-black ground
      (1.32:1, 2026-10-05). Stronger there, so the card reads as the call to
      action it is. */
-  :global(:root[data-theme="dark"]) .faq-cta {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .faq-cta:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in srgb, var(--color-accent-pink) 26%, var(--color-paper));
     --lp-shade: initial;
   }
-  :global(:root[data-theme="dark"]) .faq-cta:hover {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .faq-cta:hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in srgb, var(--color-accent-pink) 34%, var(--color-paper));
     --lp-shade: initial;
   }

@@ -178,7 +178,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
 <style>
   /* The brand mark ships in its dark navy colour; in dark mode flip it
      to solid white so it stays legible against the dark surface. */
-  :global(:root[data-theme="dark"]) .site-logo {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .site-logo:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     filter: brightness(0) invert(1);
   }
 
@@ -371,7 +371,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      Dark mode needs no lightening at all: the complaint was about light mode, and
      the full `--color-ink` (#ebe9e1) measures 10.48:1 on the dark bar. So it
      keeps the base value and only light mode comes up. */
-  :root:not([data-theme="dark"]) .site-header[data-scrolled="true"] {
+  :global(:is(:root, .tds-theme-preview__page):not([data-theme="dark"])) .site-header[data-scrolled="true"]:not(:where([data-theme="light"] [data-theme="dark"] *)) {
     --lp-nav-ink: color-mix(in oklab, var(--color-ink) 68%, var(--color-paper));
   }
 
@@ -500,11 +500,11 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
      directions, so dark runs a few points above light rather than at the
      same value. Do not lower it without looking at the scrolled bar over
      the dark hero. */
-  :global(:root[data-theme="dark"]) .site-header {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .site-header:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --tds-header-tint: 68%;
     --tds-header-fill: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
   }
-  :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .site-header[data-scrolled="true"]:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --tds-header-fill: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
   }
 
@@ -517,7 +517,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
     .site-header[data-scrolled="false"] {
       --tds-header-fill: transparent;
     }
-    :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
+    :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .site-header[data-scrolled="false"]:not(:where([data-theme="dark"] [data-theme="light"] *)) {
       --tds-header-fill: transparent;
     }
   }
@@ -530,10 +530,10 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
        hero.) Only the scrolled pill is filled — and since the dark base
        fill above is now dense enough to replace the rim, this override is
        what keeps the docked bar from inheriting it. */
-    :global(:root[data-theme="dark"]) .site-header[data-scrolled="false"] {
+    :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .site-header[data-scrolled="false"]:not(:where([data-theme="dark"] [data-theme="light"] *)) {
       --tds-header-fill: transparent;
     }
-    :global(:root[data-theme="dark"]) .site-header[data-scrolled="true"] {
+    :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .site-header[data-scrolled="true"]:not(:where([data-theme="dark"] [data-theme="light"] *)) {
       --tds-header-fill: color-mix(in srgb, var(--color-card) var(--tds-header-tint), transparent);
     }
   }

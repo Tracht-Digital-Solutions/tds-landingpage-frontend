@@ -173,7 +173,7 @@ const DEPTH_LAYERS = 6;
   .hero-photo {
     opacity: 0.32;
   }
-  :global(:root[data-theme="dark"]) .hero-photo {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .hero-photo:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     opacity: 0.2;
   }
   .hero-photo-scrim {
@@ -525,24 +525,24 @@ const DEPTH_LAYERS = 6;
      theme's pastel pair instead: periwinkle `--color-primary` with dark
      `--color-on-primary`, coral `--color-accent` on hover. In the light theme
      nothing here applies. */
-  :global(:root[data-theme="dark"]) .hero-cta--primary {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .hero-cta--primary:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in oklab, var(--color-primary) 92%, transparent);
     --lp-shade: var(--color-accent-pink);
     color: var(--color-on-primary);
   }
-  :global(:root[data-theme="dark"]) .hero-cta--primary:hover {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .hero-cta--primary:hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in oklab, var(--color-accent) 92%, transparent);
     --lp-shade: initial;
     color: var(--color-on-accent);
   }
   /* The second button: a surface tinted toward the primary, so it separates
      from the ground (it measured 1.17:1) without competing with the first. */
-  :global(:root[data-theme="dark"]) .hero-cta--secondary {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .hero-cta--secondary:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in srgb, var(--color-primary) 22%, var(--color-card));
     --lp-shade: var(--color-accent-pink);
     color: var(--color-black);
   }
-  :global(:root[data-theme="dark"]) .hero-cta--secondary:hover {
+  :global(:is(:root, .tds-theme-preview__page)[data-theme="dark"]) .hero-cta--secondary:hover:not(:where([data-theme="dark"] [data-theme="light"] *)) {
     --lp-fill: color-mix(in srgb, var(--color-primary) 34%, var(--color-card));
     --lp-shade: var(--color-accent-pink);
     color: var(--color-black);
