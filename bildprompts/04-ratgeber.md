@@ -6,6 +6,7 @@ Titelbilder der Artikel (`src/lib/editorialCovers.json`, gleiche Datei im Blog).
 - **Verwendung:** Artikelkarten und Artikelkopf, in voller Stärke
 - **Aufbau:** Motiv mittig, ein klarer Gegenstand pro Bild
 - **Pfad:** `public/images/editorial/<name>-2026.webp`
+- **Bleiben:** `pi-imager-android-2026` und `wparted-2026` (seit 0.95) zeigen eigene Projekte und werden nicht neu erzeugt. Die übrigen Artikel nutzen Leistungsbilder, siehe [03-leistungsseiten.md](03-leistungsseiten.md).
 
 ## power — Stromausfall und Überspannung
 
@@ -26,6 +27,8 @@ Titelbilder der Artikel (`src/lib/editorialCovers.json`, gleiche Datei im Blog).
 > A compact document scanner on an oak sideboard, one blank sheet feeding in. Beside it an almost empty shelf with a single slim bordeaux binder where many used to stand, faint marks on the wood showing where they were.
 
 ## video — Videocall und Homeoffice
+
+- **Artikel:** „besser-klingen-und-aussehen-im-videocall“ und „homeoffice-arbeitsplatz-einrichten“ teilen sich das Bild.
 
 - **Alt:** „Schreibtisch mit Mikrofon, Kamera und Licht am Fenster." / „A desk with microphone, camera and window light."
 
@@ -51,6 +54,9 @@ Titelbilder der Artikel (`src/lib/editorialCovers.json`, gleiche Datei im Blog).
 
 ## inventory — Produktpflege und Webshop
 
+- **Artikel:** „produktpflege-per-handy“ und „lohnt-sich-ein-webshop“
+- **Auch:** Kopf der Plattformseiten WooCommerce und Shopware (`DetailHero`, 36 % unter Papierschleier). Deshalb das linke Drittel ruhig halten.
+
 - **Alt:** „Versandkarton und Produkte auf einem Packtisch." / „A shipping box and products on a packing table."
 
-> A packing table in a small shop's back room: an open plain cardboard box, a handmade ceramic cup being placed inside by a cropped hand, tissue paper and a roll of tape without print. Shelves softly out of focus behind. Warm, honest, small-business scale.
+> A packing table in a small shop's back room: an open plain cardboard box, a handmade ceramic cup being placed inside by a cropped hand, tissue paper and a roll of tape without print. Shelves softly out of focus behind. Box and hand sit centre-right, the left third is calm table and wall. Warm, honest, small-business scale.

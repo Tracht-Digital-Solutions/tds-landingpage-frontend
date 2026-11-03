@@ -2,7 +2,9 @@
 
 Prompts für eine neue, einheitliche Bildserie. Sie ersetzt alle generierten Bilder der Webseite.
 
-**Bleiben unverändert:** Demos (`public/demos`), Referenzen (`public/references`), Designstudien (`public/designstudien`), eigene Projekte (`public/projects`), Zertifikate (`public/zertifikate`), die Vorschau der Visitenkarte (`images/business-card.webp`), das Portrait (`images/portrait`), Logos.
+Stand: Version 0.99.1 (2026-11-03). Formate, Zuschnitte und Deckkräfte sind am Code geprüft; ändert sich ein Bildrahmen, hier mitziehen.
+
+**Bleiben unverändert:** Demos (`public/demos`), Referenzen (`public/references`), Designstudien (`public/designstudien`), eigene Projekte (`public/projects`), Zertifikate (`public/zertifikate`), die Vorschau der Visitenkarte (`images/business-card.webp`), das Portrait (`images/portrait`), die Titelbilder der Projektartikel (`images/editorial/pi-imager-android-2026`, `images/editorial/wparted-2026`), Logos.
 
 ## Dateien
 
@@ -29,8 +31,9 @@ Motiv + **Stilblock** + **Ausschlüsse** (beide unten) + das Format des Motivs. 
 
 - **Keine Verläufe:** Die Seite hat keine Gradients mehr. Ein Bild darf keinen Farbverlauf als Gestaltungsmittel tragen.
 - **Kein Beweisfoto:** Ein Motiv ist Illustration. Es darf nie wie ein echter Kunde, ein echtes Projekt oder ein echtes Ergebnis wirken.
-- **Grundbilder liegen unter einem Schleier:** Hero und Wieso ich erscheinen sehr hell, Kontakt fast nur als Navy-Struktur. Deshalb zählen große Formen, feine Details gehen unter.
+- **Grundbilder liegen unter einem Schleier:** Hero, Wieso ich und Leistungsköpfe erscheinen sehr hell (im Dark Mode noch schwächer), Kontakt fast nur als Navy-Struktur. Deshalb zählen große Formen, feine Details gehen unter.
 - **Die Kacheln sind Inhalt:** Sie stehen in voller Stärke und klein, das Motiv muss also in der Mitte sofort lesbar sein.
+- **Ein Bild, mehrere Rahmen:** Leistungs- und Ratgeberbilder erscheinen an mehreren Stellen mit anderem Zuschnitt. Die Dateien nennen je Motiv, wo es noch steht.
 
 ## Bilder einbauen
 
@@ -38,4 +41,5 @@ Motiv + **Stilblock** + **Ausschlüsse** (beide unten) + das Format des Motivs. 
 2. Als WebP (Qualität 82) und AVIF unter dem genannten Zielpfad in `public/images/` speichern. Bestehende Namen beibehalten, dann bleiben Links, Blog und Metadaten gültig.
 3. `npm run images:variants` ausführen und die Einträge in `src/lib/imageCatalog.json` aktualisieren: Maße, Alt-Texte, Prüfsummen.
 4. Die fünf neuen Kacheln in `src/lib/serviceProducts.ts` eintragen (`image`).
-5. Alt-Texte stehen je Motiv dabei. Grundbilder bleiben dekorativ (`alt=""`).
+5. Titelbilder liegen auch im Blog: `src/lib/editorialCovers.json` ist dort identisch. Neue Namen in beiden Repos gleichziehen; bei gleichen Namen genügt der Austausch hier.
+6. Alt-Texte stehen je Motiv dabei. Grundbilder bleiben dekorativ (`alt=""`).
