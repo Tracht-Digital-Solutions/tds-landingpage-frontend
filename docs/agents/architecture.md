@@ -46,6 +46,9 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   number fields) in `lib/savingsCalculator.ts`; each answer stands for a mid value, × 46 working weeks. The
   estimate (hours per year, working days) shows once all three are answered; it is labelled a rough estimate,
   never a promise. "Erstgespräch vereinbaren" hands the chosen answers over as a `contactDraft`.
+  Since 2026-11-03: no lead sentence and no question numbers; each question has an icon disc in a brand colour
+  (coral, gold, periwinkle), an unchosen answer is a pressed-in well like the contact fields, the chosen one is
+  filled in its question's colour; the result plate is bordeaux with a pink CTA.
 - **Vorgehen** (0.97.0): the step title sits in the navy head. From 40rem all four steps show; on a phone
   the heads are buttons of an accordion, one open at a time (`hidden` only set by the script; on desktop the
   heads are disabled buttons, no tab stop). No "Schritt n" label; an arrow points from step to step (right in
@@ -117,6 +120,8 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   with a summary of everything entered so far, each line with "Ändern" back to its step.
 - **Phone numbers** (2026-11-03): `siteConfig.telephone` is the landline +49 4151 8788264 (JSON-LD, card,
   vCard, Impressum); `siteConfig.mobile` / the CMS `contact.phone` is the mobile for WhatsApp and emergencies.
+  The landline shows a desk telephone, the mobile a handset (`ui/PhoneIcon.astro`), in the card and the footer;
+  the footer gives each number its own row, without "(mobil)".
   A complete, valid field is filled periwinkle (`[data-filled]`), like the ticked emergency row but not pink.
 - A reason dropdown above the message posts as `subject` (declared in tds-shared's `ContactSchema`, because
   `zodResolver` forwards only known keys). Reasons come from `contact.reasons` and ship committed. Optional on
@@ -136,9 +141,11 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   parted by a horizontal seam (2026-10-12; one line on desktop, with a `tel:` link), an "Auch für Notfälle" badge beside the phone number and a "Notfall" checkbox in the form. The checkbox is local state, not a form
   field (`ContactSchema` has no such key and zodResolver drops unknown ones): ticked, the request goes out with
   `subject` = "Notfall – <reason>" (max 200). Copy in `lib/contactCopy.ts`.
-- The contact half, top to bottom (2026-10-12): e-mail and phone as full rows; WhatsApp pill and profile icons
-  side by side; business card and .vcf; Standort as the map itself (`ui/PlaceBubble.astro` with `inline`: the drawn
-  map, the live OSM map over it from the first hover, focus or tap). The footer uses the same component as a
+- The card's grid (2026-11-03): the emergency row on top; the form and "Direkt erreichbar" (e-mail, landline,
+  mobile, then "Messenger und Profile") side by side from `lg`; one row across the bottom (`.contact-foot`) with
+  the map (`ui/PlaceBubble.astro` with `inline`: the drawn map, the live OSM map over it from the first hover,
+  focus or tap), the town (no postal code, `contactForm.test.ts`) and the business card and .vcf buttons. The map
+  moved out of the right column because the stepper left a large empty field beside it. The footer uses the same component as a
   bubble behind "21493 Schwarzenbek". Leaflet's CSS is imported `?inline` (`lib/placeMap.ts`): a dynamic CSS
   chunk is never emitted under `inlineStylesheets: "always"` and 404'd.
 - **Footer contact** shows an icon per line, no labels (2026-10-12); "21493 Schwarzenbek" is a button that opens a

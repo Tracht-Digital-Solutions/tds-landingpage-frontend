@@ -29,15 +29,17 @@ export const ownProjects: readonly OwnProject[] = [
   {
     id: "wparted",
     image: { de: "/projects/wparted-programm-de.webp", en: "/projects/wparted-programm-en.webp" },
-    href: { de: "https://github.com/jtracht/WParted", en: "https://github.com/jtracht/WParted" },
-    hreflang: { de: "en", en: "en" },
+    // The program's card leads to its website (2026-11-03, asked for); the
+    // source code is linked from there.
+    href: { de: "https://wparted.tracht-digital.de/", en: "https://wparted.tracht-digital.de/en/" },
+    hreflang: { de: "de", en: "en" },
     service: "solutions",
     copy: {
       de: {
         title: "WParted",
         kind: "Software",
         text: "Freier Partitionsmanager für Windows 11, eine GParted-Alternative. Open Source, entwickelt von Tracht Digital Solutions. Beta: physische Datenträger bleiben gesperrt.",
-        cta: "Quellcode ansehen",
+        cta: "Zur WParted-Webseite",
         alt: "WParted mit Datenträgerkarte, Partitionsliste und einer ausstehenden Operation",
         highlights: {
           label: "Das Besondere",
@@ -52,7 +54,7 @@ export const ownProjects: readonly OwnProject[] = [
         title: "WParted",
         kind: "Software",
         text: "Free partition manager for Windows 11, a GParted alternative. Open source, developed by Tracht Digital Solutions. Beta: physical disks stay locked.",
-        cta: "View the source",
+        cta: "Visit the WParted website",
         alt: "WParted showing a disk map, a partition list and one pending operation",
         highlights: {
           label: "What is special",

@@ -15,6 +15,7 @@ import ContactForm from "~/components/islands/ContactForm.tsx";
 import AccentLetters from "~/components/ui/AccentLetters.astro";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
 import PlaceBubble from "~/components/ui/PlaceBubble.astro";
+import PhoneIcon from "~/components/ui/PhoneIcon.astro";
 import { socialLinks, whatsappHref } from "~/lib/socials";
 import { siteConfig } from "~/lib/seo";
 import type { ServiceId } from "~/lib/services";
@@ -144,6 +145,8 @@ const ui =
     ? {
         reachTitle: "Direkt erreichbar",
         landlineLabel: "Telefon",
+        channelsLabel: "Messenger und Profile",
+        region: "bei Hamburg · Kreis Herzogtum Lauenburg",
         businessCard: "Visitenkarte",
         saveContact: "Kontakt speichern",
         urgentBadge: "Auch für Notfälle",
@@ -154,6 +157,8 @@ const ui =
     : {
         reachTitle: "Direct contact",
         landlineLabel: "Phone",
+        channelsLabel: "Messenger and profiles",
+        region: "near Hamburg · District of Herzogtum Lauenburg",
         businessCard: "Business card",
         saveContact: "Save contact",
         urgentBadge: "Emergencies too",
@@ -209,7 +214,7 @@ const ui =
   <div class="lp-container">
     <h2
       id="contact-heading"
-      class="display text-4xl md:text-5xl lg:text-6xl text-white mb-4 text-center md:text-left"
+      class="display text-4xl md:text-5xl lg:text-6xl text-white mb-4 text-center md:text-right"
     >
       {contact.headline}{" "}
       <AccentLetters text={contact.headlineAccent} tone="dark" />
@@ -218,7 +223,7 @@ const ui =
         bordeaux segment sinks into the navy at its light value. */}
     <span
       aria-hidden="true"
-      class="tds-brandbar tds-brandbar--on-dark mx-auto md:mx-0 mb-8"
+      class="tds-brandbar tds-brandbar--on-dark mx-auto md:ml-auto md:mr-0 mb-8"
     ></span>
 
     {/* The "what happens next" card that used to stand here is gone. It said
@@ -285,12 +290,12 @@ const ui =
             </a>
           </li>
 
+          {/* The landline is a desk telephone, the mobile a handset
+              (2026-11-03, asked for; `ui/PhoneIcon.astro`, same in the footer). */}
           <li>
             <a class="contact-way" href={`tel:${landlineHref}`}>
               <span class="contact-disc" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
+                <PhoneIcon kind="landline" />
               </span>
               <span class="contact-way__text">
                 <span class="contact-way__label">{ui.landlineLabel}</span>
@@ -303,9 +308,7 @@ const ui =
           <li>
             <a class="contact-way" href={`tel:${phoneHref}`}>
               <span class="contact-disc" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
+                <PhoneIcon kind="mobile" />
               </span>
               <span class="contact-way__text">
                 <span class="contact-way__label">{t.contact.info.phoneLabel}</span>
@@ -322,61 +325,68 @@ const ui =
         </ul>
 
         <div class="contact-card__group contact-card__social">
-          {/* `target`/`rel` because it leaves for a messenger, like every
-              link in `SocialLinks`. */}
-          {/* Icon only (2026-10-19, asked for), like the profiles beside it; the
-              name is the accessible label and the hover tip. */}
-          <a
-            class="contact-action contact-action--whatsapp"
-            href={whatsappHref(contact.phone)}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="WhatsApp"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d={WHATSAPP_ICON} />
-            </svg>
-          </a>
-          {profileLinks.length > 0 && <SocialLinks links={profileLinks} />}
-        </div>
-
-        {/* The business card page and the .vcf, side by side and doing
-            different jobs: the file lands in a phone's address book (the
-            text/vcard MIME is set in `public/.htaccess`), the page is what a
-            person can be shown, scan or forward.
-            TODO: promote the .vcf to tds-shared contact.vcard */}
-        <div class="contact-card__group">
-          <div class="contact-card__actions">
-            <a class="contact-action" href={businessCardHref(lang)}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="2" y="5" width="20" height="14" rx="2" />
-                <circle cx="8" cy="12" r="2.5" />
-                <path d="M14 10h5M14 14h3" />
+          <p class="contact-way__label contact-card__group-label">{ui.channelsLabel}</p>
+          <div class="contact-card__social-row">
+            {/* `target`/`rel` because it leaves for a messenger, like every
+                link in `SocialLinks`. Icon only (2026-10-19, asked for), like
+                the profiles beside it; the name is the accessible label. */}
+            <a
+              class="contact-action contact-action--whatsapp"
+              href={whatsappHref(contact.phone)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d={WHATSAPP_ICON} />
               </svg>
-              {ui.businessCard}
             </a>
-            <a class="contact-action" href="/kontakt.vcf">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <line x1="19" y1="8" x2="19" y2="14" />
-                <line x1="22" y1="11" x2="16" y2="11" />
-              </svg>
-              {ui.saveContact}
-            </a>
+            {profileLinks.length > 0 && <SocialLinks links={profileLinks} />}
           </div>
         </div>
+      </aside>
 
-        {/* The location as the map itself (2026-10-12), not a line of text
-            with a pin: the drawn map, and the live OpenStreetMap over it from
-            the first hover, focus or tap (`ui/PlaceBubble.astro`, `inline`).
-            The full address stays where the law and the search engines need
-            it: the Impressum and the JSON-LD. */}
-        <div class="contact-card__group">
-          <p class="contact-way__label contact-card__where-label">{t.contact.info.locationLabel}</p>
+      {/* The card's last row (2026-11-03): where the business sits and what to
+          take away, across both halves. The map is the drawn one with the live
+          OpenStreetMap over it from the first hover, focus or tap
+          (`ui/PlaceBubble.astro`, `inline`). The full address stays where the
+          law and the search engines need it: the Impressum and the JSON-LD.
+
+          The business card page and the .vcf do different jobs: the file lands
+          in a phone's address book (text/vcard in `public/.htaccess`), the
+          page is what a person can be shown, scan or forward.
+          TODO: promote the .vcf to tds-shared contact.vcard */}
+      <div class="contact-foot">
+        <div class="contact-foot__map">
           <PlaceBubble lang={lang} id="contact-place-map" inline />
         </div>
-      </aside>
+        <div class="contact-foot__place">
+          <p class="contact-way__label">{t.contact.info.locationLabel}</p>
+          <p class="contact-foot__town">
+            {siteConfig.address.addressLocality}
+          </p>
+          <p class="contact-foot__region">{ui.region}</p>
+        </div>
+        <div class="contact-foot__actions">
+          <a class="contact-action" href={businessCardHref(lang)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <circle cx="8" cy="12" r="2.5" />
+              <path d="M14 10h5M14 14h3" />
+            </svg>
+            {ui.businessCard}
+          </a>
+          <a class="contact-action" href="/kontakt.vcf">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" y1="8" x2="19" y2="14" />
+              <line x1="22" y1="11" x2="16" y2="11" />
+            </svg>
+            {ui.saveContact}
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -716,20 +726,93 @@ const ui =
       padding-inline: 2rem;
     }
   }
-  /* Side by side from `lg`; the seam turns vertical. */
-  /* The form is a stepper (0.97.0): one step on screen at a time, so the
-     message field no longer stretches to the contacts' height. */
+  /* The card's grid (2026-11-03, reordered because the stepper left a large
+     empty field under the form): the emergency row on top, the form and the
+     direct ways side by side from `lg`, and one row across the bottom with
+     the map, the town and the two take-aways. Each half holds about as much as
+     the other, so neither column ends in a hole. */
   @media (min-width: 64rem) {
     #contact .contact-panel {
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      grid-template-areas:
+        "urgent urgent"
+        "form card"
+        "foot foot";
+    }
+    #contact .contact-urgent {
+      grid-area: urgent;
     }
     #contact .contact-panel__form {
+      grid-area: form;
       padding-right: 2.5rem;
     }
     #contact .contact-card {
+      grid-area: card;
       border-top: 0;
       border-left: 1px solid rgb(255 255 255 / 0.14);
       padding-left: 2.5rem;
+    }
+    #contact .contact-foot {
+      grid-area: foot;
+    }
+  }
+
+  /* === The bottom row: place and take-aways ========================= */
+  #contact .contact-foot {
+    display: grid;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1.5rem;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 0 0 6px 6px;
+    background: rgb(0 0 0 / 0.14);
+  }
+  #contact .contact-foot__map {
+    min-width: 0;
+  }
+  #contact .contact-foot__place p {
+    margin: 0;
+  }
+  #contact .contact-foot__town {
+    margin-top: 0.375rem !important;
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+  }
+  #contact .contact-foot__region {
+    margin-top: 0.25rem !important;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: rgb(255 255 255 / 0.7);
+  }
+  #contact .contact-foot__actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: 0.625rem;
+  }
+  @media (min-width: 40rem) {
+    #contact .contact-foot {
+      grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+    }
+    #contact .contact-foot__actions {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (min-width: 48rem) {
+    #contact .contact-foot {
+      padding: 1.5rem 2rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    #contact .contact-foot {
+      grid-template-columns: 17rem minmax(0, 1fr) auto;
+      gap: 2rem;
+    }
+    #contact .contact-foot__actions {
+      grid-column: auto;
+      grid-template-columns: repeat(2, auto);
     }
   }
 
@@ -862,11 +945,11 @@ const ui =
     padding-top: 1.25rem;
     border-top: 1px solid rgb(255 255 255 / 0.14);
   }
-  #contact .contact-card__where-label {
-    margin: 0 0 0.625rem;
+  #contact .contact-card__group-label {
+    margin: 0 0 0.75rem;
   }
   /* WhatsApp and the profile icons on one line where they fit. */
-  #contact .contact-card__social {
+  #contact .contact-card__social-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -881,14 +964,6 @@ const ui =
     color: #25d366;
   }
 
-  /* Two equal buttons, side by side, stacked on a very narrow column. Not
-     `.btn`: unlayered tds-shared beats every Tailwind utility, and these need a
-     fill the navy ground does not provide. */
-  #contact .contact-card__actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
-    gap: 0.625rem;
-  }
   #contact .contact-action {
     display: inline-flex;
     align-items: center;

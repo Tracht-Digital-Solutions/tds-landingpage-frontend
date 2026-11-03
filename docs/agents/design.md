@@ -37,6 +37,12 @@ Every section, the header and footer sit in `.lp-container`: full width, gutter
 `clamp(1.5rem, 1rem + 3vw, 5rem)`, no max-width. Text blocks keep their own `max-w-*`. Check 375, 1920 and
 2560 px for overflow.
 
+## Alternating mastheads (2026-11-03)
+
+From `md` the home sections alternate: Leistungen left, Projekte und Referenzen right, Zeitersparnis left,
+Vorgehen right, Journal left, Wieso ich? right, FAQ left, Kontakt right. `SectionHeader` takes `align="end"`;
+sections with their own heading align it the same way. Phones keep every masthead centred.
+
 ## Hard 2D shadows (tds-shared ≥ 0.42)
 
 - Boxes take `--tds-shadow-hard`, controls `--tds-shadow-hard-sm` and press into it with `translate`. The tokens

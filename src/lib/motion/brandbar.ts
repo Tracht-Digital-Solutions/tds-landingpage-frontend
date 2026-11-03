@@ -24,7 +24,12 @@
  * bar's own layers. No JavaScript, a failed import, reduced motion or a
  * coarse pointer: no spans, and the bar is the plain tds-shared bar.
  *
- * Only `transform` and `height` on the spans are written per frame (a height,
+ * The 3D touch (2026-11-03, asked for): a key that rises casts the site's
+ * hard flat shadow, a dark shade of its own colour, and leans up-left into it
+ * like every lifted button. The offset grows with the lift (at most
+ * `SHADOW` px), so the shadow is drawn per frame and never transitioned.
+ *
+ * Only `transform`, `height` and `box-shadow` on the spans are written per frame (a height,
  * not a `scaleY`, so a stretched key stays a pill). The bar itself is left
  * alone — the hero's bar draws itself in with a clip on the BAR
  * (`hero-bar-draw` in `Hero.astro`), and the keys simply ride along.
@@ -37,6 +42,8 @@ const REACH_Y = 70;
 const REACH_X = 26;
 /** How high the struck key jumps, px. */
 const HOP = 7;
+/** The hard shadow's offset at a full hop, px. */
+const SHADOW = 3;
 /** How much taller the struck key gets, as a share of its height. */
 const STRETCH = 1.2;
 /** The strike: upward velocity a key gets when the pointer enters it, px/s. */
@@ -80,6 +87,8 @@ function layerColours(backgroundImage: string): string[] {
 
 interface Key {
   el: HTMLSpanElement;
+  /** The hard shadow's colour: the key's own, 45 % into black. */
+  shade: string;
   box: KeyBox;
   y: number;
   vy: number;
@@ -126,7 +135,7 @@ export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
       span.setAttribute("aria-hidden", "true");
       span.style.background = colour;
       el.append(span);
-      return { el: span, box: { left: 0, width: 0 }, y: 0, vy: 0, s: 1, vs: 0, weight: 0, target: { y: 0, s: 1 } };
+      return { el: span, shade: `color-mix(in srgb, ${colour} 45%, #000)`, box: { left: 0, width: 0 }, y: 0, vy: 0, s: 1, vs: 0, weight: 0, target: { y: 0, s: 1 } };
     });
     el.classList.add("lp-brandbar-keys");
     const bar: Bar = { el, keys, left: 0, centreY: 0, live: false };
@@ -209,7 +218,12 @@ export function mountBrandbars({ inView, hasFinePointer }: Dom): void {
         // The stretch is a HEIGHT, not a `scaleY`: a scaled pill has flattened
         // ends, and the key must stay round at every size. One absolutely
         // positioned span per key, so the layout it costs is its own.
-        key.el.style.transform = key.y === 0 ? "" : `translateY(${key.y.toFixed(2)}px)`;
+        const lift = Math.min(1.5, Math.max(0, -key.y / HOP));
+        const offset = lift * SHADOW;
+        key.el.style.transform =
+          key.y === 0 ? "" : `translate(${(-offset * 0.5).toFixed(2)}px, ${key.y.toFixed(2)}px)`;
+        key.el.style.boxShadow =
+          offset < 0.1 ? "" : `${offset.toFixed(2)}px ${offset.toFixed(2)}px 0 0 ${key.shade}`;
         key.el.style.height = key.s === 1 ? "" : `${(key.s * 100).toFixed(1)}%`;
       }
     }
