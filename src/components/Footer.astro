@@ -36,6 +36,7 @@ const agbHref = localizePath("/legal/agb", lang);
 const homeHref = localizePath("/", lang);
 // Strip spaces for the dialer href; keep the spaced version for display.
 const telHref = `tel:${contact.phone.replace(/\s+/g, "")}`;
+const landlineHref = `tel:${siteConfig.telephone.replace(/\s+/g, "")}`;
 
 // The same sections the header lists (`lib/navigation.ts`), plus Kontakt —
 // the footer is where a reader who scrolled past the form looks for it.
@@ -166,9 +167,14 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
               </svg>
             </span>
             <span class="footer-contact__text">
+              <a href={landlineHref} class="footer-link text-white/85 hover:text-white">
+                {siteConfig.telephone}
+              </a>
+              <br />
               <a href={telHref} class="footer-link text-white/85 hover:text-white">
                 {contact.phone}
               </a>
+              <span class="text-white/60"> ({lang === "de" ? "mobil" : "mobile"})</span>
             </span>
           </li>
           {/* Visible NAP for local SEO: postal code + locality from siteConfig

@@ -35,13 +35,13 @@ describe("the link stack", () => {
     expect(ids("en")).toEqual(ids("de"));
   });
 
-  it("leads with the three ways to reach a person", () => {
+  it("leads with the ways to reach a person", () => {
     // The order is the design: someone who just scanned a code off a screen
     // wants to dial, message or write — not to browse a service catalog.
     const contact = businessCardLinks("de")
       .filter((link) => link.group === "contact")
       .map((link) => link.id);
-    expect(contact).toEqual(["phone", "whatsapp", "mail"]);
+    expect(contact).toEqual(["phone", "mobile", "whatsapp", "mail"]);
   });
 
   it("dials and writes the details the Impressum publishes", () => {
@@ -54,7 +54,10 @@ describe("the link stack", () => {
     // `wa.me` rejects the `+`.
     const e164 = siteConfig.telephone.replace(/\s/g, "");
     expect(tel?.href).toBe(`tel:${e164}`);
-    expect(whatsapp?.href).toBe(`https://wa.me/${e164.replace(/^\+/, "")}`);
+    // WhatsApp runs on the mobile, the landline is the business line.
+    const mobile = siteConfig.mobile.replace(/\s/g, "");
+    expect(links.find((link) => link.id === "mobile")?.href).toBe(`tel:${mobile}`);
+    expect(whatsapp?.href).toBe(`https://wa.me/${mobile.replace(/^\+/, "")}`);
     expect(mail?.href).toBe(`mailto:${siteConfig.email}`);
   });
 

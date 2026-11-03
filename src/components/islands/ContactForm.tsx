@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ContactSchema, type ContactFormData } from "@tracht-digital-solutions/tds-shared/schemas";
@@ -32,9 +32,33 @@ const STEPS: Record<Lang, [string, string, string]> = {
   en: ["Contact details", "Your request", "Message"],
 };
 
-const STEPPER: Record<Lang, { next: string; back: string; progress: (step: number, total: number) => string }> = {
-  de: { next: "Weiter", back: "Zurück", progress: (step, total) => `Schritt ${step} von ${total}` },
-  en: { next: "Next", back: "Back", progress: (step, total) => `Step ${step} of ${total}` },
+const STEPPER: Record<
+  Lang,
+  {
+    next: string;
+    back: string;
+    progress: (step: number, total: number) => string;
+    summary: string;
+    edit: string;
+    urgent: string;
+  }
+> = {
+  de: {
+    next: "Weiter",
+    back: "Zurück",
+    progress: (step, total) => `Schritt ${step} von ${total}`,
+    summary: "Bisherige Angaben",
+    edit: "Ändern",
+    urgent: "Notfall",
+  },
+  en: {
+    next: "Next",
+    back: "Back",
+    progress: (step, total) => `Step ${step} of ${total}`,
+    summary: "Details so far",
+    edit: "Change",
+    urgent: "Emergency",
+  },
 };
 
 /** The fields each step checks before "Weiter" moves on. */
@@ -411,7 +435,11 @@ export default function ContactForm({
 
         {/* The stepper (2026-11-03): one step at a time, so the card never
             asks everything at once. Earlier steps stay reachable. */}
-        <ol className="contact-progress" aria-label={stepper.progress(stage + 1, steps.length)}>
+        <ol
+          className="contact-progress"
+          aria-label={stepper.progress(stage + 1, steps.length)}
+          style={{ "--contact-progress": stage / (steps.length - 1) } as CSSProperties}
+        >
           {steps.map((title, index) => (
             <li key={title} className="contact-progress__item" data-state={index === stage ? "current" : doneSteps[index] ? "done" : undefined}>
               <button
@@ -553,6 +581,29 @@ export default function ContactForm({
         </Step>
 
         <Step number={3} title={steps[2]} done={doneSteps[2]} grow current={stage === 2}>
+        {/* Everything entered so far, with a way back to each step: the
+            earlier steps are hidden, so the last one shows what will be sent. */}
+        <div className="contact-summary">
+          <p className="contact-summary__title">{stepper.summary}</p>
+          <dl className="contact-summary__list">
+            <div className="contact-summary__row">
+              <dt>{steps[0]}</dt>
+              <dd>
+                {[nameValue, emailValue, companyValue].map((value) => String(value ?? "").trim()).filter(Boolean).join(" · ")}
+              </dd>
+              <button type="button" className="contact-summary__edit" onClick={() => goTo(0)}>
+                {stepper.edit}
+              </button>
+            </div>
+            <div className="contact-summary__row">
+              <dt>{steps[1]}</dt>
+              <dd>{[subjectValue, urgent ? stepper.urgent : ""].filter(Boolean).join(" · ") || "–"}</dd>
+              <button type="button" className="contact-summary__edit" onClick={() => goTo(1)}>
+                {stepper.edit}
+              </button>
+            </div>
+          </dl>
+        </div>
         <div className={`${rowClass("message")} contact-field-row--message`} data-filled={filled(messageOk)}>
           <label htmlFor="message" className="contact-field-label">
             {copy.form.message}
@@ -566,7 +617,7 @@ export default function ContactForm({
           </p>
           <textarea
             id="message"
-            rows={4}
+            rows={6}
             required
             className={`${fieldClass} resize-none`}
             {...a11yFor("message")}

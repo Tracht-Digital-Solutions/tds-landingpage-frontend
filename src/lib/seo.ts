@@ -63,8 +63,10 @@ export const siteConfig = {
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",
-  /** Verified phone (WhatsApp). E.164-friendly formatting for schema. */
-  telephone: "+49 178 8224022",
+  /** The business line (landline, 2026-11-03). E.164-friendly formatting for schema. */
+  telephone: "+49 4151 8788264",
+  /** Julian's mobile: WhatsApp and emergencies. */
+  mobile: "+49 178 8224022",
   /** Legal entity behind the brand. */
   legalName: "Julian Tracht",
   /** USt-IdNr. gemäß § 27a UStG — verified, matches the Impressum. */

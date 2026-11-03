@@ -42,7 +42,7 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
 
     <ol class="process-steps">
       {
-        process.steps.map((step) => (
+        process.steps.map((step, index) => (
           <li class="process-step" data-reveal>
             <div class="process-step__tilt" data-motion-tilt>
               <span class="process-step__shade" aria-hidden="true"></span>
@@ -57,10 +57,7 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
                     <span aria-hidden="true" class="process-step__icon">
                       <ProcessIcon number={step.number} />
                     </span>
-                    <span class="process-step__heading">
-                      <span class="process-step__when">{step.duration}</span>
-                      <span class="process-step__title">{step.title}</span>
-                    </span>
+                    <span class="process-step__title">{step.title}</span>
                     <span class="process-step__chevron" aria-hidden="true"></span>
                   </button>
                 </h3>
@@ -68,6 +65,7 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
                   <ul class="process-step__actions">
                     {step.actions.map((action) => <li>{action}</li>)}
                   </ul>
+                  {/* The card's footer, behind a 1px rule. */}
                   <p class="process-step__result">
                     <span class="process-step__result-label">{resultLabel}:</span>{" "}
                     {step.outcome}
@@ -75,6 +73,15 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
                 </div>
               </div>
             </div>
+            {/* From one step to the next: right beside the cards in a row,
+                down between them when they stack. */}
+            {index < process.steps.length - 1 && (
+              <span class="process-step__arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 12h15M13 6l6 6-6 6" />
+                </svg>
+              </span>
+            )}
           </li>
         ))
       }
@@ -91,24 +98,52 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
 
 <style>
   .process-steps {
+    --process-gap: 2.75rem;
     display: grid;
-    gap: 1.5rem;
+    gap: var(--process-gap);
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 40rem) {
+  @media (min-width: 40rem) and (max-width: 71.99rem) {
     .process-steps {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 40rem;
+      margin-inline: auto;
     }
   }
   @media (min-width: 72rem) {
     .process-steps {
+      --process-gap: 3rem;
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
   .process-step {
+    position: relative;
     min-width: 0;
+  }
+  /* The arrow sits in the gap: centred below a stacked card, pointing down;
+     centred beside a card in the row, pointing right. */
+  .process-step__arrow {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--process-gap);
+    height: var(--process-gap);
+    translate: -50% 0;
+    rotate: 90deg;
+    color: var(--color-accent);
+    pointer-events: none;
+  }
+  @media (min-width: 72rem) {
+    .process-step__arrow {
+      top: 50%;
+      left: 100%;
+      translate: 0 -50%;
+      rotate: none;
+    }
   }
 
   .process-step__tilt {
@@ -169,12 +204,6 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
     outline: 2px solid var(--color-accent-pink);
     outline-offset: -4px;
   }
-  .process-step__heading {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    min-width: 0;
-  }
   .process-step__chevron {
     display: none;
     flex: none;
@@ -206,21 +235,11 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
     color: #050f68;
     transition: rotate 420ms var(--lp-ease-bounce, var(--tds-ease-out));
   }
-  .process-step__when {
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgb(255 255 255 / 0.9);
-  }
 
   .process-step__body {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.25rem;
   }
   .process-step__title {
     font-family: var(--font-display);
@@ -237,7 +256,7 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
     display: grid;
     gap: 0.5rem;
     margin: 0;
-    padding: 0 0 0 1rem;
+    padding: 1.25rem 1.25rem 1.25rem 2.25rem;
     list-style: disc;
     font-size: 0.9375rem;
     line-height: 1.5;
@@ -248,9 +267,8 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
   }
   .process-step__result {
     margin: auto 0 0;
-    padding: 0.625rem 0.875rem;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--color-accent-pink) 18%, var(--color-paper));
+    padding: 0.875rem 1.25rem 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-black) 12%, transparent);
     font-size: 0.9375rem;
     font-weight: 700;
     line-height: 1.3;
