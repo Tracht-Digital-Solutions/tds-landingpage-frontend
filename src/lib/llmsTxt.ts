@@ -122,7 +122,7 @@ export function renderLlmsTxt(input: LlmsInput): string {
     `- Adresse: ${siteConfig.address.streetAddress}, ${siteConfig.address.postalCode} ` +
       `${siteConfig.address.addressLocality} (${siteConfig.address.addressRegion}), bei Hamburg`,
   );
-  out(`- Kontakt: ${siteConfig.email}, ${siteConfig.telephone}`);
+  out(`- Kontakt: ${siteConfig.email}, Telefon ${siteConfig.telephone}, Mobil ${siteConfig.mobile}`);
   out("- Sprachen: Deutsch (Standard), Englisch");
   out();
 

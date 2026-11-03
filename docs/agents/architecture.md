@@ -48,7 +48,8 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   never a promise. "Erstgespräch vereinbaren" hands the chosen answers over as a `contactDraft`.
 - **Vorgehen** (0.97.0): the step title sits in the navy head. From 40rem all four steps show; on a phone
   the heads are buttons of an accordion, one open at a time (`hidden` only set by the script; on desktop the
-  heads are disabled buttons, no tab stop). The outcome reads "Ergebnis: …".
+  heads are disabled buttons, no tab stop). No "Schritt n" label; an arrow points from step to step (right in
+  the row, down when stacked); the outcome "Ergebnis: …" is the card's footer behind a 1px rule.
 - **Blog für Betriebe** (0.97.0): without a curated `journal` block the newest 24 posts are ranked by
   `lib/journalRelevance.ts` (business categories and keywords), not by date alone.
 
@@ -112,6 +113,10 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
 - **A three-step stepper** (0.97.0): Kontaktdaten → Anliegen → Nachricht, one step at a time with a
   progress row; "Weiter" validates the step's fields, a failed submit jumps to the first step with an error.
   "Weiter" and "Senden" carry distinct React keys, or React reuses the element and submits on "Weiter".
+  The progress row is one track with three stops that fills up to the current step; the last step opens
+  with a summary of everything entered so far, each line with "Ändern" back to its step.
+- **Phone numbers** (2026-11-03): `siteConfig.telephone` is the landline +49 4151 8788264 (JSON-LD, card,
+  vCard, Impressum); `siteConfig.mobile` / the CMS `contact.phone` is the mobile for WhatsApp and emergencies.
   A complete, valid field is filled periwinkle (`[data-filled]`), like the ticked emergency row but not pink.
 - A reason dropdown above the message posts as `subject` (declared in tds-shared's `ContactSchema`, because
   `zodResolver` forwards only known keys). Reasons come from `contact.reasons` and ship committed. Optional on

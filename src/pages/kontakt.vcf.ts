@@ -64,8 +64,9 @@ function photoLine(): string | null {
 }
 
 export const GET: APIRoute = () => {
-  const { name, url, email, telephone, vatID, founder, socials } = siteConfig;
-  const tel = telephone.replace(/\s/g, ""); // → E.164, e.g. +491788224022
+  const { name, url, email, telephone, mobile, vatID, founder, socials } = siteConfig;
+  const tel = telephone.replace(/\s/g, ""); // → E.164, e.g. +4941518788264
+  const cell = mobile.replace(/\s/g, "");
 
   // Deliberately no ADR / GEO — the postal address is intentionally omitted from
   // the vCard (it's a private home address).
@@ -77,13 +78,14 @@ export const GET: APIRoute = () => {
     `ORG:${esc(name)}`,
     `TITLE:${esc(founder.jobTitle)}`,
     `TEL;TYPE=WORK,VOICE:${tel}`,
+    `TEL;TYPE=CELL,VOICE:${cell}`,
     `EMAIL;TYPE=WORK,PREF:${email}`,
     `URL:${url}`,
     socials.linkedin ? `X-SOCIALPROFILE;TYPE=linkedin:${socials.linkedin}` : "",
     socials.github ? `X-SOCIALPROFILE;TYPE=github:${socials.github}` : "",
     `NOTE:${esc(`USt-IdNr. ${vatID}`)}`,
     photoLine() ?? "",
-    "REV:2026-07-11T00:00:00Z",
+    "REV:2026-11-03T00:00:00Z",
     "END:VCARD",
   ].filter((line) => line !== "");
 

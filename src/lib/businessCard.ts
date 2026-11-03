@@ -144,9 +144,10 @@ const SITE_LINKS: Record<Lang, { home: string; services: string; pricing: string
  * it does in `kontakt.vcf.ts`: it is a private home address.
  */
 export function businessCardLinks(lang: Lang): BusinessCardLink[] {
-  const { email, telephone, socials, blogUrl, name } = siteConfig;
+  const { email, telephone, mobile, socials, blogUrl, name } = siteConfig;
   // → E.164 for `tel:` and `wa.me`, exactly as the contact aside derives it.
   const phoneHref = telephone.replace(/\s/g, "");
+  const mobileHref = mobile.replace(/\s/g, "");
   const site = SITE_LINKS[lang];
   const de = lang === "de";
 
@@ -159,11 +160,18 @@ export function businessCardLinks(lang: Lang): BusinessCardLink[] {
       href: `tel:${phoneHref}`,
     },
     {
+      id: "mobile",
+      group: "contact",
+      label: de ? "Mobil anrufen" : "Call mobile",
+      meta: mobile,
+      href: `tel:${mobileHref}`,
+    },
+    {
       id: "whatsapp",
       group: "contact",
       label: "WhatsApp",
       meta: de ? "Kurz schreiben, statt zu telefonieren" : "Message instead of calling",
-      href: `https://wa.me/${phoneHref.replace(/^\+/, "")}`,
+      href: `https://wa.me/${mobileHref.replace(/^\+/, "")}`,
       external: true,
     },
     {
