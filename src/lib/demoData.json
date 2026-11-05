@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T12:08:56.055Z",
+  "generatedAt": "2026-11-05T12:21:01.013Z",
   "demos": {
     "demo1": {
       "status": "ok",
@@ -10,7 +10,7 @@
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-04T12:08:35.056Z"
+      "checkedAt": "2026-11-05T12:20:39.004Z"
     },
     "demo2": {
       "status": "ok",
@@ -21,7 +21,7 @@
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-04T12:08:35.692Z"
+      "checkedAt": "2026-11-05T12:20:39.760Z"
     },
     "demo3": {
       "status": "ok",
@@ -32,7 +32,7 @@
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-04T12:08:36.620Z"
+      "checkedAt": "2026-11-05T12:20:40.807Z"
     },
     "demo4": {
       "status": "ok",
@@ -43,7 +43,7 @@
       "preview": "/demos/demo4.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-04T12:08:37.294Z"
+      "checkedAt": "2026-11-05T12:20:41.708Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,7 +54,7 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-11-04T12:08:37.635Z"
+      "checkedAt": "2026-11-05T12:20:42.230Z"
     },
     "shop": {
       "status": "ok",
@@ -65,7 +65,7 @@
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-04T12:08:38.720Z"
+      "checkedAt": "2026-11-05T12:20:43.155Z"
     }
   }
 }
