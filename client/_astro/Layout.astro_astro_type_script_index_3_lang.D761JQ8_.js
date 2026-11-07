@@ -1,0 +1,1 @@
+import{r as e}from"./analytics.C4BMHRUd.js";document.body.hasAttribute(`data-bare`)||e({site:`landing`,lang:document.documentElement.lang.startsWith(`en`)?`en`:`de`});
