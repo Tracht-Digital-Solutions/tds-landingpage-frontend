@@ -1,5 +1,15 @@
 # Image work
 
+## Image series 2026-11 — 2026-11-09
+
+The service, contact, process and journal photos were regenerated from
+`stuff/03-Materialien/Bildserie-2026-11/` (prompts, originals and
+`export.mjs`). The five product tiles have their own artwork in
+`public/images/products/<name>.webp` (1440 × 900, 480/800/960 copies, WebP and
+AVIF), each in its shop category colour; `serviceProducts.ts` points at them.
+`imageCatalog.json` holds the refreshed sizes and fingerprints from the
+export report. The unused process photos `step-02` to `step-04` are gone.
+
 ## Search and responsive image pass — 2026-10-18
 
 The 16 active editorial subjects now ship WebP and AVIF exports at 480, 800,
