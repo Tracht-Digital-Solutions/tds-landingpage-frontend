@@ -3,7 +3,7 @@
 ## Image series 2026-11 — 2026-11-09
 
 The service, contact, process and journal photos were regenerated from
-`stuff/03-Materialien/Bildserie-2026-11/` (prompts, originals and
+`stuff/03-Bilder/Bildserie-2026-11/` (prompts, originals and
 `export.mjs`). The five product tiles have their own artwork in
 `public/images/products/<name>.webp` (1440 × 900, 480/800/960 copies, WebP and
 AVIF), each in its shop category colour; `serviceProducts.ts` points at them.
@@ -119,7 +119,7 @@ the new picture to show on the next reload.
 |---|---|
 | Demo previews | `public/demos/<id>.webp`, **1440 × 900** (16:10), plus `<id>-favicon.<ext>` |
 | Reference previews | `public/references/<case-id>.webp`, **1440 × 900** (16:10) |
-| Design studies | `public/designstudien/<id>[-<view>].webp`, full-page captures of whatever height, width capped at **1440**. Written by `npm run studies:import -- --from "<folder>"`; the PNG originals live in `stuff/03-Materialien/Designstudien/` in the workspace, not in this repo. The file-name map is `lib/designStudyMeta.ts` |
+| Design studies | `public/designstudien/<id>[-<view>].webp`, full-page captures of whatever height, width capped at **1440**. Written by `npm run studies:import -- --from "<folder>"`; the PNG originals live in `stuff/03-Bilder/Designstudien/` in the workspace, not in this repo. The file-name map is `lib/designStudyMeta.ts` |
 | Certificates | `public/zertifikate/<id>.webp`, **1584 × 1224** (US Letter landscape at scale 2). Rendered from the committed PDFs in `src/assets/certificates/` by `npm run certificates:render` (pdf.js in a headless Chromium — `sharp` cannot read PDF). Quality 88, not 82: these are pictures of small type |
 | Service grounds | `public/images/services/<nr>-<slug>.webp`, **1586 × 992** (16:10) |
 | Section grounds | `public/images/sections/contact-editorial.webp`, **1870 × 841** (≈2.22:1) — the only one left |
@@ -224,7 +224,7 @@ obvious from looking at the file on its own.
 
 Prompts are not kept in this repository. The next series for all four sites
 (landing page, shop, tools, blog) lives in the workspace at
-`stuff/03-Materialien/Bildserie-2026-11/`: one ready-to-paste prompt file per
+`stuff/03-Bilder/Bildserie-2026-11/`: one ready-to-paste prompt file per
 image, `ANLEITUNG.md`, and `export.mjs`, which writes the WebP/AVIF variants into
 each repository. Earlier prompt sets are in this file's git history and in
 `stuff/99-Archiv/`.
