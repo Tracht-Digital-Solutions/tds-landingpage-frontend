@@ -25,7 +25,7 @@ export function projectsHref(lang: Lang): string {
 }
 
 /** The "Stand" line, `dateModified` and the sitemap's `lastmod`. Raise it when the page's copy changes. */
-export const PROJECTS_UPDATED_AT = "2026-11-02";
+export const PROJECTS_UPDATED_AT = "2026-11-09";
 
 /** Six divides into the one, two and three columns the home grid uses, so no row is left half empty. */
 export const HOME_PROJECT_LIMIT = 6;
@@ -89,7 +89,7 @@ export const projectsCopy = {
     },
     groups: {
       cases: { title: "Kundenprojekte", lead: "Abgeschlossene Arbeit, veröffentlicht mit Freigabe." },
-      own: { title: "Eigene Projekte", lead: "Eigene Programme und Seiten, öffentlich im Einsatz." },
+      own: { title: "Eigene Projekte", lead: "Eigene Programme und Seiten, veröffentlicht oder in Entwicklung." },
       demos: { title: "Beispielseiten", lead: "Laufende Demos zum Durchklicken, keine Kundenaufträge." },
       studies: { title: "Designstudien", lead: "Entwürfe für erfundene Marken, keine Kundenaufträge." },
     },
@@ -115,7 +115,7 @@ export const projectsCopy = {
     },
     groups: {
       cases: { title: "Client projects", lead: "Finished work, published with approval." },
-      own: { title: "Own projects", lead: "Own programs and pages, publicly in use." },
+      own: { title: "Own projects", lead: "Own programs and pages, released or in development." },
       demos: { title: "Example sites", lead: "Running demos to click through, not client work." },
       studies: { title: "Design studies", lead: "Drafts for invented brands, not client work." },
     },

@@ -96,6 +96,6 @@ Each demo embeds only `<tds-brand-bar lang="…">` with a fallback link plus
 
 ## Own projects
 
-`src/lib/ownProjects.ts` holds WParted, Pi Imager for Android and the WParted website: code-owned, one picture per language in
+`src/lib/ownProjects.ts` holds WParted, Pi Imager for Android, Kanlo and the WParted website: code-owned, one picture per language in
 `public/projects/`, not probed and not synced. They carry the badge "Eigenes Projekt" and never
-go into `references.ts`. Replace the pictures by hand when WParted or its website changes visibly.
+go into `references.ts`. Replace the pictures by hand when a project changes visibly. Kanlo's repository is private: its card links to the freelance project page, and its picture is a seeded sample board of a local instance (`kanlo-server`, light theme, zoom 0.86).

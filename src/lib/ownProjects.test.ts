@@ -8,8 +8,14 @@ import { getServiceById } from "./services";
 const LANGS = ["de", "en"] as const;
 
 describe("own projects", () => {
-  it("shows WParted, Pi Imager for Android and the WParted website", () => {
-    expect(ownProjects.map((p) => p.id)).toEqual(["wparted", "pi-imager-android", "wparted-website"]);
+  it("shows WParted, Pi Imager for Android, Kanlo and the WParted website", () => {
+    expect(ownProjects.map((p) => p.id)).toEqual(["wparted", "pi-imager-android", "kanlo", "wparted-website"]);
+  });
+
+  it("call Kanlo a development version and never stable", () => {
+    const kanlo = ownProjects.find((p) => p.id === "kanlo")!;
+    expect(kanlo.copy.de.text).toMatch(/Entwicklungsversion.*kein stabiles Release/);
+    expect(kanlo.copy.en.text).toMatch(/Development version.*no stable release/);
   });
 
   it("call Pi Imager independent and do not hide its test state", () => {
