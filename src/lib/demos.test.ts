@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { DEMO_KINDS, DEMO_ORIGINS } from "./demoCatalog";
 import {
   demoDefinitions,
+  demoTextFor,
   demoSnapshot,
   filterReachable,
   getDemos,
@@ -206,6 +207,7 @@ describe("filterReachable", () => {
       title: id,
       description: null,
       siteLang: null,
+      alternates: {},
       favicon: null,
       preview: `/demos/${id}.webp`,
       previewWidth: 1440,
@@ -337,6 +339,28 @@ describe("the committed assets", () => {
           `${demo.definition.id}: ${publicPath} is in demoData.json but not on disk`,
         ).resolves.toBeUndefined();
       }
+    }
+  });
+});
+
+describe("demo text per page language (2026-11-10)", () => {
+  const alt = { url: "https://demo1.tracht-digital.de/en/", title: "Sample site", description: "A description by the demo itself." };
+
+  it("uses the demo's own page in the visitor's language when there is one", () => {
+    const [demo] = resolveSnapshotDemos(snapshotOf({ demo1: entry({ alternates: { en: alt } }) }), one);
+    expect(demoTextFor(demo!, "en")).toEqual({ ...alt, textLang: "en" });
+    expect(demoTextFor(demo!, "de")).toMatchObject({ title: "Beispielseite", textLang: "de" });
+  });
+
+  it("falls back to the demo's own language and names it", () => {
+    const [demo] = resolveSnapshotDemos(snapshotOf({ demo1: entry() }), one);
+    expect(demoTextFor(demo!, "en")).toMatchObject({ title: "Beispielseite", textLang: "de", url: demo!.definition.url });
+  });
+
+  it("refuses an alternate on another host or without https", () => {
+    for (const url of ["https://example.com/en/", "http://demo1.tracht-digital.de/en/"]) {
+      const [demo] = resolveSnapshotDemos(snapshotOf({ demo1: entry({ alternates: { en: { ...alt, url } } }) }), one);
+      expect(demo!.alternates).toEqual({});
     }
   });
 });

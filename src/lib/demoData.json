@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-09T12:52:42.289Z",
+  "generatedAt": "2026-11-10T10:02:59.345Z",
   "demos": {
     "demo1": {
       "status": "ok",
@@ -10,29 +10,36 @@
       "preview": "/demos/demo1.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-09T12:52:17.457Z"
+      "checkedAt": "2026-11-10T10:02:44.766Z"
     },
     "demo2": {
       "status": "ok",
       "title": "Dein Rhythmus. Deine Regeln. — BLOCK/01",
       "description": "Streetwear für deinen eigenen Rhythmus. Entdecke BLOCK/01, die interaktive Shop-Arbeitsprobe von Tracht Digital Solutions.",
       "siteLang": "de",
+      "alternates": {
+        "en": {
+          "url": "https://demo2.tracht-digital.de/en/",
+          "title": "Your rhythm. Your rules. — BLOCK/01",
+          "description": "Streetwear for your own rhythm. Discover BLOCK/01, an interactive store demo by Tracht Digital Solutions."
+        }
+      },
       "favicon": "/demos/demo2-favicon.svg",
       "preview": "/demos/demo2.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-09T12:52:18.449Z"
+      "checkedAt": "2026-11-10T10:02:45.003Z"
     },
     "demo3": {
       "status": "ok",
-      "title": "Immobilienverwaltung — Nordstern Immobilien",
-      "description": "Interaktives Immobilien-Verwaltungspanel mit Beispieldaten",
+      "title": "Backoffice — Nordstern Immobilienverwaltung (Demo)",
+      "description": "Backoffice einer Hausverwaltung: Liegenschaften, Mietparteien, Vorgänge und Buchhaltung als interaktive Demo mit Beispieldaten.",
       "siteLang": "de",
       "favicon": "/demos/demo3-favicon.svg",
       "preview": "/demos/demo3.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-09T12:52:19.593Z"
+      "checkedAt": "2026-11-10T10:02:45.361Z"
     },
     "demo4": {
       "status": "ok",
@@ -43,7 +50,7 @@
       "preview": "/demos/demo4.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-09T12:52:20.548Z"
+      "checkedAt": "2026-11-10T10:02:45.554Z"
     },
     "demo5": {
       "status": "tls-invalid",
@@ -54,18 +61,25 @@
       "preview": null,
       "previewWidth": null,
       "previewHeight": null,
-      "checkedAt": "2026-11-09T12:52:21.154Z"
+      "checkedAt": "2026-11-10T10:02:45.616Z"
     },
     "shop": {
       "status": "ok",
       "title": "Shop von Tracht Digital Solutions",
       "description": "Digitale Leistungen zum Festpreis für Selbstständige und kleine Betriebe: Website, SEO, E-Mail, Wartung und Schulung. Dazu Technik mit eigener Einschätzung.",
       "siteLang": "de",
+      "alternates": {
+        "en": {
+          "url": "https://shop.tracht-digital.de/en/",
+          "title": "Shop von Tracht Digital Solutions",
+          "description": "Digital services at a fixed price for freelancers and small businesses: websites, SEO, email, maintenance and training, plus technology we assess ourselves."
+        }
+      },
       "favicon": "/demos/shop-favicon.png",
       "preview": "/demos/shop.webp",
       "previewWidth": 1440,
       "previewHeight": 900,
-      "checkedAt": "2026-11-09T12:52:22.538Z"
+      "checkedAt": "2026-11-10T10:02:45.994Z"
     }
   }
 }

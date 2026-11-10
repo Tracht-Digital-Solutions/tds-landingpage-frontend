@@ -80,6 +80,11 @@ export const siteConfig = {
     // Websites first, like the site since 2026-09-15. Shown on the business
     // card and in the vCard as well.
     jobTitle: "Webentwickler & Digitalisierungsberater",
+    /** The same title per page language, for what a visitor reads (business card, "Wieso ich?"). */
+    jobTitles: {
+      de: "Webentwickler & Digitalisierungsberater",
+      en: "Web developer & digitalisation consultant",
+    },
     /** The same profiles `socials` renders — see `PROFILES` above. */
     sameAs: Object.values(PROFILES) as string[],
   },

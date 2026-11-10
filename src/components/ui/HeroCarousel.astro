@@ -39,7 +39,7 @@
  * tab order, but stay clickable. Every card leads to the project overview.
  */
 import { projectsHref } from "~/lib/projects";
-import { getDemos } from "~/lib/demos";
+import { demoTextFor, getDemos } from "~/lib/demos";
 import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
 import { coverView, designStudies } from "~/lib/designStudies";
 import type { Lang } from "~/lib/i18n";
@@ -59,6 +59,8 @@ const COUNT = 7;
 interface Example {
   key: string;
   title: string;
+  /** Set when the title is in another language than the page (a German demo on /en/). */
+  titleLang?: string;
   kind: string;
   origin: string;
   src: string;
@@ -71,7 +73,13 @@ const demos = await getDemos();
 const pool: Example[] = shuffled<Example>([
   ...demos.map((demo) => ({
     key: `demo-${demo.definition.id}`,
-    title: demo.title,
+    ...(() => {
+      const text = demoTextFor(demo, lang);
+      return {
+        title: text.title,
+        titleLang: text.textLang && text.textLang.split("-")[0] !== lang ? text.textLang : undefined,
+      };
+    })(),
     kind: DEMO_KINDS[demo.definition.kind][lang],
     origin: DEMO_ORIGINS[demo.definition.origin][lang],
     src: mediaSrc(demo.preview),
@@ -152,7 +160,7 @@ const ui =
                   <span class="hero-carousel__origin">{example.origin}</span>
                 </span>
                 <span class="hero-carousel__meta">
-                  <span class="hero-carousel__title">{example.title}</span>
+                  <span class="hero-carousel__title" lang={example.titleLang}>{example.title}</span>
                   <span class="hero-carousel__kind">
                     {example.kind}
                     <span class="sr-only"> – {example.origin}. {ui.open}</span>

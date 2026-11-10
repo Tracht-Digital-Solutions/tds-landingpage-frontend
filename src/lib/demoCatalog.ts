@@ -96,6 +96,13 @@ export interface DemoDefinition {
    * it shows. Code-owned like the kind; each one is visible on the demo itself.
    */
   labels: { readonly de: readonly string[]; readonly en: readonly string[] };
+  /**
+   * The demo's own page in another language (2026-11-10), for a demo that has
+   * one but does not announce it with `<link rel="alternate" hreflang>`. The
+   * sync harvests title and description from there, so an English page shows
+   * the demo's English words instead of its German ones. Same host only.
+   */
+  alternates?: { readonly de?: string; readonly en?: string };
 }
 
 /**
@@ -118,7 +125,7 @@ export const demoDefinitions: readonly DemoDefinition[] = [
   // body is one link to `/de/` — no heading, 25 characters of text — which is
   // indistinguishable from a parking page and was rejected as one, correctly:
   // that IS what the root serves. The entry points past the gate, at the site.
-  { id: "demo2", number: "02", host: "demo2.tracht-digital.de", url: "https://demo2.tracht-digital.de/de/", kind: "shop", origin: "demo", labels: { de: ["Mode", "Interaktiv"], en: ["Fashion", "Interactive"] } },
+  { id: "demo2", number: "02", host: "demo2.tracht-digital.de", url: "https://demo2.tracht-digital.de/de/", kind: "shop", origin: "demo", labels: { de: ["Mode", "Interaktiv"], en: ["Fashion", "Interactive"] }, alternates: { en: "https://demo2.tracht-digital.de/en/" } },
   { id: "demo3", number: "03", host: "demo3.tracht-digital.de", url: "https://demo3.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: ["Immobilien", "Verwaltungspanel"], en: ["Real estate", "Management panel"] } },
   { id: "demo4", number: "04", host: "demo4.tracht-digital.de", url: "https://demo4.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: ["Handwerk", "Schreinerei"], en: ["Trades", "Joinery"] } },
   { id: "demo5", number: "05", host: "demo5.tracht-digital.de", url: "https://demo5.tracht-digital.de/", kind: "website", origin: "demo", labels: { de: [], en: [] } },

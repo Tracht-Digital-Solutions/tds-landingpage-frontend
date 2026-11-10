@@ -41,7 +41,7 @@ import type { Lang } from "~/lib/i18n";
 import { DEMO_KINDS, DEMO_ORIGINS } from "~/lib/demoCatalog";
 import { PREVIEW_VARIANT_WIDTHS, srcsetFor } from "~/lib/imageVariants";
 import { mediaSrc } from "~/lib/mediaSrc";
-import { demoUi, type ResolvedDemo } from "~/lib/demos";
+import { demoTextFor, demoUi, type ResolvedDemo } from "~/lib/demos";
 import type { CardAction } from "~/lib/cardActions";
 import CardActions from "~/components/ui/CardActions.astro";
 
@@ -63,7 +63,10 @@ interface Props {
 const { demo, lang, serviceLink = null } = Astro.props;
 const ui = demoUi[lang];
 
-const { definition, title, description, favicon, preview, previewWidth, previewHeight } = demo;
+const { definition, favicon, preview, previewWidth, previewHeight } = demo;
+/** The demo's own words, from its page in the visitor's language when it has one. */
+const { title, description, url, textLang } = demoTextFor(demo, lang);
+const contentLang = textLang && textLang.split("-")[0] !== lang ? textLang : undefined;
 
 /**
  * The screenshot's alt text, in the language of the PAGE.
@@ -100,6 +103,7 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
   origin={origin}
   kind={kind}
   text={description}
+  contentLang={contentLang}
   labels={definition.labels[lang]}
 >
   {
@@ -122,10 +126,10 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
     lang={lang}
     service={serviceLink}
     cta={{
-      href: definition.url,
+      href: url,
       label: ui.visit,
       external: true,
-      hreflang: demo.siteLang ?? undefined,
+      hreflang: textLang ?? undefined,
       // "Demo ansehen" alone would read identically on every card.
       detail: title,
     }}

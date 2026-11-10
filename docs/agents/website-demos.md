@@ -42,6 +42,11 @@ Everything a visitor reads on a demo card comes from the demo, with **two except
 - `DemoDefinition.kind`, the genre label (`DEMO_KINDS`: Webseite · Landingpage · Onlineshop). Closed vocabulary,
   names the genre never the subject; adding one means adding it in both languages. `demos.test.ts` holds it.
 
+**Language (2026-11-10):** an English page shows the demo's own English title and description when the demo has an
+English page (`<link rel="alternate" hreflang="en">`, or `alternates` in the catalog for demo2, which announces
+none) — same host, HTTPS, harvested by the sync into `alternates`; the card then links there. Without one the card
+keeps the demo's German words and marks them `lang="de"` (`demoTextFor()`). Never translate a demo's words here.
+
 `homeContent.ts` owns only the section framing, overridable via the `website_demos` block. Never write a
 description for someone's site; a demo without one shows none.
 

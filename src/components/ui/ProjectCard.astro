@@ -42,6 +42,11 @@ interface Props {
   labels?: readonly string[];
   /** Read before the labels by a screen reader. */
   labelsLabel?: string;
+  /**
+   * Language of `title` and `text` when it is not the page's: a demo quoted in
+   * German on an English page. Omitted when they match.
+   */
+  contentLang?: string;
 }
 
 const {
@@ -61,6 +66,7 @@ const {
   captionLabel,
   labels = [],
   labelsLabel,
+  contentLang,
 } = Astro.props;
 
 ---
@@ -102,13 +108,13 @@ const {
         }
         <div class="project-card__head">
           <slot name="before-title" />
-          <h3 class="project-card__title">{title}</h3>
+          <h3 class="project-card__title" lang={contentLang}>{title}</h3>
         </div>
         {
           text && (
             <p class="project-card__text">
               {textLabel && <span class="sr-only">{textLabel}: </span>}
-              {text}
+              {contentLang ? <span lang={contentLang}>{text}</span> : text}
             </p>
           )
         }

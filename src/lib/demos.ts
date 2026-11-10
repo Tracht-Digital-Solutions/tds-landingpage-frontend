@@ -68,6 +68,8 @@ export interface DemoSnapshotEntry {
   description: string | null;
   /** The `lang` the demo declares, so the card can carry `hreflang`. */
   siteLang: string | null;
+  /** The demo's own words on its page in another language, keyed by language. */
+  alternates?: Record<string, DemoAlternate>;
   /** Public path under `/demos/`, or `null`. */
   favicon: string | null;
   /** Public path under `/demos/`, or `null`. */
@@ -75,6 +77,13 @@ export interface DemoSnapshotEntry {
   previewWidth: number | null;
   previewHeight: number | null;
   checkedAt: string | null;
+}
+
+/** A demo's page in another language, harvested like the main page. */
+export interface DemoAlternate {
+  url: string;
+  title: string;
+  description: string | null;
 }
 
 export interface DemoSnapshot {
@@ -88,6 +97,7 @@ export interface ResolvedDemo {
   title: string;
   description: string | null;
   siteLang: string | null;
+  alternates: Record<string, DemoAlternate>;
   favicon: string | null;
   preview: string;
   previewWidth: number;
@@ -98,6 +108,51 @@ export const demoSnapshot = snapshot as DemoSnapshot;
 
 function isNonEmpty(value: unknown): value is string {
   return typeof value === "string" && value.trim() !== "";
+}
+
+/** Only complete HTTPS alternates on the demo's own host survive. */
+function validAlternates(
+  source: Record<string, DemoAlternate> | undefined,
+  host: string,
+): Record<string, DemoAlternate> {
+  const out: Record<string, DemoAlternate> = {};
+  for (const [lang, alt] of Object.entries(source ?? {})) {
+    if (!alt || !isNonEmpty(alt.title) || !isNonEmpty(alt.url)) continue;
+    let url: URL;
+    try {
+      url = new URL(alt.url);
+    } catch {
+      continue;
+    }
+    if (url.protocol !== "https:" || url.hostname !== host) continue;
+    out[lang] = {
+      url: url.toString(),
+      title: alt.title.trim(),
+      description: isNonEmpty(alt.description) ? alt.description.trim() : null,
+    };
+  }
+  return out;
+}
+
+/**
+ * What a card says about a demo on a page in `lang` (2026-11-10).
+ *
+ * The demo's own words stay the rule: its page in that language if it has one,
+ * otherwise its main page — and then `textLang` names the demo's language, so
+ * the card can mark the German sentence on an English page with `lang`.
+ */
+export function demoTextFor(
+  demo: ResolvedDemo,
+  lang: Lang,
+): { title: string; description: string | null; url: string; textLang: string | null } {
+  const alt = demo.alternates[lang];
+  if (alt) return { title: alt.title, description: alt.description, url: alt.url, textLang: lang };
+  return {
+    title: demo.title,
+    description: demo.description,
+    url: demo.definition.url,
+    textLang: demo.siteLang,
+  };
 }
 
 /**
@@ -126,6 +181,7 @@ export function resolveSnapshotDemos(
       title: entry.title.trim(),
       description: isNonEmpty(entry.description) ? entry.description.trim() : null,
       siteLang: isNonEmpty(entry.siteLang) ? entry.siteLang : null,
+      alternates: validAlternates(entry.alternates, definition.host),
       favicon: isNonEmpty(entry.favicon) ? entry.favicon : null,
       preview: entry.preview,
       // A snapshot written before these fields existed still has to render at

@@ -69,8 +69,70 @@ interface Harvest {
   previewWidth: number | null;
   previewHeight: number | null;
   checkedAt: string;
+  /** The demo's own title and description in its other language(s), if it has a page for them. */
+  alternates?: Record<string, { url: string; title: string; description: string | null }>;
   /** Printed in the report, not written to the snapshot. */
   note?: string;
+}
+
+/** Languages this site renders; a demo's page in one of them is worth harvesting. */
+const SITE_LANGS = ["de", "en"] as const;
+
+/** Title and description as the demo states them, with the banned-word rule applied. */
+function readMeta(doc: Document, demo: DemoDefinition): { title: string | null; description: string | null } {
+  const rawTitle = (doc.querySelector("title")?.textContent ?? "").replace(/\s+/g, " ").trim();
+  const title =
+    firstMeta(doc, ['meta[property="og:site_name"]', 'meta[property="og:title"]']) || rawTitle || null;
+  const harvested = firstMeta(doc, ['meta[name="description"]', 'meta[property="og:description"]']);
+  const description = harvested && hasBannedWord(harvested) ? null : harvested;
+  if (harvested && description === null) {
+    console.warn(`  ${demo.id}  description dropped — banned word: ${JSON.stringify(harvested)}`);
+  }
+  return { title, description };
+}
+
+/**
+ * The demo's pages in the site's other languages: the catalog's explicit
+ * `alternates` first, then what the page announces with `hreflang`. Only the
+ * demo's own host — a demo cannot send visitors of this site elsewhere.
+ */
+async function harvestAlternates(
+  demo: DemoDefinition,
+  doc: Document,
+  base: URL,
+  siteLang: string | null,
+): Promise<Harvest["alternates"]> {
+  const found: NonNullable<Harvest["alternates"]> = {};
+  for (const lang of SITE_LANGS) {
+    if (siteLang?.split("-")[0] === lang) continue;
+    const announced = doc.querySelector(`link[rel="alternate"][hreflang="${lang}"]`)?.getAttribute("href");
+    const candidate = demo.alternates?.[lang] ?? announced;
+    if (!candidate) continue;
+    let url: URL;
+    try {
+      url = new URL(candidate, base);
+    } catch {
+      continue;
+    }
+    if (url.protocol !== "https:" || url.hostname !== demo.host) continue;
+    try {
+      const res = await fetch(url, {
+        redirect: "follow",
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        headers: { "user-agent": "tds-landingpage demos-sync" },
+      });
+      if (!res.ok || !(res.headers.get("content-type") ?? "").includes("html")) continue;
+      const altDoc = new JSDOM(await res.text(), { url: res.url || url.toString() }).window.document;
+      const declared = (altDoc.documentElement.getAttribute("lang") ?? "").trim().toLowerCase();
+      if (declared.split("-")[0] !== lang) continue;
+      const meta = readMeta(altDoc, demo);
+      if (!meta.title) continue;
+      found[lang] = { url: url.toString(), title: meta.title, description: meta.description };
+    } catch {
+      // An unreachable translation is a card in the demo's own language, not a failed demo.
+    }
+  }
+  return Object.keys(found).length > 0 ? found : undefined;
 }
 
 // ─── Reachability ────────────────────────────────────────────────────────────
@@ -297,19 +359,8 @@ async function harvest(demo: DemoDefinition): Promise<Harvest> {
     );
   }
 
-  const title =
-    firstMeta(doc, ['meta[property="og:site_name"]', 'meta[property="og:title"]']) ||
-    rawTitle ||
-    null;
-  if (!title) return unavailable("placeholder", "no title");
-
   // No description is a legitimate outcome. The card shows the title and the
   // screenshot; inventing a sentence about someone's site is not on the table.
-  const harvested = firstMeta(doc, [
-    'meta[name="description"]',
-    'meta[property="og:description"]',
-  ]);
-
   /**
    * A harvested sentence is still a sentence this site publishes.
    *
@@ -323,20 +374,21 @@ async function harvest(demo: DemoDefinition): Promise<Harvest> {
    * It fired the first time on 2026-09-28, when demo1's own description
    * changed to "keine echten Kontaktdaten" and `bannedWords.test.ts` failed on
    * the snapshot rather than on any copy anybody had written here.
+   * `readMeta()` applies it, to the demo's other-language pages as well.
    */
-  const description = harvested && hasBannedWord(harvested) ? null : harvested;
-  if (harvested && description === null) {
-    console.warn(`  ${demo.id}  description dropped — banned word: ${JSON.stringify(harvested)}`);
-  }
+  const { title, description } = readMeta(doc, demo);
+  if (!title) return unavailable("placeholder", "no title");
 
   const declaredLang = (doc.documentElement.getAttribute("lang") ?? "").trim().toLowerCase();
   const siteLang = /^[a-z]{2}(-[a-z0-9]+)*$/.test(declaredLang) ? declaredLang : null;
+  const alternates = await harvestAlternates(demo, doc, base, siteLang);
 
   return {
     status: "ok",
     title,
     description,
     siteLang,
+    ...(alternates ? { alternates } : {}),
     favicon: await fetchFavicon(demo, faviconCandidates(doc, base)),
     preview: null,
     previewWidth: DEMO_PREVIEW.width,
