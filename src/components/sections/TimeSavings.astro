@@ -86,7 +86,7 @@ const ICONS: Record<string, string> = {
                 </span>
                 {question.question[lang]}
               </legend>
-              <div class="savings-answers" data-savings-track>
+              <div class="savings-answers" data-savings-track data-count={question.answers.length} style={`--n: ${question.answers.length}`}>
                 <span class="savings-thumb" aria-hidden="true" data-savings-thumb></span>
                 {question.answers.map((answer) => (
                   <label class="savings-answer">
@@ -130,7 +130,7 @@ const ICONS: Record<string, string> = {
 
           <div class="savings-summary">
             <p class="savings-pending" data-savings-pending>{copy.pending}</p>
-            <div class="savings-figures" data-savings-figures hidden>
+            <div class="savings-figures" data-savings-figures aria-hidden="true" hidden>
               <p class="savings-figure savings-figure--year">
                 <span class="savings-prefix">{copy.resultPrefix}</span>
                 <span class="savings-number" aria-hidden="true" data-savings-count="year"></span>
@@ -266,20 +266,24 @@ const ICONS: Record<string, string> = {
 
   /* One pressed-in track per question (form controls press in, design.md):
      the answers share it in equal columns, so a wide row fills instead of
-     leaving chips afloat. Two columns on a phone. */
+     leaving chips afloat. Four answers fold to two by two on a narrow row,
+     never three and one. */
+  .savings-question {
+    container-type: inline-size;
+  }
   .savings-answers {
     clear: both;
     position: relative;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+    grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
     gap: 0.25rem;
     padding: 0.25rem;
     border-radius: 1.625rem;
     background: var(--color-paper);
     box-shadow: var(--tds-shadow-inset);
   }
-  @media (max-width: 40rem) {
-    .savings-answers {
+  @container (max-width: 34rem) {
+    .savings-answers[data-count="4"] {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -354,6 +358,16 @@ const ICONS: Record<string, string> = {
   }
   [data-glide] .savings-answers[data-instant] .savings-thumb {
     transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-glide] .savings-thumb,
+    .savings-icon,
+    .savings-dots i {
+      transition: none;
+    }
+    .savings-question[data-answered] .savings-icon {
+      rotate: none;
+    }
   }
   [data-glide] .savings-answer input:checked + span {
     background: transparent;
@@ -796,8 +810,8 @@ const ICONS: Record<string, string> = {
       // The third answer on a phone: show the plate down to the button, once.
       if (!wasReady && event && window.matchMedia(PHONE_QUERY).matches) {
         const row = plate.querySelector<HTMLElement>(".savings-chart-row");
-        const cta = plate.querySelector<HTMLElement>("[data-savings-cta]");
-        if (row && cta) keepInView(row, cta, 120);
+        const action = plate.querySelector<HTMLElement>(".savings-action");
+        if (row && action) keepInView(row, action, 120);
       }
       wasReady = true;
     };
