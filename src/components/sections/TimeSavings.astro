@@ -17,6 +17,22 @@
  * working days saved in the middle (asked for). The ring is drawn with
  * `stroke-dasharray` (no gradients); its numbers also stand in the legend, so
  * nothing depends on telling two colours apart.
+ *
+ * Motion since 2026-11-10 (asked for: pleasant motion, more enquiries):
+ * - Each question's answers are one pressed-in track; with JS one pill in the
+ *   question's colour glides to the chosen answer (`--lp-ease-spring` on
+ *   `transform` only, size on `--lp-ease-soft`), like the process stepper.
+ *   Without JS the chosen answer fills itself.
+ * - Every answer gets a reply on the result plate: a dot in its colour pops in
+ *   the ring's middle and the line counts down the missing answers.
+ * - The estimate arrives together: the ring sweeps, days and hours count up
+ *   (one rAF loop, 900 ms, stops at the end; only `aria-hidden` twins count,
+ *   one hidden sentence is announced once), figures rise into place.
+ * - The CTA stays quiet until an estimate stands, then takes the full fill,
+ *   says "Diesen Ablauf besprechen" and that the answers travel along.
+ * - On a phone the plate is scrolled into view once, after the third answer.
+ * The state lives in `data-state` on the plate, written only by the script;
+ * the motion switch and reduced motion get the end states at once.
  */
 import Arrow from "~/components/ui/Arrow.astro";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
@@ -51,7 +67,16 @@ const ICONS: Record<string, string> = {
     />
 
     <div class="savings-card" data-reveal>
-      <form class="savings-form" data-savings data-lang={lang} data-draft={copy.draft} data-chart-label={copy.chartLabel} data-work-hours={WORK_YEAR_HOURS}>
+      <form
+        class="savings-form"
+        data-savings
+        data-lang={lang}
+        data-draft={copy.draft}
+        data-chart-label={copy.chartLabel}
+        data-work-hours={WORK_YEAR_HOURS}
+        data-pending-one={copy.pendingOne}
+        data-pending-two={copy.pendingTwo}
+      >
         {
           SAVINGS_QUESTIONS.map((question) => (
             <fieldset class="savings-question" data-tone={TONES[question.id]}>
@@ -61,7 +86,8 @@ const ICONS: Record<string, string> = {
                 </span>
                 {question.question[lang]}
               </legend>
-              <div class="savings-answers">
+              <div class="savings-answers" data-savings-track>
+                <span class="savings-thumb" aria-hidden="true" data-savings-thumb></span>
                 {question.answers.map((answer) => (
                   <label class="savings-answer">
                     <input type="radio" name={question.id} value={answer.value} />
@@ -74,7 +100,8 @@ const ICONS: Record<string, string> = {
         }
       </form>
 
-      <div class="savings-result" aria-live="polite">
+      <div class="savings-result" data-savings-result-plate>
+        <p class="sr-only" aria-live="polite" data-savings-announce></p>
         <div class="savings-chart-row">
           <figure class="savings-chart">
             <svg viewBox="0 0 120 120" role="img" aria-labelledby="savings-chart-label">
@@ -91,7 +118,12 @@ const ICONS: Record<string, string> = {
               />
             </svg>
             <span class="savings-chart__centre" aria-hidden="true">
-              <span class="savings-chart__days" data-savings-share>–</span>
+              <span class="savings-dots">
+                {SAVINGS_QUESTIONS.map((question) => (
+                  <i data-tone={TONES[question.id]} data-savings-dot={question.id}></i>
+                ))}
+              </span>
+              <span class="savings-chart__days" data-savings-count="days">–</span>
               <span class="savings-chart__unit">{copy.centre}</span>
             </span>
           </figure>
@@ -101,11 +133,11 @@ const ICONS: Record<string, string> = {
             <div class="savings-figures" data-savings-figures hidden>
               <p class="savings-figure savings-figure--year">
                 <span class="savings-prefix">{copy.resultPrefix}</span>
-                <output data-savings-result="year"></output>
+                <span class="savings-number" aria-hidden="true" data-savings-count="year"></span>
                 <span>{copy.year}</span>
               </p>
               <p class="savings-figure">
-                <output data-savings-result="days"></output>
+                <span class="savings-number" aria-hidden="true" data-savings-count="days"></span>
                 <span>{copy.days}</span>
               </p>
             </div>
@@ -115,19 +147,22 @@ const ICONS: Record<string, string> = {
         <dl class="savings-legend" data-savings-legend hidden>
           <div>
             <dt><span class="savings-swatch savings-swatch--saved" aria-hidden="true"></span>{copy.sliceSaved}</dt>
-            <dd><output data-savings-result="year"></output> h</dd>
+            <dd><span data-savings-value="year"></span> h</dd>
           </div>
           <div>
             <dt><span class="savings-swatch savings-swatch--rest" aria-hidden="true"></span>{copy.sliceRest}</dt>
-            <dd><output data-savings-result="rest"></output> h</dd>
+            <dd><span data-savings-value="rest"></span> h</dd>
           </div>
         </dl>
 
         <p class="savings-small">{copy.note}</p>
-        <a href={contactHref} class="savings-cta" data-cta data-savings-cta data-track="savings-first-call">
-          {copy.cta}
-          <span aria-hidden="true"><Arrow dir="right" /></span>
-        </a>
+        <div class="savings-action">
+          <a href={contactHref} class="savings-cta" data-cta data-savings-cta data-track="savings-first-call">
+            <span data-savings-cta-label data-ready={copy.ctaReady}>{copy.cta}</span>
+            <span class="savings-cta__arrow" aria-hidden="true"><Arrow dir="right" /></span>
+          </a>
+          <p class="savings-handoff" data-savings-handoff hidden>{copy.handoff}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -158,14 +193,14 @@ const ICONS: Record<string, string> = {
       font-size: 1rem;
     }
     .savings-answer span {
-      padding: 0.5rem 0.875rem;
+      padding: 0.5rem 0.625rem;
       font-size: 0.875rem;
     }
     .savings-result {
       padding: 1.125rem;
     }
     .savings-cta {
-      align-self: stretch;
+      flex: 1 1 100%;
       justify-content: center;
       padding-inline: 1.25rem;
     }
@@ -222,52 +257,109 @@ const ICONS: Record<string, string> = {
     border-radius: 9999px;
     background: var(--savings-tone);
     color: #050f68;
+    transition: rotate 420ms var(--lp-ease-bounce);
   }
+  /* The icon gives a small nod when its question is answered. */
+  .savings-question[data-answered] .savings-icon {
+    rotate: -10deg;
+  }
+
+  /* One pressed-in track per question (form controls press in, design.md):
+     the answers share it in equal columns, so a wide row fills instead of
+     leaving chips afloat. Two columns on a phone. */
   .savings-answers {
     clear: both;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 1.625rem;
+    background: var(--color-paper);
+    box-shadow: var(--tds-shadow-inset);
+  }
+  @media (max-width: 40rem) {
+    .savings-answers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   .savings-answer {
     position: relative;
-    display: inline-flex;
+    display: flex;
+    min-width: 0;
   }
   .savings-answer input {
     position: absolute;
     inset: 0;
+    z-index: 1;
     margin: 0;
     opacity: 0;
     cursor: pointer;
   }
-  /* Unchosen: a light well pressed into the row (form controls press in,
-     design.md). Chosen: filled in the question's colour, no inset. */
   .savings-answer span {
-    display: inline-flex;
+    position: relative;
+    display: flex;
+    flex: 1;
     align-items: center;
+    justify-content: center;
     min-height: 2.75rem;
-    padding: 0.5rem 1.125rem;
+    padding: 0.5rem 0.875rem;
     border-radius: 100px;
-    background: var(--color-paper);
-    box-shadow: var(--tds-shadow-inset);
     color: var(--color-black);
     font-size: 0.9375rem;
     font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
     transition:
       background-color 160ms var(--tds-ease-out),
       color 160ms var(--tds-ease-out);
   }
-  .savings-answer:hover span {
-    background: color-mix(in srgb, var(--savings-tone) 30%, var(--color-paper));
+  @media (hover: hover) {
+    .savings-answer:hover span {
+      background: color-mix(in srgb, var(--savings-tone) 22%, transparent);
+    }
   }
+  /* Without the script the chosen answer fills itself. */
   .savings-answer input:checked + span {
     background: var(--savings-tone);
-    box-shadow: none;
     color: #050f68;
   }
   .savings-answer input:focus-visible + span {
     outline: 2px solid var(--color-accent);
-    outline-offset: 3px;
+    outline-offset: 2px;
+  }
+
+  /* With the script one pill carries the fill and glides between answers. */
+  .savings-thumb {
+    display: none;
+  }
+  [data-glide] .savings-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: var(--thumb-w, 0);
+    height: var(--thumb-h, 0);
+    border-radius: 100px;
+    background: var(--savings-tone);
+    box-shadow: 2px 2px 0 color-mix(in srgb, var(--savings-tone) 55%, #050f68);
+    transform: translate(var(--thumb-x, 0), var(--thumb-y, 0)) scale(var(--thumb-s, 0));
+    transition:
+      transform 620ms var(--lp-ease-spring),
+      width 320ms var(--lp-ease-soft),
+      height 320ms var(--lp-ease-soft);
+  }
+  [data-glide] .savings-answers[data-chosen] .savings-thumb {
+    --thumb-s: 1;
+  }
+  [data-glide] .savings-answers[data-instant] .savings-thumb {
+    transition: none;
+  }
+  [data-glide] .savings-answer input:checked + span {
+    background: transparent;
+  }
+  [data-glide] .savings-answer:hover input:checked + span {
+    background: transparent;
   }
 
   /* The result: a soft rosé plate with the chart, the figures and the way on. */
@@ -308,7 +400,7 @@ const ICONS: Record<string, string> = {
   }
   .savings-ring--saved {
     stroke: var(--color-accent);
-    transition: stroke-dasharray 480ms var(--tds-ease-out);
+    transition: stroke-dasharray 900ms var(--lp-ease-soft);
   }
   @media (prefers-reduced-motion: reduce) {
     .savings-ring--saved {
@@ -338,6 +430,45 @@ const ICONS: Record<string, string> = {
     font-weight: 600;
     color: var(--color-muted);
   }
+  /* One dot per question in its colour: an outline while open, filled with a
+     pop once answered. They give way to the days when the estimate stands. */
+  .savings-dots {
+    display: none;
+    gap: 0.375rem;
+  }
+  [data-state] .savings-dots {
+    display: flex;
+  }
+  [data-state="ready"] .savings-dots,
+  [data-state] .savings-chart__days,
+  [data-state] .savings-chart__unit {
+    display: none;
+  }
+  [data-state="ready"] .savings-chart__days,
+  [data-state="ready"] .savings-chart__unit {
+    display: block;
+  }
+  .savings-dots i {
+    --dot: #ff7a9c;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--dot) 70%, var(--color-black));
+    transition:
+      transform 420ms var(--lp-ease-bounce),
+      background-color 160ms var(--tds-ease-out);
+  }
+  .savings-dots i[data-tone="gold"] {
+    --dot: #f5c04a;
+  }
+  .savings-dots i[data-tone="periwinkle"] {
+    --dot: #b9c3ff;
+  }
+  .savings-dots i[data-on] {
+    background: var(--dot);
+    box-shadow: none;
+    transform: scale(1.35);
+  }
   .savings-summary {
     flex: 1 1 11rem;
     min-width: 0;
@@ -363,7 +494,7 @@ const ICONS: Record<string, string> = {
     font-weight: 600;
     color: var(--color-black);
   }
-  .savings-figure output {
+  .savings-number {
     font-family: var(--font-display);
     font-weight: 800;
     font-size: 1.5rem;
@@ -371,9 +502,33 @@ const ICONS: Record<string, string> = {
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
   }
-  .savings-figure--year output {
+  .savings-figure--year .savings-number {
     font-size: clamp(2.5rem, 6vw, 3.5rem);
     color: var(--color-accent);
+  }
+  /* Shown figures rise into place: transform only, the text is never faded. */
+  .savings-figures:not([hidden]) .savings-figure,
+  .savings-legend:not([hidden]) div,
+  .savings-handoff:not([hidden]) {
+    animation: savings-rise 560ms var(--lp-ease-bounce) both;
+  }
+  .savings-figures .savings-figure + .savings-figure {
+    animation-delay: 70ms;
+  }
+  .savings-legend div + div {
+    animation-delay: 140ms;
+  }
+  @keyframes savings-rise {
+    from {
+      transform: translateY(0.625rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .savings-figures .savings-figure,
+    .savings-legend div,
+    .savings-handoff {
+      animation: none !important;
+    }
   }
 
   .savings-legend {
@@ -423,16 +578,30 @@ const ICONS: Record<string, string> = {
     line-height: 1.45;
     color: var(--color-muted);
   }
+
+  .savings-action {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-top: 0.25rem;
+  }
+  .savings-handoff {
+    flex: 1 1 12rem;
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-black);
+  }
   /* The site's pill CTA, like "Mehr Projekte". */
   .savings-cta {
     --lp-fill: var(--color-accent);
     --lp-shade: initial;
     display: inline-flex;
-    align-self: flex-start;
     align-items: center;
     gap: 0.5rem;
     min-height: 2.75rem;
-    margin-top: 0.25rem;
     padding: 0.75rem 1.75rem;
     border-radius: 100px;
     background: var(--lp-fill);
@@ -440,7 +609,9 @@ const ICONS: Record<string, string> = {
     font-size: 0.9375rem;
     font-weight: 600;
     text-decoration: none;
-    transition: background-color 200ms var(--tds-ease-out);
+    transition:
+      background-color 200ms var(--tds-ease-out),
+      color 200ms var(--tds-ease-out);
   }
   .savings-cta:hover {
     --lp-fill: var(--color-surface-navy);
@@ -451,61 +622,198 @@ const ICONS: Record<string, string> = {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
+  /* Quiet while answers are missing (set by the script only, so a page
+     without it keeps the full button); full weight once the estimate stands. */
+  [data-state="pending"] .savings-cta:not(:hover) {
+    --lp-fill: color-mix(in srgb, var(--color-accent) 12%, var(--color-paper));
+    --lp-shade: color-mix(in srgb, var(--color-accent) 30%, var(--color-paper));
+    color: var(--color-accent);
+  }
+  .savings-cta__arrow {
+    display: inline-flex;
+  }
+  [data-state="ready"] .savings-cta__arrow {
+    animation: savings-nudge 900ms var(--tds-ease-out) 450ms 2;
+  }
+  @keyframes savings-nudge {
+    40% {
+      transform: translateX(0.3125rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-state="ready"] .savings-cta__arrow {
+      animation: none;
+    }
+  }
 </style>
 
 <script>
+  import { lessMotion } from "~/lib/a11yPrefs";
   import { handOffContactDraft } from "~/lib/contactDraft";
+  import { PHONE_QUERY, keepInView } from "~/lib/keepInView";
   import { formatSavings, savings, savingsDraft, type SavingsInput } from "~/lib/savingsCalculator";
+
+  const COUNT_MS = 900;
+  const easeOut = (t: number) => 1 - (1 - t) ** 3;
 
   for (const form of document.querySelectorAll<HTMLFormElement>("[data-savings]")) {
     const section = form.closest("section");
+    const plate = section?.querySelector<HTMLElement>("[data-savings-result-plate]");
+    if (!section || !plate) continue;
     const lang = form.dataset.lang === "en" ? "en" : "de";
+    const ring = Number(section.querySelector<SVGCircleElement>("[data-savings-arc]")?.dataset.ring ?? 0);
+    const pendingCopy = section.querySelector<HTMLElement>("[data-savings-pending]")?.textContent ?? "";
+    const ctaLabel = section.querySelector<HTMLElement>("[data-savings-cta-label]");
+    const ctaCopy = ctaLabel?.textContent ?? "";
+    const tracks = [...form.querySelectorAll<HTMLElement>("[data-savings-track]")];
+
     const read = (): SavingsInput | null => {
       const data = new FormData(form);
       const value = (name: string) => (data.has(name) ? Number(data.get(name)) : Number.NaN);
       const input = { minutes: value("minutes"), perWeek: value("perWeek"), share: value("share") };
       return Object.values(input).every(Number.isFinite) ? input : null;
     };
-    const update = () => {
+
+    // The gliding pill: measured in the change handler or a task after a
+    // resize, never inside a frame or an observer callback (motion.md).
+    const place = (track: HTMLElement, instant: boolean) => {
+      const checked = track.querySelector<HTMLInputElement>("input:checked");
+      const target = checked?.nextElementSibling as HTMLElement | null;
+      track.closest("fieldset")?.toggleAttribute("data-answered", !!checked);
+      if (!target) {
+        track.removeAttribute("data-chosen");
+        return;
+      }
+      const first = !track.hasAttribute("data-chosen");
+      if (instant || first) track.setAttribute("data-instant", "");
+      // Relative to the track's padding box (the label is the span's offset
+      // parent, so offsetLeft would always read 0).
+      const box = track.getBoundingClientRect();
+      const spot = target.getBoundingClientRect();
+      track.style.setProperty("--thumb-x", `${spot.left - box.left - track.clientLeft}px`);
+      track.style.setProperty("--thumb-y", `${spot.top - box.top - track.clientTop}px`);
+      track.style.setProperty("--thumb-w", `${target.offsetWidth}px`);
+      track.style.setProperty("--thumb-h", `${target.offsetHeight}px`);
+      if (instant || first) {
+        void track.offsetWidth;
+        track.removeAttribute("data-instant");
+      }
+      // A first choice pops the pill in from its place (scale, bounce).
+      track.setAttribute("data-chosen", "");
+    };
+    let resizeTask = 0;
+    const replaceAll = () => {
+      window.clearTimeout(resizeTask);
+      resizeTask = window.setTimeout(() => tracks.forEach((track) => place(track, true)), 60);
+    };
+    form.setAttribute("data-glide", "");
+    new ResizeObserver(replaceAll).observe(form);
+    void document.fonts?.ready.then(replaceAll);
+
+    // Counting numbers: only the aria-hidden twins move; the sentence for
+    // screen readers is written once, with the final values.
+    const shown = { year: 0, days: 0 };
+    let frame = 0;
+    const paint = (year: number, days: number) => {
+      for (const node of section.querySelectorAll<HTMLElement>('[data-savings-count="year"]')) node.textContent = formatSavings(year, lang);
+      for (const node of section.querySelectorAll<HTMLElement>('[data-savings-count="days"]')) node.textContent = formatSavings(days, lang);
+    };
+    const countTo = (year: number, days: number) => {
+      cancelAnimationFrame(frame);
+      const from = { ...shown };
+      if (lessMotion()) {
+        Object.assign(shown, { year, days });
+        paint(year, days);
+        return;
+      }
+      const start = performance.now();
+      const step = (now: number) => {
+        const t = Math.min((now - start) / COUNT_MS, 1);
+        const k = easeOut(t);
+        shown.year = from.year + (year - from.year) * k;
+        shown.days = from.days + (days - from.days) * k;
+        // Hours round to whole numbers while counting, so the digits settle.
+        paint(t < 1 && shown.year >= 10 ? Math.round(shown.year) : shown.year, shown.days);
+        if (t < 1) frame = requestAnimationFrame(step);
+      };
+      frame = requestAnimationFrame(step);
+    };
+
+    let wasReady = false;
+    const update = (event?: Event) => {
+      const target = event?.target as HTMLInputElement | undefined;
+      const track = target?.closest<HTMLElement>("[data-savings-track]");
+      if (track) place(track, false);
+
+      const answered = tracks.filter((item) => item.querySelector("input:checked")).length;
+      for (const dot of section.querySelectorAll<HTMLElement>("[data-savings-dot]")) {
+        dot.toggleAttribute("data-on", !!form.querySelector(`input[name="${dot.dataset.savingsDot}"]:checked`));
+      }
       const input = read();
-      const figures = section?.querySelector<HTMLElement>("[data-savings-figures]");
-      const pending = section?.querySelector<HTMLElement>("[data-savings-pending]");
-      const legend = section?.querySelector<HTMLElement>("[data-savings-legend]");
-      const arc = section?.querySelector<SVGCircleElement>("[data-savings-arc]");
-      const centre = section?.querySelector<HTMLElement>("[data-savings-share]");
-      const label = section?.querySelector<SVGTitleElement>("[data-savings-chart-label]");
+      const figures = section.querySelector<HTMLElement>("[data-savings-figures]");
+      const pending = section.querySelector<HTMLElement>("[data-savings-pending]");
+      const legend = section.querySelector<HTMLElement>("[data-savings-legend]");
+      const handoff = section.querySelector<HTMLElement>("[data-savings-handoff]");
+      const arc = section.querySelector<SVGCircleElement>("[data-savings-arc]");
+      const label = section.querySelector<SVGTitleElement>("[data-savings-chart-label]");
+      const announce = section.querySelector<HTMLElement>("[data-savings-announce]");
+      plate.dataset.state = input ? "ready" : "pending";
       if (figures) figures.hidden = !input;
       if (legend) legend.hidden = !input;
-      if (pending) pending.hidden = !!input;
-      const ring = Number(arc?.dataset.ring ?? 0);
+      if (handoff) handoff.hidden = !input;
+      if (pending) {
+        pending.hidden = !!input;
+        const left = 3 - answered;
+        pending.textContent = left === 1 ? (form.dataset.pendingOne ?? "") : left === 2 ? (form.dataset.pendingTwo ?? "") : pendingCopy;
+      }
+      if (ctaLabel) ctaLabel.textContent = input ? (ctaLabel.dataset.ready ?? ctaCopy) : ctaCopy;
+
       if (!input) {
         arc?.setAttribute("stroke-dasharray", `0 ${ring}`);
-        if (centre) centre.textContent = "–";
+        cancelAnimationFrame(frame);
+        Object.assign(shown, { year: 0, days: 0 });
+        if (label) label.textContent = pendingCopy;
+        wasReady = false;
         return;
       }
       const result = savings(input);
-      for (const key of ["year", "days", "rest"] as const) {
-        for (const output of section?.querySelectorAll<HTMLOutputElement>(`[data-savings-result="${key}"]`) ?? []) {
-          output.textContent = formatSavings(result[key], lang);
+      for (const key of ["year", "rest"] as const) {
+        for (const node of section.querySelectorAll<HTMLElement>(`[data-savings-value="${key}"]`)) {
+          node.textContent = formatSavings(result[key], lang);
         }
       }
       // At least a sliver, so a small saving still shows on the ring.
       const slice = result.year > 0 ? Math.max(result.yearShare, 0.015) : 0;
       arc?.setAttribute("stroke-dasharray", `${(ring * slice).toFixed(2)} ${ring}`);
-      if (centre) centre.textContent = formatSavings(result.days, lang);
-      if (label) {
-        label.textContent = (form.dataset.chartLabel ?? "")
-          .replace("{year}", formatSavings(result.year, lang))
-          .replace("{days}", formatSavings(result.days, lang))
-          .replace("{work}", formatSavings(Number(form.dataset.workHours ?? 0), lang));
+      countTo(result.year, result.days);
+      const sentence = (form.dataset.chartLabel ?? "")
+        .replace("{year}", formatSavings(result.year, lang))
+        .replace("{days}", formatSavings(result.days, lang))
+        .replace("{work}", formatSavings(Number(form.dataset.workHours ?? 0), lang));
+      if (label) label.textContent = sentence;
+      if (announce) announce.textContent = sentence;
+
+      // The third answer on a phone: show the plate down to the button, once.
+      if (!wasReady && event && window.matchMedia(PHONE_QUERY).matches) {
+        const row = plate.querySelector<HTMLElement>(".savings-chart-row");
+        const cta = plate.querySelector<HTMLElement>("[data-savings-cta]");
+        if (row && cta) keepInView(row, cta, 120);
       }
+      wasReady = true;
     };
     form.addEventListener("change", update);
     form.addEventListener("submit", (event) => event.preventDefault());
-    section?.querySelector("[data-savings-cta]")?.addEventListener("click", () => {
+    section.querySelector("[data-savings-cta]")?.addEventListener("click", () => {
       const input = read();
       if (input) handOffContactDraft({ message: savingsDraft(form.dataset.draft ?? "", input, lang), service: "process" });
     });
+    // Answers the browser restored (back navigation) show at once, no count.
+    for (const track of tracks) place(track, true);
+    const restored = read();
+    if (restored) {
+      const result = savings(restored);
+      Object.assign(shown, { year: result.year, days: result.days });
+    }
     update();
   }
 </script>

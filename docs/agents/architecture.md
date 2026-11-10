@@ -52,7 +52,11 @@ Preise (`sections/Pricing.astro`, with the assistant's second button) → FAQ �
   tinted in its colour, and the result a rosé plate with a donut chart (SVG ring, `stroke-dasharray`, no
   gradient): the hours saved as a slice of one working year (`WORK_YEAR_HOURS`, 46 × 40 h), the working days
   saved in its middle, saved and remaining hours in a legend (0.101.1, asked for). `savings()` returns
-  `yearShare` and `rest` for it.
+  `yearShare` and `rest` for it. Since 2026-11-10 (asked for: motion, more enquiries) each question's answers
+  share one pressed-in track with a gliding pill, every answer is answered on the plate (a dot per question,
+  the line counts down the missing answers), and once the estimate stands the CTA turns from quiet to full,
+  reads "Diesen Ablauf besprechen" and says that the answers go into the contact form. The plate's
+  `data-state` (pending/ready) is written by the script only, so the page without it keeps the full button.
 - **Vorgehen** (0.97.0): the step title sits in the navy head. From 40rem all four steps show; on a phone
   the heads are buttons of an accordion, one open at a time (`hidden` only set by the script; on desktop the
   heads are disabled buttons, no tab stop). No "Schritt n" label; an arrow points from step to step (right in

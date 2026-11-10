@@ -44,4 +44,17 @@ describe("time-savings questionnaire", () => {
     expect(getSavingsCopy("de").note).toMatch(/Schätzung.*keine Zusage/);
     expect(getSavingsCopy("en").note).toMatch(/estimate.*not a promise/);
   });
+
+  it("counts down the missing answers and names the hand-off in both languages", () => {
+    for (const lang of ["de", "en"] as const) {
+      const copy = getSavingsCopy(lang);
+      for (const text of [copy.pendingOne, copy.pendingTwo, copy.ctaReady, copy.handoff]) {
+        expect(text).not.toBe("");
+        expect(text).not.toMatch(/\d/);
+      }
+      expect(copy.ctaReady).not.toBe(copy.cta);
+    }
+    expect(getSavingsCopy("de").handoff).toMatch(/Kontaktformular/);
+    expect(getSavingsCopy("en").handoff).toMatch(/contact form/);
+  });
 });

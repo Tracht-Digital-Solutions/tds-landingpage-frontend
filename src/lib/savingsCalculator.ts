@@ -100,6 +100,9 @@ export interface SavingsCopy {
   headline: string;
   headlineAccent: string;
   pending: string;
+  /** While answers are missing: one left, two left. Nothing is numbered. */
+  pendingOne: string;
+  pendingTwo: string;
   resultPrefix: string;
   year: string;
   days: string;
@@ -111,6 +114,9 @@ export interface SavingsCopy {
   chartLabel: string;
   note: string;
   cta: string;
+  /** The CTA once an estimate stands, and the line that says what it carries. */
+  ctaReady: string;
+  handoff: string;
   /** The draft handed to the contact form; `{…}` are filled in by the script. */
   draft: string;
 }
@@ -120,6 +126,8 @@ const copy: Record<Lang, SavingsCopy> = {
     headline: "Was Digitalisierung",
     headlineAccent: "an Zeit spart.",
     pending: "Nach drei Antworten steht hier die Schätzung.",
+    pendingOne: "Noch eine Antwort bis zur Schätzung.",
+    pendingTwo: "Noch zwei Antworten bis zur Schätzung.",
     resultPrefix: "Etwa",
     year: "Stunden pro Jahr",
     days: "Arbeitstage",
@@ -129,6 +137,8 @@ const copy: Record<Lang, SavingsCopy> = {
     chartLabel: "Etwa {year} Stunden oder {days} Arbeitstage gespart, von {work} Stunden Arbeitszeit im Jahr.",
     note: "Eine grobe Schätzung aus den Antworten, keine Zusage.",
     cta: "Erstgespräch vereinbaren",
+    ctaReady: "Diesen Ablauf besprechen",
+    handoff: "Die drei Antworten gehen als Entwurf ins Kontaktformular.",
     draft:
       "Aus dem Zeitersparnis-Fragebogen: Dauer {minutes}, Häufigkeit {perWeek}, Routine {share}. Geschätzt etwa {year} Stunden pro Jahr.\n\nUm diesen Ablauf geht es: ",
   },
@@ -136,6 +146,8 @@ const copy: Record<Lang, SavingsCopy> = {
     headline: "How much time",
     headlineAccent: "digitalization saves.",
     pending: "The estimate appears here after three answers.",
+    pendingOne: "One more answer to the estimate.",
+    pendingTwo: "Two more answers to the estimate.",
     resultPrefix: "About",
     year: "hours per year",
     days: "working days",
@@ -145,6 +157,8 @@ const copy: Record<Lang, SavingsCopy> = {
     chartLabel: "About {year} hours or {days} working days saved, out of {work} working hours a year.",
     note: "A rough estimate from the answers, not a promise.",
     cta: "Book a first conversation",
+    ctaReady: "Talk this task through",
+    handoff: "The three answers go into the contact form as a draft.",
     draft:
       "From the time-savings questionnaire: duration {minutes}, frequency {perWeek}, routine {share}. Estimated at about {year} hours per year.\n\nThe task in question: ",
   },
