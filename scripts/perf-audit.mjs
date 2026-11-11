@@ -129,11 +129,15 @@ async function measure(browser, url, device) {
           }
 
           const el = lcp?.element;
+          // tag#id, else tag.firstClass — "p" alone could not tell the hero
+          // lead from the cookie notice's text (2026-11-11).
+          const firstClass = el && typeof el.className === "string" ? el.className.trim().split(/\s+/)[0] : "";
           resolve({
             lcp: lcp ? lcp.startTime : -1,
             lcpElement: el
-              ? `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}`.slice(0, 40)
+              ? `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : firstClass ? "." + firstClass : ""}`.slice(0, 40)
               : "(keines)",
+            lcpInCookieNotice: Boolean(el?.closest?.(".cookie-notice, .consent-dialog")),
             cls,
             ttfb: nav ? nav.responseStart : -1,
             // The document itself is not a resource entry; take it from nav.
@@ -171,6 +175,7 @@ for (const path of paths) {
     lcpMedian,
     lcpAll: samples.map((s) => Math.round(s.lcp)).sort((a, b) => a - b),
     lcpElement: last.lcpElement,
+    lcpInCookieNotice: samples.some((s) => s.lcpInCookieNotice),
     cls: Number(last.cls.toFixed(4)),
     ttfb: Math.round(last.ttfb),
     documentKb: kb(last.documentBytes),
@@ -199,8 +204,19 @@ for (const path of paths) {
 
   // Budgets are per page path, falling back to the shared default.
   const deviceBudget = budgets.devices?.[device] ?? {};
-  const budget = { ...budgets.default, ...(deviceBudget.budget ?? {}), ...(budgets.pages?.[path] ?? {}) };
-  const expectedElement = deviceBudget.lcpElement ?? budgets.lcpElement;
+  const budget = { ...budgets.default, ...(deviceBudget.budget ?? {}), ...(budgets.pages?.[path]?.budget ?? {}) };
+  // The hero headline is the home page's contract; a subpage has its own H1
+  // (`#service-title`, a lead, a project tile) and names it under pages.<path>.
+  // On EVERY page the cookie notice must never be the largest paint — it was,
+  // at 4.1 s, before the banner mounted at idle.
+  const pageBudget = budgets.pages?.[path] ?? {};
+  const expectedElement =
+    pageBudget.lcpElement ??
+    ((budgets.lcpElementPaths ?? []).includes(path) ? (deviceBudget.lcpElement ?? budgets.lcpElement) : undefined);
+  if (page.lcpInCookieNotice) {
+    console.log(`  ✗ LCP-Element liegt im Cookie-Hinweis — der Hinweis malt vor dem Inhalt`);
+    failed++;
+  }
   for (const [key, limit] of Object.entries(budget)) {
     const value = page[key];
     if (typeof value !== "number") continue;

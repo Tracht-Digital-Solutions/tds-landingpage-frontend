@@ -23,16 +23,29 @@
     "Devices (2026-09-21): mobile 390px and desktop 1440px. Each may carry its",
     "own lcpElement and budget overrides under devices.<name>. The desktop is",
     "where the hero photo loads and Motion is busiest; the H1 has to stay the",
-    "LCP element there too, or a start state has overtaken it."
+    "LCP element there too, or a start state has overtaken it.",
+    "",
+    "Re-baselined 2026-11-11 (local release build, cache off, CPU x4), after the",
+    "cookie notice lost React and the product tiles moved to AVIF:",
+    "  home mobile: LCP ~0.5 s (h1#hero-heading), document 490 KB raw (87 KB gzip",
+    "  live; 281 KB of it is the inlined stylesheet, see architecture.md), JS",
+    "  decoded 197 KB (was 416), total 1069 KB; desktop total 1336 KB.",
+    "The document grew 342 -> 490 KB with the redesign (scenes, demos, FAQ), not",
+    "by accident; budgets sit ~15 % above again. jsDecodedKb is TIGHTENED to 300:",
+    "React coming back on a first visit is exactly what it should catch.",
+    "",
+    "lcpElement applies to lcpElementPaths only (the home pages). A subpage may",
+    "name its own under pages.<path>.lcpElement; on every page an LCP inside the",
+    "cookie notice fails (perf-audit.mjs)."
   ],
   "lcpElement": "h1#hero-heading",
   "default": {
     "lcpMedian": 2200,
     "cls": 0.05,
     "ttfb": 600,
-    "jsDecodedKb": 600,
-    "totalKb": 1200,
-    "documentKb": 400
+    "jsDecodedKb": 300,
+    "totalKb": 1250,
+    "documentKb": 560
   },
   "pages": {},
   "devices": {
@@ -42,8 +55,13 @@
     "desktop": {
       "lcpElement": "h1#hero-heading",
       "budget": {
-        "lcpMedian": 1800
+        "lcpMedian": 1800,
+        "totalKb": 1550
       }
     }
-  }
+  },
+  "lcpElementPaths": [
+    "/",
+    "/en/"
+  ]
 }

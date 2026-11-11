@@ -36,6 +36,12 @@ Performance numbers used to be hand-taken Lighthouse readings nothing could repr
 is not a number: it **pins the LCP element to `h1#hero-heading`**. A per-word headline entrance once fragmented
 the H1 so a paragraph became the largest paint, with no timing worse.
 
+- The hero pin applies to `lcpElementPaths` (the two home pages); a subpage may name its own under
+  `pages.<path>.lcpElement`. On every page an LCP inside the cookie notice fails. Elements are reported as
+  `tag#id` or `tag.firstClass` (2026-11-11).
+- `jsDecodedKb` is 300 since the cookie notice lost React (197 KB measured): it catches React returning on a
+  first visit. Budgets are re-baselined in `perf-budget.json` with the measurement they sit above.
+
 - Measure locally against locally; the local server doesn't compress and its first requests are cold.
 - Restart the preview before measuring; a stale page cache can report 0 KB JS (a false green).
 
