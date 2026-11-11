@@ -99,6 +99,15 @@ export interface ServiceDefinition {
    */
   seoTitle: Record<Lang, string>;
   /**
+   * The `<meta name="description">` (and og/twitter description) of the
+   * detail page, added 2026-11-11. Answer-first for search and answer
+   * engines: the search term, then who and where — none of which the visible
+   * `summary` (card text and hero lead) names. Meta only: the JSON-LD keeps
+   * describing the page with the visible `summary`. Code-owned like
+   * `seoTitle`; 81–160 characters in both languages (`services.test.ts`).
+   */
+  seoDescription: Record<Lang, string>;
+  /**
    * ISO date of the last change to this service's committed copy. Rendered as
    * "Stand" on the detail page and published as its `dateModified`. Raise it
    * only when the content changes; a panel override does not move it.
@@ -172,6 +181,10 @@ export const serviceDefinitions = [
     seoTitle: {
       de: "Kundenportal & Verwaltungspanel erstellen lassen — Tracht Digital",
       en: "Customer Portal & Admin Panel Development — Tracht Digital",
+    },
+    seoDescription: {
+      de: "Kundenportal und Verwaltungspanel erstellen lassen: Aufträge, Kunden und Termine in einem System. Tracht Digital Solutions aus Schwarzenbek bei Hamburg.",
+      en: "Customer portal and admin panel development: orders, customers and appointments in one system. Tracht Digital Solutions from Schwarzenbek near Hamburg.",
     },
     // 2026-10-12: the point is structure — from project management to
     // automation, in one system the business runs on.
@@ -295,6 +308,10 @@ export const serviceDefinitions = [
       de: "Digitale Buchführung & Projektmanagement — Tracht Digital",
       en: "Digital Bookkeeping & Project Management — Tracht Digital",
     },
+    seoDescription: {
+      de: "Abläufe digitalisieren: digitale Buchführung, Projektmanagement und passende Werkzeuge im Betrieb einführen. Tracht Digital Solutions bei Hamburg.",
+      en: "Digitalizing workflows: digital bookkeeping, project management and the right tools brought into the business. Tracht Digital Solutions near Hamburg.",
+    },
     // 2026-10-12: named by what gets brought in — digital bookkeeping and a
     // project management system — with the workflow around it.
     updatedAt: "2026-10-12",
@@ -411,6 +428,10 @@ export const serviceDefinitions = [
       de: "IT- & Digitalisierungsberatung, Konzeption — Tracht Digital",
       en: "IT & Digital Consulting and Planning — Tracht Digital",
     },
+    seoDescription: {
+      de: "IT- und Digitalisierungsberatung für Betriebe: was digital gebraucht wird, was es kostet, womit es losgeht. Tracht Digital Solutions aus Schwarzenbek.",
+      en: "IT and digitalization consulting for businesses: what is needed, what it costs, where to start. Tracht Digital Solutions from Schwarzenbek near Hamburg.",
+    },
     // 2026-10-12: consulting and concept work on what is needed, with the
     // whole of the know-how behind every other service.
     updatedAt: "2026-10-12",
@@ -526,6 +547,10 @@ export const serviceDefinitions = [
     seoTitle: {
       de: "Auftragsprogrammierung & Automatisierung — Tracht Digital",
       en: "Custom Programming & Automation — Tracht Digital",
+    },
+    seoDescription: {
+      de: "Auftragsprogrammierung und Automatisierung für Betriebe: Tools und Skripte übernehmen Datenpflege und Klickarbeit. Tracht Digital Solutions bei Hamburg.",
+      en: "Custom programming and automation for businesses: tools and scripts take over data handling and repetitive clicking. Tracht Digital Solutions near Hamburg.",
     },
     // 2026-10-12: leads with contract programming — small tools and scripts
     // that take over dull data handling and repetitive clicking.
@@ -651,6 +676,10 @@ export const serviceDefinitions = [
     seoTitle: {
       de: "Individuelle Website erstellen lassen — Tracht Digital",
       en: "Custom Websites Built Around Each Business — Tracht Digital",
+    },
+    seoDescription: {
+      de: "Website und Onlineshop erstellen lassen: nach Maß, ohne Baukasten-Vorlage und ohne KI-Einheitstext. Tracht Digital Solutions aus Schwarzenbek bei Hamburg.",
+      en: "Custom websites and online shops: made to measure, without site-builder templates or generic AI copy. Tracht Digital Solutions from Schwarzenbek near Hamburg.",
     },
     // 2026-10-12: the page now leads with what sets the work apart — a site
     // made for this business and its customers, not a template and not

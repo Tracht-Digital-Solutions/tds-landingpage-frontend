@@ -151,6 +151,23 @@ describe("service summaries double as meta descriptions", () => {
       }
     });
 
+    it(`keeps every ${lang} meta description answer-first and inside the budget`, () => {
+      // `seoDescription` (2026-11-11) is what the detail page's
+      // <meta name="description"> renders; the summary stays the visible lead.
+      const seen = new Set<string>();
+      for (const service of serviceDefinitions) {
+        const text = service.seoDescription[lang];
+        expect(text.length, `${service.id} (${lang}) is too long`).toBeLessThanOrEqual(RENDERED);
+        expect(text.length, `${service.id} (${lang}) is too short`).toBeGreaterThan(MIN_USEFUL);
+        expect(text, `${service.id} (${lang}) names no provider`).toContain("Tracht Digital Solutions");
+        expect(text, `${service.id} (${lang}) names no place`).toMatch(/Hamburg|Schwarzenbek/);
+        expect(text, `${service.id} (${lang}) has doubled spaces`).not.toMatch(/\s{2,}/);
+        expect(text, `${service.id} (${lang}) repeats the summary`).not.toBe(service.fallback[lang].summary);
+        seen.add(text);
+      }
+      expect(seen.size).toBe(serviceDefinitions.length);
+    });
+
     it(`gives each ${lang} service a distinct summary`, () => {
       // Duplicate descriptions across indexable pages are a self-inflicted
       // ranking problem; near-identical service pages would be exactly that.
