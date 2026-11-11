@@ -82,10 +82,15 @@ import Arrow from "~/components/ui/Arrow.astro";
     /* Every offset below is derived from the marker rather than restated as
        a magic number, because the line has to meet it in four places (two
        orientations × the hidden state). */
-    --stepper-marker: 0.875rem;
+    --stepper-marker: 1rem;
+    /* Phone (2026-11-11): a tighter timeline whose line runs unbroken from
+       dot to dot. The offset centres the dot on the text's first line
+       (line-height 1.55 at 1rem). */
+    --stepper-gap: 1.25rem;
+    --stepper-offset: calc((1.55rem - var(--stepper-marker)) / 2);
 
     display: grid;
-    gap: 1.75rem;
+    gap: var(--stepper-gap);
   }
 
   .stepper__step {
@@ -99,9 +104,8 @@ import Arrow from "~/components/ui/Arrow.astro";
   .stepper__marker {
     position: relative;
     z-index: 1;
-    /* Sat above the text's first line once the numeral left; nudged down so
-       the dot reads as centred on it. */
-    margin-top: 0.35rem;
+    /* Centred on the text's first line; the line runs into it unbroken. */
+    margin-top: var(--stepper-offset);
     width: var(--stepper-marker);
     height: var(--stepper-marker);
     border-radius: 9999px;
@@ -119,8 +123,10 @@ import Arrow from "~/components/ui/Arrow.astro";
   .stepper__line {
     position: absolute;
     left: calc(var(--stepper-marker) / 2);
-    top: calc(var(--stepper-marker) + 0.35rem);
-    bottom: -1.75rem;
+    /* From this dot's centre to the next one's: through the gap and the next
+       step's offset. The dots sit above it (z-index). */
+    top: calc(var(--stepper-offset) + var(--stepper-marker) / 2);
+    bottom: calc(-1 * (var(--stepper-gap) + var(--stepper-offset) + var(--stepper-marker) / 2));
     width: 2px;
     transform: translateX(-1px);
     background: color-mix(in srgb, var(--color-accent) 22%, transparent);
@@ -138,6 +144,8 @@ import Arrow from "~/components/ui/Arrow.astro";
 
   @media (min-width: 40rem) {
     .stepper {
+      /* Desktop is unchanged by the phone pass of 2026-11-11. */
+      --stepper-marker: 0.875rem;
       grid-auto-flow: column;
       grid-auto-columns: minmax(0, 1fr);
       gap: 1.25rem;
