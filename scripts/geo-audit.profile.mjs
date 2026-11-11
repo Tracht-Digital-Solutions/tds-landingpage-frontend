@@ -109,7 +109,9 @@ export default {
       return { kind: "credentials", requiredTypes: ["WebPage", "Person", "BreadcrumbList"], requireDate: true };
     }
     if (path === "/bildrechte" || path === "/en/image-rights") {
-      return { kind: "image-rights", requiredTypes: [], requireDate: false };
+      // A rights notice: origin, use, how to ask. Short by design (tds-shared
+      // ≥ 0.64.12 reads `minWords` per kind); padding it would serve no reader.
+      return { kind: "image-rights", requiredTypes: [], requireDate: false, minWords: 60 };
     }
     if (path === "/projekte" || path === "/en/projects") {
       return { kind: "projects", requiredTypes: ["WebPage", "BreadcrumbList"], requireDate: true };
@@ -120,7 +122,8 @@ export default {
       // is `bare` — it carries no site chrome and no breadcrumb a reader could
       // see, and a contact card's freshness is its vCard, not a "Stand" line.
       // Structured data that claims either would say more than the page.
-      return { kind: "card", requiredTypes: ["ProfilePage", "Person"] };
+      // A contact card is short by design: name, role, channels, QR code.
+      return { kind: "card", requiredTypes: ["ProfilePage", "Person"], minWords: 120 };
     }
     return { kind: "other", requiredTypes: [] };
   },
