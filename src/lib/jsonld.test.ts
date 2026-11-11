@@ -144,6 +144,16 @@ describe("the organization node", () => {
     expect(org.contactPoint.email).toBe(siteConfig.email);
   });
 
+  it("types its service area instead of naming bare places", () => {
+    const byName = Object.fromEntries(org.areaServed.map((p: any) => [p.name, p]));
+    expect(byName.Hamburg["@type"]).toBe("City");
+    expect(byName.Schwarzenbek["@type"]).toBe("City");
+    expect(byName.Deutschland["@type"]).toBe("Country");
+    for (const place of org.areaServed) {
+      if (place.sameAs) expect(place.sameAs).toMatch(/^https:\/\/de\.wikipedia\.org\/wiki\//);
+    }
+  });
+
   it("publishes NO priceRange", () => {
     // The site states no amount since 2026-11-02 (prices live in the shop).
     // Structured data must not carry a figure no page shows.

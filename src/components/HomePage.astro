@@ -76,6 +76,18 @@ const faq = await cmsFor("faq_v2", lang, getFaqContent(lang));
 // visible.
 const shownFaq = homeFaqItems(faq);
 
+// The search term first, then the brand. At most 60 characters; the local
+// qualifier lives in the description, the schema's address and the footer.
+//
+// Since 2026-10-12 the title follows the hero and the service order: the own
+// portal first, digitalization second, websites third. "Digitalisierung" is
+// the Germany-wide keyword target named in the root CLAUDE.md, and
+// `seo.test.ts` holds the full phrase in the description.
+const titles = {
+  de: "Kundenportale, Digitalisierung, Websites — Tracht Digital",
+  en: "Customer portals, digitalization, websites — Tracht Digital",
+};
+
 // The home page carries the canonical entity graph — Organization, Person and
 // WebSite live here; subpages reference them by @id. No `HowTo`: Google retired those
 // rich results, and the process is not a set of instructions.
@@ -88,6 +100,10 @@ const jsonLd = asGraph(
     "@type": "WebPage",
     "@id": `${siteConfig.url}/#webpage-${lang}`,
     url: lang === "de" ? `${siteConfig.url}/` : `${siteConfig.url}/en/`,
+    // The same title and description the head carries (2026-11-11); every
+    // subpage's WebPage node already named itself.
+    name: titles[lang],
+    description: siteConfig.description[lang],
     inLanguage: lang === "de" ? "de-DE" : "en-GB",
     isPartOf: { "@id": `${siteConfig.url}/#website` },
     publisher: { "@id": `${siteConfig.url}/#organization` },
@@ -99,18 +115,6 @@ const jsonLd = asGraph(
     speakable: speakableSchema(["#hero-heading", "#faq"]),
   },
 );
-
-// The search term first, then the brand. At most 60 characters; the local
-// qualifier lives in the description, the schema's address and the footer.
-//
-// Since 2026-10-12 the title follows the hero and the service order: the own
-// portal first, digitalization second, websites third. "Digitalisierung" is
-// the Germany-wide keyword target named in the root CLAUDE.md, and
-// `seo.test.ts` holds the full phrase in the description.
-const titles = {
-  de: "Kundenportale, Digitalisierung, Websites — Tracht Digital",
-  en: "Customer portals, digitalization, websites — Tracht Digital",
-};
 ---
 
 <Layout

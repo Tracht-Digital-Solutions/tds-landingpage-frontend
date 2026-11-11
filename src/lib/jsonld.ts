@@ -71,7 +71,7 @@ export function organizationSchema() {
     founder: { "@id": `${siteConfig.url}/#person` },
     // Shown in "Wieso ich?" as "selbstständig seit …"; JSON-LD follows the page.
     foundingDate: String(siteConfig.foundingYear),
-    areaServed: siteConfig.areaServed.map((a) => ({ "@type": "Place", name: a })),
+    areaServed: areaServedNodes(),
     address: {
       "@type": "PostalAddress",
       streetAddress: siteConfig.address.streetAddress,
@@ -219,7 +219,7 @@ export function pricingSchema(packages: PackageOffering[]): WithContext {
     name: `${siteConfig.name} — Festpreise`,
     provider: { "@id": `${siteConfig.url}/#organization` },
     serviceType: "Software development & digital consulting",
-    areaServed: siteConfig.areaServed.map((a) => ({ "@type": "Place", name: a })),
+    areaServed: areaServedNodes(),
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Festpreise",
@@ -316,7 +316,7 @@ export function serviceNode(input: ServiceInput): object {
     description: input.description,
     serviceType: input.serviceType,
     provider: { "@id": `${siteConfig.url}/#organization` },
-    areaServed: siteConfig.areaServed.map((name) => ({ "@type": "Place", name })),
+    areaServed: areaServedNodes(),
     inLanguage: input.lang === "de" ? "de-DE" : "en-GB",
     ...(input.outputs ? { serviceOutput: [...input.outputs] } : {}),
   };
@@ -374,6 +374,27 @@ export function speakableSchema(cssSelectors: readonly string[]): object {
  * way to emit several typed entities in one <script> block without
  * duplicating the @context.
  */
+/**
+ * The service area as typed places (2026-11-11). A bare `Place` with a name
+ * leaves an engine to guess whether "Hamburg" is a city or a street; the type
+ * and, for the two towns, the Wikipedia article settle it. "Norddeutschland"
+ * is a region without an administrative body, so it stays a `Place`.
+ */
+const AREA_TYPES: Record<string, { type: string; sameAs?: string }> = {
+  Hamburg: { type: "City", sameAs: "https://de.wikipedia.org/wiki/Hamburg" },
+  Schwarzenbek: { type: "City", sameAs: "https://de.wikipedia.org/wiki/Schwarzenbek" },
+  Deutschland: { type: "Country", sameAs: "https://de.wikipedia.org/wiki/Deutschland" },
+};
+
+export function areaServedNodes(): object[] {
+  return siteConfig.areaServed.map((name) => {
+    const known = AREA_TYPES[name];
+    return known
+      ? { "@type": known.type, name, ...(known.sameAs ? { sameAs: known.sameAs } : {}) }
+      : { "@type": "Place", name };
+  });
+}
+
 export function asGraph(...nodes: object[]): WithContext {
   return {
     "@context": "https://schema.org",
