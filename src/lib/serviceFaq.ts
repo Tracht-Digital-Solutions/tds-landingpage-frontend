@@ -150,7 +150,7 @@ const FAQ: Record<ServiceId, Record<Lang, ServiceFaqItem[]>> = {
       },
       {
         q: "Was kostet eine Website?",
-        a: "Es gibt Festpreise ab 390 € netto, alles andere auf Anfrage.",
+        a: "Die Preise stehen im Shop: jede Website-Leistung mit ihrem Ab-Preis. Alles andere wird als eigenes Angebot kalkuliert, bevor die Arbeit beginnt.",
       },
     ],
     en: [
@@ -164,7 +164,7 @@ const FAQ: Record<ServiceId, Record<Lang, ServiceFaqItem[]>> = {
       },
       {
         q: "What does a website cost?",
-        a: "There are fixed prices from €390 net, everything else on request.",
+        a: "Prices are listed in the shop: every website service with its starting price. Everything else is quoted individually before work begins.",
       },
     ],
   },

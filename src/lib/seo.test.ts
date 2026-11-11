@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { serviceFaq } from "./serviceFaq";
+import { serviceDefinitions } from "./services";
 import { siteConfig } from "./seo";
 
 /**
@@ -159,6 +161,15 @@ describe("no amount in the descriptions", () => {
   it("names no price", () => {
     for (const text of Object.values(siteConfig.description)) {
       expect(text).not.toMatch(/€|EUR|\d{3,}/);
+    }
+  });
+
+  it("keeps the service FAQs free of amounts too (2026-11-11)", () => {
+    // The answers render on the page AND as its FAQPage node.
+    for (const id of serviceDefinitions.map((service) => service.id)) {
+      for (const lang of ["de", "en"] as const) {
+        for (const item of serviceFaq(id, lang)) expect(item.a, `${id} ${lang}`).not.toMatch(/€|EUR/);
+      }
     }
   });
 });
