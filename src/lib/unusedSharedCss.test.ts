@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-// @ts-expect-error — plain ESM build helper without types
 import { DROPPED_BLOCKS, pruneSelector, splitTop } from "../../scripts/postcss-drop-unused-shared.mjs";
 
 /**
