@@ -24,7 +24,8 @@
 ## Titles and descriptions
 
 Distinct, truthful and within the limits enforced by `src/lib/seo.test.ts`, `services.test.ts` and
-`platforms.test.ts`. `Layout.astro` uses the route's actual title. Titles: search term first,
+`platforms.test.ts`. Service detail pages use the code-owned `seoDescription` (search term, provider, place;
+2026-11-11) as meta description; the visible `summary` stays the lead and the JSON-LD description. `Layout.astro` uses the route's actual title. Titles: search term first,
 "— Tracht Digital" last.
 
 ## JSON-LD

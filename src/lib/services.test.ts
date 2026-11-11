@@ -124,10 +124,11 @@ describe("service titles and dates", () => {
 });
 
 /**
- * The summary carries two loads.
+ * The summary and the meta description.
  *
- * It is the card text on the home page AND the `<meta name="description">`
- * of the service detail page, which is indexable and listed in the sitemap.
+ * The summary is the card text and the detail page's lead; until 2026-11-11 it
+ * was also the `<meta name="description">`, which is now `seoDescription`.
+ * Both are budgeted here.
  * `seo.test.ts` budgets every description it can read off a page file, but
  * these are resolved at render time, so they would otherwise be the only
  * indexable descriptions on the site with no length guard at all.
@@ -136,7 +137,7 @@ describe("service titles and dates", () => {
  * summary below the useful minimum — that is a redaktional risk noted in
  * AGENTS.md, not something a unit test can reach.
  */
-describe("service summaries double as meta descriptions", () => {
+describe("service summaries and meta descriptions", () => {
   const RENDERED = 160;
   const MIN_USEFUL = 80;
 

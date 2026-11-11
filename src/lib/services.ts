@@ -163,9 +163,11 @@ export interface ServiceDefinition {
  * - Neutral voice since 2026-10-12: no "du", no "Sie" (see addressForm.test.ts).
  * - **Short and clear** (asked for 2026-09-15): three points per list, one
  *   statement per line, no filler.
- * - `summary` is rendered twice: as the card text on the pricing grid and as
- *   the `<meta name="description">` of the detail page. It must stay between
- *   81 and 160 characters in BOTH languages, which `services.test.ts` measures.
+ * - `summary` is the visible card text and the detail page's hero lead, and
+ *   describes the page in its JSON-LD. The `<meta name="description">` is
+ *   `seoDescription` since 2026-11-11 (a panel edit of `summary` no longer
+ *   reaches it). Both stay between 81 and 160 characters in BOTH languages,
+ *   which `services.test.ts` measures.
  */
 export const serviceDefinitions = [
   {
