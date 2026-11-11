@@ -112,7 +112,8 @@ export function getFaqPageCopy(lang: "de" | "en") {
   return lang === "de"
     ? {
         title: "Häufige Fragen",
-        headline: "Alle",
+        // The search term itself (2026-11-11): "Alle Fragen" matched no query.
+        headline: "Häufige",
         headlineAccent: "Fragen.",
         intro:
           "Übernahme, Preise und Zusammenarbeit – die Fragen, die Tracht Digital Solutions am häufigsten gestellt werden.",
@@ -135,7 +136,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
       }
     : {
         title: "Common questions",
-        headline: "All",
+        headline: "Common",
         headlineAccent: "questions.",
         intro:
           "Takeovers, pricing and working together – the questions Tracht Digital Solutions is asked most often.",
