@@ -58,8 +58,12 @@ export const siteConfig = {
   description: {
     // Since 2026-10-06: the own panel and digitalization first, the web
     // presence after them — the same order as the services.
-    de: "Kundenportale, Verwaltungspanels und Digitalisierung für Unternehmen – dazu Websites ab 390 €. Aus Schwarzenbek bei Hamburg.",
-    en: "Customer portals, admin panels and digitalization for businesses – plus websites from €390. From Schwarzenbek near Hamburg.",
+    //
+    // No amount since 2026-11-11: the home page states no price (2026-11-02,
+    // prices live in the shop), and a snippet must not promise what the page
+    // it leads to does not show.
+    de: "Kundenportale, Verwaltungspanels und Digitalisierung für Unternehmen – dazu Websites und Shops nach Maß. Aus Schwarzenbek bei Hamburg.",
+    en: "Customer portals, admin panels and digitalization for businesses – plus made-to-measure websites and shops. From Schwarzenbek near Hamburg.",
   },
   /** Verified contact channel. Safe to publish in schema. */
   email: "kontakt@tracht-digital.de",

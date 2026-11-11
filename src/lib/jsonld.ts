@@ -13,10 +13,6 @@
  */
 import { imageRights } from "@tracht-digital-solutions/tds-shared/site";
 import { LOGO, portraitSrc } from "./imageVariants";
-// Sync helpers only — `getDefaultPackages` reads the committed list and
-// touches neither the CMS nor `contentCache`, so this stays a leaf import and
-// cannot close an import cycle the way `contentCache` once did.
-import { getDefaultPackages } from "./pricing";
 import { siteConfig } from "./seo";
 
 type WithContext<T extends Record<string, unknown> = Record<string, unknown>> =
@@ -123,16 +119,16 @@ export function organizationSchema() {
       availableLanguage: ["de", "en"],
     },
     /**
-     * Expected on a LocalBusiness-typed entity, and honest: the band is the
-     * committed fixed-price packages the page publishes, so this repeats a fact
-     * rather than inventing one. No hourly rates since 2026-09-22.
+     * NOT here: `priceRange` (removed 2026-11-11). It repeated the committed
+     * package band while the pricing section was on the page; since 2026-11-02
+     * the site states no amount and prices live in the shop, so the node would
+     * publish a figure no page shows.
      *
      * NOT here: `openingHoursSpecification`. Julian works by arrangement, and
      * the vocabulary has no way to say that — `opens`/`closes` would be an
      * invented promise of availability. The page says it in words instead.
      * Do not "complete" this node with hours.
      */
-    priceRange: packagePriceRange(),
   };
 
   if (socials.length > 0) base.sameAs = socials;
@@ -385,8 +381,4 @@ export function asGraph(...nodes: object[]): WithContext {
   };
 }
 
-/** "390–1040 €" — the span of the committed fixed-price packages. */
-function packagePriceRange(): string {
-  const prices = getDefaultPackages("de").map((pkg) => pkg.price);
-  return `${Math.min(...prices)}–${Math.max(...prices)} €`;
-}
+

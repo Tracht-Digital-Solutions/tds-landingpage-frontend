@@ -30,8 +30,9 @@ Distinct, truthful and within the limits enforced by `src/lib/seo.test.ts`, `ser
 ## JSON-LD
 
 - Must match visible content after CMS resolution; FAQ answers use the same resolved values as the section.
-- Pricing: each package is a plain `PriceSpecification` without a unit. A `UnitPriceSpecification` with
-  `unitCode: "HUR"` would publish a four-figure hourly rate (`pricing.test.ts`). Figures are net.
+- No amounts: the site states no price since 2026-11-02 (prices live in the shop), so neither the home
+  description nor the Organization node carries one (`priceRange` removed 2026-11-11, `jsonld.test.ts`,
+  `seo.test.ts`). Never a `UnitPriceSpecification` with `unitCode: "HUR"` (an hourly rate).
 - No `HowTo` node (retired rich result).
 - Subpages emit one `@graph` (`lib/jsonld.ts`): `WebPage` (author, publisher, visible date as `dateModified`),
   `Service` (an `Offer` only where the page states it), `BreadcrumbList`, `FAQPage` where questions show.

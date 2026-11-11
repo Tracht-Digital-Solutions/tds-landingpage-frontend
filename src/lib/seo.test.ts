@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { getDefaultPackages } from "./pricing";
 import { siteConfig } from "./seo";
 
 /**
@@ -151,17 +150,16 @@ describe("the keyword commitments", () => {
   });
 });
 
-describe("the fixed-price floor in the descriptions", () => {
+describe("no amount in the descriptions", () => {
   /**
-   * Since 2026-09-21 the home description names the lowest fixed price — the
-   * one number a searcher comparing offers wants before the click. It is a
-   * literal in `siteConfig`, so this ties it to the committed packages: a
-   * package price change fails here until the description follows.
+   * From 2026-09-21 to 2026-11-11 the home description named the lowest fixed
+   * price. Since 2026-11-02 the home page states no amount (prices live in the
+   * shop), so the snippet promised a figure the page did not show.
    */
-  it("quotes the cheapest committed package", () => {
-    const floor = Math.min(...getDefaultPackages("de").map((pkg) => pkg.price));
-    expect(siteConfig.description.de).toContain(`ab ${floor} €`);
-    expect(siteConfig.description.en).toContain(`from €${floor}`);
+  it("names no price", () => {
+    for (const text of Object.values(siteConfig.description)) {
+      expect(text).not.toMatch(/€|EUR|\d{3,}/);
+    }
   });
 });
 

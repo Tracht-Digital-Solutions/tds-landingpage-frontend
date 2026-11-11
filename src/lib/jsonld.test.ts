@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { getDefaultPackages } from "./pricing";
 import {
   asGraph,
   breadcrumbNode,
@@ -145,12 +144,10 @@ describe("the organization node", () => {
     expect(org.contactPoint.email).toBe(siteConfig.email);
   });
 
-  it("derives priceRange from the published packages, never from a literal", () => {
-    // The figures move. A second place stating them by hand drifts, silently.
-    const prices = getDefaultPackages("de").map((pkg) => pkg.price);
-    expect(org.priceRange).toContain(String(Math.min(...prices)));
-    expect(org.priceRange).toContain(String(Math.max(...prices)));
-    expect(org.priceRange).not.toContain("/h");
+  it("publishes NO priceRange", () => {
+    // The site states no amount since 2026-11-02 (prices live in the shop).
+    // Structured data must not carry a figure no page shows.
+    expect(org.priceRange).toBeUndefined();
   });
 
   it("publishes NO opening hours", () => {
