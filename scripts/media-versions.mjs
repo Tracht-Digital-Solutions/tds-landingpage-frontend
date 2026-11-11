@@ -21,7 +21,10 @@ import { join, relative, sep } from "node:path";
  * Used by `astro.config.mjs` and `vitest.config.ts`; read through
  * `mediaSrc()` in `src/lib/imageVariants.ts`.
  */
-const ROOTS = ["demos", "references", "designstudien", "zertifikate", "images/business-card.webp"];
+// `images/products` since 2026-11-11: its AVIF twins have no catalog hash
+// (`imageCatalog.json` records the WebP files only), so `avifSrcSet()` reads
+// theirs from here.
+const ROOTS = ["demos", "references", "designstudien", "zertifikate", "images/business-card.webp", "images/products"];
 const MEDIA = /\.(webp|png|jpe?g|avif|gif|svg|ico)$/i;
 
 function walk(path) {

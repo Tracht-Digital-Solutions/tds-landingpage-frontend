@@ -35,7 +35,6 @@ import FloatingCta from "~/components/FloatingCta.astro";
 import PropertyTabs from "~/components/PropertyTabs.astro";
 import JsonLd from "~/components/JsonLd.astro";
 import { LiveChatCta } from "@tracht-digital-solutions/tds-shared/islands/live-chat";
-import { ConsentBanner } from "@tracht-digital-solutions/tds-shared/consent";
 import {
   errorBounceScript,
   hoverTipScript,
@@ -293,15 +292,12 @@ const showCookieNotice = !bare;
     <slot />
     {!bare && <FloatingCta />}
     {!bare && <PropertyTabs />}
-    {showCookieNotice && (
-      <ConsentBanner
-        client:when="consent"
-        lang={lang}
-        categories={["analytics"]}
-        privacyUrl="/legal/datenschutz"
-        imprintUrl="/legal/impressum"
-      />
-    )}
+    {/* The consent banner's place in the page (2026-11-11): the plain-DOM
+        twin from tds-shared mounts here at idle — same markup and CSS as the
+        React island it replaced, without the ~210 KB React runtime a first
+        visit used to download for it. `display: contents` like the
+        `<astro-island>` that stood here. Mounted by the script below. */}
+    {showCookieNotice && <div data-consent-host style="display: contents"></div>}
     {/* Floating support widget — self-hides unless the live-chat-cta extension
         enables the "landingpage" frontend in the admin.
         No apiBase prop on purpose: the widget then resolves through tds-shared's
@@ -352,6 +348,25 @@ const showCookieNotice = !bare;
 
       bootMotion();
       bootChrome();
+    </script>
+
+    {/* Consent banner (plain DOM, tds-shared ≥ 0.64.8). A top-level script: one
+        inside `{!bare && …}` would ship unbundled. It mounts at idle, only
+        where the host exists (not on bare pages), and asks only when no
+        decision is stored — `client:when="consent"` semantics. */}
+    <script>
+      import { mountConsentBanner } from "@tracht-digital-solutions/tds-shared/dom";
+
+      const host = document.querySelector<HTMLElement>("[data-consent-host]");
+      if (host) {
+        mountConsentBanner({
+          host,
+          lang: document.documentElement.lang.startsWith("en") ? "en" : "de",
+          categories: ["analytics"],
+          privacyUrl: "/legal/datenschutz",
+          imprintUrl: "/legal/impressum",
+        });
+      }
     </script>
 
     {/* Besucher-Statistik. Starts only once the visitor has agreed to

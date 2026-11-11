@@ -238,10 +238,16 @@ cookie-, session- or `Accept-Language`-dependent content on a cached route.**
   home page waited on three render-blocking requests (mobile LCP 3.6 s → 2.6 s). Measure through compression
   before switching back.
 - **Page chrome without React (2026-10-22).** Theme toggle and consent link are `tds-shared/dom` markup; smooth
-  scroll, cursor and reading progress are modules started at idle by `lib/chrome.ts`. The consent banner and chat
-  use `client:when` (`consent`, `chat:…`), the service finder `client:when="intent:[data-assistant-open]"` (hover,
+  scroll, cursor and reading progress are modules started at idle by `lib/chrome.ts`. The consent banner is plain
+  DOM since 2026-11-11 (`mountConsentBanner` from tds-shared `./dom`, host `[data-consent-host]` in
+  `Layout.astro`): as a React island it made every first visit download React (~210 KB decoded) for it alone. The
+  chat uses `client:when` (`chat:…`), the service finder `client:when="intent:[data-assistant-open]"` (hover,
   focus or press of an opener). Don't add a React island to every page; the contact form is `client:visible`.
   The logo is a pre-sized lossless WebP (`LOGO` in `lib/imageVariants.ts`).
+- **Product tiles serve AVIF** (2026-11-11): `<picture>` with an AVIF `<source>` from `avifSrcSet()`
+  (`lib/imageCatalog.ts`, hashes from `virtual:media-versions` over `images/products`), `display: contents` on the
+  picture so the tile box is unchanged. A missing twin drops the source and WebP stays. Not on
+  `[data-motion-image]` photos: the motion layer uses the image's `parentElement` as scroll target.
 - Republished screenshots carry a content hash (`scripts/media-versions.mjs` → `virtual:media-versions`;
   `mediaSrc()` appends `?v=<hash>`), because those paths are cached for a week.
 
