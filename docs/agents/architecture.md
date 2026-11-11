@@ -237,6 +237,10 @@ cookie-, session- or `Accept-Language`-dependent content on a cached route.**
 - **Stylesheets are inlined** (`build.inlineStylesheets: "always"`): with `"auto"` nothing was inlined and the
   home page waited on three render-blocking requests (mobile LCP 3.6 s → 2.6 s). Measure through compression
   before switching back.
+- **Unused tds-shared component styles are dropped at build** (2026-11-11, `scripts/postcss-drop-unused-shared.mjs`
+  in `postcss.config.mjs`): blocks no page or bundle renders (drop zone, dropdown, product card, toasts …), about
+  23 KB per document. Only whole selectors or `:is()`/`:where()` members go; `:not()`/`:has()` stay. Using a dropped
+  block fails `unusedSharedCss.test.ts` — take it off `DROPPED_BLOCKS` in the same change.
 - **Page chrome without React (2026-10-22).** Theme toggle and consent link are `tds-shared/dom` markup; smooth
   scroll, cursor and reading progress are modules started at idle by `lib/chrome.ts`. The consent banner is plain
   DOM since 2026-11-11 (`mountConsentBanner` from tds-shared `./dom`, host `[data-consent-host]` in
