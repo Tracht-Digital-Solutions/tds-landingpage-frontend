@@ -192,6 +192,21 @@ describe("motion on the landing page", () => {
     expect(src("lib/motion/boot.ts")).toContain('import("./tilt")');
   });
 
+  it("plays the process scenes once, from finished markup, never under less motion", () => {
+    const scene = src("components/ui/ProcessScene.astro");
+    // The markup is the finished picture: no attribute, no motion.
+    expect(scene).toContain('<div class="ps" data-process-scene aria-hidden="true">');
+    // Every animation sits behind the OS setting and the site's switch, and none loops.
+    expect(scene).toContain("@media (prefers-reduced-motion: no-preference)");
+    expect(scene).toContain("html:not([data-a11y-motion])");
+    expect(scene).not.toMatch(/infinite/);
+    expect(scene).not.toMatch(/gradient|box-shadow|blur\(/);
+    const process = src("components/sections/Process.astro");
+    expect(process).toContain("lessMotion()");
+    // The first frame is only written while the row is off screen.
+    expect(process).toMatch(/box\.bottom <= 0 \|\| box\.top >= window\.innerHeight[\s\S]*?"armed"/);
+  });
+
   it("animates the contact form only through the shared primitives", () => {
     const form = src("components/islands/ContactForm.tsx");
     expect(form).toContain('from "@tracht-digital-solutions/tds-shared/motion/react"');

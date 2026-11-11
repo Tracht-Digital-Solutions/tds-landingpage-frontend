@@ -1,0 +1,409 @@
+---
+/**
+ * A small drawn scene per process step, above the step's sentences. It shows
+ * what the step's result says, built from the site's own parts: 6 px cards,
+ * the hard offset plate, pills, the brand bar's three keys, outline rings.
+ *
+ * 01 Erstgespräch → two sides slide together into one card: the shared picture
+ * 02 Angebot      → a sheet is written line by line and sealed
+ * 03 Umsetzung    → a page is built in three stages; the three keys fill along
+ * 04 Übergabe     → the switch is turned on, the status dot goes live
+ *
+ * The markup IS the finished picture. Without JavaScript, under reduced motion,
+ * with the site's motion switch and in print nothing moves and nothing is
+ * hidden. Motion exists only while the section's script sets `data-scene`
+ * (`armed`: paused at the first frame, set only while the cards are off screen;
+ * `play`: runs once). Every animation is finite and ends on the resting state,
+ * so the attribute can be dropped afterwards without a jump. No loop, no frame
+ * after it has played.
+ *
+ * Decorative only: `aria-hidden`, no words, no figures.
+ */
+interface Props {
+  number: string;
+}
+
+const { number } = Astro.props;
+---
+
+<div class="ps" data-process-scene aria-hidden="true">
+  {
+    number === "01" && (
+      <svg viewBox="0 0 240 112" focusable="false">
+        <circle class="ps-ring s1-end s1-end--l" cx="22" cy="51" r="4.5" />
+        <circle class="ps-ring s1-end s1-end--r" cx="218" cy="51" r="4.5" />
+        <path class="ps-hair s1-wire s1-wire--l" pathLength="1" d="M27 51 H70" />
+        <path class="ps-hair s1-wire s1-wire--r" pathLength="1" d="M213 51 H176" />
+        <rect class="ps-pink s1-back" x="90" y="28" width="76" height="54" rx="6" />
+        <rect class="ps-navy s1-front" x="82" y="20" width="76" height="54" rx="6" />
+        <path class="ps-on-navy s1-line s1-line--1" pathLength="1" d="M95 35 H125" />
+        <path class="ps-on-navy s1-line s1-line--2" pathLength="1" d="M95 47 H145" />
+        <path class="ps-on-navy s1-line s1-line--3" pathLength="1" d="M95 59 H119" />
+        <circle class="ps-pink s1-dot" cx="143" cy="35" r="4.5" />
+      </svg>
+    )
+  }
+  {
+    number === "02" && (
+      <svg viewBox="0 0 240 112" focusable="false">
+        <rect class="ps-plate s2-plate" x="88" y="12" width="64" height="86" rx="6" />
+        <rect class="ps-sheet s2-sheet" x="82" y="6" width="64" height="86" rx="6" />
+        <path class="ps-ink s2-line s2-line--1" pathLength="1" d="M93 21 H123" />
+        <path class="ps-ink-soft s2-line s2-line--2" pathLength="1" d="M93 33 H135" />
+        <path class="ps-ink-soft s2-line s2-line--3" pathLength="1" d="M93 43 H131" />
+        <path class="ps-ink-soft s2-line s2-line--4" pathLength="1" d="M93 53 H121" />
+        <path class="ps-ink s2-sign" pathLength="1" d="M93 77 C97 69 100 69 101 75 C102 81 105 81 108 73 C110 68 112 70 113 76" />
+        <g class="s2-seal">
+          <circle class="ps-pink" cx="146" cy="80" r="13" />
+          <path class="ps-on-pink s2-check" pathLength="1" d="M140 80 L144.5 84.5 L152.5 75.5" />
+        </g>
+      </svg>
+    )
+  }
+  {
+    number === "03" && (
+      <svg viewBox="0 0 240 112" focusable="false">
+        <rect class="ps-frame" x="62" y="6" width="116" height="74" rx="6" />
+        <rect class="ps-navy s3-block s3-block--1" x="70" y="14" width="100" height="12" rx="6" />
+        <rect class="ps-pink s3-block s3-block--2" x="70" y="32" width="62" height="40" rx="4" />
+        <rect class="ps-accent s3-block s3-block--3" x="138" y="32" width="32" height="17" rx="4" />
+        <rect class="ps-navy-soft s3-block s3-block--4" x="138" y="55" width="32" height="17" rx="4" />
+        <path class="ps-key ps-key--navy s3-key s3-key--1" pathLength="1" d="M76 97 H100" />
+        <path class="ps-key ps-key--accent s3-key s3-key--2" pathLength="1" d="M110 97 H130" />
+        <path class="ps-key ps-key--pink s3-key s3-key--3" pathLength="1" d="M140 97 H164" />
+      </svg>
+    )
+  }
+  {
+    number === "04" && (
+      <svg viewBox="0 0 240 112" focusable="false">
+        <rect class="ps-plate" x="54" y="22" width="70" height="56" rx="6" />
+        <rect class="ps-navy" x="48" y="16" width="70" height="56" rx="6" />
+        <rect class="ps-on-navy-fill" x="58" y="26" width="34" height="8" rx="4" />
+        <rect class="ps-on-navy-fill ps-faint" x="58" y="40" width="50" height="22" rx="3" />
+        <rect class="ps-track s4-track" x="138" y="32" width="48" height="24" rx="12" />
+        <g class="s4-knob">
+          <circle class="ps-knob" cx="174" cy="44" r="9" />
+        </g>
+        <circle class="ps-ring s4-pulse" cx="162" cy="76" r="6" />
+        <circle class="ps-pink s4-live" cx="162" cy="76" r="4" />
+        <path class="ps-hair s4-wire" pathLength="1" d="M118 44 H130" />
+      </svg>
+    )
+  }
+</div>
+
+<style>
+  .ps {
+    padding: 1.25rem 1.25rem 0;
+  }
+  .ps svg {
+    display: block;
+    width: 100%;
+    max-width: 18rem;
+    height: auto;
+    aspect-ratio: 240 / 112;
+    margin-inline: auto;
+    overflow: visible;
+  }
+  .ps :is(path, rect, circle, g) {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* Paint, from tokens only, so both themes follow on their own. */
+  .ps-navy {
+    fill: var(--color-surface-navy);
+  }
+  .ps-navy-soft {
+    fill: color-mix(in srgb, var(--color-surface-navy) 45%, var(--color-soft));
+  }
+  .ps-pink {
+    fill: var(--color-accent-pink);
+  }
+  .ps-accent {
+    fill: var(--color-surface-accent);
+  }
+  .ps-plate {
+    fill: var(--tds-shadow-ink, rgb(0 0 0 / 0.22));
+  }
+  .ps-sheet {
+    fill: var(--color-paper);
+  }
+  .ps-frame {
+    fill: var(--color-paper);
+    stroke: color-mix(in srgb, var(--color-black) 22%, transparent);
+    stroke-width: 1.5;
+  }
+  .ps-track {
+    fill: var(--color-accent-pink);
+    stroke: color-mix(in srgb, var(--color-black) 14%, transparent);
+    stroke-width: 1;
+  }
+  .ps-knob {
+    fill: var(--color-surface-navy);
+  }
+  .ps-on-navy-fill {
+    fill: rgb(255 255 255 / 0.85);
+  }
+  .ps-faint {
+    fill: rgb(255 255 255 / 0.22);
+  }
+  .ps-ring {
+    fill: none;
+    stroke: var(--color-surface-navy);
+    stroke-width: 1.5;
+  }
+  .ps :is(.ps-hair, .ps-on-navy, .ps-ink, .ps-ink-soft, .ps-on-pink, .ps-key) {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  .ps-hair {
+    stroke: color-mix(in srgb, var(--color-black) 30%, transparent);
+    stroke-width: 1.5;
+    stroke-dasharray: 0.04 0.06;
+  }
+  .ps-on-navy {
+    stroke: rgb(255 255 255 / 0.85);
+    stroke-width: 5;
+  }
+  .ps-ink {
+    stroke: color-mix(in srgb, var(--color-black) 72%, transparent);
+    stroke-width: 3;
+  }
+  .ps-ink-soft {
+    stroke: color-mix(in srgb, var(--color-black) 28%, transparent);
+    stroke-width: 3;
+  }
+  .s2-sign {
+    stroke-width: 1.75;
+  }
+  .ps-on-pink {
+    stroke: #050f68;
+    stroke-width: 2.5;
+  }
+  .ps-key {
+    stroke-width: 8;
+  }
+  .ps-key--navy {
+    stroke: var(--color-surface-navy);
+  }
+  .ps-key--accent {
+    stroke: var(--color-surface-accent);
+  }
+  .ps-key--pink {
+    stroke: var(--color-accent-pink);
+  }
+  /* The live ring has spread out and gone by the time the picture rests. */
+  .s4-pulse {
+    opacity: 0;
+  }
+
+  /* --- Motion: only while the script asks for it ---------------------- */
+
+  @keyframes ps-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  /* The dotted hairlines fade in while their dots march toward the middle. */
+  @keyframes ps-run {
+    from {
+      stroke-dashoffset: 1;
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
+  @keyframes ps-pop {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes ps-from-left {
+    from {
+      transform: translate(-64px, -8px);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes ps-from-right {
+    from {
+      transform: translate(64px, 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes ps-drop {
+    from {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes ps-land {
+    from {
+      transform: translate(10px, -18px) scale(1.5) rotate(-24deg);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes ps-knob {
+    from {
+      transform: translateX(-24px);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes ps-track {
+    from {
+      fill: color-mix(in srgb, var(--color-black) 12%, var(--color-soft));
+    }
+    to {
+      fill: var(--color-accent-pink);
+    }
+  }
+  @keyframes ps-pulse {
+    from {
+      transform: scale(0.7);
+      opacity: 1;
+    }
+    to {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  /* One clock per scene: `--ps-delay` is the card's own start (set by the
+     section's script), each part adds its offset. The holds between the
+     parts are deliberate: a step happens, rests, then the next one. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html:not([data-a11y-motion])) .ps[data-scene="armed"]  * {
+      animation-play-state: paused !important;
+    }
+
+    /* 01 — two sides meet, one picture is drawn. */
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-end {
+      animation: ps-pop 380ms var(--lp-ease-bounce) calc(var(--ps-delay, 0ms) + 0ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-end--r {
+      animation-delay: calc(var(--ps-delay, 0ms) + 90ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-wire {
+      animation: ps-run 520ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 160ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-back {
+      animation: ps-from-left 900ms var(--lp-ease-spring) calc(var(--ps-delay, 0ms) + 380ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-front {
+      animation: ps-from-right 900ms var(--lp-ease-spring) calc(var(--ps-delay, 0ms) + 450ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-line {
+      animation: ps-draw 420ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 1120ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-line--2 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 1230ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-line--3 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 1310ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s1-dot {
+      animation: ps-pop 420ms var(--lp-ease-bounce) calc(var(--ps-delay, 0ms) + 1560ms) both;
+    }
+
+    /* 02 — the sheet arrives, is written, signed and sealed. */
+    :global(html:not([data-a11y-motion])) .ps[data-scene] :is(.s2-plate, .s2-sheet) {
+      animation: ps-drop 460ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 0ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-line {
+      animation: ps-draw 360ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 420ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-line--2 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 600ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-line--3 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 700ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-line--4 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 790ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-sign {
+      animation: ps-draw 640ms cubic-bezier(0.45, 0.05, 0.4, 1) calc(var(--ps-delay, 0ms) + 1080ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-seal {
+      animation: ps-land 520ms var(--lp-ease-bounce) calc(var(--ps-delay, 0ms) + 1820ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s2-check {
+      animation: ps-draw 300ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 2240ms) both;
+    }
+
+    /* 03 — three stages; each fills its key, then the page grows a part. */
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-key {
+      animation: ps-draw 520ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 100ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-key--2 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 820ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-key--3 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 1500ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-block {
+      animation: ps-drop 520ms var(--lp-ease-bounce) calc(var(--ps-delay, 0ms) + 420ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-block--2 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 1140ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-block--3 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 1820ms);
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s3-block--4 {
+      animation-delay: calc(var(--ps-delay, 0ms) + 1900ms);
+    }
+
+    /* 04 — the result is checked, then turned on: the switch, then live. */
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s4-wire {
+      animation: ps-run 420ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 200ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s4-knob {
+      animation: ps-knob 640ms var(--lp-ease-spring) calc(var(--ps-delay, 0ms) + 1000ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s4-track {
+      animation: ps-track 260ms linear calc(var(--ps-delay, 0ms) + 1120ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s4-live {
+      animation: ps-pop 420ms var(--lp-ease-bounce) calc(var(--ps-delay, 0ms) + 1520ms) both;
+    }
+    :global(html:not([data-a11y-motion])) .ps[data-scene] .s4-pulse {
+      animation: ps-pulse 900ms var(--lp-ease-soft) calc(var(--ps-delay, 0ms) + 1640ms) both;
+    }
+  }
+
+  @media print {
+    .ps {
+      display: none;
+    }
+  }
+</style>

@@ -12,6 +12,10 @@
  * shadow plate slides against the lean (`lib/motion/tilt.ts`, as on the project
  * cards); the card lifts and its band turns bordeaux. Nothing has to be opened.
  *
+ * Each card opens with a small drawn scene (`ui/ProcessScene.astro`). The
+ * four play once, in order, as the row scrolls in, and then rest; on a phone a
+ * step's scene plays when the step is opened.
+ *
  * The copy is code-owned (`lib/processContent.ts`). The `<ol>` carries the order
  * for assistive technology. `data-reveal` and the tilt sit on two elements, so
  * their transforms never meet.
@@ -19,6 +23,7 @@
 import Arrow from "~/components/ui/Arrow.astro";
 import { localizePath, resolveLang } from "~/lib/i18n";
 import ProcessIcon from "~/components/ui/ProcessIcon.astro";
+import ProcessScene from "~/components/ui/ProcessScene.astro";
 import SectionHeader from "~/components/ui/SectionHeader.astro";
 import { getProcessContent } from "~/lib/processContent";
 import { getHomeContent } from "~/lib/homeContent";
@@ -63,6 +68,7 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
                   </button>
                 </h3>
                 <div class="process-step__body" id={`process-step-${step.number}`}>
+                  <ProcessScene number={step.number} />
                   <ul class="process-step__actions">
                     {step.actions.map((action) => <li>{action}</li>)}
                   </ul>
@@ -325,6 +331,56 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
 </style>
 
 <script>
+  import { lessMotion } from "~/lib/a11yPrefs";
+
+  /* The scenes (`ui/ProcessScene.astro`). Their markup is the finished picture;
+     `data-scene` adds the motion. `armed` holds the first frame and is only ever
+     written while the row is off screen, so nothing visible is reset. `play`
+     runs once, the cards one after another; afterwards the attribute goes and
+     the picture stays as it is. */
+  const SCENE_STEP_MS = 420;
+  const SCENE_LONGEST_MS = 2700;
+  const shown = (el: HTMLElement) => el.getClientRects().length > 0;
+  const playScene = (scene: HTMLElement, delay = 0) => {
+    if (lessMotion()) return;
+    window.clearTimeout(Number(scene.dataset.sceneTimer ?? 0));
+    scene.style.setProperty("--ps-delay", `${delay}ms`);
+    if (scene.dataset.scene !== "armed") {
+      scene.dataset.scene = "armed";
+      void scene.getBoundingClientRect();
+    }
+    scene.dataset.scene = "play";
+    scene.dataset.sceneTimer = String(
+      window.setTimeout(() => {
+        delete scene.dataset.scene;
+        delete scene.dataset.sceneTimer;
+        scene.style.removeProperty("--ps-delay");
+      }, delay + SCENE_LONGEST_MS),
+    );
+  };
+
+  for (const list of document.querySelectorAll<HTMLElement>(".process-steps")) {
+    if (lessMotion()) break;
+    const scenes = [...list.querySelectorAll<HTMLElement>("[data-process-scene]")];
+    const box = list.getBoundingClientRect();
+    if (box.bottom <= 0 || box.top >= window.innerHeight) {
+      for (const scene of scenes) scene.dataset.scene = "armed";
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          let order = 0;
+          for (const scene of scenes) {
+            if (shown(scene)) playScene(scene, order++ * SCENE_STEP_MS);
+            else delete scene.dataset.scene;
+          }
+        },
+        { rootMargin: "0px 0px -25% 0px" },
+      );
+      observer.observe(list);
+    }
+  }
+
   /* Phone accordion: one step open at a time. From 40rem every step shows and
      the heads are plain headings again: disabled, no aria-expanded, no tab stop. */
   const phone = matchMedia("(max-width: 39.99rem)");
@@ -351,6 +407,8 @@ const resultLabel = lang === "en" ? "Result" : "Ergebnis";
         if (!phone.matches) return;
         open = open === index ? -1 : index;
         apply();
+        const scene = panel(toggle)?.querySelector<HTMLElement>("[data-process-scene]");
+        if (open === index && scene) playScene(scene);
       });
     });
     phone.addEventListener("change", apply);
