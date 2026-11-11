@@ -356,6 +356,12 @@ html[data-modal-open] dialog {
   transform-origin: center 80%;
 }
 
+/* The letter itself (AccentLetters.astro): drawn from `data-char`, so the
+   word is text only once — in the visually hidden copy. */
+.accent-letter::before {
+  content: attr(data-char);
+}
+
 /* Light-section palette: cycle primary → accent-pink → primary → accent */
 .accent-letters:not([data-tone="dark"]) .accent-letter:nth-child(4n+1) {
   --letter-hover: var(--color-primary);

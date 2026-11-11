@@ -18,6 +18,12 @@
  * left to read, because the glyphs were hidden. Ten headings on the home page
  * carried it, so ten headings could lose their accent word.
  *
+ * The glyphs are drawn from `data-char` by CSS (`::before`, global.css), not
+ * written as text (2026-11-11). As text the word stood in the document twice —
+ * "Lösungen.Lösungen." to every crawler and answer engine that reads the
+ * markup without CSS. Now the hidden copy is the only text; the letters look
+ * and move exactly as before.
+ *
  * The spans are written on ONE line on purpose: whitespace between the hidden
  * copy and the glyphs would render as a visible gap before the word.
  *
@@ -37,4 +43,4 @@ const { text, tone = "light", class: className = "" } = Astro.props;
 const chars = Array.from(text);
 ---
 
-<span class:list={["accent-letters", className]} data-tone={tone}><span class="sr-only">{text}</span><span class="accent-letters__glyphs" aria-hidden="true">{chars.map((char) => <span class="accent-letter">{char === " " ? " " : char}</span>)}</span></span>
+<span class:list={["accent-letters", className]} data-tone={tone}><span class="sr-only">{text}</span><span class="accent-letters__glyphs" aria-hidden="true">{chars.map((char) => <span class="accent-letter" data-char={char === " " ? " " : char}></span>)}</span></span>

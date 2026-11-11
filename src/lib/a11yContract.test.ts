@@ -52,6 +52,10 @@ describe("names come from text, not from labels on generic elements", () => {
     expect(t).not.toMatch(/<span[^>]*aria-label=/);
     expect(t).toMatch(/<span class="sr-only">\{text\}<\/span>/);
     expect(t).toMatch(/class="accent-letters__glyphs" aria-hidden="true"/);
+    // …and the glyphs carry no text of their own, so the word is in the
+    // document once (2026-11-11): drawn from data-char by CSS.
+    expect(t).toMatch(/class="accent-letter" data-char=/);
+    expect(t).not.toMatch(/<span class="accent-letter">\{/);
   });
 
   it("no component names a plain span or div with aria-label", () => {
