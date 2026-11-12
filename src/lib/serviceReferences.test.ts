@@ -29,12 +29,12 @@ beforeEach(() => {
 describe("resolveServiceContent — references", () => {
   it("has the committed cases the assertions below assume", () => {
     // Guards the fixture: every assertion below is vacuous without this, and
-    // the shape matters as much as the count. Position 0 must be the case with
-    // a journal article, position 1 the named one with a customer site —
-    // reorder the catalog and these tests would keep passing while proving
-    // something else.
+    // the shape matters as much as the count. Position 0 must be the anonymous
+    // case (no journal article since 2026-11-12, for confidentiality), position
+    // 1 the named one with a customer site — reorder the catalog and these
+    // tests would keep passing while proving something else.
     expect(committed.length).toBeGreaterThan(1);
-    expect(committed[0].articleUrl).toBeTruthy();
+    expect(committed[0].articleUrl).toBeUndefined();
     expect(committed[0].siteUrl).toBeUndefined();
     expect(committed[1].siteUrl).toBeTruthy();
   });
@@ -154,9 +154,14 @@ describe("resolveServiceContent — references", () => {
     expect(content.references).toEqual([]);
   });
 
-  it("resolves the English twin with English copy and an English article link", async () => {
+  it("resolves the English twin with English copy", async () => {
     const content = await resolveServiceContent(service, "en");
     expect(content.references[0]).toEqual(referencesForService("web-presence", "en")[0]);
-    expect(content.references[0].articleUrl).toContain("/en/");
+    expect(content.references[0].title).toBe(
+      referencesForService("web-presence", "en")[0].title,
+    );
+    expect(content.references[0].title).not.toBe(
+      referencesForService("web-presence", "de")[0].title,
+    );
   });
 });

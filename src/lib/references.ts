@@ -103,9 +103,14 @@ export function articleUrl(slug: string, lang: Lang): string {
 
 export const referenceCases: readonly ReferenceCase[] = [
   {
+    // Anonymous on purpose, and deliberately abstract: the client may not be
+    // identifiable and their business processes are confidential. No industry,
+    // no shop system, no channel names, no pricing logic, no catalogue size,
+    // and no journal link (the article would turn the card back into a case
+    // study of that one client). The complexity is the point, not the client.
     id: "product-data-pipeline",
     services: ["web-presence", "process", "solutions"],
-    articleSlug: "vom-baukasten-shop-zum-eigenen-shop",
+    articleSlug: null,
     disclosure: "anonymous",
     siteUrl: null,
     previewAllowed: false,
