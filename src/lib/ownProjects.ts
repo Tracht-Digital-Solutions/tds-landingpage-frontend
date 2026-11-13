@@ -99,7 +99,7 @@ export const ownProjects: readonly OwnProject[] = [
     id: "kanlo",
     // Version 1.0.0 is released (2026-11). The card still leads to the project
     // page on the freelance profile (decided 2026-11-13), which links the release.
-    image: { de: "/projects/kanlo-de.webp", en: "/projects/kanlo-en.webp" },
+    image: { de: "/projects/kanlo-v1-de.webp", en: "/projects/kanlo-v1-en.webp" },
     href: { de: "https://freelance.tracht-digital.de/projekte/kanlo/", en: "https://freelance.tracht-digital.de/en/projects/kanlo/" },
     hreflang: { de: "de", en: "en" },
     service: "solutions",
@@ -110,14 +110,14 @@ export const ownProjects: readonly OwnProject[] = [
         kind: "Software",
         text: "Lokales Kanban-Board für Raspberry Pi und Debian. Läuft im eigenen Netz ohne Internet und wird im Browser auf Handy und PC bedient. Version 1.0 mit Downloads für AMD64, ARM64 und armhf.",
         cta: "Projekt ansehen",
-        alt: "Kanlo-Board mit den Spalten Ideen, Geplant, In Arbeit und Erledigt, Tickets mit Labels und einem WIP-Limit",
+        alt: "Kanlo-Board mit Suche, Filtern, Backlog und den Spalten Offen, In Arbeit und Erledigt mit Beispieltickets für Werkstatt und Haus",
       },
       en: {
         title: "Kanlo",
         kind: "Software",
         text: "Local Kanban board for Raspberry Pi and Debian. Runs in the local network with no internet and is used in the browser on phone and PC. Version 1.0 with downloads for AMD64, ARM64 and armhf.",
         cta: "View the project",
-        alt: "Kanlo board with the columns Ideas, Planned, In progress and Done, labelled tickets and a WIP limit",
+        alt: "Kanlo board with search, filters, a backlog and three columns of example tickets for the workshop and home",
       },
     },
   },
