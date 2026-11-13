@@ -168,7 +168,7 @@ export const referenceCases: readonly ReferenceCase[] = [
         challenge:
           "Die Webseite war über die Jahre stehen geblieben: ein veralteter Stand, Fehler im Detail, auf dem Telefon umständlich zu bedienen und für die Suche nicht aufgestellt.",
         solution:
-          "Übernahme der bestehenden Seite und Überarbeitung: aktueller Stand, ausgebessertes Design, behobene Fehler, eine Darstellung, die auf dem Telefon funktioniert, und die Grundlagen für die Auffindbarkeit. Seither läuft die Wartung über mich — zusammen mit den E-Mail-Postfächern.",
+          "Übernahme der bestehenden Seite und Überarbeitung: aktueller Stand, ausgebessertes Design, behobene Fehler, eine Darstellung, die auf dem Telefon funktioniert, und die Grundlagen für die Auffindbarkeit. Seither läuft die Wartung über mich, zusammen mit den E-Mail-Postfächern.",
         result:
           "Die Seite bleibt aktuell, ohne dass der Betrieb sich darum kümmern muss. Bei technischen Fragen gibt es einen Ansprechpartner statt einer Suche nach Zuständigkeiten.",
         metric: "",
@@ -179,9 +179,46 @@ export const referenceCases: readonly ReferenceCase[] = [
         challenge:
           "The website had stood still over the years: out of date, faults in the detail, awkward to use on a phone and not set up to be found.",
         solution:
-          "Taking the existing site over and reworking it: current again, the design repaired, the faults fixed, a layout that works on a phone, and the groundwork for being found. The upkeep has run through me since — along with the email accounts.",
+          "Taking the existing site over and reworking it: current again, the design repaired, the faults fixed, a layout that works on a phone, and the groundwork for being found. The upkeep has run through me since, along with the email accounts.",
         result:
           "The site stays current without the business having to attend to it. For technical questions there is one point of contact instead of a hunt for who is responsible.",
+        metric: "",
+      },
+    },
+  },
+  {
+    // Named and linked with the customer's approval (2026-11-13). A new
+    // build, not a takeover: the case says what was built and nothing about
+    // the customer's own business beyond what its site states.
+    id: "astera",
+    services: ["web-presence"],
+    articleSlug: null,
+    disclosure: "named",
+    siteUrl: "https://astera.one/",
+    // Approved together with the naming (2026-11-13).
+    previewAllowed: true,
+    platforms: ["typo3"],
+    content: {
+      de: {
+        title: "Eine zweisprachige Firmenwebsite auf TYPO3 14",
+        context: "Astera GbR, Software-Audits und individuelle Softwareentwicklung",
+        challenge:
+          "Für die Leistungen der Astera GbR fehlte ein Webauftritt auf Deutsch und Englisch, den das Team selbst pflegen kann.",
+        solution:
+          "Neubau auf TYPO3 14 LTS mit eigenem Sitepackage: Seitenvorlagen, Inhaltselemente, Scroll-Szenen und ein Anfrageformular mit eigenem Backend-Modul. Automatische Tests prüfen Darstellung und Barrierefreiheit.",
+        result:
+          "Beide Sprachfassungen werden im TYPO3-Backend gepflegt. Anfragen kommen gesammelt im Backend an.",
+        metric: "",
+      },
+      en: {
+        title: "A bilingual company website on TYPO3 14",
+        context: "Astera GbR, software audits and custom software development",
+        challenge:
+          "Astera GbR needed a website in German and English for its services that the team can maintain itself.",
+        solution:
+          "A new build on TYPO3 14 LTS with its own site package: page templates, content elements, scroll scenes and an enquiry form with its own backend module. Automated tests check layout and accessibility.",
+        result:
+          "Both language versions are maintained in the TYPO3 backend. Enquiries arrive in one place in the backend.",
         metric: "",
       },
     },

@@ -96,11 +96,8 @@ describe("resolveServiceContent — references", () => {
     };
     vi.mocked(cms.fetchBlocks).mockResolvedValue({
       service_web_presence: {
-        references: [
-          { ...hostile, title: "A" },
-          { ...hostile, title: "B" },
-          { ...hostile, title: "C" },
-        ],
+        // One entry per committed case, plus one past the end.
+        references: Array.from({ length: committed.length + 1 }, (_, i) => ({ ...hostile, title: `T${i}` })),
       },
     } as never);
 
@@ -123,8 +120,9 @@ describe("resolveServiceContent — references", () => {
     // for it. This position is what keeps the rule under test as the catalog
     // grows — the ones above stop proving it as soon as something committed
     // sits behind them.
-    expect(references[2].articleUrl).toBeUndefined();
-    expect(references[2].siteUrl).toBeUndefined();
+    const past = references[committed.length];
+    expect(past.articleUrl).toBeUndefined();
+    expect(past.siteUrl).toBeUndefined();
   });
 
   it("hides the section on an EXPLICITLY empty list", async () => {

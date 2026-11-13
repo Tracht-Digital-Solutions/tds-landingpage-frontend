@@ -12,10 +12,11 @@ describe("own projects", () => {
     expect(ownProjects.map((p) => p.id)).toEqual(["wparted", "pi-imager-android", "kanlo", "wparted-website"]);
   });
 
-  it("call Kanlo a development version and never stable", () => {
+  it("names Kanlo's released version and no longer calls it a development build", () => {
     const kanlo = ownProjects.find((p) => p.id === "kanlo")!;
-    expect(kanlo.copy.de.text).toMatch(/Entwicklungsversion.*kein stabiles Release/);
-    expect(kanlo.copy.en.text).toMatch(/Development version.*no stable release/);
+    expect(kanlo.copy.de.text).toMatch(/Version 1.0/);
+    expect(kanlo.copy.en.text).toMatch(/Version 1.0/);
+    expect(kanlo.copy.de.text).not.toMatch(/Entwicklungsversion/);
   });
 
   it("call Pi Imager independent and do not hide its test state", () => {
