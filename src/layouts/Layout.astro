@@ -42,6 +42,8 @@ import {
   themeBootstrapScript,
 } from "@tracht-digital-solutions/tds-shared/astro";
 import { PAGE_ENTER_SCRIPT } from "~/lib/motion/constants";
+import { SPLASH_SCRIPT } from "~/lib/splash";
+import Splash from "~/components/Splash.astro";
 import { A11Y_BOOT_SCRIPT } from "~/lib/a11yPrefs";
 import { siteConfig } from "~/lib/seo";
 import { isExcluded } from "~/lib/sitemap";
@@ -159,6 +161,8 @@ const showCookieNotice = !bare;
         page-enter flag below reads the motion switch. */}
     <script is:inline set:html={A11Y_BOOT_SCRIPT} />
     <script is:inline set:html={PAGE_ENTER_SCRIPT} />
+    {/* First-visit splash: after the two above, whose attributes it reads. */}
+    {!bare && <script is:inline set:html={SPLASH_SCRIPT} />}
     {/* The LCP element's font, fetched as early as the parser can see it.
         Without this it is discovered only when the inlined CSS is parsed —
         measured live, the two Lato faces did not finish until 520 ms against
@@ -254,6 +258,7 @@ const showCookieNotice = !bare;
     <slot name="head" />
   </head>
   <body data-bare={bare ? "" : undefined}>
+    {!bare && <Splash />}
     {/* The page's ONE ground, with its generated shapes: see the component. */}
     <PageGround bare={bare} />
     {/* In the page's language: it said "Skip to content" on every German page.

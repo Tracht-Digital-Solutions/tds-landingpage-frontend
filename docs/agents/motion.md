@@ -76,6 +76,15 @@ an internal navigation), and nothing under reduced motion. `src/__tests__/motion
 
 Scroll reveal stays `lib/reveal.ts` (`[data-reveal]`).
 
+## First-visit splash (2026-11-13)
+
+`lib/splash.ts` + `components/Splash.astro`: an inline head script sets `html[data-splash]` once per browser
+(`localStorage["lp-splash"]`), never under reduced motion, the motion switch, after an internal navigation, on
+`bare` pages or without JS. A navy layer with the wordmark covers the finished page until fonts and the images in
+the first screen have loaded (min 450 ms, max 1.6 s), then fades. It is a layer ON TOP: nothing underneath is hidden,
+it holds no image and its type is small, so `h1#hero-heading` stays the LCP element (`audit:perf`). Tests:
+`splash.test.ts`.
+
 - **Switches slide by hand** (2026-10-19, `lib/slideSwitch.ts`): the net/gross switches (price list and
   calculator) and the accessibility toggles follow a sideways drag (mouse and touch, capture after 6 px,
   `touch-action: pan-y`) and settle on the nearer end; a tap stays a tap, the click a drag ends in is swallowed.

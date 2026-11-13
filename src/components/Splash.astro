@@ -1,0 +1,66 @@
+---
+/**
+ * The first-visit splash layer (see `lib/splash.ts` for when it shows).
+ *
+ * Hidden by default; only `html[data-splash]`, which the inline head script
+ * sets, shows it. Without JavaScript, on a second visit and under reduced
+ * motion it never appears. It is `aria-hidden` decoration: the wordmark is
+ * set in small type so it never competes with the H1 as the LCP element, and
+ * there is no image in it.
+ */
+import { siteConfig } from "~/lib/seo";
+---
+
+<div class="lp-splash" aria-hidden="true">
+  <div class="lp-splash__mark">
+    <span class="lp-splash__name">{siteConfig.name}</span>
+    <span class="tds-brandbar tds-brandbar--on-dark lp-splash__bar"></span>
+  </div>
+</div>
+
+<style is:global>
+  .lp-splash {
+    display: none;
+  }
+  html[data-splash] .lp-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    display: grid;
+    place-items: center;
+    background: var(--color-surface-navy);
+    color: #fff;
+    transition: opacity var(--tds-dur-slow) var(--tds-ease-out);
+  }
+  html[data-splash="out"] .lp-splash {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* The page under it does not scroll away while it covers it. */
+  html[data-splash]:not([data-splash="out"]) {
+    overflow: hidden;
+  }
+  .lp-splash__mark {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .lp-splash__name {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .lp-splash__bar {
+    margin: 0;
+    animation: lp-splash-draw var(--tds-dur-draw) var(--tds-ease-out) both;
+  }
+  @keyframes lp-splash-draw {
+    from {
+      clip-path: inset(0 100% 0 0 round 999px);
+    }
+    to {
+      clip-path: inset(0 0 0 0 round 999px);
+    }
+  }
+</style>
