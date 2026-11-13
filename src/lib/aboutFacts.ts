@@ -70,9 +70,3 @@ export function aboutFacts(lang: Lang, now: Date = new Date()): AboutFact[] {
         },
       ];
 }
-
-/** Julian's line on AI, after the freelance site's AI page. Code-owned: it is a quotation. */
-export const FOUNDER_QUOTE: Record<Lang, string> = {
-  de: "KI beschleunigt die Entwicklung. Die Verantwortung bleibt beim Menschen.",
-  en: "AI speeds up development. Responsibility stays with people.",
-};

@@ -41,11 +41,11 @@ describe("motion on the landing page", () => {
     expect(hero).toContain("<h1");
     // No photo ground since 2026-11-03: it covered the page ground's shapes.
     expect(hero).not.toContain("<picture>");
-    // Slogan + two buttons, nothing else (2026-09-21).
-    for (const field of ["{slogan}", "{cta1}", "{cta2}"]) {
+    // Title, lead, slogan and two buttons (2026-11-13), nothing else.
+    for (const field of ["{title}", "{lead}", "{slogan}", "{cta1}", "{cta2}"]) {
       expect(hero, `${field} must render in Astro`).toContain(field);
     }
-    expect(hero).not.toMatch(/hero-trust|hero-sub|hero-eyebrow|hero-note/);
+    expect(hero).not.toMatch(/hero-trust|hero-sub|hero-eyebrow|hero-note/);
   });
 
   /**

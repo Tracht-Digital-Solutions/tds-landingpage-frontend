@@ -13,7 +13,7 @@ import { cmsFor } from "~/lib/cms";
 import { businessCardHref } from "~/lib/businessCard";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
-import AccentLetters from "~/components/ui/AccentLetters.astro";
+import { headingText } from "~/lib/heading";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
 import PlaceBubble from "~/components/ui/PlaceBubble.astro";
 import PhoneIcon from "~/components/ui/PhoneIcon.astro";
@@ -211,8 +211,7 @@ const ui =
       id="contact-heading"
       class="display text-4xl md:text-5xl lg:text-6xl text-white mb-4 text-center md:text-left"
     >
-      {contact.headline}{" "}
-      <AccentLetters text={contact.headlineAccent} tone="dark" />
+      {headingText(contact.headline, contact.headlineAccent)}
     </h2>
     {/* The three-part brand accent on its lifted (on-dark) run — the
         bordeaux segment sinks into the navy at its light value. */}

@@ -1,6 +1,6 @@
 ---
 /**
- * Shared section masthead — display headline with italic accent word.
+ * Shared section masthead: one plain display headline (see `lib/heading.ts`).
  * Used by Services / Process / FAQ / Journal so
  * every section opens the same way.
  *
@@ -13,11 +13,11 @@
  * to --color-accent-pink for legibility against the dark backgrounds
  * (Contact).
  */
-import AccentLetters from "~/components/ui/AccentLetters.astro";
+import { headingText } from "~/lib/heading";
 
 interface Props {
   headline: string;
-  headlineAccent: string;
+  headlineAccent?: string;
   id: string;
   dark?: boolean;
   headingClass?: string;
@@ -68,8 +68,7 @@ const headingSpacing = bar ? "mb-5" : headingClass;
       headingSpacing,
     ]}
   >
-    {headline}{" "}
-    <AccentLetters text={headlineAccent} tone={dark ? "dark" : "light"} />
+    {headingText(headline, headlineAccent)}
   </h2>
   {
     bar && (

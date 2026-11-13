@@ -1,7 +1,7 @@
 ---
 /**
- * Hero — the brand's slogan and two actions. Nothing else (decided
- * 2026-09-21): the eyebrow, the benefit sub, the note under the buttons and the
+ * Hero — what the business does, the slogan and two actions (2026-11-13;
+ * before that the slogan alone was the H1, decided 2026-09-21): the eyebrow, the benefit sub, the note under the buttons and the
  * trust card are gone. Who it is for and what it costs are answered by the
  * sections below and by the meta description; the first screen says the one
  * sentence the brand stands for and offers the two ways on.
@@ -32,13 +32,17 @@ import HeroCarousel from "~/components/ui/HeroCarousel.astro";
 
 interface Props {
   lang: Lang;
-  /** The brand slogan — the page's H1. */
+  /** The H1: services in the words a search uses. */
+  title: string;
+  /** One sentence under the H1: who, where, what follows. */
+  lead: string;
+  /** The brand slogan, the small line above the H1. */
   slogan: string;
   cta1: string;
   cta2: string;
 }
 
-const { lang, slogan, cta1, cta2 } = Astro.props;
+const { lang, title, lead, slogan, cta1, cta2 } = Astro.props;
 
 ---
 
@@ -58,7 +62,9 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
           per-word split made every word an inline-block, which fragmented the
           H1 into small LCP candidates and removed every chance for
           `hyphens: auto` to break a long word. */}
-      <h1 id="hero-heading" class="hero-title hero-rise">{slogan}</h1>
+      <p class="hero-slogan hero-rise">{slogan}</p>
+      <h1 id="hero-heading" class="hero-title hero-rise">{title}</h1>
+      <p id="hero-lead" class="hero-lead hero-rise">{lead}</p>
       {/* The brand's three-part bar, drawn out from the left once the slogan
           has landed (2026-09-22). Decoration: `aria-hidden`, uncovered by a
           round clip (never scaled, so the segments stay pills), and at rest
@@ -124,15 +130,36 @@ const { lang, slogan, cta1, cta2 } = Astro.props;
 
   /* The slogan is the only text on the screen, so it carries the size the
      eyebrow, sub and card used to share. */
+  .hero-slogan {
+    margin: 0 auto 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  .hero-lead {
+    max-width: 40rem;
+    margin: 0 auto 2rem;
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--color-black);
+  }
+  @media (min-width: 768px) {
+    .hero-slogan,
+    .hero-lead {
+      margin-inline: 0;
+    }
+  }
+
   .hero-title {
-    max-width: 18ch;
+    max-width: 20ch;
     margin: 0 auto 1.5rem;
     font-family: var(--font-display);
     font-weight: 500;
     /* 3rem floor since 2026-09-22: at 2.5rem the slogan was a small island in
        the middle of an empty phone screen. */
-    font-size: clamp(3rem, 1.2rem + 6vw, 7.5rem);
-    line-height: 1.02;
+    font-size: clamp(2.375rem, 1rem + 4.2vw, 5.25rem);
+    line-height: 1.04;
     letter-spacing: -0.03em;
     color: var(--color-black);
     font-variation-settings: "opsz" 144;

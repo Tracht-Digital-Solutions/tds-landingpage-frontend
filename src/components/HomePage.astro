@@ -112,7 +112,7 @@ const jsonLd = asGraph(
     // The slogan and the FAQ — what a voice assistant should read if it
     // reads anything. (`#hero-sub` went with the hero's reduction to the
     // slogan.)
-    speakable: speakableSchema(["#hero-heading", "#faq"]),
+    speakable: speakableSchema(["#hero-heading", "#hero-lead", "#faq"]),
   },
 );
 ---
@@ -125,7 +125,14 @@ const jsonLd = asGraph(
 >
   <Header />
   <main id="main">
-    <Hero lang={lang} slogan={footer.slogan} cta1={hero.cta1} cta2={hero.cta2} />
+    <Hero
+      lang={lang}
+      title={home.hero.title}
+      lead={home.hero.lead}
+      slogan={footer.slogan}
+      cta1={hero.cta1}
+      cta2={hero.cta2}
+    />
     <Services />
     <SectionSeam />
     <ProjectReferences />

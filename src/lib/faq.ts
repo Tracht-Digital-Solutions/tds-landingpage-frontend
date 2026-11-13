@@ -116,7 +116,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
         headline: "Häufige",
         headlineAccent: "Fragen.",
         intro:
-          "Übernahme, Preise und Zusammenarbeit – die Fragen, die Tracht Digital Solutions am häufigsten gestellt werden.",
+          "Übernahme, Preise und Zusammenarbeit: die Fragen, die Tracht Digital Solutions am häufigsten gestellt werden.",
         // The answer-first paragraph: who answers, what about, for whom, where.
         // It is the first thing an answer engine reads after the headline, and
         // the first thing a reader needs in order to trust the rest.
@@ -124,7 +124,7 @@ export function getFaqPageCopy(lang: "de" | "en") {
           "Die Fragen auf dieser Seite beantwortet Tracht Digital Solutions aus Schwarzenbek bei Hamburg, tätig für Unternehmen in ganz Deutschland. Es geht um Websites und eigene Software, um Festpreise und Dauer, um den Umgang mit KI und um die Betreuung nach dem Start.",
         seoTitle: "Häufige Fragen zu Website, Preis und Ablauf — Tracht Digital",
         description:
-          "Antworten zu Websites, eigener Software, Festpreisen, Dauer, KI und Betreuung – kurz beantwortet, ohne Fachsprache.",
+          "Antworten zu Websites, eigener Software, Festpreisen, Dauer, KI und Betreuung, kurz beantwortet und ohne Fachsprache.",
         groups: {
           takeover: "Übernahme und Umsetzung",
           pricing: "Preise und Dauer",
@@ -139,12 +139,12 @@ export function getFaqPageCopy(lang: "de" | "en") {
         headline: "Common",
         headlineAccent: "questions.",
         intro:
-          "Takeovers, pricing and working together – the questions Tracht Digital Solutions is asked most often.",
+          "Takeovers, pricing and working together: the questions Tracht Digital Solutions is asked most often.",
         answer:
           "The questions on this page are answered by Tracht Digital Solutions from Schwarzenbek near Hamburg, working with companies across Germany. They cover websites and custom software, fixed prices and timelines, the use of AI and support after launch.",
         seoTitle: "Common Questions on Websites and Pricing — Tracht Digital",
         description:
-          "Answers on websites, custom software, fixed prices, timelines, AI and ongoing support – answered briefly, without the jargon.",
+          "Answers on websites, custom software, fixed prices, timelines, AI and ongoing support, answered briefly and without jargon.",
         groups: {
           takeover: "Takeover and build",
           pricing: "Pricing and timelines",
@@ -163,7 +163,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Häufige",
         headlineAccent: "Fragen.",
         intro:
-          "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten – kurz beantwortet.",
+          "Die wichtigsten Fragen zu Zusammenarbeit, Verantwortung und Kosten, kurz beantwortet.",
         items: [
           // --- The six the home page shows ------------------------------
           // Erste Position, seit die Seite auf die Übernahme bestehender
@@ -171,12 +171,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           // hier ankommen, und sie steht damit über der Preisfrage.
           {
             q: "Übernimmt Tracht Digital Solutions bestehende Websites und Shops?",
-            a: "Ja – auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Tracht Digital Solutions verschafft sich zuerst einen Überblick über Technik und Zugänge, behebt dann die dringenden Fehler und übernimmt anschließend die laufende Pflege. Der bisherige Stand bleibt dabei nutzbar.",
+            a: "Ja, auch bei WordPress, WooCommerce, Shopware, TYPO3 oder STRATO. Tracht Digital Solutions verschafft sich zuerst einen Überblick über Technik und Zugänge, behebt dann die dringenden Fehler und übernimmt anschließend die laufende Pflege. Der bisherige Stand bleibt dabei nutzbar.",
             group: "takeover",
           },
           {
             q: "Muss die Seite dafür neu gebaut werden?",
-            a: "Meistens nicht. Was trägt, bleibt – Inhalte, Gestaltung und gut laufende Funktionen werden weitergenutzt. Neu gebaut wird nur, was sich nicht mehr sinnvoll reparieren lässt, und das steht vorher im Angebot.",
+            a: "Meistens nicht. Inhalte, Gestaltung und gut laufende Funktionen werden weitergenutzt. Neu gebaut wird nur, was sich nicht mehr sinnvoll reparieren lässt, und das steht vorher im Angebot.",
             group: "takeover",
           },
           {
@@ -193,7 +193,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Wie lange dauert ein Projekt?",
-            a: "Das hängt vom Umfang ab, deshalb gibt es keine Pauschale. Im Angebot steht ein verbindlicher Termin – vor der Zusage, nicht danach. Größere Vorhaben laufen in Etappen, sodass ein erster Teil früher fertig ist.",
+            a: "Das hängt vom Umfang ab, deshalb gibt es keine Pauschale. Im Angebot steht ein verbindlicher Termin, vor der Zusage und nicht danach. Größere Vorhaben laufen in Etappen, sodass ein erster Teil früher fertig ist.",
             group: "pricing",
           },
           {
@@ -205,7 +205,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           // --- Only on /fragen ------------------------------------------
           {
             q: "Was heißt „Abläufe digitalisieren“ für einen kleinen Betrieb?",
-            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Den Anfang macht ein Ablauf, der jede Woche Zeit kostet – etwa Angebote, Termine oder Belege. Manchmal lautet die ehrliche Antwort auch: so lassen.",
+            a: "Arbeit, die heute auf Papier, in Mails oder Tabellen läuft, wandert in ein passendes digitales Werkzeug. Den Anfang macht ein Ablauf, der jede Woche Zeit kostet, etwa Angebote, Termine oder Belege. Manchmal lautet die ehrliche Antwort auch: so lassen.",
             group: "takeover",
           },
           {
@@ -214,7 +214,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             // plus one technical freigabe. No promise of a placement — that is
             // the boundary the Webauftritt page draws for Google and this one
             // draws for the same reason.
-            q: "Findet ChatGPT meine Seite – und kann man das beeinflussen?",
+            q: "Findet ChatGPT meine Seite, und kann man das beeinflussen?",
             a: "Ja, und ja. KI-Suchen lesen dieselbe Seite wie Google, achten aber auf anderes: eine klare Antwort im ersten Absatz, Fragen als Überschriften, prüfbare Angaben mit Quelle, Datum und Autor. Außerdem dürfen die KI-Crawler nicht ausgesperrt sein. Das nennt sich GEO – eine Platzierung kann trotzdem niemand versprechen.",
             group: "takeover",
           },
@@ -250,7 +250,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             // an dazu"); the boundary is the same one the bookkeeping answer
             // draws — technology yes, legal advice no.
             q: "Kümmert sich Tracht Digital Solutions um Datenschutz und Barrierefreiheit?",
-            a: "Ja, bei der technischen Umsetzung – von Anfang an und nicht erst kurz vor dem Start. Dazu gehören ein datensparsamer Aufbau, eingebundene Pflichtseiten und eine Bedienung, die auch mit Tastatur und Screenreader funktioniert. Eine Rechtsberatung ersetzt das nicht.",
+            a: "Ja, bei der technischen Umsetzung, von Anfang an und nicht erst kurz vor dem Start. Dazu gehören ein datensparsamer Aufbau, eingebundene Pflichtseiten und eine Bedienung, die auch mit Tastatur und Screenreader funktioniert. Eine Rechtsberatung ersetzt das nicht.",
             group: "takeover",
           },
           {
@@ -271,7 +271,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
             // one doing the job. Stated plainly, without claiming it is never
             // used — it is.
             q: "Wie nutzt Tracht Digital Solutions KI?",
-            a: "Als Werkzeug, nicht als Ersatz für die Arbeit. KI hilft beim Recherchieren, Prüfen und bei Routineschritten. Entscheidungen, Gestaltung und Prüfung bleiben in Menschenhand – ungeprüfte KI-Texte gehen nicht online.",
+            a: "Als Werkzeug, nicht als Ersatz für die Arbeit. KI hilft beim Recherchieren, Prüfen und bei Routineschritten. Entscheidungen, Gestaltung und Prüfung bleiben in Menschenhand. Ungeprüfte KI-Texte gehen nicht online.",
             group: "cooperation",
           },
           {
@@ -288,7 +288,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Lassen sich Texte und Bilder selbst ändern?",
-            a: "Ja. Zur Übergabe gehören ein eigener Zugang, eine verständliche Dokumentation und eine Einweisung. Alternativ genügt eine kurze Nachricht mit der Änderung – das ist Teil der Pflege, kein Aufpreis.",
+            a: "Ja. Zur Übergabe gehören ein eigener Zugang, eine verständliche Dokumentation und eine Einweisung. Alternativ genügt eine kurze Nachricht mit der Änderung. Das ist Teil der Pflege, kein Aufpreis.",
             group: "cooperation",
           },
           {
@@ -303,12 +303,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Funktioniert die Zusammenarbeit mit bisherigen Anbietern weiter?",
-            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt – bestehende Programme, Dienstleister und Verträge werden eingebunden statt ersetzt. Ein Wechsel wird nur empfohlen, wenn er dem Betrieb spürbar etwas bringt.",
+            a: "Wenn es sinnvoll ist, ja. Was gut läuft, bleibt: Bestehende Programme, Dienstleister und Verträge werden eingebunden statt ersetzt. Ein Wechsel wird nur empfohlen, wenn er dem Betrieb spürbar etwas bringt.",
             group: "cooperation",
           },
           {
             q: "Gibt es Betreuung nach dem Start?",
-            a: "Ja, auf Wunsch – nach Bedarf oder als festes Monatsmodell mit Wartung, Updates und Weiterentwicklung. Ansprechpartner bleibt dabei dieselbe Person, die das Projekt gebaut hat.",
+            a: "Ja, auf Wunsch nach Bedarf oder als festes Monatsmodell mit Wartung, Updates und Weiterentwicklung. Ansprechpartner bleibt dabei dieselbe Person, die das Projekt gebaut hat.",
             group: "cooperation",
           },
           {
@@ -324,16 +324,16 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
         headline: "Common",
         headlineAccent: "questions.",
         intro:
-          "The key questions about working together, ownership and pricing — answered briefly.",
+          "The key questions about working together, ownership and pricing, answered briefly.",
         items: [
           {
             q: "Does Tracht Digital Solutions take over existing websites and shops?",
-            a: "Yes – including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. Tracht Digital Solutions first gets an overview of the technology and logins, then fixes the urgent errors and takes over ongoing maintenance. The current site stays usable throughout.",
+            a: "Yes, including WordPress, WooCommerce, Shopware, TYPO3 or STRATO. Tracht Digital Solutions first gets an overview of the technology and logins, then fixes the urgent errors and takes over ongoing maintenance. The current site stays usable throughout.",
             group: "takeover",
           },
           {
             q: "Does the site have to be rebuilt for that?",
-            a: "Usually not. What holds up stays – content, design and features that work are kept. Only what can no longer be sensibly repaired gets rebuilt, and that is stated in the quote beforehand.",
+            a: "Usually not. Content, design and features that work are kept. Only what can no longer be sensibly repaired gets rebuilt, and that is stated in the quote beforehand.",
             group: "takeover",
           },
           {
@@ -348,7 +348,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "How long does a project take?",
-            a: "That depends on the scope, so there is no blanket figure. The quote carries a binding date — before any commitment, not after. Larger projects run in stages, so a first part is ready sooner.",
+            a: "That depends on the scope, so there is no blanket figure. The quote carries a binding date, before any commitment and not after. Larger projects run in stages, so a first part is ready sooner.",
             group: "pricing",
           },
           {
@@ -359,11 +359,11 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
 
           {
             q: "What does “digitalizing workflows” mean for a small business?",
-            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. It starts with one routine that costs time every week – quotes, appointments or receipts, for example. Sometimes the honest answer is: leave it as it is.",
+            a: "Work that runs on paper, in emails or spreadsheets today moves into a suitable digital tool. It starts with one routine that costs time every week: quotes, appointments or receipts, for example. Sometimes the honest answer is: leave it as it is.",
             group: "takeover",
           },
           {
-            q: "Does ChatGPT find my site – and can that be influenced?",
+            q: "Does ChatGPT find my site, and can that be influenced?",
             a: "Yes, and yes. AI search reads the same page Google does, but weighs different things: a clear answer in the first paragraph, questions as headings, checkable facts with sources, a date and an author. And the AI crawlers must not be shut out. It is called GEO – but nobody can promise a placement.",
             group: "takeover",
           },
@@ -389,7 +389,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Does Tracht Digital Solutions take care of data protection and accessibility?",
-            a: "Yes, in the technical implementation – from the start, not just before launch. That covers a data-sparing setup, the mandatory legal pages and controls that work with a keyboard and a screen reader. It does not replace legal advice.",
+            a: "Yes, in the technical implementation, from the start, not just before launch. That covers a data-sparing setup, the mandatory legal pages and controls that work with a keyboard and a screen reader. It does not replace legal advice.",
             group: "takeover",
           },
           {
@@ -404,7 +404,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "How does Tracht Digital Solutions use AI?",
-            a: "As a tool, not as a substitute for the work. AI helps with research, checking and routine steps. Decisions, design and review stay with a person – unchecked AI copy does not go online.",
+            a: "As a tool, not as a substitute for the work. AI helps with research, checking and routine steps. Decisions, design and review stay with a person. Unchecked AI copy does not go online.",
             group: "cooperation",
           },
           {
@@ -419,7 +419,7 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Can text and images be changed in-house?",
-            a: "Yes. Handover includes a login, clear documentation and a walkthrough. Alternatively a short message with the change is enough — that is part of maintenance, not an extra.",
+            a: "Yes. Handover includes a login, clear documentation and a walkthrough. Alternatively a short message with the change is enough. That is part of maintenance, not an extra.",
             group: "cooperation",
           },
           {
@@ -434,12 +434,12 @@ export function getFaqContent(lang: "de" | "en"): FaqContent {
           },
           {
             q: "Does the work continue alongside current suppliers?",
-            a: "Where it makes sense, yes. What works stays – existing software, service providers and contracts are integrated rather than replaced. A switch is only recommended when it brings the business a noticeable benefit.",
+            a: "Where it makes sense, yes. What works stays: existing software, service providers and contracts are integrated rather than replaced. A switch is only recommended when it brings the business a noticeable benefit.",
             group: "cooperation",
           },
           {
             q: "Is there support after launch?",
-            a: "Yes, on request — as needed, or as a fixed monthly arrangement covering maintenance, updates and further development. The contact remains the same person who built the project.",
+            a: "Yes, on request: as needed or as a fixed monthly arrangement covering maintenance, updates and further development. The contact remains the same person who built the project.",
             group: "cooperation",
           },
           {

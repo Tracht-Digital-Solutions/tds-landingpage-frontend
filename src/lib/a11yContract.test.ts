@@ -45,19 +45,6 @@ function filesUnder(dir: string, pattern: RegExp): string[] {
 }
 
 describe("names come from text, not from labels on generic elements", () => {
-  it("AccentLetters reads its word from a visually hidden copy", () => {
-    // `aria-label` on a role-less span is prohibited ARIA (axe, serious): a
-    // screen reader may ignore it, and the letters beside it were hidden.
-    const t = template(read("src/components/ui/AccentLetters.astro"));
-    expect(t).not.toMatch(/<span[^>]*aria-label=/);
-    expect(t).toMatch(/<span class="sr-only">\{text\}<\/span>/);
-    expect(t).toMatch(/class="accent-letters__glyphs" aria-hidden="true"/);
-    // …and the glyphs carry no text of their own, so the word is in the
-    // document once (2026-11-11): drawn from data-char by CSS.
-    expect(t).toMatch(/class="accent-letter" data-char=/);
-    expect(t).not.toMatch(/<span class="accent-letter">\{/);
-  });
-
   it("no component names a plain span or div with aria-label", () => {
     const offenders: string[] = [];
     for (const file of filesUnder("src/components", /\.(astro|tsx)$/)) {

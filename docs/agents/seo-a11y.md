@@ -83,7 +83,6 @@ permissive `*` group.
 
 Every rule was broken on the live site once, silently:
 
-- `AccentLetters` reads its word from an `sr-only` copy; never `aria-label` on a span or div.
 - The FAQ is **one** native `<details name="faq">` accordion at every width (not a tablist, not a second hidden copy).
 - **Fixed bottom chrome never hides focus:** `scroll-padding-bottom` adds `--tds-bottom-lane` (cookie notice) and
   `--lp-floating-lane`; the footer adds both lanes to its bottom padding. The header stops being fixed below

@@ -166,8 +166,8 @@ header.
 - **An open modal owns the scroll** (2026-10-12): `lib/motion/dialog.ts` sets `html[data-modal-open]`
   (`overflow: hidden`, dialogs `overscroll-behavior: contain`) and clears it on `close`; Lenis' `prevent`
   skips every wheel while it is set. Before, Lenis turned the wheel inside a dialog into a scroll of the page.
-- Keep `SectionHeader` and `AccentLetters` semantics; accent letters need one accessible label and stop
-  transforming under reduced motion.
+- Section headings are plain text (`lib/heading.ts`, 2026-11-13): no italic accent word, no closing full stop.
+  Only the hero keeps a display treatment.
 - Test desktop, 375 px, both themes and reduced motion. Overflow can be clipped invisibly; measure the rendered
   page.
 

@@ -35,6 +35,14 @@
 DirectoryIndex index.html
 Options -Indexes
 
+# Name UTF-8 in the Content-Type header (2026-11-13). Cache hits and static files
+# never reach Node, so the middleware cannot add it for them. Both directives are
+# FileInfo-class, like the AddType below, which this host already allows.
+AddDefaultCharset UTF-8
+<IfModule mod_mime.c>
+  AddCharset UTF-8 .html .css .js .mjs .json .xml .txt .svg .webmanifest .vcf
+</IfModule>
+
 # Serve the contact vCard as text/vcard so mobile clients offer "add contact"
 # (the prerendered /kontakt.vcf carries no MIME of its own — Apache decides it).
 <IfModule mod_mime.c>

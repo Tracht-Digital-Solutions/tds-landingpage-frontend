@@ -1,6 +1,7 @@
 import { defineMiddleware, sequence } from "astro:middleware";
 
 import { siteCache } from "./lib/pageCache";
+import { withUtf8Charset } from "./lib/charset";
 import { guardSiteKey } from "@tracht-digital-solutions/tds-shared/site";
 
 /**
@@ -41,7 +42,16 @@ const refuseStaleKey = defineMiddleware((_context, next) => guardSiteKey(next as
  * to store it. Reversing the two would put the guard outside the cache, where
  * it would see hits it never rendered and mark them unstorable for no reason.
  */
+/**
+ * Name the character set in the HTTP header (2026-11-13). Astro answers
+ * `text/html` without one, and the SEO checkers flag it; the `<meta charset>`
+ * alone only counts once the parser has reached it. Apache adds the same for
+ * cache hits it serves itself (`AddDefaultCharset` in `public/.htaccess`).
+ */
+const utf8Charset = defineMiddleware(async (_context, next) => withUtf8Charset(await next()));
+
 export const onRequest = sequence(
+  utf8Charset,
   defineMiddleware((context, next) =>
     siteCache.middleware(
       {

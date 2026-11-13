@@ -42,6 +42,14 @@ export interface HomeHeroContent {
    * group belongs in the first line it reads.
    */
   eyebrow: string;
+  /**
+   * The H1 since 2026-11-13: what the business does, in the words a search
+   * uses ("Kundenportale", "Websites"). The slogan moved to the line above it.
+   * Code-owned: no panel field yet, so a stored block cannot blank it.
+   */
+  title: string;
+  /** One sentence under the H1: who, where, what happens after the launch. */
+  lead: string;
   headline: string;
   headlineAccent: string;
   headlineSuffix: string;
@@ -257,13 +265,15 @@ const content: Record<Lang, HomeContent> = {
       // Seit 2026-10-12 spricht die Seite niemanden direkt an: Sie erzählt,
       // was Tracht Digital Solutions macht, nicht, was "du bekommst".
       eyebrow: "Digitale Lösungen für kleine und mittlere Betriebe",
+      title: "Kundenportale, digitale Abläufe und Websites für Betriebe",
+      lead: "Tracht Digital Solutions aus Schwarzenbek bei Hamburg baut sie neu, übernimmt bestehende Systeme und betreut sie nach dem Start weiter.",
       // Der Umbruch ist gewollt: Zeile eins benennt das Ziel, der Akzentteil
       // beginnt Zeile zwei. `text-wrap: balance` zöge das Akzentwort sonst
       // nach oben.
       headline: "Alles an einem Ort.",
       headlineAccent: "Ein eigenes",
       headlineSuffix: "Panel.",
-      sub: "Tracht Digital Solutions bündelt Aufträge, Kunden und Termine in einem System – für Team und Kundschaft. Wiederkehrende Arbeit läuft *automatisch*, mit einem festen Ansprechpartner.",
+      sub: "Tracht Digital Solutions bündelt Aufträge, Kunden und Termine in einem System für Team und Kundschaft. Wiederkehrende Arbeit läuft *automatisch*, mit einem festen Ansprechpartner.",
       cta1: "Erstgespräch vereinbaren",
       cta2: "Leistungen ansehen",
       ctaNote:
@@ -271,17 +281,17 @@ const content: Record<Lang, HomeContent> = {
       scrollHint: "Wieso ich?",
     },
     whyMe: {
-      headline: "Wieso",
-      headlineAccent: "ich?",
+      headline: "Über Julian Tracht",
+      headlineAccent: "",
       lead: "*Ein Ansprechpartner* statt fünf Anbieter.",
       p1: "Tracht Digital Solutions baut auf dem auf, was schon da ist, statt alles neu zu machen.",
-      p2: "Hinter Tracht Digital Solutions steht Julian Tracht – aus Schwarzenbek bei Hamburg, für Betriebe in ganz Deutschland.",
+      p2: "Hinter Tracht Digital Solutions steht Julian Tracht aus Schwarzenbek bei Hamburg. Er arbeitet für Betriebe in ganz Deutschland.",
       portfolioLink: "Freelancer-Portfolio ansehen",
       motivation: {
         title: "Warum ich das mache",
         body: [
           "Zu oft hängt digitale Arbeit an Behelfen: eine Tabelle hier, ein Zettel dort, ein Passwort für alle.",
-          "Das will ich ändern. Ich baue, was zum Ablauf eines Betriebs passt – sicher und ohne Pflegeaufwand im Alltag.",
+          "Das will ich ändern. Ich baue, was zum Ablauf eines Betriebs passt: sicher und ohne Pflegeaufwand im Alltag.",
         ],
       },
       reasons: [
@@ -304,23 +314,23 @@ const content: Record<Lang, HomeContent> = {
       ],
     },
     servicesOverview: {
-      headline: "Digitale",
-      headlineAccent: "Lösungen.",
+      headline: "Leistungen",
+      headlineAccent: "",
       intro: "Fünf Leistungen, *ein Ansprechpartner*: vom eigenen Panel über digitale Abläufe bis zur Website.",
     },
     websiteDemos: {
       headline: "Beispielseiten und",
       headlineAccent: "Designstudien.",
-      intro: "Eigene Demos und Entwürfe – *keine Kundenaufträge*.",
-      serviceIntro: "Eigene Demos und Projekte, live im Netz – *keine Kundenaufträge*.",
+      intro: "Eigene Demos und Entwürfe, *keine Kundenaufträge*.",
+      serviceIntro: "Eigene Demos und Projekte, live im Netz, *keine Kundenaufträge*.",
       headlineSingle: "Eine Beispielseite zum",
-      introSingle: "Eine eigene Beispielseite – *kein Kundenauftrag*. Zum Durchklicken.",
-      serviceIntroSingle: "Eine eigene Beispielseite, live im Netz – *kein Kundenauftrag*.",
+      introSingle: "Eine eigene Beispielseite, *kein Kundenauftrag*. Zum Durchklicken.",
+      serviceIntroSingle: "Eine eigene Beispielseite, live im Netz, *kein Kundenauftrag*.",
     },
     referencesHome: {
       headline: "Umgesetzt für",
       headlineAccent: "Kunden.",
-      intro: "Abgeschlossene Projekte – und *was sie gebracht haben*.",
+      intro: "Abgeschlossene Projekte und *was sie gebracht haben*.",
       label: "Veröffentlicht nur mit Freigabe der Kunden.",
       serviceCta: "Zur passenden Leistung",
     },
@@ -338,13 +348,13 @@ const content: Record<Lang, HomeContent> = {
       secondaryCta: "Preise ansehen",
     },
     contactHeading: {
-      headline: "Womit fangen",
-      headlineAccent: "wir an?",
+      headline: "Kontakt",
+      headlineAccent: "",
       sub: "Eine kurze Nachricht genügt. Die Antwort kommt in der Regel innerhalb von 24 Stunden.",
     },
     journalHeading: {
-      headline: "Blog für",
-      headlineAccent: "Betriebe.",
+      headline: "Ratgeber für Betriebe",
+      headlineAccent: "",
     },
     trust: {
       title: "Worauf Verlass ist",
@@ -372,7 +382,7 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Ziel",
-          text: "Klären, wo es hakt – und ob und wie Tracht Digital helfen kann.",
+          text: "Klären, wo es hakt, und ob und wie Tracht Digital helfen kann.",
         },
         {
           label: "Vorbereitung",
@@ -401,11 +411,11 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "Wie viel Verantwortung dranhängt",
-          text: "Eine Infoseite kostet weniger als ein Shop, der Geld annimmt. Zahlungen und Kundendaten brauchen mehr Sorgfalt – das kostet mehr.",
+          text: "Eine Infoseite kostet weniger als ein Shop, der Geld annimmt. Zahlungen und Kundendaten brauchen mehr Sorgfalt. Das kostet mehr.",
         },
         {
           title: "Was am Ende steht",
-          text: "Passt es in ein Paket, gilt der Festpreis. Sonst gibt es ein eigenes Angebot mit Preis und Termin – vor jeder Zusage.",
+          text: "Passt es in ein Paket, gilt der Festpreis. Sonst gibt es ein eigenes Angebot mit Preis und Termin, vor jeder Zusage.",
         },
       ],
       note: "Was sich nicht einschätzen lässt, wird nicht geraten: erst ansehen, dann einen Preis nennen.",
@@ -414,27 +424,29 @@ const content: Record<Lang, HomeContent> = {
   en: {
     hero: {
       eyebrow: "Digital solutions for small and mid-sized businesses",
+      title: "Customer portals, digital workflows and websites for businesses",
+      lead: "Tracht Digital Solutions, based in Schwarzenbek near Hamburg, builds them, takes over existing systems and looks after them after the launch.",
       headline: "Everything in one place.",
       headlineAccent: "A panel of",
       headlineSuffix: "its own.",
-      sub: "Tracht Digital Solutions brings orders, customers and appointments together in one system – for the team and its customers. Recurring work runs *automatically*, with one steady point of contact.",
+      sub: "Tracht Digital Solutions brings orders, customers and appointments together in one system for the team and its customers. Recurring work runs *automatically*, with one steady point of contact.",
       cta1: "Arrange an initial consultation",
       cta2: "View services",
       ctaNote: "Costs only arise once we agree on an assignment. Replies usually within 24 hours.",
       scrollHint: "Why me?",
     },
     whyMe: {
-      headline: "Why",
-      headlineAccent: "me?",
+      headline: "About Julian Tracht",
+      headlineAccent: "",
       portfolioLink: "View freelance portfolio",
       lead: "*One point of contact* instead of five suppliers.",
       p1: "Tracht Digital Solutions builds on what already exists instead of starting from scratch.",
-      p2: "Behind Tracht Digital Solutions is Julian Tracht – based in Schwarzenbek near Hamburg, working with businesses across Germany.",
+      p2: "Behind Tracht Digital Solutions is Julian Tracht, based in Schwarzenbek near Hamburg. He works with businesses across Germany.",
       motivation: {
         title: "Why I do this",
         body: [
           "Too often digital work hangs on stopgaps: a spreadsheet here, a note there, one password for everyone.",
-          "I want to change that. I build what fits the way a business works – secure, and without upkeep in day-to-day work.",
+          "I want to change that. I build what fits the way a business works: secure, and without upkeep in day-to-day work.",
         ],
       },
       reasons: [
@@ -457,23 +469,23 @@ const content: Record<Lang, HomeContent> = {
       ],
     },
     servicesOverview: {
-      headline: "Digital",
-      headlineAccent: "solutions.",
+      headline: "Services",
+      headlineAccent: "",
       intro: "Five services, *one point of contact*: from a panel of its own and digital workflows to the website.",
     },
     websiteDemos: {
       headline: "Example sites and",
       headlineAccent: "design studies.",
-      intro: "Own demos and drafts – *not client work*. The demos are live on the web.",
-      serviceIntro: "Own demos and projects, live on the web – *not client work*.",
+      intro: "Own demos and drafts, *not client work*. The demos are live on the web.",
+      serviceIntro: "Own demos and projects, live on the web, *not client work*.",
       headlineSingle: "An example site to",
-      introSingle: "An example site of our own – *not client work*. Ready to click through.",
-      serviceIntroSingle: "An example site of our own, live on the web – *not client work*.",
+      introSingle: "An example site of our own, *not client work*. Ready to click through.",
+      serviceIntroSingle: "An example site of our own, live on the web, *not client work*.",
     },
     referencesHome: {
       headline: "Delivered for",
       headlineAccent: "clients.",
-      intro: "Finished projects – and *what they achieved*.",
+      intro: "Finished projects and *what they achieved*.",
       label: "Published only with the client's approval.",
       serviceCta: "See the matching service",
     },
@@ -491,13 +503,13 @@ const content: Record<Lang, HomeContent> = {
       secondaryCta: "View pricing",
     },
     contactHeading: {
-      headline: "Where shall we",
-      headlineAccent: "start?",
+      headline: "Contact",
+      headlineAccent: "",
       sub: "A short message is enough. Replies usually arrive within 24 hours.",
     },
     journalHeading: {
-      headline: "Blog for",
-      headlineAccent: "businesses.",
+      headline: "Guides for businesses",
+      headlineAccent: "",
     },
     trust: {
       title: "What to rely on",
@@ -525,7 +537,7 @@ const content: Record<Lang, HomeContent> = {
       items: [
         {
           label: "Goal",
-          text: "Find out where things get stuck – and whether and how Tracht Digital can help.",
+          text: "Find out where things get stuck, and whether and how Tracht Digital can help.",
         },
         {
           label: "Preparation",
@@ -551,11 +563,11 @@ const content: Record<Lang, HomeContent> = {
         },
         {
           title: "How much responsibility it carries",
-          text: "An information page costs less than a shop that takes money. Payments and customer data need more care – and that costs more.",
+          text: "An information page costs less than a shop that takes money. Payments and customer data need more care. That costs more.",
         },
         {
           title: "What stands at the end",
-          text: "If it fits a package, the fixed price applies. Otherwise there is a quote of its own with a price and a date – before any commitment.",
+          text: "If it fits a package, the fixed price applies. Otherwise there is a quote of its own with a price and a date, before any commitment.",
         },
       ],
       note: "What cannot be assessed is not guessed: look first, then name a price.",

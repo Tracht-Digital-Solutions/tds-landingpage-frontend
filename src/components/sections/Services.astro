@@ -14,12 +14,12 @@ import AssistantCard from "~/components/ui/AssistantCard.astro";
 const lang = resolveLang(Astro.currentLocale);
 
 const products = await getServiceProducts(lang);
-// Code-owned (2026-11-03, asked for): the masthead reads "Digitale Lösungen"
-// and the link "Mehr Leistungen", whatever a stored block still says.
+// Code-owned, whatever a stored block still says: the masthead names the
+// section ("Leistungen", 2026-11-13) and the link reads "Mehr Leistungen" (2026-11-03).
 const ui =
   lang === "de"
-    ? { headline: "Digitale", headlineAccent: "Lösungen.", more: "Mehr Leistungen" }
-    : { headline: "Digital", headlineAccent: "solutions.", more: "More services" };
+    ? { headline: "Leistungen", more: "Mehr Leistungen" }
+    : { headline: "Services", more: "More services" };
 ---
 
 {/* No ground of its own: the page has ONE ground, `.page-ground` in
@@ -32,7 +32,6 @@ const ui =
   <div class="lp-container">
     <SectionHeader
       headline={ui.headline}
-      headlineAccent={ui.headlineAccent}
       id="services-heading"
       headingClass="mb-10"
       bar

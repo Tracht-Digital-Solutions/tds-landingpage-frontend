@@ -47,8 +47,8 @@ import {
 import { getHomeContent } from "~/lib/homeContent";
 import { PORTRAIT_SIZE, portraitSrc, portraitSrcset } from "~/lib/imageVariants";
 import { siteConfig } from "~/lib/seo";
-import { aboutFacts, FOUNDER_QUOTE } from "~/lib/aboutFacts";
-import AccentLetters from "~/components/ui/AccentLetters.astro";
+import { aboutFacts } from "~/lib/aboutFacts";
+import { headingText } from "~/lib/heading";
 
 const lang = resolveLang(Astro.currentLocale);
 const about = await cmsFor("why_me", lang, getHomeContent(lang).whyMe);
@@ -143,8 +143,7 @@ const credentialsUi =
           id="about-heading"
           class="display text-4xl md:text-5xl lg:text-6xl text-[var(--color-black)] mb-8"
         >
-          {about.headline}{" "}
-          <AccentLetters text={about.headlineAccent} />
+          {headingText(about.headline, about.headlineAccent)}
         </h2>
 
         {/* See the note at the top for what is NOT rendered here and why. */}
@@ -178,17 +177,6 @@ const credentialsUi =
           {about.portfolioLink}
           <span aria-hidden="true"><Arrow dir="up-right" /></span>
         </a>
-
-        {/* Julian's line, set large: no box, no stripe. The opening mark and the
-            brand bar frame it; the name stands below. */}
-        <figure class="about-quote">
-          <span class="about-quote__mark" aria-hidden="true">“</span>
-          <blockquote class="about-quote__text">{FOUNDER_QUOTE[lang]}</blockquote>
-          <figcaption class="about-quote__who">
-            <span aria-hidden="true" class="tds-brandbar about-quote__bar"></span>
-            {siteConfig.founder.name}
-          </figcaption>
-        </figure>
 
         <div class="about-block credentials-teaser">
           <p class="eyebrow credentials-teaser__label">{credentialsUi.label}</p>
@@ -367,43 +355,6 @@ const credentialsUi =
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
-  /* The quotation: type alone carries it. */
-  .about-quote {
-    margin: 2.5rem 0 0;
-    text-align: left;
-  }
-  .about-quote__mark {
-    display: block;
-    height: 2.75rem;
-    font-family: var(--font-display);
-    font-size: 6rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--color-accent);
-  }
-  .about-quote__text {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: clamp(1.375rem, 1.1rem + 1.1vw, 2rem);
-    font-weight: 600;
-    line-height: 1.25;
-    letter-spacing: -0.015em;
-    color: var(--color-black);
-    text-wrap: pretty;
-  }
-  .about-quote__who {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-muted);
-  }
-  .about-quote__bar {
-    margin: 0;
-  }
-
   /* --- The three blocks under the paragraph ------------------------------
      Motivation, reasons, certificates. A SEAM between them, not a gap: three
      stacked lists separated by air read as three things that came apart, and

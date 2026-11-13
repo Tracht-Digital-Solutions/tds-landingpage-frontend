@@ -5,7 +5,7 @@ import { fetchTopics, fetchPostsBySlug, type ContentPost } from "~/lib/content";
 import { fetchBlocks } from "~/lib/cms";
 import { getHomeContent } from "~/lib/homeContent";
 import BlogPostCard from "~/components/ui/BlogPostCard.astro";
-import AccentLetters from "~/components/ui/AccentLetters.astro";
+import { headingText } from "~/lib/heading";
 import { mostRelevantPosts } from "~/lib/journalRelevance";
 
 const t = tFor(Astro.currentLocale);
@@ -86,8 +86,7 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
         id="journal-heading"
         class="display text-4xl md:text-5xl lg:text-6xl text-[var(--color-black)]"
       >
-        {heading.headline}{" "}
-        <AccentLetters text={heading.headlineAccent} />
+        {headingText(heading.headline, heading.headlineAccent)}
       </h2>
       <a
         href="https://blog.tracht-digital.de"
