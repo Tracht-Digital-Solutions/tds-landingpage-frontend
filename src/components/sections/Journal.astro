@@ -1,4 +1,5 @@
 ---
+import { siteConfig } from "~/lib/seo";
 import Arrow from "~/components/ui/Arrow.astro";
 import { tFor, resolveLang } from "~/lib/i18n";
 import { fetchTopics, fetchPostsBySlug, type ContentPost } from "~/lib/content";
@@ -10,6 +11,7 @@ import { mostRelevantPosts } from "~/lib/journalRelevance";
 
 const t = tFor(Astro.currentLocale);
 const lang = resolveLang(Astro.currentLocale);
+const blogHome = `${siteConfig.blogUrl}${lang === "en" ? "/en/" : "/"}`;
 // The heading is this page's own words (the blog shares `t.blog.headline`).
 const heading = getHomeContent(lang).journalHeading;
 
@@ -88,13 +90,6 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
       >
         {headingText(heading.headline, heading.headlineAccent)}
       </h2>
-      <a
-        href="https://blog.tracht-digital.de"
-        class="hidden sm:flex items-center gap-2 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors group [@media(pointer:coarse)]:min-h-11"
-      >
-        {t.blog.allPosts}
-        <span aria-hidden="true" class="group-hover:translate-x-1 transition-transform duration-200"><Arrow dir="right" /></span>
-      </a>
     </div>
 
     {/* Grid, not flex — every card is a `container-type: inline-size` slot,
@@ -114,9 +109,11 @@ const gridCols = colClass[Math.min(posts.length, 3)] ?? "sm:grid-cols-3";
       ))}
     </div>
 
+    {/* One "all articles" link at every width (2026-11-13; a second copy for
+        desktop repeated the anchor text). */}
     <a
-      href="https://blog.tracht-digital.de"
-      class="sm:hidden mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-primary)]"
+      href={blogHome}
+      class="mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-card)] px-5 py-2.5 text-sm font-medium text-[var(--color-primary)]"
     >
       {t.blog.allPosts}
       <span aria-hidden="true"><Arrow dir="up-right" /></span>

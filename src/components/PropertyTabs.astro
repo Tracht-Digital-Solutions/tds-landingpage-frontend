@@ -18,6 +18,15 @@
  * links are the second block of the mobile menu (`Header.astro`), from the
  * same list (`propertyLinks()` in `lib/navigation.ts`).
  *
+ * **The list ships inside a `<template>`** (2026-11-13). The same four links
+ * are already in the mobile menu, and a second copy in the HTML doubled them
+ * for crawlers and SEO checkers (external-link count, repeated anchor texts).
+ * Inside it the links carry their target as `data-to`, not `href`, because
+ * some checkers read template markup as part of the page. The inline script
+ * below sets `href` and puts the list in place while the page parses, but
+ * only where the bookmarks can show (the media query above), and again if the
+ * window later starts matching it.
+ *
  * The parked peek is 3rem, inside the page gutter from 64rem up
  * (`clamp(1.5rem, 1rem + 3vw, 5rem)` is ≥ 2.9rem there), so a parked tab
  * never covers content.
@@ -46,11 +55,12 @@ const ICONS: Record<PropertyTabId, string[]> = {
 ---
 
 <nav class="property-tabs" aria-label={navLabel} data-property-tabs>
+  <template data-property-tabs-src>
   <ul class="property-tabs__list">
     {
       links.map((link) => (
         <li>
-          <a href={link.href} class="property-tab" data-property-tab={link.id} rel="noopener">
+          <a data-to={link.href} class="property-tab" data-property-tab={link.id} rel="noopener">
             <span class="property-tab__label">
               {link.label}
               <span class="sr-only"> {external}</span>
@@ -77,6 +87,22 @@ const ICONS: Record<PropertyTabId, string[]> = {
       ))
     }
   </ul>
+  </template>
+  <script is:inline>
+    (function (t) {
+      var q = matchMedia("(min-width: 64rem) and (hover: hover) and (pointer: fine)");
+      function show() {
+        if (!t.isConnected || !q.matches) return;
+        var list = t.content.cloneNode(true);
+        list.querySelectorAll("[data-to]").forEach(function (a) {
+          a.setAttribute("href", a.getAttribute("data-to"));
+        });
+        t.replaceWith(list);
+      }
+      show();
+      if (t.isConnected) q.addEventListener("change", show);
+    })(document.currentScript.previousElementSibling);
+  </script>
 </nav>
 
 <style>

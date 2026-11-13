@@ -54,7 +54,12 @@ const contactHref = `${localizePath("/", lang)}#contact`;
       <div class="first-call__shot" aria-hidden="true">
         {/* The process photo of step one — the conversation itself. It lived in
             the hover-only detail panel beside the steps, which is gone. */}
-        <img src="/images/process/step-01.webp" alt="" loading="lazy" decoding="async" />
+        <img
+          src="/images/process/step-01.webp"
+          alt={lang === "en" ? "Two people at a table talking over a sketch on paper" : "Zwei Personen am Tisch besprechen eine Skizze auf Papier"}
+          loading="lazy"
+          decoding="async"
+        />
       </div>
     )
   }

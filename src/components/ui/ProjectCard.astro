@@ -90,7 +90,7 @@ const {
             />
           ) : (
             /* A literal empty alt: Astro drops an expression that is "". */
-            <img src={tdsPlaceholder({ seed: title, width, height, monogram: title.charAt(0) })} alt="" width={width} height={height} loading="lazy" decoding="async" />
+            <img src={tdsPlaceholder({ seed: title, width, height, monogram: title.charAt(0) })} alt={title} width={width} height={height} loading="lazy" decoding="async" />
           )
         }
         {origin && <span class="project-card__origin">{origin}</span>}

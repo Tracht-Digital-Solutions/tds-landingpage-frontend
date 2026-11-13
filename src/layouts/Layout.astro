@@ -43,6 +43,7 @@ import {
 } from "@tracht-digital-solutions/tds-shared/astro";
 import { PAGE_ENTER_SCRIPT } from "~/lib/motion/constants";
 import { SPLASH_SCRIPT } from "~/lib/splash";
+import { canonicalPath } from "~/lib/share";
 import Splash from "~/components/Splash.astro";
 import { A11Y_BOOT_SCRIPT } from "~/lib/a11yPrefs";
 import { siteConfig } from "~/lib/seo";
@@ -93,7 +94,7 @@ const description = givenDescription ?? siteConfig.description[lang];
 const site = Astro.site?.origin ?? siteConfig.url;
 // One spelling per page (public/.htaccess rule 0a): no trailing slash except
 // on the two roots, so the canonical and hreflang URLs match the sitemap.
-const pathname = Astro.url.pathname.replace(/(.)\/+$/, "$1").replace(/^\/en$/, "/en/");
+const pathname = canonicalPath(Astro.url.pathname);
 const url = canonical ?? new URL(pathname, site).toString();
 const ogImageAbs = ogImage.startsWith("http")
   ? ogImage

@@ -20,6 +20,8 @@ export interface ServiceProduct {
   title: Record<Lang, string>;
   image: string;
   kind: Record<Lang, string>;
+  /** What the tile's picture shows (every image has a text alternative). */
+  alt: Record<Lang, string>;
 }
 
 export const SERVICE_PRODUCTS: readonly ServiceProduct[] = [
@@ -29,6 +31,10 @@ export const SERVICE_PRODUCTS: readonly ServiceProduct[] = [
     title: { de: "Firmenwebsite", en: "Business website" },
     kind: { de: "Webauftritt", en: "Web presence" },
     image: "/images/products/firmenwebsite.webp",
+    alt: {
+      de: "Laptop und Smartphone zeigen dieselbe Firmenwebsite mit Startseite und Leistungsübersicht",
+      en: "Laptop and phone showing the same business website with its home page and services",
+    },
   },
   {
     id: "one-pager",
@@ -36,6 +42,10 @@ export const SERVICE_PRODUCTS: readonly ServiceProduct[] = [
     title: { de: "Onepager", en: "One-page website" },
     kind: { de: "Webauftritt", en: "Web presence" },
     image: "/images/products/onepager.webp",
+    alt: {
+      de: "Eine einzelne lange Webseite als Papierbahn neben einem Smartphone",
+      en: "A single long web page as a paper strip next to a phone",
+    },
   },
   {
     id: "maintenance",
@@ -43,6 +53,10 @@ export const SERVICE_PRODUCTS: readonly ServiceProduct[] = [
     title: { de: "Website-Wartung", en: "Website maintenance" },
     kind: { de: "Betrieb", en: "Operations" },
     image: "/images/products/wartung.webp",
+    alt: {
+      de: "Laptop mit einer Liste geprüfter Updates und Sicherungen, daneben ein Schraubendrehersatz",
+      en: "Laptop with a list of checked updates and backups next to a screwdriver set",
+    },
   },
   {
     id: "ai-visibility",
@@ -50,6 +64,10 @@ export const SERVICE_PRODUCTS: readonly ServiceProduct[] = [
     title: { de: "KI-Sichtbarkeit", en: "AI visibility" },
     kind: { de: "Sichtbarkeit", en: "Visibility" },
     image: "/images/products/ki-sichtbarkeit.webp",
+    alt: {
+      de: "Smartphone mit einer KI-Antwort, die eine Website als Quelle nennt, daneben eine Lupe",
+      en: "Phone with an AI answer citing a website as its source, next to a magnifying glass",
+    },
   },
   {
     id: "online-form",
@@ -57,6 +75,10 @@ export const SERVICE_PRODUCTS: readonly ServiceProduct[] = [
     title: { de: "Online-Formular", en: "Online form" },
     kind: { de: "Digitalisierung", en: "Digitalisation" },
     image: "/images/products/online-formular.webp",
+    alt: {
+      de: "Tablet mit einem Online-Formular neben demselben Formular auf Papier",
+      en: "Tablet with an online form next to the same form on paper",
+    },
   },
 ];
 

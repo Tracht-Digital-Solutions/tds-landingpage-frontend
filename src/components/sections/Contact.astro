@@ -14,7 +14,6 @@ import { businessCardHref } from "~/lib/businessCard";
 import { getHomeContent } from "~/lib/homeContent";
 import ContactForm from "~/components/islands/ContactForm.tsx";
 import { headingText } from "~/lib/heading";
-import SocialLinks from "~/components/ui/SocialLinks.astro";
 import PlaceBubble from "~/components/ui/PlaceBubble.astro";
 import PhoneIcon from "~/components/ui/PhoneIcon.astro";
 import { socialLinks, whatsappHref } from "~/lib/socials";
@@ -129,7 +128,6 @@ const landlineHref = siteConfig.telephone.replace(/\s/g, "");
  * same reason). Listing it in both places would be one label for two identical
  * links a centimetre apart.
  */
-const profileLinks = socialLinks(contact.phone).filter((link) => link.id !== "whatsapp");
 
 /**
  * The WhatsApp glyph, taken from the shared icon set rather than copied: the row
@@ -197,7 +195,7 @@ const ui =
       srcset={imageHints("/images/sections/contact-editorial.webp", "de")?.srcSet}
       sizes="100vw"
       width="1860" height="840"
-      alt=""
+      alt={lang === "de" ? "Dunkler Schreibtisch mit Telefon und Notizbuch im Licht einer Lampe" : "Dark desk with a telephone and a notebook in lamplight"}
       aria-hidden="true"
       loading="lazy"
       decoding="async"
@@ -308,7 +306,7 @@ const ui =
           <div class="contact-card__social-row">
             {/* `target`/`rel` because it leaves for a messenger, like every
                 link in `SocialLinks`. Icon only (2026-10-19, asked for), like
-                the profiles beside it; the name is the accessible label. */}
+                the footer's profiles; the name is the accessible label. */}
             <a
               class="contact-action contact-action--whatsapp"
               href={whatsappHref(contact.phone)}
@@ -320,7 +318,6 @@ const ui =
                 <path d={WHATSAPP_ICON} />
               </svg>
             </a>
-            {profileLinks.length > 0 && <SocialLinks links={profileLinks} />}
           </div>
         </div>
       </aside>

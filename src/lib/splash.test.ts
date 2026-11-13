@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SPLASH_ATTR, SPLASH_FADE_MS, SPLASH_MAX_MS, SPLASH_MIN_MS, SPLASH_SCRIPT, SPLASH_STORAGE_KEY } from "./splash";
+import { SPLASH_ATTR, SPLASH_FADE_MS, SPLASH_MAX_MS, SPLASH_SCRIPT, SPLASH_STORAGE_KEY } from "./splash";
 
 const root = () => document.documentElement;
 

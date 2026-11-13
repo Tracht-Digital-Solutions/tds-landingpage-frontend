@@ -1,0 +1,149 @@
+---
+/**
+ * "Share this page" (2026-11-13), in the footer of every page.
+ *
+ * LinkedIn, WhatsApp and email are plain links built from the page's canonical
+ * URL: they work without JavaScript, load nothing from the networks and need
+ * no consent. Two buttons join them once JavaScript runs: the browser's own
+ * share sheet where it exists, and "copy link", which confirms with the shared
+ * `data-copied` pulse (tds-shared 0.66).
+ */
+import { resolveLang } from "~/lib/i18n";
+import { siteConfig } from "~/lib/seo";
+import { canonicalUrl, shareTargets } from "~/lib/share";
+
+interface Props {
+  class?: string;
+}
+
+const lang = resolveLang(Astro.currentLocale);
+const url = canonicalUrl(Astro.url.pathname, Astro.site?.origin ?? siteConfig.url);
+const targets = shareTargets(url, lang);
+const ui =
+  lang === "de"
+    ? { label: "Seite teilen", via: "Teilen über", native: "Teilen", copy: "Link kopieren", copied: "Link kopiert" }
+    : { label: "Share this page", via: "Share via", native: "Share", copy: "Copy link", copied: "Link copied" };
+---
+
+<div class:list={["share-links", Astro.props.class]} data-share data-url={url}>
+  <p class="share-links__label">{ui.label}</p>
+  <ul class="share-links__row">
+    {
+      targets.map((target) => (
+        <li>
+          <a
+            class="share-links__item"
+            href={target.href}
+            target={target.id === "email" ? undefined : "_blank"}
+            rel={target.id === "email" ? undefined : "noopener noreferrer nofollow"}
+          >
+            <span class="sr-only">{ui.via} </span>
+            {target.label}
+          </a>
+        </li>
+      ))
+    }
+    <li hidden data-share-native-row>
+      <button type="button" class="share-links__item" data-share-native>{ui.native}</button>
+    </li>
+    <li hidden data-share-copy-row>
+      <button type="button" class="share-links__item" data-share-copy data-copied-label={ui.copied}>
+        {ui.copy}
+      </button>
+    </li>
+  </ul>
+  <p class="sr-only" aria-live="polite" data-share-status></p>
+</div>
+
+<script>
+  // Not tds-shared's `copyText`: its module also holds a React hook, and this
+  // script runs on every page of a site that loads React only on intent.
+  async function copyText(text: string): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function mount(root: HTMLElement) {
+    const url = root.dataset.url ?? location.href;
+    const nativeRow = root.querySelector<HTMLElement>("[data-share-native-row]");
+    const copyRow = root.querySelector<HTMLElement>("[data-share-copy-row]");
+    const copyButton = root.querySelector<HTMLButtonElement>("[data-share-copy]");
+    const status = root.querySelector<HTMLElement>("[data-share-status]");
+
+    if (nativeRow && typeof navigator.share === "function") {
+      nativeRow.hidden = false;
+      nativeRow.querySelector("button")?.addEventListener("click", () => {
+        navigator.share({ url, title: document.title }).catch(() => {
+          /* dismissed: nothing to report */
+        });
+      });
+    }
+
+    if (copyRow && copyButton) {
+      copyRow.hidden = false;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      copyButton.addEventListener("click", async () => {
+        if (!(await copyText(url))) return;
+        clearTimeout(timer);
+        copyButton.removeAttribute("data-copied");
+        void copyButton.offsetWidth;
+        copyButton.setAttribute("data-copied", "");
+        if (status) status.textContent = copyButton.dataset.copiedLabel ?? "";
+        timer = setTimeout(() => {
+          copyButton.removeAttribute("data-copied");
+          if (status) status.textContent = "";
+        }, 1500);
+      });
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-share]").forEach(mount);
+</script>
+
+<style>
+  .share-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+  }
+  .share-links__label {
+    margin: 0;
+  }
+  .share-links__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .share-links__item {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+  .share-links__item:hover {
+    color: #fff;
+    text-decoration-color: currentColor;
+  }
+  @media (pointer: coarse) {
+    .share-links__item {
+      min-height: 2.75rem;
+    }
+  }
+</style>

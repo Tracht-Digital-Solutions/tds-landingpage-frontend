@@ -112,7 +112,7 @@ import ProjectCard from "~/components/ui/ProjectCard.astro";
         slot="before-title"
         class="demo-card__favicon"
         src={mediaSrc(favicon)}
-        alt=""
+        alt={lang === "de" ? `Favicon von ${title}` : `${title} favicon`}
         aria-hidden="true"
         width="20"
         height="20"

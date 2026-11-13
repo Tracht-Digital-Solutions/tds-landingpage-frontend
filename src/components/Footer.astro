@@ -9,6 +9,7 @@ import { platformDefinitions, platformHref } from "~/lib/platforms";
 import { siteConfig } from "~/lib/seo";
 import { socialLinks } from "~/lib/socials";
 import SocialLinks from "~/components/ui/SocialLinks.astro";
+import ShareLinks from "~/components/ui/ShareLinks.astro";
 import PhoneIcon from "~/components/ui/PhoneIcon.astro";
 import PlaceBubble from "~/components/ui/PlaceBubble.astro";
 
@@ -92,11 +93,6 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
             </li>
           ))}
           <li>
-            <a href={siteConfig.blogUrl} class="footer-link text-white/80 hover:text-white">
-              {t.nav.blog}
-            </a>
-          </li>
-          <li>
             <a
               href={`${siteConfig.freelanceUrl}${lang === "en" ? "/en/" : "/"}`}
               class="footer-link text-white/80 hover:text-white"
@@ -130,11 +126,6 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
               class="footer-link text-white/80 hover:text-white"
             >
               WParted
-            </a>
-          </li>
-          <li>
-            <a href="https://astera.one" class="footer-link text-white/80 hover:text-white" rel="noopener">
-              astera.one
             </a>
           </li>
         </ul>
@@ -212,11 +203,18 @@ const systemsTitle = lang === "de" ? "Shopsysteme & CMS" : "Shop systems & CMS";
         on the page however long the texts either side of them are — a flex
         row with `space-between` centres them only when both sides happen to
         be equally wide. On a phone everything stacks, centred. */}
-    <div class="footer-bottom pt-12 text-xs text-white/70">
+    <ShareLinks class="footer-share pt-10 text-xs text-white/70" />
+
+    <div class="footer-bottom pt-8 text-xs text-white/70">
       <p class="footer-bottom__copy">{footer.copyright}</p>
       {/* The same row as the contact section (lib/socials.ts), so a reader
           who scrolled past the form still finds the profiles. */}
-      <SocialLinks links={socialLinks(contact.phone)} class="footer-bottom__social" />
+      {/* Profiles only (2026-11-13): WhatsApp is a contact channel and sits in the
+          contact card; one link per destination keeps the page's link count honest. */}
+      <SocialLinks
+        links={socialLinks(contact.phone).filter((link) => link.id !== "whatsapp")}
+        class="footer-bottom__social"
+      />
       <div class="footer-bottom__legal flex flex-wrap gap-x-6 gap-y-1">
         <a href="/legal/impressum" class="footer-link hover:text-white">{footer.impressum}</a>
         <a href="/legal/datenschutz" class="footer-link hover:text-white">{footer.datenschutz}</a>

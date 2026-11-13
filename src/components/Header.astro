@@ -15,6 +15,12 @@ const properties = propertyLinks(lang);
 
 const homeHref = localizePath("/", lang);
 const menuLabel = lang === "en" ? "Menu" : "Menü";
+// Every image carries a text alternative (2026-11-13). The link's own
+// `aria-label` stays its accessible name; these describe the two images.
+const logoAlt =
+  lang === "en"
+    ? { mark: "Tracht Digital Solutions logo mark", letters: "Tracht Digital Solutions wordmark" }
+    : { mark: "Bildmarke von Tracht Digital Solutions", letters: "Schriftzug Tracht Digital Solutions" };
 const navLabel = lang === "en" ? "Main navigation" : "Hauptnavigation";
 const homeLabel =
   lang === "en" ? "Tracht Digital Solutions – home" : "Tracht Digital Solutions – Startseite";
@@ -49,7 +55,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         src={logoSrc("mark", LOGO.mark.widths[1])}
         srcset={logoSrcset("mark")}
         sizes="(min-width: 1024px) 72px, 48px"
-        alt=""
+        alt={logoAlt.mark}
         width={LOGO.mark.width}
         height={LOGO.mark.height}
         class="site-logo h-6 lg:h-7 w-auto"
@@ -58,7 +64,7 @@ const sectionHref = (id: string) => `${homeHref}#${id}`;
         src={logoSrc("letters", LOGO.letters.widths[1])}
         srcset={logoSrcset("letters")}
         sizes="(min-width: 1024px) 100px, 66px"
-        alt=""
+        alt={logoAlt.letters}
         width={LOGO.letters.width}
         height={LOGO.letters.height}
         class="site-logo h-6 lg:h-7 w-auto"
