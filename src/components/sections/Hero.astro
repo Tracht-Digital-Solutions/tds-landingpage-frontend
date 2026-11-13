@@ -150,6 +150,13 @@ const { lang, title, lead, slogan, cta1, cta2 } = Astro.props;
       margin-inline: 0;
     }
   }
+  /* Beside the carousel (from 64rem) the lead stays left of its faded
+     neighbour card. */
+  @media (min-width: 64rem) {
+    .hero-lead {
+      max-width: 32rem;
+    }
+  }
 
   .hero-title {
     max-width: 17ch;
