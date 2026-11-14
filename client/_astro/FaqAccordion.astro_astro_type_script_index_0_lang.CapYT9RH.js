@@ -1,0 +1,1 @@
+import{n as e,t}from"./keepInView.DjSw7Xp4.js";var n=360,r=window.matchMedia(t);document.querySelectorAll(`.faq-summary`).forEach(t=>{let i=t.parentElement;i instanceof HTMLDetailsElement&&t.addEventListener(`click`,()=>{requestAnimationFrame(()=>{i.open&&r.matches&&e(t,i,n)})})});
